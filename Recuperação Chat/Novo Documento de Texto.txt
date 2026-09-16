@@ -1,0 +1,1 @@
+Quero continuar o desenvolvimento do VighnaStudy a partir deste checkpoint. A próxima etapa é o Calendário de Revisões. Preserve todas as funcionalidades, o banco estudos.db e a arquitetura atual.

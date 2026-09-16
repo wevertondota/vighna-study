@@ -1,0 +1,207 @@
+"""Diagnóstico técnico e manutenção segura do VighnaStudy."""
+
+from __future__ import annotations
+
+import platform
+import sys
+from pathlib import Path
+
+import PySide6
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (
+    QApplication,
+    QDialog,
+    QHBoxLayout,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QTextEdit,
+    QVBoxLayout,
+)
+
+from banco import CAMINHO_BANCO, conectar
+from backup import listar_backups
+from checkpoint import obter_ultimo_checkpoint, localizar_pasta_projeto
+from versao import VIGHNA_BUILD, VIGHNA_SCHEMA, VIGHNA_VERSION
+
+
+def coletar_diagnostico() -> dict:
+    banco = Path(CAMINHO_BANCO)
+    resultado = {
+        "versao": VIGHNA_VERSION,
+        "build": VIGHNA_BUILD,
+        "schema_app": VIGHNA_SCHEMA,
+        "python": platform.python_version(),
+        "pyside": getattr(PySide6, "__version__", "—"),
+        "modo_execucao": "EXE compilado" if getattr(sys, "frozen", False) else "Python / fontes",
+        "pasta_projeto": str(localizar_pasta_projeto()),
+        "banco": str(banco),
+        "banco_existe": banco.is_file(),
+        "banco_tamanho": banco.stat().st_size if banco.is_file() else 0,
+        "integridade": "não verificada",
+        "journal_mode": "—",
+        "indices": 0,
+        "tabelas": 0,
+        "freelist": 0,
+        "paginas": 0,
+        "ultimo_checkpoint": None,
+        "ultimo_backup": None,
+    }
+
+    if banco.is_file():
+        with conectar() as conexao:
+            integ = conexao.execute("PRAGMA integrity_check").fetchone()
+            resultado["integridade"] = str(integ[0]) if integ else "sem resposta"
+            jm = conexao.execute("PRAGMA journal_mode").fetchone()
+            resultado["journal_mode"] = str(jm[0]) if jm else "—"
+            resultado["indices"] = int(conexao.execute(
+                "SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name NOT LIKE 'sqlite_%'"
+            ).fetchone()[0] or 0)
+            resultado["tabelas"] = int(conexao.execute(
+                "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+            ).fetchone()[0] or 0)
+            resultado["freelist"] = int(conexao.execute("PRAGMA freelist_count").fetchone()[0] or 0)
+            resultado["paginas"] = int(conexao.execute("PRAGMA page_count").fetchone()[0] or 0)
+
+    try:
+        ultimo = obter_ultimo_checkpoint()
+        if ultimo:
+            resultado["ultimo_checkpoint"] = {
+                "nome": ultimo.get("nome"),
+                "caminho": str(ultimo.get("caminho")),
+                "tamanho": int(ultimo.get("tamanho_bytes") or 0),
+                "data": ultimo.get("data_modificacao"),
+            }
+    except Exception:
+        pass
+
+    try:
+        backups = listar_backups()
+        if backups:
+            ultimo_b = backups[0]
+            resultado["ultimo_backup"] = {
+                "nome": ultimo_b.get("nome"),
+                "caminho": str(ultimo_b.get("caminho")),
+                "tamanho": int(ultimo_b.get("tamanho") or 0),
+                "data": ultimo_b.get("data_modificacao"),
+                "motivo": ultimo_b.get("motivo"),
+            }
+    except Exception:
+        pass
+    return resultado
+
+
+def otimizar_banco_seguro() -> dict:
+    """Executa apenas PRAGMA optimize; não faz VACUUM nem reescreve dados."""
+    with conectar() as conexao:
+        conexao.execute("PRAGMA optimize")
+        conexao.commit()
+    return coletar_diagnostico()
+
+
+def _formatar_bytes(valor):
+    valor = int(valor or 0)
+    if valor < 1024:
+        return f"{valor} B"
+    if valor < 1024 * 1024:
+        return f"{valor / 1024:.1f} KB"
+    return f"{valor / (1024 * 1024):.1f} MB"
+
+
+def texto_diagnostico(dados: dict) -> str:
+    ultimo = dados.get("ultimo_checkpoint") or {}
+    ultimo_backup = dados.get("ultimo_backup") or {}
+    paginas = int(dados.get("paginas") or 0)
+    livres = int(dados.get("freelist") or 0)
+    fragmentacao = (100.0 * livres / paginas) if paginas else 0.0
+    linhas = [
+        f"VighnaStudy {dados.get('versao')} ({dados.get('build')})",
+        f"Modo: {dados.get('modo_execucao')}",
+        f"Python: {dados.get('python')} • PySide6: {dados.get('pyside')}",
+        "",
+        f"Projeto: {dados.get('pasta_projeto')}",
+        f"Banco ativo: {dados.get('banco')}",
+        f"Tamanho do banco: {_formatar_bytes(dados.get('banco_tamanho'))}",
+        f"Integridade SQLite: {dados.get('integridade')}",
+        f"Journal mode: {dados.get('journal_mode')}",
+        f"Tabelas: {dados.get('tabelas')} • Índices: {dados.get('indices')}",
+        f"Páginas livres: {livres}/{paginas} ({fragmentacao:.1f}%)",
+        "",
+        "Último checkpoint: " + (
+            f"{ultimo.get('nome')} • {_formatar_bytes(ultimo.get('tamanho'))}"
+            if ultimo else "nenhum encontrado"
+        ),
+        "Último backup: " + (
+            f"{ultimo_backup.get('nome')} • {_formatar_bytes(ultimo_backup.get('tamanho'))}"
+            if ultimo_backup else "nenhum encontrado"
+        ),
+    ]
+    if str(dados.get("integridade")).lower() != "ok":
+        linhas += ["", "ATENÇÃO: a verificação de integridade do SQLite não retornou 'ok'."]
+    return "\n".join(linhas)
+
+
+class JanelaDiagnosticoVighna(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle(f"Diagnóstico — VighnaStudy {VIGHNA_VERSION}")
+        self.resize(720, 560)
+        self.setMinimumSize(620, 460)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(20, 18, 20, 18)
+        layout.setSpacing(10)
+
+        titulo = QLabel("Diagnóstico e desempenho")
+        titulo.setObjectName("pageTitle")
+        layout.addWidget(titulo)
+        subtitulo = QLabel(
+            "Confere a versão, o banco ativo, a integridade SQLite, os índices e o último checkpoint. "
+            "A otimização segura usa apenas PRAGMA optimize e não apaga dados."
+        )
+        subtitulo.setObjectName("pageSubtitle")
+        subtitulo.setWordWrap(True)
+        layout.addWidget(subtitulo)
+
+        self.texto = QTextEdit()
+        self.texto.setReadOnly(True)
+        layout.addWidget(self.texto, 1)
+
+        botoes = QHBoxLayout()
+        atualizar = QPushButton("Executar diagnóstico")
+        atualizar.setObjectName("toolbarButton")
+        atualizar.clicked.connect(self.atualizar)
+        otimizar = QPushButton("Otimização segura")
+        otimizar.setObjectName("primaryButton")
+        otimizar.clicked.connect(self.otimizar)
+        copiar = QPushButton("Copiar resumo")
+        copiar.setObjectName("subtleButton")
+        copiar.clicked.connect(self.copiar)
+        fechar = QPushButton("Fechar")
+        fechar.setObjectName("subtleButton")
+        fechar.clicked.connect(self.accept)
+        botoes.addWidget(atualizar)
+        botoes.addWidget(otimizar)
+        botoes.addWidget(copiar)
+        botoes.addStretch(1)
+        botoes.addWidget(fechar)
+        layout.addLayout(botoes)
+        self.atualizar()
+
+    def atualizar(self):
+        try:
+            self.dados = coletar_diagnostico()
+            self.texto.setPlainText(texto_diagnostico(self.dados))
+        except Exception as erro:
+            self.texto.setPlainText(f"Falha no diagnóstico:\n{erro}")
+
+    def otimizar(self):
+        try:
+            self.dados = otimizar_banco_seguro()
+            self.texto.setPlainText(texto_diagnostico(self.dados))
+            QMessageBox.information(self, "Otimização", "PRAGMA optimize executado com sucesso.")
+        except Exception as erro:
+            QMessageBox.critical(self, "Otimização", str(erro))
+
+    def copiar(self):
+        QApplication.clipboard().setText(self.texto.toPlainText())
