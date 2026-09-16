@@ -28263,6 +28263,10 @@ class SistemaEstudos(QMainWindow):
             self.dashboard_hoje_revisoes_valor,
             self.dashboard_hoje_revisoes_detalhe,
         ) = criar_metrica_hoje("Revisões")
+        self.dashboard_hoje_revisoes_card.setProperty(
+            "metricKind",
+            "review",
+        )
 
         (
             self.dashboard_hoje_sessoes_card,

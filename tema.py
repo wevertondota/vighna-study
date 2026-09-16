@@ -6540,6 +6540,10 @@ QPushButton#sectionEditButton:hover {
         background-color: #f2f7fd;
         border-color: #c7d9ec;
     }
+    QFrame#dashboardTodayMetric[metricKind="review"] {
+        background-color: #eef6ff;
+        border-color: #bfd5ee;
+    }
     QLabel#dashboardTodayEyebrow {
         color: #607890;
         font-size: 7.9pt;
@@ -6559,6 +6563,7 @@ QPushButton#sectionEditButton:hover {
     QFrame#dashboardTodayMetric[metricRole="today"] QLabel#dashboardTodayMetricValue { color: #a9761a; }
     QFrame#dashboardTodayMetric[metricRole="ok"] QLabel#dashboardTodayMetricValue { color: #397854; }
     QFrame#dashboardTodayMetric[metricRole="active"] QLabel#dashboardTodayMetricValue { color: #356da7; }
+    QFrame#dashboardTodayMetric[metricKind="review"] QLabel#dashboardTodayMetricValue { color: #215fa8; }
     QLabel#dashboardTodayDetail {
         color: #63788e;
         font-size: 8.2pt;
@@ -12810,6 +12815,7 @@ def stylesheet_escuro():
     QFrame#dashboardTodayMetric[metricRole="today"] { background-color: #322a1d; border-color: #6d5a34; }
     QFrame#dashboardTodayMetric[metricRole="ok"] { background-color: #182a22; border-color: #355c46; }
     QFrame#dashboardTodayMetric[metricRole="active"] { background-color: #16283a; border-color: #365a7a; }
+    QFrame#dashboardTodayMetric[metricKind="review"] { background-color: #14273a; border-color: #365a7a; }
     QLabel#dashboardTodayEyebrow { color: #8ca4bb; font-size: 7.9pt; font-weight: 900; }
     QLabel#dashboardTodayFocusValue { color: #9dccff; font-size: 15pt; font-weight: 900; }
     QLabel#dashboardTodayMetricValue { color: #e8eef6; font-size: 14pt; font-weight: 900; }
@@ -12817,6 +12823,7 @@ def stylesheet_escuro():
     QFrame#dashboardTodayMetric[metricRole="today"] QLabel#dashboardTodayMetricValue { color: #e3bd6a; }
     QFrame#dashboardTodayMetric[metricRole="ok"] QLabel#dashboardTodayMetricValue { color: #8fc5a2; }
     QFrame#dashboardTodayMetric[metricRole="active"] QLabel#dashboardTodayMetricValue { color: #9bc7f2; }
+    QFrame#dashboardTodayMetric[metricKind="review"] QLabel#dashboardTodayMetricValue { color: #9dccff; }
     QLabel#dashboardTodayDetail { color: #91a6ba; font-size: 8.2pt; }
     QFrame#dashboardQuickAccess { background-color: #162333; border: 1px solid #354b62; border-radius: 12px; }
     QLabel#dashboardQuickAccessTitle { color: #a3b7ca; font-size: 8.6pt; font-weight: 900; }
@@ -15873,6 +15880,7 @@ def stylesheet_futurista():
     QFrame#dashboardTodayMetric[metricRole="today"] { background-color: #322a1d; border-color: #7b6537; }
     QFrame#dashboardTodayMetric[metricRole="ok"] { background-color: #142c29; border-color: #397267; }
     QFrame#dashboardTodayMetric[metricRole="active"] { background-color: #102a3f; border-color: #397aa3; }
+    QFrame#dashboardTodayMetric[metricKind="review"] { background-color: #102a3f; border-color: #397aa3; }
     QLabel#dashboardTodayEyebrow { color: #79abc8; font-size: 7.9pt; font-weight: 900; }
     QLabel#dashboardTodayFocusValue { color: #a9ddff; font-size: 15pt; font-weight: 900; }
     QLabel#dashboardTodayMetricValue { color: #eefaff; font-size: 14pt; font-weight: 900; }
@@ -15880,6 +15888,7 @@ def stylesheet_futurista():
     QFrame#dashboardTodayMetric[metricRole="today"] QLabel#dashboardTodayMetricValue { color: #edc86f; }
     QFrame#dashboardTodayMetric[metricRole="ok"] QLabel#dashboardTodayMetricValue { color: #8ddbc6; }
     QFrame#dashboardTodayMetric[metricRole="active"] QLabel#dashboardTodayMetricValue { color: #a9ddff; }
+    QFrame#dashboardTodayMetric[metricKind="review"] QLabel#dashboardTodayMetricValue { color: #a9ddff; }
     QLabel#dashboardTodayDetail { color: #8fb7ce; font-size: 8.2pt; }
     QFrame#dashboardQuickAccess { background-color: #10283c; border: 1px solid #3f7599; border-radius: 12px; }
     QLabel#dashboardQuickAccessTitle { color: #8fc4df; font-size: 8.6pt; font-weight: 900; }
