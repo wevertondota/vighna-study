@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 
 
-from PySide6.QtCore import Qt, QDate, QPointF, QRectF, QTimer, Signal
+from PySide6.QtCore import Qt, QDate, QPointF, QRectF, QTimer, Signal, QEventLoop
 from PySide6.QtGui import QColor, QPainter, QPen, QFont, QPainterPath, QBrush, QPixmap, QIcon, QTextCharFormat, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
@@ -14101,11 +14101,18 @@ class JanelaResolverQuestoes(QDialog):
             parent
         )
 
-        # Janela operacional ampla: permite maximizar/restaurar
-        # pelo botão nativo do Windows e por duplo clique na barra.
+        # A resolução funciona como uma janela operacional independente. Ela
+        # pode ser minimizada enquanto o restante do Vighna permanece ativo.
+        self.setWindowFlag(
+            Qt.WindowMinimizeButtonHint,
+            True
+        )
         self.setWindowFlag(
             Qt.WindowMaximizeButtonHint,
             True
+        )
+        self.setWindowModality(
+            Qt.NonModal
         )
 
         self.configuracao = configuracao
@@ -14735,6 +14742,40 @@ class JanelaResolverQuestoes(QDialog):
                 self.timer_simulado.start()
 
         self.carregar_atual()
+
+    def exec_nao_modal(self):
+        """Exibe a sessão sem bloquear as demais janelas do aplicativo."""
+        ciclo = QEventLoop()
+        encerrada = False
+
+        def encerrar_ciclo(*_args):
+            nonlocal encerrada
+            encerrada = True
+            if ciclo.isRunning():
+                ciclo.quit()
+
+        self.finished.connect(
+            encerrar_ciclo
+        )
+
+        self.setWindowModality(
+            Qt.NonModal
+        )
+        self.show()
+        self.raise_()
+        self.activateWindow()
+
+        if not encerrada:
+            ciclo.exec()
+
+        try:
+            self.finished.disconnect(
+                encerrar_ciclo
+            )
+        except (RuntimeError, TypeError):
+            pass
+
+        return self.result()
 
     def atualizar_rotulo_duvida(
         self,
@@ -15918,7 +15959,10 @@ class JanelaResolverQuestoes(QDialog):
             )
         )
 
-        event.accept()
+        # ``reject`` também emite ``finished`` e libera o ciclo local usado
+        # pela abertura não modal. As respostas registradas já foram salvas.
+        event.ignore()
+        self.reject()
 
 
 def abrir_resolvedor_topico(
@@ -16129,7 +16173,7 @@ def abrir_resolvedor_topico(
         configuracao,
         parent
     )
-    janela.exec()
+    janela.exec_nao_modal()
 
     resultado = {
         "resumo": janela.resumo_final,
@@ -18155,7 +18199,7 @@ class JanelaHistoricoQuestoes(QDialog):
             configuracao,
             self
         )
-        janela.exec()
+        janela.exec_nao_modal()
 
         self.atualizar_dados()
 
@@ -29347,15 +29391,48 @@ class SistemaEstudos(QMainWindow):
         acao_layout.setContentsMargins(
             24, 16, 24, 18
         )
-        acao_layout.setSpacing(7)
+        acao_layout.setSpacing(8)
 
-        acao_rotulo = QLabel("RECOMENDADO PELO ALGORITMO")
+        acao_rotulo = QLabel("✦  RECOMENDADO PELO ALGORITMO")
         acao_rotulo.setObjectName(
             "dashboardGuidedHeroEyebrow"
         )
         acao_rotulo.setAlignment(
             Qt.AlignLeft | Qt.AlignVCenter
         )
+
+        hero_topo = QHBoxLayout()
+        hero_topo.setSpacing(10)
+
+        self.dashboard_hoje_acao_ajuda = QPushButton("?")
+        self.dashboard_hoje_acao_ajuda.setObjectName("subtleButton")
+        self.dashboard_hoje_acao_ajuda.setFixedSize(30, 30)
+        self.dashboard_hoje_acao_ajuda.setToolTip(
+            "Entender o que esta recomendação faz."
+        )
+        self.dashboard_hoje_acao_ajuda.clicked.connect(
+            lambda: QMessageBox.information(
+                self,
+                "Recomendado pelo algoritmo",
+                (
+                    "Este bloco mostra a próxima sessão sugerida automaticamente pelo Vighna.\n\n"
+                    "O algoritmo considera revisões vencidas e de hoje, domínio por tópico, urgência, desempenho recente, atrasos e ritmo de estudo.\n\n"
+                    "Use 'Começar agora' para abrir a recomendação do dia e conferir o que o Vighna sugere antes de iniciar qualquer sessão. Se preferir decidir manualmente, use o bloco logo abaixo para escolher questões por conta própria."
+                )
+            )
+        )
+        hero_topo.addWidget(
+            acao_rotulo,
+            0,
+            Qt.AlignVCenter
+        )
+        hero_topo.addStretch(1)
+        hero_topo.addWidget(
+            self.dashboard_hoje_acao_ajuda,
+            0,
+            Qt.AlignVCenter
+        )
+
         self.dashboard_hoje_acao_titulo = QLabel(
             "Encontrar próxima sessão"
         )
@@ -29379,7 +29456,7 @@ class SistemaEstudos(QMainWindow):
         )
 
         hero_painel_inferior = QHBoxLayout()
-        hero_painel_inferior.setSpacing(12)
+        hero_painel_inferior.setSpacing(14)
 
         hero_info = QFrame()
         hero_info.setObjectName(
@@ -29389,7 +29466,7 @@ class SistemaEstudos(QMainWindow):
             hero_info
         )
         hero_info_layout.setContentsMargins(
-            16, 12, 16, 12
+            18, 14, 18, 14
         )
         hero_info_layout.setSpacing(6)
 
@@ -29423,38 +29500,51 @@ class SistemaEstudos(QMainWindow):
             0,
             Qt.AlignVCenter
         )
-        hero_info_topo.addStretch()
-
-        hero_info_ajuda = QPushButton("?")
-        hero_info_ajuda.setObjectName("subtleButton")
-        hero_info_ajuda.setFixedSize(30, 30)
-        hero_info_ajuda.setToolTip("Entender o que esta recomendação faz.")
-        hero_info_ajuda.clicked.connect(
-            lambda: QMessageBox.information(
-                self,
-                "Recomendado pelo algoritmo",
-                (
-                    "Este bloco mostra a próxima sessão sugerida automaticamente pelo Vighna.\n\n"
-                    "O algoritmo considera revisões vencidas e de hoje, domínio por tópico, urgência, desempenho recente, atrasos e ritmo de estudo.\n\n"
-                    "Use 'Começar agora' para abrir a recomendação do dia e conferir o que o Vighna sugere antes de iniciar qualquer sessão. Se preferir decidir manualmente, use o bloco logo abaixo para escolher questões por conta própria."
-                )
-            )
-        )
-        hero_info_topo.addWidget(hero_info_ajuda, 0, Qt.AlignVCenter)
+        hero_info_topo.addStretch(1)
 
         self.dashboard_hoje_modo_guiado = QLabel(
-            "Deixe o Vighna escolher sua próxima sessão com base em revisões, domínio, urgência, desempenho e ritmo de estudo."
+            "O Vighna compara suas prioridades e indica a sessão com maior impacto para este momento."
         )
         self.dashboard_hoje_modo_guiado.setObjectName(
             "dashboardGuidedHeroGuide"
         )
         self.dashboard_hoje_modo_guiado.setWordWrap(True)
+        self.dashboard_hoje_modo_guiado.setAlignment(
+            Qt.AlignLeft | Qt.AlignTop
+        )
+
+        hero_info_chamada = QLabel(
+            "Uma escolha orientada pelos seus dados de estudo"
+        )
+        hero_info_chamada.setObjectName(
+            "dashboardGuidedInfoHeading"
+        )
+        hero_info_chamada.setWordWrap(True)
+
+        hero_info_criterios = QLabel(
+            "REVISÕES  •  DOMÍNIO  •  URGÊNCIA  •  DESEMPENHO  •  RITMO"
+        )
+        hero_info_criterios.setObjectName(
+            "dashboardGuidedInfoCriteria"
+        )
+        hero_info_criterios.setWordWrap(True)
+        hero_info_criterios.setAlignment(
+            Qt.AlignLeft | Qt.AlignVCenter
+        )
 
         hero_info_layout.addLayout(
             hero_info_topo
         )
+        hero_info_layout.addSpacing(2)
+        hero_info_layout.addWidget(
+            hero_info_chamada
+        )
         hero_info_layout.addWidget(
             self.dashboard_hoje_modo_guiado
+        )
+        hero_info_layout.addStretch(1)
+        hero_info_layout.addWidget(
+            hero_info_criterios
         )
 
         self.dashboard_hoje_um_clique = QPushButton(
@@ -29465,8 +29555,9 @@ class SistemaEstudos(QMainWindow):
         )
         self.dashboard_hoje_um_clique.setMinimumSize(
             300,
-            48
+            58
         )
+        self.dashboard_hoje_um_clique.setMaximumWidth(390)
         self.dashboard_hoje_um_clique.setToolTip(
             "Abrir a recomendação de estudo para hoje. O Vighna mostra o que priorizou antes de qualquer sessão ser iniciada."
         )
@@ -29494,47 +29585,88 @@ class SistemaEstudos(QMainWindow):
             self.abrir_estudar_agora_v4
         )
 
-        acao_layout.addWidget(acao_rotulo)
+        acao_layout.addLayout(hero_topo)
         acao_layout.addWidget(
             self.dashboard_hoje_acao_titulo
         )
         acao_layout.addWidget(
             self.dashboard_hoje_acao_detalhe
         )
-        acao_layout.addSpacing(
-            2
-        )
+        acao_layout.addSpacing(4)
+
         acoes_hoje = QFrame()
         acoes_hoje.setObjectName(
             "dashboardGuidedActionBox"
         )
+        acoes_hoje.setMinimumSize(
+            360,
+            152
+        )
+        acoes_hoje.setMaximumWidth(430)
         acoes_hoje_layout = QVBoxLayout(
             acoes_hoje
         )
         acoes_hoje_layout.setContentsMargins(
-            14, 12, 14, 12
+            22, 16, 22, 16
         )
-        acoes_hoje_layout.setSpacing(8)
+        acoes_hoje_layout.setSpacing(6)
+
+        acao_destaque_rotulo = QLabel(
+            "✦  PRÓXIMO PASSO"
+        )
+        acao_destaque_rotulo.setObjectName(
+            "dashboardGuidedActionEyebrow"
+        )
+        acao_destaque_rotulo.setAlignment(
+            Qt.AlignHCenter | Qt.AlignVCenter
+        )
+
+        acao_destaque_apoio = QLabel(
+            "Abra a sugestão do Vighna e veja a melhor sessão para agora"
+        )
+        acao_destaque_apoio.setObjectName(
+            "dashboardGuidedActionHint"
+        )
+        acao_destaque_apoio.setWordWrap(True)
+        acao_destaque_apoio.setAlignment(
+            Qt.AlignHCenter | Qt.AlignVCenter
+        )
+
+        acoes_hoje_layout.addWidget(
+            acao_destaque_rotulo,
+            0,
+            Qt.AlignHCenter
+        )
+        acoes_hoje_layout.addWidget(
+            acao_destaque_apoio,
+            0,
+            Qt.AlignHCenter
+        )
+        acoes_hoje_layout.addStretch(1)
         acoes_hoje_layout.addWidget(
             self.dashboard_hoje_um_clique,
             0,
             Qt.AlignHCenter
         )
+        acoes_hoje_layout.addSpacing(2)
         acoes_hoje_layout.addWidget(
             self.dashboard_hoje_botao,
             0,
             Qt.AlignHCenter
         )
+        acoes_hoje_layout.addStretch(1)
 
         hero_painel_inferior.addWidget(
             hero_info,
-            1
+            5
         )
         hero_painel_inferior.addWidget(
             acoes_hoje,
-            0,
-            Qt.AlignVCenter
+            3,
+            Qt.AlignTop
         )
+        hero_painel_inferior.setStretch(0, 5)
+        hero_painel_inferior.setStretch(1, 3)
         acao_layout.addLayout(
             hero_painel_inferior
         )
@@ -34865,8 +34997,8 @@ class SistemaEstudos(QMainWindow):
             questao_role,
         )
 
-        # Próxima ação. O botão primário prepara direto no Foco; o botão
-        # secundário abre a explicação completa do Estudar Agora V5.
+        # Próxima ação. O Modo Foco é apenas um cronômetro auxiliar e não
+        # substitui nem bloqueia a recomendação operacional do Dashboard.
         action_role = "neutral"
         botao_texto = "Por que esta recomendação?"
         botao_um_clique_texto = "▶ Começar agora"
@@ -34876,21 +35008,7 @@ class SistemaEstudos(QMainWindow):
             and getattr(self, "sessao_pausada", False)
         )
 
-        foco_ativo = False
-        janela_foco = getattr(self, "_janela_modo_foco", None)
-        if janela_foco is not None:
-            try:
-                foco_ativo = bool(getattr(janela_foco, "sessao_ativa", False))
-            except RuntimeError:
-                self._janela_modo_foco = None
-
-        if foco_ativo:
-            titulo_acao = "Sessão de foco em andamento"
-            detalhe_acao = "Abra o Modo Foco para continuar a sessão atual."
-            action_role = "active"
-            botao_texto = "Abrir Foco"
-            botao_um_clique_texto = "Abrir Foco"
-        elif sessao_pausada:
+        if sessao_pausada:
             titulo_acao = "Retomar sessão pausada"
             detalhe_acao = "Existe uma sessão anterior esperando continuidade."
             action_role = "active"
@@ -35759,7 +35877,7 @@ class SistemaEstudos(QMainWindow):
                 configurador.configuracao,
                 self
             )
-            janela.exec()
+            janela.exec_nao_modal()
         except Exception as erro:
             QMessageBox.critical(
                 self,
@@ -35825,7 +35943,7 @@ class SistemaEstudos(QMainWindow):
                 configuracao.configuracao,
                 self
             )
-            janela.exec()
+            janela.exec_nao_modal()
         except Exception as erro:
             QMessageBox.critical(
                 self,
@@ -36001,15 +36119,23 @@ class SistemaEstudos(QMainWindow):
         if getattr(self, "sessao_ativa", False) and getattr(self, "sessao_pausada", False):
             self.abrir_sessao_estudo()
             return
+
+        # O Foco registra tempo de forma independente. Uma sessão ativa não
+        # pode impedir recomendações, questões, revisões ou outras atividades.
+        foco_ativo = False
         janela_foco = getattr(self, "_janela_modo_foco", None)
         if janela_foco is not None:
             try:
-                if getattr(janela_foco, "sessao_ativa", False):
-                    QMessageBox.information(self, "Foco já em andamento", "Já existe uma sessão de foco ativa. O Vighna vai trazê-la para frente.")
-                    self.abrir_modo_foco()
-                    return
+                foco_ativo = bool(
+                    getattr(
+                        janela_foco,
+                        "sessao_ativa",
+                        False
+                    )
+                )
             except RuntimeError:
                 self._janela_modo_foco = None
+
         self.cache_analitico.invalidar()
         self.atualizar_dashboard()
         try:
@@ -36025,6 +36151,16 @@ class SistemaEstudos(QMainWindow):
             except Exception:
                 registro_id = None
         janela = JanelaEstudarAgoraV5(recomendacao, self)
+        if foco_ativo:
+            janela.opcao_modo_foco.setChecked(True)
+            janela.opcao_modo_foco.setEnabled(False)
+            janela.opcao_modo_foco.setText(
+                "Modo Foco já está ativo — o cronômetro continuará independente"
+            )
+            janela.opcao_modo_foco.setToolTip(
+                "A atividade será aberta normalmente sem reiniciar ou interromper o Modo Foco atual."
+            )
+
         if janela.exec() != QDialog.Accepted:
             if registro_id is not None:
                 try: atualizar_decisao_recomendacao(registro_id, "ignorada")
@@ -36047,10 +36183,16 @@ class SistemaEstudos(QMainWindow):
 
         self.cache_analitico.invalidar("inteligencia:decisoes")
 
-        if janela.usar_modo_foco and janela.preparacao:
+        if (
+            janela.usar_modo_foco
+            and janela.preparacao
+            and not foco_ativo
+        ):
             self.abrir_modo_foco(janela.preparacao)
             return
 
+        # Com um Foco já ativo, a recomendação é executada diretamente. O
+        # cronômetro segue em sua janela, sem receber ou impor contexto.
         self.executar_recomendacao_estudar_agora_v5(recomendacao)
 
     def executar_recomendacao_estudar_agora_v5(self, recomendacao):
@@ -38336,7 +38478,7 @@ class SistemaEstudos(QMainWindow):
                 configuracao.configuracao,
                 self
             )
-            janela.exec()
+            janela.exec_nao_modal()
         except Exception as erro:
             QMessageBox.critical(
                 self,
