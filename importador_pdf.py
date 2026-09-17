@@ -781,7 +781,7 @@ PADRAO_VPQ_1_0 = re.compile(
     ^[ \t]*
     VIGHNA[ \t]+PDF
     [ \t]*[—–-][ \t]*
-    VPQ[ \t]+1\.0
+    VPQ[ \t]+1\.[01]
     [ \t]*$
     """,
     re.VERBOSE
@@ -795,6 +795,10 @@ PADRAO_VPQ_METADADO = re.compile(
         DISCIPLINA
         |TÓPICO
         |TOPICO
+        |TÍTULO
+        |TITULO
+        |CAPÍTULO
+        |CAPITULO
         |FONTE
         |QUANTIDADE
         |ALTERNATIVAS
@@ -840,6 +844,7 @@ def extrair_metadados_vpq_1_0(
     metadados = {
         "disciplina": "",
         "topico": "",
+        "capitulo": "",
         "fonte": "",
         "quantidade": None,
         "alternativas": "",
@@ -849,6 +854,10 @@ def extrair_metadados_vpq_1_0(
         "DISCIPLINA": "disciplina",
         "TÓPICO": "topico",
         "TOPICO": "topico",
+        "TÍTULO": "topico",
+        "TITULO": "topico",
+        "CAPÍTULO": "capitulo",
+        "CAPITULO": "capitulo",
         "FONTE": "fonte",
         "QUANTIDADE": "quantidade",
         "ALTERNATIVAS": "alternativas",
@@ -1352,13 +1361,12 @@ def analisar_vpq_1_0(
             "Disciplina não informada no cabeçalho VPQ."
         )
 
-    if not _normalizar_metadado_vpq(
-        metadados.get(
-            "topico"
-        )
+    if not (
+        _normalizar_metadado_vpq(metadados.get("topico"))
+        or _normalizar_metadado_vpq(metadados.get("capitulo"))
     ):
         avisos.append(
-            "Tópico não informado no cabeçalho VPQ."
+            "Título ou capítulo não informado no cabeçalho VPQ."
         )
 
     # Divergências que podem corromper a interpretação bloqueiam
@@ -1431,7 +1439,7 @@ def analisar_texto_questoes_pdf(
         **analise,
         "protocolo": "PDF genérico",
         "vpq_detectado": False,
-        "vpq_metadados": {},
+        "vpq_metadados": extrair_metadados_vpq_1_0(texto),
         "vpq_erros": [],
         "vpq_avisos": [],
         "vpq_bloqueia_importacao": False,

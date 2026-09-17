@@ -130,6 +130,13 @@ from banco import (
     listar_topicos_gerenciamento,
     definir_topico_pausado,
     topico_esta_pausado,
+    topico_possui_capitulos,
+    listar_capitulos_topico,
+    listar_capitulos_perfil,
+    adicionar_capitulo,
+    renomear_capitulo,
+    definir_capitulo_pausado,
+    atualizar_dificuldade_capitulo,
     adicionar_topico,
     registrar_revisao,
     listar_revisoes_topico,
@@ -4244,6 +4251,7 @@ class JanelaImportarPDFQuestoes(QDialog):
             obter_concurso_ativo()
         )
         self.topicos = []
+        self.capitulos = []
 
         for disciplina_id, disciplina in listar_disciplinas(
             self.concurso[0]
@@ -4262,10 +4270,31 @@ class JanelaImportarPDFQuestoes(QDialog):
                     ),
                 })
 
-        if self.vpq_detectado:
+        for (
+            capitulo_id,
+            capitulo,
+            topico_id,
+            topico,
+            disciplina,
+        ) in listar_capitulos_perfil():
+            self.capitulos.append({
+                "capitulo_id": capitulo_id,
+                "capitulo": capitulo,
+                "topico_id": topico_id,
+                "topico": topico,
+                "disciplina": disciplina,
+                "rotulo": f"{disciplina} › {topico} › {capitulo}",
+            })
+
+        if self.vpq_metadados:
             self.vpq_topico_id = (
                 self.localizar_topico_vpq()
             )
+            self.vpq_capitulo_id = (
+                self.localizar_capitulo_vpq()
+            )
+        else:
+            self.vpq_capitulo_id = None
 
         self.setWindowTitle(
             (
@@ -4524,6 +4553,10 @@ class JanelaImportarPDFQuestoes(QDialog):
                 )
                 or "Não informado"
             )
+            capitulo_meta = (
+                metadados.get("capitulo")
+                or "Não informado"
+            )
 
             declaradas = self.analise.get(
                 "vpq_quantidade_declarada"
@@ -4538,7 +4571,8 @@ class JanelaImportarPDFQuestoes(QDialog):
             vpq_meta = QLabel(
                 (
                     f"Disciplina: {disciplina_meta}  •  "
-                    f"Tópico: {topico_meta}  •  "
+                    f"Título: {topico_meta}  •  "
+                    f"Capítulo: {capitulo_meta}  •  "
                     f"Declaradas: "
                     f"{declaradas if declaradas is not None else '—'}  •  "
                     f"Encontradas: {encontradas}  •  "
@@ -4774,7 +4808,7 @@ class JanelaImportarPDFQuestoes(QDialog):
 
         defaults_layout.addWidget(
             QLabel(
-                "Tópico padrão"
+                "Título padrão"
             ),
             0,
             0
@@ -4943,7 +4977,7 @@ class JanelaImportarPDFQuestoes(QDialog):
             "pdfImportTable"
         )
         self.tabela_pdf.setColumnCount(
-            8
+            9
         )
         self.tabela_pdf.setHorizontalHeaderLabels([
             "Importar",
@@ -4952,7 +4986,8 @@ class JanelaImportarPDFQuestoes(QDialog):
             "Questão",
             "Alt.",
             "Gabarito",
-            "Tópico",
+            "Título",
+            "Capítulo",
             "Status"
         ])
         self.tabela_pdf.setEditTriggers(
@@ -4994,7 +5029,7 @@ class JanelaImportarPDFQuestoes(QDialog):
             (2, 52),
             (4, 50),
             (5, 90),
-            (7, 115),
+            (8, 115),
         ):
             header.setSectionResizeMode(
                 coluna,
@@ -5015,7 +5050,15 @@ class JanelaImportarPDFQuestoes(QDialog):
         )
         self.tabela_pdf.setColumnWidth(
             6,
-            300
+            220
+        )
+        header.setSectionResizeMode(
+            7,
+            QHeaderView.Fixed
+        )
+        self.tabela_pdf.setColumnWidth(
+            7,
+            245
         )
 
         layout.addWidget(
@@ -5112,13 +5155,6 @@ class JanelaImportarPDFQuestoes(QDialog):
             )
         )
 
-        if disciplina in (
-            "",
-            "nao informado",
-            "nao informada"
-        ):
-            return None
-
         if topico in (
             "",
             "nao informado",
@@ -5130,11 +5166,14 @@ class JanelaImportarPDFQuestoes(QDialog):
 
         for item in self.topicos:
             if (
-                self.normalizar_rotulo_vpq(
-                    item[
-                        "disciplina"
-                    ]
-                ) == disciplina
+                (
+                    not disciplina
+                    or self.normalizar_rotulo_vpq(
+                        item[
+                            "disciplina"
+                        ]
+                    ) == disciplina
+                )
                 and self.normalizar_rotulo_vpq(
                     item[
                         "topico"
@@ -5159,6 +5198,43 @@ class JanelaImportarPDFQuestoes(QDialog):
         return correspondencias[0][
             "topico_id"
         ]
+
+    def localizar_capitulo_vpq(self):
+        disciplina = self.normalizar_rotulo_vpq(
+            self.vpq_metadados.get("disciplina", "")
+        )
+        topico = self.normalizar_rotulo_vpq(
+            self.vpq_metadados.get("topico", "")
+        )
+        capitulo = self.normalizar_rotulo_vpq(
+            self.vpq_metadados.get("capitulo", "")
+        )
+
+        if not capitulo:
+            return None
+
+        correspondencias = []
+        for item in self.capitulos:
+            if self.normalizar_rotulo_vpq(item["capitulo"]) != capitulo:
+                continue
+            if (
+                disciplina
+                and self.normalizar_rotulo_vpq(item["disciplina"])
+                != disciplina
+            ):
+                continue
+            if (
+                topico
+                and self.normalizar_rotulo_vpq(item["topico"])
+                != topico
+            ):
+                continue
+            correspondencias.append(item)
+
+        if len(correspondencias) != 1:
+            return None
+
+        return correspondencias[0]["capitulo_id"]
 
     def indice_topico_combo(
         self,
@@ -5201,10 +5277,7 @@ class JanelaImportarPDFQuestoes(QDialog):
                 ]
             )
 
-        if (
-            self.vpq_detectado
-            and self.vpq_topico_id is not None
-        ):
+        if self.vpq_topico_id is not None:
             indice = self.indice_topico_combo(
                 combo,
                 self.vpq_topico_id
@@ -5216,7 +5289,7 @@ class JanelaImportarPDFQuestoes(QDialog):
                 )
                 combo.setToolTip(
                     (
-                        "Tópico definido pelo cabeçalho VPQ 1.0: "
+                    "Título identificado no cabeçalho do arquivo: "
                         f"{self.vpq_topico_rotulo}."
                     )
                 )
@@ -5286,6 +5359,27 @@ class JanelaImportarPDFQuestoes(QDialog):
             if indice >= 0:
                 combo.setCurrentIndex(
                     indice
+                )
+
+        return combo
+
+    def criar_combo_capitulo(self):
+        combo = QComboBox()
+        combo.setObjectName("pdfChapterCombo")
+        combo.addItem("Selecione o capítulo...", None)
+
+        for capitulo in self.capitulos:
+            combo.addItem(
+                capitulo["rotulo"],
+                capitulo["capitulo_id"]
+            )
+
+        if self.vpq_capitulo_id is not None:
+            indice = combo.findData(self.vpq_capitulo_id)
+            if indice >= 0:
+                combo.setCurrentIndex(indice)
+                combo.setToolTip(
+                    "Capítulo identificado no cabeçalho do arquivo."
                 )
 
         return combo
@@ -5395,6 +5489,7 @@ class JanelaImportarPDFQuestoes(QDialog):
                     questao
                 )
             )
+            capitulo_combo = self.criar_combo_capitulo()
 
             status_item = QTableWidgetItem(
                 ""
@@ -5438,9 +5533,14 @@ class JanelaImportarPDFQuestoes(QDialog):
                 6,
                 topico_combo
             )
-            self.tabela_pdf.setItem(
+            self.tabela_pdf.setCellWidget(
                 linha,
                 7,
+                capitulo_combo
+            )
+            self.tabela_pdf.setItem(
+                linha,
+                8,
                 status_item
             )
 
@@ -5455,6 +5555,10 @@ class JanelaImportarPDFQuestoes(QDialog):
                     self.atualizar_status_linha(
                         l
                     )
+            )
+            capitulo_combo.currentIndexChanged.connect(
+                lambda _=None, l=linha:
+                    self.atualizar_status_linha(l)
             )
 
             self.tabela_pdf.setRowHeight(
@@ -5489,7 +5593,7 @@ class JanelaImportarPDFQuestoes(QDialog):
         )
         status_item = self.tabela_pdf.item(
             linha,
-            7
+            8
         )
         gabarito_combo = (
             self.tabela_pdf.cellWidget(
@@ -5503,6 +5607,7 @@ class JanelaImportarPDFQuestoes(QDialog):
                 6
             )
         )
+        capitulo_combo = self.tabela_pdf.cellWidget(linha, 7)
 
         gabarito = (
             gabarito_combo.currentData()
@@ -5514,6 +5619,18 @@ class JanelaImportarPDFQuestoes(QDialog):
             if topico_combo
             else None
         )
+        capitulo_id = (
+            capitulo_combo.currentData()
+            if capitulo_combo
+            else None
+        )
+
+        topico_capitulo_id = None
+        if capitulo_id is not None:
+            for capitulo in self.capitulos:
+                if capitulo["capitulo_id"] == capitulo_id:
+                    topico_capitulo_id = capitulo["topico_id"]
+                    break
 
         nivel = None
 
@@ -5521,12 +5638,20 @@ class JanelaImportarPDFQuestoes(QDialog):
             status = "Sem gabarito"
             nivel = "atencao"
 
-        elif topico_id is None:
-            status = "Sem tópico"
+        elif topico_id is None and capitulo_id is None:
+            status = "Sem título/capítulo"
+            nivel = "atencao"
+
+        elif (
+            topico_id is not None
+            and topico_capitulo_id is not None
+            and topico_id != topico_capitulo_id
+        ):
+            status = "Título/capítulo divergentes"
             nivel = "atencao"
 
         elif questao_existe(
-            topico_id,
+            topico_id or topico_capitulo_id,
             questao[
                 "enunciado"
             ]
@@ -5655,7 +5780,7 @@ class JanelaImportarPDFQuestoes(QDialog):
             )
             status = self.tabela_pdf.item(
                 linha,
-                7
+                8
             )
 
             if (
@@ -5732,6 +5857,7 @@ class JanelaImportarPDFQuestoes(QDialog):
                     6
                 )
             )
+            capitulo_combo = self.tabela_pdf.cellWidget(linha, 7)
 
             gabarito = (
                 gabarito_combo.currentData()
@@ -5743,6 +5869,18 @@ class JanelaImportarPDFQuestoes(QDialog):
                 if topico_combo
                 else None
             )
+            capitulo_id = (
+                capitulo_combo.currentData()
+                if capitulo_combo
+                else None
+            )
+
+            topico_capitulo_id = None
+            if capitulo_id is not None:
+                for capitulo in self.capitulos:
+                    if capitulo["capitulo_id"] == capitulo_id:
+                        topico_capitulo_id = capitulo["topico_id"]
+                        break
 
             if not gabarito:
                 problemas.append(
@@ -5755,19 +5893,34 @@ class JanelaImportarPDFQuestoes(QDialog):
                 )
                 continue
 
-            if topico_id is None:
+            if topico_id is None and capitulo_id is None:
                 problemas.append(
                     (
                         questao[
                             "numero_pdf"
                         ],
-                        "sem tópico"
+                        "sem título/capítulo"
                     )
                 )
                 continue
 
+            if (
+                topico_id is not None
+                and topico_capitulo_id is not None
+                and topico_id != topico_capitulo_id
+            ):
+                problemas.append(
+                    (
+                        questao["numero_pdf"],
+                        "título e capítulo divergentes"
+                    )
+                )
+                continue
+
+            topico_id_efetivo = topico_id or topico_capitulo_id
+
             if questao_existe(
-                topico_id,
+                topico_id_efetivo,
                 questao[
                     "enunciado"
                 ]
@@ -5802,6 +5955,7 @@ class JanelaImportarPDFQuestoes(QDialog):
 
             registros.append({
                 "topico_id": topico_id,
+                "capitulo_id": capitulo_id,
                 "enunciado": questao[
                     "enunciado"
                 ],
@@ -5841,7 +5995,7 @@ class JanelaImportarPDFQuestoes(QDialog):
                     "Há questões selecionadas que ainda precisam "
                     "de conferência.\n\n"
                     f"{detalhes}\n\n"
-                    "Corrija o gabarito/tópico ou desmarque essas questões."
+                    "Corrija o gabarito, título ou capítulo; ou desmarque essas questões."
                 )
             )
             return
@@ -5987,7 +6141,7 @@ class JanelaQuestaoEditor(QDialog):
 
         subtitulo = QLabel(
             (
-                "Vincule a questão a um tópico do perfil ativo. "
+                "Classifique a questão por título ou capítulo do perfil ativo. "
                 "As alternativas A–E são flexíveis: use de 2 a 5."
             )
         )
@@ -6084,6 +6238,11 @@ class JanelaQuestaoEditor(QDialog):
             34
         )
 
+        self.questao_capitulo = QComboBox()
+        self.questao_capitulo.setMinimumHeight(
+            34
+        )
+
         self.questao_dificuldade = QComboBox()
         self.questao_dificuldade.addItems([
             "Não informada",
@@ -6129,7 +6288,7 @@ class JanelaQuestaoEditor(QDialog):
         )
         grade_classificacao.addWidget(
             QLabel(
-                "Tópico"
+                "Título (opcional)"
             ),
             0,
             1
@@ -6162,9 +6321,19 @@ class JanelaQuestaoEditor(QDialog):
         grade_classificacao.addWidget(
             self.questao_banca,
             3,
-            0,
-            1,
-            2
+            0
+        )
+        grade_classificacao.addWidget(
+            QLabel(
+                "Capítulo (opcional)"
+            ),
+            2,
+            1
+        )
+        grade_classificacao.addWidget(
+            self.questao_capitulo,
+            3,
+            1
         )
         grade_classificacao.addWidget(
             QLabel(
@@ -6471,6 +6640,9 @@ class JanelaQuestaoEditor(QDialog):
         self.questao_disciplina.currentTextChanged.connect(
             self.carregar_topicos
         )
+        self.questao_topico.currentIndexChanged.connect(
+            self.carregar_capitulos
+        )
 
         self.carregar_disciplinas()
 
@@ -6507,9 +6679,16 @@ class JanelaQuestaoEditor(QDialog):
             self.questao_disciplina.currentText()
         )
 
+        self.questao_topico.blockSignals(True)
         self.questao_topico.clear()
+        self.questao_topico.addItem(
+            "Não informado",
+            None
+        )
 
         if not disciplina:
+            self.questao_topico.blockSignals(False)
+            self.carregar_capitulos()
             return
 
         concurso_id = (
@@ -6524,6 +6703,34 @@ class JanelaQuestaoEditor(QDialog):
                 topico[1],
                 topico[0]
             )
+
+        self.questao_topico.blockSignals(False)
+        self.carregar_capitulos()
+
+    def carregar_capitulos(self):
+        disciplina = self.questao_disciplina.currentText()
+        topico_id = self.questao_topico.currentData()
+
+        self.questao_capitulo.blockSignals(True)
+        self.questao_capitulo.clear()
+        self.questao_capitulo.addItem(
+            "Não informado",
+            None
+        )
+
+        if topico_id is not None:
+            capitulos = listar_capitulos_topico(topico_id)
+            for capitulo_id, nome, _ordem, _dificuldade, _pausado in capitulos:
+                self.questao_capitulo.addItem(nome, capitulo_id)
+        elif disciplina:
+            capitulos = listar_capitulos_perfil(disciplina)
+            for capitulo_id, nome, _topico_id, titulo, _disciplina in capitulos:
+                self.questao_capitulo.addItem(
+                    f"{titulo} — {nome}",
+                    capitulo_id
+                )
+
+        self.questao_capitulo.blockSignals(False)
 
     def carregar_questao_existente(self):
         dados = obter_questao(
@@ -6595,6 +6802,17 @@ class JanelaQuestaoEditor(QDialog):
         if indice_topico >= 0:
             self.questao_topico.setCurrentIndex(
                 indice_topico
+            )
+
+        self.carregar_capitulos()
+
+        indice_capitulo = self.questao_capitulo.findData(
+            dados.get("capitulo_id")
+        )
+
+        if indice_capitulo >= 0:
+            self.questao_capitulo.setCurrentIndex(
+                indice_capitulo
             )
 
         self.questao_enunciado.setPlainText(
@@ -6673,12 +6891,15 @@ class JanelaQuestaoEditor(QDialog):
         topico_id = (
             self.questao_topico.currentData()
         )
+        capitulo_id = (
+            self.questao_capitulo.currentData()
+        )
 
-        if topico_id is None:
+        if topico_id is None and capitulo_id is None:
             QMessageBox.warning(
                 self,
                 "Questão",
-                "Selecione um tópico."
+                "Informe um título ou um capítulo."
             )
             return
 
@@ -6750,10 +6971,22 @@ class JanelaQuestaoEditor(QDialog):
             )
             return
 
-        if questao_existe(
-            topico_id,
-            enunciado,
-            ignorar_id=self.questao_id
+        topico_id_duplicidade = topico_id
+        if topico_id_duplicidade is None and capitulo_id is not None:
+            for capitulo in listar_capitulos_perfil(
+                self.questao_disciplina.currentText()
+            ):
+                if capitulo[0] == capitulo_id:
+                    topico_id_duplicidade = capitulo[2]
+                    break
+
+        if (
+            topico_id_duplicidade is not None
+            and questao_existe(
+                topico_id_duplicidade,
+                enunciado,
+                ignorar_id=self.questao_id
+            )
         ):
             resposta = QMessageBox.question(
                 self,
@@ -6812,7 +7045,8 @@ class JanelaQuestaoEditor(QDialog):
                     .strip(),
                     self.questao_dificuldade
                     .currentText(),
-                    True
+                    True,
+                    capitulo_id=capitulo_id
                 )
             else:
                 atualizar_questao(
@@ -6832,7 +7066,8 @@ class JanelaQuestaoEditor(QDialog):
                     .strip(),
                     self.questao_dificuldade
                     .currentText(),
-                    self.questao_ativa_atual
+                    self.questao_ativa_atual,
+                    capitulo_id=capitulo_id
                 )
 
         except Exception as erro:
@@ -19872,6 +20107,219 @@ class JanelaRevisao(QDialog):
         self.accept()
 
 
+class JanelaCapitulosTopico(QDialog):
+    """Gerencia a divisão interna de um título sem alterar sua agenda."""
+
+    def __init__(self, topico_id, nome_topico, parent=None):
+        super().__init__(parent)
+        self.topico_id = int(topico_id)
+        self.nome_topico = str(nome_topico)
+        self.dados_capitulos = []
+
+        self.setWindowTitle(f"Capítulos — {self.nome_topico}")
+        self.resize(900, 560)
+        self.setMinimumSize(720, 430)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(22, 18, 22, 20)
+        layout.setSpacing(12)
+
+        cabecalho = QHBoxLayout()
+        titulos = QVBoxLayout()
+        titulo = QLabel(self.nome_topico)
+        titulo.setObjectName("pageTitle")
+        subtitulo = QLabel(
+            "Capítulos internos deste título. A dificuldade e o estado são definidos para o perfil atual."
+        )
+        subtitulo.setObjectName("pageSubtitle")
+        subtitulo.setWordWrap(True)
+        titulos.addWidget(titulo)
+        titulos.addWidget(subtitulo)
+        cabecalho.addLayout(titulos, 1)
+
+        adicionar = QPushButton("+ Adicionar capítulo")
+        adicionar.setObjectName("primaryButton")
+        adicionar.setFixedHeight(34)
+        adicionar.clicked.connect(self.novo_capitulo)
+        cabecalho.addWidget(adicionar)
+
+        self.botao_renomear = QPushButton("Renomear")
+        self.botao_renomear.setObjectName("toolbarButton")
+        self.botao_renomear.setFixedHeight(34)
+        self.botao_renomear.clicked.connect(self.renomear_capitulo_selecionado)
+        cabecalho.addWidget(self.botao_renomear)
+
+        self.botao_estado = QPushButton("Desligar capítulo")
+        self.botao_estado.setObjectName("toolbarButton")
+        self.botao_estado.setFixedHeight(34)
+        self.botao_estado.clicked.connect(self.alternar_estado_capitulo_selecionado)
+        cabecalho.addWidget(self.botao_estado)
+        layout.addLayout(cabecalho)
+
+        aviso = QLabel(
+            "A desativação preserva o capítulo e sua dificuldade; ele pode ser reativado a qualquer momento."
+        )
+        aviso.setObjectName("infoNotice")
+        aviso.setWordWrap(True)
+        layout.addWidget(aviso)
+
+        self.tabela = QTableWidget()
+        self.tabela.setColumnCount(3)
+        self.tabela.setHorizontalHeaderLabels([
+            "Capítulo",
+            "Dificuldade",
+            "Estado",
+        ])
+        self.tabela.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.tabela.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.tabela.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tabela.setAlternatingRowColors(True)
+        self.tabela.setShowGrid(False)
+        self.tabela.verticalHeader().setVisible(False)
+        self.tabela.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.tabela.setColumnWidth(1, 165)
+        self.tabela.setColumnWidth(2, 120)
+        self.tabela.itemSelectionChanged.connect(self.atualizar_botoes)
+        layout.addWidget(self.tabela, 1)
+
+        botoes = QDialogButtonBox(QDialogButtonBox.Close)
+        botoes.rejected.connect(self.reject)
+        botoes.accepted.connect(self.accept)
+        layout.addWidget(botoes)
+
+        self.carregar_capitulos()
+
+    def carregar_capitulos(self):
+        self.dados_capitulos = listar_capitulos_topico(self.topico_id)
+        self.tabela.setRowCount(len(self.dados_capitulos))
+
+        for linha, dado in enumerate(self.dados_capitulos):
+            capitulo_id, nome, _ordem, dificuldade, pausado = dado
+            pausado = bool(pausado)
+
+            item_nome = QTableWidgetItem(nome)
+            item_nome.setData(Qt.UserRole, capitulo_id)
+            item_nome.setData(Qt.UserRole + 1, pausado)
+            self.tabela.setItem(linha, 0, item_nome)
+
+            seletor = SeletorEstrelas(
+                valor=int(dificuldade),
+                ao_alterar=(
+                    lambda novo_valor, cid=capitulo_id:
+                    self.alterar_dificuldade(cid, novo_valor)
+                )
+            )
+            seletor.setToolTip(
+                "Clique em uma estrela para definir a dificuldade deste capítulo."
+            )
+            seletor.setEnabled(not pausado)
+            if pausado:
+                seletor.setToolTip(
+                    "Capítulo desligado. Reative-o para alterar a dificuldade."
+                )
+            self.tabela.setCellWidget(linha, 1, seletor)
+
+            item_estado = QTableWidgetItem("Desligado" if pausado else "Ativo")
+            item_estado.setTextAlignment(Qt.AlignCenter)
+            self.tabela.setItem(linha, 2, item_estado)
+
+            if pausado:
+                for coluna in (0, 2):
+                    aplicar_destaque_tabela(
+                        self.tabela.item(linha, coluna),
+                        "inativo",
+                        True
+                    )
+
+            self.tabela.setRowHeight(linha, 34)
+
+        self.atualizar_botoes()
+
+    def obter_capitulo_selecionado(self):
+        linha = self.tabela.currentRow()
+        if linha < 0:
+            return None, None, False
+        item = self.tabela.item(linha, 0)
+        if item is None:
+            return None, None, False
+        return (
+            item.data(Qt.UserRole),
+            item.text(),
+            bool(item.data(Qt.UserRole + 1))
+        )
+
+    def atualizar_botoes(self):
+        capitulo_id, _nome, pausado = self.obter_capitulo_selecionado()
+        habilitado = capitulo_id is not None
+        self.botao_renomear.setEnabled(habilitado)
+        self.botao_estado.setEnabled(habilitado)
+        self.botao_estado.setText(
+            "Reativar capítulo" if pausado else "Desligar capítulo"
+        )
+
+    def alterar_dificuldade(self, capitulo_id, nova_dificuldade):
+        if atualizar_dificuldade_capitulo(capitulo_id, nova_dificuldade):
+            QTimer.singleShot(0, self.carregar_capitulos)
+
+    def novo_capitulo(self):
+        nome, confirmou = QInputDialog.getText(
+            self,
+            "Novo capítulo",
+            f"Novo capítulo de {self.nome_topico}:"
+        )
+        if not confirmou or not nome.strip():
+            return
+        if adicionar_capitulo(self.topico_id, nome):
+            self.carregar_capitulos()
+        else:
+            QMessageBox.information(
+                self,
+                "Capítulo existente",
+                "Esse capítulo já está cadastrado neste título."
+            )
+
+    def renomear_capitulo_selecionado(self):
+        capitulo_id, nome_atual, _pausado = self.obter_capitulo_selecionado()
+        if capitulo_id is None:
+            return
+        novo_nome, confirmou = QInputDialog.getText(
+            self,
+            "Renomear capítulo",
+            "Novo nome:",
+            text=nome_atual
+        )
+        if not confirmou or not novo_nome.strip() or novo_nome.strip() == nome_atual:
+            return
+        if renomear_capitulo(capitulo_id, novo_nome):
+            self.carregar_capitulos()
+        else:
+            QMessageBox.information(
+                self,
+                "Nome já utilizado",
+                "Já existe um capítulo com esse nome neste título."
+            )
+
+    def alternar_estado_capitulo_selecionado(self):
+        capitulo_id, nome, pausado = self.obter_capitulo_selecionado()
+        if capitulo_id is None:
+            return
+        if not pausado:
+            resposta = QMessageBox.question(
+                self,
+                "Desligar capítulo",
+                (
+                    f"Desligar temporariamente o capítulo:\n\n{nome}\n\n"
+                    "A dificuldade continuará registrada para este perfil."
+                ),
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            if resposta != QMessageBox.Yes:
+                return
+        if definir_capitulo_pausado(capitulo_id, not pausado):
+            self.carregar_capitulos()
+
+
 class JanelaTopico(QDialog):
     def __init__(
         self,
@@ -21908,6 +22356,20 @@ class JanelaConteudosConcurso(QDialog):
             explicacao
         )
 
+        self.busca_conteudos = QLineEdit()
+        self.busca_conteudos.setPlaceholderText(
+            "Pesquisar matéria, tópico ou capítulo..."
+        )
+        self.busca_conteudos.setClearButtonEnabled(
+            True
+        )
+        self.busca_conteudos.textChanged.connect(
+            self.filtrar_conteudos
+        )
+        layout.addWidget(
+            self.busca_conteudos
+        )
+
         self.arvore = QTreeWidget()
         self.arvore.setColumnCount(
             2
@@ -22141,10 +22603,153 @@ class JanelaConteudosConcurso(QDialog):
                     f"{importancia}/5"
                 )
 
+                for capitulo in listar_capitulos_topico(
+                    topico[
+                        "topico_id"
+                    ]
+                ):
+                    item_capitulo = QTreeWidgetItem(
+                        item_topico
+                    )
+
+                    item_capitulo.setText(
+                        0,
+                        f"Capítulo: {capitulo[1]}"
+                    )
+                    item_capitulo.setData(
+                        0,
+                        Qt.UserRole,
+                        (
+                            "capitulo",
+                            capitulo[0]
+                        )
+                    )
+                    item_capitulo.setText(
+                        1,
+                        ""
+                    )
+
         self.atualizando_arvore = False
         self.arvore.expandToDepth(
             0
         )
+        self.filtrar_conteudos(
+            self.busca_conteudos.text()
+        )
+
+    @staticmethod
+    def normalizar_busca(texto):
+        texto = unicodedata.normalize(
+            "NFD",
+            str(texto or "")
+        )
+        return "".join(
+            caractere
+            for caractere in texto
+            if unicodedata.category(caractere) != "Mn"
+        ).casefold()
+
+    def filtrar_conteudos(
+        self,
+        texto
+    ):
+        termo = self.normalizar_busca(
+            texto
+        )
+        possui_filtro = bool(
+            termo
+        )
+
+        self.atualizando_arvore = True
+
+        try:
+            for indice in range(
+                self.arvore.topLevelItemCount()
+            ):
+                disciplina = self.arvore.topLevelItem(
+                    indice
+                )
+                disciplina_corresponde = (
+                    termo in self.normalizar_busca(
+                        disciplina.text(0)
+                    )
+                )
+                possui_resultado = disciplina_corresponde
+
+                for indice_topico in range(
+                    disciplina.childCount()
+                ):
+                    topico = disciplina.child(
+                        indice_topico
+                    )
+                    topico_corresponde = (
+                        termo in self.normalizar_busca(
+                            topico.text(0)
+                        )
+                    )
+                    capitulo_corresponde = False
+
+                    for indice_capitulo in range(
+                        topico.childCount()
+                    ):
+                        capitulo = topico.child(
+                            indice_capitulo
+                        )
+                        encontrado = (
+                            termo in self.normalizar_busca(
+                                capitulo.text(0)
+                            )
+                        )
+                        capitulo_corresponde = (
+                            capitulo_corresponde
+                            or encontrado
+                        )
+                        capitulo.setHidden(
+                            possui_filtro
+                            and not (
+                                disciplina_corresponde
+                                or topico_corresponde
+                                or encontrado
+                            )
+                        )
+
+                    exibir_topico = (
+                        not possui_filtro
+                        or disciplina_corresponde
+                        or topico_corresponde
+                        or capitulo_corresponde
+                    )
+                    topico.setHidden(
+                        not exibir_topico
+                    )
+                    possui_resultado = (
+                        possui_resultado
+                        or exibir_topico
+                    )
+
+                    if (
+                        possui_filtro
+                        and (
+                            topico_corresponde
+                            or capitulo_corresponde
+                        )
+                    ):
+                        topico.setExpanded(
+                            True
+                        )
+
+                disciplina.setHidden(
+                    possui_filtro
+                    and not possui_resultado
+                )
+
+                if possui_filtro and possui_resultado:
+                    disciplina.setExpanded(
+                        True
+                    )
+
+        finally:
+            self.atualizando_arvore = False
 
     def item_alterado(
         self,
@@ -53831,7 +54436,7 @@ class SistemaEstudos(QMainWindow):
             "Última",
             "Próxima",
             "% atual",
-            "Importância",
+            "Nível",
             "Estado"
         ])
 
@@ -53898,6 +54503,8 @@ class SistemaEstudos(QMainWindow):
             7,
             96
         )
+
+        self.topicos_expandidos = set()
 
         self.tabela_topicos.itemSelectionChanged.connect(
             self.atualizar_botao_estado_topico
@@ -54292,14 +54899,14 @@ class SistemaEstudos(QMainWindow):
 
     def renderizar_topicos(self, dados):
         self.tabela_topicos.setRowCount(
-            len(dados)
+            0
         )
 
         hoje = QDate.currentDate()
 
-        for linha, dado in enumerate(
-            dados
-        ):
+        for dado in dados:
+            linha = self.tabela_topicos.rowCount()
+            self.tabela_topicos.insertRow(linha)
             topico_id = dado[0]
             nome = dado[1]
             revisoes = dado[2]
@@ -54321,6 +54928,10 @@ class SistemaEstudos(QMainWindow):
                 Qt.UserRole + 1,
                 pausado
             )
+            item_topico.setData(
+                Qt.UserRole + 2,
+                "topico"
+            )
             if pausado:
                 item_topico.setToolTip(
                     "Tópico desligado temporariamente no perfil atual. O histórico continua preservado."
@@ -54330,6 +54941,40 @@ class SistemaEstudos(QMainWindow):
                 0,
                 item_topico
             )
+
+            tem_capitulos = topico_possui_capitulos(topico_id)
+            if tem_capitulos:
+                celula_topico = QWidget()
+                layout_topico = QHBoxLayout(celula_topico)
+                layout_topico.setContentsMargins(3, 0, 3, 0)
+                layout_topico.setSpacing(4)
+
+                botao_expandir = QToolButton()
+                botao_expandir.setText(
+                    "−" if topico_id in self.topicos_expandidos else "+"
+                )
+                botao_expandir.setAutoRaise(True)
+                botao_expandir.setFixedSize(18, 18)
+                botao_expandir.setToolTip(
+                    "Ocultar capítulos" if topico_id in self.topicos_expandidos
+                    else "Mostrar capítulos"
+                )
+                botao_expandir.clicked.connect(
+                    lambda checked=False, tid=topico_id:
+                    self.alternar_expansao_topico(tid)
+                )
+
+                texto_topico = QLabel(nome)
+                texto_topico.setToolTip(
+                    "Clique no + para exibir os capítulos deste título."
+                )
+                layout_topico.addWidget(botao_expandir)
+                layout_topico.addWidget(texto_topico, 1)
+                self.tabela_topicos.setCellWidget(
+                    linha,
+                    0,
+                    celula_topico
+                )
 
             # Ação compacta logo após o tópico.
             botao_atualizar = QPushButton(
@@ -54521,6 +55166,16 @@ class SistemaEstudos(QMainWindow):
                 31
             )
 
+            if (
+                tem_capitulos
+                and topico_id in self.topicos_expandidos
+            ):
+                for capitulo in listar_capitulos_topico(topico_id):
+                    self.renderizar_capitulo_inline(
+                        topico_id,
+                        capitulo
+                    )
+
         total = len(
             getattr(
                 self,
@@ -54539,6 +55194,95 @@ class SistemaEstudos(QMainWindow):
                 f"{visiveis} de {total}"
             )
         self.atualizar_botao_estado_topico()
+
+    def alternar_expansao_topico(self, topico_id):
+        for linha in range(self.tabela_topicos.rowCount()):
+            item = self.tabela_topicos.item(linha, 0)
+            if (
+                item is not None
+                and item.data(Qt.UserRole) == topico_id
+                and item.data(Qt.UserRole + 2) == "topico"
+            ):
+                self.tabela_topicos.setCurrentCell(linha, 0)
+                break
+
+        if topico_id in self.topicos_expandidos:
+            self.topicos_expandidos.remove(topico_id)
+        else:
+            self.topicos_expandidos.add(topico_id)
+        self.aplicar_filtros_topicos()
+
+    def renderizar_capitulo_inline(self, topico_id, capitulo):
+        capitulo_id, nome, _ordem, dificuldade, pausado = capitulo
+        pausado = bool(pausado)
+        linha = self.tabela_topicos.rowCount()
+        self.tabela_topicos.insertRow(linha)
+
+        item_capitulo = QTableWidgetItem(f"    ↳ {nome}")
+        item_capitulo.setData(Qt.UserRole, capitulo_id)
+        item_capitulo.setData(Qt.UserRole + 1, pausado)
+        item_capitulo.setData(Qt.UserRole + 2, "capitulo")
+        item_capitulo.setData(Qt.UserRole + 3, topico_id)
+        item_capitulo.setToolTip(
+            "Capítulo interno. As estrelas representam sua dificuldade."
+        )
+        self.tabela_topicos.setItem(linha, 0, item_capitulo)
+
+        for coluna in (1, 2, 3, 4, 5):
+            item_vazio = QTableWidgetItem("—")
+            item_vazio.setTextAlignment(Qt.AlignCenter)
+            self.tabela_topicos.setItem(linha, coluna, item_vazio)
+
+        seletor = SeletorEstrelas(
+            valor=int(dificuldade),
+            ao_alterar=(
+                lambda novo_valor, cid=capitulo_id:
+                self.alterar_dificuldade_capitulo_inline(
+                    cid,
+                    novo_valor
+                )
+            )
+        )
+        seletor.setToolTip(
+            "Dificuldade do capítulo: clique em uma estrela para alterar."
+        )
+        seletor.setEnabled(not pausado)
+        self.tabela_topicos.setCellWidget(linha, 6, seletor)
+
+        item_estado = QTableWidgetItem(
+            "Desligado" if pausado else "Ativo"
+        )
+        item_estado.setTextAlignment(Qt.AlignCenter)
+        item_estado.setToolTip(
+            "Capítulo desligado para este perfil."
+            if pausado
+            else "Capítulo ativo neste perfil."
+        )
+        self.tabela_topicos.setItem(linha, 7, item_estado)
+
+        if pausado:
+            for coluna in (0, 1, 2, 3, 4, 5, 7):
+                aplicar_destaque_tabela(
+                    self.tabela_topicos.item(linha, coluna),
+                    "inativo",
+                    True
+                )
+            seletor.setToolTip(
+                "Capítulo desligado. Reative-o para alterar a dificuldade."
+            )
+
+        self.tabela_topicos.setRowHeight(linha, 29)
+
+    def alterar_dificuldade_capitulo_inline(
+        self,
+        capitulo_id,
+        nova_dificuldade
+    ):
+        if atualizar_dificuldade_capitulo(
+            capitulo_id,
+            nova_dificuldade
+        ):
+            QTimer.singleShot(0, self.aplicar_filtros_topicos)
 
     def alterar_importancia_estrelas(
         self,
@@ -54621,11 +55365,11 @@ class SistemaEstudos(QMainWindow):
                 "Esse tópico já está cadastrado."
             )
 
-    def obter_topico_selecionado(self):
+    def obter_conteudo_selecionado(self):
         linha = self.tabela_topicos.currentRow()
 
         if linha < 0:
-            return None, None
+            return None, None, None, None, False
 
         item = self.tabela_topicos.item(
             linha,
@@ -54633,22 +55377,50 @@ class SistemaEstudos(QMainWindow):
         )
 
         if item is None:
-            return None, None
+            return None, None, None, None, False
 
         return (
             item.data(Qt.UserRole),
-            item.text()
+            item.text().replace("    ↳ ", "", 1),
+            item.data(Qt.UserRole + 2) or "topico",
+            item.data(Qt.UserRole + 3),
+            bool(item.data(Qt.UserRole + 1))
         )
+
+    def obter_topico_selecionado(self):
+        topico_id, nome, tipo, _pai_id, _pausado = (
+            self.obter_conteudo_selecionado()
+        )
+
+        if topico_id is None or tipo == "capitulo":
+            return None, None
+
+        return topico_id, nome
 
     def atualizar_botao_estado_topico(self):
         if not hasattr(self, "botao_estado_topico"):
             return
-        topico_id, _ = self.obter_topico_selecionado()
-        if topico_id is None:
+        conteudo_id, _nome, tipo, _pai_id, pausado = (
+            self.obter_conteudo_selecionado()
+        )
+        if conteudo_id is None:
             self.botao_estado_topico.setEnabled(False)
             self.botao_estado_topico.setText("Desligar tópico")
             return
-        pausado = topico_esta_pausado(topico_id)
+
+        if tipo == "capitulo":
+            self.botao_estado_topico.setEnabled(True)
+            self.botao_estado_topico.setText(
+                "Reativar capítulo" if pausado else "Desligar capítulo"
+            )
+            self.botao_estado_topico.setToolTip(
+                "Reativar o capítulo no perfil atual."
+                if pausado
+                else "Desligar temporariamente este capítulo no perfil atual."
+            )
+            return
+
+        pausado = topico_esta_pausado(conteudo_id)
         self.botao_estado_topico.setEnabled(True)
         self.botao_estado_topico.setText(
             "Reativar tópico" if pausado else "Desligar tópico"
@@ -54663,14 +55435,37 @@ class SistemaEstudos(QMainWindow):
         )
 
     def alternar_estado_topico_selecionado(self):
-        topico_id, nome_topico = self.obter_topico_selecionado()
-        if topico_id is None:
+        conteudo_id, nome_conteudo, tipo, _pai_id, pausado = (
+            self.obter_conteudo_selecionado()
+        )
+        if conteudo_id is None:
             QMessageBox.information(
                 self,
                 "Selecione um tópico",
                 "Primeiro selecione um tópico da tabela."
             )
             return
+
+        if tipo == "capitulo":
+            if not pausado:
+                resposta = QMessageBox.question(
+                    self,
+                    "Desligar capítulo",
+                    (
+                        f"Desligar temporariamente o capítulo:\n\n{nome_conteudo}\n\n"
+                        "A dificuldade continuará registrada para este perfil."
+                    ),
+                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.No
+                )
+                if resposta != QMessageBox.Yes:
+                    return
+            if definir_capitulo_pausado(conteudo_id, not pausado):
+                self.aplicar_filtros_topicos()
+            return
+
+        topico_id = conteudo_id
+        nome_topico = nome_conteudo
 
         pausado = topico_esta_pausado(topico_id)
         if not pausado:
@@ -54924,6 +55719,9 @@ class SistemaEstudos(QMainWindow):
         )
 
         if item is None:
+            return
+
+        if item.data(Qt.UserRole + 2) == "capitulo":
             return
 
         janela = JanelaTopico(

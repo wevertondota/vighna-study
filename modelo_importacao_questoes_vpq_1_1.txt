@@ -1,0 +1,35 @@
+VIGHNA PDF — VPQ 1.1
+DISCIPLINA: Direito Penal
+TÍTULO: Título I: Dos crimes contra a pessoa
+CAPÍTULO: Capítulo I: Dos crimes contra a vida
+FONTE: Simulado próprio — setembro/2026
+QUANTIDADE: 2
+ALTERNATIVAS: A-E
+
+QUESTÃO 1
+Enunciado completo da questão 1.
+
+A) Texto da alternativa A
+B) Texto da alternativa B
+C) Texto da alternativa C
+D) Texto da alternativa D
+GABARITO: B
+EXPLICAÇÃO: Comentário opcional da questão.
+
+QUESTÃO 2
+Enunciado completo da questão 2.
+
+A) Texto da alternativa A
+B) Texto da alternativa B
+C) Texto da alternativa C
+D) Texto da alternativa D
+GABARITO: A
+
+REGRAS DO PROTOCOLO
+1. Use exatamente a primeira linha: VIGHNA PDF — VPQ 1.1.
+2. DISCIPLINA é recomendada para a identificação precisa.
+3. Preencha TÍTULO, CAPÍTULO ou ambos. Pelo menos um deles é suficiente.
+4. Quando ambos forem usados, o capítulo deve pertencer ao título informado.
+5. Os nomes devem corresponder aos cadastrados no perfil ativo.
+6. GABARITO deve apontar para uma alternativa existente em cada questão.
+7. FONTE e EXPLICAÇÃO são opcionais.

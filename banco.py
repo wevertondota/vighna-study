@@ -362,6 +362,38 @@ def criar_banco():
             )
         """)
 
+        # Capítulos são conteúdos internos de um tópico (por exemplo, os
+        # capítulos de um Título do Código Penal). Eles têm configuração
+        # própria por perfil, mas não substituem o tópico pai na agenda.
+        conexao.execute("""
+            CREATE TABLE IF NOT EXISTS capitulos_topico (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                topico_id INTEGER NOT NULL,
+                nome TEXT NOT NULL,
+                ordem INTEGER NOT NULL DEFAULT 0,
+                UNIQUE (topico_id, nome),
+                FOREIGN KEY (topico_id)
+                    REFERENCES topicos(id)
+                    ON DELETE CASCADE
+            )
+        """)
+
+        conexao.execute("""
+            CREATE TABLE IF NOT EXISTS capitulo_concurso_config (
+                capitulo_id INTEGER NOT NULL,
+                concurso_id INTEGER NOT NULL,
+                dificuldade INTEGER NOT NULL DEFAULT 3,
+                pausado INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY (capitulo_id, concurso_id),
+                FOREIGN KEY (capitulo_id)
+                    REFERENCES capitulos_topico(id)
+                    ON DELETE CASCADE,
+                FOREIGN KEY (concurso_id)
+                    REFERENCES concursos(id)
+                    ON DELETE CASCADE
+            )
+        """)
+
         colunas_topico_concurso = {
             linha[1]
             for linha in conexao.execute(
@@ -426,6 +458,7 @@ def criar_banco():
             CREATE TABLE IF NOT EXISTS questoes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 topico_id INTEGER NOT NULL,
+                capitulo_id INTEGER,
                 enunciado TEXT NOT NULL,
                 explicacao TEXT,
                 banca TEXT,
@@ -441,7 +474,10 @@ def criar_banco():
                 ),
                 FOREIGN KEY (topico_id)
                     REFERENCES topicos(id)
-                    ON DELETE CASCADE
+                    ON DELETE CASCADE,
+                FOREIGN KEY (capitulo_id)
+                    REFERENCES capitulos_topico(id)
+                    ON DELETE SET NULL
             )
         """)
 
@@ -451,6 +487,14 @@ def criar_banco():
                 "PRAGMA table_info(questoes)"
             ).fetchall()
         }
+
+        if "capitulo_id" not in colunas_questoes:
+            conexao.execute(
+                """
+                ALTER TABLE questoes
+                ADD COLUMN capitulo_id INTEGER
+                """
+            )
 
         if "excluida" not in colunas_questoes:
             conexao.execute(
@@ -1144,6 +1188,31 @@ def criar_banco():
         ]
         for comando in indices_performance:
             conexao.execute(comando)
+
+        # Materializa os capítulos padrão logo na abertura. Assim, títulos de
+        # Direito Penal já chegam completos, inclusive antes do primeiro
+        # clique na tela de disciplina.
+        topicos_penal = conexao.execute(
+            """
+            SELECT t.id
+            FROM topicos t
+            JOIN disciplinas d ON d.id = t.disciplina_id
+            WHERE d.nome = 'Direito Penal'
+            """
+        ).fetchall()
+        for (topico_id,) in topicos_penal:
+            _garantir_capitulos_padrao(topico_id, conexao)
+
+        conexao.execute(
+            """
+            INSERT OR IGNORE INTO capitulo_concurso_config (
+                capitulo_id, concurso_id, dificuldade, pausado
+            )
+            SELECT c.id, co.id, 3, 0
+            FROM capitulos_topico c
+            CROSS JOIN concursos co
+            """
+        )
 
         try:
             conexao.execute("PRAGMA optimize")
@@ -2635,6 +2704,393 @@ def obter_importancia_topico(
         )
 
 
+def _normalizar_chave_conteudo(texto):
+    texto = unicodedata.normalize(
+        "NFD",
+        str(texto or "")
+    )
+    texto = "".join(
+        caractere
+        for caractere in texto
+        if unicodedata.category(caractere) != "Mn"
+    )
+    return " ".join(texto.lower().split())
+
+
+# Estrutura de estudo baseada na organização vigente do Código Penal e nos
+# títulos já cadastrados em Direito Penal. Quando a lei não traz capítulos
+# formais, o conteúdo é apresentado como uma divisão interna estudável.
+CAPITULOS_DIREITO_PENAL = {
+    _normalizar_chave_conteudo("Título I: Da aplicação da lei penal"): (
+        "Capítulo I: Da aplicação da lei penal",
+        "Capítulo II: Da aplicação da lei penal no espaço",
+    ),
+    _normalizar_chave_conteudo("Título II: Do crime"): (
+        "Capítulo I: Do crime",
+        "Capítulo II: Da relação de causalidade",
+        "Capítulo III: Da consumação e da tentativa",
+        "Capítulo IV: Da desistência voluntária e do arrependimento eficaz",
+        "Capítulo V: Do arrependimento posterior",
+        "Capítulo VI: Do crime impossível",
+        "Capítulo VII: Do crime doloso e do crime culposo",
+        "Capítulo VIII: Da agravação pelo resultado",
+        "Capítulo IX: Do erro",
+        "Capítulo X: Da ilicitude",
+        "Capítulo XI: Da culpabilidade",
+        "Capítulo XII: Do concurso de pessoas",
+    ),
+    _normalizar_chave_conteudo("Título III: Da imputabilidade penal"): (
+        "Disposições gerais sobre a imputabilidade penal",
+    ),
+    _normalizar_chave_conteudo("Título IV: Do concurso de pessoas"): (
+        "Disposições gerais sobre o concurso de pessoas",
+    ),
+    _normalizar_chave_conteudo("Título V: Das penas"): (
+        "Capítulo I: Das penas",
+        "Capítulo II: Da cominação das penas",
+        "Capítulo III: Da aplicação da pena",
+        "Capítulo IV: Da suspensão condicional da pena",
+        "Capítulo V: Do livramento condicional",
+        "Capítulo VI: Dos efeitos da condenação",
+        "Capítulo VII: Da reabilitação",
+    ),
+    _normalizar_chave_conteudo("Título VI: Das medidas de segurança"): (
+        "Capítulo I: Das medidas de segurança",
+        "Capítulo II: Da cessação da periculosidade",
+    ),
+    _normalizar_chave_conteudo("Título VII: Da ação penal"): (
+        "Capítulo I: Da ação penal",
+        "Capítulo II: Da ação civil",
+    ),
+    _normalizar_chave_conteudo("Título VIII: Da extinção da punibilidade"): (
+        "Capítulo I: Da extinção da punibilidade",
+        "Capítulo II: Da prescrição",
+    ),
+    _normalizar_chave_conteudo("Título I: Dos crimes contra a pessoa"): (
+        "Capítulo I: Dos crimes contra a vida",
+        "Capítulo II: Das lesões corporais",
+        "Capítulo III: Da periclitação da vida e da saúde",
+        "Capítulo IV: Da rixa",
+        "Capítulo V: Dos crimes contra a honra",
+        "Capítulo VI: Dos crimes contra a liberdade individual",
+    ),
+    _normalizar_chave_conteudo("Título II: Dos crimes contra o patrimônio"): (
+        "Capítulo I: Do furto",
+        "Capítulo II: Do roubo e da extorsão",
+        "Capítulo III: Da usurpação",
+        "Capítulo IV: Do dano",
+        "Capítulo V: Da apropriação indébita",
+        "Capítulo VI: Do estelionato e outras fraudes",
+        "Capítulo VII: Da receptação",
+        "Capítulo VIII: Disposições gerais",
+    ),
+    _normalizar_chave_conteudo("Título III: Dos crimes contra a propriedade imaterial"): (
+        "Capítulo I: Dos crimes contra a propriedade intelectual",
+        "Capítulo II: Dos crimes contra o privilégio de invenção",
+        "Capítulo III: Dos crimes contra as marcas de indústria e comércio",
+        "Capítulo IV: Dos crimes de concorrência desleal",
+    ),
+    _normalizar_chave_conteudo("Título IV: Dos crimes contra a organização do trabalho"): (
+        "Disposições sobre os crimes contra a organização do trabalho",
+    ),
+    _normalizar_chave_conteudo("Título V: Dos crimes contra o sentimento religioso e contra o respeito aos mortos"): (
+        "Capítulo I: Dos crimes contra o sentimento religioso",
+        "Capítulo II: Dos crimes contra o respeito aos mortos",
+    ),
+    _normalizar_chave_conteudo("Título VI: Dos crimes contra a dignidade sexual"): (
+        "Capítulo I: Dos crimes contra a liberdade sexual",
+        "Capítulo I-A: Da exposição da intimidade sexual",
+        "Capítulo II: Dos crimes sexuais contra vulnerável",
+        "Capítulo III: Do assédio sexual",
+        "Capítulo IV: Disposições gerais",
+        "Capítulo V: Do lenocínio e do tráfico de pessoa para fim de prostituição ou outra forma de exploração sexual",
+        "Capítulo VI: Disposições gerais",
+        "Capítulo VII: Da divulgação de cena de estupro ou de cena de estupro de vulnerável, de cena de sexo ou de pornografia",
+    ),
+    _normalizar_chave_conteudo("Título VII: Dos crimes contra a família"): (
+        "Capítulo I: Dos crimes contra o casamento",
+        "Capítulo II: Dos crimes contra o estado de filiação",
+        "Capítulo III: Dos crimes contra a assistência familiar",
+        "Capítulo IV: Dos crimes contra o pátrio poder, tutela ou curatela",
+    ),
+    _normalizar_chave_conteudo("Título VIII: Dos crimes contra a incolumidade pública"): (
+        "Capítulo I: Dos crimes de perigo comum",
+        "Capítulo II: Dos crimes contra a segurança dos meios de comunicação e transporte e outros serviços públicos",
+        "Capítulo III: Dos crimes contra a saúde pública",
+    ),
+    _normalizar_chave_conteudo("Título IX: Dos crimes contra a paz pública"): (
+        "Disposições sobre os crimes contra a paz pública",
+    ),
+    _normalizar_chave_conteudo("Título X: Dos crimes contra a fé pública"): (
+        "Capítulo I: Da moeda falsa",
+        "Capítulo II: Da falsidade de títulos e outros papéis públicos",
+        "Capítulo III: Da falsidade documental",
+        "Capítulo IV: De outras falsidades",
+        "Capítulo V: Das fraudes em certames de interesse público",
+        "Capítulo VI: Disposições gerais",
+    ),
+    _normalizar_chave_conteudo("Título XI: Dos crimes contra a administração pública"): (
+        "Capítulo I: Dos crimes praticados por funcionário público contra a administração em geral",
+        "Capítulo II: Dos crimes praticados por particular contra a administração em geral",
+        "Capítulo II-A: Dos crimes praticados por particular contra a administração pública estrangeira",
+        "Capítulo III: Dos crimes contra a administração da justiça",
+        "Capítulo IV: Dos crimes contra as finanças públicas",
+    ),
+}
+
+# A disciplina também possui alguns tópicos sem o prefixo "Título". Eles
+# representam os mesmos blocos do Código Penal e, por isso, recebem a mesma
+# árvore de capítulos ao serem exibidos na tabela.
+CAPITULOS_DIREITO_PENAL.update({
+    _normalizar_chave_conteudo("Aplicação da Lei Penal"):
+        CAPITULOS_DIREITO_PENAL[
+            _normalizar_chave_conteudo("Título I: Da aplicação da lei penal")
+        ],
+    _normalizar_chave_conteudo("Do Crime"):
+        CAPITULOS_DIREITO_PENAL[
+            _normalizar_chave_conteudo("Título II: Do crime")
+        ],
+    _normalizar_chave_conteudo("Imputabilidade Penal"):
+        CAPITULOS_DIREITO_PENAL[
+            _normalizar_chave_conteudo("Título III: Da imputabilidade penal")
+        ],
+    _normalizar_chave_conteudo("Concurso de Pessoas"):
+        CAPITULOS_DIREITO_PENAL[
+            _normalizar_chave_conteudo("Título IV: Do concurso de pessoas")
+        ],
+    _normalizar_chave_conteudo("Das Penas"):
+        CAPITULOS_DIREITO_PENAL[
+            _normalizar_chave_conteudo("Título V: Das penas")
+        ],
+    _normalizar_chave_conteudo("Crimes contra o Patrimônio"):
+        CAPITULOS_DIREITO_PENAL[
+            _normalizar_chave_conteudo(
+                "Título II: Dos crimes contra o patrimônio"
+            )
+        ],
+})
+
+
+def _obter_capitulos_padrao_topico(topico_id, conexao):
+    linha = conexao.execute(
+        """
+        SELECT d.nome, t.nome
+        FROM topicos t
+        JOIN disciplinas d ON d.id = t.disciplina_id
+        WHERE t.id = ?
+        """,
+        (int(topico_id),)
+    ).fetchone()
+
+    if linha is None or _normalizar_chave_conteudo(linha[0]) != "direito penal":
+        return ()
+
+    return CAPITULOS_DIREITO_PENAL.get(
+        _normalizar_chave_conteudo(linha[1]),
+        ()
+    )
+
+
+def _garantir_capitulos_padrao(topico_id, conexao):
+    capitulos = _obter_capitulos_padrao_topico(topico_id, conexao)
+    for ordem, nome in enumerate(capitulos, start=1):
+        conexao.execute(
+            """
+            INSERT OR IGNORE INTO capitulos_topico (topico_id, nome, ordem)
+            VALUES (?, ?, ?)
+            """,
+            (int(topico_id), nome, ordem)
+        )
+    return bool(capitulos)
+
+
+def topico_possui_capitulos(topico_id):
+    with conectar() as conexao:
+        existe = conexao.execute(
+            "SELECT 1 FROM capitulos_topico WHERE topico_id = ? LIMIT 1",
+            (int(topico_id),)
+        ).fetchone()
+        return bool(existe) or bool(
+            _obter_capitulos_padrao_topico(topico_id, conexao)
+        )
+
+
+def listar_capitulos_topico(topico_id, concurso_id=None):
+    if concurso_id is None:
+        concurso_id = obter_concurso_ativo()[0]
+
+    with conectar() as conexao:
+        _garantir_capitulos_padrao(topico_id, conexao)
+        conexao.execute(
+            """
+            INSERT OR IGNORE INTO capitulo_concurso_config (
+                capitulo_id, concurso_id, dificuldade, pausado
+            )
+            SELECT id, ?, 3, 0
+            FROM capitulos_topico
+            WHERE topico_id = ?
+            """,
+            (int(concurso_id), int(topico_id))
+        )
+        return conexao.execute(
+            """
+            SELECT
+                c.id,
+                c.nome,
+                c.ordem,
+                COALESCE(cc.dificuldade, 3) AS dificuldade,
+                COALESCE(cc.pausado, 0) AS pausado
+            FROM capitulos_topico c
+            LEFT JOIN capitulo_concurso_config cc
+                ON cc.capitulo_id = c.id
+                AND cc.concurso_id = ?
+            WHERE c.topico_id = ?
+            ORDER BY c.ordem, c.nome COLLATE NOCASE
+            """,
+            (int(concurso_id), int(topico_id))
+        ).fetchall()
+
+
+def listar_capitulos_perfil(disciplina_nome=None, concurso_id=None):
+    """Lista capítulos disponíveis para classificar uma questão no perfil."""
+    if concurso_id is None:
+        concurso_id = obter_concurso_ativo()[0]
+
+    with conectar() as conexao:
+        if disciplina_nome:
+            topicos = conexao.execute(
+                """
+                SELECT t.id
+                FROM topicos t
+                JOIN disciplinas d ON d.id = t.disciplina_id
+                WHERE d.nome = ?
+                """,
+                (str(disciplina_nome),)
+            ).fetchall()
+            for (topico_id,) in topicos:
+                _garantir_capitulos_padrao(topico_id, conexao)
+
+        filtro_disciplina = "AND d.nome = ?" if disciplina_nome else ""
+        parametros = [int(concurso_id)]
+        if disciplina_nome:
+            parametros.append(str(disciplina_nome))
+
+        return conexao.execute(
+            f"""
+            SELECT c.id, c.nome, c.topico_id, t.nome, d.nome
+            FROM capitulos_topico c
+            JOIN topicos t ON t.id = c.topico_id
+            JOIN disciplinas d ON d.id = t.disciplina_id
+            JOIN topico_concurso_importancia tc
+                ON tc.topico_id = t.id
+                AND tc.concurso_id = ?
+                AND tc.incluido = 1
+            WHERE 1 = 1 {filtro_disciplina}
+            ORDER BY d.nome COLLATE NOCASE, t.nome COLLATE NOCASE,
+                c.ordem, c.nome COLLATE NOCASE
+            """,
+            parametros
+        ).fetchall()
+
+
+def adicionar_capitulo(topico_id, nome_capitulo):
+    nome_capitulo = str(nome_capitulo or "").strip()
+    if not nome_capitulo:
+        return False
+
+    with conectar() as conexao:
+        try:
+            proxima_ordem = conexao.execute(
+                """
+                SELECT COALESCE(MAX(ordem), 0) + 1
+                FROM capitulos_topico
+                WHERE topico_id = ?
+                """,
+                (int(topico_id),)
+            ).fetchone()[0]
+            cursor = conexao.execute(
+                """
+                INSERT INTO capitulos_topico (topico_id, nome, ordem)
+                VALUES (?, ?, ?)
+                """,
+                (int(topico_id), nome_capitulo, int(proxima_ordem))
+            )
+            conexao.execute(
+                """
+                INSERT OR IGNORE INTO capitulo_concurso_config (
+                    capitulo_id, concurso_id, dificuldade, pausado
+                )
+                SELECT ?, id, 3, 0 FROM concursos
+                """,
+                (int(cursor.lastrowid),)
+            )
+            return True
+        except sqlite3.IntegrityError:
+            return False
+
+
+def renomear_capitulo(capitulo_id, novo_nome):
+    novo_nome = str(novo_nome or "").strip()
+    if not novo_nome:
+        return False
+    with conectar() as conexao:
+        try:
+            cursor = conexao.execute(
+                "UPDATE capitulos_topico SET nome = ? WHERE id = ?",
+                (novo_nome, int(capitulo_id))
+            )
+            return cursor.rowcount > 0
+        except sqlite3.IntegrityError:
+            return False
+
+
+def definir_capitulo_pausado(capitulo_id, pausado=True, concurso_id=None):
+    if concurso_id is None:
+        concurso_id = obter_concurso_ativo()[0]
+    with conectar() as conexao:
+        existe = conexao.execute(
+            "SELECT 1 FROM capitulos_topico WHERE id = ?",
+            (int(capitulo_id),)
+        ).fetchone()
+        if existe is None:
+            return False
+        conexao.execute(
+            """
+            INSERT INTO capitulo_concurso_config (
+                capitulo_id, concurso_id, dificuldade, pausado
+            ) VALUES (?, ?, 3, ?)
+            ON CONFLICT(capitulo_id, concurso_id)
+            DO UPDATE SET pausado = excluded.pausado
+            """,
+            (int(capitulo_id), int(concurso_id), 1 if pausado else 0)
+        )
+    return True
+
+
+def atualizar_dificuldade_capitulo(capitulo_id, dificuldade, concurso_id=None):
+    if concurso_id is None:
+        concurso_id = obter_concurso_ativo()[0]
+    dificuldade = max(1, min(5, int(dificuldade)))
+    with conectar() as conexao:
+        existe = conexao.execute(
+            "SELECT 1 FROM capitulos_topico WHERE id = ?",
+            (int(capitulo_id),)
+        ).fetchone()
+        if existe is None:
+            return False
+        conexao.execute(
+            """
+            INSERT INTO capitulo_concurso_config (
+                capitulo_id, concurso_id, dificuldade, pausado
+            ) VALUES (?, ?, ?, 0)
+            ON CONFLICT(capitulo_id, concurso_id)
+            DO UPDATE SET dificuldade = excluded.dificuldade
+            """,
+            (int(capitulo_id), int(concurso_id), dificuldade)
+        )
+    return True
+
+
 def _data_iso_segura(valor):
     texto = str(valor or "").strip()[:10]
     if not texto:
@@ -3319,6 +3775,42 @@ def _normalizar_alternativas_questao(
     return resultado
 
 
+def _resolver_classificacao_questao(topico_id, capitulo_id, conexao):
+    """Aceita título, capítulo ou ambos e retorna a classificação coerente."""
+    topico_id = int(topico_id) if topico_id is not None else None
+    capitulo_id = int(capitulo_id) if capitulo_id is not None else None
+
+    if capitulo_id is not None:
+        capitulo = conexao.execute(
+            """
+            SELECT topico_id
+            FROM capitulos_topico
+            WHERE id = ?
+            """,
+            (capitulo_id,)
+        ).fetchone()
+        if capitulo is None:
+            raise ValueError("O capítulo selecionado não existe.")
+        topico_capitulo_id = int(capitulo[0])
+        if topico_id is not None and topico_id != topico_capitulo_id:
+            raise ValueError(
+                "O capítulo selecionado não pertence ao título informado."
+            )
+        topico_id = topico_capitulo_id
+
+    if topico_id is None:
+        raise ValueError("Informe um título ou um capítulo para a questão.")
+
+    existe_topico = conexao.execute(
+        "SELECT 1 FROM topicos WHERE id = ?",
+        (topico_id,)
+    ).fetchone()
+    if existe_topico is None:
+        raise ValueError("O título selecionado não existe.")
+
+    return topico_id, capitulo_id
+
+
 def questao_existe(
     topico_id,
     enunciado,
@@ -3379,7 +3871,8 @@ def criar_questao(
     ano=None,
     fonte="",
     dificuldade="Não informada",
-    ativa=True
+    ativa=True,
+    capitulo_id=None
 ):
     enunciado = str(
         enunciado
@@ -3408,28 +3901,17 @@ def criar_questao(
         )
 
     with conectar() as conexao:
-        existe_topico = conexao.execute(
-            """
-            SELECT 1
-            FROM topicos
-            WHERE id = ?
-            """,
-            (
-                int(
-                    topico_id
-                ),
-            )
-        ).fetchone()
-
-        if existe_topico is None:
-            raise ValueError(
-                "O tópico selecionado não existe."
-            )
+        topico_id, capitulo_id = _resolver_classificacao_questao(
+            topico_id,
+            capitulo_id,
+            conexao
+        )
 
         cursor = conexao.execute(
             """
             INSERT INTO questoes (
                 topico_id,
+                capitulo_id,
                 enunciado,
                 explicacao,
                 banca,
@@ -3438,12 +3920,11 @@ def criar_questao(
                 dificuldade,
                 ativa
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
-                int(
-                    topico_id
-                ),
+                topico_id,
+                capitulo_id,
                 enunciado,
                 str(
                     explicacao
@@ -3545,10 +4026,17 @@ def criar_questoes_lote(
                     ano
                 )
 
+            topico_id, capitulo_id = _resolver_classificacao_questao(
+                registro.get("topico_id"),
+                registro.get("capitulo_id"),
+                conexao
+            )
+
             cursor = conexao.execute(
                 """
                 INSERT INTO questoes (
                     topico_id,
+                    capitulo_id,
                     enunciado,
                     explicacao,
                     banca,
@@ -3557,14 +4045,11 @@ def criar_questoes_lote(
                     dificuldade,
                     ativa
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
                 """,
                 (
-                    int(
-                        registro[
-                            "topico_id"
-                        ]
-                    ),
+                    topico_id,
+                    capitulo_id,
                     enunciado,
                     str(
                         registro.get(
@@ -3647,9 +4132,11 @@ def obter_questao(
             SELECT
                 q.id,
                 q.topico_id,
+                q.capitulo_id,
                 d.id,
                 d.nome,
                 t.nome,
+                c.nome,
                 q.enunciado,
                 q.explicacao,
                 q.banca,
@@ -3667,6 +4154,8 @@ def obter_questao(
                 ON t.id = q.topico_id
             JOIN disciplinas d
                 ON d.id = t.disciplina_id
+            LEFT JOIN capitulos_topico c
+                ON c.id = q.capitulo_id
             WHERE q.id = ?
             """,
             (
@@ -3700,30 +4189,32 @@ def obter_questao(
     return {
         "id": linha[0],
         "topico_id": linha[1],
-        "disciplina_id": linha[2],
-        "disciplina": linha[3],
-        "topico": linha[4],
-        "enunciado": linha[5],
-        "explicacao": linha[6] or "",
-        "banca": linha[7] or "",
-        "ano": linha[8],
-        "fonte": linha[9] or "",
+        "capitulo_id": linha[2],
+        "disciplina_id": linha[3],
+        "disciplina": linha[4],
+        "topico": linha[5],
+        "capitulo": linha[6] or "",
+        "enunciado": linha[7],
+        "explicacao": linha[8] or "",
+        "banca": linha[9] or "",
+        "ano": linha[10],
+        "fonte": linha[11] or "",
         "dificuldade": (
-            linha[10]
+            linha[12]
             or "Não informada"
         ),
         "ativa": bool(
-            linha[11]
+            linha[13]
         ),
         "excluida": bool(
-            linha[12]
+            linha[14]
         ),
-        "criado_em": linha[13],
-        "atualizado_em": linha[14],
+        "criado_em": linha[15],
+        "atualizado_em": linha[16],
         "analise_pendente": bool(
-            linha[15]
+            linha[17]
         ),
-        "analise_solicitada_em": linha[16],
+        "analise_solicitada_em": linha[18],
         "alternativas": [
             {
                 "letra": alternativa[0],
@@ -3785,7 +4276,8 @@ def atualizar_questao(
     ano=None,
     fonte="",
     dificuldade="Não informada",
-    ativa=True
+    ativa=True,
+    capitulo_id=None
 ):
     enunciado = str(
         enunciado
@@ -3814,11 +4306,17 @@ def atualizar_questao(
         )
 
     with conectar() as conexao:
+        topico_id, capitulo_id = _resolver_classificacao_questao(
+            topico_id,
+            capitulo_id,
+            conexao
+        )
         cursor = conexao.execute(
             """
             UPDATE questoes
             SET
                 topico_id = ?,
+                capitulo_id = ?,
                 enunciado = ?,
                 explicacao = ?,
                 banca = ?,
@@ -3833,9 +4331,8 @@ def atualizar_questao(
             WHERE id = ?
             """,
             (
-                int(
-                    topico_id
-                ),
+                topico_id,
+                capitulo_id,
                 enunciado,
                 str(
                     explicacao
