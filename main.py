@@ -5702,7 +5702,12 @@ class JanelaImportarPDFQuestoes(QDialog):
             topico_id or topico_capitulo_id,
             questao[
                 "enunciado"
-            ]
+            ],
+            alternativas=questao.get(
+                "alternativas",
+                []
+            ),
+            gabarito=gabarito
         ):
             status = "Duplicada"
             nivel = "alerta"
@@ -5992,15 +5997,6 @@ class JanelaImportarPDFQuestoes(QDialog):
 
             topico_id_efetivo = topico_id or topico_capitulo_id
 
-            if questao_existe(
-                topico_id_efetivo,
-                questao[
-                    "enunciado"
-                ]
-            ):
-                duplicadas += 1
-                continue
-
             alternativas = []
 
             for alternativa in questao[
@@ -6020,6 +6016,17 @@ class JanelaImportarPDFQuestoes(QDialog):
                         == gabarito
                     ),
                 })
+
+            if questao_existe(
+                topico_id_efetivo,
+                questao[
+                    "enunciado"
+                ],
+                alternativas=alternativas,
+                gabarito=gabarito
+            ):
+                duplicadas += 1
+                continue
 
             ano = (
                 self.pdf_ano.value()
@@ -7069,7 +7076,9 @@ class JanelaQuestaoEditor(QDialog):
             and questao_existe(
                 topico_id_duplicidade,
                 enunciado,
-                ignorar_id=self.questao_id
+                ignorar_id=self.questao_id,
+                alternativas=alternativas,
+                gabarito=gabarito
             )
         ):
             resposta = QMessageBox.question(
@@ -28956,6 +28965,7 @@ class SistemaEstudos(QMainWindow):
 
     def criar_tela_inicial(self):
         tela = QWidget()
+        tela.setObjectName("dashboardPage")
 
         layout_externo = QVBoxLayout(
             tela
@@ -28969,6 +28979,7 @@ class SistemaEstudos(QMainWindow):
         )
 
         scroll = QScrollArea()
+        scroll.setObjectName("dashboardScroll")
         scroll.setWidgetResizable(
             True
         )
@@ -28977,6 +28988,7 @@ class SistemaEstudos(QMainWindow):
         )
 
         conteudo = QWidget()
+        conteudo.setObjectName("dashboardRoot")
 
         layout = QVBoxLayout(
             conteudo
@@ -28990,7 +29002,7 @@ class SistemaEstudos(QMainWindow):
         )
 
         layout.setSpacing(
-            12
+            14
         )
 
         # ====================================================
@@ -29032,7 +29044,11 @@ class SistemaEstudos(QMainWindow):
         # Cabeçalho em três zonas: marca | perfil ativo | ações principais.
         # As duas colunas laterais têm o mesmo stretch para manter o perfil
         # visualmente centralizado na janela.
-        topo = QGridLayout()
+        topo_container = QFrame()
+        topo_container.setObjectName("dashboardTopBar")
+
+        topo = QGridLayout(topo_container)
+        topo.setContentsMargins(14, 10, 14, 10)
         topo.setHorizontalSpacing(12)
         topo.setVerticalSpacing(0)
         topo.setColumnStretch(0, 1)
@@ -29138,7 +29154,7 @@ class SistemaEstudos(QMainWindow):
             Qt.AlignRight | Qt.AlignVCenter
         )
 
-        layout.addLayout(topo)
+        layout.addWidget(topo_container)
 
         # ====================================================
         # HOJE OPERACIONAL — visão diária acionável
@@ -29165,9 +29181,20 @@ class SistemaEstudos(QMainWindow):
         hoje_header = QHBoxLayout()
         hoje_header.setSpacing(8)
 
-        hoje_titulo = QLabel("Hoje")
-        hoje_titulo.setObjectName(
-            "dashboardTodayTitle"
+        self.dashboard_toggle_hoje = QPushButton(
+            "▾  Hoje"
+        )
+        self.dashboard_toggle_hoje.setObjectName(
+            "dashboardSectionToggle"
+        )
+        self.dashboard_toggle_hoje.setCursor(
+            Qt.PointingHandCursor
+        )
+        self.dashboard_toggle_hoje.clicked.connect(
+            lambda:
+                self.alternar_secao_dashboard(
+                    "hoje"
+                )
         )
 
         self.dashboard_hoje_data = QLabel("—")
@@ -29182,7 +29209,9 @@ class SistemaEstudos(QMainWindow):
             "dashboardTodayStatus"
         )
 
-        hoje_header.addWidget(hoje_titulo)
+        hoje_header.addWidget(
+            self.dashboard_toggle_hoje
+        )
         hoje_header.addWidget(self.dashboard_hoje_data)
         hoje_header.addStretch()
         hoje_header.addWidget(self.dashboard_hoje_status)
@@ -29316,7 +29345,7 @@ class SistemaEstudos(QMainWindow):
             self.dashboard_hoje_acao
         )
         acao_layout.setContentsMargins(
-            26, 18, 26, 20
+            24, 16, 24, 18
         )
         acao_layout.setSpacing(7)
 
@@ -29325,7 +29354,7 @@ class SistemaEstudos(QMainWindow):
             "dashboardGuidedHeroEyebrow"
         )
         acao_rotulo.setAlignment(
-            Qt.AlignCenter
+            Qt.AlignLeft | Qt.AlignVCenter
         )
         self.dashboard_hoje_acao_titulo = QLabel(
             "Encontrar próxima sessão"
@@ -29335,7 +29364,7 @@ class SistemaEstudos(QMainWindow):
         )
         self.dashboard_hoje_acao_titulo.setWordWrap(True)
         self.dashboard_hoje_acao_titulo.setAlignment(
-            Qt.AlignCenter
+            Qt.AlignLeft | Qt.AlignVCenter
         )
 
         self.dashboard_hoje_acao_detalhe = QLabel(
@@ -29346,10 +29375,10 @@ class SistemaEstudos(QMainWindow):
         )
         self.dashboard_hoje_acao_detalhe.setWordWrap(True)
         self.dashboard_hoje_acao_detalhe.setAlignment(
-            Qt.AlignCenter
+            Qt.AlignLeft | Qt.AlignVCenter
         )
 
-        hero_painel_inferior = QVBoxLayout()
+        hero_painel_inferior = QHBoxLayout()
         hero_painel_inferior.setSpacing(12)
 
         hero_info = QFrame()
@@ -29435,8 +29464,8 @@ class SistemaEstudos(QMainWindow):
             "dashboardTodayPrimaryButton"
         )
         self.dashboard_hoje_um_clique.setMinimumSize(
-            430,
-            54
+            300,
+            48
         )
         self.dashboard_hoje_um_clique.setToolTip(
             "Abrir a recomendação de estudo para hoje. O Vighna mostra o que priorizou antes de qualquer sessão ser iniciada."
@@ -29473,7 +29502,7 @@ class SistemaEstudos(QMainWindow):
             self.dashboard_hoje_acao_detalhe
         )
         acao_layout.addSpacing(
-            6
+            2
         )
         acoes_hoje = QFrame()
         acoes_hoje.setObjectName(
@@ -29483,7 +29512,7 @@ class SistemaEstudos(QMainWindow):
             acoes_hoje
         )
         acoes_hoje_layout.setContentsMargins(
-            18, 16, 18, 16
+            14, 12, 14, 12
         )
         acoes_hoje_layout.setSpacing(8)
         acoes_hoje_layout.addWidget(
@@ -29498,18 +29527,37 @@ class SistemaEstudos(QMainWindow):
         )
 
         hero_painel_inferior.addWidget(
-            hero_info
+            hero_info,
+            1
         )
         hero_painel_inferior.addWidget(
             acoes_hoje,
             0,
-            Qt.AlignHCenter
+            Qt.AlignVCenter
         )
         acao_layout.addLayout(
             hero_painel_inferior
         )
 
-        hoje_layout.addLayout(hoje_corpo)
+        self.dashboard_hoje_conteudo = QWidget()
+        self.dashboard_hoje_conteudo.setObjectName(
+            "dashboardCollapsibleContent"
+        )
+        dashboard_hoje_conteudo_layout = QVBoxLayout(
+            self.dashboard_hoje_conteudo
+        )
+        dashboard_hoje_conteudo_layout.setContentsMargins(
+            0, 0, 0, 0
+        )
+        dashboard_hoje_conteudo_layout.setSpacing(
+            0
+        )
+        dashboard_hoje_conteudo_layout.addLayout(
+            hoje_corpo
+        )
+        hoje_layout.addWidget(
+            self.dashboard_hoje_conteudo
+        )
 
         layout.addWidget(
             self.dashboard_hoje_painel
@@ -29522,14 +29570,46 @@ class SistemaEstudos(QMainWindow):
         atalhos_rapidos = QFrame()
         atalhos_rapidos.setObjectName("dashboardQuickAccess")
         atalhos_layout = QHBoxLayout(atalhos_rapidos)
-        atalhos_layout.setContentsMargins(12, 7, 12, 7)
-        atalhos_layout.setSpacing(8)
+        atalhos_layout.setContentsMargins(14, 9, 14, 9)
+        atalhos_layout.setSpacing(10)
 
-        atalhos_titulo = QLabel("ACESSOS RÁPIDOS")
-        atalhos_titulo.setObjectName("dashboardQuickAccessTitle")
-        atalhos_titulo.setFixedWidth(112)
-        atalhos_titulo.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-        atalhos_layout.addWidget(atalhos_titulo, 0, Qt.AlignVCenter)
+        self.dashboard_toggle_acessos = QPushButton(
+            "▾  Acessos rápidos"
+        )
+        self.dashboard_toggle_acessos.setObjectName(
+            "dashboardSectionToggle"
+        )
+        self.dashboard_toggle_acessos.setMinimumWidth(
+            135
+        )
+        self.dashboard_toggle_acessos.setCursor(
+            Qt.PointingHandCursor
+        )
+        self.dashboard_toggle_acessos.clicked.connect(
+            lambda:
+                self.alternar_secao_dashboard(
+                    "acessos"
+                )
+        )
+        atalhos_layout.addWidget(
+            self.dashboard_toggle_acessos,
+            0,
+            Qt.AlignVCenter
+        )
+
+        self.dashboard_acessos_conteudo = QWidget()
+        self.dashboard_acessos_conteudo.setObjectName(
+            "dashboardCollapsibleContent"
+        )
+        acessos_conteudo_layout = QHBoxLayout(
+            self.dashboard_acessos_conteudo
+        )
+        acessos_conteudo_layout.setContentsMargins(
+            0, 0, 0, 0
+        )
+        acessos_conteudo_layout.setSpacing(
+            8
+        )
 
         botao_foco = QPushButton("Foco")
         botao_foco.setObjectName("focusNavButton")
@@ -29573,9 +29653,14 @@ class SistemaEstudos(QMainWindow):
             botao_relatorios,
             botao_calendario,
         ):
-            botao.setMinimumHeight(38)
+            botao.setMinimumHeight(44)
             botao.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-            atalhos_layout.addWidget(botao, 1)
+            acessos_conteudo_layout.addWidget(botao, 1)
+
+        atalhos_layout.addWidget(
+            self.dashboard_acessos_conteudo,
+            1
+        )
 
         layout.addWidget(atalhos_rapidos)
 
@@ -33068,6 +33153,36 @@ class SistemaEstudos(QMainWindow):
 
     def obter_secoes_recolhiveis_dashboard(self):
         return {
+            "hoje": {
+                "conteudo": getattr(
+                    self,
+                    "dashboard_hoje_conteudo",
+                    None
+                ),
+                "botao": getattr(
+                    self,
+                    "dashboard_toggle_hoje",
+                    None
+                ),
+                "subtitulo": None,
+                "titulo": "Hoje",
+                "config": "dashboard_secao_hoje_expandida",
+            },
+            "acessos": {
+                "conteudo": getattr(
+                    self,
+                    "dashboard_acessos_conteudo",
+                    None
+                ),
+                "botao": getattr(
+                    self,
+                    "dashboard_toggle_acessos",
+                    None
+                ),
+                "subtitulo": None,
+                "titulo": "Acessos rápidos",
+                "config": "dashboard_secao_acessos_expandida",
+            },
             "resumo": {
                 "conteudo": getattr(
                     self,
@@ -33324,6 +33439,8 @@ class SistemaEstudos(QMainWindow):
 
         if not preset_executivo_aplicado:
             padroes_executivos = {
+                "hoje": True,
+                "acessos": True,
                 "resumo": True,
                 "notificacoes": False,
                 "progresso": True,
@@ -33351,6 +33468,8 @@ class SistemaEstudos(QMainWindow):
             return
 
         padroes = {
+            "hoje": True,
+            "acessos": True,
             "resumo": True,
             "notificacoes": False,
             "progresso": True,
@@ -36575,7 +36694,7 @@ class SistemaEstudos(QMainWindow):
 
         self.questoes_busca = QLineEdit()
         self.questoes_busca.setPlaceholderText(
-            "Buscar por ID, enunciado, banca, fonte, disciplina ou tópico..."
+            "Buscar por ID, enunciado, banca, fonte, disciplina, tópico ou capítulo..."
         )
         self.questoes_busca.setClearButtonEnabled(True)
         self.questoes_busca.setMinimumHeight(34)
@@ -36587,6 +36706,11 @@ class SistemaEstudos(QMainWindow):
         self.questoes_filtro_topico = QComboBox()
         self.questoes_filtro_topico.setMinimumWidth(175)
         self.questoes_filtro_topico.setFixedHeight(34)
+
+        self.questoes_filtro_capitulo = QComboBox()
+        self.questoes_filtro_capitulo.setMinimumWidth(175)
+        self.questoes_filtro_capitulo.setMaximumWidth(260)
+        self.questoes_filtro_capitulo.setFixedHeight(34)
 
         self.questoes_filtro_dificuldade = QComboBox()
         self.questoes_filtro_dificuldade.setMinimumWidth(125)
@@ -36612,6 +36736,7 @@ class SistemaEstudos(QMainWindow):
         filtros_layout.addWidget(self.questoes_busca, 1)
         filtros_layout.addWidget(self.questoes_filtro_disciplina)
         filtros_layout.addWidget(self.questoes_filtro_topico)
+        filtros_layout.addWidget(self.questoes_filtro_capitulo)
         filtros_layout.addWidget(self.questoes_filtro_dificuldade)
         area_trabalho_layout.addWidget(
             filtros
@@ -36751,7 +36876,13 @@ class SistemaEstudos(QMainWindow):
             self.atualizar_filtro_topicos_questoes
         )
         self.questoes_filtro_disciplina.currentTextChanged.connect(self.filtrar_questoes)
+        self.questoes_filtro_topico.currentTextChanged.connect(
+            self.atualizar_filtro_capitulos_questoes
+        )
         self.questoes_filtro_topico.currentTextChanged.connect(self.filtrar_questoes)
+        self.questoes_filtro_capitulo.currentIndexChanged.connect(
+            self.filtrar_questoes
+        )
         self.questoes_filtro_dificuldade.currentTextChanged.connect(self.filtrar_questoes)
         self.questoes_mostrar_arquivadas.stateChanged.connect(self.carregar_questoes)
         self.tabela_questoes.itemSelectionChanged.connect(self.atualizar_acoes_questao)
@@ -36987,6 +37118,23 @@ class SistemaEstudos(QMainWindow):
         janela.exec()
 
     def abrir_questoes(self):
+        # A Central deve abrir sempre com o banco completo em destaque. O
+        # botão "Para análise" continua disponível como filtro opcional, mas
+        # não pode manter a grade presa à fila usada em uma visita anterior.
+        if hasattr(
+            self,
+            "questoes_para_analise"
+        ):
+            self.questoes_para_analise.blockSignals(
+                True
+            )
+            self.questoes_para_analise.setChecked(
+                False
+            )
+            self.questoes_para_analise.blockSignals(
+                False
+            )
+
         self.carregar_questoes()
         self.telas.setCurrentWidget(
             self.tela_questoes
@@ -37350,6 +37498,124 @@ class SistemaEstudos(QMainWindow):
             False
         )
 
+        self.atualizar_filtro_capitulos_questoes()
+
+    def atualizar_filtro_capitulos_questoes(self):
+        if not hasattr(
+            self,
+            "questoes_filtro_capitulo"
+        ):
+            return
+
+        selecao_anterior = (
+            self.questoes_filtro_capitulo
+            .currentData()
+        )
+        disciplina = (
+            self.questoes_filtro_disciplina
+            .currentText()
+        )
+        topico = (
+            self.questoes_filtro_topico
+            .currentText()
+        )
+
+        questoes_contexto = [
+            item
+            for item in self.dados_questoes
+            if (
+                not disciplina
+                or disciplina == "Todas disciplinas"
+                or item["disciplina"] == disciplina
+            )
+            and (
+                not topico
+                or topico == "Todos tópicos"
+                or item["topico"] == topico
+            )
+        ]
+
+        capitulos = sorted(
+            {
+                (
+                    item["capitulo_id"],
+                    item["capitulo"],
+                    item["topico"],
+                    item["disciplina"],
+                )
+                for item in questoes_contexto
+                if item.get("capitulo_id") is not None
+                and item.get("capitulo")
+            },
+            key=lambda item: (
+                item[3].lower(),
+                item[2].lower(),
+                item[1].lower(),
+            )
+        )
+        possui_sem_capitulo = any(
+            item.get("capitulo_id") is None
+            for item in questoes_contexto
+        )
+
+        self.questoes_filtro_capitulo.blockSignals(
+            True
+        )
+        self.questoes_filtro_capitulo.clear()
+        self.questoes_filtro_capitulo.addItem(
+            "Todos capítulos",
+            None
+        )
+
+        if possui_sem_capitulo:
+            self.questoes_filtro_capitulo.addItem(
+                "Sem capítulo",
+                "sem_capitulo"
+            )
+
+        topico_especifico = (
+            topico
+            and topico != "Todos tópicos"
+        )
+        disciplina_especifica = (
+            disciplina
+            and disciplina != "Todas disciplinas"
+        )
+
+        for (
+            capitulo_id,
+            nome_capitulo,
+            nome_topico,
+            nome_disciplina,
+        ) in capitulos:
+            if topico_especifico:
+                rotulo = nome_capitulo
+            elif disciplina_especifica:
+                rotulo = f"{nome_topico} — {nome_capitulo}"
+            else:
+                rotulo = (
+                    f"{nome_disciplina} — {nome_topico} — "
+                    f"{nome_capitulo}"
+                )
+
+            self.questoes_filtro_capitulo.addItem(
+                rotulo,
+                capitulo_id
+            )
+
+        indice_anterior = (
+            self.questoes_filtro_capitulo
+            .findData(selecao_anterior)
+        )
+        if indice_anterior >= 0:
+            self.questoes_filtro_capitulo.setCurrentIndex(
+                indice_anterior
+            )
+
+        self.questoes_filtro_capitulo.blockSignals(
+            False
+        )
+
     def filtrar_questoes(self):
         if not hasattr(
             self,
@@ -37368,6 +37634,10 @@ class SistemaEstudos(QMainWindow):
         topico = (
             self.questoes_filtro_topico
             .currentText()
+        )
+        capitulo = (
+            self.questoes_filtro_capitulo
+            .currentData()
         )
         dificuldade = (
             self.questoes_filtro_dificuldade
@@ -37414,6 +37684,18 @@ class SistemaEstudos(QMainWindow):
                 continue
 
             if (
+                capitulo == "sem_capitulo"
+                and item.get("capitulo_id") is not None
+            ):
+                continue
+
+            if (
+                capitulo not in (None, "sem_capitulo")
+                and item.get("capitulo_id") != capitulo
+            ):
+                continue
+
+            if (
                 dificuldade
                 and dificuldade
                 != "Todas dificuldades"
@@ -37426,8 +37708,10 @@ class SistemaEstudos(QMainWindow):
             if busca:
                 alvo = self.normalizar_texto_questoes(
                     (
+                        f"{item['id']} "
                         f"{item['disciplina']} "
                         f"{item['topico']} "
+                        f"{item.get('capitulo', '')} "
                         f"{item['enunciado']} "
                         f"{item['banca']} "
                         f"{item['fonte']} "
@@ -38754,7 +39038,9 @@ class SistemaEstudos(QMainWindow):
                     in chaves_importacao
                     or questao_existe(
                         topico_id,
-                        enunciado
+                        enunciado,
+                        alternativas=alternativas,
+                        gabarito=gabarito
                     )
                 ):
                     duplicadas += 1

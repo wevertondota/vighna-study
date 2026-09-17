@@ -83,6 +83,454 @@ QProgressBar#journeyProgress::chunk { background-color: #55a7d5; border-radius: 
 QTableWidget#journeyTable { background-color: #101f30; border: 1px solid #315d79; border-radius: 10px; }
 """
 
+
+ESTILO_DASHBOARD_MODERNO_CLARO = r"""
+/* Dashboard moderno — camada final do tema claro */
+QWidget#dashboardPage,
+QScrollArea#dashboardScroll,
+QWidget#dashboardRoot {
+    background-color: #f3f6fb;
+}
+
+QWidget#dashboardRoot QLabel {
+    background-color: transparent;
+}
+
+QFrame#dashboardTopBar {
+    background-color: #ffffff;
+    border: 1px solid #dbe4ef;
+    border-radius: 16px;
+}
+
+QWidget#dashboardRoot QLabel#pageTitle {
+    color: #10233f;
+    font-size: 20px;
+    font-weight: 900;
+}
+
+QWidget#dashboardRoot QLabel#pageSubtitle {
+    color: #738196;
+    font-size: 9pt;
+}
+
+QWidget#dashboardRoot QFrame#topProfileBar {
+    background-color: #f6f8fc;
+    border: 1px solid #dce5f0;
+    border-radius: 11px;
+}
+
+QWidget#dashboardRoot QFrame#dashboardTodayPanel,
+QWidget#dashboardRoot QFrame#dashboardQuickAccess,
+QWidget#dashboardRoot QFrame#dashboardOverviewCard,
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel,
+QWidget#dashboardRoot QFrame#planningPanel,
+QWidget#dashboardRoot QFrame#studyNowPanel,
+QWidget#dashboardRoot QFrame#priorityQueuePanel,
+QWidget#dashboardRoot QFrame#dashboardCenterBar {
+    background-color: #ffffff;
+    border: 1px solid #d9e3ef;
+    border-radius: 14px;
+}
+
+QWidget#dashboardRoot QFrame#dashboardTodayFocus,
+QWidget#dashboardRoot QFrame#dashboardTodayMetric {
+    border-radius: 11px;
+}
+
+QWidget#dashboardRoot QFrame#dashboardQuickAccess {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #f8fbff, stop:0.5 #ffffff, stop:1 #f8fbff);
+    border-color: #c8d9ec;
+}
+
+QWidget#dashboardRoot QPushButton#toolbarButton,
+QWidget#dashboardRoot QPushButton#focusNavButton,
+QWidget#dashboardRoot QPushButton#pauseNavButton {
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+QWidget#dashboardRoot QFrame#dashboardQuickAccess QPushButton#dashboardSectionToggle {
+    color: #294866;
+    font-size: 9.5pt;
+    font-weight: 900;
+}
+
+QWidget#dashboardRoot QPushButton#focusNavButton {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #2563eb, stop:1 #3182f6);
+    color: #ffffff;
+    border: 1px solid #1d4ed8;
+    border-radius: 11px;
+    font-size: 10pt;
+    font-weight: 900;
+    padding: 7px 18px;
+}
+
+QWidget#dashboardRoot QPushButton#focusNavButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #1d4ed8, stop:1 #2563eb);
+    border-color: #1744bd;
+}
+
+QWidget#dashboardRoot QPushButton#focusNavButton:pressed {
+    background-color: #1748c7;
+    border-color: #143da8;
+}
+
+QWidget#dashboardRoot QFrame#dashboardTodayAction[heroCentral="true"] {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #ffffff, stop:0.54 #eef5ff, stop:1 #f7fbff);
+    border: 1px solid #b9d0eb;
+    border-radius: 18px;
+}
+
+QWidget#dashboardRoot QFrame#dashboardGuidedInfoCard {
+    background-color: rgba(255, 255, 255, 0.82);
+    border: 1px solid #d4e2f1;
+    border-radius: 13px;
+}
+
+QWidget#dashboardRoot QFrame#dashboardGuidedActionBox {
+    background-color: #ffffff;
+    border: 1px solid #cbdced;
+    border-radius: 14px;
+    min-width: 330px;
+}
+
+QWidget#dashboardRoot QFrame#dashboardTodayAction[heroCentral="true"] QLabel#dashboardTodayActionTitle {
+    color: #102a4e;
+    font-size: 16pt;
+    font-weight: 900;
+}
+
+QWidget#dashboardRoot QFrame#questionsHeroActions {
+    background-color: #ffffff;
+    border: 1px solid #d9e3ef;
+    border-radius: 14px;
+}
+
+QWidget#dashboardRoot QLabel#questionsHeroTitle {
+    color: #172b48;
+    font-size: 10pt;
+    font-weight: 900;
+}
+
+QWidget#dashboardRoot QLabel#questionsHeroDescription {
+    color: #6b7a90;
+    font-size: 8.5pt;
+}
+
+QWidget#dashboardRoot QPushButton#dashboardGroupToggle,
+QWidget#dashboardRoot QPushButton#dashboardSectionToggle,
+QWidget#dashboardRoot QPushButton#dashboardSectionToggleCentered,
+QWidget#dashboardRoot QPushButton#dashboardProjectionTitleButton {
+    color: #243b5a;
+    font-size: 9.5pt;
+    font-weight: 800;
+}
+
+QWidget#dashboardRoot QFrame#dashboardAttentionCard,
+QWidget#dashboardRoot QFrame#dailyGoalBox,
+QWidget#dashboardRoot QFrame#weeklyLoadBox,
+QWidget#dashboardRoot QFrame#weeklyGoalBox,
+QWidget#dashboardRoot QFrame#studyActionCard,
+QWidget#dashboardRoot QFrame#strategyCompactCard {
+    border-radius: 11px;
+}
+
+QWidget#dashboardRoot QTableWidget#priorityQueueTable {
+    background-color: #ffffff;
+    alternate-background-color: #f6f8fc;
+    border: 1px solid #dce5ef;
+    border-radius: 10px;
+    selection-background-color: #e8f1ff;
+    selection-color: #17375e;
+}
+
+QWidget#dashboardRoot QTableWidget#priorityQueueTable QHeaderView::section {
+    background-color: #f2f6fb;
+    color: #50627a;
+    border: none;
+    border-bottom: 1px solid #d9e3ef;
+    padding: 7px 8px;
+    font-weight: 800;
+}
+
+/* Pills que mantêm preenchimento após a limpeza visual dos textos. */
+QWidget#dashboardRoot QLabel#dashboardTodayDate,
+QWidget#dashboardRoot QLabel#planningTotalBadge {
+    background-color: #eef4fb;
+}
+
+QWidget#dashboardRoot QLabel#studyReviewSourceBadge,
+QWidget#dashboardRoot QLabel#priorityQueueSourceBadge {
+    background-color: #edf5ff;
+}
+
+QWidget#dashboardRoot QLabel#assessmentBadge {
+    background-color: #fff3d8;
+}
+
+QWidget#dashboardRoot QLabel#dashboardAttentionBadge {
+    background-color: #fff0c8;
+}
+
+QWidget#dashboardRoot QFrame#dashboardAttentionCard[alertState="ok"] QLabel#dashboardAttentionBadge {
+    background-color: #eaf5ee;
+}
+
+QWidget#dashboardRoot QFrame#dashboardAttentionCard[alertState="critico"] QLabel#dashboardAttentionBadge {
+    background-color: #fde9e6;
+}
+
+QWidget#dashboardRoot QLabel#dashboardPaceBadge {
+    background-color: #e9f2fd;
+}
+
+QWidget#dashboardRoot QLabel#weeklyGoalStatus {
+    background-color: #f1f5f9;
+}
+
+QWidget#dashboardRoot QLabel#weeklyGoalStatus[weekState="concluida"] {
+    background-color: #eaf6ee;
+}
+
+QWidget#dashboardRoot QLabel#weeklyGoalStatus[weekState="atencao"] {
+    background-color: #fff4da;
+}
+"""
+
+
+ESTILO_DASHBOARD_MODERNO_ESCURO = r"""
+/* Dashboard moderno — camada final do tema escuro */
+QWidget#dashboardPage,
+QScrollArea#dashboardScroll,
+QWidget#dashboardRoot {
+    background-color: #0e1623;
+}
+
+QWidget#dashboardRoot QLabel {
+    background-color: transparent;
+}
+
+QFrame#dashboardTopBar,
+QWidget#dashboardRoot QFrame#dashboardTodayPanel,
+QWidget#dashboardRoot QFrame#dashboardQuickAccess,
+QWidget#dashboardRoot QFrame#dashboardOverviewCard,
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel,
+QWidget#dashboardRoot QFrame#planningPanel,
+QWidget#dashboardRoot QFrame#studyNowPanel,
+QWidget#dashboardRoot QFrame#priorityQueuePanel,
+QWidget#dashboardRoot QFrame#dashboardCenterBar,
+QWidget#dashboardRoot QFrame#questionsHeroActions {
+    background-color: #151f2d;
+    border: 1px solid #2d4054;
+    border-radius: 14px;
+}
+
+QWidget#dashboardRoot QFrame#dashboardQuickAccess {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #132235, stop:0.5 #151f2d, stop:1 #132235);
+    border-color: #35516d;
+}
+
+QWidget#dashboardRoot QFrame#dashboardQuickAccess QPushButton#dashboardSectionToggle {
+    color: #c8dbed;
+    font-size: 9.5pt;
+    font-weight: 900;
+}
+
+QWidget#dashboardRoot QPushButton#focusNavButton {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #2f6fe4, stop:1 #3c8bf2);
+    color: #ffffff;
+    border: 1px solid #5a9bf5;
+    border-radius: 11px;
+    font-size: 10pt;
+    font-weight: 900;
+    padding: 7px 18px;
+}
+
+QWidget#dashboardRoot QPushButton#focusNavButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #397deb, stop:1 #53a0f7);
+    border-color: #82b8ff;
+}
+
+QWidget#dashboardRoot QLabel#pageTitle { color: #f1f6fb; font-size: 20px; font-weight: 900; }
+QWidget#dashboardRoot QLabel#pageSubtitle { color: #8fa1b5; font-size: 9pt; }
+
+QWidget#dashboardRoot QFrame#topProfileBar {
+    background-color: #111b28;
+    border: 1px solid #30445a;
+    border-radius: 11px;
+}
+
+QWidget#dashboardRoot QFrame#dashboardTodayAction[heroCentral="true"] {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #172437, stop:0.55 #142b45, stop:1 #172334);
+    border: 1px solid #3d6387;
+    border-radius: 18px;
+}
+
+QWidget#dashboardRoot QFrame#dashboardGuidedInfoCard,
+QWidget#dashboardRoot QFrame#dashboardGuidedActionBox {
+    background-color: #111d2b;
+    border: 1px solid #334d66;
+    border-radius: 13px;
+}
+
+QWidget#dashboardRoot QFrame#dashboardGuidedActionBox { min-width: 330px; }
+
+QWidget#dashboardRoot QFrame#dashboardTodayAction[heroCentral="true"] QLabel#dashboardTodayActionTitle {
+    color: #eef6ff;
+    font-size: 16pt;
+    font-weight: 900;
+}
+
+QWidget#dashboardRoot QPushButton#dashboardGroupToggle,
+QWidget#dashboardRoot QPushButton#dashboardSectionToggle,
+QWidget#dashboardRoot QPushButton#dashboardSectionToggleCentered,
+QWidget#dashboardRoot QPushButton#dashboardProjectionTitleButton {
+    color: #d7e4f2;
+    font-size: 9.5pt;
+    font-weight: 800;
+}
+
+QWidget#dashboardRoot QFrame#dashboardAttentionCard,
+QWidget#dashboardRoot QFrame#dailyGoalBox,
+QWidget#dashboardRoot QFrame#weeklyLoadBox,
+QWidget#dashboardRoot QFrame#weeklyGoalBox,
+QWidget#dashboardRoot QFrame#studyActionCard,
+QWidget#dashboardRoot QFrame#strategyCompactCard {
+    border-radius: 11px;
+}
+
+QWidget#dashboardRoot QTableWidget#priorityQueueTable {
+    background-color: #111a27;
+    alternate-background-color: #172231;
+    border: 1px solid #30445a;
+    border-radius: 10px;
+    selection-background-color: #24496f;
+    selection-color: #ffffff;
+}
+
+QWidget#dashboardRoot QTableWidget#priorityQueueTable QHeaderView::section {
+    background-color: #192536;
+    color: #aebfd0;
+    border: none;
+    border-bottom: 1px solid #30445a;
+    padding: 7px 8px;
+    font-weight: 800;
+}
+
+QWidget#dashboardRoot QLabel#dashboardTodayDate,
+QWidget#dashboardRoot QLabel#planningTotalBadge,
+QWidget#dashboardRoot QLabel#weeklyGoalStatus {
+    background-color: #202d3c;
+}
+
+QWidget#dashboardRoot QLabel#studyReviewSourceBadge,
+QWidget#dashboardRoot QLabel#priorityQueueSourceBadge,
+QWidget#dashboardRoot QLabel#dashboardPaceBadge {
+    background-color: #173552;
+}
+
+QWidget#dashboardRoot QLabel#assessmentBadge,
+QWidget#dashboardRoot QLabel#dashboardAttentionBadge {
+    background-color: #3b321f;
+}
+
+QWidget#dashboardRoot QFrame#dashboardAttentionCard[alertState="ok"] QLabel#dashboardAttentionBadge,
+QWidget#dashboardRoot QLabel#weeklyGoalStatus[weekState="concluida"] {
+    background-color: #21372d;
+}
+
+QWidget#dashboardRoot QFrame#dashboardAttentionCard[alertState="critico"] QLabel#dashboardAttentionBadge,
+QWidget#dashboardRoot QLabel#weeklyGoalStatus[weekState="atencao"] {
+    background-color: #432827;
+}
+"""
+
+
+ESTILO_DASHBOARD_MODERNO_FUTURISTA = r"""
+/* Dashboard moderno — acabamento do tema futurista */
+QWidget#dashboardPage,
+QScrollArea#dashboardScroll,
+QWidget#dashboardRoot { background-color: #07111e; }
+
+QFrame#dashboardTopBar,
+QWidget#dashboardRoot QFrame#dashboardTodayPanel,
+QWidget#dashboardRoot QFrame#dashboardQuickAccess,
+QWidget#dashboardRoot QFrame#dashboardOverviewCard,
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel,
+QWidget#dashboardRoot QFrame#planningPanel,
+QWidget#dashboardRoot QFrame#studyNowPanel,
+QWidget#dashboardRoot QFrame#priorityQueuePanel,
+QWidget#dashboardRoot QFrame#dashboardCenterBar,
+QWidget#dashboardRoot QFrame#questionsHeroActions {
+    background-color: #0d1d2c;
+    border: 1px solid #315b76;
+    border-radius: 15px;
+}
+
+QWidget#dashboardRoot QFrame#dashboardQuickAccess {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #0b2132, stop:0.5 #0d2a3e, stop:1 #0b2132);
+    border-color: #3c7494;
+}
+
+QWidget#dashboardRoot QFrame#dashboardQuickAccess QPushButton#dashboardSectionToggle {
+    color: #a9dcf4;
+    font-size: 9.5pt;
+    font-weight: 900;
+}
+
+QWidget#dashboardRoot QPushButton#focusNavButton {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #176fa6, stop:1 #2c91d1);
+    color: #f2fbff;
+    border: 1px solid #67c1ed;
+    border-radius: 11px;
+    font-size: 10pt;
+    font-weight: 900;
+    padding: 7px 18px;
+}
+
+QWidget#dashboardRoot QPushButton#focusNavButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #1d82bd, stop:1 #39a4df);
+    border-color: #a2e1ff;
+}
+
+QWidget#dashboardRoot QFrame#dashboardTodayAction[heroCentral="true"] {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #0d2234, stop:0.52 #10314a, stop:1 #102234);
+    border: 1px solid #4f88ad;
+    border-radius: 18px;
+}
+
+QWidget#dashboardRoot QFrame#dashboardGuidedInfoCard,
+QWidget#dashboardRoot QFrame#dashboardGuidedActionBox {
+    background-color: #0a1b2a;
+    border: 1px solid #35607b;
+}
+
+QWidget#dashboardRoot QTableWidget#priorityQueueTable {
+    background-color: #091724;
+    alternate-background-color: #0d2131;
+    border-color: #315b76;
+    selection-background-color: #155073;
+}
+
+QWidget#dashboardRoot QTableWidget#priorityQueueTable QHeaderView::section {
+    background-color: #10283a;
+    color: #9ec8dc;
+    border-bottom-color: #315b76;
+}
+"""
+
 def stylesheet_claro():
     return r"""
     * {
@@ -7006,7 +7454,7 @@ QPushButton#sectionEditButton:hover {
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_CLARO
+""" + ESTILO_JORNADA_CLARO + ESTILO_DASHBOARD_MODERNO_CLARO
 
 
 def stylesheet_escuro():
@@ -13371,7 +13819,7 @@ def stylesheet_escuro():
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_ESCURO
+""" + ESTILO_JORNADA_ESCURO + ESTILO_DASHBOARD_MODERNO_ESCURO
 
 
 
@@ -16439,7 +16887,7 @@ def stylesheet_futurista():
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_FUTURISTA
+""" + ESTILO_JORNADA_FUTURISTA + ESTILO_DASHBOARD_MODERNO_FUTURISTA
 
 def aplicar_tema(
     app,

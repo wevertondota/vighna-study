@@ -64,6 +64,16 @@ def main():
                 (disciplina_id,),
             ).fetchone()[0])
             con.execute(
+                """INSERT OR IGNORE INTO capitulos_topico(topico_id, nome, ordem)
+                   VALUES (?, 'Capítulo Smoke', 1)""",
+                (topico_id,),
+            )
+            capitulo_id = int(con.execute(
+                """SELECT id FROM capitulos_topico
+                   WHERE topico_id = ? AND nome = 'Capítulo Smoke'""",
+                (topico_id,),
+            ).fetchone()[0])
+            con.execute(
                 """INSERT OR REPLACE INTO disciplina_concurso_inclusao
                    (disciplina_id, concurso_id, incluido) VALUES (?, ?, 1)""",
                 (disciplina_id, concurso_id),
@@ -84,6 +94,7 @@ def main():
                 {"letra": "B", "texto": "Distrator", "correta": False},
             ],
             explicacao="Smoke",
+            capitulo_id=capitulo_id,
         )
         questao_smoke = banco.obter_questao(
             qid_smoke
@@ -118,9 +129,11 @@ def main():
                 item["id"] == qid_smoke
                 and item["analise_pendente"]
                 and item["analise_solicitada_em"]
+                and item["capitulo_id"] == capitulo_id
+                and item["capitulo"] == "Capítulo Smoke"
                 for item in questoes_administrativas
             ),
-            "Central recebe a fila de questões para análise"
+            "Central recebe análise e classificação por capítulo"
         )
         assert_true(
             banco.definir_questao_analise_pendente(

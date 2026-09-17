@@ -3811,17 +3811,71 @@ def _resolver_classificacao_questao(topico_id, capitulo_id, conexao):
     return topico_id, capitulo_id
 
 
+def _normalizar_texto_duplicidade_questao(valor):
+    texto = str(valor or "").strip().lower()
+    texto = unicodedata.normalize("NFD", texto)
+    texto = "".join(
+        caractere
+        for caractere in texto
+        if unicodedata.category(caractere) != "Mn"
+    )
+    texto = re.sub(r"\s+", " ", texto)
+    return texto.strip()
+
+
+def _assinatura_alternativas_duplicidade(alternativas, gabarito=None):
+    if not alternativas:
+        return None
+
+    gabarito = str(gabarito or "").strip().upper() or None
+    assinatura = []
+
+    for alternativa in alternativas:
+        letra = str(alternativa.get("letra", "")).strip().upper()
+        texto = _normalizar_texto_duplicidade_questao(
+            alternativa.get("texto", "")
+        )
+
+        if not letra or not texto:
+            continue
+
+        if gabarito is not None:
+            correta = letra == gabarito
+        elif "correta" in alternativa:
+            correta = bool(alternativa.get("correta"))
+        else:
+            correta = None
+
+        assinatura.append((
+            letra,
+            texto,
+            correta,
+        ))
+
+    if len(assinatura) < 2:
+        return None
+
+    return tuple(sorted(assinatura))
+
+
 def questao_existe(
     topico_id,
     enunciado,
-    ignorar_id=None
+    ignorar_id=None,
+    alternativas=None,
+    gabarito=None
 ):
     enunciado = str(
         enunciado
     ).strip()
 
-    if not enunciado:
+    if not enunciado or topico_id is None:
         return False
+
+    assinatura_nova = _assinatura_alternativas_duplicidade(
+        alternativas,
+        gabarito
+    )
 
     with conectar() as conexao:
         parametros = [
@@ -3832,11 +3886,12 @@ def questao_existe(
         ]
 
         sql = """
-            SELECT 1
+            SELECT id
             FROM questoes
             WHERE topico_id = ?
               AND LOWER(TRIM(enunciado))
                   = LOWER(TRIM(?))
+              AND COALESCE(excluida, 0) = 0
         """
 
         if ignorar_id is not None:
@@ -3849,18 +3904,49 @@ def questao_existe(
                 )
             )
 
-        sql += """
-            LIMIT 1
-        """
+        candidatos = conexao.execute(
+            sql,
+            parametros
+        ).fetchall()
 
-        return (
-            conexao.execute(
-                sql,
-                parametros
-            ).fetchone()
-            is not None
-        )
+        if not candidatos:
+            return False
 
+        # Chamadas antigas que não fornecem alternativas mantêm a regra
+        # conservadora de enunciado idêntico. Importadores e editores que
+        # conhecem as alternativas usam a assinatura completa para evitar
+        # falso positivo entre questões que compartilham o mesmo enunciado.
+        if assinatura_nova is None:
+            return True
+
+        for candidato in candidatos:
+            alternativas_existentes = conexao.execute(
+                """
+                SELECT letra, texto, correta
+                FROM alternativas_questoes
+                WHERE questao_id = ?
+                ORDER BY letra
+                """,
+                (int(candidato[0]),)
+            ).fetchall()
+
+            assinatura_existente = tuple(
+                sorted(
+                    (
+                        str(item[0] or "").strip().upper(),
+                        _normalizar_texto_duplicidade_questao(item[1]),
+                        bool(item[2]),
+                    )
+                    for item in alternativas_existentes
+                    if str(item[0] or "").strip()
+                    and _normalizar_texto_duplicidade_questao(item[1])
+                )
+            )
+
+            if assinatura_existente == assinatura_nova:
+                return True
+
+    return False
 
 def criar_questao(
     topico_id,
@@ -4840,12 +4926,16 @@ def listar_questoes(
                 COALESCE(tc.pausado, 0) AS topico_pausado,
                 COALESCE(dc.pausado, 0) AS disciplina_pausada,
                 COALESCE(q.analise_pendente, 0) AS analise_pendente,
-                q.analise_solicitada_em
+                q.analise_solicitada_em,
+                q.capitulo_id,
+                c.nome AS capitulo
             FROM questoes q
             JOIN topicos t
                 ON t.id = q.topico_id
             JOIN disciplinas d
                 ON d.id = t.disciplina_id
+            LEFT JOIN capitulos_topico c
+                ON c.id = q.capitulo_id
             JOIN disciplina_concurso_inclusao dc
                 ON dc.disciplina_id = d.id
                 AND dc.concurso_id = ?
@@ -4904,6 +4994,8 @@ def listar_questoes(
                 linha[15]
             ),
             "analise_solicitada_em": linha[16],
+            "capitulo_id": linha[17],
+            "capitulo": linha[18] or "",
         }
         for linha in linhas
     ]
