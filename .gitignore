@@ -10,6 +10,12 @@ dist_nova/
 _dados_antes_atualizacao/
 
 # Dados gerados pelo aplicativo
+backups/
+checkpoints/
+*.db-shm
+*.db-wal
+*.tmp-shm
+*.tmp-wal
 dist/SistemaEstudos/backups/
 dist/SistemaEstudos/*.db
 dist/SistemaEstudos/*.db-shm
