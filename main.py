@@ -46,7 +46,8 @@ from PySide6.QtWidgets import (
     QProgressBar,
     QRadioButton,
     QButtonGroup,
-    QToolButton
+    QToolButton,
+    QMenu
 )
 
 from tema import (
@@ -185,6 +186,7 @@ from banco import (
     criar_questao,
     criar_questoes_lote,
     obter_questao,
+    definir_questao_analise_pendente,
     atualizar_questao,
     excluir_questao,
     obter_integridade_questao,
@@ -237,6 +239,7 @@ from banco import (
     selecionar_questoes_inteligentes,
     selecionar_questoes_por_modo,
     contar_questoes_disponiveis_por_modo,
+    listar_topicos_equivalentes_com_questoes,
     listar_prompts_ia,
     obter_prompt_ia,
     criar_prompt_ia,
@@ -14201,14 +14204,68 @@ class JanelaResolverQuestoes(QDialog):
         )
 
         self.duvida = QCheckBox(
-            "Marcar esta questão como dúvida"
+            "Marcar como dúvida"
         )
         self.duvida.setObjectName(
             "questionSessionDoubt"
         )
+        self.duvida.setAccessibleName(
+            "Marcar como dúvida"
+        )
+        self.duvida.toggled.connect(
+            self.atualizar_rotulo_duvida
+        )
+
+        self.analise_pendente = QCheckBox(
+            "Analisar depois"
+        )
+        self.analise_pendente.setObjectName(
+            "questionSessionAnalysisFlag"
+        )
+        self.analise_pendente.setToolTip(
+            (
+                "Separar esta questão para análise posterior "
+                "na Central de Questões."
+            )
+        )
+        self.analise_pendente.setAccessibleName(
+            "Analisar esta questão depois"
+        )
+        self.analise_pendente.toggled.connect(
+            self.alternar_analise_pendente
+        )
+
+        painel_acoes = QFrame()
+        painel_acoes.setObjectName(
+            "questionSessionActionPanel"
+        )
+
+        acoes = QHBoxLayout(
+            painel_acoes
+        )
+        acoes.setContentsMargins(
+            12,
+            10,
+            12,
+            10
+        )
+        acoes.setSpacing(
+            9
+        )
+        acoes.addWidget(
+            self.duvida,
+            0,
+            Qt.AlignVCenter
+        )
+        acoes.addWidget(
+            self.analise_pendente,
+            0,
+            Qt.AlignVCenter
+        )
+        acoes.addStretch()
 
         conteudo_layout.addWidget(
-            self.duvida
+            painel_acoes
         )
 
         self.feedback = QFrame()
@@ -14273,20 +14330,17 @@ class JanelaResolverQuestoes(QDialog):
             1
         )
 
-        # Ações.
-        acoes = QHBoxLayout()
-        acoes.setSpacing(
-            8
-        )
-
         self.botao_pular = QPushButton(
-            "Pular"
+            "Pular questão"
         )
         self.botao_pular.setObjectName(
             "questionSessionSkipButton"
         )
         self.botao_pular.setFixedHeight(
-            36
+            40
+        )
+        self.botao_pular.setMinimumWidth(
+            110
         )
         self.botao_pular.clicked.connect(
             self.pular
@@ -14299,7 +14353,10 @@ class JanelaResolverQuestoes(QDialog):
             "primaryButton"
         )
         self.botao_confirmar.setFixedHeight(
-            36
+            40
+        )
+        self.botao_confirmar.setMinimumWidth(
+            165
         )
         self.botao_confirmar.clicked.connect(
             self.confirmar_resposta
@@ -14312,7 +14369,10 @@ class JanelaResolverQuestoes(QDialog):
             "primaryButton"
         )
         self.botao_proxima.setFixedHeight(
-            36
+            40
+        )
+        self.botao_proxima.setMinimumWidth(
+            150
         )
         self.botao_proxima.setVisible(
             False
@@ -14324,16 +14384,11 @@ class JanelaResolverQuestoes(QDialog):
         acoes.addWidget(
             self.botao_pular
         )
-        acoes.addStretch()
         acoes.addWidget(
             self.botao_confirmar
         )
         acoes.addWidget(
             self.botao_proxima
-        )
-
-        layout.addLayout(
-            acoes
         )
 
         if self.modo_simulado:
@@ -14352,6 +14407,88 @@ class JanelaResolverQuestoes(QDialog):
                 self.timer_simulado.start()
 
         self.carregar_atual()
+
+    def atualizar_rotulo_duvida(
+        self,
+        marcada
+    ):
+        texto = (
+            "✓  Marcada como dúvida"
+            if marcada
+            else "Marcar como dúvida"
+        )
+
+        self.duvida.setText(
+            texto
+        )
+        self.duvida.setAccessibleName(
+            texto
+        )
+
+    def atualizar_rotulo_analise_pendente(
+        self,
+        marcada
+    ):
+        texto = (
+            "✓  Separada para análise"
+            if marcada
+            else "Analisar depois"
+        )
+
+        self.analise_pendente.setText(
+            texto
+        )
+        self.analise_pendente.setAccessibleName(
+            texto
+        )
+
+    def alternar_analise_pendente(
+        self,
+        marcada
+    ):
+        if self.questao_atual is None:
+            return
+
+        sucesso = False
+
+        try:
+            sucesso = definir_questao_analise_pendente(
+                self.questao_atual[
+                    "id"
+                ],
+                marcada
+            )
+        except Exception:
+            sucesso = False
+
+        if not sucesso:
+            self.analise_pendente.blockSignals(
+                True
+            )
+            self.analise_pendente.setChecked(
+                not marcada
+            )
+            self.analise_pendente.blockSignals(
+                False
+            )
+            self.atualizar_rotulo_analise_pendente(
+                not marcada
+            )
+            QMessageBox.warning(
+                self,
+                "Analisar depois",
+                "Não foi possível salvar a marcação desta questão."
+            )
+            return
+
+        self.questao_atual[
+            "analise_pendente"
+        ] = bool(
+            marcada
+        )
+        self.atualizar_rotulo_analise_pendente(
+            marcada
+        )
 
     def atualizar_relogio_simulado(self):
         if not self.modo_simulado:
@@ -14783,6 +14920,27 @@ class JanelaResolverQuestoes(QDialog):
         )
         self.duvida.setEnabled(
             True
+        )
+        analise_pendente = bool(
+            dados.get(
+                "analise_pendente",
+                False
+            )
+        )
+        self.analise_pendente.blockSignals(
+            True
+        )
+        self.analise_pendente.setChecked(
+            analise_pendente
+        )
+        self.analise_pendente.blockSignals(
+            False
+        )
+        self.analise_pendente.setEnabled(
+            True
+        )
+        self.atualizar_rotulo_analise_pendente(
+            analise_pendente
         )
         self.feedback.setVisible(
             False
@@ -15444,6 +15602,8 @@ def abrir_resolvedor_topico(
     modo_nome=None
 ):
     concurso = obter_concurso_ativo()
+    topico_solicitado_nome = nome_topico
+    aviso_topico_equivalente = ""
 
     disponiveis = listar_questoes_resolucao(
         concurso[0],
@@ -15451,6 +15611,70 @@ def abrir_resolvedor_topico(
         somente_ineditas=False,
         aleatorio=False
     )
+
+    if not disponiveis:
+        equivalentes = (
+            listar_topicos_equivalentes_com_questoes(
+                concurso[0],
+                topico_id
+            )
+        )
+
+        equivalente = None
+
+        if len(
+            equivalentes
+        ) == 1:
+            equivalente = equivalentes[0]
+        elif equivalentes:
+            opcoes = [
+                (
+                    f"{item['nome']} "
+                    f"({item['quantidade']} questões)"
+                )
+                for item in equivalentes
+            ]
+            escolha, ok = QInputDialog.getItem(
+                parent,
+                "Escolher tópico equivalente",
+                (
+                    "As questões deste conteúdo estão vinculadas a "
+                    "mais de um tópico equivalente. Escolha qual deseja "
+                    "resolver:"
+                ),
+                opcoes,
+                0,
+                False
+            )
+
+            if not ok:
+                return None
+
+            equivalente = equivalentes[
+                opcoes.index(
+                    escolha
+                )
+            ]
+
+        if equivalente is not None:
+            topico_id = equivalente[
+                "topico_id"
+            ]
+            nome_topico = equivalente[
+                "nome"
+            ]
+            disponiveis = listar_questoes_resolucao(
+                concurso[0],
+                topico_id=topico_id,
+                somente_ineditas=False,
+                aleatorio=False
+            )
+            aviso_topico_equivalente = (
+                "\n\nAs questões de "
+                f"{topico_solicitado_nome} estão cadastradas no tópico "
+                f"equivalente “{nome_topico}”. Esta sessão e seu histórico "
+                "serão registrados nesse vínculo."
+            )
 
     if not disponiveis:
         QMessageBox.information(
@@ -15505,12 +15729,14 @@ def abrir_resolvedor_topico(
             "Primeiro contato com este tópico: ao finalizar a resolução, "
             "o VighnaStudy registrará automaticamente a primeira revisão "
             "e calculará a próxima data conforme o desempenho."
+            f"{aviso_topico_equivalente}"
         )
     else:
         mensagem = (
             f"{maximo} questão(ões) disponível(is) para {nome_topico}.\n\n"
             f"{minimo_registro} questões: começa a gerar revisão automática.\n"
             f"{minimo_agendamento} questões: passa a recalcular a próxima revisão."
+            f"{aviso_topico_equivalente}"
         )
 
     if quantidade_exata is not None:
@@ -35323,13 +35549,6 @@ class SistemaEstudos(QMainWindow):
         titulos.addWidget(subtitulo)
         cabecalho.addLayout(titulos, 1)
 
-        selo_admin = QLabel("GESTÃO DO BANCO")
-        selo_admin.setObjectName("studyReviewSourceBadge")
-        selo_admin.setToolTip(
-            "Esta área é destinada à organização do banco. A prática de questões fica no Dashboard e nas Estratégias de estudo."
-        )
-        cabecalho.addWidget(selo_admin, 0, Qt.AlignVCenter)
-
         ajuda_questoes = QPushButton("?")
         ajuda_questoes.setObjectName("subtleButton")
         ajuda_questoes.setFixedSize(34, 34)
@@ -35339,35 +35558,12 @@ class SistemaEstudos(QMainWindow):
 
         self.questoes_perfil = QLabel("Perfil: —")
         self.questoes_perfil.setObjectName("profileBadge")
-        cabecalho.addWidget(self.questoes_perfil, 0, Qt.AlignVCenter)
-
-        prompts_ia = QPushButton("Prompts IA")
-        prompts_ia.setObjectName("questionsPromptsButton")
-        prompts_ia.setFixedHeight(34)
-        prompts_ia.setToolTip(
-            "Abrir a biblioteca de prompts para geração e auditoria de questões."
+        cabecalho.insertWidget(
+            cabecalho.count() - 1,
+            self.questoes_perfil,
+            0,
+            Qt.AlignVCenter
         )
-        prompts_ia.clicked.connect(self.abrir_prompts_ia)
-        cabecalho.addWidget(prompts_ia, 0, Qt.AlignVCenter)
-
-        modelo = QPushButton("Modelo CSV")
-        modelo.setObjectName("subtleButton")
-        modelo.setFixedHeight(34)
-        modelo.clicked.connect(self.salvar_modelo_csv_questoes)
-        cabecalho.addWidget(modelo, 0, Qt.AlignVCenter)
-
-        importar = QPushButton("Importar CSV")
-        importar.setObjectName("questionsImportButton")
-        importar.setFixedHeight(34)
-        importar.clicked.connect(self.importar_questoes_csv)
-        cabecalho.addWidget(importar, 0, Qt.AlignVCenter)
-
-        importar_pdf = QPushButton("Importar PDF")
-        importar_pdf.setObjectName("questionsPdfImportButton")
-        importar_pdf.setFixedHeight(34)
-        importar_pdf.setToolTip("Importar questões de PDF com texto selecionável.")
-        importar_pdf.clicked.connect(self.importar_questoes_pdf)
-        cabecalho.addWidget(importar_pdf, 0, Qt.AlignVCenter)
 
         layout.addLayout(cabecalho)
 
@@ -35402,60 +35598,258 @@ class SistemaEstudos(QMainWindow):
         nova.clicked.connect(self.nova_questao)
         painel_admin_layout.addWidget(nova, 0, Qt.AlignVCenter)
 
-        desativadas = QPushButton("Questões desativadas")
-        desativadas.setObjectName("subtleButton")
-        desativadas.setMinimumSize(155, 40)
-        desativadas.setToolTip("Consultar e reativar questões desativadas do perfil atual.")
-        desativadas.clicked.connect(lambda: self.abrir_itens_desativados(1))
-        painel_admin_layout.addWidget(desativadas, 0, Qt.AlignVCenter)
+        self.questoes_para_analise = QPushButton(
+            "Para análise · 0"
+        )
+        self.questoes_para_analise.setObjectName(
+            "questionsAnalysisButton"
+        )
+        self.questoes_para_analise.setCheckable(
+            True
+        )
+        self.questoes_para_analise.setMinimumSize(
+            145,
+            40
+        )
+        self.questoes_para_analise.setToolTip(
+            (
+                "Mostrar somente as questões separadas durante "
+                "uma bateria para análise posterior."
+            )
+        )
+        self.questoes_para_analise.toggled.connect(
+            self.filtrar_questoes
+        )
+        painel_admin_layout.addWidget(
+            self.questoes_para_analise,
+            0,
+            Qt.AlignVCenter
+        )
 
-        lixeira = QPushButton("Lixeira")
-        lixeira.setObjectName("subtleButton")
-        lixeira.setMinimumSize(100, 40)
-        lixeira.setToolTip("Restaurar ou excluir permanentemente questões enviadas à lixeira.")
-        lixeira.clicked.connect(self.abrir_lixeira_questoes_central)
-        painel_admin_layout.addWidget(lixeira, 0, Qt.AlignVCenter)
+        importar = QToolButton()
+        importar.setObjectName(
+            "questionsImportMenuButton"
+        )
+        importar.setText(
+            "Importar"
+        )
+        importar.setPopupMode(
+            QToolButton.InstantPopup
+        )
+        importar.setMinimumSize(
+            118,
+            40
+        )
+        menu_importar = QMenu(
+            importar
+        )
+        menu_importar.addAction(
+            "Importar CSV"
+        ).triggered.connect(
+            self.importar_questoes_csv
+        )
+        menu_importar.addAction(
+            "Importar PDF"
+        ).triggered.connect(
+            self.importar_questoes_pdf
+        )
+        menu_importar.addSeparator()
+        menu_importar.addAction(
+            "Baixar modelo CSV"
+        ).triggered.connect(
+            self.salvar_modelo_csv_questoes
+        )
+        importar.setMenu(
+            menu_importar
+        )
+        painel_admin_layout.addWidget(
+            importar,
+            0,
+            Qt.AlignVCenter
+        )
+
+        mais = QToolButton()
+        mais.setObjectName(
+            "questionsMoreMenuButton"
+        )
+        mais.setText(
+            "Mais"
+        )
+        mais.setPopupMode(
+            QToolButton.InstantPopup
+        )
+        mais.setMinimumSize(
+            96,
+            40
+        )
+        menu_mais = QMenu(
+            mais
+        )
+        menu_mais.addAction(
+            "Prompts IA"
+        ).triggered.connect(
+            self.abrir_prompts_ia
+        )
+        menu_mais.addAction(
+            "Questões desativadas"
+        ).triggered.connect(
+            lambda: self.abrir_itens_desativados(
+                1
+            )
+        )
+        menu_mais.addAction(
+            "Lixeira"
+        ).triggered.connect(
+            self.abrir_lixeira_questoes_central
+        )
+        menu_mais.addSeparator()
+        menu_mais.addAction(
+            "Ajuda da Central"
+        ).triggered.connect(
+            self.mostrar_ajuda_banco_questoes
+        )
+        mais.setMenu(
+            menu_mais
+        )
+        painel_admin_layout.addWidget(
+            mais,
+            0,
+            Qt.AlignVCenter
+        )
 
         layout.addWidget(painel_admin)
 
         # ====================================================
         # INVENTÁRIO DO BANCO
         # ====================================================
-        inventario_header = QHBoxLayout()
-        inventario_titulo = QLabel("Inventário do banco")
-        inventario_titulo.setObjectName("questionsAdaptiveTitle")
-        inventario_desc = QLabel("Visão rápida do conteúdo atualmente armazenado neste perfil.")
-        inventario_desc.setObjectName("questionsAdaptiveDescription")
-        inventario_header.addWidget(inventario_titulo)
-        inventario_header.addWidget(inventario_desc)
-        inventario_header.addStretch()
-        layout.addLayout(inventario_header)
+        inventario = QFrame()
+        inventario.setObjectName(
+            "questionsInventoryStrip"
+        )
+        inventario_layout = QHBoxLayout(
+            inventario
+        )
+        inventario_layout.setContentsMargins(
+            14,
+            8,
+            14,
+            8
+        )
+        inventario_layout.setSpacing(
+            0
+        )
 
-        cards = QGridLayout()
-        cards.setHorizontalSpacing(9)
-        for coluna in range(5):
-            cards.setColumnStretch(coluna, 1)
+        def criar_indicador_inventario(
+            rotulo_texto
+        ):
+            item = QFrame()
+            item.setObjectName(
+                "questionsInventoryItem"
+            )
+            item_layout = QVBoxLayout(
+                item
+            )
+            item_layout.setContentsMargins(
+                12,
+                2,
+                12,
+                2
+            )
+            item_layout.setSpacing(
+                1
+            )
 
-        card, self.questoes_total = self.criar_cartao("Ativas")
-        cards.addWidget(card, 0, 0)
+            valor = QLabel(
+                "0"
+            )
+            valor.setObjectName(
+                "questionsInventoryValue"
+            )
+            rotulo = QLabel(
+                rotulo_texto
+            )
+            rotulo.setObjectName(
+                "questionsInventoryLabel"
+            )
 
-        card, self.questoes_desativadas_total = self.criar_cartao("Desativadas")
-        cards.addWidget(card, 0, 1)
+            item_layout.addWidget(
+                valor
+            )
+            item_layout.addWidget(
+                rotulo
+            )
 
-        card, self.questoes_topicos = self.criar_cartao("Tópicos com questões")
-        cards.addWidget(card, 0, 2)
+            return item, valor
 
-        card, self.questoes_disciplinas = self.criar_cartao("Disciplinas")
-        cards.addWidget(card, 0, 3)
+        indicadores = [
+            ("Ativas", "questoes_total"),
+            ("Desativadas", "questoes_desativadas_total"),
+            ("Tópicos", "questoes_topicos"),
+            ("Disciplinas", "questoes_disciplinas"),
+            ("Com explicação", "questoes_explicadas"),
+        ]
 
-        card, self.questoes_explicadas = self.criar_cartao("Com explicação")
-        cards.addWidget(card, 0, 4)
+        for indice, (
+            rotulo_texto,
+            atributo
+        ) in enumerate(
+            indicadores
+        ):
+            item, valor = criar_indicador_inventario(
+                rotulo_texto
+            )
+            setattr(
+                self,
+                atributo,
+                valor
+            )
+            inventario_layout.addWidget(
+                item,
+                1
+            )
 
-        layout.addLayout(cards)
+            if indice < len(
+                indicadores
+            ) - 1:
+                divisor = QFrame()
+                divisor.setObjectName(
+                    "questionsInventoryDivider"
+                )
+                divisor.setFixedWidth(
+                    1
+                )
+                inventario_layout.addWidget(
+                    divisor
+                )
+
+        layout.addWidget(
+            inventario
+        )
 
         # ====================================================
         # QUESTÕES CADASTRADAS — FILTROS E AÇÕES
         # ====================================================
+        area_trabalho = QFrame()
+        area_trabalho.setObjectName(
+            "questionsWorkspaceCard"
+        )
+        area_trabalho_layout = QVBoxLayout(
+            area_trabalho
+        )
+        area_trabalho_layout.setContentsMargins(
+            12,
+            10,
+            12,
+            12
+        )
+        area_trabalho_layout.setSpacing(
+            8
+        )
+        layout.addWidget(
+            area_trabalho,
+            1
+        )
+
         secao_lista = QFrame()
         secao_lista.setObjectName("questionsFoundationNotice")
         secao_lista_layout = QHBoxLayout(secao_lista)
@@ -35480,7 +35874,9 @@ class SistemaEstudos(QMainWindow):
         atualizar.setFixedHeight(34)
         atualizar.clicked.connect(self.carregar_questoes)
         secao_lista_layout.addWidget(atualizar, 0, Qt.AlignVCenter)
-        layout.addWidget(secao_lista)
+        area_trabalho_layout.addWidget(
+            secao_lista
+        )
 
         filtros = QFrame()
         filtros.setObjectName("questionsFilterBar")
@@ -35528,9 +35924,9 @@ class SistemaEstudos(QMainWindow):
         filtros_layout.addWidget(self.questoes_filtro_disciplina)
         filtros_layout.addWidget(self.questoes_filtro_topico)
         filtros_layout.addWidget(self.questoes_filtro_dificuldade)
-        filtros_layout.addWidget(self.questoes_mostrar_arquivadas)
-        filtros_layout.addWidget(self.questoes_selecionar_todas)
-        layout.addWidget(filtros)
+        area_trabalho_layout.addWidget(
+            filtros
+        )
 
         # Barra administrativa aplicada à seleção atual.
         acoes = QHBoxLayout()
@@ -35538,17 +35934,53 @@ class SistemaEstudos(QMainWindow):
         self.questoes_contagem = QLabel("0 questões")
         self.questoes_contagem.setObjectName("filterCount")
         acoes.addWidget(self.questoes_contagem)
+        acoes.addSpacing(
+            8
+        )
+        acoes.addWidget(
+            self.questoes_mostrar_arquivadas
+        )
+        acoes.addWidget(
+            self.questoes_selecionar_todas
+        )
         acoes.addStretch()
 
-        visualizar = QPushButton("Visualizar")
-        visualizar.setObjectName("subtleButton")
-        visualizar.clicked.connect(self.visualizar_questao_selecionada)
-        acoes.addWidget(visualizar)
+        self.questoes_visualizar = QPushButton("Visualizar")
+        self.questoes_visualizar.setObjectName("subtleButton")
+        self.questoes_visualizar.clicked.connect(
+            self.visualizar_questao_selecionada
+        )
+        acoes.addWidget(
+            self.questoes_visualizar
+        )
 
-        editar = QPushButton("Editar")
-        editar.setObjectName("subtleButton")
-        editar.clicked.connect(self.editar_questao_selecionada)
-        acoes.addWidget(editar)
+        self.questoes_editar = QPushButton("Editar")
+        self.questoes_editar.setObjectName("subtleButton")
+        self.questoes_editar.clicked.connect(
+            self.editar_questao_selecionada
+        )
+        acoes.addWidget(
+            self.questoes_editar
+        )
+
+        self.questoes_concluir_analise = QPushButton(
+            "Concluir análise"
+        )
+        self.questoes_concluir_analise.setObjectName(
+            "questionsAnalysisCompleteButton"
+        )
+        self.questoes_concluir_analise.setToolTip(
+            (
+                "Retirar da fila de análise as questões selecionadas "
+                "após terminar a conferência."
+            )
+        )
+        self.questoes_concluir_analise.clicked.connect(
+            self.concluir_analise_questoes_central
+        )
+        acoes.addWidget(
+            self.questoes_concluir_analise
+        )
 
         self.questoes_estado = QPushButton("Desativar")
         self.questoes_estado.setObjectName("subtleButton")
@@ -35566,14 +35998,16 @@ class SistemaEstudos(QMainWindow):
         self.questoes_remover.clicked.connect(self.excluir_questao_selecionada)
         acoes.addWidget(self.questoes_remover)
 
-        layout.addLayout(acoes)
+        area_trabalho_layout.addLayout(
+            acoes
+        )
 
         # ====================================================
         # TABELA DO BANCO
         # ====================================================
         self.tabela_questoes = QTableWidget()
         self.tabela_questoes.setObjectName("questionsTable")
-        self.tabela_questoes.setColumnCount(10)
+        self.tabela_questoes.setColumnCount(11)
         self.tabela_questoes.setHorizontalHeaderLabels([
             "",
             "#",
@@ -35584,6 +36018,7 @@ class SistemaEstudos(QMainWindow):
             "Ano",
             "Dificuldade",
             "Gabarito",
+            "Análise",
             "Estado",
         ])
         self.tabela_questoes.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -35608,14 +36043,18 @@ class SistemaEstudos(QMainWindow):
             6: 56,
             7: 88,
             8: 68,
-            9: 82,
+            9: 86,
+            10: 82,
         }
         for coluna, largura in larguras.items():
             header.setSectionResizeMode(coluna, QHeaderView.Fixed)
             self.tabela_questoes.setColumnWidth(coluna, largura)
         header.setSectionResizeMode(4, QHeaderView.Stretch)
 
-        layout.addWidget(self.tabela_questoes, 1)
+        area_trabalho_layout.addWidget(
+            self.tabela_questoes,
+            1
+        )
 
         # Atualizações e filtros.
         self.questoes_busca.textChanged.connect(self.filtrar_questoes)
@@ -35632,6 +36071,9 @@ class SistemaEstudos(QMainWindow):
         self.dados_questoes = []
         self.questoes_estado.setEnabled(False)
         self.questoes_remover.setEnabled(False)
+        self.questoes_concluir_analise.setEnabled(False)
+        self.questoes_visualizar.setEnabled(False)
+        self.questoes_editar.setEnabled(False)
 
         return tela
 
@@ -35898,6 +36340,14 @@ class SistemaEstudos(QMainWindow):
             1 for item in todas_questoes_administrativas
             if not item.get("ativa", True)
         )
+        total_para_analise = sum(
+            1
+            for item in todas_questoes_administrativas
+            if item.get(
+                "analise_pendente",
+                False
+            )
+        )
         estatisticas = {
             "total": total_ativas,
             "disciplinas": len({
@@ -35925,6 +36375,26 @@ class SistemaEstudos(QMainWindow):
         )
         if hasattr(self, "questoes_desativadas_total"):
             self.questoes_desativadas_total.setText(str(total_desativadas))
+        if hasattr(
+            self,
+            "questoes_para_analise"
+        ):
+            self.questoes_para_analise.setText(
+                f"Para análise · {total_para_analise}"
+            )
+            if total_para_analise <= 0:
+                self.questoes_para_analise.blockSignals(
+                    True
+                )
+                self.questoes_para_analise.setChecked(
+                    False
+                )
+                self.questoes_para_analise.blockSignals(
+                    False
+                )
+            self.questoes_para_analise.setEnabled(
+                total_para_analise > 0
+            )
         self.questoes_topicos.setText(
             str(
                 estatisticas[
@@ -36214,10 +36684,26 @@ class SistemaEstudos(QMainWindow):
             self.questoes_filtro_dificuldade
             .currentText()
         )
+        somente_para_analise = (
+            hasattr(
+                self,
+                "questoes_para_analise"
+            )
+            and self.questoes_para_analise.isChecked()
+        )
 
         filtradas = []
 
         for item in self.dados_questoes:
+            if (
+                somente_para_analise
+                and not item.get(
+                    "analise_pendente",
+                    False
+                )
+            ):
+                continue
+
             if (
                 disciplina
                 and disciplina
@@ -36300,6 +36786,9 @@ class SistemaEstudos(QMainWindow):
                 f" • {arquivadas_filtradas} desativada(s)"
             )
 
+        if somente_para_analise:
+            texto_contagem += " • fila de análise"
+
         self.questoes_contagem.setText(
             texto_contagem
         )
@@ -36337,6 +36826,14 @@ class SistemaEstudos(QMainWindow):
 
             enunciado_exibicao = enunciado_resumido
             estado_texto = "Ativa" if item.get("ativa", True) else "Desativada"
+            analise_texto = (
+                "Pendente"
+                if item.get(
+                    "analise_pendente",
+                    False
+                )
+                else "—"
+            )
 
             valores = [
                 str(item["id"]),
@@ -36347,6 +36844,7 @@ class SistemaEstudos(QMainWindow):
                 str(item["ano"]) if item["ano"] else "—",
                 item["dificuldade"],
                 item["gabarito"] or "—",
+                analise_texto,
                 estado_texto,
             ]
 
@@ -36374,6 +36872,14 @@ class SistemaEstudos(QMainWindow):
                             if not item.get(
                                 "ativa",
                                 True
+                            )
+                            else ""
+                        )
+                        + (
+                            "\n\nSeparada para análise posterior."
+                            if item.get(
+                                "analise_pendente",
+                                False
                             )
                             else ""
                         )
@@ -36406,7 +36912,8 @@ class SistemaEstudos(QMainWindow):
                     6,
                     7,
                     8,
-                    9
+                    9,
+                    10
                 ):
                     celula.setTextAlignment(
                         Qt.AlignCenter
@@ -36424,6 +36931,19 @@ class SistemaEstudos(QMainWindow):
                     aplicar_destaque_tabela(
                         marca,
                         "inativo",
+                        True
+                    )
+
+                if (
+                    indice_valor == 9
+                    and item.get(
+                        "analise_pendente",
+                        False
+                    )
+                ):
+                    aplicar_destaque_tabela(
+                        celula,
+                        "atencao",
                         True
                     )
 
@@ -36538,6 +37058,9 @@ class SistemaEstudos(QMainWindow):
             self.questoes_estado.setText("Desativar")
             self.questoes_estado.setEnabled(False)
             self.questoes_remover.setEnabled(False)
+            self.questoes_concluir_analise.setEnabled(False)
+            self.questoes_visualizar.setEnabled(False)
+            self.questoes_editar.setEnabled(False)
             return
 
         estados = []
@@ -36549,10 +37072,50 @@ class SistemaEstudos(QMainWindow):
         if not estados:
             self.questoes_estado.setEnabled(False)
             self.questoes_remover.setEnabled(False)
+            self.questoes_concluir_analise.setEnabled(False)
+            self.questoes_visualizar.setEnabled(False)
+            self.questoes_editar.setEnabled(False)
             return
 
         self.questoes_estado.setEnabled(True)
         self.questoes_remover.setEnabled(True)
+        selecao_unica = len(
+            ids
+        ) == 1
+        self.questoes_visualizar.setEnabled(
+            selecao_unica
+        )
+        self.questoes_editar.setEnabled(
+            selecao_unica
+        )
+
+        ids_para_analise = {
+            int(
+                item[
+                    "id"
+                ]
+            )
+            for item in self.dados_questoes
+            if item.get(
+                "analise_pendente",
+                False
+            )
+        }
+        quantidade_para_analise = sum(
+            1
+            for questao_id in ids
+            if questao_id in ids_para_analise
+        )
+        self.questoes_concluir_analise.setEnabled(
+            quantidade_para_analise > 0
+        )
+        self.questoes_concluir_analise.setText(
+            (
+                "Concluir análise"
+                if quantidade_para_analise <= 1
+                else f"Concluir {quantidade_para_analise} análises"
+            )
+        )
 
         if all(estados):
             self.questoes_estado.setText(
@@ -36568,6 +37131,77 @@ class SistemaEstudos(QMainWindow):
         self.questoes_remover.setText(
             "Excluir" if len(ids) == 1 else f"Excluir {len(ids)}"
         )
+
+    def concluir_analise_questoes_central(self):
+        ids = self.obter_ids_questoes_marcadas_central()
+
+        if not ids:
+            questao_id = self.obter_questao_selecionada_id()
+            ids = [
+                questao_id
+            ] if questao_id is not None else []
+
+        ids_para_analise = {
+            int(
+                item[
+                    "id"
+                ]
+            )
+            for item in self.dados_questoes
+            if item.get(
+                "analise_pendente",
+                False
+            )
+        }
+        ids = [
+            questao_id
+            for questao_id in ids
+            if questao_id in ids_para_analise
+        ]
+
+        if not ids:
+            return
+
+        resposta = QMessageBox.question(
+            self,
+            "Concluir análise",
+            (
+                f"Retirar {len(ids)} questão(ões) da fila de análise?\n\n"
+                "O conteúdo e o histórico das questões serão preservados."
+            ),
+            QMessageBox.Yes
+            | QMessageBox.No,
+            QMessageBox.Yes
+        )
+
+        if resposta != QMessageBox.Yes:
+            return
+
+        concluidas = sum(
+            1
+            for questao_id in ids
+            if definir_questao_analise_pendente(
+                questao_id,
+                False
+            )
+        )
+
+        self.carregar_questoes()
+        self.notificar_dados_alterados(
+            "questoes"
+        )
+
+        if concluidas != len(
+            ids
+        ):
+            QMessageBox.warning(
+                self,
+                "Concluir análise",
+                (
+                    f"{concluidas} de {len(ids)} questão(ões) "
+                    "foram retiradas da fila."
+                )
+            )
 
     def alternar_estado_questoes_central(self):
         ids = self.obter_ids_questoes_marcadas_central()
@@ -36754,6 +37388,7 @@ class SistemaEstudos(QMainWindow):
                 "• Nova questão: cadastra uma questão manualmente.\n"
                 "• Importar CSV/PDF: adiciona questões em lote.\n"
                 "• Desativar: retira temporariamente a questão das novas sessões sem apagá-la.\n"
+                "• Para análise: reúne questões sinalizadas durante uma bateria para visualização e edição.\n"
                 "• Lixeira: recebe questões removidas e permite restaurar ou excluir permanentemente.\n"
                 "• Caixas de seleção: permitem aplicar ações em lote.\n\n"
                 "A prática de questões, os simulados, a efetividade e o histórico de estudo ficam fora desta Central para manter esta tela focada exclusivamente na organização do banco."

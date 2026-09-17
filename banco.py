@@ -3,7 +3,9 @@ import sys
 import random
 import json
 import math
+import re
 import statistics
+import unicodedata
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
@@ -465,6 +467,29 @@ def criar_banco():
                 ADD COLUMN excluida_em TEXT
                 """
             )
+
+        if "analise_pendente" not in colunas_questoes:
+            conexao.execute(
+                """
+                ALTER TABLE questoes
+                ADD COLUMN analise_pendente INTEGER NOT NULL DEFAULT 0
+                """
+            )
+
+        if "analise_solicitada_em" not in colunas_questoes:
+            conexao.execute(
+                """
+                ALTER TABLE questoes
+                ADD COLUMN analise_solicitada_em TEXT
+                """
+            )
+
+        conexao.execute(
+            """
+            CREATE INDEX IF NOT EXISTS idx_questoes_analise_pendente
+            ON questoes(analise_pendente, id)
+            """
+        )
 
         conexao.execute("""
             CREATE TABLE IF NOT EXISTS alternativas_questoes (
@@ -3634,7 +3659,9 @@ def obter_questao(
                 q.ativa,
                 COALESCE(q.excluida, 0),
                 q.criado_em,
-                q.atualizado_em
+                q.atualizado_em,
+                COALESCE(q.analise_pendente, 0),
+                q.analise_solicitada_em
             FROM questoes q
             JOIN topicos t
                 ON t.id = q.topico_id
@@ -3693,6 +3720,10 @@ def obter_questao(
         ),
         "criado_em": linha[13],
         "atualizado_em": linha[14],
+        "analise_pendente": bool(
+            linha[15]
+        ),
+        "analise_solicitada_em": linha[16],
         "alternativas": [
             {
                 "letra": alternativa[0],
@@ -3706,6 +3737,42 @@ def obter_questao(
             in alternativas
         ],
     }
+
+
+def definir_questao_analise_pendente(
+    questao_id,
+    marcada=True
+):
+    marcada = bool(
+        marcada
+    )
+
+    with conectar() as conexao:
+        cursor = conexao.execute(
+            """
+            UPDATE questoes
+            SET
+                analise_pendente = ?,
+                analise_solicitada_em = CASE
+                    WHEN ? = 1
+                    THEN datetime('now', 'localtime')
+                    ELSE NULL
+                END,
+                atualizado_em = datetime('now', 'localtime')
+            WHERE
+                id = ?
+                AND COALESCE(excluida, 0) = 0
+            """,
+            (
+                1 if marcada else 0,
+                1 if marcada else 0,
+                int(
+                    questao_id
+                ),
+            )
+        )
+
+        return cursor.rowcount > 0
 
 
 def atualizar_questao(
@@ -4274,7 +4341,9 @@ def listar_questoes(
                     ELSE 0
                 END AS tem_explicacao,
                 COALESCE(tc.pausado, 0) AS topico_pausado,
-                COALESCE(dc.pausado, 0) AS disciplina_pausada
+                COALESCE(dc.pausado, 0) AS disciplina_pausada,
+                COALESCE(q.analise_pendente, 0) AS analise_pendente,
+                q.analise_solicitada_em
             FROM questoes q
             JOIN topicos t
                 ON t.id = q.topico_id
@@ -4334,6 +4403,10 @@ def listar_questoes(
             "disciplina_pausada": bool(
                 linha[14]
             ),
+            "analise_pendente": bool(
+                linha[15]
+            ),
+            "analise_solicitada_em": linha[16],
         }
         for linha in linhas
     ]
@@ -9718,6 +9791,147 @@ def contar_questoes_disponiveis_por_modo(
             "total_disponivel"
         ]
     )
+
+
+def _normalizar_nome_topico_equivalente(
+    nome
+):
+    texto = unicodedata.normalize(
+        "NFD",
+        str(
+            nome
+            or ""
+        ).lower()
+    )
+    texto = "".join(
+        caractere
+        for caractere in texto
+        if unicodedata.category(
+            caractere
+        ) != "Mn"
+    )
+    texto = re.sub(
+        r"^(?:titulo|capitulo|secao)\s+"
+        r"(?:[ivxlcdm]+|\d+)\s*[:.\-–—]?\s*",
+        "",
+        texto
+    )
+    texto = re.sub(
+        r"^(?:da|das|de|do|dos)\s+",
+        "",
+        texto
+    )
+    texto = re.sub(
+        r"[^a-z0-9]+",
+        " ",
+        texto
+    )
+
+    return " ".join(
+        texto.split()
+    )
+
+
+def listar_topicos_equivalentes_com_questoes(
+    concurso_id,
+    topico_id
+):
+    concurso_id = int(
+        concurso_id
+    )
+    topico_id = int(
+        topico_id
+    )
+
+    with conectar() as conexao:
+        origem = conexao.execute(
+            """
+            SELECT
+                disciplina_id,
+                nome
+            FROM topicos
+            WHERE id = ?
+            """,
+            (
+                topico_id,
+            )
+        ).fetchone()
+
+        if origem is None:
+            return []
+
+        candidatos = conexao.execute(
+            """
+            SELECT
+                t.id,
+                t.nome,
+                COUNT(q.id) AS quantidade
+            FROM topicos t
+            JOIN questoes q
+                ON q.topico_id = t.id
+                AND q.ativa = 1
+                AND COALESCE(q.excluida, 0) = 0
+            JOIN disciplina_concurso_inclusao dc
+                ON dc.disciplina_id = t.disciplina_id
+                AND dc.concurso_id = ?
+                AND dc.incluido = 1
+                AND COALESCE(dc.pausado, 0) = 0
+            JOIN topico_concurso_importancia tc
+                ON tc.topico_id = t.id
+                AND tc.concurso_id = ?
+                AND tc.incluido = 1
+                AND COALESCE(tc.pausado, 0) = 0
+            WHERE
+                t.disciplina_id = ?
+                AND t.id <> ?
+            GROUP BY
+                t.id,
+                t.nome
+            ORDER BY
+                quantidade DESC,
+                t.nome COLLATE NOCASE,
+                t.id
+            """,
+            (
+                concurso_id,
+                concurso_id,
+                int(
+                    origem[0]
+                ),
+                topico_id,
+            )
+        ).fetchall()
+
+    chave_origem = (
+        _normalizar_nome_topico_equivalente(
+            origem[1]
+        )
+    )
+
+    if not chave_origem:
+        return []
+
+    return [
+        {
+            "topico_id": int(
+                candidato[0]
+            ),
+            "nome": str(
+                candidato[1]
+            ),
+            "quantidade": int(
+                candidato[2]
+                or 0
+            ),
+        }
+        for candidato in candidatos
+        if (
+            _normalizar_nome_topico_equivalente(
+                candidato[1]
+            )
+            == chave_origem
+        )
+    ]
 
 
 def listar_questoes_resolucao(
@@ -17052,4 +17266,3 @@ def obter_perfil_decisoes_recomendacao(concurso_id, dias=90):
             float(statistics.median(aceitas_valores)) if aceitas_valores else None
         ),
     }
-

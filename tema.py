@@ -812,6 +812,99 @@ QPushButton#sectionEditButton:hover {
         background: transparent;
     }
 
+    QPushButton#questionsAnalysisButton,
+    QPushButton#questionsAnalysisCompleteButton {
+        background-color: #fffbeb;
+        color: #92400e;
+        border: 1px solid #f59e0b;
+        border-radius: 8px;
+        padding: 7px 12px;
+        font-weight: 800;
+    }
+
+    QPushButton#questionsAnalysisButton:hover,
+    QPushButton#questionsAnalysisCompleteButton:hover {
+        background-color: #fef3c7;
+        border-color: #d97706;
+    }
+
+    QPushButton#questionsAnalysisButton:checked {
+        background-color: #d97706;
+        color: #ffffff;
+        border-color: #b45309;
+    }
+
+    QPushButton#questionsAnalysisButton:disabled,
+    QPushButton#questionsAnalysisCompleteButton:disabled {
+        background-color: #f8fafc;
+        color: #94a3b8;
+        border-color: #cbd5e1;
+    }
+
+    QToolButton#questionsImportMenuButton,
+    QToolButton#questionsMoreMenuButton {
+        background-color: #ffffff;
+        color: #334155;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 7px 12px;
+        font-weight: 700;
+    }
+
+    QToolButton#questionsImportMenuButton:hover,
+    QToolButton#questionsMoreMenuButton:hover {
+        background-color: #f8fafc;
+        border-color: #94a3b8;
+        color: #1d4ed8;
+    }
+
+    QFrame#questionsInventoryStrip {
+        background-color: #ffffff;
+        border: 1px solid #dbe3ed;
+        border-radius: 11px;
+    }
+
+    QFrame#questionsInventoryItem {
+        background: transparent;
+        border: none;
+    }
+
+    QLabel#questionsInventoryValue {
+        background: transparent;
+        color: #4338ca;
+        font-size: 14pt;
+        font-weight: 900;
+    }
+
+    QLabel#questionsInventoryLabel {
+        background: transparent;
+        color: #64748b;
+        font-size: 8.5pt;
+        font-weight: 700;
+    }
+
+    QFrame#questionsInventoryDivider {
+        background-color: #e2e8f0;
+        border: none;
+    }
+
+    QFrame#questionsWorkspaceCard {
+        background-color: #ffffff;
+        border: 1px solid #dbe3ed;
+        border-radius: 12px;
+    }
+
+    QFrame#questionsWorkspaceCard QFrame#questionsFoundationNotice {
+        background: transparent;
+        border: none;
+    }
+
+    QFrame#questionsWorkspaceCard QFrame#questionsFilterBar {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+    }
+
     QLabel#questionsHeroTitle {
         color: #12253d;
         font-size: 10.7pt;
@@ -1432,8 +1525,72 @@ QPushButton#sectionEditButton:hover {
     }
 
     QCheckBox#questionSessionDoubt {
+        background: transparent;
         color: #475569;
         font-weight: 700;
+        spacing: 9px;
+        padding: 4px 0;
+    }
+
+    QCheckBox#questionSessionDoubt:checked {
+        color: #1d4ed8;
+    }
+
+    QCheckBox#questionSessionDoubt::indicator {
+        background-color: #ffffff;
+        border: 2px solid #64748b;
+        border-radius: 5px;
+        width: 20px;
+        height: 20px;
+    }
+
+    QCheckBox#questionSessionDoubt::indicator:hover {
+        border-color: #2563eb;
+    }
+
+    QCheckBox#questionSessionDoubt::indicator:checked {
+        background-color: #2563eb;
+        border-color: #1d4ed8;
+    }
+
+    QCheckBox#questionSessionDoubt::indicator:disabled {
+        background-color: #e2e8f0;
+        border-color: #94a3b8;
+    }
+
+    QCheckBox#questionSessionAnalysisFlag {
+        background: transparent;
+        color: #64748b;
+        font-weight: 600;
+        spacing: 7px;
+        padding: 4px 8px;
+    }
+
+    QCheckBox#questionSessionAnalysisFlag:checked {
+        color: #92400e;
+        font-weight: 700;
+    }
+
+    QCheckBox#questionSessionAnalysisFlag::indicator {
+        background-color: #ffffff;
+        border: 2px solid #94a3b8;
+        border-radius: 4px;
+        width: 16px;
+        height: 16px;
+    }
+
+    QCheckBox#questionSessionAnalysisFlag::indicator:hover {
+        border-color: #d97706;
+    }
+
+    QCheckBox#questionSessionAnalysisFlag::indicator:checked {
+        background-color: #f59e0b;
+        border-color: #b45309;
+    }
+
+    QFrame#questionSessionActionPanel {
+        background: transparent;
+        border: none;
     }
 
     QFrame#questionSolverFeedback {
@@ -7550,6 +7707,99 @@ def stylesheet_escuro():
         background: transparent;
     }
 
+    QPushButton#questionsAnalysisButton,
+    QPushButton#questionsAnalysisCompleteButton {
+        background-color: #2d2415;
+        color: #fbbf24;
+        border: 1px solid #b45309;
+        border-radius: 8px;
+        padding: 7px 12px;
+        font-weight: 800;
+    }
+
+    QPushButton#questionsAnalysisButton:hover,
+    QPushButton#questionsAnalysisCompleteButton:hover {
+        background-color: #3a2d17;
+        border-color: #f59e0b;
+    }
+
+    QPushButton#questionsAnalysisButton:checked {
+        background-color: #b45309;
+        color: #fff7ed;
+        border-color: #fbbf24;
+    }
+
+    QPushButton#questionsAnalysisButton:disabled,
+    QPushButton#questionsAnalysisCompleteButton:disabled {
+        background-color: #1f2937;
+        color: #64748b;
+        border-color: #475569;
+    }
+
+    QToolButton#questionsImportMenuButton,
+    QToolButton#questionsMoreMenuButton {
+        background-color: #182235;
+        color: #cbd5e1;
+        border: 1px solid #475569;
+        border-radius: 8px;
+        padding: 7px 12px;
+        font-weight: 700;
+    }
+
+    QToolButton#questionsImportMenuButton:hover,
+    QToolButton#questionsMoreMenuButton:hover {
+        background-color: #1f2937;
+        border-color: #64748b;
+        color: #93c5fd;
+    }
+
+    QFrame#questionsInventoryStrip {
+        background-color: #121c2d;
+        border: 1px solid #334155;
+        border-radius: 11px;
+    }
+
+    QFrame#questionsInventoryItem {
+        background: transparent;
+        border: none;
+    }
+
+    QLabel#questionsInventoryValue {
+        background: transparent;
+        color: #a5b4fc;
+        font-size: 14pt;
+        font-weight: 900;
+    }
+
+    QLabel#questionsInventoryLabel {
+        background: transparent;
+        color: #94a3b8;
+        font-size: 8.5pt;
+        font-weight: 700;
+    }
+
+    QFrame#questionsInventoryDivider {
+        background-color: #334155;
+        border: none;
+    }
+
+    QFrame#questionsWorkspaceCard {
+        background-color: #121c2d;
+        border: 1px solid #334155;
+        border-radius: 12px;
+    }
+
+    QFrame#questionsWorkspaceCard QFrame#questionsFoundationNotice {
+        background: transparent;
+        border: none;
+    }
+
+    QFrame#questionsWorkspaceCard QFrame#questionsFilterBar {
+        background-color: #111827;
+        border: 1px solid #334155;
+        border-radius: 9px;
+    }
+
     QLabel#questionsHeroTitle {
         color: #f8fafc;
         font-size: 10.5pt;
@@ -8206,8 +8456,72 @@ def stylesheet_escuro():
     }
 
     QCheckBox#questionSessionDoubt {
+        background: transparent;
         color: #cbd5e1;
         font-weight: 700;
+        spacing: 9px;
+        padding: 4px 0;
+    }
+
+    QCheckBox#questionSessionDoubt:checked {
+        color: #93c5fd;
+    }
+
+    QCheckBox#questionSessionDoubt::indicator {
+        background-color: #111827;
+        border: 2px solid #94a3b8;
+        border-radius: 5px;
+        width: 20px;
+        height: 20px;
+    }
+
+    QCheckBox#questionSessionDoubt::indicator:hover {
+        border-color: #60a5fa;
+    }
+
+    QCheckBox#questionSessionDoubt::indicator:checked {
+        background-color: #3b82f6;
+        border-color: #93c5fd;
+    }
+
+    QCheckBox#questionSessionDoubt::indicator:disabled {
+        background-color: #1f2937;
+        border-color: #475569;
+    }
+
+    QCheckBox#questionSessionAnalysisFlag {
+        background: transparent;
+        color: #94a3b8;
+        font-weight: 600;
+        spacing: 7px;
+        padding: 4px 8px;
+    }
+
+    QCheckBox#questionSessionAnalysisFlag:checked {
+        color: #fbbf24;
+        font-weight: 700;
+    }
+
+    QCheckBox#questionSessionAnalysisFlag::indicator {
+        background-color: #111827;
+        border: 2px solid #64748b;
+        border-radius: 4px;
+        width: 16px;
+        height: 16px;
+    }
+
+    QCheckBox#questionSessionAnalysisFlag::indicator:hover {
+        border-color: #f59e0b;
+    }
+
+    QCheckBox#questionSessionAnalysisFlag::indicator:checked {
+        background-color: #d97706;
+        border-color: #fbbf24;
+    }
+
+    QFrame#questionSessionActionPanel {
+        background: transparent;
+        border: none;
     }
 
     QFrame#questionSolverFeedback {

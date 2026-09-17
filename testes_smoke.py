@@ -4,6 +4,7 @@ Execute com: python testes_smoke.py
 """
 
 from pathlib import Path
+from contextlib import closing
 import sqlite3
 import tempfile
 import shutil
@@ -83,6 +84,88 @@ def main():
                 {"letra": "B", "texto": "Distrator", "correta": False},
             ],
             explicacao="Smoke",
+        )
+        questao_smoke = banco.obter_questao(
+            qid_smoke
+        )
+        assert_true(
+            not questao_smoke["analise_pendente"],
+            "questão nasce sem análise pendente"
+        )
+        assert_true(
+            banco.definir_questao_analise_pendente(
+                qid_smoke,
+                True
+            ),
+            "questão pode ser separada para análise"
+        )
+        questao_smoke = banco.obter_questao(
+            qid_smoke
+        )
+        assert_true(
+            questao_smoke["analise_pendente"]
+            and questao_smoke["analise_solicitada_em"],
+            "marcação de análise é persistida"
+        )
+        questoes_administrativas = banco.listar_questoes(
+            concurso_id,
+            incluir_inativas=True,
+            incluir_topicos_pausados=True,
+            incluir_disciplinas_pausadas=True
+        )
+        assert_true(
+            any(
+                item["id"] == qid_smoke
+                and item["analise_pendente"]
+                and item["analise_solicitada_em"]
+                for item in questoes_administrativas
+            ),
+            "Central recebe a fila de questões para análise"
+        )
+        assert_true(
+            banco.definir_questao_analise_pendente(
+                qid_smoke,
+                False
+            )
+            and not banco.obter_questao(
+                qid_smoke
+            )["analise_pendente"],
+            "marcação de análise pode ser removida"
+        )
+        with banco.conectar() as con:
+            topico_equivalente_id = int(
+                con.execute(
+                    """
+                    INSERT INTO topicos(disciplina_id, nome)
+                    VALUES (?, 'Título I: Da habilitação smoke')
+                    """,
+                    (
+                        disciplina_id,
+                    )
+                ).lastrowid
+            )
+            con.execute(
+                """
+                INSERT INTO topico_concurso_importancia
+                    (topico_id, concurso_id, importancia, incluido)
+                VALUES (?, ?, 3, 1)
+                """,
+                (
+                    topico_equivalente_id,
+                    concurso_id,
+                )
+            )
+        equivalentes = (
+            banco.listar_topicos_equivalentes_com_questoes(
+                concurso_id,
+                topico_equivalente_id
+            )
+        )
+        assert_true(
+            len(equivalentes) == 1
+            and equivalentes[0]["topico_id"] == topico_id
+            and equivalentes[0]["quantidade"] == 1,
+            "tópico equivalente localiza questões do mesmo conteúdo"
         )
         assert_true(any(q[0] == topico_id for q in banco.listar_topicos("CTB", concurso_id)), "tópico inicialmente ativo")
         assert_true(any(q["id"] == qid_smoke for q in banco.listar_questoes(concurso_id)), "questão inicialmente ativa")
@@ -263,9 +346,14 @@ def main():
             destino = projeto_smoke / nome_rel
             destino.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(origem, destino)
-        with sqlite3.connect(projeto_smoke / "estudos.db") as con:
+        with closing(
+            sqlite3.connect(
+                projeto_smoke / "estudos.db"
+            )
+        ) as con:
             con.execute("CREATE TABLE smoke_checkpoint(id INTEGER PRIMARY KEY, valor TEXT)")
             con.execute("INSERT INTO smoke_checkpoint(valor) VALUES ('ok')")
+            con.commit()
 
         localizar_original = checkpoint.localizar_pasta_projeto
         localizar_banco_original = checkpoint.localizar_banco_ativo
