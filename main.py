@@ -45,7 +45,8 @@ from PySide6.QtWidgets import (
     QCalendarWidget,
     QProgressBar,
     QRadioButton,
-    QButtonGroup
+    QButtonGroup,
+    QToolButton
 )
 
 from tema import (
@@ -14445,6 +14446,63 @@ class JanelaResolverQuestoes(QDialog):
         )
         self.radio_por_letra = {}
         self.frame_por_letra = {}
+        self.texto_por_letra = {}
+        self.botao_eliminar_por_letra = {}
+
+    def alternar_eliminacao_alternativa(
+        self,
+        letra,
+        eliminada
+    ):
+        texto = self.texto_por_letra.get(
+            letra
+        )
+        botao = self.botao_eliminar_por_letra.get(
+            letra
+        )
+
+        if (
+            texto is None
+            or botao is None
+            or self.resposta_confirmada
+        ):
+            return
+
+        eliminada = bool(
+            eliminada
+        )
+
+        texto.setProperty(
+            "eliminated",
+            eliminada
+        )
+        texto.style().unpolish(
+            texto
+        )
+        texto.style().polish(
+            texto
+        )
+
+        # A repolida aplica primeiro a cor do estado; o tachado precisa
+        # ser definido depois para não ser sobrescrito pelo stylesheet.
+        fonte = texto.font()
+        fonte.setStrikeOut(
+            eliminada
+        )
+        texto.setFont(
+            fonte
+        )
+
+        botao.setToolTip(
+            (
+                f"Restaurar alternativa {letra}"
+                if eliminada
+                else f"Eliminar alternativa {letra}"
+            )
+        )
+        botao.setAccessibleName(
+            botao.toolTip()
+        )
 
     def carregar_atual(self):
         if self.indice >= len(
@@ -14624,6 +14682,30 @@ class JanelaResolverQuestoes(QDialog):
                 8
             )
 
+            eliminar = QToolButton()
+            eliminar.setObjectName(
+                "questionSolverEliminateButton"
+            )
+            eliminar.setText(
+                "✂"
+            )
+            eliminar.setCheckable(
+                True
+            )
+            eliminar.setAutoRaise(
+                True
+            )
+            eliminar.setFixedSize(
+                24,
+                24
+            )
+            eliminar.setToolTip(
+                f"Eliminar alternativa {letra}"
+            )
+            eliminar.setAccessibleName(
+                eliminar.toolTip()
+            )
+
             radio = QRadioButton(
                 letra
             )
@@ -14654,6 +14736,11 @@ class JanelaResolverQuestoes(QDialog):
             )
 
             linha.addWidget(
+                eliminar,
+                0,
+                Qt.AlignTop
+            )
+            linha.addWidget(
                 radio,
                 0,
                 Qt.AlignTop
@@ -14672,6 +14759,20 @@ class JanelaResolverQuestoes(QDialog):
             self.frame_por_letra[
                 letra
             ] = frame
+            self.texto_por_letra[
+                letra
+            ] = texto
+            self.botao_eliminar_por_letra[
+                letra
+            ] = eliminar
+
+            eliminar.toggled.connect(
+                lambda eliminada, alternativa_letra=letra:
+                    self.alternar_eliminacao_alternativa(
+                        alternativa_letra,
+                        eliminada
+                    )
+            )
 
             self.alternativas_layout.addWidget(
                 frame
@@ -14863,6 +14964,11 @@ class JanelaResolverQuestoes(QDialog):
             "marcada": marcada,
             "gabarito": gabarito,
         })
+
+        for botao in self.botao_eliminar_por_letra.values():
+            botao.setEnabled(
+                False
+            )
 
         if (
             self.modo_simulado

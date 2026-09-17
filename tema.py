@@ -1404,6 +1404,33 @@ QPushButton#sectionEditButton:hover {
         font-size: 10pt;
     }
 
+    QLabel#questionSolverAlternativeText[eliminated="true"] {
+        color: #94a3b8;
+    }
+
+    QToolButton#questionSolverEliminateButton {
+        background: transparent;
+        color: #94a3b8;
+        border: none;
+        border-radius: 5px;
+        font-size: 11pt;
+        padding: 0;
+    }
+
+    QToolButton#questionSolverEliminateButton:hover {
+        background-color: #f1f5f9;
+        color: #475569;
+    }
+
+    QToolButton#questionSolverEliminateButton:checked {
+        background-color: #e2e8f0;
+        color: #334155;
+    }
+
+    QToolButton#questionSolverEliminateButton:disabled {
+        color: #cbd5e1;
+    }
+
     QCheckBox#questionSessionDoubt {
         color: #475569;
         font-weight: 700;
@@ -8149,6 +8176,33 @@ def stylesheet_escuro():
     QLabel#questionSolverAlternativeText {
         color: #e2e8f0;
         font-size: 10pt;
+    }
+
+    QLabel#questionSolverAlternativeText[eliminated="true"] {
+        color: #64748b;
+    }
+
+    QToolButton#questionSolverEliminateButton {
+        background: transparent;
+        color: #64748b;
+        border: none;
+        border-radius: 5px;
+        font-size: 11pt;
+        padding: 0;
+    }
+
+    QToolButton#questionSolverEliminateButton:hover {
+        background-color: #273449;
+        color: #cbd5e1;
+    }
+
+    QToolButton#questionSolverEliminateButton:checked {
+        background-color: #334155;
+        color: #e2e8f0;
+    }
+
+    QToolButton#questionSolverEliminateButton:disabled {
+        color: #475569;
     }
 
     QCheckBox#questionSessionDoubt {
