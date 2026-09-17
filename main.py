@@ -2542,191 +2542,42 @@ class GraficoSerieTemporal(QWidget):
                 )
 
 
-VPQ_1_0_PROMPT = """PROTOCOLO VIGHNA PDF — VPQ 1.0
-Protocolo oficial do VighnaStudy para preparação de questões em PDF.
-
-TAREFA
-Pegue as questões JÁ GERADAS, REVISADAS e APROVADAS nesta conversa e prepare a versão final destinada à importação no VighnaStudy.
-
-REGRA CENTRAL
-Esta etapa é de FORMATAÇÃO E EMPACOTAMENTO, não de nova elaboração.
-
-Não crie novas questões.
-Não substitua questões aprovadas por outras.
-Não altere o mérito jurídico, técnico ou conceitual.
-Não mude deliberadamente enunciados, alternativas, gabaritos ou explicações já aprovados.
-Corrija apenas erros puramente materiais de formatação que impeçam a montagem do documento, sem alterar o conteúdo.
-
-OBJETIVO DO ARQUIVO
-Gerar um PDF digital, com texto selecionável e estrutura extremamente previsível para que o importador do VighnaStudy consiga identificar:
-- disciplina;
-- tópico;
-- fonte;
-- quantidade de questões;
-- enunciado;
-- alternativas;
-- gabarito;
-- explicação.
-
-UNIDADE DO DOCUMENTO
-Preferencialmente, cada PDF deve conter questões de UM ÚNICO TÓPICO.
-
-Se as questões aprovadas nesta conversa pertencerem a tópicos diferentes, não misture silenciosamente.
-Separe em PDFs distintos por tópico quando isso for necessário para manter a classificação inequívoca.
-
-CABEÇALHO OBRIGATÓRIO
-O documento deve começar exatamente com esta estrutura textual:
-
-VIGHNA PDF — VPQ 1.0
-DISCIPLINA: [disciplina]
-TÓPICO: [tópico]
-FONTE: [fonte]
-QUANTIDADE: [número total de questões]
-ALTERNATIVAS: [quantidade predominante ou intervalo, por exemplo 4 ou 4–5]
-
-Se algum metadado não puder ser determinado com segurança a partir da conversa, use:
-NÃO INFORMADO
-
-Não invente banca, ano, legislação, fonte ou tópico.
-
-ESTRUTURA OBRIGATÓRIA DE CADA QUESTÃO
+VPQ_1_1_PROMPT = """VIGHNA PDF — VPQ 1.1
+DISCIPLINA: Direito Penal
+TÍTULO: Título I: Dos crimes contra a pessoa
+CAPÍTULO: Capítulo I: Dos crimes contra a vida
+FONTE: Simulado próprio — setembro/2026
+QUANTIDADE: 2
+ALTERNATIVAS: A-E
 
 QUESTÃO 1
+Enunciado completo da questão 1.
 
-[enunciado completo]
-
-A) [alternativa A]
-B) [alternativa B]
-C) [alternativa C]
-D) [alternativa D]
-E) [alternativa E, quando existir]
-
-GABARITO: C
-
-EXPLICAÇÃO:
-[explicação aprovada da questão]
-
-Depois:
+A) Texto da alternativa A
+B) Texto da alternativa B
+C) Texto da alternativa C
+D) Texto da alternativa D
+GABARITO: B
+EXPLICAÇÃO: Comentário opcional da questão.
 
 QUESTÃO 2
+Enunciado completo da questão 2.
 
-[enunciado completo]
-
-A) ...
-B) ...
-C) ...
-D) ...
-
+A) Texto da alternativa A
+B) Texto da alternativa B
+C) Texto da alternativa C
+D) Texto da alternativa D
 GABARITO: A
 
-EXPLICAÇÃO:
-[...]
-
-E assim sucessivamente, sem saltos na numeração.
-
-ALTERNATIVAS
-Use exclusivamente letras A, B, C, D e E.
-Preserve a quantidade de alternativas da questão aprovada.
-Não acrescente uma alternativa E a uma questão originalmente aprovada com A–D.
-Não remova alternativas existentes.
-
-GABARITO INDIVIDUAL
-Cada questão deve possuir exatamente uma linha:
-
-GABARITO: X
-
-em que X é A, B, C, D ou E.
-
-O gabarito individual deve corresponder exatamente à alternativa correta aprovada.
-
-EXPLICAÇÃO
-Depois do gabarito, use sempre o marcador:
-
-EXPLICAÇÃO:
-
-Se a questão aprovada possui explicação, preserve-a.
-Se não houver explicação disponível, escreva:
-
-EXPLICAÇÃO:
-Não fornecida.
-
-Não invente uma nova justificativa apenas para preencher o campo.
-
-GABARITO GERAL
-Após a última questão, inclua uma nova seção:
-
-GABARITO GERAL
-
-1-C
-2-A
-3-D
-4-B
-
-e assim por diante até a última questão.
-
-Use exatamente o formato:
-número-hífen-letra
-
-O gabarito geral deve ser uma reprodução fiel dos gabaritos individuais.
-
-REGRAS DE FORMATAÇÃO PARA EXTRAÇÃO
-1. O PDF deve ter texto real e selecionável, nunca páginas transformadas em imagem.
-2. Use uma única coluna.
-3. Não use tabelas para apresentar questões ou gabaritos.
-4. Não use caixas de texto flutuantes.
-5. Não use duas colunas.
-6. Não use elementos decorativos entre enunciado e alternativas.
-7. Não substitua A), B), C), D), E) por marcadores gráficos.
-8. Não coloque o gabarito na mesma linha de uma alternativa.
-9. Não use markdown visível como **, ### ou cercas de código no conteúdo do PDF.
-10. Evite inserir numeração no início de parágrafos das explicações que possa ser confundida com uma nova questão.
-11. Quando precisar enumerar itens dentro de uma explicação, prefira marcadores como “a)”, “b)” ou travessões.
-12. Evite quebrar uma questão entre páginas quando isso puder ser feito sem deformar o documento.
-13. Cabeçalhos e rodapés não devem usar padrões como “1.”, “2.” ou “QUESTÃO 1”.
-14. Se houver paginação, use “Página 1”, “Página 2” etc.
-15. Mantenha espaços e quebras de linha simples e previsíveis.
-
-INTEGRIDADE DO CONTEÚDO
-Não resuma enunciados.
-Não encurte alternativas.
-Não reorganize alternativas.
-Não troque a letra correta.
-Não “melhore” o mérito da questão nesta etapa.
-Não reescreva distratores.
-Não acrescente comentários editoriais dentro do documento.
-
-Se detectar uma inconsistência real entre uma questão aprovada e seu gabarito, não corrija silenciosamente.
-Antes de gerar o PDF final, informe a inconsistência ao usuário para confirmação.
-
-VALIDAÇÃO OBRIGATÓRIA ANTES DO PDF
-Antes de finalizar, confira:
-- quantidade total de questões;
-- sequência numérica sem lacunas ou duplicações;
-- ao menos duas alternativas em cada questão;
-- no máximo cinco alternativas A–E;
-- exatamente um gabarito por questão;
-- gabarito aponta para alternativa existente;
-- correspondência entre gabarito individual e gabarito geral;
-- presença do marcador EXPLICAÇÃO em todas as questões;
-- disciplina e tópico coerentes com o conjunto;
-- ausência de questões não aprovadas;
-- ausência de duplicação acidental;
-- texto do PDF permanece selecionável.
-
-NOME DO ARQUIVO
-Use, sempre que possível:
-
-Vighna_[Disciplina]_[Topico]_[Quantidade]Q_VPQ1.pdf
-
-Remova caracteres incompatíveis com nomes de arquivo e mantenha o nome legível.
-
-SAÍDA FINAL
-Depois da validação, gere o PDF VPQ 1.0 como arquivo final para o usuário.
-
-Não responda apenas com o texto formatado se for possível gerar o arquivo.
-Entregue o PDF final pronto para ser importado no VighnaStudy.
+REGRAS DO PROTOCOLO
+1. Use exatamente a primeira linha: VIGHNA PDF — VPQ 1.1.
+2. DISCIPLINA é recomendada para a identificação precisa.
+3. Preencha TÍTULO, CAPÍTULO ou ambos. Pelo menos um deles é suficiente.
+4. Quando ambos forem usados, o capítulo deve pertencer ao título informado.
+5. Use os nomes cadastrados no perfil ativo; maiúsculas, acentos e os
+   separadores ":", "-" e "–" são aceitos como equivalentes.
+6. GABARITO deve apontar para uma alternativa existente em cada questão.
 """
-
 
 
 class JanelaPromptsIA(QDialog):
@@ -2742,6 +2593,8 @@ class JanelaPromptsIA(QDialog):
         self.prompts = []
         self.prompts_filtrados = []
         self.carregando_editor = False
+        self.prompt_editor_sujo = False
+        self._fechando_biblioteca_prompts = False
 
         self.setWindowTitle(
             "Prompts IA"
@@ -3216,6 +3069,35 @@ class JanelaPromptsIA(QDialog):
             False
         )
 
+        # O editor passa a proteger alterações em tempo real. Antes desta
+        # versão, trocar de prompt, filtrar a lista ou fechar a janela podia
+        # recarregar o conteúdo do banco antes que o usuário clicasse em
+        # "Salvar prompt", descartando silenciosamente as edições.
+        self.prompt_autosave_timer = QTimer(self)
+        self.prompt_autosave_timer.setSingleShot(True)
+        self.prompt_autosave_timer.setInterval(850)
+        self.prompt_autosave_timer.timeout.connect(
+            self.salvar_prompt_automaticamente
+        )
+
+        self.prompt_nome.textEdited.connect(
+            self.marcar_prompt_alterado
+        )
+        self.prompt_categoria.textEdited.connect(
+            self.marcar_prompt_alterado
+        )
+        self.prompt_texto.textChanged.connect(
+            self.marcar_prompt_alterado
+        )
+
+        self.prompt_atalho_salvar = QShortcut(
+            QKeySequence.Save,
+            self
+        )
+        self.prompt_atalho_salvar.activated.connect(
+            self.salvar_prompt
+        )
+
         rodape = QHBoxLayout()
         rodape.setSpacing(
             7
@@ -3334,7 +3216,7 @@ class JanelaPromptsIA(QDialog):
         )
 
         vpq_titulo = QLabel(
-            "VPQ 1.0 — Preparar questões para importação"
+            "VPQ 1.1 — Preparar questões para importação"
         )
         vpq_titulo.setObjectName(
             "promptProtocolTitle"
@@ -3342,8 +3224,8 @@ class JanelaPromptsIA(QDialog):
 
         vpq_desc = QLabel(
             (
-                "Converte as questões já aprovadas no chat em um PDF "
-                "digital padronizado para o importador do VighnaStudy."
+                "Modelo oficial de estrutura VPQ 1.1 para organizar questões "
+                "de forma previsível para o importador do VighnaStudy."
             )
         )
         vpq_desc.setObjectName(
@@ -3379,10 +3261,10 @@ class JanelaPromptsIA(QDialog):
 
         vpq_uso = QLabel(
             (
-                "Uso recomendado: após gerar e auditar as questões aqui "
-                "no ChatGPT, copie este protocolo e envie-o na mesma "
-                "conversa. A IA deverá apenas empacotar o material "
-                "aprovado no padrão VPQ."
+                "Uso recomendado: copie este protocolo quando quiser preparar "
+                "questões no padrão oficial do VighnaStudy. O conteúdo "
+                "pode ser copiado diretamente para a importação por texto "
+                "ou usado na preparação de um arquivo compatível."
             )
         )
         vpq_uso.setObjectName(
@@ -3403,7 +3285,7 @@ class JanelaPromptsIA(QDialog):
             False
         )
         self.vpq_texto.setPlainText(
-            VPQ_1_0_PROMPT
+            VPQ_1_1_PROMPT
         )
 
         vpq_botoes = QHBoxLayout()
@@ -3438,7 +3320,7 @@ class JanelaPromptsIA(QDialog):
         )
 
         self.vpq_status = QLabel(
-            "Versão instalada: VPQ 1.0"
+            "Versão instalada: VPQ 1.1"
         )
         self.vpq_status.setObjectName(
             "promptProtocolStatus"
@@ -3485,9 +3367,6 @@ class JanelaPromptsIA(QDialog):
         fechar.rejected.connect(
             self.reject
         )
-        fechar.clicked.connect(
-            self.accept
-        )
 
         layout.addWidget(
             fechar
@@ -3497,18 +3376,18 @@ class JanelaPromptsIA(QDialog):
 
     def copiar_protocolo_vpq(self):
         QApplication.clipboard().setText(
-            VPQ_1_0_PROMPT
+            VPQ_1_1_PROMPT
         )
 
         self.vpq_status.setText(
-            "VPQ 1.0 copiado para a área de transferência"
+            "VPQ 1.1 copiado para a área de transferência"
         )
 
     def duplicar_protocolo_vpq(self):
         try:
             novo_id = criar_prompt_ia(
-                "VPQ 1.0 — cópia personalizada",
-                VPQ_1_0_PROMPT,
+                "VPQ 1.1 — cópia personalizada",
+                VPQ_1_1_PROMPT,
                 "Protocolo Vighna"
             )
         except Exception as erro:
@@ -3571,6 +3450,173 @@ class JanelaPromptsIA(QDialog):
         return " ".join(
             texto.split()
         )
+
+    def marcar_prompt_alterado(self, *_):
+        """Marca o editor como alterado e agenda persistência segura.
+
+        Prompts já existentes são salvos automaticamente após uma pequena
+        pausa na digitação. Prompts novos continuam exigindo uma confirmação
+        explícita no primeiro salvamento para evitar registros acidentais.
+        """
+        if self.carregando_editor:
+            return
+
+        self.prompt_editor_sujo = True
+
+        if self.prompt_id_atual is None:
+            self.prompt_status.setText(
+                "Novo prompt • alterações ainda não salvas"
+            )
+            return
+
+        self.prompt_status.setText(
+            "Alterações pendentes…"
+        )
+        self.prompt_autosave_timer.start()
+
+    def _dados_editor_prompt(self):
+        return (
+            self.prompt_nome.text().strip(),
+            self.prompt_categoria.text().strip(),
+            self.prompt_texto.toPlainText().strip(),
+        )
+
+    def _atualizar_cache_prompt_atual(self, nome, categoria, texto):
+        """Mantém lista e linha visível coerentes sem recarregar o editor."""
+        if self.prompt_id_atual is None:
+            return
+
+        for item in self.prompts:
+            if item.get("id") == self.prompt_id_atual:
+                item["nome"] = nome
+                item["categoria"] = categoria
+                item["texto"] = texto
+                break
+
+        linha = self.prompt_tabela.currentRow()
+        if linha >= 0:
+            item_nome = self.prompt_tabela.item(linha, 0)
+            if (
+                item_nome is not None
+                and item_nome.data(Qt.UserRole) == self.prompt_id_atual
+            ):
+                item_nome.setText(nome)
+                item_categoria = self.prompt_tabela.item(linha, 1)
+                if item_categoria is not None:
+                    item_categoria.setText(categoria or "—")
+
+        self.prompt_editor_titulo.setText(nome)
+
+    def _salvar_prompt_existente_pendente(self, mostrar_erro=False):
+        """Persiste o prompt atual sem reconstruir a lista nem mover o cursor."""
+        if not self.prompt_editor_sujo:
+            return True
+
+        if self.prompt_id_atual is None:
+            return False
+
+        nome, categoria, texto = self._dados_editor_prompt()
+
+        if not nome or not texto:
+            if mostrar_erro:
+                QMessageBox.warning(
+                    self,
+                    "Alterações não salvas",
+                    (
+                        "O prompt possui alterações pendentes, mas não pode "
+                        "ser salvo porque o nome ou o texto está vazio."
+                    )
+                )
+            self.prompt_status.setText(
+                "Alterações pendentes • nome e texto são obrigatórios"
+            )
+            return False
+
+        try:
+            atualizado = atualizar_prompt_ia(
+                self.prompt_id_atual,
+                nome,
+                texto,
+                categoria
+            )
+            if not atualizado:
+                raise RuntimeError(
+                    "O registro do prompt não foi localizado no banco."
+                )
+        except Exception as erro:
+            self.prompt_status.setText(
+                "Falha ao salvar alterações"
+            )
+            if mostrar_erro:
+                QMessageBox.critical(
+                    self,
+                    "Salvar prompt",
+                    (
+                        "Não foi possível salvar as alterações do prompt.\n\n"
+                        f"{erro}"
+                    )
+                )
+            return False
+
+        self.prompt_editor_sujo = False
+        self.prompt_autosave_timer.stop()
+        self._atualizar_cache_prompt_atual(
+            nome,
+            categoria,
+            texto
+        )
+        self.prompt_status.setText(
+            "Salvo automaticamente"
+        )
+        return True
+
+    def salvar_prompt_automaticamente(self):
+        if self.carregando_editor or self._fechando_biblioteca_prompts:
+            return
+        self._salvar_prompt_existente_pendente(
+            mostrar_erro=False
+        )
+
+    def _selecionar_prompt_por_id(self, prompt_id):
+        if prompt_id is None:
+            return
+        for linha in range(self.prompt_tabela.rowCount()):
+            item = self.prompt_tabela.item(linha, 0)
+            if item is not None and item.data(Qt.UserRole) == prompt_id:
+                self.prompt_tabela.blockSignals(True)
+                self.prompt_tabela.selectRow(linha)
+                self.prompt_tabela.blockSignals(False)
+                return
+
+    def _confirmar_descartar_prompt_novo(self):
+        """Protege texto de um novo prompt ainda não salvo."""
+        if self.prompt_id_atual is not None or not self.prompt_editor_sujo:
+            return True
+
+        nome, categoria, texto = self._dados_editor_prompt()
+        if not nome and not categoria and not texto:
+            self.prompt_editor_sujo = False
+            return True
+
+        resposta = QMessageBox.question(
+            self,
+            "Prompt ainda não salvo",
+            (
+                "Há conteúdo de um novo prompt que ainda não foi salvo.\n\n"
+                "Deseja salvá-lo antes de continuar?"
+            ),
+            QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
+            QMessageBox.Yes
+        )
+
+        if resposta == QMessageBox.Cancel:
+            return False
+        if resposta == QMessageBox.No:
+            self.prompt_editor_sujo = False
+            return True
+
+        self.salvar_prompt()
+        return not self.prompt_editor_sujo and self.prompt_id_atual is not None
 
     def carregar_prompts(
         self,
@@ -3834,6 +3880,26 @@ class JanelaPromptsIA(QDialog):
         if prompt_id is None:
             return
 
+        # Trocar de linha era o principal caminho de perda silenciosa: a
+        # seleção nova recarregava o editor antes de persistir o prompt antigo.
+        if (
+            self.prompt_id_atual is not None
+            and self.prompt_editor_sujo
+        ):
+            prompt_anterior = self.prompt_id_atual
+            if not self._salvar_prompt_existente_pendente(
+                mostrar_erro=True
+            ):
+                self._selecionar_prompt_por_id(prompt_anterior)
+                return
+
+        elif (
+            self.prompt_id_atual is None
+            and self.prompt_editor_sujo
+        ):
+            if not self._confirmar_descartar_prompt_novo():
+                return
+
         prompt = obter_prompt_ia(
             prompt_id
         )
@@ -3894,6 +3960,8 @@ class JanelaPromptsIA(QDialog):
             )
         )
 
+        self.prompt_editor_sujo = False
+        self.prompt_autosave_timer.stop()
         self.carregando_editor = False
 
     def novo_prompt(
@@ -3901,8 +3969,22 @@ class JanelaPromptsIA(QDialog):
         *_,
         limpar_selecao=True
     ):
+        if self.prompt_id_atual is not None and self.prompt_editor_sujo:
+            if not self._salvar_prompt_existente_pendente(
+                mostrar_erro=True
+            ):
+                return
+        elif self.prompt_id_atual is None and self.prompt_editor_sujo:
+            if not self._confirmar_descartar_prompt_novo():
+                return
+
+        self.carregando_editor = True
+        self.prompt_autosave_timer.stop()
+
         if limpar_selecao:
+            self.prompt_tabela.blockSignals(True)
             self.prompt_tabela.clearSelection()
+            self.prompt_tabela.blockSignals(False)
 
         self.prompt_id_atual = None
         self.prompt_nome.clear()
@@ -3914,23 +3996,13 @@ class JanelaPromptsIA(QDialog):
         self.prompt_status.setText(
             "Ainda não salvo"
         )
+        self.prompt_editor_sujo = False
+        self.carregando_editor = False
         self.prompt_nome.setFocus()
 
-    def salvar_prompt(
-        self
-    ):
-        nome = (
-            self.prompt_nome.text()
-            .strip()
-        )
-        categoria = (
-            self.prompt_categoria.text()
-            .strip()
-        )
-        texto = (
-            self.prompt_texto.toPlainText()
-            .strip()
-        )
+    def salvar_prompt(self):
+        self.prompt_autosave_timer.stop()
+        nome, categoria, texto = self._dados_editor_prompt()
 
         if not nome:
             QMessageBox.warning(
@@ -3958,17 +4030,20 @@ class JanelaPromptsIA(QDialog):
                     categoria
                 )
             else:
-                atualizar_prompt_ia(
+                atualizado = atualizar_prompt_ia(
                     self.prompt_id_atual,
                     nome,
                     texto,
                     categoria
                 )
-                prompt_id = (
-                    self.prompt_id_atual
-                )
+                if not atualizado:
+                    raise RuntimeError(
+                        "O registro do prompt não foi localizado no banco."
+                    )
+                prompt_id = self.prompt_id_atual
 
         except Exception as erro:
+            self.prompt_editor_sujo = True
             QMessageBox.critical(
                 self,
                 "Salvar prompt",
@@ -3979,14 +4054,11 @@ class JanelaPromptsIA(QDialog):
             )
             return
 
-        self.prompt_id_atual = (
-            prompt_id
-        )
-
+        self.prompt_id_atual = prompt_id
+        self.prompt_editor_sujo = False
         self.carregar_prompts(
             selecionar_id=prompt_id
         )
-
         self.prompt_status.setText(
             "Salvo"
         )
@@ -4018,6 +4090,15 @@ class JanelaPromptsIA(QDialog):
     def duplicar_prompt(
         self
     ):
+        if (
+            self.prompt_id_atual is not None
+            and self.prompt_editor_sujo
+            and not self._salvar_prompt_existente_pendente(
+                mostrar_erro=True
+            )
+        ):
+            return
+
         prompt_id = (
             self.prompt_selecionado_id()
         )
@@ -4051,6 +4132,15 @@ class JanelaPromptsIA(QDialog):
     def excluir_prompt(
         self
     ):
+        if (
+            self.prompt_id_atual is not None
+            and self.prompt_editor_sujo
+            and not self._salvar_prompt_existente_pendente(
+                mostrar_erro=True
+            )
+        ):
+            return
+
         prompt_id = (
             self.prompt_selecionado_id()
         )
@@ -4115,6 +4205,36 @@ class JanelaPromptsIA(QDialog):
             )
 
 
+    def done(self, resultado):
+        """Garante persistência ao fechar a Biblioteca de Prompts."""
+        if self._fechando_biblioteca_prompts:
+            super().done(resultado)
+            return
+
+        self._fechando_biblioteca_prompts = True
+        self.prompt_autosave_timer.stop()
+
+        try:
+            if self.prompt_id_atual is not None and self.prompt_editor_sujo:
+                if not self._salvar_prompt_existente_pendente(
+                    mostrar_erro=True
+                ):
+                    self._fechando_biblioteca_prompts = False
+                    return
+            elif self.prompt_id_atual is None and self.prompt_editor_sujo:
+                if not self._confirmar_descartar_prompt_novo():
+                    self._fechando_biblioteca_prompts = False
+                    return
+        finally:
+            # Se o fechamento for cancelado por validação, o editor volta a
+            # aceitar autosave normalmente.
+            if self.isVisible():
+                self._fechando_biblioteca_prompts = False
+
+        super().done(resultado)
+
+
+
 class JanelaTextoExtraidoPDF(QDialog):
 
     def __init__(
@@ -4126,8 +4246,9 @@ class JanelaTextoExtraidoPDF(QDialog):
             parent
         )
 
+        eh_texto_colado = str(origem_tipo or "pdf").strip().lower() == "texto"
         self.setWindowTitle(
-            "Texto extraído do PDF"
+            "Texto colado" if eh_texto_colado else "Texto extraído do PDF"
         )
         self.resize(
             900,
@@ -4146,9 +4267,13 @@ class JanelaTextoExtraidoPDF(QDialog):
 
         aviso = QLabel(
             (
-                "Esta é a camada de texto que o VighnaStudy conseguiu "
-                "ler do PDF. Use esta visualização para conferir PDFs "
-                "com formatação incomum."
+                "Este é o texto que será interpretado pelo VighnaStudy. Use esta visualização para conferir a formatação antes da importação."
+                if eh_texto_colado
+                else (
+                    "Esta é a camada de texto que o VighnaStudy conseguiu "
+                    "ler do PDF. Use esta visualização para conferir PDFs "
+                    "com formatação incomum."
+                )
             )
         )
         aviso.setObjectName(
@@ -4196,13 +4321,232 @@ class JanelaTextoExtraidoPDF(QDialog):
         )
 
 
+class JanelaImportarTextoQuestoes(QDialog):
+    """Recebe questões coladas e encaminha a análise ao importador comum."""
+
+    EXEMPLO_FORMATO = VPQ_1_1_PROMPT
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Importar questões por texto")
+        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
+        self.resize(980, 720)
+        self.setMinimumSize(760, 560)
+        self.importadas = 0
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(18, 15, 18, 15)
+        layout.setSpacing(10)
+
+        cabecalho = QHBoxLayout()
+        titulos = QVBoxLayout()
+        titulos.setSpacing(1)
+
+        titulo = QLabel("Importar texto colado")
+        titulo.setObjectName("pageTitle")
+        subtitulo = QLabel(
+            "Cole as questões abaixo. O Vighna analisa a estrutura antes de qualquer alteração no banco."
+        )
+        subtitulo.setObjectName("pageSubtitle")
+        subtitulo.setWordWrap(True)
+        titulos.addWidget(titulo)
+        titulos.addWidget(subtitulo)
+        cabecalho.addLayout(titulos, 1)
+
+        formato = QPushButton("Ver formato recomendado")
+        formato.setObjectName("subtleButton")
+        formato.setFixedHeight(34)
+        formato.clicked.connect(self.mostrar_formato_recomendado)
+        cabecalho.addWidget(formato, 0, Qt.AlignTop)
+        layout.addLayout(cabecalho)
+
+        aviso = QFrame()
+        aviso.setObjectName("pdfImportSummary")
+        aviso_layout = QHBoxLayout(aviso)
+        aviso_layout.setContentsMargins(11, 8, 11, 8)
+        aviso_layout.setSpacing(10)
+
+        self.status_formato = QLabel("Formato: aguardando texto")
+        self.status_formato.setObjectName("pdfImportMeta")
+        self.status_contagem = QLabel("0 caracteres")
+        self.status_contagem.setObjectName("pdfImportMeta")
+        aviso_layout.addWidget(self.status_formato)
+        aviso_layout.addStretch(1)
+        aviso_layout.addWidget(self.status_contagem)
+        layout.addWidget(aviso)
+
+        self.editor = QTextEdit()
+        self.editor.setObjectName("textQuestionImportEditor")
+        self.editor.setAcceptRichText(False)
+        self.editor.setPlaceholderText(
+            "Cole aqui as questões.\n\n"
+            "Exemplo mínimo:\n"
+            "QUESTÃO 1\nEnunciado...\nA) ...\nB) ...\nC) ...\nD) ...\n"
+            "GABARITO: B\nEXPLICAÇÃO: ..."
+        )
+        self.editor.textChanged.connect(self.atualizar_resumo)
+        layout.addWidget(self.editor, 1)
+
+        dica = QLabel(
+            "O formato VPQ é o mais confiável, mas o Vighna também tenta reconhecer textos numerados "
+            "com alternativas A–E, gabarito e explicação. Nenhuma questão é gravada antes da tela de conferência."
+        )
+        dica.setObjectName("pdfImportHint")
+        dica.setWordWrap(True)
+        layout.addWidget(dica)
+
+        rodape = QHBoxLayout()
+        colar = QPushButton("Colar da área de transferência")
+        colar.setObjectName("subtleButton")
+        colar.clicked.connect(self.colar_area_transferencia)
+        rodape.addWidget(colar)
+
+        limpar = QPushButton("Limpar")
+        limpar.setObjectName("subtleButton")
+        limpar.clicked.connect(self.editor.clear)
+        rodape.addWidget(limpar)
+        rodape.addStretch(1)
+
+        cancelar = QPushButton("Cancelar")
+        cancelar.setObjectName("subtleButton")
+        cancelar.clicked.connect(self.reject)
+        rodape.addWidget(cancelar)
+
+        analisar = QPushButton("Analisar texto →")
+        analisar.setObjectName("primaryButton")
+        analisar.setMinimumSize(160, 38)
+        analisar.setDefault(True)
+        analisar.clicked.connect(self.analisar_texto)
+        rodape.addWidget(analisar)
+        layout.addLayout(rodape)
+
+    def colar_area_transferencia(self):
+        texto = QApplication.clipboard().text()
+        if not str(texto or "").strip():
+            QMessageBox.information(
+                self,
+                "Área de transferência vazia",
+                "Não há texto disponível na área de transferência."
+            )
+            return
+        self.editor.setPlainText(str(texto))
+        self.editor.setFocus()
+
+    def atualizar_resumo(self):
+        texto = self.editor.toPlainText()
+        caracteres = len(texto.strip())
+        self.status_contagem.setText(f"{caracteres:,} caracteres".replace(",", "."))
+        if not texto.strip():
+            self.status_formato.setText("Formato: aguardando texto")
+        elif detectar_vpq_1_0(texto):
+            self.status_formato.setText("Formato detectado: VPQ 1.1")
+        else:
+            self.status_formato.setText("Formato detectado: texto estruturado")
+
+    def mostrar_formato_recomendado(self):
+        janela = QDialog(self)
+        janela.setWindowTitle("Formato recomendado para texto colado")
+        janela.resize(760, 590)
+        layout = QVBoxLayout(janela)
+        layout.setContentsMargins(14, 12, 14, 12)
+        layout.setSpacing(8)
+
+        aviso = QLabel(
+            "Este é o formato mais previsível para importação. Você pode copiar o exemplo, adaptar e colar na janela anterior."
+        )
+        aviso.setObjectName("pdfImportHint")
+        aviso.setWordWrap(True)
+        layout.addWidget(aviso)
+
+        exemplo = QTextEdit()
+        exemplo.setReadOnly(True)
+        exemplo.setPlainText(self.EXEMPLO_FORMATO)
+        exemplo.setObjectName("pdfExtractedText")
+        layout.addWidget(exemplo, 1)
+
+        botoes = QHBoxLayout()
+        copiar = QPushButton("Copiar exemplo")
+        copiar.setObjectName("subtleButton")
+        copiar.clicked.connect(
+            lambda: QApplication.clipboard().setText(self.EXEMPLO_FORMATO)
+        )
+        fechar = QPushButton("Fechar")
+        fechar.setObjectName("primaryButton")
+        fechar.clicked.connect(janela.accept)
+        botoes.addWidget(copiar)
+        botoes.addStretch(1)
+        botoes.addWidget(fechar)
+        layout.addLayout(botoes)
+        janela.exec()
+
+    def analisar_texto(self):
+        texto = self.editor.toPlainText().strip()
+        if len(texto) < 30:
+            QMessageBox.information(
+                self,
+                "Importar texto",
+                "Cole um conjunto de questões antes de iniciar a análise."
+            )
+            return
+
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        try:
+            analise = analisar_texto_questoes_pdf(texto, [])
+        except Exception as erro:
+            QApplication.restoreOverrideCursor()
+            QMessageBox.critical(
+                self,
+                "Importar texto",
+                f"Não foi possível analisar o texto colado.\n\n{erro}"
+            )
+            return
+        QApplication.restoreOverrideCursor()
+
+        if analise.get("quantidade", 0) <= 0:
+            QMessageBox.information(
+                self,
+                "Nenhuma questão detectada",
+                (
+                    "O Vighna não reconheceu questões completas no texto colado.\n\n"
+                    "Use numeração como 'QUESTÃO 1' ou '1.' e alternativas A), B), C), D) e E), "
+                    "quando houver. Para maior confiabilidade, use o formato recomendado."
+                )
+            )
+            return
+
+        dados_texto = {
+            "caminho": "",
+            "arquivo": "Texto colado",
+            "total_paginas": 1,
+            "pagina_inicial": 1,
+            "pagina_final": 1,
+            "texto": texto,
+            "faixas_paginas": [],
+            "caracteres": len(texto),
+        }
+
+        revisao = JanelaImportarPDFQuestoes(
+            "texto_colado.txt",
+            dados_texto,
+            analise,
+            self,
+            origem_tipo="texto",
+            nome_origem="Texto colado",
+        )
+        if revisao.exec() == QDialog.Accepted and revisao.importadas > 0:
+            self.importadas = revisao.importadas
+            self.accept()
+
+
 class JanelaImportarPDFQuestoes(QDialog):
     def __init__(
         self,
         caminho_pdf,
         dados_pdf,
         analise,
-        parent=None
+        parent=None,
+        origem_tipo="pdf",
+        nome_origem=None,
     ):
         super().__init__(
             parent
@@ -4219,6 +4563,14 @@ class JanelaImportarPDFQuestoes(QDialog):
             caminho_pdf
         )
         self.dados_pdf = dados_pdf
+        self.origem_tipo = str(origem_tipo or "pdf").strip().lower()
+        self.eh_texto_colado = self.origem_tipo == "texto"
+        self.nome_origem = (
+            str(nome_origem or "").strip()
+            or ("Texto colado" if self.eh_texto_colado else self.caminho_pdf.name)
+        )
+        self.titulo_operacao = "Importar texto" if self.eh_texto_colado else "Importar PDF"
+        self.rotulo_origem = "texto colado" if self.eh_texto_colado else "PDF"
         self.analise = analise
         self.questoes = list(
             analise[
@@ -4316,9 +4668,13 @@ class JanelaImportarPDFQuestoes(QDialog):
 
         self.setWindowTitle(
             (
-                "Importar VPQ 1.0"
+                "Importar VPQ 1.1"
                 if self.vpq_detectado
-                else "Importar questões de PDF"
+                else (
+                    "Importar questões por texto"
+                    if self.eh_texto_colado
+                    else "Importar questões de PDF"
+                )
             )
         )
         self.resize(
@@ -4356,9 +4712,13 @@ class JanelaImportarPDFQuestoes(QDialog):
 
         titulo = QLabel(
             (
-                "Importação estruturada VPQ 1.0"
+                "Importação estruturada VPQ 1.1"
                 if self.vpq_detectado
-                else "Importação por PDF"
+                else (
+                    "Importação por texto colado"
+                    if self.eh_texto_colado
+                    else "Importação por PDF"
+                )
             )
         )
         titulo.setObjectName(
@@ -4368,13 +4728,18 @@ class JanelaImportarPDFQuestoes(QDialog):
         subtitulo = QLabel(
             (
                 (
-                    "O VighnaStudy reconheceu o protocolo VPQ 1.0. "
+                    "O VighnaStudy reconheceu o protocolo VPQ 1.1. "
                     "Confira a auditoria estrutural e o vínculo com o tópico."
                 )
                 if self.vpq_detectado
                 else (
-                    "Confira o gabarito e o tópico sugerido antes de "
-                    "adicionar as questões ao banco."
+                    (
+                        "O texto foi analisado. Confira gabaritos e vínculos antes de adicionar as questões ao banco."
+                    )
+                    if self.eh_texto_colado
+                    else (
+                        "Confira o gabarito e o tópico sugerido antes de adicionar as questões ao banco."
+                    )
                 )
             )
         )
@@ -4393,7 +4758,7 @@ class JanelaImportarPDFQuestoes(QDialog):
         )
 
         ver_texto = QPushButton(
-            "Ver texto extraído"
+            "Ver texto colado" if self.eh_texto_colado else "Ver texto extraído"
         )
         ver_texto.setObjectName(
             "subtleButton"
@@ -4439,7 +4804,7 @@ class JanelaImportarPDFQuestoes(QDialog):
         )
 
         arquivo = QLabel(
-            self.caminho_pdf.name
+            self.nome_origem
         )
         arquivo.setObjectName(
             "pdfImportFile"
@@ -4447,10 +4812,14 @@ class JanelaImportarPDFQuestoes(QDialog):
 
         paginas = QLabel(
             (
-                f"Páginas lidas: "
-                f"{dados_pdf['pagina_inicial']}–"
-                f"{dados_pdf['pagina_final']} "
-                f"de {dados_pdf['total_paginas']}"
+                f"Caracteres: {dados_pdf.get('caracteres', 0):,}".replace(",", ".")
+                if self.eh_texto_colado
+                else (
+                    f"Páginas lidas: "
+                    f"{dados_pdf['pagina_inicial']}–"
+                    f"{dados_pdf['pagina_final']} "
+                    f"de {dados_pdf['total_paginas']}"
+                )
             )
         )
         paginas.setObjectName(
@@ -4526,7 +4895,7 @@ class JanelaImportarPDFQuestoes(QDialog):
             vpq_linha = QHBoxLayout()
 
             vpq_badge = QLabel(
-                "VPQ 1.0 RECONHECIDO"
+                "VPQ 1.1 RECONHECIDO"
             )
             vpq_badge.setObjectName(
                 "vpqImportBadge"
@@ -4836,7 +5205,11 @@ class JanelaImportarPDFQuestoes(QDialog):
             (
                 fonte_vpq
                 if fonte_vpq
-                else f"PDF: {self.caminho_pdf.name}"
+                else (
+                    "Texto colado"
+                    if self.eh_texto_colado
+                    else f"PDF: {self.caminho_pdf.name}"
+                )
             )
         )
         self.pdf_fonte.setMinimumHeight(
@@ -4932,7 +5305,7 @@ class JanelaImportarPDFQuestoes(QDialog):
         ajuda = QLabel(
             (
                 (
-                    "VPQ 1.0 usa o cabeçalho para localizar disciplina e "
+                    "VPQ 1.1 usa o cabeçalho para localizar disciplina e "
                     "classificação. Maiúsculas, acentos e pontuação são "
                     "normalizados; ainda assim, o VighnaStudy só associa "
                     "título ou capítulo quando houver uma correspondência "
@@ -4940,10 +5313,8 @@ class JanelaImportarPDFQuestoes(QDialog):
                 )
                 if self.vpq_detectado
                 else (
-                    "A sugestão de tópico é conservadora: quando o texto "
-                    "não fornece evidência suficiente, o VighnaStudy deixa "
-                    "o campo sem seleção para você decidir. Isso evita "
-                    "classificação automática incorreta."
+                    "A sugestão de tópico é conservadora: quando o texto não fornece evidência suficiente, "
+                    "o VighnaStudy deixa o campo sem seleção para você decidir. Isso evita classificação automática incorreta."
                 )
             )
         )
@@ -5028,6 +5399,8 @@ class JanelaImportarPDFQuestoes(QDialog):
             "Capítulo",
             "Status"
         ])
+        if self.eh_texto_colado:
+            self.tabela_pdf.setColumnHidden(2, True)
         self.tabela_pdf.setEditTriggers(
             QAbstractItemView.NoEditTriggers
         )
@@ -5862,7 +6235,8 @@ class JanelaImportarPDFQuestoes(QDialog):
             self.dados_pdf[
                 "texto"
             ],
-            self
+            self,
+            origem_tipo=("texto" if self.eh_texto_colado else "pdf")
         ).exec()
 
     def importar(self):
@@ -6070,7 +6444,7 @@ class JanelaImportarPDFQuestoes(QDialog):
 
             QMessageBox.warning(
                 self,
-                "Importar PDF",
+                self.titulo_operacao,
                 (
                     "Há questões selecionadas que ainda precisam "
                     "de conferência.\n\n"
@@ -6083,7 +6457,7 @@ class JanelaImportarPDFQuestoes(QDialog):
         if not registros:
             QMessageBox.information(
                 self,
-                "Importar PDF",
+                self.titulo_operacao,
                 (
                     "Nenhuma questão pronta foi selecionada para importação."
                     + (
@@ -6113,12 +6487,12 @@ class JanelaImportarPDFQuestoes(QDialog):
 
         try:
             fazer_backup(
-                "antes_importar_questoes_pdf"
+                "antes_importar_questoes_texto" if self.eh_texto_colado else "antes_importar_questoes_pdf"
             )
         except Exception as erro:
             QMessageBox.critical(
                 self,
-                "Importar PDF",
+                self.titulo_operacao,
                 (
                     "A importação foi cancelada porque o backup "
                     "de segurança não pôde ser criado.\n\n"
@@ -6145,7 +6519,7 @@ class JanelaImportarPDFQuestoes(QDialog):
         if len(ids_importadas) != len(registros):
             QMessageBox.critical(
                 self,
-                "Importar PDF",
+                self.titulo_operacao,
                 (
                     "A importação não confirmou todas as questões no banco. "
                     "Nenhuma atualização foi exibida na Central de Questões."
@@ -28880,61 +29254,284 @@ class SistemaEstudos(QMainWindow):
     def abrir_diagnostico_vighna(self):
         JanelaDiagnosticoVighna(self).exec()
 
+    def obter_comandos_busca_global(self):
+        """Catálogo enxuto de destinos e ações para a busca global."""
+        return [
+            {
+                "id": "dashboard",
+                "categoria": "NAVEGAÇÃO",
+                "titulo": "Dashboard",
+                "descricao": "Voltar à visão geral do estudo",
+                "termos": "inicio início home principal visão geral",
+                "atalho": "Ctrl+H",
+                "prioridade": 100,
+            },
+            {
+                "id": "foco",
+                "categoria": "ESTUDO",
+                "titulo": "Modo Foco",
+                "descricao": "Abrir uma sessão completa de concentração",
+                "termos": "cronometro cronômetro estudar concentração tempo",
+                "atalho": "Ctrl+F",
+                "prioridade": 99,
+            },
+            {
+                "id": "sessao_rapida",
+                "categoria": "ESTUDO",
+                "titulo": "Sessão rápida",
+                "descricao": "Ir para as opções de 5, 10 ou 15 minutos",
+                "termos": "rapida rápida cinco dez quinze minutos foco curto",
+                "atalho": "",
+                "prioridade": 94,
+            },
+            {
+                "id": "algoritmo",
+                "categoria": "ESTUDO",
+                "titulo": "Recomendado pelo algoritmo",
+                "descricao": "Ir para a próxima sessão sugerida pelo Vighna",
+                "termos": "recomendado recomendação sugestão prioridade começar agora",
+                "atalho": "",
+                "prioridade": 96,
+            },
+            {
+                "id": "estudo_questoes",
+                "categoria": "ESTUDO",
+                "titulo": "Estudo por questões",
+                "descricao": "Revisão, treino adaptativo e simulado",
+                "termos": "questoes questões revisar revisão treino adaptativo simulado pratica prática",
+                "atalho": "",
+                "prioridade": 95,
+            },
+            {
+                "id": "revisao_inteligente",
+                "categoria": "ESTUDO",
+                "titulo": "Revisão Inteligente",
+                "descricao": "Revisar conteúdos prioritários usando questões",
+                "termos": "revisao revisão inteligente atrasada prioritária erros",
+                "atalho": "",
+                "prioridade": 91,
+            },
+            {
+                "id": "treino_adaptativo",
+                "categoria": "ESTUDO",
+                "titulo": "Treino Adaptativo",
+                "descricao": "Montar treino pelos pontos de maior necessidade",
+                "termos": "adaptativo domínio urgência erros cobertura treino",
+                "atalho": "",
+                "prioridade": 90,
+            },
+            {
+                "id": "simulado",
+                "categoria": "ESTUDO",
+                "titulo": "Simulado",
+                "descricao": "Criar uma prova sem feedback durante a resolução",
+                "termos": "prova avaliação avaliacao simulação simulacao",
+                "atalho": "",
+                "prioridade": 89,
+            },
+            {
+                "id": "central_questoes",
+                "categoria": "NAVEGAÇÃO",
+                "titulo": "Central de Questões",
+                "descricao": "Gerenciar, editar, importar e organizar questões",
+                "termos": "banco questões questoes gerenciar adicionar editar importar excluir arquivar lixeira",
+                "atalho": "Ctrl+Q",
+                "prioridade": 98,
+            },
+            {
+                "id": "estatisticas",
+                "categoria": "ANÁLISE",
+                "titulo": "Estatísticas",
+                "descricao": "Analisar desempenho e evolução",
+                "termos": "estatistica estatísticas desempenho evolução evolucao acertos erros",
+                "atalho": "",
+                "prioridade": 87,
+            },
+            {
+                "id": "relatorios",
+                "categoria": "ANÁLISE",
+                "titulo": "Relatórios",
+                "descricao": "Abrir relatórios e análises do estudo",
+                "termos": "relatorio relatório analise análise resultados período periodo",
+                "atalho": "",
+                "prioridade": 86,
+            },
+            {
+                "id": "calendario",
+                "categoria": "PLANEJAMENTO",
+                "titulo": "Calendário",
+                "descricao": "Ver revisões e atividades programadas",
+                "termos": "calendario calendário agenda revisão revisao datas planejamento",
+                "atalho": "",
+                "prioridade": 85,
+            },
+            {
+                "id": "pausa",
+                "categoria": "NAVEGAÇÃO",
+                "titulo": "Pausa & Desafios",
+                "descricao": "Abrir a área de pausa",
+                "termos": "pausa descanso desafio desafios jogos",
+                "atalho": "",
+                "prioridade": 70,
+            },
+            {
+                "id": "perfis",
+                "categoria": "SISTEMA",
+                "titulo": "Gerenciar perfis",
+                "descricao": "Criar e configurar concursos/perfis",
+                "termos": "perfil perfis concurso concursos gerenciar criar duplicar renomear",
+                "atalho": "",
+                "prioridade": 82,
+            },
+            {
+                "id": "configuracoes",
+                "categoria": "SISTEMA",
+                "titulo": "Configurações",
+                "descricao": "Ajustar aparência, metas e comportamento do Vighna",
+                "termos": "configuracao configurações opções opcoes tema aparência aparencia metas preferências preferencias",
+                "atalho": "",
+                "prioridade": 84,
+            },
+            {
+                "id": "backup",
+                "categoria": "SISTEMA",
+                "titulo": "Fazer backup",
+                "descricao": "Criar uma cópia de segurança do banco",
+                "termos": "backup segurança seguranca salvar banco copia cópia",
+                "atalho": "",
+                "prioridade": 72,
+            },
+            {
+                "id": "diagnostico",
+                "categoria": "SISTEMA",
+                "titulo": "Diagnóstico técnico",
+                "descricao": "Verificar banco, integridade e ambiente do Vighna",
+                "termos": "diagnostico diagnóstico integridade banco sqlite python tecnico técnico",
+                "atalho": "",
+                "prioridade": 55,
+            },
+        ]
+
+    def ir_para_secao_dashboard(self, chave=None, widget=None):
+        """Volta ao Dashboard, expande a seção desejada e a traz para a tela."""
+        self.telas.setCurrentWidget(self.tela_inicial)
+        if chave:
+            try:
+                self.definir_estado_secao_dashboard(chave, True, salvar=False)
+            except Exception:
+                pass
+
+        alvo = widget
+        if alvo is None:
+            if chave == "hoje":
+                alvo = getattr(self, "dashboard_hoje_painel", None)
+            elif chave == "estudar":
+                alvo = getattr(self, "dashboard_estudo_questoes_painel", None)
+
+        if alvo is not None and hasattr(self, "dashboard_scroll"):
+            QTimer.singleShot(
+                0,
+                lambda alvo=alvo: self.dashboard_scroll.ensureWidgetVisible(alvo, 0, 28),
+            )
+
+    def executar_comando_busca_global(self, comando_id):
+        comando_id = str(comando_id or "")
+        if comando_id == "dashboard":
+            self.telas.setCurrentWidget(self.tela_inicial)
+        elif comando_id == "foco":
+            self.abrir_modo_foco()
+        elif comando_id == "sessao_rapida":
+            self.ir_para_secao_dashboard("hoje")
+        elif comando_id == "algoritmo":
+            self.ir_para_secao_dashboard(
+                widget=getattr(self, "dashboard_hoje_acao", None)
+            )
+        elif comando_id == "estudo_questoes":
+            self.ir_para_secao_dashboard("estudar")
+        elif comando_id == "revisao_inteligente":
+            self.abrir_revisao_inteligente_dashboard()
+        elif comando_id == "treino_adaptativo":
+            self.abrir_treino_adaptativo()
+        elif comando_id == "simulado":
+            self.abrir_simulado()
+        elif comando_id == "central_questoes":
+            self.abrir_questoes()
+        elif comando_id == "estatisticas":
+            self.abrir_estatisticas()
+        elif comando_id == "relatorios":
+            self.abrir_relatorios()
+        elif comando_id == "calendario":
+            self.abrir_calendario()
+        elif comando_id == "pausa":
+            self.abrir_pausa_desafios()
+        elif comando_id == "perfis":
+            self.abrir_concursos()
+        elif comando_id == "configuracoes":
+            self.abrir_configuracoes()
+        elif comando_id == "backup":
+            self.backup_manual()
+        elif comando_id == "diagnostico":
+            self.abrir_diagnostico_vighna()
+
     def abrir_busca_global(self):
         concurso = obter_concurso_ativo()
         conteudos = listar_conteudos_concurso(concurso[0])
-        itens = []
+        topicos = []
         for disciplina in conteudos:
             if not disciplina.get("incluida"):
                 continue
             for topico in disciplina.get("topicos") or []:
                 if not topico.get("incluido"):
                     continue
-                itens.append({
+                topicos.append({
                     "disciplina_id": disciplina.get("disciplina_id"),
                     "disciplina": disciplina.get("disciplina"),
                     "topico_id": topico.get("topico_id"),
                     "topico": topico.get("topico"),
                     "importancia": topico.get("importancia", 3),
                 })
-        if not itens:
-            QMessageBox.information(self, "Busca rápida", "O perfil ativo ainda não possui tópicos incluídos.")
-            return
-        janela = JanelaBuscaGlobal(itens, self)
+
+        try:
+            recentes = json.loads(
+                obter_configuracao_texto("busca_global_recentes", "[]") or "[]"
+            )
+            if not isinstance(recentes, list):
+                recentes = []
+        except Exception:
+            recentes = []
+
+        janela = JanelaBuscaGlobal(
+            self.obter_comandos_busca_global(),
+            topicos=topicos,
+            recentes=recentes,
+            parent=self,
+        )
         if janela.exec() != QDialog.Accepted or not janela.resultado:
             return
+
         item = janela.resultado
-        acao = janela.acao
-        if acao == "estudar":
-            preparacao = {
-                "minutos": 25,
-                "atividade": "Estudo livre",
-                "disciplina": item.get("disciplina"),
-                "topico_id": item.get("topico_id"),
-                "topico": item.get("topico"),
-                "observacao": "Busca rápida • sessão escolhida manualmente",
-                "questoes_alvo": 0,
-                "origem": "Busca rápida",
-                "plano_chave": None,
-                "abrir_questoes_ao_iniciar": False,
-            }
-            self.abrir_modo_foco(preparacao)
+        if item.get("tipo") == "topico":
+            topico = item.get("topico") or {}
+            topico_id = topico.get("topico_id")
+            topico_nome = topico.get("topico")
+            if topico_id is None or not topico_nome:
+                return
+            JanelaTopico(int(topico_id), str(topico_nome), self).exec()
+            self.notificar_dados_alterados("topicos")
             return
-        if acao == "questoes":
-            resultado = abrir_resolvedor_topico(
-                int(item["topico_id"]),
-                str(item["topico"]),
-                parent=self,
-                quantidade_padrao=10,
-                modo_nome="Busca rápida",
-            )
-            if resultado:
-                self.notificar_dados_alterados("questoes")
+
+        comando_id = str(item.get("id") or "")
+        if not comando_id:
             return
-        if acao == "revisao":
-            janela_rev = JanelaRevisao(int(item["topico_id"]), str(item["topico"]), self)
-            if janela_rev.exec() == QDialog.Accepted:
-                self.notificar_dados_alterados("revisoes")
+
+        novos_recentes = [comando_id] + [
+            str(valor) for valor in recentes if str(valor) != comando_id
+        ]
+        definir_configuracao_texto(
+            "busca_global_recentes",
+            json.dumps(novos_recentes[:6], ensure_ascii=False),
+        )
+        self.executar_comando_busca_global(comando_id)
 
     def iniciar_estudo_um_clique(self):
         """Abre primeiro a recomendação do dia; o Foco só vem após confirmação."""
@@ -29024,6 +29621,7 @@ class SistemaEstudos(QMainWindow):
 
         scroll = QScrollArea()
         scroll.setObjectName("dashboardScroll")
+        self.dashboard_scroll = scroll
         scroll.setWidgetResizable(
             True
         )
@@ -29046,7 +29644,7 @@ class SistemaEstudos(QMainWindow):
         )
 
         layout.setSpacing(
-            14
+            12
         )
 
         # ====================================================
@@ -29085,19 +29683,19 @@ class SistemaEstudos(QMainWindow):
         marca.addWidget(logo_marca)
         marca.addLayout(texto_marca)
 
-        # Cabeçalho em três zonas: marca | perfil ativo | ações principais.
-        # As duas colunas laterais têm o mesmo stretch para manter o perfil
-        # visualmente centralizado na janela.
+        # Cabeçalho em quatro zonas: marca | perfil ativo | busca global | ações.
+        # A busca fica sempre disponível sem aumentar a altura do cabeçalho.
         topo_container = QFrame()
         topo_container.setObjectName("dashboardTopBar")
 
         topo = QGridLayout(topo_container)
-        topo.setContentsMargins(14, 10, 14, 10)
+        topo.setContentsMargins(14, 8, 14, 8)
         topo.setHorizontalSpacing(12)
         topo.setVerticalSpacing(0)
         topo.setColumnStretch(0, 1)
         topo.setColumnStretch(1, 0)
-        topo.setColumnStretch(2, 1)
+        topo.setColumnStretch(2, 0)
+        topo.setColumnStretch(3, 1)
 
         topo.addLayout(
             marca,
@@ -29156,6 +29754,25 @@ class SistemaEstudos(QMainWindow):
             Qt.AlignCenter
         )
 
+        self.botao_busca_global = QPushButton(
+            "⌕  Buscar no Vighna...          Ctrl+K"
+        )
+        self.botao_busca_global.setObjectName("globalSearchTrigger")
+        self.botao_busca_global.setMinimumWidth(245)
+        self.botao_busca_global.setMaximumWidth(310)
+        self.botao_busca_global.setFixedHeight(36)
+        self.botao_busca_global.setCursor(Qt.PointingHandCursor)
+        self.botao_busca_global.setToolTip(
+            "Buscar telas, ferramentas, ações e tópicos do perfil ativo. Atalho: Ctrl+K."
+        )
+        self.botao_busca_global.clicked.connect(self.abrir_busca_global)
+        topo.addWidget(
+            self.botao_busca_global,
+            0,
+            2,
+            Qt.AlignCenter
+        )
+
         acoes_topo = QHBoxLayout()
         acoes_topo.setSpacing(10)
         acoes_topo.addStretch(1)
@@ -29184,7 +29801,7 @@ class SistemaEstudos(QMainWindow):
             botao_configuracoes,
         ):
             botao.setMinimumWidth(112)
-            botao.setFixedHeight(38)
+            botao.setFixedHeight(36)
             acoes_topo.addWidget(
                 botao,
                 0,
@@ -29194,39 +29811,46 @@ class SistemaEstudos(QMainWindow):
         topo.addLayout(
             acoes_topo,
             0,
-            2,
+            3,
             Qt.AlignRight | Qt.AlignVCenter
         )
 
         layout.addWidget(topo_container)
 
         # ====================================================
-        # HOJE OPERACIONAL — visão diária acionável
+        # FOCO — gestão do tempo de concentração
         # ====================================================
 
+        # O antigo bloco "Hoje" foi substituído por um módulo de Foco.
+        # A recomendação de conteúdo permanece no card próprio do algoritmo;
+        # aqui a responsabilidade é exclusivamente organizar o tempo de estudo.
         self.dashboard_hoje_painel = QFrame()
         self.dashboard_hoje_painel.setObjectName(
-            "dashboardTodayPanel"
+            "dashboardFocusPanel"
         )
 
-        hoje_layout = QVBoxLayout(
+        foco_painel_layout = QVBoxLayout(
             self.dashboard_hoje_painel
         )
-        hoje_layout.setContentsMargins(
-            12,
-            7,
-            12,
-            8
+        foco_painel_layout.setContentsMargins(
+            16, 13, 16, 14
         )
-        hoje_layout.setSpacing(
-            5
-        )
+        foco_painel_layout.setSpacing(9)
 
-        hoje_header = QHBoxLayout()
-        hoje_header.setSpacing(8)
+        # Cabeçalho no mesmo padrão visual de "Estudo por questões".
+        foco_header = QHBoxLayout()
+        foco_header.setSpacing(10)
+
+        foco_icone = QLabel("◎")
+        foco_icone.setObjectName("focusDashboardIcon")
+        foco_icone.setAlignment(Qt.AlignCenter)
+        foco_icone.setFixedSize(36, 36)
+
+        foco_titulos = QVBoxLayout()
+        foco_titulos.setSpacing(1)
 
         self.dashboard_toggle_hoje = QPushButton(
-            "▾  Hoje"
+            "▾  Foco"
         )
         self.dashboard_toggle_hoje.setObjectName(
             "dashboardSectionToggle"
@@ -29235,441 +29859,38 @@ class SistemaEstudos(QMainWindow):
             Qt.PointingHandCursor
         )
         self.dashboard_toggle_hoje.clicked.connect(
-            lambda:
-                self.alternar_secao_dashboard(
-                    "hoje"
-                )
+            lambda: self.alternar_secao_dashboard("hoje")
         )
+
+        self.dashboard_foco_subtitulo = QLabel(
+            "Organize seu tempo de concentração e escolha entre uma sessão completa ou rápida."
+        )
+        self.dashboard_foco_subtitulo.setObjectName(
+            "focusDashboardSubtitle"
+        )
+        self.dashboard_foco_subtitulo.setWordWrap(True)
+
+        foco_titulos.addWidget(self.dashboard_toggle_hoje)
+        foco_titulos.addWidget(self.dashboard_foco_subtitulo)
 
         self.dashboard_hoje_data = QLabel("—")
         self.dashboard_hoje_data.setObjectName(
             "dashboardTodayDate"
         )
 
-        self.dashboard_hoje_status = QLabel(
-            "Visão operacional do dia"
-        )
-        self.dashboard_hoje_status.setObjectName(
-            "dashboardTodayStatus"
-        )
+        # Mantido por compatibilidade com a atualização do Dashboard, mas não
+        # exibido: alertas de revisão pertencem aos blocos de prioridade.
+        self.dashboard_hoje_status = QLabel("", self.dashboard_hoje_painel)
+        self.dashboard_hoje_status.setVisible(False)
 
-        hoje_header.addWidget(
-            self.dashboard_toggle_hoje
-        )
-        hoje_header.addWidget(self.dashboard_hoje_data)
-        hoje_header.addStretch()
-        hoje_header.addWidget(self.dashboard_hoje_status)
-        hoje_layout.addLayout(hoje_header)
-
-        hoje_corpo = QHBoxLayout()
-        hoje_corpo.setSpacing(10)
-
-        # Foco do dia.
-        foco_hoje = QFrame()
-        foco_hoje.setObjectName(
-            "dashboardTodayFocus"
-        )
-        foco_hoje_layout = QHBoxLayout(foco_hoje)
-        foco_hoje_layout.setContentsMargins(
-            10, 6, 10, 6
-        )
-        foco_hoje_layout.setSpacing(7)
-        foco_hoje.setMinimumHeight(48)
-        foco_hoje.setMaximumHeight(58)
-
-        foco_rotulo = QLabel("FOCO HOJE")
-        foco_rotulo.setObjectName(
-            "dashboardTodayEyebrow"
-        )
-        self.dashboard_hoje_foco_valor = QLabel(
-            "0 min"
-        )
-        self.dashboard_hoje_foco_valor.setObjectName(
-            "dashboardTodayFocusValue"
-        )
-        self.dashboard_hoje_foco_detalhe = QLabel(
-            "Tempo efetivo medido pelo Modo Foco"
-        )
-        self.dashboard_hoje_foco_detalhe.setObjectName(
-            "dashboardTodayDetail"
-        )
-        self.dashboard_hoje_foco_detalhe.setWordWrap(False)
-        self.dashboard_hoje_foco_detalhe.setVisible(False)
-
-        self.dashboard_hoje_foco_barra = QProgressBar()
-        self.dashboard_hoje_foco_barra.setObjectName(
-            "dashboardTodayProgress"
-        )
-        self.dashboard_hoje_foco_barra.setRange(0, 100)
-        self.dashboard_hoje_foco_barra.setValue(0)
-        self.dashboard_hoje_foco_barra.setTextVisible(False)
-
-        foco_hoje_layout.addWidget(
-            foco_rotulo,
-            1
-        )
-        foco_hoje_layout.addWidget(
-            self.dashboard_hoje_foco_valor,
+        foco_header.addWidget(foco_icone, 0, Qt.AlignVCenter)
+        foco_header.addLayout(foco_titulos, 1)
+        foco_header.addWidget(
+            self.dashboard_hoje_data,
             0,
-            Qt.AlignRight | Qt.AlignVCenter
+            Qt.AlignTop | Qt.AlignRight,
         )
-        self.dashboard_hoje_foco_barra.setVisible(False)
-
-        hoje_corpo.addWidget(foco_hoje, 1)
-
-        # Métricas rápidas.
-        hoje_metricas = QHBoxLayout()
-        hoje_metricas.setSpacing(8)
-
-        def criar_metrica_hoje(titulo_texto):
-            card = QFrame()
-            card.setObjectName(
-                "dashboardTodayMetric"
-            )
-            card.setMinimumHeight(48)
-            card.setMaximumHeight(58)
-            card_layout = QHBoxLayout(card)
-            card_layout.setContentsMargins(
-                10, 6, 10, 6
-            )
-            card_layout.setSpacing(7)
-            rotulo = QLabel(titulo_texto.upper())
-            rotulo.setObjectName(
-                "dashboardTodayEyebrow"
-            )
-            valor = QLabel("0")
-            valor.setObjectName(
-                "dashboardTodayMetricValue"
-            )
-            valor.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            detalhe = QLabel("—")
-            detalhe.setObjectName(
-                "dashboardTodayDetail"
-            )
-            detalhe.setVisible(False)
-            card_layout.addWidget(rotulo, 1)
-            card_layout.addWidget(valor, 0, Qt.AlignVCenter)
-            hoje_metricas.addWidget(card, 1)
-            return card, valor, detalhe
-
-        (
-            self.dashboard_hoje_revisoes_card,
-            self.dashboard_hoje_revisoes_valor,
-            self.dashboard_hoje_revisoes_detalhe,
-        ) = criar_metrica_hoje("Revisões")
-        self.dashboard_hoje_revisoes_card.setProperty(
-            "metricKind",
-            "review",
-        )
-
-        (
-            self.dashboard_hoje_sessoes_card,
-            self.dashboard_hoje_sessoes_valor,
-            self.dashboard_hoje_sessoes_detalhe,
-        ) = criar_metrica_hoje("Sessões")
-
-        (
-            self.dashboard_hoje_questoes_card,
-            self.dashboard_hoje_questoes_valor,
-            self.dashboard_hoje_questoes_detalhe,
-        ) = criar_metrica_hoje("Questões")
-
-        hoje_corpo.addLayout(hoje_metricas, 3)
-
-        # Próxima ação reaproveita o Estudar Agora V2.
-        self.dashboard_hoje_acao = QFrame()
-        self.dashboard_hoje_acao.setObjectName(
-            "dashboardTodayAction"
-        )
-        self.dashboard_hoje_acao.setProperty(
-            "actionRole",
-            "neutral"
-        )
-        acao_layout = QVBoxLayout(
-            self.dashboard_hoje_acao
-        )
-        acao_layout.setContentsMargins(
-            24, 16, 24, 18
-        )
-        acao_layout.setSpacing(8)
-
-        acao_rotulo = QLabel("✦  RECOMENDADO PELO ALGORITMO")
-        acao_rotulo.setObjectName(
-            "dashboardGuidedHeroEyebrow"
-        )
-        acao_rotulo.setAlignment(
-            Qt.AlignLeft | Qt.AlignVCenter
-        )
-
-        hero_topo = QHBoxLayout()
-        hero_topo.setSpacing(10)
-
-        self.dashboard_hoje_acao_ajuda = QPushButton("?")
-        self.dashboard_hoje_acao_ajuda.setObjectName("subtleButton")
-        self.dashboard_hoje_acao_ajuda.setFixedSize(30, 30)
-        self.dashboard_hoje_acao_ajuda.setToolTip(
-            "Entender o que esta recomendação faz."
-        )
-        self.dashboard_hoje_acao_ajuda.clicked.connect(
-            lambda: QMessageBox.information(
-                self,
-                "Recomendado pelo algoritmo",
-                (
-                    "Este bloco mostra a próxima sessão sugerida automaticamente pelo Vighna.\n\n"
-                    "O algoritmo considera revisões vencidas e de hoje, domínio por tópico, urgência, desempenho recente, atrasos e ritmo de estudo.\n\n"
-                    "Use 'Começar agora' para abrir a recomendação do dia e conferir o que o Vighna sugere antes de iniciar qualquer sessão. Se preferir decidir manualmente, use o bloco logo abaixo para escolher questões por conta própria."
-                )
-            )
-        )
-        hero_topo.addWidget(
-            acao_rotulo,
-            0,
-            Qt.AlignVCenter
-        )
-        hero_topo.addStretch(1)
-        hero_topo.addWidget(
-            self.dashboard_hoje_acao_ajuda,
-            0,
-            Qt.AlignVCenter
-        )
-
-        self.dashboard_hoje_acao_titulo = QLabel(
-            "Encontrar próxima sessão"
-        )
-        self.dashboard_hoje_acao_titulo.setObjectName(
-            "dashboardTodayActionTitle"
-        )
-        self.dashboard_hoje_acao_titulo.setWordWrap(True)
-        self.dashboard_hoje_acao_titulo.setAlignment(
-            Qt.AlignLeft | Qt.AlignVCenter
-        )
-
-        self.dashboard_hoje_acao_detalhe = QLabel(
-            "O Vighna vai analisar as prioridades atuais."
-        )
-        self.dashboard_hoje_acao_detalhe.setObjectName(
-            "dashboardGuidedHeroDetail"
-        )
-        self.dashboard_hoje_acao_detalhe.setWordWrap(True)
-        self.dashboard_hoje_acao_detalhe.setAlignment(
-            Qt.AlignLeft | Qt.AlignVCenter
-        )
-
-        hero_painel_inferior = QHBoxLayout()
-        hero_painel_inferior.setSpacing(14)
-
-        hero_info = QFrame()
-        hero_info.setObjectName(
-            "dashboardGuidedInfoCard"
-        )
-        hero_info_layout = QVBoxLayout(
-            hero_info
-        )
-        hero_info_layout.setContentsMargins(
-            18, 14, 18, 14
-        )
-        hero_info_layout.setSpacing(6)
-
-        hero_info_topo = QHBoxLayout()
-        hero_info_topo.setSpacing(8)
-
-        self.dashboard_hoje_recomendado_badge = QLabel(
-            "RECOMENDADO"
-        )
-        self.dashboard_hoje_recomendado_badge.setObjectName(
-            "studyReviewSourceBadge"
-        )
-        self.dashboard_hoje_recomendado_badge.setToolTip(
-            "Este é o caminho guiado: o Vighna escolhe a próxima sessão com base nos dados atuais."
-        )
-
-        hero_info_titulo = QLabel(
-            "Modo guiado"
-        )
-        hero_info_titulo.setObjectName(
-            "dashboardGuidedInfoTitle"
-        )
-
-        hero_info_topo.addWidget(
-            self.dashboard_hoje_recomendado_badge,
-            0,
-            Qt.AlignVCenter
-        )
-        hero_info_topo.addWidget(
-            hero_info_titulo,
-            0,
-            Qt.AlignVCenter
-        )
-        hero_info_topo.addStretch(1)
-
-        self.dashboard_hoje_modo_guiado = QLabel(
-            "O Vighna compara suas prioridades e indica a sessão com maior impacto para este momento."
-        )
-        self.dashboard_hoje_modo_guiado.setObjectName(
-            "dashboardGuidedHeroGuide"
-        )
-        self.dashboard_hoje_modo_guiado.setWordWrap(True)
-        self.dashboard_hoje_modo_guiado.setAlignment(
-            Qt.AlignLeft | Qt.AlignTop
-        )
-
-        hero_info_chamada = QLabel(
-            "Uma escolha orientada pelos seus dados de estudo"
-        )
-        hero_info_chamada.setObjectName(
-            "dashboardGuidedInfoHeading"
-        )
-        hero_info_chamada.setWordWrap(True)
-
-        hero_info_criterios = QLabel(
-            "REVISÕES  •  DOMÍNIO  •  URGÊNCIA  •  DESEMPENHO  •  RITMO"
-        )
-        hero_info_criterios.setObjectName(
-            "dashboardGuidedInfoCriteria"
-        )
-        hero_info_criterios.setWordWrap(True)
-        hero_info_criterios.setAlignment(
-            Qt.AlignLeft | Qt.AlignVCenter
-        )
-
-        hero_info_layout.addLayout(
-            hero_info_topo
-        )
-        hero_info_layout.addSpacing(2)
-        hero_info_layout.addWidget(
-            hero_info_chamada
-        )
-        hero_info_layout.addWidget(
-            self.dashboard_hoje_modo_guiado
-        )
-        hero_info_layout.addStretch(1)
-        hero_info_layout.addWidget(
-            hero_info_criterios
-        )
-
-        self.dashboard_hoje_um_clique = QPushButton(
-            "▶ Começar agora"
-        )
-        self.dashboard_hoje_um_clique.setObjectName(
-            "dashboardTodayPrimaryButton"
-        )
-        self.dashboard_hoje_um_clique.setMinimumSize(
-            300,
-            58
-        )
-        self.dashboard_hoje_um_clique.setMaximumWidth(390)
-        self.dashboard_hoje_um_clique.setToolTip(
-            "Abrir a recomendação de estudo para hoje. O Vighna mostra o que priorizou antes de qualquer sessão ser iniciada."
-        )
-        self.dashboard_hoje_um_clique.clicked.connect(
-            self.iniciar_estudo_um_clique
-        )
-        self.dashboard_hoje_um_clique.setVisible(
-            obter_configuracao_bool("mostrar_modo_um_clique", True)
-        )
-
-        self.dashboard_hoje_botao = QPushButton(
-            "Por que esta recomendação?"
-        )
-        self.dashboard_hoje_botao.setObjectName(
-            "dashboardTodayButton"
-        )
-        self.dashboard_hoje_botao.setMinimumSize(
-            250,
-            34
-        )
-        self.dashboard_hoje_botao.setToolTip(
-            "Ver os critérios usados pelo Vighna sem iniciar a sessão."
-        )
-        self.dashboard_hoje_botao.clicked.connect(
-            self.abrir_estudar_agora_v4
-        )
-
-        acao_layout.addLayout(hero_topo)
-        acao_layout.addWidget(
-            self.dashboard_hoje_acao_titulo
-        )
-        acao_layout.addWidget(
-            self.dashboard_hoje_acao_detalhe
-        )
-        acao_layout.addSpacing(4)
-
-        acoes_hoje = QFrame()
-        acoes_hoje.setObjectName(
-            "dashboardGuidedActionBox"
-        )
-        acoes_hoje.setMinimumSize(
-            360,
-            152
-        )
-        acoes_hoje.setMaximumWidth(430)
-        acoes_hoje_layout = QVBoxLayout(
-            acoes_hoje
-        )
-        acoes_hoje_layout.setContentsMargins(
-            22, 16, 22, 16
-        )
-        acoes_hoje_layout.setSpacing(6)
-
-        acao_destaque_rotulo = QLabel(
-            "✦  PRÓXIMO PASSO"
-        )
-        acao_destaque_rotulo.setObjectName(
-            "dashboardGuidedActionEyebrow"
-        )
-        acao_destaque_rotulo.setAlignment(
-            Qt.AlignHCenter | Qt.AlignVCenter
-        )
-
-        acao_destaque_apoio = QLabel(
-            "Abra a sugestão do Vighna e veja a melhor sessão para agora"
-        )
-        acao_destaque_apoio.setObjectName(
-            "dashboardGuidedActionHint"
-        )
-        acao_destaque_apoio.setWordWrap(True)
-        acao_destaque_apoio.setAlignment(
-            Qt.AlignHCenter | Qt.AlignVCenter
-        )
-
-        acoes_hoje_layout.addWidget(
-            acao_destaque_rotulo,
-            0,
-            Qt.AlignHCenter
-        )
-        acoes_hoje_layout.addWidget(
-            acao_destaque_apoio,
-            0,
-            Qt.AlignHCenter
-        )
-        acoes_hoje_layout.addStretch(1)
-        acoes_hoje_layout.addWidget(
-            self.dashboard_hoje_um_clique,
-            0,
-            Qt.AlignHCenter
-        )
-        acoes_hoje_layout.addSpacing(2)
-        acoes_hoje_layout.addWidget(
-            self.dashboard_hoje_botao,
-            0,
-            Qt.AlignHCenter
-        )
-        acoes_hoje_layout.addStretch(1)
-
-        hero_painel_inferior.addWidget(
-            hero_info,
-            5
-        )
-        hero_painel_inferior.addWidget(
-            acoes_hoje,
-            3,
-            Qt.AlignTop
-        )
-        hero_painel_inferior.setStretch(0, 5)
-        hero_painel_inferior.setStretch(1, 3)
-        acao_layout.addLayout(
-            hero_painel_inferior
-        )
+        foco_painel_layout.addLayout(foco_header)
 
         self.dashboard_hoje_conteudo = QWidget()
         self.dashboard_hoje_conteudo.setObjectName(
@@ -29681,52 +29902,320 @@ class SistemaEstudos(QMainWindow):
         dashboard_hoje_conteudo_layout.setContentsMargins(
             0, 0, 0, 0
         )
-        dashboard_hoje_conteudo_layout.setSpacing(
-            0
+        dashboard_hoje_conteudo_layout.setSpacing(8)
+
+        # Resumo compacto — equivalente à linha de métricas do card de questões.
+        foco_metricas = QHBoxLayout()
+        foco_metricas.setSpacing(12)
+
+        self.dashboard_focus_metric_today = QLabel(
+            "0 min de foco hoje"
         )
-        dashboard_hoje_conteudo_layout.addLayout(
-            hoje_corpo
+        self.dashboard_focus_metric_today.setObjectName(
+            "focusDashboardMetricText"
         )
-        hoje_layout.addWidget(
-            self.dashboard_hoje_conteudo
+        self.dashboard_focus_metric_today.setProperty(
+            "metricKind", "time"
+        )
+        self.dashboard_focus_metric_sessions = QLabel(
+            "0 sessões hoje"
+        )
+        self.dashboard_focus_metric_sessions.setObjectName(
+            "focusDashboardMetricText"
+        )
+        self.dashboard_focus_metric_sessions.setProperty(
+            "metricKind", "sessions"
+        )
+        self.dashboard_focus_metric_goal = QLabel(
+            "Meta semanal desativada"
+        )
+        self.dashboard_focus_metric_goal.setObjectName(
+            "focusDashboardMetricText"
+        )
+        self.dashboard_focus_metric_goal.setProperty(
+            "metricKind", "goal"
         )
 
-        layout.addWidget(
-            self.dashboard_hoje_painel
+        foco_metricas.addWidget(self.dashboard_focus_metric_today)
+        foco_metricas.addWidget(self.dashboard_focus_metric_sessions)
+        foco_metricas.addWidget(self.dashboard_focus_metric_goal)
+        foco_metricas.addStretch(1)
+        dashboard_hoje_conteudo_layout.addLayout(foco_metricas)
+
+        foco_cards = QHBoxLayout()
+        foco_cards.setSpacing(8)
+
+        # ----------------------------------------------------
+        # Modo Foco — protagonista
+        # ----------------------------------------------------
+        foco_hoje = QFrame()
+        foco_hoje.setObjectName(
+            "focusDashboardMainCard"
+        )
+        foco_hoje.setMinimumHeight(194)
+        foco_hoje.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Expanding,
+        )
+        foco_hoje_layout = QVBoxLayout(foco_hoje)
+        foco_hoje_layout.setContentsMargins(
+            14, 12, 14, 12
+        )
+        foco_hoje_layout.setSpacing(6)
+
+        foco_cabecalho = QHBoxLayout()
+        foco_cabecalho.setSpacing(8)
+
+        foco_card_icone = QLabel("◉")
+        foco_card_icone.setObjectName("focusDashboardCardIcon")
+        foco_card_icone.setAlignment(Qt.AlignCenter)
+        foco_card_icone.setFixedSize(34, 34)
+
+        foco_card_titulos = QHBoxLayout()
+        foco_card_titulos.setSpacing(7)
+        foco_rotulo = QLabel("Modo Foco")
+        foco_rotulo.setObjectName(
+            "focusDashboardCardTitle"
+        )
+        foco_selo = QLabel("PROTAGONISTA")
+        foco_selo.setObjectName(
+            "focusDashboardBadge"
+        )
+        foco_card_titulos.addWidget(foco_rotulo, 0, Qt.AlignVCenter)
+        foco_card_titulos.addWidget(foco_selo, 0, Qt.AlignVCenter)
+        foco_card_titulos.addStretch(1)
+
+        foco_cabecalho.addWidget(foco_card_icone)
+        foco_cabecalho.addLayout(foco_card_titulos, 1)
+
+        foco_descricao = QLabel(
+            "Sessão completa com cronômetro, pausas e registro do tempo efetivo."
+        )
+        foco_descricao.setObjectName(
+            "focusDashboardDescription"
+        )
+        foco_descricao.setWordWrap(True)
+
+        foco_valor_linha = QHBoxLayout()
+        foco_valor_linha.setSpacing(7)
+        self.dashboard_hoje_foco_valor = QLabel(
+            "0 min"
+        )
+        self.dashboard_hoje_foco_valor.setObjectName(
+            "dashboardTodayFocusValue"
+        )
+        foco_valor_legenda = QLabel(
+            "de foco hoje"
+        )
+        foco_valor_legenda.setObjectName(
+            "focusDashboardCaption"
+        )
+        foco_valor_linha.addWidget(
+            self.dashboard_hoje_foco_valor,
+            0,
+            Qt.AlignBottom,
+        )
+        foco_valor_linha.addWidget(
+            foco_valor_legenda,
+            0,
+            Qt.AlignBottom,
+        )
+        foco_valor_linha.addStretch(1)
+
+        self.dashboard_hoje_foco_detalhe = QLabel(
+            "Meta semanal de foco desativada"
+        )
+        self.dashboard_hoje_foco_detalhe.setObjectName(
+            "focusDashboardDetail"
+        )
+        self.dashboard_hoje_foco_detalhe.setWordWrap(True)
+
+        self.dashboard_hoje_foco_barra = QProgressBar()
+        self.dashboard_hoje_foco_barra.setObjectName(
+            "dashboardTodayProgress"
+        )
+        self.dashboard_hoje_foco_barra.setRange(0, 100)
+        self.dashboard_hoje_foco_barra.setValue(0)
+        self.dashboard_hoje_foco_barra.setTextVisible(False)
+        self.dashboard_hoje_foco_barra.setVisible(False)
+
+        self.dashboard_iniciar_foco = QPushButton(
+            "▶  Iniciar Foco"
+        )
+        self.dashboard_iniciar_foco.setObjectName(
+            "dashboardFocusPrimaryButton"
+        )
+        self.dashboard_iniciar_foco.setMinimumHeight(38)
+        self.dashboard_iniciar_foco.setCursor(
+            Qt.PointingHandCursor
+        )
+        self.dashboard_iniciar_foco.setToolTip(
+            "Abrir o Modo Foco e registrar o tempo real dedicado ao estudo."
+        )
+        self.dashboard_iniciar_foco.clicked.connect(
+            self.abrir_modo_foco
         )
 
-        # ====================================================
-        # ACESSOS RÁPIDOS — navegação operacional do dia
-        # ====================================================
+        foco_hoje_layout.addLayout(foco_cabecalho)
+        foco_hoje_layout.addWidget(foco_descricao)
+        foco_hoje_layout.addLayout(foco_valor_linha)
+        foco_hoje_layout.addWidget(
+            self.dashboard_hoje_foco_detalhe
+        )
+        foco_hoje_layout.addWidget(
+            self.dashboard_hoje_foco_barra
+        )
+        foco_hoje_layout.addStretch(1)
+        foco_hoje_layout.addWidget(
+            self.dashboard_iniciar_foco
+        )
+
+        # ----------------------------------------------------
+        # Sessão rápida — alternativa para janelas curtas de tempo
+        # ----------------------------------------------------
+        sessao_rapida_card = QFrame()
+        sessao_rapida_card.setObjectName(
+            "focusQuickCard"
+        )
+        sessao_rapida_card.setMinimumHeight(194)
+        sessao_rapida_card.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Expanding,
+        )
+        sessao_rapida_layout = QVBoxLayout(sessao_rapida_card)
+        sessao_rapida_layout.setContentsMargins(
+            14, 12, 14, 12
+        )
+        sessao_rapida_layout.setSpacing(6)
+
+        sessao_rapida_topo = QHBoxLayout()
+        sessao_rapida_topo.setSpacing(8)
+        sessao_rapida_icone = QLabel("↯")
+        sessao_rapida_icone.setObjectName("focusQuickIcon")
+        sessao_rapida_icone.setAlignment(Qt.AlignCenter)
+        sessao_rapida_icone.setFixedSize(34, 34)
+        sessao_rapida_titulo = QLabel("Sessão rápida")
+        sessao_rapida_titulo.setObjectName(
+            "focusDashboardCardTitle"
+        )
+        sessao_rapida_topo.addWidget(sessao_rapida_icone)
+        sessao_rapida_topo.addWidget(sessao_rapida_titulo, 1)
+
+        sessao_rapida_descricao = QLabel(
+            "Sessão curta para quando você tiver pouco tempo, sem alterar o planejamento."
+        )
+        sessao_rapida_descricao.setObjectName(
+            "focusDashboardDescription"
+        )
+        sessao_rapida_descricao.setWordWrap(True)
+
+        sessao_rapida_eyebrow = QLabel("ESCOLHA A DURAÇÃO")
+        sessao_rapida_eyebrow.setObjectName(
+            "focusQuickEyebrow"
+        )
+
+        presets_rapidos = QHBoxLayout()
+        presets_rapidos.setSpacing(8)
+        self.dashboard_quick_focus_group = QButtonGroup(self)
+        self.dashboard_quick_focus_group.setExclusive(True)
+        self.dashboard_quick_focus_buttons = {}
+
+        for minutos in (5, 10, 15):
+            botao_rapido = QPushButton(f"{minutos} min")
+            botao_rapido.setObjectName(
+                "focusQuickPresetButton"
+            )
+            botao_rapido.setCheckable(True)
+            botao_rapido.setMinimumHeight(34)
+            botao_rapido.setCursor(Qt.PointingHandCursor)
+            self.dashboard_quick_focus_group.addButton(
+                botao_rapido,
+                minutos,
+            )
+            self.dashboard_quick_focus_buttons[minutos] = botao_rapido
+            botao_rapido.clicked.connect(
+                lambda _checked=False, m=minutos:
+                    self.selecionar_sessao_rapida_dashboard(m)
+            )
+            presets_rapidos.addWidget(botao_rapido, 1)
+
+        self.dashboard_quick_focus_buttons[10].setChecked(True)
+        self.dashboard_quick_focus_minutes = 10
+
+        self.dashboard_quick_focus_hint = QLabel(
+            "10 min selecionados • início imediato"
+        )
+        self.dashboard_quick_focus_hint.setObjectName(
+            "focusQuickHint"
+        )
+
+        self.dashboard_sessao_rapida_iniciar = QPushButton(
+            "▶  Começar"
+        )
+        self.dashboard_sessao_rapida_iniciar.setObjectName(
+            "focusQuickStartButton"
+        )
+        self.dashboard_sessao_rapida_iniciar.setMinimumHeight(38)
+        self.dashboard_sessao_rapida_iniciar.setCursor(
+            Qt.PointingHandCursor
+        )
+        self.dashboard_sessao_rapida_iniciar.setToolTip(
+            "Iniciar imediatamente uma sessão curta no Modo Foco."
+        )
+        self.dashboard_sessao_rapida_iniciar.clicked.connect(
+            self.iniciar_sessao_rapida_dashboard
+        )
+
+        sessao_rapida_layout.addLayout(sessao_rapida_topo)
+        sessao_rapida_layout.addWidget(sessao_rapida_descricao)
+        sessao_rapida_layout.addWidget(sessao_rapida_eyebrow)
+        sessao_rapida_layout.addLayout(presets_rapidos)
+        sessao_rapida_layout.addWidget(
+            self.dashboard_quick_focus_hint
+        )
+        sessao_rapida_layout.addStretch(1)
+        sessao_rapida_layout.addWidget(
+            self.dashboard_sessao_rapida_iniciar
+        )
+
+        foco_cards.addWidget(foco_hoje, 1)
+        foco_cards.addWidget(sessao_rapida_card, 1)
+        dashboard_hoje_conteudo_layout.addLayout(foco_cards)
+
+        # ----------------------------------------------------
+        # Ações rápidas — mantidas no rodapé do módulo de Foco
+        # ----------------------------------------------------
+        separador_foco = QFrame()
+        separador_foco.setObjectName("dashboardTodaySeparator")
+        separador_foco.setFrameShape(QFrame.HLine)
+        separador_foco.setFixedHeight(1)
+        # O rodapé já possui superfície própria, como o modo manual do bloco
+        # Estudo por questões; o separador extra deixaria a composição pesada.
 
         atalhos_rapidos = QFrame()
         atalhos_rapidos.setObjectName("dashboardQuickAccess")
+        atalhos_rapidos.setProperty("embedded", True)
         atalhos_layout = QHBoxLayout(atalhos_rapidos)
-        atalhos_layout.setContentsMargins(14, 9, 14, 9)
-        atalhos_layout.setSpacing(10)
+        atalhos_layout.setContentsMargins(12, 7, 12, 7)
+        atalhos_layout.setSpacing(6)
 
         self.dashboard_toggle_acessos = QPushButton(
-            "▾  Acessos rápidos"
+            "▾  Ações rápidas"
         )
         self.dashboard_toggle_acessos.setObjectName(
             "dashboardSectionToggle"
         )
-        self.dashboard_toggle_acessos.setMinimumWidth(
-            135
-        )
+        self.dashboard_toggle_acessos.setMinimumWidth(135)
         self.dashboard_toggle_acessos.setCursor(
             Qt.PointingHandCursor
         )
         self.dashboard_toggle_acessos.clicked.connect(
-            lambda:
-                self.alternar_secao_dashboard(
-                    "acessos"
-                )
+            lambda: self.alternar_secao_dashboard("acessos")
         )
         atalhos_layout.addWidget(
             self.dashboard_toggle_acessos,
             0,
-            Qt.AlignVCenter
+            Qt.AlignVCenter,
         )
 
         self.dashboard_acessos_conteudo = QWidget()
@@ -29739,22 +30228,11 @@ class SistemaEstudos(QMainWindow):
         acessos_conteudo_layout.setContentsMargins(
             0, 0, 0, 0
         )
-        acessos_conteudo_layout.setSpacing(
-            8
-        )
-
-        botao_foco = QPushButton("Foco")
-        botao_foco.setObjectName("focusNavButton")
-        botao_foco.setToolTip(
-            "Abrir o Modo Foco e registrar o tempo real dedicado ao estudo."
-        )
-        botao_foco.clicked.connect(self.abrir_modo_foco)
+        acessos_conteudo_layout.setSpacing(8)
 
         botao_pausa = QPushButton("Pausa")
         botao_pausa.setObjectName("pauseNavButton")
-        botao_pausa.setToolTip(
-            "Abrir Pausa & Desafios."
-        )
+        botao_pausa.setToolTip("Abrir Pausa & Desafios.")
         botao_pausa.clicked.connect(self.abrir_pausa_desafios)
 
         botao_estatisticas = QPushButton("Estatísticas")
@@ -29779,22 +30257,260 @@ class SistemaEstudos(QMainWindow):
         botao_calendario.clicked.connect(self.abrir_calendario)
 
         for botao in (
-            botao_foco,
             botao_pausa,
             botao_estatisticas,
             botao_relatorios,
             botao_calendario,
         ):
-            botao.setMinimumHeight(44)
-            botao.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+            botao.setMinimumHeight(34)
+            botao.setMaximumHeight(36)
+            botao.setSizePolicy(
+                QSizePolicy.Expanding,
+                QSizePolicy.Fixed,
+            )
             acessos_conteudo_layout.addWidget(botao, 1)
 
         atalhos_layout.addWidget(
             self.dashboard_acessos_conteudo,
-            1
+            1,
+        )
+        dashboard_hoje_conteudo_layout.addWidget(atalhos_rapidos)
+
+        foco_painel_layout.addWidget(
+            self.dashboard_hoje_conteudo
+        )
+        layout.addWidget(
+            self.dashboard_hoje_painel
         )
 
-        layout.addWidget(atalhos_rapidos)
+        # ----------------------------------------------------
+        # Compatibilidade interna do antigo "Resumo do dia"
+        # ----------------------------------------------------
+        # Esses widgets continuam existindo, mas não entram no layout. Isso
+        # preserva a lógica de atualização e evita acoplamento desnecessário
+        # durante a transição visual para o módulo de Foco.
+        compat_hoje = QWidget(self.dashboard_hoje_painel)
+        compat_hoje.setVisible(False)
+
+        self.dashboard_hoje_questoes_card = QFrame(compat_hoje)
+        self.dashboard_hoje_questoes_card.setProperty(
+            "metricKind",
+            "questions",
+        )
+        self.dashboard_hoje_resumo_disciplina = QLabel("", compat_hoje)
+        self.dashboard_hoje_resumo_topico = QLabel("", compat_hoje)
+        self.dashboard_hoje_resumo_contexto = QLabel("", compat_hoje)
+
+        self.dashboard_hoje_dominio_card = QFrame(compat_hoje)
+        self.dashboard_hoje_dominio_valor = QLabel("—", compat_hoje)
+        self.dashboard_hoje_dominio_detalhe = QLabel("—", compat_hoje)
+        self.dashboard_hoje_recente_card = QFrame(compat_hoje)
+        self.dashboard_hoje_recente_valor = QLabel("—", compat_hoje)
+        self.dashboard_hoje_recente_detalhe = QLabel("—", compat_hoje)
+        self.dashboard_hoje_pratica_card = QFrame(compat_hoje)
+        self.dashboard_hoje_pratica_valor = QLabel("—", compat_hoje)
+        self.dashboard_hoje_pratica_detalhe = QLabel("—", compat_hoje)
+
+        self.dashboard_hoje_meta_questoes_card = QFrame(compat_hoje)
+        self.dashboard_hoje_meta_questoes_valor = QLabel("0", compat_hoje)
+        self.dashboard_hoje_meta_questoes_detalhe = QLabel("", compat_hoje)
+        self.dashboard_hoje_meta_foco_card = QFrame(compat_hoje)
+        self.dashboard_hoje_meta_foco_valor = QLabel("0 min", compat_hoje)
+        self.dashboard_hoje_meta_foco_detalhe = QLabel("", compat_hoje)
+        self.dashboard_hoje_meta_revisoes_card = QFrame(compat_hoje)
+        self.dashboard_hoje_meta_revisoes_card.setProperty(
+            "metricKind",
+            "review",
+        )
+        self.dashboard_hoje_meta_revisoes_valor = QLabel("0", compat_hoje)
+        self.dashboard_hoje_meta_revisoes_detalhe = QLabel("", compat_hoje)
+
+        # Recomendação do algoritmo — launcher simples e direto.
+        # A composição segue a mesma gramática visual do bloco
+        # "Estudo por questões": um único painel, cabeçalho claro e CTA central.
+        self.dashboard_hoje_acao = QFrame()
+        self.dashboard_hoje_acao.setObjectName(
+            "dashboardTodayAction"
+        )
+        self.dashboard_hoje_acao.setProperty(
+            "actionRole",
+            "neutral"
+        )
+        self.dashboard_hoje_acao.setProperty(
+            "simpleHero",
+            True
+        )
+
+        acao_layout = QVBoxLayout(
+            self.dashboard_hoje_acao
+        )
+        acao_layout.setContentsMargins(
+            16, 12, 16, 12
+        )
+        acao_layout.setSpacing(7)
+
+        # Cabeçalho no mesmo padrão dos demais módulos principais.
+        algoritmo_header = QHBoxLayout()
+        algoritmo_header.setSpacing(10)
+
+        algoritmo_icone = QLabel("✦")
+        algoritmo_icone.setObjectName(
+            "algorithmDashboardIcon"
+        )
+        algoritmo_icone.setAlignment(Qt.AlignCenter)
+        algoritmo_icone.setFixedSize(32, 32)
+
+        algoritmo_titulos = QVBoxLayout()
+        algoritmo_titulos.setSpacing(1)
+
+        algoritmo_titulo = QLabel(
+            "Recomendado pelo algoritmo"
+        )
+        algoritmo_titulo.setObjectName(
+            "algorithmDashboardTitle"
+        )
+
+        self.dashboard_algoritmo_subtitulo = QLabel(
+            "O Vighna já definiu sua próxima sessão de estudo."
+        )
+        self.dashboard_algoritmo_subtitulo.setObjectName(
+            "algorithmDashboardSubtitle"
+        )
+        self.dashboard_algoritmo_subtitulo.setWordWrap(True)
+
+        algoritmo_titulos.addWidget(algoritmo_titulo)
+        algoritmo_titulos.addWidget(
+            self.dashboard_algoritmo_subtitulo
+        )
+
+        self.dashboard_hoje_acao_ajuda = QPushButton("?")
+        self.dashboard_hoje_acao_ajuda.setObjectName(
+            "algorithmDashboardHelp"
+        )
+        self.dashboard_hoje_acao_ajuda.setFixedSize(30, 30)
+        self.dashboard_hoje_acao_ajuda.setCursor(
+            Qt.PointingHandCursor
+        )
+        self.dashboard_hoje_acao_ajuda.setToolTip(
+            "Entender o que esta recomendação faz."
+        )
+        self.dashboard_hoje_acao_ajuda.clicked.connect(
+            lambda: QMessageBox.information(
+                self,
+                "Recomendado pelo algoritmo",
+                (
+                    "Este bloco mostra a próxima sessão sugerida automaticamente pelo Vighna.\n\n"
+                    "O algoritmo considera revisões vencidas e de hoje, domínio por tópico, urgência, desempenho recente, atrasos e ritmo de estudo.\n\n"
+                    "Use 'Começar agora' para abrir a recomendação do dia e conferir o que o Vighna sugere antes de iniciar qualquer sessão. Se preferir decidir manualmente, use o bloco logo abaixo para escolher questões por conta própria."
+                )
+            )
+        )
+
+        algoritmo_header.addWidget(
+            algoritmo_icone,
+            0,
+            Qt.AlignVCenter
+        )
+        algoritmo_header.addLayout(
+            algoritmo_titulos,
+            1
+        )
+        algoritmo_header.addWidget(
+            self.dashboard_hoje_acao_ajuda,
+            0,
+            Qt.AlignTop | Qt.AlignRight
+        )
+        acao_layout.addLayout(algoritmo_header)
+
+        # Mantidos para compatibilidade com a lógica de atualização existente.
+        # Permanecem ocultos para que o launcher não volte a acumular informação.
+        self.dashboard_hoje_acao_titulo = QLabel(
+            "Encontrar próxima sessão",
+            self.dashboard_hoje_acao
+        )
+        self.dashboard_hoje_acao_titulo.setVisible(False)
+
+        self.dashboard_hoje_acao_detalhe = QLabel(
+            "O Vighna vai analisar as prioridades atuais.",
+            self.dashboard_hoje_acao
+        )
+        self.dashboard_hoje_acao_detalhe.setVisible(False)
+
+        self.dashboard_algoritmo_pronto = QLabel(
+            "PRÓXIMA SESSÃO PRONTA"
+        )
+        self.dashboard_algoritmo_pronto.setObjectName(
+            "algorithmDashboardReady"
+        )
+        self.dashboard_algoritmo_pronto.setAlignment(
+            Qt.AlignHCenter | Qt.AlignVCenter
+        )
+
+        self.dashboard_hoje_um_clique = QPushButton(
+            "▶  COMEÇAR AGORA"
+        )
+        self.dashboard_hoje_um_clique.setObjectName(
+            "dashboardTodayPrimaryButton"
+        )
+        self.dashboard_hoje_um_clique.setMinimumSize(
+            340,
+            48
+        )
+        self.dashboard_hoje_um_clique.setMaximumWidth(430)
+        self.dashboard_hoje_um_clique.setCursor(
+            Qt.PointingHandCursor
+        )
+        self.dashboard_hoje_um_clique.setToolTip(
+            "Abrir a recomendação de estudo para hoje. O Vighna mostra o que priorizou antes de qualquer sessão ser iniciada."
+        )
+        self.dashboard_hoje_um_clique.clicked.connect(
+            self.iniciar_estudo_um_clique
+        )
+        self.dashboard_hoje_um_clique.setVisible(
+            obter_configuracao_bool(
+                "mostrar_modo_um_clique",
+                True
+            )
+        )
+
+        self.dashboard_hoje_botao = QPushButton(
+            "Por que esta recomendação?"
+        )
+        self.dashboard_hoje_botao.setObjectName(
+            "dashboardTodayButton"
+        )
+        self.dashboard_hoje_botao.setMinimumSize(
+            220,
+            26
+        )
+        self.dashboard_hoje_botao.setCursor(
+            Qt.PointingHandCursor
+        )
+        self.dashboard_hoje_botao.setToolTip(
+            "Ver os critérios usados pelo Vighna sem iniciar a sessão."
+        )
+        self.dashboard_hoje_botao.clicked.connect(
+            self.abrir_estudar_agora_v4
+        )
+
+        acao_layout.addSpacing(0)
+        acao_layout.addWidget(
+            self.dashboard_algoritmo_pronto,
+            0,
+            Qt.AlignHCenter
+        )
+        acao_layout.addWidget(
+            self.dashboard_hoje_um_clique,
+            0,
+            Qt.AlignHCenter
+        )
+        acao_layout.addWidget(
+            self.dashboard_hoje_botao,
+            0,
+            Qt.AlignHCenter
+        )
+        acao_layout.addSpacing(0)
+
 
         # ====================================================
         # HERO CENTRAL — ENTRADA GUIADA
@@ -29809,225 +30525,11 @@ class SistemaEstudos(QMainWindow):
         )
 
         # ====================================================
-        # QUESTÕES — MODO MANUAL
+        # ESTUDO POR QUESTÕES — slot prioritário
         # ====================================================
 
-        nucleo_questoes = QFrame()
-        nucleo_questoes.setObjectName(
-            "questionsHeroActions"
-        )
-
-        nucleo_questoes_layout = QHBoxLayout(
-            nucleo_questoes
-        )
-        nucleo_questoes_layout.setContentsMargins(
-            16,
-            11,
-            16,
-            11
-        )
-        nucleo_questoes_layout.setSpacing(
-            14
-        )
-
-        nucleo_textos = QVBoxLayout()
-        nucleo_textos.setSpacing(
-            3
-        )
-
-        nucleo_topo = QHBoxLayout()
-        nucleo_topo.setSpacing(
-            8
-        )
-
-        nucleo_titulo = QLabel(
-            "ESCOLHER QUESTÕES MANUALMENTE"
-        )
-        nucleo_titulo.setObjectName(
-            "questionsHeroTitle"
-        )
-
-        nucleo_selo = QLabel(
-            "VOCÊ ESCOLHE"
-        )
-        nucleo_selo.setObjectName(
-            "studyReviewSourceBadge"
-        )
-
-        nucleo_topo.addWidget(
-            nucleo_titulo
-        )
-        nucleo_topo.addWidget(
-            nucleo_selo,
-            0,
-            Qt.AlignVCenter
-        )
-        nucleo_topo.addStretch()
-
-        nucleo_desc = QLabel(
-            "Escolha você mesmo a disciplina, o tópico e a bateria. Seus resultados continuam alimentando domínio, revisões e prioridades do Vighna."
-        )
-        nucleo_desc.setObjectName(
-            "questionsHeroDescription"
-        )
-        nucleo_desc.setWordWrap(
-            True
-        )
-
-        nucleo_metricas = QHBoxLayout()
-        nucleo_metricas.setSpacing(
-            14
-        )
-
-        self.dashboard_nucleo_questoes_total = QLabel(
-            "— questões"
-        )
-        self.dashboard_nucleo_questoes_total.setObjectName(
-            "questionsFoundationText"
-        )
-
-        self.dashboard_nucleo_questoes_desempenho = QLabel(
-            "Desempenho —"
-        )
-        self.dashboard_nucleo_questoes_desempenho.setObjectName(
-            "questionsFoundationText"
-        )
-
-        self.dashboard_nucleo_questoes_erros = QLabel(
-            "— erros"
-        )
-        self.dashboard_nucleo_questoes_erros.setObjectName(
-            "questionsFoundationText"
-        )
-
-        self.dashboard_nucleo_questoes_topicos = QLabel(
-            "— tópicos"
-        )
-        self.dashboard_nucleo_questoes_topicos.setObjectName(
-            "questionsFoundationText"
-        )
-
-        for metrica in (
-            self.dashboard_nucleo_questoes_total,
-            self.dashboard_nucleo_questoes_desempenho,
-            self.dashboard_nucleo_questoes_erros,
-            self.dashboard_nucleo_questoes_topicos,
-        ):
-            nucleo_metricas.addWidget(
-                metrica
-            )
-
-        nucleo_metricas.addStretch()
-
-        nucleo_textos.addLayout(
-            nucleo_topo
-        )
-        nucleo_textos.addWidget(
-            nucleo_desc
-        )
-        nucleo_textos.addLayout(
-            nucleo_metricas
-        )
-
-        nucleo_acoes = QVBoxLayout()
-        nucleo_acoes.setSpacing(
-            8
-        )
-        nucleo_acoes.setContentsMargins(
-            0, 2, 0, 2
-        )
-
-        modo_manual_topo = QHBoxLayout()
-        modo_manual_topo.setSpacing(6)
-
-        modo_manual_badge = QLabel(
-            "MODO MANUAL"
-        )
-        modo_manual_badge.setObjectName(
-            "studyReviewSourceBadge"
-        )
-
-        modo_manual_texto = QLabel(
-            "Você decide o conteúdo e a quantidade de questões."
-        )
-        modo_manual_texto.setObjectName(
-            "dashboardTodayDetail"
-        )
-        modo_manual_texto.setWordWrap(True)
-
-        modo_manual_topo.addWidget(
-            modo_manual_badge,
-            0,
-            Qt.AlignTop
-        )
-        modo_manual_topo.addWidget(
-            modo_manual_texto,
-            1
-        )
-
-        self.dashboard_resolver_questoes = QPushButton(
-            "Escolher questões"
-        )
-        self.dashboard_resolver_questoes.setObjectName(
-            "subtleButton"
-        )
-        self.dashboard_resolver_questoes.setMinimumSize(
-            160,
-            38
-        )
-        self.dashboard_resolver_questoes.setToolTip(
-            "Modo manual: escolher disciplina, tópico e quantidade de questões."
-        )
-        self.dashboard_resolver_questoes.clicked.connect(
-            self.resolver_questoes
-        )
-
-        abrir_banco_questoes = QPushButton(
-            "Gerenciar banco"
-        )
-        abrir_banco_questoes.setObjectName(
-            "subtleButton"
-        )
-        abrir_banco_questoes.setMinimumSize(
-            145,
-            38
-        )
-        abrir_banco_questoes.setToolTip(
-            "Abrir a Central de Questões para importar, editar, organizar, consultar histórico, treinos e simulados."
-        )
-        abrir_banco_questoes.clicked.connect(
-            self.abrir_questoes
-        )
-
-        nucleo_acoes.addLayout(
-            modo_manual_topo
-        )
-        botoes_manuais = QHBoxLayout()
-        botoes_manuais.setSpacing(6)
-        botoes_manuais.addWidget(
-            self.dashboard_resolver_questoes
-        )
-        botoes_manuais.addWidget(
-            abrir_banco_questoes
-        )
-        nucleo_acoes.addLayout(
-            botoes_manuais
-        )
-
-        nucleo_questoes_layout.addLayout(
-            nucleo_textos,
-            1
-        )
-        nucleo_questoes_layout.addLayout(
-            nucleo_acoes
-        )
-
-        layout.addWidget(
-            nucleo_questoes
-        )
-
-        # Slot prioritário: Estratégias de estudo deve permanecer logo abaixo
-        # do caminho manual de questões, antes das áreas analíticas do Dashboard.
+        # O bloco unificado de estudo por questões é construído mais abaixo,
+        # mas permanece visualmente neste ponto do Dashboard.
         self.dashboard_estrategias_slot = QVBoxLayout()
         self.dashboard_estrategias_slot.setContentsMargins(0, 0, 0, 0)
         self.dashboard_estrategias_slot.setSpacing(0)
@@ -32270,123 +32772,59 @@ class SistemaEstudos(QMainWindow):
         )
 
         # ====================================================
-        # FERRAMENTAS PARA SEU TREINO
+        # ESTUDO POR QUESTÕES — modos de prática
         # ====================================================
 
         estudar_painel = QFrame()
-        estudar_painel.setObjectName(
-            "studyNowPanel"
-        )
+        estudar_painel.setObjectName("studyNowPanel")
+        self.dashboard_estudo_questoes_painel = estudar_painel
 
-        estudar_layout = QVBoxLayout(
-            estudar_painel
-        )
-        estudar_layout.setContentsMargins(
-            16,
-            13,
-            16,
-            14
-        )
-        estudar_layout.setSpacing(
-            11
-        )
+        estudar_layout = QVBoxLayout(estudar_painel)
+        estudar_layout.setContentsMargins(16, 12, 16, 12)
+        estudar_layout.setSpacing(8)
 
-        # ----------------------------------------------------
-        # Cabeçalho
-        # ----------------------------------------------------
-
+        # Cabeçalho: este setor é deliberadamente secundário ao Começar agora.
         estudar_header = QHBoxLayout()
-        estudar_header.setSpacing(
-            10
-        )
+        estudar_header.setSpacing(10)
 
-        estudar_icone = QLabel(
-            "◇"
-        )
-        estudar_icone.setObjectName(
-            "studyNowIcon"
-        )
-        estudar_icone.setAlignment(
-            Qt.AlignCenter
-        )
-        estudar_icone.setFixedSize(
-            36,
-            36
-        )
+        estudar_icone = QLabel("◇")
+        estudar_icone.setObjectName("studyNowIcon")
+        estudar_icone.setAlignment(Qt.AlignCenter)
+        estudar_icone.setFixedSize(36, 36)
 
         estudar_titulos = QVBoxLayout()
-        estudar_titulos.setSpacing(
-            1
-        )
+        estudar_titulos.setSpacing(1)
 
         self.dashboard_toggle_estudar = QPushButton(
-            "▸  Estratégias de estudo"
+            "▸  Estudo por questões"
         )
         self.dashboard_toggle_estudar.setObjectName(
             "dashboardSectionToggle"
         )
-        self.dashboard_toggle_estudar.setCursor(
-            Qt.PointingHandCursor
-        )
+        self.dashboard_toggle_estudar.setCursor(Qt.PointingHandCursor)
         self.dashboard_toggle_estudar.clicked.connect(
-            lambda:
-                self.alternar_secao_dashboard(
-                    "estudar"
-                )
+            lambda: self.alternar_secao_dashboard("estudar")
         )
 
         self.estudar_agora_subtitulo = QLabel(
-            "Revisão inteligente, treino adaptativo e simulado orientam como usar o núcleo de questões com mais eficiência."
+            "Escolha como deseja praticar: revisar, treinar de forma adaptativa ou simular uma prova."
         )
         self.estudar_agora_subtitulo.setObjectName(
             "dashboardActionSectionSubtitle"
         )
-        self.estudar_agora_subtitulo.setWordWrap(
-            True
-        )
+        self.estudar_agora_subtitulo.setWordWrap(True)
 
-        estudar_titulos.addWidget(
-            self.dashboard_toggle_estudar
-        )
-        estudar_titulos.addWidget(
-            self.estudar_agora_subtitulo
-        )
+        estudar_titulos.addWidget(self.dashboard_toggle_estudar)
+        estudar_titulos.addWidget(self.estudar_agora_subtitulo)
+        estudar_header.addWidget(estudar_icone, 0, Qt.AlignVCenter)
+        estudar_header.addLayout(estudar_titulos, 1)
+        estudar_layout.addLayout(estudar_header)
 
-        self.botao_estudar_agora = QPushButton(
-            "Analisar"
-        )
-        self.botao_estudar_agora.setObjectName(
-            "studyManualButton"
-        )
-        self.botao_estudar_agora.setMinimumSize(
-            108,
-            34
-        )
-        self.botao_estudar_agora.setToolTip(
-            "Abrir a recomendação explicada do Estudar Agora V5."
-        )
-        self.botao_estudar_agora.clicked.connect(
-            self.abrir_estudar_agora_v4
-        )
-
-        estudar_header.addWidget(
-            estudar_icone,
-            0,
-            Qt.AlignVCenter
-        )
-        estudar_header.addLayout(
-            estudar_titulos,
-            1
-        )
-        estudar_header.addWidget(
-            self.botao_estudar_agora,
-            0,
-            Qt.AlignVCenter
-        )
-
-        estudar_layout.addLayout(
-            estudar_header
-        )
+        # Mantido apenas como referência interna para compatibilidade com a
+        # atualização do Dashboard. Não é exibido: Começar agora já é a ação
+        # guiada principal do sistema.
+        self.botao_estudar_agora = QPushButton()
+        self.botao_estudar_agora.setVisible(False)
 
         self.dashboard_estudar_conteudo = QWidget()
         self.dashboard_estudar_conteudo.setObjectName(
@@ -32395,562 +32833,256 @@ class SistemaEstudos(QMainWindow):
         dashboard_estudar_conteudo_layout = QVBoxLayout(
             self.dashboard_estudar_conteudo
         )
-        dashboard_estudar_conteudo_layout.setContentsMargins(
-            0, 0, 0, 0
+        dashboard_estudar_conteudo_layout.setContentsMargins(0, 0, 0, 0)
+        dashboard_estudar_conteudo_layout.setSpacing(8)
+
+        # Resumo do banco de questões.
+        nucleo_metricas = QHBoxLayout()
+        nucleo_metricas.setSpacing(12)
+
+        self.dashboard_nucleo_questoes_total = QLabel("— questões")
+        self.dashboard_nucleo_questoes_total.setObjectName(
+            "questionsFoundationText"
         )
-        dashboard_estudar_conteudo_layout.setSpacing(
-            0
+        self.dashboard_nucleo_questoes_desempenho = QLabel("Desempenho —")
+        self.dashboard_nucleo_questoes_desempenho.setObjectName(
+            "questionsFoundationText"
         )
+        self.dashboard_nucleo_questoes_erros = QLabel("— erros")
+        self.dashboard_nucleo_questoes_erros.setObjectName(
+            "questionsFoundationText"
+        )
+        self.dashboard_nucleo_questoes_topicos = QLabel("— tópicos")
+        self.dashboard_nucleo_questoes_topicos.setObjectName(
+            "questionsFoundationText"
+        )
+        for metrica in (
+            self.dashboard_nucleo_questoes_total,
+            self.dashboard_nucleo_questoes_desempenho,
+            self.dashboard_nucleo_questoes_erros,
+            self.dashboard_nucleo_questoes_topicos,
+        ):
+            nucleo_metricas.addWidget(metrica)
+        nucleo_metricas.addStretch(1)
+        dashboard_estudar_conteudo_layout.addLayout(nucleo_metricas)
 
         # ----------------------------------------------------
-        # Colunas analíticas
+        # Três modos principais — mesma hierarquia visual
         # ----------------------------------------------------
+        modos_layout = QHBoxLayout()
+        modos_layout.setSpacing(8)
 
-        colunas = QHBoxLayout()
-        colunas.setSpacing(
-            12
-        )
-
-        # ====================================================
-        # COLUNA ESQUERDA — PRIORIDADES DO DIA
-        # ====================================================
-
-        coluna_prioridades = QVBoxLayout()
-        coluna_prioridades.setSpacing(
-            7
-        )
-
-        titulo_prioridades = QLabel(
-            "Revisão orientada por questões"
-        )
-        titulo_prioridades.setObjectName(
-            "studyColumnTitle"
-        )
-
-        coluna_prioridades.addWidget(
-            titulo_prioridades
-        )
-
+        # Revisão Inteligente
         revisao_card = QFrame()
-        revisao_card.setObjectName(
-            "studyActionCard"
-        )
-        revisao_card.setProperty(
-            "actionRole",
-            "review"
-        )
-        revisao_card.setSizePolicy(
-            QSizePolicy.Expanding,
-            QSizePolicy.Expanding
-        )
-
-        revisao_layout = QVBoxLayout(
-            revisao_card
-        )
-        revisao_layout.setContentsMargins(
-            14,
-            12,
-            14,
-            12
-        )
-        revisao_layout.setSpacing(
-            7
-        )
+        revisao_card.setObjectName("studyActionCard")
+        revisao_card.setProperty("actionRole", "review")
+        revisao_card.setMinimumHeight(198)
+        revisao_card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        revisao_layout = QVBoxLayout(revisao_card)
+        revisao_layout.setContentsMargins(13, 12, 13, 12)
+        revisao_layout.setSpacing(6)
 
         revisao_topo = QHBoxLayout()
-        revisao_topo.setSpacing(
-            8
-        )
-
-        revisao_icone = QLabel(
-            "↻"
-        )
-        revisao_icone.setObjectName(
-            "studyCardIcon"
-        )
-        revisao_icone.setAlignment(
-            Qt.AlignCenter
-        )
-        revisao_icone.setFixedSize(
-            38,
-            38
-        )
-
+        revisao_topo.setSpacing(8)
+        revisao_icone = QLabel("↻")
+        revisao_icone.setObjectName("studyCardIcon")
+        revisao_icone.setAlignment(Qt.AlignCenter)
+        revisao_icone.setFixedSize(34, 34)
         revisao_titulos = QVBoxLayout()
-        revisao_titulos.setSpacing(
-            1
-        )
-
-        revisao_titulo = QLabel(
-            "Revisão Inteligente"
-        )
-        revisao_titulo.setObjectName(
-            "studyActionTitle"
-        )
-
+        revisao_titulos.setSpacing(1)
+        revisao_titulo = QLabel("Revisão Inteligente")
+        revisao_titulo.setObjectName("studyActionTitle")
         self.revisao_inteligente_resumo = QLabel(
             "Carregando revisões prioritárias…"
         )
-        self.revisao_inteligente_resumo.setObjectName(
-            "studyReviewCount"
-        )
-
-        revisao_titulos.addWidget(
-            revisao_titulo
-        )
-        revisao_titulos.addWidget(
-            self.revisao_inteligente_resumo
-        )
-
-        revisao_selo = QLabel(
-            "Usa a fila abaixo"
-        )
-        revisao_selo.setObjectName(
-            "studyReviewSourceBadge"
-        )
-
-        revisao_topo.addWidget(
-            revisao_icone
-        )
-        revisao_topo.addLayout(
-            revisao_titulos,
-            1
-        )
-        revisao_topo.addWidget(
-            revisao_selo,
-            0,
-            Qt.AlignTop
-        )
+        self.revisao_inteligente_resumo.setObjectName("studyReviewCount")
+        revisao_titulos.addWidget(revisao_titulo)
+        revisao_titulos.addWidget(self.revisao_inteligente_resumo)
+        revisao_topo.addWidget(revisao_icone)
+        revisao_topo.addLayout(revisao_titulos, 1)
 
         revisao_intro = QLabel(
-            (
-                "A Revisão Inteligente seleciona o conteúdo mais prioritário e abre uma bateria direcionada de questões."
-            )
+            "Revise primeiro o conteúdo mais urgente da sua fila."
         )
-        revisao_intro.setObjectName(
-            "studyActionDescription"
-        )
-        revisao_intro.setWordWrap(
-            True
-        )
+        revisao_intro.setObjectName("studyActionDescription")
+        revisao_intro.setWordWrap(True)
 
-        self.botao_revisao_inteligente = QPushButton(
-            "Revisar com questões"
-        )
-        self.botao_revisao_inteligente.setObjectName(
-            "subtleButton"
-        )
-        self.botao_revisao_inteligente.setMinimumHeight(
-            44
-        )
+        self.revisao_inteligente_detalhe = QLabel("")
+        self.revisao_inteligente_detalhe.setObjectName("studyReviewDetail")
+        self.revisao_inteligente_detalhe.setWordWrap(True)
+
+        self.botao_revisao_inteligente = QPushButton("Revisar")
+        self.botao_revisao_inteligente.setObjectName("subtleButton")
+        self.botao_revisao_inteligente.setMinimumHeight(38)
+        self.botao_revisao_inteligente.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.botao_revisao_inteligente.setToolTip(
-            (
-                "Usa o tópico selecionado em Revisões prioritárias. "
-                "Sem seleção, usa o tópico de maior prioridade."
-            )
+            "Usa o conteúdo prioritário da fila de revisões e abre uma bateria direcionada."
         )
         self.botao_revisao_inteligente.clicked.connect(
             self.abrir_revisao_inteligente_dashboard
         )
 
-        self.revisao_inteligente_detalhe = QLabel(
-            ""
-        )
-        self.revisao_inteligente_detalhe.setObjectName(
-            "studyReviewDetail"
-        )
-        self.revisao_inteligente_detalhe.setWordWrap(
-            True
-        )
+        revisao_layout.addLayout(revisao_topo)
+        revisao_layout.addWidget(revisao_intro)
+        revisao_layout.addWidget(self.revisao_inteligente_detalhe)
+        revisao_layout.addStretch(1)
+        revisao_layout.addWidget(self.botao_revisao_inteligente)
 
-        revisao_rodape = QLabel(
-            (
-                "A fila define o conteúdo; a prática acontece pelas questões disponíveis daquele tópico."
-            )
-        )
-        revisao_rodape.setObjectName(
-            "studyReviewFooter"
-        )
-        revisao_rodape.setWordWrap(
-            True
-        )
-
-        revisao_layout.addLayout(
-            revisao_topo
-        )
-        revisao_layout.addWidget(
-            revisao_intro
-        )
-        revisao_layout.addStretch()
-        revisao_layout.addWidget(
-            self.botao_revisao_inteligente
-        )
-        revisao_layout.addWidget(
-            self.revisao_inteligente_detalhe
-        )
-        revisao_layout.addWidget(
-            revisao_rodape
-        )
-
-        coluna_prioridades.addWidget(
-            revisao_card,
-            1
-        )
-
-        # ====================================================
-        # COLUNA DIREITA — ESTRATÉGIA E AVALIAÇÃO
-        # ====================================================
-
-        coluna_estrategia = QVBoxLayout()
-        coluna_estrategia.setSpacing(
-            7
-        )
-
-        titulo_estrategia = QLabel(
-            "Estratégias de treino"
-        )
-        titulo_estrategia.setObjectName(
-            "studyColumnTitle"
-        )
-
-        coluna_estrategia.addWidget(
-            titulo_estrategia
-        )
-
-        # ----------------------------------------------------
-        # Treino Adaptativo compacto
-        # ----------------------------------------------------
-
+        # Treino Adaptativo
         adaptativo_card = QFrame()
-        adaptativo_card.setObjectName(
-            "strategyCompactCard"
-        )
-        adaptativo_card.setProperty(
-            "actionRole",
-            "adaptive"
-        )
+        adaptativo_card.setObjectName("strategyCompactCard")
+        adaptativo_card.setProperty("actionRole", "adaptive")
+        adaptativo_card.setMinimumHeight(198)
+        adaptativo_card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        adaptativo_layout = QVBoxLayout(adaptativo_card)
+        adaptativo_layout.setContentsMargins(13, 12, 13, 12)
+        adaptativo_layout.setSpacing(6)
 
-        adaptativo_layout = QHBoxLayout(
-            adaptativo_card
-        )
-        adaptativo_layout.setContentsMargins(
-            13,
-            10,
-            13,
-            10
-        )
-        adaptativo_layout.setSpacing(
-            10
-        )
-
-        adaptativo_icone = QLabel(
-            "◎"
-        )
-        adaptativo_icone.setObjectName(
-            "strategyCardIcon"
-        )
-        adaptativo_icone.setAlignment(
-            Qt.AlignCenter
-        )
-        adaptativo_icone.setFixedSize(
-            38,
-            38
-        )
-
-        adaptativo_textos = QVBoxLayout()
-        adaptativo_textos.setSpacing(
-            1
-        )
-
-        adaptativo_titulo = QLabel(
-            "Treino Adaptativo"
-        )
-        adaptativo_titulo.setObjectName(
-            "strategyCardTitle"
-        )
+        adaptativo_topo = QHBoxLayout()
+        adaptativo_topo.setSpacing(8)
+        adaptativo_icone = QLabel("◎")
+        adaptativo_icone.setObjectName("strategyCardIcon")
+        adaptativo_icone.setAlignment(Qt.AlignCenter)
+        adaptativo_icone.setFixedSize(34, 34)
+        adaptativo_titulo = QLabel("Treino Adaptativo")
+        adaptativo_titulo.setObjectName("strategyCardTitle")
+        adaptativo_topo.addWidget(adaptativo_icone)
+        adaptativo_topo.addWidget(adaptativo_titulo, 1)
 
         adaptativo_descricao = QLabel(
-            "Treine o que mais precisa melhorar."
+            "Treine os pontos em que o Vighna identifica maior necessidade."
         )
-        adaptativo_descricao.setObjectName(
-            "strategyCardDescription"
-        )
-
+        adaptativo_descricao.setObjectName("strategyCardDescription")
+        adaptativo_descricao.setWordWrap(True)
         adaptativo_criterios = QLabel(
             "Domínio • urgência • erros • cobertura"
         )
-        adaptativo_criterios.setObjectName(
-            "studyAdaptiveCriteria"
-        )
+        adaptativo_criterios.setObjectName("studyAdaptiveCriteria")
+        adaptativo_criterios.setWordWrap(True)
 
-        adaptativo_textos.addWidget(
-            adaptativo_titulo
-        )
-        adaptativo_textos.addWidget(
-            adaptativo_descricao
-        )
-        adaptativo_textos.addWidget(
-            adaptativo_criterios
-        )
-
-        self.botao_treino_adaptativo = QPushButton(
-            "Montar treino"
-        )
-        self.botao_treino_adaptativo.setObjectName(
-            "adaptiveDashboardButton"
-        )
-        self.botao_treino_adaptativo.setMinimumSize(
-            150,
-            40
-        )
+        self.botao_treino_adaptativo = QPushButton("Montar treino")
+        self.botao_treino_adaptativo.setObjectName("adaptiveDashboardButton")
+        self.botao_treino_adaptativo.setMinimumHeight(38)
+        self.botao_treino_adaptativo.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.botao_treino_adaptativo.clicked.connect(
             self.abrir_treino_adaptativo
         )
 
-        adaptativo_layout.addWidget(
-            adaptativo_icone
-        )
-        adaptativo_layout.addLayout(
-            adaptativo_textos,
-            1
-        )
-        adaptativo_layout.addWidget(
-            self.botao_treino_adaptativo,
-            0,
-            Qt.AlignVCenter
-        )
+        adaptativo_layout.addLayout(adaptativo_topo)
+        adaptativo_layout.addWidget(adaptativo_descricao)
+        adaptativo_layout.addWidget(adaptativo_criterios)
+        adaptativo_layout.addStretch(1)
+        adaptativo_layout.addWidget(self.botao_treino_adaptativo)
 
-        coluna_estrategia.addWidget(
-            adaptativo_card
-        )
-
-        # ----------------------------------------------------
-        # Simulado compacto
-        # ----------------------------------------------------
-
+        # Simulado
         simulado_card = QFrame()
-        simulado_card.setObjectName(
-            "strategyCompactCard"
-        )
-        simulado_card.setProperty(
-            "actionRole",
-            "simulation"
-        )
+        simulado_card.setObjectName("strategyCompactCard")
+        simulado_card.setProperty("actionRole", "simulation")
+        simulado_card.setMinimumHeight(198)
+        simulado_card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        simulado_layout = QVBoxLayout(simulado_card)
+        simulado_layout.setContentsMargins(13, 12, 13, 12)
+        simulado_layout.setSpacing(6)
 
-        simulado_layout = QHBoxLayout(
-            simulado_card
-        )
-        simulado_layout.setContentsMargins(
-            13,
-            10,
-            13,
-            10
-        )
-        simulado_layout.setSpacing(
-            10
-        )
-
-        simulado_icone = QLabel(
-            "▣"
-        )
-        simulado_icone.setObjectName(
-            "strategyCardIcon"
-        )
-        simulado_icone.setAlignment(
-            Qt.AlignCenter
-        )
-        simulado_icone.setFixedSize(
-            38,
-            38
-        )
-
-        simulado_textos = QVBoxLayout()
-        simulado_textos.setSpacing(
-            1
-        )
-
-        simulado_titulo_linha = QHBoxLayout()
-        simulado_titulo_linha.setSpacing(
-            6
-        )
-
-        simulado_titulo = QLabel(
-            "Simulado"
-        )
-        simulado_titulo.setObjectName(
-            "strategyCardTitle"
-        )
-
-        simulado_selo = QLabel(
-            "Modo avaliação"
-        )
-        simulado_selo.setObjectName(
-            "assessmentBadge"
-        )
-
-        simulado_titulo_linha.addWidget(
-            simulado_titulo
-        )
-        simulado_titulo_linha.addWidget(
-            simulado_selo
-        )
-        simulado_titulo_linha.addStretch()
+        simulado_topo = QHBoxLayout()
+        simulado_topo.setSpacing(8)
+        simulado_icone = QLabel("▣")
+        simulado_icone.setObjectName("strategyCardIcon")
+        simulado_icone.setAlignment(Qt.AlignCenter)
+        simulado_icone.setFixedSize(34, 34)
+        simulado_titulo = QLabel("Simulado")
+        simulado_titulo.setObjectName("strategyCardTitle")
+        simulado_selo = QLabel("MODO AVALIAÇÃO")
+        simulado_selo.setObjectName("assessmentBadge")
+        simulado_topo.addWidget(simulado_icone)
+        simulado_topo.addWidget(simulado_titulo)
+        simulado_topo.addWidget(simulado_selo, 0, Qt.AlignVCenter)
+        simulado_topo.addStretch(1)
 
         simulado_descricao = QLabel(
-            "Teste seu desempenho sem feedback durante a prova."
+            "Teste seu desempenho sem feedback durante a resolução."
         )
-        simulado_descricao.setObjectName(
-            "strategyCardDescription"
-        )
-        simulado_descricao.setWordWrap(
-            True
-        )
-
-        simulado_textos.addLayout(
-            simulado_titulo_linha
-        )
-        simulado_textos.addWidget(
-            simulado_descricao
-        )
+        simulado_descricao.setObjectName("strategyCardDescription")
+        simulado_descricao.setWordWrap(True)
 
         stats_simulado = QHBoxLayout()
-        stats_simulado.setSpacing(
-            5
-        )
+        stats_simulado.setSpacing(4)
 
-        def criar_stat_simulado(
-            titulo_texto
-        ):
+        def criar_stat_simulado(titulo_texto):
             frame = QFrame()
-            frame.setObjectName(
-                "assessmentStat"
-            )
+            frame.setObjectName("assessmentStat")
+            frame_layout = QVBoxLayout(frame)
+            frame_layout.setContentsMargins(6, 3, 6, 3)
+            frame_layout.setSpacing(0)
+            label = QLabel(titulo_texto)
+            label.setObjectName("assessmentStatLabel")
+            valor = QLabel("—")
+            valor.setObjectName("assessmentStatValue")
+            frame_layout.addWidget(label)
+            frame_layout.addWidget(valor)
+            return frame, valor
 
-            frame_layout = QVBoxLayout(
-                frame
-            )
-            frame_layout.setContentsMargins(
-                7,
-                4,
-                7,
-                4
-            )
-            frame_layout.setSpacing(
-                0
-            )
+        stat_ultimo, self.simulado_ultimo_dashboard = criar_stat_simulado("Último")
+        stat_melhor, self.simulado_melhor_dashboard = criar_stat_simulado("Melhor")
+        stat_total, self.simulado_total_dashboard = criar_stat_simulado("Realizados")
+        stats_simulado.addWidget(stat_ultimo)
+        stats_simulado.addWidget(stat_melhor)
+        stats_simulado.addWidget(stat_total)
 
-            label = QLabel(
-                titulo_texto
-            )
-            label.setObjectName(
-                "assessmentStatLabel"
-            )
+        self.botao_simulado = QPushButton("Criar simulado")
+        self.botao_simulado.setObjectName("mockExamDashboardButton")
+        self.botao_simulado.setMinimumHeight(38)
+        self.botao_simulado.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.botao_simulado.clicked.connect(self.abrir_simulado)
 
-            valor = QLabel(
-                "—"
-            )
-            valor.setObjectName(
-                "assessmentStatValue"
-            )
+        simulado_layout.addLayout(simulado_topo)
+        simulado_layout.addWidget(simulado_descricao)
+        simulado_layout.addLayout(stats_simulado)
+        simulado_layout.addStretch(1)
+        simulado_layout.addWidget(self.botao_simulado)
 
-            frame_layout.addWidget(
-                label
-            )
-            frame_layout.addWidget(
-                valor
-            )
+        modos_layout.addWidget(revisao_card, 1)
+        modos_layout.addWidget(adaptativo_card, 1)
+        modos_layout.addWidget(simulado_card, 1)
+        dashboard_estudar_conteudo_layout.addLayout(modos_layout)
 
-            return (
-                frame,
-                valor
-            )
+        # ----------------------------------------------------
+        # Rodapé — modo manual e gerenciamento
+        # ----------------------------------------------------
+        manual_barra = QFrame()
+        manual_barra.setObjectName("studyManualFooter")
+        manual_layout = QHBoxLayout(manual_barra)
+        manual_layout.setContentsMargins(12, 7, 12, 7)
+        manual_layout.setSpacing(6)
 
-        (
-            stat_ultimo,
-            self.simulado_ultimo_dashboard
-        ) = criar_stat_simulado(
-            "Último"
+        manual_badge = QLabel("MODO MANUAL")
+        manual_badge.setObjectName("studyReviewSourceBadge")
+        manual_texto = QLabel(
+            "Prefere decidir? Escolha disciplina, tópico e quantidade por conta própria."
         )
+        manual_texto.setObjectName("dashboardTodayDetail")
+        manual_texto.setWordWrap(True)
 
-        (
-            stat_melhor,
-            self.simulado_melhor_dashboard
-        ) = criar_stat_simulado(
-            "Melhor"
+        self.dashboard_resolver_questoes = QPushButton(
+            "Escolher manualmente"
         )
+        self.dashboard_resolver_questoes.setObjectName("subtleButton")
+        self.dashboard_resolver_questoes.setMinimumHeight(36)
+        self.dashboard_resolver_questoes.clicked.connect(self.resolver_questoes)
 
-        (
-            stat_total,
-            self.simulado_total_dashboard
-        ) = criar_stat_simulado(
-            "Realizados"
-        )
+        abrir_banco_questoes = QPushButton("Gerenciar banco")
+        abrir_banco_questoes.setObjectName("subtleButton")
+        abrir_banco_questoes.setMinimumHeight(36)
+        abrir_banco_questoes.clicked.connect(self.abrir_questoes)
 
-        stats_simulado.addWidget(
-            stat_ultimo
-        )
-        stats_simulado.addWidget(
-            stat_melhor
-        )
-        stats_simulado.addWidget(
-            stat_total
-        )
+        manual_layout.addWidget(manual_badge, 0, Qt.AlignVCenter)
+        manual_layout.addWidget(manual_texto, 1, Qt.AlignVCenter)
+        manual_layout.addWidget(self.dashboard_resolver_questoes)
+        manual_layout.addWidget(abrir_banco_questoes)
+        dashboard_estudar_conteudo_layout.addWidget(manual_barra)
 
-        self.botao_simulado = QPushButton(
-            "Criar simulado"
-        )
-        self.botao_simulado.setObjectName(
-            "mockExamDashboardButton"
-        )
-        self.botao_simulado.setMinimumSize(
-            150,
-            40
-        )
-        self.botao_simulado.clicked.connect(
-            self.abrir_simulado
-        )
-
-        simulado_layout.addWidget(
-            simulado_icone
-        )
-        simulado_layout.addLayout(
-            simulado_textos,
-            2
-        )
-        simulado_layout.addLayout(
-            stats_simulado,
-            2
-        )
-        simulado_layout.addWidget(
-            self.botao_simulado,
-            0,
-            Qt.AlignVCenter
-        )
-
-        coluna_estrategia.addWidget(
-            simulado_card
-        )
-
-        # As duas colunas ocupam o mesmo espaço horizontal.
-        colunas.addLayout(
-            coluna_prioridades,
-            1
-        )
-        colunas.addLayout(
-            coluna_estrategia,
-            1
-        )
-
-        dashboard_estudar_conteudo_layout.addLayout(
-            colunas
-        )
-        estudar_layout.addWidget(
-            self.dashboard_estudar_conteudo
-        )
-
-        self.dashboard_estrategias_slot.addWidget(
-            estudar_painel
-        )
+        estudar_layout.addWidget(self.dashboard_estudar_conteudo)
+        self.dashboard_estrategias_slot.addWidget(estudar_painel)
 
         # ====================================================
         # REVISÕES PRIORITÁRIAS
@@ -33296,8 +33428,12 @@ class SistemaEstudos(QMainWindow):
                     "dashboard_toggle_hoje",
                     None
                 ),
-                "subtitulo": None,
-                "titulo": "Hoje",
+                "subtitulo": getattr(
+                    self,
+                    "dashboard_foco_subtitulo",
+                    None
+                ),
+                "titulo": "Foco",
                 "config": "dashboard_secao_hoje_expandida",
             },
             "acessos": {
@@ -33399,7 +33535,7 @@ class SistemaEstudos(QMainWindow):
                     "estudar_agora_subtitulo",
                     None
                 ),
-                "titulo": "Estratégias de treino",
+                "titulo": "Estudo por questões",
                 "config": "dashboard_secao_estudar_expandida",
             },
             "fila": {
@@ -34852,6 +34988,17 @@ class SistemaEstudos(QMainWindow):
         self.dashboard_hoje_foco_valor.setText(
             formatar_tempo_foco_resumido(hoje_foco)
         )
+        if hasattr(self, "dashboard_focus_metric_today"):
+            self.dashboard_focus_metric_today.setText(
+                formatar_tempo_foco_resumido(hoje_foco)
+                + " de foco hoje"
+            )
+        if hasattr(self, "dashboard_focus_metric_sessions"):
+            self.dashboard_focus_metric_sessions.setText(
+                f"{hoje_sessoes} "
+                + ("sessão" if hoje_sessoes == 1 else "sessões")
+                + " hoje"
+            )
         meta_foco_horas = max(
             0,
             obter_configuracao_int("meta_foco_semanal_horas", 0),
@@ -34881,12 +35028,21 @@ class SistemaEstudos(QMainWindow):
                 self.dashboard_hoje_foco_detalhe.setText(
                     "Ritmo diário da meta semanal atingido"
                 )
+                if hasattr(self, "dashboard_focus_metric_goal"):
+                    self.dashboard_focus_metric_goal.setText(
+                        "Meta semanal • ritmo diário atingido"
+                    )
             else:
+                restante_texto = formatar_tempo_foco_resumido(restante_dia)
                 self.dashboard_hoje_foco_detalhe.setText(
                     "Faltam "
-                    + formatar_tempo_foco_resumido(restante_dia)
+                    + restante_texto
                     + " para o ritmo diário"
                 )
+                if hasattr(self, "dashboard_focus_metric_goal"):
+                    self.dashboard_focus_metric_goal.setText(
+                        "Meta semanal • faltam " + restante_texto + " hoje"
+                    )
             self.dashboard_hoje_foco_detalhe.setToolTip(
                 "Referência diária: "
                 + formatar_tempo_foco_resumido(alvo_dia)
@@ -34902,6 +35058,10 @@ class SistemaEstudos(QMainWindow):
             self.dashboard_hoje_foco_detalhe.setText(
                 "Meta semanal de foco desativada"
             )
+            if hasattr(self, "dashboard_focus_metric_goal"):
+                self.dashboard_focus_metric_goal.setText(
+                    "Meta semanal desativada"
+                )
             self.dashboard_hoje_foco_detalhe.setToolTip(
                 "Ative Foco semanal em Definir metas para acompanhar um ritmo diário de referência."
             )
@@ -34910,7 +35070,6 @@ class SistemaEstudos(QMainWindow):
         revisoes_hoje = int(resumo.get("hoje", 0) or 0)
         revisoes_atrasadas = int(resumo.get("atrasadas", 0) or 0)
         revisoes_pendentes = revisoes_hoje + revisoes_atrasadas
-        self.dashboard_hoje_revisoes_valor.setText(str(revisoes_pendentes))
         if revisoes_pendentes <= 0:
             revisoes_detalhe = "Fila em dia"
             revisao_role = "ok"
@@ -34925,14 +35084,8 @@ class SistemaEstudos(QMainWindow):
                 partes.append(f"{revisoes_hoje} para hoje")
             revisoes_detalhe = " • ".join(partes)
             revisao_role = "late" if revisoes_atrasadas else "today"
-        self.dashboard_hoje_revisoes_detalhe.setText(revisoes_detalhe)
-        self.dashboard_hoje_revisoes_card.setProperty(
-            "metricRole",
-            revisao_role,
-        )
 
         # Sessões reais do Modo Foco no dia.
-        self.dashboard_hoje_sessoes_valor.setText(str(hoje_concluidas))
         if hoje_sessoes <= 0:
             sessoes_detalhe = "Nenhuma sessão com tempo efetivo"
         elif hoje_sessoes == hoje_concluidas:
@@ -34947,11 +35100,6 @@ class SistemaEstudos(QMainWindow):
                 + f" • {hoje_sessoes} registrada"
                 + ("s" if hoje_sessoes != 1 else "")
             )
-        self.dashboard_hoje_sessoes_detalhe.setText(sessoes_detalhe)
-        self.dashboard_hoje_sessoes_card.setProperty(
-            "metricRole",
-            "active" if hoje_sessoes > 0 else "neutral",
-        )
 
         # Questões: usa o mesmo histórico consolidado das revisões.
         # Isso inclui tanto registros manuais quanto sessões do Banco de
@@ -34979,7 +35127,6 @@ class SistemaEstudos(QMainWindow):
             if respondidas > 0
             else None
         )
-        self.dashboard_hoje_questoes_valor.setText(str(respondidas))
         if respondidas > 0 and percentual is not None:
             questoes_detalhe = (
                 f"{float(percentual):.0f}% de acerto • "
@@ -34991,17 +35138,24 @@ class SistemaEstudos(QMainWindow):
         else:
             questoes_detalhe = "Nenhuma registrada hoje"
             questao_role = "neutral"
-        self.dashboard_hoje_questoes_detalhe.setText(questoes_detalhe)
         self.dashboard_hoje_questoes_card.setProperty(
             "metricRole",
             questao_role,
+        )
+
+        meta_questoes = max(
+            0,
+            obter_configuracao_int("meta_questoes_diaria", 0),
         )
 
         # Próxima ação. O Modo Foco é apenas um cronômetro auxiliar e não
         # substitui nem bloqueia a recomendação operacional do Dashboard.
         action_role = "neutral"
         botao_texto = "Por que esta recomendação?"
-        botao_um_clique_texto = "▶ Começar agora"
+        botao_um_clique_texto = "▶  COMEÇAR AGORA"
+        estado_pronto = "PRÓXIMA SESSÃO"
+        subtitulo_algoritmo = "O Vighna prepara automaticamente sua próxima sessão."
+        recomendacao = None
 
         sessao_pausada = (
             getattr(self, "sessao_ativa", False)
@@ -35012,8 +35166,10 @@ class SistemaEstudos(QMainWindow):
             titulo_acao = "Retomar sessão pausada"
             detalhe_acao = "Existe uma sessão anterior esperando continuidade."
             action_role = "active"
-            botao_texto = "Continuar sessão"
-            botao_um_clique_texto = "▶ Continuar sessão"
+            botao_texto = "Por que esta recomendação?"
+            botao_um_clique_texto = "▶  CONTINUAR SESSÃO"
+            estado_pronto = "SESSÃO PAUSADA"
+            subtitulo_algoritmo = "Há uma sessão pausada pronta para continuar."
         else:
             try:
                 recomendacao = self.montar_recomendacao_estudar_agora_v4()
@@ -35021,6 +35177,8 @@ class SistemaEstudos(QMainWindow):
                 recomendacao = None
 
             if recomendacao:
+                estado_pronto = "PRÓXIMA SESSÃO PRONTA"
+                subtitulo_algoritmo = "O Vighna já definiu sua próxima sessão."
                 disciplina = str(recomendacao.get("disciplina") or "").strip()
                 topico = str(recomendacao.get("topico") or "").strip()
                 origem = str(recomendacao.get("origem") or "").strip().lower()
@@ -35058,6 +35216,10 @@ class SistemaEstudos(QMainWindow):
         self.dashboard_hoje_acao_titulo.setText(titulo_acao)
         self.dashboard_hoje_acao_detalhe.setText(detalhe_acao)
         self.dashboard_hoje_botao.setText(botao_texto)
+        if hasattr(self, "dashboard_algoritmo_pronto"):
+            self.dashboard_algoritmo_pronto.setText(estado_pronto)
+        if hasattr(self, "dashboard_algoritmo_subtitulo"):
+            self.dashboard_algoritmo_subtitulo.setText(subtitulo_algoritmo)
         if hasattr(self, "dashboard_hoje_um_clique"):
             self.dashboard_hoje_um_clique.setText(botao_um_clique_texto)
             self.dashboard_hoje_um_clique.setVisible(
@@ -35065,28 +35227,179 @@ class SistemaEstudos(QMainWindow):
             )
         self.dashboard_hoje_acao.setProperty("actionRole", action_role)
 
-        # Síntese textual no cabeçalho do painel.
-        sinais = []
+        # Resumo do dia: informativo, alinhado ao que será aberto em
+        # Começar agora, sem competir com a ação principal.
+        if sessao_pausada:
+            self.dashboard_hoje_resumo_disciplina.setText("SESSÃO PAUSADA")
+            self.dashboard_hoje_resumo_topico.setText(titulo_acao)
+            self.dashboard_hoje_resumo_contexto.setText(
+                "Ao clicar em Começar agora, o Vighna continuará a sessão pausada."
+            )
+            self.dashboard_hoje_dominio_valor.setText("—")
+            self.dashboard_hoje_dominio_detalhe.setText("continuidade")
+            self.dashboard_hoje_recente_valor.setText("—")
+            self.dashboard_hoje_recente_detalhe.setText("desempenho do tópico")
+            self.dashboard_hoje_pratica_valor.setText(str(hoje_concluidas))
+            self.dashboard_hoje_pratica_detalhe.setText(sessoes_detalhe)
+        elif recomendacao:
+            disciplina = str(recomendacao.get("disciplina") or "").strip()
+            topico = str(recomendacao.get("topico") or "").strip()
+            motivo_resumo = []
+            if questoes_detalhe and questoes_detalhe != "Nenhuma registrada hoje":
+                motivo_resumo.append(questoes_detalhe)
+            minutos = int(recomendacao.get("minutos") or 0)
+            if minutos > 0:
+                motivo_resumo.append(f"~{minutos} min")
+            questoes_alvo = int(recomendacao.get("questoes_alvo") or 0)
+            if questoes_alvo > 0:
+                motivo_resumo.append(f"{questoes_alvo} questões")
+            if not motivo_resumo:
+                motivo_resumo.append("Conteúdo recomendado pelo algoritmo")
+
+            self.dashboard_hoje_resumo_disciplina.setText(
+                disciplina.upper() if disciplina else "RECOMENDADO"
+            )
+            self.dashboard_hoje_resumo_topico.setText(
+                topico or titulo_acao
+            )
+            self.dashboard_hoje_resumo_contexto.setText(
+                " • ".join(motivo_resumo)
+            )
+
+            try:
+                topico_id = int(recomendacao.get("topico_id") or 0)
+            except Exception:
+                topico_id = 0
+
+            indice_topico = {}
+            resumo_topico = {}
+            if topico_id > 0:
+                try:
+                    indices_dominio = self.cache_analitico.obter(
+                        f"dashboard:dominio:{concurso_id}",
+                        lambda: obter_indices_dominio_topicos(concurso_id),
+                        ttl=20,
+                    )
+                except Exception:
+                    indices_dominio = {}
+                indice_topico = dict(indices_dominio.get(topico_id) or {})
+                try:
+                    resumo_topico = obter_resumo_topico(topico_id, concurso_id)
+                except Exception:
+                    resumo_topico = {}
+
+            score_dominio = indice_topico.get("score")
+            if score_dominio is not None:
+                self.dashboard_hoje_dominio_valor.setText(
+                    f"{int(round(float(score_dominio)))}%"
+                )
+                nivel = str(indice_topico.get("nivel") or "").strip()
+                self.dashboard_hoje_dominio_detalhe.setText(
+                    nivel.capitalize() if nivel else "Domínio V2"
+                )
+            else:
+                self.dashboard_hoje_dominio_valor.setText("—")
+                self.dashboard_hoje_dominio_detalhe.setText("ainda sem índice")
+
+            recente_topico = indice_topico.get("desempenho_recente")
+            if recente_topico is not None and float(recente_topico) > 0:
+                self.dashboard_hoje_recente_valor.setText(
+                    f"{int(round(float(recente_topico)))}%"
+                )
+                self.dashboard_hoje_recente_detalhe.setText("acerto recente")
+            else:
+                self.dashboard_hoje_recente_valor.setText("—")
+                self.dashboard_hoje_recente_detalhe.setText("sem prática recente")
+
+            pratica_total = int(
+                indice_topico.get("tentativas_historicas")
+                or indice_topico.get("tentativas")
+                or 0
+            )
+            revisoes_total = int(
+                indice_topico.get("revisoes")
+                or resumo_topico.get("revisoes_programa")
+                or 0
+            )
+            self.dashboard_hoje_pratica_valor.setText(str(pratica_total))
+            if pratica_total > 0:
+                self.dashboard_hoje_pratica_detalhe.setText(
+                    f"{revisoes_total} revisões registradas"
+                )
+            else:
+                self.dashboard_hoje_pratica_detalhe.setText(
+                    "ainda sem histórico interno"
+                )
+        else:
+            self.dashboard_hoje_resumo_disciplina.setText("HOJE")
+            self.dashboard_hoje_resumo_topico.setText(
+                "Nenhum conteúdo recomendado no momento"
+            )
+            self.dashboard_hoje_resumo_contexto.setText(
+                "Use Começar agora para o Vighna analisar a fila atual."
+            )
+            self.dashboard_hoje_dominio_valor.setText("—")
+            self.dashboard_hoje_dominio_detalhe.setText("sem conteúdo")
+            self.dashboard_hoje_recente_valor.setText("—")
+            self.dashboard_hoje_recente_detalhe.setText("sem conteúdo")
+            self.dashboard_hoje_pratica_valor.setText(str(respondidas))
+            self.dashboard_hoje_pratica_detalhe.setText(questoes_detalhe)
+
+        if meta_questoes > 0:
+            restante_questoes = max(0, meta_questoes - respondidas)
+            self.dashboard_hoje_meta_questoes_valor.setText(
+                f"{respondidas}/{meta_questoes}"
+            )
+            self.dashboard_hoje_meta_questoes_detalhe.setText(
+                "Meta atingida"
+                if restante_questoes <= 0
+                else f"{restante_questoes} restante" + ("s" if restante_questoes != 1 else "")
+            )
+        else:
+            self.dashboard_hoje_meta_questoes_valor.setText(str(respondidas))
+            self.dashboard_hoje_meta_questoes_detalhe.setText(
+                "meta diária desativada"
+            )
+
+        self.dashboard_hoje_meta_foco_valor.setText(
+            formatar_tempo_foco_resumido(hoje_foco)
+        )
+        if meta_foco_horas > 0 and alvo_dia > 0:
+            self.dashboard_hoje_meta_foco_detalhe.setText(
+                "Meta atingida"
+                if restante_dia <= 0
+                else "Faltam " + formatar_tempo_foco_resumido(restante_dia)
+            )
+        else:
+            self.dashboard_hoje_meta_foco_detalhe.setText(
+                "meta semanal desativada"
+            )
+
+        self.dashboard_hoje_meta_revisoes_valor.setText(str(revisoes_pendentes))
+        self.dashboard_hoje_meta_revisoes_detalhe.setText(revisoes_detalhe)
+        self.dashboard_hoje_meta_revisoes_card.setProperty(
+            "metricRole",
+            revisao_role,
+        )
+
+        # Cabeçalho enxuto: mostra apenas a urgência da fila de revisão.
         if revisoes_atrasadas:
-            sinais.append(
+            status_hoje = (
                 f"{revisoes_atrasadas} "
                 + ("revisão atrasada" if revisoes_atrasadas == 1 else "revisões atrasadas")
             )
-        if respondidas:
-            sinais.append(f"{respondidas} questões")
-        if hoje_concluidas:
-            sinais.append(
-                f"{hoje_concluidas} "
-                + ("sessão" if hoje_concluidas == 1 else "sessões")
+        elif revisoes_hoje:
+            status_hoje = (
+                f"{revisoes_hoje} "
+                + ("revisão para hoje" if revisoes_hoje == 1 else "revisões para hoje")
             )
-        self.dashboard_hoje_status.setText(
-            " • ".join(sinais) if sinais else "Dia pronto para começar"
-        )
+        else:
+            status_hoje = "Fila de revisão em dia"
+        self.dashboard_hoje_status.setText(status_hoje)
 
         for card in (
-            self.dashboard_hoje_revisoes_card,
-            self.dashboard_hoje_sessoes_card,
             self.dashboard_hoje_questoes_card,
+            self.dashboard_hoje_meta_revisoes_card,
             self.dashboard_hoje_acao,
         ):
             card.style().unpolish(card)
@@ -35568,59 +35881,15 @@ class SistemaEstudos(QMainWindow):
             )
         )
 
-        # O Estudar agora V2 permanece útil mesmo quando a fila de revisões
-        # está em dia: nesse caso ele procura uma prioridade estratégica
-        # baseada no histórico de questões e Domínio V2.
-        self.botao_estudar_agora.setEnabled(True)
-
-        if sessao_pausada_ativa:
-            self.botao_estudar_agora.setText(
-                "▶ Continuar sessão"
+        # Este setor é deliberadamente secundário ao Começar agora.
+        # Mantemos o cabeçalho estável para não duplicar a recomendação
+        # principal do Dashboard dentro dos modos alternativos de questões.
+        self.botao_estudar_agora.setEnabled(False)
+        self.botao_estudar_agora.setVisible(False)
+        if hasattr(self, "estudar_agora_subtitulo"):
+            self.estudar_agora_subtitulo.setText(
+                "Escolha como deseja praticar: revisar, treinar de forma adaptativa ou simular uma prova."
             )
-            self.botao_estudar_agora.setToolTip(
-                (
-                    "Retomar a sessão tradicional pausada"
-                    + (
-                        f" do perfil {self.sessao_concurso_nome}."
-                        if getattr(
-                            self,
-                            "sessao_concurso_nome",
-                            ""
-                        )
-                        else "."
-                    )
-                )
-            )
-            if hasattr(self, "estudar_agora_subtitulo"):
-                self.estudar_agora_subtitulo.setText(
-                    "Existe uma sessão pausada. Continue de onde parou antes de iniciar uma nova recomendação."
-                )
-        elif fila:
-            prioridade_agora = fila[0]
-            self.botao_estudar_agora.setText(
-                "▶ Preparar foco"
-            )
-            self.botao_estudar_agora.setToolTip(
-                "Ver por que este conteúdo foi escolhido e preparar a sessão no Modo Foco."
-            )
-            if hasattr(self, "estudar_agora_subtitulo"):
-                self.estudar_agora_subtitulo.setText(
-                    (
-                        f"{prioridade_agora['disciplina']} — {prioridade_agora['topico']} "
-                        f"• prioridade {prioridade_agora['nivel'].lower()} • {prioridade_agora['motivo']}"
-                    )
-                )
-        else:
-            self.botao_estudar_agora.setText(
-                "▶ Encontrar estudo"
-            )
-            self.botao_estudar_agora.setToolTip(
-                "A fila está em dia. Procurar o conteúdo mais estratégico para estudar agora."
-            )
-            if hasattr(self, "estudar_agora_subtitulo"):
-                self.estudar_agora_subtitulo.setText(
-                    "Revisões em dia. O Vighna pode procurar um tópico estratégico pelo histórico de questões e preparar o Foco."
-                )
 
         # Resumo visual de "Estudar agora".
         atrasadas_fila = sum(
@@ -35680,12 +35949,34 @@ class SistemaEstudos(QMainWindow):
                     "fila ordenada por prioridade"
                 )
 
-            self.revisao_inteligente_detalhe.setText(
-                (
-                    " • ".join(partes)
-                    + ". A Revisão Inteligente começa pelo "
-                    "conteúdo mais prioritário da fila."
+            prioridade_agora = fila[0]
+            disciplina_prioridade = str(
+                prioridade_agora.get("disciplina") or ""
+            ).strip()
+            topico_prioridade = str(
+                prioridade_agora.get("topico") or ""
+            ).strip()
+            motivo_prioridade = str(
+                prioridade_agora.get("motivo") or ""
+            ).strip()
+            destino_prioridade = " — ".join(
+                parte for parte in (
+                    disciplina_prioridade,
+                    topico_prioridade,
                 )
+                if parte
+            )
+            contexto_fila = " • ".join(partes)
+            detalhe_partes = []
+            if destino_prioridade:
+                detalhe_partes.append(f"Próximo: {destino_prioridade}")
+            if contexto_fila:
+                detalhe_partes.append(contexto_fila)
+            if motivo_prioridade:
+                detalhe_partes.append(motivo_prioridade)
+            self.revisao_inteligente_detalhe.setText(
+                " • ".join(detalhe_partes)
+                or "A Revisão Inteligente começa pelo conteúdo mais prioritário da fila."
             )
             self.botao_revisao_inteligente.setEnabled(
                 True
@@ -36603,6 +36894,11 @@ class SistemaEstudos(QMainWindow):
         ).triggered.connect(
             self.importar_questoes_pdf
         )
+        menu_importar.addAction(
+            "Importar texto colado"
+        ).triggered.connect(
+            self.importar_questoes_texto
+        )
         menu_importar.addSeparator()
         menu_importar.addAction(
             "Baixar modelo CSV"
@@ -37064,6 +37360,84 @@ class SistemaEstudos(QMainWindow):
         return " ".join(
             texto.split()
         )
+
+    def selecionar_sessao_rapida_dashboard(self, minutos):
+        """Seleciona a duração usada pelo atalho de Sessão rápida."""
+        try:
+            minutos = int(minutos)
+        except (TypeError, ValueError):
+            minutos = 10
+
+        if minutos not in (5, 10, 15):
+            minutos = 10
+
+        self.dashboard_quick_focus_minutes = minutos
+
+        botoes = getattr(
+            self,
+            "dashboard_quick_focus_buttons",
+            {},
+        )
+        for valor, botao in botoes.items():
+            botao.setChecked(int(valor) == minutos)
+
+        hint = getattr(
+            self,
+            "dashboard_quick_focus_hint",
+            None,
+        )
+        if hint is not None:
+            hint.setText(
+                f"{minutos} min selecionados • início imediato"
+            )
+
+    def iniciar_sessao_rapida_dashboard(self):
+        """Inicia uma sessão curta sem alterar o planejamento do usuário."""
+        minutos = getattr(
+            self,
+            "dashboard_quick_focus_minutes",
+            10,
+        )
+        try:
+            minutos = int(minutos)
+        except (TypeError, ValueError):
+            minutos = 10
+
+        if minutos not in (5, 10, 15):
+            minutos = 10
+
+        janela_existente = getattr(
+            self,
+            "_janela_modo_foco",
+            None,
+        )
+        if janela_existente is not None:
+            try:
+                if bool(getattr(janela_existente, "sessao_ativa", False)):
+                    janela_existente.showNormal()
+                    janela_existente.raise_()
+                    janela_existente.activateWindow()
+                    return
+            except RuntimeError:
+                self._janela_modo_foco = None
+
+        # Preparar apenas a duração mantém a sessão realmente rápida: sem
+        # disciplina/tópico obrigatório e sem interferir no plano do dia.
+        self.abrir_modo_foco({"minutos": minutos})
+
+        janela = getattr(
+            self,
+            "_janela_modo_foco",
+            None,
+        )
+        if janela is None:
+            return
+
+        try:
+            if not bool(getattr(janela, "sessao_ativa", False)):
+                janela.iniciar()
+        except RuntimeError:
+            self._janela_modo_foco = None
 
     def abrir_modo_foco(self, preparacao=None):
         # Modo Foco é uma janela de apoio, não um diálogo modal.
@@ -38501,7 +38875,7 @@ class SistemaEstudos(QMainWindow):
                 "A Central de Questões é a área administrativa do banco do VighnaStudy.\n\n"
                 "Aqui você organiza o conteúdo que será usado pelas revisões, pelo Motor V5, pelos treinos e pelas baterias inteligentes.\n\n"
                 "• Nova questão: cadastra uma questão manualmente.\n"
-                "• Importar CSV/PDF: adiciona questões em lote.\n"
+                "• Importar CSV/PDF/texto: adiciona questões em lote.\n"
                 "• Desativar: retira temporariamente a questão das novas sessões sem apagá-la.\n"
                 "• Para análise: reúne questões sinalizadas durante uma bateria para visualização e edição.\n"
                 "• Lixeira: recebe questões removidas e permite restaurar ou excluir permanentemente.\n"
@@ -38643,6 +39017,14 @@ class SistemaEstudos(QMainWindow):
             self
         )
         janela.exec()
+
+    def importar_questoes_texto(self):
+        janela = JanelaImportarTextoQuestoes(self)
+
+        if janela.exec() == QDialog.Accepted:
+            if janela.importadas > 0:
+                self.carregar_questoes()
+                self.notificar_dados_alterados("questoes")
 
     def importar_questoes_pdf(self):
         if not dependencia_pdf_disponivel():

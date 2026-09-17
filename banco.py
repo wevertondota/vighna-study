@@ -3598,6 +3598,7 @@ def criar_prompt_ia(
         )
 
         prompt_id = cursor.lastrowid
+        conexao.commit()
 
     return int(
         prompt_id
@@ -3662,6 +3663,7 @@ def atualizar_prompt_ia(
         atualizado = (
             cursor.rowcount > 0
         )
+        conexao.commit()
 
     return atualizado
 
@@ -3685,6 +3687,7 @@ def excluir_prompt_ia(
         excluido = (
             cursor.rowcount > 0
         )
+        conexao.commit()
 
     return excluido
 

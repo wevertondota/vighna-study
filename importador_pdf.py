@@ -1422,7 +1422,7 @@ def analisar_vpq_1_0(
 
     return {
         **analise,
-        "protocolo": "VPQ 1.0",
+        "protocolo": "VPQ 1.1",
         "vpq_detectado": True,
         "vpq_metadados": metadados,
         "vpq_gabaritos_individuais": (
