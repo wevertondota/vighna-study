@@ -1113,7 +1113,10 @@ def analisar_vpq_1_0(
         - individuais_set
     )
 
-    if faltando_individual:
+    # Gabarito individual e gabarito geral são duas formas válidas de
+    # informar a resposta. Só alerta sobre lacunas quando aquela forma foi
+    # efetivamente usada em pelo menos uma questão do arquivo.
+    if individuais_set and faltando_individual:
         avisos.append(
             (
                 "Questões sem gabarito individual: "
@@ -1145,8 +1148,8 @@ def analisar_vpq_1_0(
         - numeros_set
     )
 
-    if faltando_global:
-        erros.append(
+    if globais_set and faltando_global:
+        avisos.append(
             (
                 "Gabarito geral sem entrada para: "
                 + ", ".join(
@@ -1162,6 +1165,28 @@ def analisar_vpq_1_0(
                     if len(
                         faltando_global
                     ) > 20
+                    else ""
+                )
+            )
+        )
+
+    sem_gabarito_vpq = sorted(
+        numeros_set
+        - individuais_set
+        - globais_set
+    )
+
+    if sem_gabarito_vpq:
+        erros.append(
+            (
+                "Questões sem gabarito individual ou geral: "
+                + ", ".join(
+                    str(numero)
+                    for numero in sem_gabarito_vpq[:20]
+                )
+                + (
+                    "..."
+                    if len(sem_gabarito_vpq) > 20
                     else ""
                 )
             )

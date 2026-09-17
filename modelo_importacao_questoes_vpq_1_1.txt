@@ -30,6 +30,7 @@ REGRAS DO PROTOCOLO
 2. DISCIPLINA é recomendada para a identificação precisa.
 3. Preencha TÍTULO, CAPÍTULO ou ambos. Pelo menos um deles é suficiente.
 4. Quando ambos forem usados, o capítulo deve pertencer ao título informado.
-5. Os nomes devem corresponder aos cadastrados no perfil ativo.
+5. Use os nomes cadastrados no perfil ativo; maiúsculas, acentos e os
+   separadores ":", "-" e "–" são aceitos como equivalentes.
 6. GABARITO deve apontar para uma alternativa existente em cada questão.
 7. FONTE e EXPLICAÇÃO são opcionais.

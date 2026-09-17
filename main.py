@@ -4247,6 +4247,7 @@ class JanelaImportarPDFQuestoes(QDialog):
         )
         self.vpq_topico_id = None
         self.vpq_topico_rotulo = ""
+        self.vpq_capitulo_id = None
         self.concurso = (
             obter_concurso_ativo()
         )
@@ -4293,8 +4294,25 @@ class JanelaImportarPDFQuestoes(QDialog):
             self.vpq_capitulo_id = (
                 self.localizar_capitulo_vpq()
             )
-        else:
-            self.vpq_capitulo_id = None
+
+            # Um capítulo identificado com segurança determina seu título
+            # pai. Assim, o protocolo pode trazer somente o capítulo sem
+            # exigir que o título também seja preenchido.
+            if (
+                self.vpq_topico_id is None
+                and self.vpq_capitulo_id is not None
+            ):
+                for capitulo in self.capitulos:
+                    if (
+                        capitulo["capitulo_id"]
+                        == self.vpq_capitulo_id
+                    ):
+                        self.vpq_topico_id = capitulo["topico_id"]
+                        self.vpq_topico_rotulo = (
+                            f"{capitulo['disciplina']} › "
+                            f"{capitulo['topico']}"
+                        )
+                        break
 
         self.setWindowTitle(
             (
@@ -4594,17 +4612,36 @@ class JanelaImportarPDFQuestoes(QDialog):
                 True
             )
 
-            if self.vpq_topico_id is not None:
+            capitulo_informado = bool(
+                self.normalizar_rotulo_vpq(
+                    metadados.get("capitulo", "")
+                )
+            )
+
+            if (
+                self.vpq_topico_id is not None
+                and (
+                    not capitulo_informado
+                    or self.vpq_capitulo_id is not None
+                )
+            ):
                 vinculo_texto = (
-                    "Tópico do cabeçalho localizado no perfil ativo: "
+                    "Classificação do cabeçalho localizada no perfil ativo: "
                     f"{self.vpq_topico_rotulo}."
                 )
                 vinculo_estado = "ok"
+            elif self.vpq_topico_id is not None:
+                vinculo_texto = (
+                    "Título do cabeçalho localizado no perfil ativo, mas o "
+                    "capítulo não foi localizado com segurança. Confira-o "
+                    "antes de importar."
+                )
+                vinculo_estado = "warning"
             else:
                 vinculo_texto = (
-                    "O tópico informado no cabeçalho VPQ não foi localizado "
-                    "exatamente no perfil ativo. Selecione o tópico correto "
-                    "antes de importar."
+                    "A classificação informada no cabeçalho VPQ não foi "
+                    "localizada com segurança no perfil ativo. Selecione o "
+                    "título ou capítulo correto antes de importar."
                 )
                 vinculo_estado = "warning"
 
@@ -4896,9 +4933,10 @@ class JanelaImportarPDFQuestoes(QDialog):
             (
                 (
                     "VPQ 1.0 usa o cabeçalho para localizar disciplina e "
-                    "tópico exatamente. Se não houver correspondência no "
-                    "perfil ativo, o VighnaStudy não cria nem escolhe outro "
-                    "tópico silenciosamente."
+                    "classificação. Maiúsculas, acentos e pontuação são "
+                    "normalizados; ainda assim, o VighnaStudy só associa "
+                    "título ou capítulo quando houver uma correspondência "
+                    "única no perfil ativo."
                 )
                 if self.vpq_detectado
                 else (
@@ -5067,44 +5105,44 @@ class JanelaImportarPDFQuestoes(QDialog):
         )
 
         # Rodapé.
-        botoes = QDialogButtonBox(
+        self.botoes_importacao_pdf = QDialogButtonBox(
             QDialogButtonBox.Cancel
         )
 
-        self.pdf_importar = botoes.addButton(
+        self.pdf_importar = self.botoes_importacao_pdf.addButton(
             "Importar questões selecionadas",
             QDialogButtonBox.AcceptRole
         )
         self.pdf_importar.setObjectName(
             "primaryButton"
         )
-        self.pdf_importar.clicked.connect(
+        self.pdf_importar.setDefault(
+            True
+        )
+        self.botoes_importacao_pdf.accepted.connect(
             self.importar
         )
 
         if self.vpq_bloqueia_importacao:
-            self.pdf_importar.setEnabled(
-                False
-            )
             self.pdf_importar.setToolTip(
                 (
-                    "A importação está bloqueada porque o VPQ possui "
-                    "divergência estrutural. Corrija o PDF e importe novamente."
+                    "O VPQ possui divergências estruturais. Clique para "
+                    "consultar os motivos e as correções necessárias."
                 )
             )
 
-        cancelar = botoes.button(
+        cancelar = self.botoes_importacao_pdf.button(
             QDialogButtonBox.Cancel
         )
         cancelar.setText(
             "Cancelar"
         )
-        botoes.rejected.connect(
+        self.botoes_importacao_pdf.rejected.connect(
             self.reject
         )
 
         layout.addWidget(
-            botoes
+            self.botoes_importacao_pdf
         )
 
         self.pdf_topico_padrao.currentIndexChanged.connect(
@@ -5133,6 +5171,16 @@ class JanelaImportarPDFQuestoes(QDialog):
             if unicodedata.category(
                 caractere
             ) != "Mn"
+        )
+
+        # Cabeçalhos legais costumam alternar entre ":", "-" e "–"
+        # (por exemplo, "Título II: ..." e "TÍTULO II - ..."). Esses
+        # sinais não devem tornar a classificação diferente.
+        texto = re.sub(
+            r"[\W_]+",
+            " ",
+            texto,
+            flags=re.UNICODE
         )
 
         return " ".join(
@@ -5289,7 +5337,7 @@ class JanelaImportarPDFQuestoes(QDialog):
                 )
                 combo.setToolTip(
                     (
-                    "Título identificado no cabeçalho do arquivo: "
+                    "Título identificado pelo cabeçalho do arquivo: "
                         f"{self.vpq_topico_rotulo}."
                     )
                 )
@@ -5814,14 +5862,39 @@ class JanelaImportarPDFQuestoes(QDialog):
 
     def importar(self):
         if self.vpq_bloqueia_importacao:
+            motivos = list(
+                self.analise.get(
+                    "vpq_erros",
+                    []
+                )
+                or []
+            )
+
+            if motivos:
+                detalhes = "\n".join(
+                    f"• {motivo}"
+                    for motivo in motivos[:12]
+                )
+
+                if len(motivos) > 12:
+                    detalhes += (
+                        f"\n• ... e mais {len(motivos) - 12} erro(s)."
+                    )
+            else:
+                detalhes = (
+                    "• O arquivo possui uma divergência estrutural não "
+                    "identificada. Confira a auditoria exibida na tela."
+                )
+
             QMessageBox.warning(
                 self,
-                "VPQ 1.0 — revisão necessária",
+                "Não foi possível importar o VPQ",
                 (
-                    "A importação foi bloqueada porque o arquivo possui "
-                    "divergência estrutural no protocolo VPQ 1.0.\n\n"
-                    "Confira os avisos exibidos, corrija o PDF e importe "
-                    "o arquivo novamente."
+                    "As questões ainda não foram importadas porque o PDF "
+                    "possui os seguintes problemas:\n\n"
+                    f"{detalhes}\n\n"
+                    "Corrija essas informações no PDF e importe o arquivo "
+                    "novamente."
                 )
             )
             return
@@ -6048,7 +6121,7 @@ class JanelaImportarPDFQuestoes(QDialog):
             return
 
         try:
-            criar_questoes_lote(
+            ids_importadas = criar_questoes_lote(
                 registros
             )
         except Exception as erro:
@@ -6062,8 +6135,19 @@ class JanelaImportarPDFQuestoes(QDialog):
             )
             return
 
+        if len(ids_importadas) != len(registros):
+            QMessageBox.critical(
+                self,
+                "Importar PDF",
+                (
+                    "A importação não confirmou todas as questões no banco. "
+                    "Nenhuma atualização foi exibida na Central de Questões."
+                )
+            )
+            return
+
         self.importadas = len(
-            registros
+            ids_importadas
         )
 
         QMessageBox.information(
@@ -38246,6 +38330,9 @@ class SistemaEstudos(QMainWindow):
         if janela.exec() == QDialog.Accepted:
             if janela.importadas > 0:
                 self.carregar_questoes()
+                self.notificar_dados_alterados(
+                    "questoes"
+                )
 
     def salvar_modelo_csv_questoes(self):
         caminho, _ = QFileDialog.getSaveFileName(
