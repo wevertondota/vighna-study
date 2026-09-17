@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# PyInstaller
+build/
+build_novo/
+dist_nova/
+_dados_antes_atualizacao/
+
+# Dados gerados pelo aplicativo
+dist/SistemaEstudos/backups/
+dist/SistemaEstudos/*.db
+dist/SistemaEstudos/*.db-shm
+dist/SistemaEstudos/*.db-wal
