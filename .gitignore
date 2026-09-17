@@ -16,6 +16,7 @@ checkpoints/
 *.db-wal
 *.tmp-shm
 *.tmp-wal
+checkpoint_manifest.json
 dist/SistemaEstudos/backups/
 dist/SistemaEstudos/*.db
 dist/SistemaEstudos/*.db-shm

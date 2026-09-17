@@ -88,6 +88,10 @@ ARQUIVOS_IGNORADOS = {
     ".env",
     "estudos.db-shm",
     "estudos.db-wal",
+    # Metadado interno de um checkpoint extraído na raiz do projeto.
+    # Ele é recriado a cada novo ZIP e nunca deve entrar no inventário,
+    # senão o ZIP acaba com duas entradas de checkpoint_manifest.json.
+    "checkpoint_manifest.json",
 }
 
 TAMANHO_MAXIMO_RECURSO = 25 * 1024 * 1024
