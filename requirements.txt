@@ -1,0 +1,8 @@
+# Interface grafica
+PySide6==6.11.2
+
+# Leitura e importacao de arquivos PDF
+pypdf==6.18.1
+
+# Geracao do executavel para Windows
+PyInstaller==6.22.3
