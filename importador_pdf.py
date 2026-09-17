@@ -298,6 +298,16 @@ def separar_gabarito_global(texto):
     )
 
     for correspondencia in reversed(correspondencias):
+        linha_cabecalho = correspondencia.group(0)
+
+        # VPQ 1.1 usa "GABARITO: A/B/C/D/E" dentro de cada questão.
+        # Essa linha é um gabarito individual, não o início de um bloco geral.
+        # Sem esta proteção, números citados na EXPLICAÇÃO (por exemplo,
+        # "art. 161" ou "art. 168-A") podem ser lidos como pares de
+        # gabarito global e bloquear uma importação válida.
+        if PADRAO_GABARITO_INLINE.fullmatch(linha_cabecalho):
+            continue
+
         trecho = (
             correspondencia.group("resto")
             + "\n"
@@ -318,7 +328,6 @@ def separar_gabarito_global(texto):
         {},
         "",
     )
-
 
 def _candidatos_questao(texto):
     candidatos = []
