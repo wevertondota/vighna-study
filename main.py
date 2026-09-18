@@ -108,6 +108,7 @@ from laboratorio import (
     restaurar_padrao_motor_v5, montar_laboratorio,
     explicar_topico as explicar_topico_laboratorio,
 )
+from progresso_edital import build_syllabus_forecast
 from jornada import (
     gerar_jornada,
     carregar_jornada,
@@ -192,7 +193,7 @@ from banco import (
     salvar_plano_acao_automatico,
     obter_plano_acao_automatico,
     listar_revisoes_agendadas_periodo,
-    obter_eventos_previsao_edital,
+    obter_eventos_previsao_edital_v2,
     criar_questao,
     criar_questoes_lote,
     obter_questao,
@@ -248,7 +249,7 @@ from banco import (
     obter_estatisticas_historico_questoes,
     obter_metricas_globais_nucleo,
     obter_metricas_periodo_nucleo,
-    obter_progresso_topicos_nucleo,
+    obter_snapshot_progresso_edital,
     obter_central_minha_evolucao,
     obter_contextos_revisao_automatica_sessao,
     salvar_revisao_automatica_questoes,
@@ -32574,7 +32575,7 @@ class SistemaEstudos(QMainWindow):
             nao_iniciado_metric,
             self.dashboard_progresso_nao_iniciado
         ) = criar_metrica_projecao(
-            "Não iniciados",
+            "Cobertura questões",
             "notStarted"
         )
 
@@ -32582,7 +32583,7 @@ class SistemaEstudos(QMainWindow):
             consolidando_metric,
             self.dashboard_progresso_consolidando
         ) = criar_metrica_projecao(
-            "Consolidando",
+            "Evidência suficiente",
             "consolidating"
         )
 
@@ -32598,7 +32599,7 @@ class SistemaEstudos(QMainWindow):
             dominio_metric,
             self.dashboard_dominio_medio
         ) = criar_metrica_projecao(
-            "Domínio médio",
+            "Domínio oficial",
             "domain"
         )
 
@@ -50366,7 +50367,7 @@ class SistemaEstudos(QMainWindow):
             self.progresso_card_trabalhado,
             self.progresso_card_trabalhado_hint
         ) = criar_card_progresso(
-            "Conteúdo trabalhado"
+            "Cobertura do edital"
         )
         resumo_progresso.addWidget(
             card,
@@ -50392,7 +50393,7 @@ class SistemaEstudos(QMainWindow):
             self.progresso_card_consolidando,
             self.progresso_card_consolidando_hint
         ) = criar_card_progresso(
-            "Consolidando"
+            "Evidência suficiente"
         )
         resumo_progresso.addWidget(
             card,
@@ -50405,7 +50406,7 @@ class SistemaEstudos(QMainWindow):
             self.progresso_card_nao_iniciado,
             self.progresso_card_nao_iniciado_hint
         ) = criar_card_progresso(
-            "Não iniciado"
+            "Cobertura de questões"
         )
         resumo_progresso.addWidget(
             card,
@@ -50418,7 +50419,7 @@ class SistemaEstudos(QMainWindow):
             self.progresso_card_dominio,
             self.progresso_card_dominio_hint
         ) = criar_card_progresso(
-            "Domínio médio"
+            "Domínio oficial"
         )
         resumo_progresso.addWidget(
             card,
@@ -50450,7 +50451,7 @@ class SistemaEstudos(QMainWindow):
         )
 
         regras_titulo = QLabel(
-            "Como o estado é calculado"
+            "Como interpretar o progresso"
         )
         regras_titulo.setObjectName(
             "syllabusSectionTitle"
@@ -50458,14 +50459,12 @@ class SistemaEstudos(QMainWindow):
 
         regras_texto = QLabel(
             (
-                "Não iniciado: 0 revisões  •  "
-                "Em andamento: histórico ainda curto ou desempenho abaixo de 70%  •  "
-                "Consolidando: 3+ revisões e 70% a 84,9%  •  "
-                "Consolidado: 4+ revisões e pelo menos 85%.\n"
-                "Índice de Domínio V2: 30% desempenho recente + 20% variedade + "
-                "15% estabilidade + 10% recência + 15% controle de erros/recuperação + "
-                "10% robustez da evidência. Dúvidas marcadas e evidência insuficiente "
-                "podem limitar a nota final."
+                "Cobertura mede tópicos iniciados por tentativas efetivas; cobertura de "
+                "questões mede questões ativas já respondidas. Evidência indica a força "
+                "da amostra. Domínio é exibido somente quando calculável. Consolidado "
+                "depende exclusivamente de topic_consolidation_status@1.\n"
+                "“Em consolidação” é apenas um estado visual: evidência moderada/alta, "
+                "domínio oficial de pelo menos 70 e consolidação oficial ainda não atingida."
             )
         )
         regras_texto.setObjectName(
@@ -50484,6 +50483,22 @@ class SistemaEstudos(QMainWindow):
 
         progresso_layout.addWidget(
             regras
+        )
+
+        self.progresso_lacunas_resumo = QLabel(
+            "Lacunas do edital: aguardando dados"
+        )
+        self.progresso_lacunas_resumo.setObjectName(
+            "syllabusRules"
+        )
+        self.progresso_lacunas_resumo.setWordWrap(
+            True
+        )
+        self.progresso_lacunas_resumo.setToolTip(
+            "Visão analítica; não altera prioridade, fila ou recomendação."
+        )
+        progresso_layout.addWidget(
+            self.progresso_lacunas_resumo
         )
 
         # ----------------------------------------------------
@@ -50904,8 +50919,9 @@ class SistemaEstudos(QMainWindow):
 
         previsao_desc = QLabel(
             (
-                "Projeta cobertura e consolidação usando o ritmo de eventos "
-                "com data real registrada no VighnaStudy."
+                "Extrapola cobertura somente com base temporal mínima confiável. "
+                "Consolidação exige linhagem histórica oficial; sem ela, a data não é estimada. "
+                "Previsões não são metas nem garantias."
             )
         )
         previsao_desc.setObjectName(
@@ -51352,7 +51368,7 @@ class SistemaEstudos(QMainWindow):
         )
 
         disciplinas_desc = QLabel(
-            "Cobertura mostra quantos tópicos da disciplina já possuem histórico de revisão."
+            "Cobertura usa tentativas efetivas; domínio e evidência permanecem dimensões separadas."
         )
         disciplinas_desc.setObjectName(
             "mutedLabel"
@@ -51395,11 +51411,11 @@ class SistemaEstudos(QMainWindow):
         self.tabela_progresso_disciplinas.setHorizontalHeaderLabels([
             "Disciplina",
             "Tópicos",
-            "Trabalhados",
-            "Cobertura",
-            "Consolidando",
+            "Cobertura tópicos",
+            "Cobertura questões",
+            "Evidência suficiente",
             "Consolidados",
-            "Não iniciados"
+            "Domínio"
         ])
         self.tabela_progresso_disciplinas.setEditTriggers(
             QAbstractItemView.NoEditTriggers
@@ -51560,8 +51576,23 @@ class SistemaEstudos(QMainWindow):
             "Todos os estados",
             "Não iniciado",
             "Em andamento",
-            "Consolidando",
+            "Em consolidação",
             "Consolidado"
+        ])
+
+        self.progresso_filtro_evidencia = QComboBox()
+        self.progresso_filtro_evidencia.setMinimumWidth(
+            170
+        )
+        self.progresso_filtro_evidencia.setFixedHeight(
+            34
+        )
+        self.progresso_filtro_evidencia.addItems([
+            "Todas as evidências",
+            "Evidência insuficiente",
+            "Evidência baixa",
+            "Evidência moderada",
+            "Evidência alta"
         ])
 
         filtros.addWidget(
@@ -51573,6 +51604,9 @@ class SistemaEstudos(QMainWindow):
         )
         filtros.addWidget(
             self.progresso_filtro_estado
+        )
+        filtros.addWidget(
+            self.progresso_filtro_evidencia
         )
 
         topicos_layout.addLayout(
@@ -51590,10 +51624,10 @@ class SistemaEstudos(QMainWindow):
             "Disciplina",
             "Tópico",
             "Estado",
-            "Revisões",
-            "% atual",
-            "Importância",
+            "Cobertura questões",
+            "Evidência",
             "Domínio",
+            "Revisões",
             "Próxima revisão"
         ])
         self.tabela_progresso_topicos.setEditTriggers(
@@ -51672,6 +51706,9 @@ class SistemaEstudos(QMainWindow):
             self.filtrar_progresso_edital
         )
         self.progresso_filtro_estado.currentTextChanged.connect(
+            self.filtrar_progresso_edital
+        )
+        self.progresso_filtro_evidencia.currentTextChanged.connect(
             self.filtrar_progresso_edital
         )
 
@@ -51776,55 +51813,6 @@ class SistemaEstudos(QMainWindow):
         except Exception:
             return 4
 
-    def prever_data_por_ritmo(
-        self,
-        quantidade_restante,
-        ritmo_semanal
-    ):
-        quantidade_restante = max(
-            0,
-            int(
-                quantidade_restante
-                or 0
-            )
-        )
-
-        ritmo_semanal = float(
-            ritmo_semanal
-            or 0.0
-        )
-
-        if quantidade_restante <= 0:
-            return {
-                "data": QDate.currentDate(),
-                "semanas": 0.0,
-                "atingido": True,
-            }
-
-        if ritmo_semanal <= 0:
-            return None
-
-        semanas = (
-            quantidade_restante
-            / ritmo_semanal
-        )
-
-        dias = max(
-            1,
-            int(
-                semanas * 7.0
-                + 0.999999
-            )
-        )
-
-        return {
-            "data": QDate.currentDate().addDays(
-                dias
-            ),
-            "semanas": semanas,
-            "atingido": False,
-        }
-
     def formatar_previsao_data(
         self,
         previsao,
@@ -51832,7 +51820,7 @@ class SistemaEstudos(QMainWindow):
     ):
         if previsao is None:
             return (
-                f"{prefixo}dados insuficientes"
+                f"{prefixo}Dados insuficientes para previsão"
             )
 
         if previsao.get(
@@ -51871,260 +51859,122 @@ class SistemaEstudos(QMainWindow):
             f"(≈ {prazo})"
         )
 
-    def qualidade_base_previsao(
-        self,
-        eventos,
-        semanas
-    ):
-        eventos = int(
-            eventos
-            or 0
-        )
-        semanas = max(
-            1,
-            int(
-                semanas
-                or 1
-            )
-        )
-
-        if eventos <= 0:
-            return (
-                "Dados insuficientes",
-                "insuficiente"
-            )
-
-        if eventos == 1:
-            return (
-                "Base limitada",
-                "limitada"
-            )
-
-        if eventos >= max(
-            4,
-            semanas
-        ):
-            return (
-                "Base boa",
-                "boa"
-            )
-
-        return (
-            "Base moderada",
-            "moderada"
-        )
-
     def calcular_previsao_edital(
         self,
         concurso_id,
         semanas=None
     ):
-        if semanas is None:
-            semanas = self.obter_janela_previsao_semanas()
-
         semanas = max(
             1,
-            int(
-                semanas
-            )
+            int(semanas or self.obter_janela_previsao_semanas())
+        )
+        snapshot = self.montar_snapshot_progresso_edital(concurso_id)
+        eventos = obter_eventos_previsao_edital_v2(concurso_id)
+        hoje_data = datetime.now().astimezone().date()
+        previsao = build_syllabus_forecast(
+            snapshot,
+            eventos,
+            weeks=semanas,
+            today=hoje_data,
         )
 
-        dados_progresso = self.montar_dados_progresso_edital(
-            concurso_id
-        )
-        eventos = obter_eventos_previsao_edital(
-            concurso_id
-        )
+        def adaptar_projecao(item):
+            if item is None:
+                return None
+            if item.get("achieved"):
+                return {
+                    "data": QDate.currentDate(),
+                    "semanas": 0,
+                    "atingido": True,
+                }
+            data_qt = QDate.fromString(item.get("date") or "", "yyyy-MM-dd")
+            return {
+                "data": data_qt,
+                "semanas": int(item.get("weeks") or 0),
+                "atingido": False,
+            }
 
-        total = len(
-            dados_progresso
-        )
-
-        nao_iniciados = sum(
-            1
-            for item in dados_progresso
-            if item[
-                "estado"
-            ] == "Não iniciado"
-        )
-
-        consolidados = sum(
-            1
-            for item in dados_progresso
-            if item[
-                "estado"
-            ] == "Consolidado"
-        )
-
-        trabalhados = (
-            total
-            - nao_iniciados
-        )
-
-        cobertura_percentual = (
-            100.0
-            * trabalhados
-            / total
-            if total > 0
-            else 0.0
-        )
-
-        consolidacao_percentual = (
-            100.0
-            * consolidados
-            / total
-            if total > 0
-            else 0.0
-        )
-
-        hoje = QDate.currentDate()
-        inicio_janela = hoje.addDays(
-            -(
-                semanas * 7
-                - 1
-            )
-        )
-
-        def dentro_janela(
-            data_texto
-        ):
-            if not data_texto:
-                return False
-
-            data = QDate.fromString(
-                data_texto,
-                "yyyy-MM-dd"
-            )
-
-            return (
-                data.isValid()
-                and inicio_janela <= data <= hoje
-            )
-
-        eventos_inicio = [
-            item
-            for item in eventos
-            if dentro_janela(
-                item.get(
-                    "data_inicio"
-                )
-            )
-        ]
-
-        eventos_consolidacao = [
-            item
-            for item in eventos
-            if dentro_janela(
-                item.get(
-                    "data_consolidacao"
-                )
-            )
-        ]
-
-        ritmo_inicio = (
-            len(
-                eventos_inicio
-            )
-            / float(
-                semanas
-            )
-        )
-
-        ritmo_consolidacao = (
-            len(
-                eventos_consolidacao
-            )
-            / float(
-                semanas
-            )
-        )
-
-        alvo_80 = (
-            int(
-                total * 0.8
-                + 0.999999
-            )
-            if total > 0
-            else 0
-        )
-
-        restantes_80 = max(
-            0,
-            alvo_80
-            - consolidados
-        )
-
-        restantes_100_consolidacao = max(
-            0,
-            total
-            - consolidados
-        )
-
-        cobertura_previsao = self.prever_data_por_ritmo(
-            nao_iniciados,
-            ritmo_inicio
-        )
-        consolidacao_80_previsao = self.prever_data_por_ritmo(
-            restantes_80,
-            ritmo_consolidacao
-        )
-        consolidacao_100_previsao = self.prever_data_por_ritmo(
-            restantes_100_consolidacao,
-            ritmo_consolidacao
-        )
-
-        ritmo_necessario_30 = (
-            (
-                nao_iniciados
-                / (
-                    30.0
-                    / 7.0
-                )
-            )
-            if nao_iniciados > 0
-            else 0.0
-        )
-
-        qualidade_inicio = self.qualidade_base_previsao(
-            len(
-                eventos_inicio
-            ),
-            semanas
-        )
-        qualidade_consolidacao = self.qualidade_base_previsao(
-            len(
-                eventos_consolidacao
-            ),
-            semanas
-        )
+        total = int(snapshot["total_topics"])
+        trabalhados = int(snapshot["started_topics"])
+        consolidados = int(snapshot["consolidated_topics"])
+        nao_iniciados = max(0, total - trabalhados)
+        alvo_80 = int(total * 0.8 + 0.999999) if total else 0
+        base_inicio = previsao["coverage_basis"]
+        base_consolidacao = previsao["consolidation_basis"]
 
         return {
             "semanas": semanas,
-            "inicio_janela": inicio_janela,
-            "hoje": hoje,
+            "inicio_janela": QDate.fromString(
+                previsao["window_start"],
+                "yyyy-MM-dd",
+            ),
+            "hoje": QDate.fromString(
+                previsao["window_end"],
+                "yyyy-MM-dd",
+            ),
             "total": total,
             "trabalhados": trabalhados,
             "nao_iniciados": nao_iniciados,
-            "cobertura_percentual": cobertura_percentual,
+            "cobertura_percentual": float(
+                snapshot["topic_coverage_rate"] or 0.0
+            ),
             "consolidados": consolidados,
-            "consolidacao_percentual": consolidacao_percentual,
+            "consolidacao_percentual": float(
+                snapshot["consolidated_rate"] or 0.0
+            ),
             "alvo_80": alvo_80,
-            "restantes_80": restantes_80,
-            "restantes_100_consolidacao": restantes_100_consolidacao,
-            "eventos_inicio": len(
-                eventos_inicio
+            "restantes_80": max(0, alvo_80 - consolidados),
+            "restantes_100_consolidacao": max(0, total - consolidados),
+            "eventos_inicio": int(base_inicio["event_count"]),
+            "eventos_consolidacao": int(base_consolidacao["event_count"]),
+            "ritmo_inicio": float(previsao["coverage_rate_per_week"]),
+            "ritmo_consolidacao": float(
+                previsao["consolidation_rate_per_week"]
             ),
-            "eventos_consolidacao": len(
-                eventos_consolidacao
+            "ritmo_necessario_30": (
+                nao_iniciados / (30.0 / 7.0)
+                if nao_iniciados > 0
+                else 0.0
             ),
-            "ritmo_inicio": ritmo_inicio,
-            "ritmo_consolidacao": ritmo_consolidacao,
-            "ritmo_necessario_30": ritmo_necessario_30,
-            "previsao_cobertura": cobertura_previsao,
-            "previsao_consolidacao_80": consolidacao_80_previsao,
-            "previsao_consolidacao_100": consolidacao_100_previsao,
-            "qualidade_inicio": qualidade_inicio,
-            "qualidade_consolidacao": qualidade_consolidacao,
+            "previsao_cobertura": adaptar_projecao(
+                previsao["coverage_forecast"]
+            ),
+            "previsao_consolidacao_80": adaptar_projecao(
+                previsao["consolidation_80_forecast"]
+            ),
+            "previsao_consolidacao_100": adaptar_projecao(
+                previsao["consolidation_100_forecast"]
+            ),
+            "qualidade_inicio": (
+                base_inicio["label"],
+                "boa" if base_inicio["sufficient"] else "insuficiente",
+            ),
+            "qualidade_consolidacao": (
+                base_consolidacao["label"],
+                "boa" if base_consolidacao["sufficient"] else "insuficiente",
+            ),
+            "base_inicio": base_inicio,
+            "base_consolidacao": base_consolidacao,
+            "cenarios": [
+                {
+                    "nome": item["name"],
+                    "ritmo_inicio": item["coverage_rate_per_week"],
+                    "ritmo_consolidacao": item[
+                        "consolidation_rate_per_week"
+                    ],
+                    "previsao_cobertura": adaptar_projecao(
+                        item["coverage_forecast"]
+                    ),
+                    "previsao_consolidacao_80": adaptar_projecao(
+                        item["consolidation_80_forecast"]
+                    ),
+                    "previsao_consolidacao_100": adaptar_projecao(
+                        item["consolidation_100_forecast"]
+                    ),
+                }
+                for item in previsao["scenarios"]
+            ],
+            "extrapolacao": True,
         }
 
     def atualizar_previsao_dashboard(
@@ -52301,7 +52151,11 @@ class SistemaEstudos(QMainWindow):
             f"Iniciados: {trabalhados}/{total}\n"
             f"Não iniciados: {nao_iniciados}\n"
             f"Consolidados: {consolidados}/{total}\n"
-            f"Ritmo de novos tópicos: {ritmo_inicio:.2f}/semana"
+            f"Ritmo de novos tópicos: {ritmo_inicio:.2f}/semana\n"
+            f"Base: {resultado['base_inicio']['event_count']} eventos em "
+            f"{resultado['base_inicio']['distinct_days']} dias distintos; "
+            f"período observado de {resultado['base_inicio']['span_days']} dias.\n"
+            "Datas, quando exibidas, são extrapolações e não metas ou garantias."
         )
         self.dashboard_previsao_edital.setToolTip(
             tooltip
@@ -52549,20 +52403,7 @@ class SistemaEstudos(QMainWindow):
         # CENÁRIOS
         # ----------------------------------------------------
 
-        cenarios = [
-            (
-                "Conservador",
-                0.70
-            ),
-            (
-                "Ritmo atual",
-                1.00
-            ),
-            (
-                "Acelerado",
-                1.30
-            ),
-        ]
+        cenarios = resultado["cenarios"]
 
         self.tabela_previsao_cenarios.setRowCount(
             len(
@@ -52570,43 +52411,15 @@ class SistemaEstudos(QMainWindow):
             )
         )
 
-        for linha, (
-            nome,
-            fator
-        ) in enumerate(
+        for linha, cenario in enumerate(
             cenarios
         ):
-            ritmo_inicio = (
-                resultado[
-                    "ritmo_inicio"
-                ]
-                * fator
-            )
-            ritmo_consolidacao = (
-                resultado[
-                    "ritmo_consolidacao"
-                ]
-                * fator
-            )
-
-            prev_cobertura = self.prever_data_por_ritmo(
-                resultado[
-                    "nao_iniciados"
-                ],
-                ritmo_inicio
-            )
-            prev_80 = self.prever_data_por_ritmo(
-                resultado[
-                    "restantes_80"
-                ],
-                ritmo_consolidacao
-            )
-            prev_100 = self.prever_data_por_ritmo(
-                resultado[
-                    "restantes_100_consolidacao"
-                ],
-                ritmo_consolidacao
-            )
+            nome = cenario["nome"]
+            ritmo_inicio = cenario["ritmo_inicio"]
+            ritmo_consolidacao = cenario["ritmo_consolidacao"]
+            prev_cobertura = cenario["previsao_cobertura"]
+            prev_80 = cenario["previsao_consolidacao_80"]
+            prev_100 = cenario["previsao_consolidacao_100"]
 
             def data_curta(
                 previsao
@@ -52698,7 +52511,7 @@ class SistemaEstudos(QMainWindow):
             or 0
         )
         tentativas = int(
-            item.get("dominio", {}).get("tentativas", 0)
+            item.get("tentativas", 0)
             or 0
         )
         iniciado = tentativas > 0
@@ -53714,7 +53527,18 @@ class SistemaEstudos(QMainWindow):
         self,
         concurso_id
     ):
-        return obter_progresso_topicos_nucleo(concurso_id)
+        return self.montar_snapshot_progresso_edital(concurso_id)["topicos"]
+
+    def montar_snapshot_progresso_edital(
+        self,
+        concurso_id
+    ):
+        """Fonte única compartilhada pela aba Progresso e pelo Dashboard."""
+        return self.cache_analitico.obter(
+            f"progresso:v2:{int(concurso_id)}",
+            lambda: obter_snapshot_progresso_edital(concurso_id),
+            ttl=20,
+        )
 
     def atualizar_progresso_dashboard(
         self,
@@ -53727,41 +53551,13 @@ class SistemaEstudos(QMainWindow):
         ):
             return
 
-        dados = self.montar_dados_progresso_edital(
+        snapshot = self.montar_snapshot_progresso_edital(
             concurso_id
         )
-
-        total = len(
-            dados
-        )
-
-        nao_iniciados = sum(
-            1
-            for item in dados
-            if item["estado"] == "Não iniciado"
-        )
-        consolidando = sum(
-            1
-            for item in dados
-            if item["estado"] == "Consolidando"
-        )
-        consolidados = sum(
-            1
-            for item in dados
-            if item["estado"] == "Consolidado"
-        )
-
-        trabalhados = (
-            total
-            - nao_iniciados
-        )
-
-        cobertura_nucleo = (
-            (metricas_globais or {})
-            .get("topic_coverage_rate", {})
-            .get("value")
-        )
-        cobertura = round(float(cobertura_nucleo)) if cobertura_nucleo is not None else 0
+        total = int(snapshot["total_topics"])
+        trabalhados = int(snapshot["started_topics"])
+        cobertura_valor = snapshot["topic_coverage_rate"]
+        cobertura = round(float(cobertura_valor)) if cobertura_valor is not None else 0
 
         self.dashboard_progresso_trabalhado.setText(
             f"{cobertura}%"
@@ -53775,26 +53571,23 @@ class SistemaEstudos(QMainWindow):
             f"{trabalhados} de {total} tópicos"
         )
         self.dashboard_progresso_consolidando.setText(
-            str(
-                consolidando
+            (
+                f"{float(snapshot['sufficient_evidence_rate']):.0f}%"
+                if snapshot["sufficient_evidence_rate"] is not None
+                else "Dados insuficientes"
             )
         )
         self.dashboard_progresso_consolidado.setText(
-            str(
-                consolidados
-            )
+            str(snapshot["consolidated_topics"])
         )
         self.dashboard_progresso_nao_iniciado.setText(
-            str(
-                nao_iniciados
+            (
+                f"{float(snapshot['question_coverage_rate']):.0f}%"
+                if snapshot["question_coverage_rate"] is not None
+                else "—"
             )
         )
-
-        dominio_global = (
-            (metricas_globais or {})
-            .get("mastery_score", {})
-            .get("value")
-        )
+        dominio_global = snapshot["global_mastery_score"]
 
         if dominio_global is not None:
             self.dashboard_dominio_medio.setText(
@@ -53862,112 +53655,73 @@ class SistemaEstudos(QMainWindow):
             obter_concurso_ativo()[0]
         )
 
-        dados = self.montar_dados_progresso_edital(
+        snapshot = self.montar_snapshot_progresso_edital(
             concurso_id
         )
-
+        dados = snapshot["topicos"]
         self.dados_progresso_edital = dados
-        metricas_globais_progresso = obter_metricas_globais_nucleo(
-            concurso_id
-        ).get("metrics", {})
-
-        total = len(
-            dados
-        )
-
-        estados = {
-            "Não iniciado": 0,
-            "Em andamento": 0,
-            "Consolidando": 0,
-            "Consolidado": 0,
-        }
-
-        for item in dados:
-            estados[
-                item["estado"]
-            ] += 1
-
-        trabalhados = (
-            total
-            - estados[
-                "Não iniciado"
-            ]
-        )
-
-        percentual_trabalhado_nucleo = (
-            metricas_globais_progresso
-            .get("topic_coverage_rate", {})
-            .get("value")
-        )
-        percentual_trabalhado = (
-            float(percentual_trabalhado_nucleo)
-            if percentual_trabalhado_nucleo is not None
-            else 0.0
-        )
-        percentual_consolidado = (
-            100.0
-            * estados[
-                "Consolidado"
-            ]
-            / total
-            if total > 0
-            else 0.0
-        )
+        total = int(snapshot["total_topics"])
+        trabalhados = int(snapshot["started_topics"])
+        percentual_trabalhado = snapshot["topic_coverage_rate"]
+        percentual_consolidado = snapshot["consolidated_rate"]
+        percentual_evidencia = snapshot["sufficient_evidence_rate"]
+        cobertura_questoes = snapshot["question_coverage_rate"]
 
         self.progresso_card_trabalhado.setText(
-            f"{percentual_trabalhado:.0f}%"
+            (
+                f"{float(percentual_trabalhado):.0f}%"
+                if percentual_trabalhado is not None
+                else "Dados insuficientes"
+            )
         )
         self.progresso_card_trabalhado_hint.setText(
             f"{trabalhados} de {total} tópicos"
         )
 
         self.progresso_card_consolidado.setText(
-            f"{percentual_consolidado:.0f}%"
+            (
+                f"{float(percentual_consolidado):.0f}%"
+                if percentual_consolidado is not None
+                else "Dados insuficientes"
+            )
         )
         self.progresso_card_consolidado_hint.setText(
             (
-                f"{estados['Consolidado']} "
+                f"{snapshot['consolidated_topics']} "
                 f"de {total} tópicos"
             )
         )
 
         self.progresso_card_consolidando.setText(
-            str(
-                estados[
-                    "Consolidando"
-                ]
+            (
+                f"{float(percentual_evidencia):.0f}%"
+                if percentual_evidencia is not None
+                else "Dados insuficientes"
             )
         )
         self.progresso_card_consolidando_hint.setText(
-            "tópicos em faixa intermediária"
+            (
+                f"{snapshot['sufficient_evidence_topics']} de {total} "
+                "com evidência moderada/alta"
+            )
         )
 
         self.progresso_card_nao_iniciado.setText(
-            str(
-                estados[
-                    "Não iniciado"
-                ]
+            (
+                f"{float(cobertura_questoes):.0f}%"
+                if cobertura_questoes is not None
+                else "Dados insuficientes"
             )
         )
         self.progresso_card_nao_iniciado_hint.setText(
-            (
-                "nenhum histórico"
-                if estados[
-                    "Não iniciado"
-                ] > 0
-                else "todo o conteúdo já foi iniciado"
-            )
+            "questões ativas respondidas ao menos uma vez"
         )
 
-        dominio_global = (
-            metricas_globais_progresso
-            .get("mastery_score", {})
-            .get("value")
-        )
+        dominio_global = snapshot["global_mastery_score"]
         topicos_com_dominio = sum(
             1
             for item in dados
-            if item["dominio"]["score"] is not None
+            if item["dominio_score"] is not None
         )
 
         if dominio_global is not None:
@@ -53983,62 +53737,29 @@ class SistemaEstudos(QMainWindow):
             )
         else:
             self.progresso_card_dominio.setText(
-                "—"
+                "Dados insuficientes"
             )
             self.progresso_card_dominio_hint.setText(
-                "ainda sem respostas internas"
+                "o núcleo ainda não certifica domínio global"
             )
+
+        lacunas = snapshot["gaps"]
+        self.progresso_lacunas_resumo.setText(
+            "Lacunas do edital — "
+            f"não iniciados: {lacunas['not_started']} • "
+            f"iniciados com evidência insuficiente: "
+            f"{lacunas['started_insufficient_evidence']} • "
+            f"evidência baixa: {lacunas['low_evidence']} • "
+            f"evidência suficiente, ainda não consolidados: "
+            f"{lacunas['sufficient_evidence_not_consolidated']} • "
+            f"revisões vencidas: {lacunas['overdue_review']}"
+        )
 
         # ----------------------------------------------------
         # DISCIPLINAS
         # ----------------------------------------------------
 
-        agrupado = {}
-
-        for item in dados:
-            nome = item[
-                "disciplina"
-            ]
-
-            if nome not in agrupado:
-                agrupado[
-                    nome
-                ] = {
-                    "total": 0,
-                    "trabalhados": 0,
-                    "consolidando": 0,
-                    "consolidados": 0,
-                    "nao_iniciados": 0,
-                }
-
-            info = agrupado[
-                nome
-            ]
-            info["total"] += 1
-
-            if item["estado"] == "Não iniciado":
-                info[
-                    "nao_iniciados"
-                ] += 1
-            else:
-                info[
-                    "trabalhados"
-                ] += 1
-
-            if item["estado"] == "Consolidando":
-                info[
-                    "consolidando"
-                ] += 1
-
-            if item["estado"] == "Consolidado":
-                info[
-                    "consolidados"
-                ] += 1
-
-        disciplinas = sorted(
-            agrupado.items(),
-            key=lambda par: par[0].lower()
-        )
+        disciplinas = snapshot["disciplinas"]
 
         self.progresso_contagem_disciplinas.setText(
             (
@@ -54056,64 +53777,27 @@ class SistemaEstudos(QMainWindow):
             )
         )
 
-        for linha, (
-            disciplina,
-            info
-        ) in enumerate(
-            disciplinas
-        ):
-            cobertura = (
-                round(
-                    100.0
-                    * info[
-                        "trabalhados"
-                    ]
-                    / info[
-                        "total"
-                    ]
-                )
-                if info[
-                    "total"
-                ] > 0
-                else 0
-            )
+        for linha, info in enumerate(disciplinas):
+            def taxa_texto(valor):
+                return f"{float(valor):.0f}%" if valor is not None else "—"
 
             valores = [
-                disciplina,
-                str(
-                    info[
-                        "total"
-                    ]
-                ),
-                str(
-                    info[
-                        "trabalhados"
-                    ]
-                ),
-                "",
-                str(
-                    info[
-                        "consolidando"
-                    ]
-                ),
-                str(
-                    info[
-                        "consolidados"
-                    ]
-                ),
-                str(
-                    info[
-                        "nao_iniciados"
-                    ]
+                info["disciplina"],
+                str(info["total_topicos"]),
+                taxa_texto(info["cobertura_topicos"]),
+                taxa_texto(info["cobertura_questoes"]),
+                taxa_texto(info["evidencia_suficiente_taxa"]),
+                str(info["consolidados"]),
+                (
+                    f"{float(info['dominio']):.0f}/100"
+                    if info["dominio"] is not None
+                    else "Dados insuficientes"
                 ),
             ]
 
             for coluna, valor in enumerate(
                 valores
             ):
-                if coluna == 3:
-                    continue
-
                 item_tabela = QTableWidgetItem(
                     valor
                 )
@@ -54125,25 +53809,11 @@ class SistemaEstudos(QMainWindow):
 
                 if (
                     coluna == 5
-                    and info[
-                        "consolidados"
-                    ] > 0
+                    and info["consolidados"] > 0
                 ):
                     aplicar_destaque_tabela(
                         item_tabela,
                         "sucesso",
-                        False
-                    )
-
-                if (
-                    coluna == 6
-                    and info[
-                        "nao_iniciados"
-                    ] > 0
-                ):
-                    aplicar_destaque_tabela(
-                        item_tabela,
-                        "perigo",
                         False
                     )
 
@@ -54152,52 +53822,6 @@ class SistemaEstudos(QMainWindow):
                     coluna,
                     item_tabela
                 )
-
-            barra = QProgressBar()
-            barra.setObjectName(
-                "syllabusCoverageBar"
-            )
-            barra.setRange(
-                0,
-                100
-            )
-            barra.setValue(
-                int(
-                    cobertura
-                )
-            )
-            barra.setFormat(
-                f"{cobertura}%"
-            )
-            barra.setAlignment(
-                Qt.AlignCenter
-            )
-            barra.setTextVisible(
-                True
-            )
-            barra.setFixedHeight(
-                18
-            )
-
-            contenedor_barra = QWidget()
-            contenedor_layout = QHBoxLayout(
-                contenedor_barra
-            )
-            contenedor_layout.setContentsMargins(
-                7,
-                4,
-                7,
-                4
-            )
-            contenedor_layout.addWidget(
-                barra
-            )
-
-            self.tabela_progresso_disciplinas.setCellWidget(
-                linha,
-                3,
-                contenedor_barra
-            )
 
             self.tabela_progresso_disciplinas.setRowHeight(
                 linha,
@@ -54210,8 +53834,8 @@ class SistemaEstudos(QMainWindow):
         )
 
         nomes_disciplinas = [
-            nome
-            for nome, _ in disciplinas
+            item["disciplina"]
+            for item in disciplinas
         ]
 
         self.progresso_filtro_disciplina.blockSignals(
@@ -54258,6 +53882,15 @@ class SistemaEstudos(QMainWindow):
         estado_filtro = (
             self.progresso_filtro_estado.currentText()
         )
+        evidencia_filtro = (
+            self.progresso_filtro_evidencia.currentText()
+        )
+        mapa_evidencia_filtro = {
+            "Evidência insuficiente": "insufficient",
+            "Evidência baixa": "low",
+            "Evidência moderada": "moderate",
+            "Evidência alta": "high",
+        }
 
         filtrados = []
 
@@ -54282,14 +53915,21 @@ class SistemaEstudos(QMainWindow):
             ):
                 continue
 
+            evidencia_codigo = mapa_evidencia_filtro.get(
+                evidencia_filtro
+            )
+            if evidencia_codigo and item["evidencia"] != evidencia_codigo:
+                continue
+
             if busca:
                 alvo = self.normalizar_texto_progresso(
                     (
                         f"{item['disciplina']} "
                         f"{item['topico']} "
                         f"{item['estado']} "
-                        f"{item['dominio']['nivel']} "
-                        f"{item['dominio']['score']}"
+                        f"{item['evidencia_rotulo']} "
+                        f"{item['dominio_nivel']} "
+                        f"{item['dominio_score']}"
                     )
                 )
 
@@ -54330,7 +53970,7 @@ class SistemaEstudos(QMainWindow):
         mapa_destaque = {
             "Não iniciado": "perigo",
             "Em andamento": "alerta",
-            "Consolidando": "atencao",
+            "Em consolidação": "atencao",
             "Consolidado": "sucesso",
         }
 
@@ -54338,47 +53978,31 @@ class SistemaEstudos(QMainWindow):
             filtrados
         ):
             dominio_item = item["dominio"]
-            score_dominio = dominio_item.get("score")
+            score_dominio = item["dominio_score"]
             texto_dominio = (
-                f"{float(score_dominio):.0f}/100 • {dominio_item['nivel']}"
+                f"{float(score_dominio):.0f}/100 • {item['dominio_nivel']}"
+                + (" • provisório" if item["dominio_provisorio"] else "")
                 if score_dominio is not None
-                else "— • Dados insuficientes"
+                else "Dados insuficientes"
             )
             valores = [
-                item[
-                    "disciplina"
-                ],
-                item[
-                    "topico"
-                ],
-                item[
-                    "estado"
-                ],
-                str(
-                    item[
-                        "revisoes"
-                    ]
+                item["disciplina"],
+                item["topico"],
+                item["estado"],
+                (
+                    f"{float(item['cobertura_questoes']):.0f}%"
+                    if item["cobertura_questoes"] is not None
+                    else "Sem questões ativas"
                 ),
-                formatar_percentual(
-                    item[
-                        "percentual"
-                    ]
-                ),
-                "",
+                item["evidencia_rotulo"],
                 texto_dominio,
-                formatar_data(
-                    item[
-                        "proxima"
-                    ]
-                ),
+                str(item["revisoes"]),
+                formatar_data(item["proxima"]),
             ]
 
             for coluna, valor in enumerate(
                 valores
             ):
-                if coluna == 5:
-                    continue
-
                 celula = QTableWidgetItem(
                     valor
                 )
@@ -54414,7 +54038,7 @@ class SistemaEstudos(QMainWindow):
                         True
                     )
 
-                if coluna == 6:
+                if coluna == 5:
                     cobertura_item = dominio_item.get("cobertura")
                     recente_item = dominio_item.get("desempenho_recente")
                     score_tooltip = (
@@ -54436,27 +54060,22 @@ class SistemaEstudos(QMainWindow):
                     celula.setToolTip(
                         (
                             f"Índice de Domínio: {score_tooltip}\n"
-                            f"Nível: {dominio_item['nivel']}\n"
-                            f"Evidência: {dominio_item['qualidade_evidencia']}\n\n"
-                            f"Desempenho atual: {float(dominio_item['desempenho']):.1f}\n"
+                            f"Nível: {item['dominio_nivel']}\n"
+                            f"Evidência: {item['evidencia_rotulo']}\n\n"
+                            f"Desempenho atual: {dominio_item.get('desempenho') if dominio_item.get('desempenho') is not None else 'dados insuficientes'}\n"
                             f"Desempenho recente: {recente_tooltip}\n"
-                            f"Cobertura: {cobertura_tooltip}\n"
-                            f"Estabilidade: {dominio_item['estabilidade']:.1f}\n"
-                            f"Recência: {dominio_item['recencia']:.1f}\n"
-                            f"Controle de erros/recuperação: {dominio_item['controle_erros']:.1f}\n"
+                            f"Cobertura de questões: {cobertura_tooltip}\n"
                             f"Consolidação: {item['consolidacao']}\n\n"
                             f"Respostas históricas: {dominio_item['tentativas_historicas']} • "
                             f"Questões diferentes: {dominio_item['questoes_unicas']} • "
                             f"Dias: {dominio_item['dias_ativos_historicos']} • "
-                            f"Dúvidas: {dominio_item['taxa_duvida']:.0f}% • "
+                            f"Dúvidas: {dominio_item.get('taxa_duvida') if dominio_item.get('taxa_duvida') is not None else '—'} • "
                             f"Recorrentes: {dominio_item['recorrentes']} • "
                             f"Críticas: {dominio_item['criticas']}"
                         )
                     )
 
-                    nivel_dominio = dominio_item[
-                        "nivel"
-                    ]
+                    nivel_dominio = item["dominio_nivel"]
 
                     if nivel_dominio in (
                         "Domínio forte",
@@ -54486,45 +54105,20 @@ class SistemaEstudos(QMainWindow):
                             False
                         )
 
-                if (
-                    coluna == 4
-                    and item[
-                        "percentual"
-                    ] is not None
-                ):
-                    if item[
-                        "percentual"
-                    ] >= 85:
-                        aplicar_destaque_tabela(
-                            celula,
-                            "sucesso",
-                            False
-                        )
-                    elif item[
-                        "percentual"
-                    ] < 70:
-                        aplicar_destaque_tabela(
-                            celula,
-                            "perigo",
-                            False
-                        )
+                if coluna == 4:
+                    tom_evidencia = {
+                        "insufficient": "perigo",
+                        "low": "alerta",
+                        "moderate": "atencao",
+                        "high": "sucesso",
+                    }.get(item["evidencia"], "atencao")
+                    aplicar_destaque_tabela(celula, tom_evidencia, False)
 
                 self.tabela_progresso_topicos.setItem(
                     linha,
                     coluna,
                     celula
                 )
-
-            estrelas = IndicadorEstrelasFila(
-                item[
-                    "importancia"
-                ]
-            )
-            self.tabela_progresso_topicos.setCellWidget(
-                linha,
-                5,
-                estrelas
-            )
 
             self.tabela_progresso_topicos.setRowHeight(
                 linha,

@@ -124,6 +124,7 @@ FONTES_NUCLEO_ATUAL = {
     "laboratorio.py",
     "fila_candidata.py",
     "fila_observacao.py",
+    "progresso_edital.py",
     "versao.py",
     "statistics_core/__init__.py",
     "statistics_core/models.py",

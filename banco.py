@@ -29,6 +29,7 @@ from fila_observacao import (
     observation_signature,
     summarize_snapshot_safety,
 )
+from progresso_edital import build_syllabus_progress_snapshot
 from statistics_core import StatisticsService
 
 
@@ -91,7 +92,12 @@ def obter_metricas_periodo_nucleo(
 
 
 def obter_progresso_topicos_nucleo(concurso_id=None):
-    """Snapshot em lote para Dashboard e aba Progresso, sem formulas na UI."""
+    """Compatibilidade: retorna os tópicos do snapshot oficial de progresso."""
+    return obter_snapshot_progresso_edital(concurso_id)["topicos"]
+
+
+def obter_snapshot_progresso_edital(concurso_id=None):
+    """Snapshot V2 compartilhado pelo Dashboard e pela aba Progresso."""
     if concurso_id is None:
         concurso_id = obter_concurso_ativo()[0]
     concurso_id = int(concurso_id)
@@ -124,92 +130,35 @@ def obter_progresso_topicos_nucleo(concurso_id=None):
             (concurso_id, concurso_id),
         ).fetchall()
 
-    metricas = obter_servico_estatistico().get_topic_metrics_batch(
-        concurso_id,
-        [int(linha[0]) for linha in linhas],
-    )
-    resultados = []
-    for linha in linhas:
-        topico_id = int(linha[0])
-        nucleo = metricas[topico_id]
-        dominio_resultado = nucleo.metric("mastery_score")
-        evidencia_resultado = nucleo.metric("evidence_level")
-        cobertura_resultado = nucleo.metric("question_coverage_rate")
-        recente_resultado = nucleo.metric("recent_performance_rate")
-        tendencia_resultado = nucleo.metric("performance_trend")
-        consolidacao = nucleo.value("topic_consolidation_status")
-        tentativas = int(nucleo.value("answered_attempt_count", 0) or 0)
-        evidencia_ordem = int(
-            evidencia_resultado.parameters.get("order", 0) or 0
-        )
-        dominio = dominio_resultado.value
-
-        if tentativas <= 0:
-            estado, ordem_estado = "Não iniciado", 0
-        elif consolidacao == "consolidated":
-            estado, ordem_estado = "Consolidado", 3
-        elif dominio is not None and float(dominio) >= 70.0 and evidencia_ordem >= 2:
-            estado, ordem_estado = "Consolidando", 2
-        else:
-            estado, ordem_estado = "Em andamento", 1
-
-        parametros_dominio = dominio_resultado.parameters
-        controle_erros = parametros_dominio.get("error_control", {})
-        ultima_revisao = nucleo.value("last_review_at")
-        resultados.append({
-            "topico_id": topico_id,
+    catalogo = [
+        {
+            "topico_id": int(linha[0]),
             "disciplina_id": int(linha[1]),
             "disciplina": linha[2],
             "topico": linha[3],
-            "revisoes": int(nucleo.value("completed_review_count", 0) or 0),
-            "estado_revisoes": nucleo.metric("completed_review_count").state,
-            "ultima": str(ultima_revisao)[:10] if ultima_revisao else None,
-            "ultima_atividade": nucleo.value("last_activity_at"),
-            "proxima": linha[5],
-            "percentual": nucleo.value("accuracy_rate"),
             "importancia": int(linha[4] or 3),
-            "estado": estado,
-            "ordem_estado": ordem_estado,
-            "consolidacao": consolidacao,
-            "dominio": {
-                "score": dominio,
-                "score_estimado": parametros_dominio.get("estimate"),
-                "nivel": parametros_dominio.get("level", "Dados insuficientes"),
-                "qualidade_evidencia": evidencia_resultado.parameters.get(
-                    "label", "Insuficiente"
-                ),
-                "evidence_level": evidencia_resultado.value,
-                "desempenho": parametros_dominio.get("current_performance", 0.0),
-                "desempenho_recente": recente_resultado.value,
-                "tendencia": tendencia_resultado.value,
-                "cobertura": cobertura_resultado.value,
-                "estabilidade": parametros_dominio.get("temporal_stability", 50.0),
-                "recencia": parametros_dominio.get("recency", 0.0),
-                "controle_erros": controle_erros.get("score", 100.0),
-                "tentativas": tentativas,
-                "tentativas_historicas": tentativas,
-                "questoes_unicas": int(
-                    nucleo.value("answered_unique_question_count", 0) or 0
-                ),
-                "dias_ativos_historicos": int(
-                    evidencia_resultado.parameters.get("active_days", 0) or 0
-                ),
-                "taxa_duvida": parametros_dominio.get("doubt_rate", 0.0),
-                "recorrentes": int(controle_erros.get("recurring", 0) or 0),
-                "criticas": int(controle_erros.get("critical", 0) or 0),
-                "recuperadas": int(controle_erros.get("recovered", 0) or 0),
-            },
-        })
-
-    resultados.sort(
-        key=lambda item: (
-            item["ordem_estado"],
-            -item["importancia"],
-            item["disciplina"].lower(),
-            item["topico"].lower(),
-        )
+            "proxima_revisao": linha[5],
+        }
+        for linha in linhas
+    ]
+    servico = obter_servico_estatistico()
+    metricas_topicos = servico.get_topic_metrics_batch(
+        concurso_id,
+        [int(linha[0]) for linha in linhas],
     )
-    return resultados
+    disciplina_ids = sorted({int(linha[1]) for linha in linhas})
+    metricas_disciplinas = servico.get_subject_metrics_batch(
+        concurso_id,
+        disciplina_ids,
+    )
+    metricas_globais = servico.get_global_metrics(concurso_id)
+    return build_syllabus_progress_snapshot(
+        concurso_id,
+        catalogo,
+        metricas_topicos,
+        metricas_disciplinas,
+        metricas_globais,
+    ).to_dict()
 
 
 def comparar_metricas_nucleo_topico(topico_id, concurso_id=None):
@@ -17652,6 +17601,64 @@ def obter_eventos_previsao_edital(
             "data_inicio": linha[8],
             "data_consolidacao": linha[9],
             "ultima_revisao": linha[10],
+        }
+        for linha in linhas
+    ]
+
+
+def obter_eventos_previsao_edital_v2(concurso_id=None):
+    """Eventos com linhagem comprovável para a previsão conservadora V2.
+
+    O início usa a primeira tentativa efetiva do tópico no concurso. Não há
+    evento histórico oficial que permita datar retrospectivamente a
+    consolidação definida por ``topic_consolidation_status@1``; portanto essa
+    data permanece ausente até existir histórico versionado próprio.
+    """
+    if concurso_id is None:
+        concurso_id = obter_concurso_ativo()[0]
+    concurso_id = int(concurso_id)
+    with conectar() as conexao:
+        linhas = conexao.execute(
+            """
+            SELECT
+                t.id,
+                d.nome,
+                t.nome,
+                MIN(substr(tq.respondida_em, 1, 10)) AS data_inicio
+            FROM topicos t
+            JOIN disciplinas d ON d.id = t.disciplina_id
+            JOIN disciplina_concurso_inclusao dc
+                ON dc.disciplina_id = d.id
+                AND dc.concurso_id = ?
+                AND dc.incluido = 1
+                AND COALESCE(dc.pausado, 0) = 0
+            JOIN topico_concurso_importancia tc
+                ON tc.topico_id = t.id
+                AND tc.concurso_id = ?
+                AND tc.incluido = 1
+                AND COALESCE(tc.pausado, 0) = 0
+            LEFT JOIN tentativas_questoes tq
+                ON tq.concurso_id = ?
+                AND COALESCE(tq.topico_id_snapshot, (
+                    SELECT q.topico_id
+                    FROM questoes q
+                    WHERE q.id = tq.questao_id
+                )) = t.id
+                AND tq.correta IN (0, 1)
+            GROUP BY t.id, d.nome, t.nome
+            ORDER BY d.nome COLLATE NOCASE, t.nome COLLATE NOCASE
+            """,
+            (concurso_id, concurso_id, concurso_id),
+        ).fetchall()
+    return [
+        {
+            "topico_id": int(linha[0]),
+            "disciplina": linha[1],
+            "topico": linha[2],
+            "data_inicio": linha[3],
+            "data_consolidacao": None,
+            "linhagem_inicio_confirmada": bool(linha[3]),
+            "linhagem_consolidacao_confirmada": False,
         }
         for linha in linhas
     ]
