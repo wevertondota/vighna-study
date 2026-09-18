@@ -12,7 +12,30 @@ from typing import Any
 
 ACTIVE_QUEUE_VERSION = "fila_inteligente_v3"
 SHADOW_QUEUE_VERSION = "fila_candidate_shadow_v1"
+ELIGIBLE_QUEUE_VERSION = "fila_candidate_eligible_v1"
 USED_FOR_QUEUE_ORDER = False
+
+CANDIDATE_MODE_EXPLORATORY = "exploratory"
+CANDIDATE_MODE_ELIGIBLE = "activation_eligible"
+
+EVIDENCE_ACTIVATION_POLICY = {
+    "insufficient": {
+        "active_eligible": False,
+        "status": "uncertified",
+    },
+    "low": {
+        "active_eligible": False,
+        "status": "provisional_low_evidence",
+    },
+    "moderate": {
+        "active_eligible": True,
+        "status": "eligible",
+    },
+    "high": {
+        "active_eligible": True,
+        "status": "eligible",
+    },
+}
 
 ACADEMIC_COMPONENTS = {
     "dominio",
@@ -60,6 +83,19 @@ def _metric(metrics: Any, metric_id: str) -> Any | None:
         return None
 
 
+def evidence_activation_policy(evidence_level: Any) -> dict[str, Any]:
+    """Retorna a politica central de elegibilidade do dominio oficial."""
+
+    level = str(evidence_level or "insufficient").strip().lower()
+    policy = EVIDENCE_ACTIVATION_POLICY.get(
+        level,
+        EVIDENCE_ACTIVATION_POLICY["insufficient"],
+    )
+    return {
+        "evidence_level": level,
+        "active_eligible": bool(policy["active_eligible"]),
+        "status": str(policy["status"]),
+    }
 def _review_score(review_count: int) -> float:
     count = max(0, int(review_count))
     return {0: 100.0, 1: 78.0, 2: 58.0, 3: 40.0, 4: 24.0}.get(
@@ -132,8 +168,15 @@ def build_shadow_candidate(
     *,
     decline_moderate: float,
     decline_strong: float,
+    candidate_mode: str = CANDIDATE_MODE_EXPLORATORY,
 ) -> dict[str, Any]:
     """Calcula um candidato sem modificar nem reinterpretar a fila ativa."""
+
+    if candidate_mode not in {
+        CANDIDATE_MODE_EXPLORATORY,
+        CANDIDATE_MODE_ELIGIBLE,
+    }:
+        raise ValueError(f"Modo de candidato invalido: {candidate_mode}")
 
     active_item = dict(active_item or {})
     weights = {
@@ -176,8 +219,18 @@ def build_shadow_candidate(
         if evidence is not None
         else 0
     )
+    activation_policy = evidence_activation_policy(evidence_level)
+    mastery_available = mastery is not None and mastery.value is not None
+    use_official_mastery = (
+        mastery_available
+        and activation_policy["status"] != "uncertified"
+        and (
+            candidate_mode == CANDIDATE_MODE_EXPLORATORY
+            or activation_policy["active_eligible"]
+        )
+    )
 
-    if mastery is not None and mastery.value is not None:
+    if use_official_mastery:
         mastery_value = _clamp(float(mastery.value))
         components["dominio"] = _component_record(
             raw_value=mastery_value,
@@ -187,11 +240,19 @@ def build_shadow_candidate(
             state=mastery.state,
             metric_version=mastery.metric_version,
         )
-        if evidence_level == "low":
+        if activation_policy["status"] == "provisional_low_evidence":
             warnings.append("provisional_mastery_low_evidence")
     else:
         legacy_value = active_item.get("dominio")
-        if mastery is None:
+        if (
+            mastery_available
+            and activation_policy["status"] == "provisional_low_evidence"
+        ):
+            reason = "official_mastery_low_evidence_not_activation_eligible"
+            warnings.append("provisional_mastery_low_evidence")
+        elif activation_policy["status"] == "uncertified":
+            reason = "official_mastery_insufficient_evidence"
+        elif mastery is None:
             reason = "official_mastery_unavailable"
         elif mastery.state == "insufficient_data":
             reason = "official_mastery_insufficient_evidence"
@@ -432,7 +493,12 @@ def build_shadow_candidate(
         "topico": active_item.get("topico"),
         "importancia": int(active_item.get("importancia") or 3),
         "active_queue_version": ACTIVE_QUEUE_VERSION,
-        "candidate_queue_version": SHADOW_QUEUE_VERSION,
+        "candidate_queue_version": (
+            SHADOW_QUEUE_VERSION
+            if candidate_mode == CANDIDATE_MODE_EXPLORATORY
+            else ELIGIBLE_QUEUE_VERSION
+        ),
+        "candidate_mode": candidate_mode,
         "score_candidate": score,
         "level_candidate": _level(score),
         "main_reason_key_candidate": principal,
@@ -447,6 +513,7 @@ def build_shadow_candidate(
         "official_metrics": official_snapshot,
         "evidence_level": evidence_level,
         "evidence_order": evidence_order,
+        "evidence_activation_policy": activation_policy,
         "fallbacks": fallbacks,
         "warnings": warnings,
         "used_for_queue_order": USED_FOR_QUEUE_ORDER,
@@ -472,14 +539,29 @@ def compare_shadow_queue(
         )
         for item in active
     ]
-    candidates.sort(
-        key=lambda item: (
+    eligible_candidates = [
+        build_shadow_candidate(
+            item,
+            metrics_by_topic.get(int(item["topico_id"])),
+            decline_moderate=decline_moderate,
+            decline_strong=decline_strong,
+            candidate_mode=CANDIDATE_MODE_ELIGIBLE,
+        )
+        for item in active
+    ]
+
+    def candidate_sort_key(item: Mapping[str, Any]) -> tuple[Any, ...]:
+        return (
             -float(item["score_candidate"]),
             -int(item["importancia"]),
             str(item.get("disciplina") or "").lower(),
             str(item.get("topico") or "").lower(),
         )
+
+    candidates.sort(
+        key=candidate_sort_key,
     )
+    eligible_candidates.sort(key=candidate_sort_key)
 
     active_positions = {
         int(item["topico_id"]): position
@@ -489,9 +571,17 @@ def compare_shadow_queue(
         int(item["topico_id"]): position
         for position, item in enumerate(candidates, 1)
     }
+    eligible_candidate_positions = {
+        int(item["topico_id"]): position
+        for position, item in enumerate(eligible_candidates, 1)
+    }
     candidate_by_topic = {
         int(item["topico_id"]): item
         for item in candidates
+    }
+    eligible_candidate_by_topic = {
+        int(item["topico_id"]): item
+        for item in eligible_candidates
     }
     active_by_topic = {
         int(item["topico_id"]): item
@@ -502,6 +592,7 @@ def compare_shadow_queue(
     for item in active:
         topic_id = int(item["topico_id"])
         candidate = candidate_by_topic[topic_id]
+        eligible_candidate = eligible_candidate_by_topic[topic_id]
         active_components = dict(item.get("componentes_fila") or {})
         component_deltas = {
             key: round(
@@ -532,6 +623,14 @@ def compare_shadow_queue(
             "active_score": float(item.get("score_fila") or 0.0),
             "candidate_position": candidate_positions[topic_id],
             "candidate_score": float(candidate["score_candidate"]),
+            "eligible_candidate_position": eligible_candidate_positions[topic_id],
+            "eligible_candidate_score": float(
+                eligible_candidate["score_candidate"]
+            ),
+            "eligible_candidate_components": eligible_candidate[
+                "components_candidate"
+            ],
+            "eligible_candidate_fallbacks": eligible_candidate["fallbacks"],
             "position_delta": active_positions[topic_id] - candidate_positions[topic_id],
             "score_delta": round(
                 float(candidate["score_candidate"])
@@ -551,6 +650,7 @@ def compare_shadow_queue(
             "relevant_differences": relevant,
             "active_queue_version": ACTIVE_QUEUE_VERSION,
             "candidate_queue_version": SHADOW_QUEUE_VERSION,
+            "eligible_candidate_queue_version": ELIGIBLE_QUEUE_VERSION,
             "used_for_queue_order": USED_FOR_QUEUE_ORDER,
         })
 
@@ -584,9 +684,14 @@ def compare_shadow_queue(
     return {
         "active_queue_version": ACTIVE_QUEUE_VERSION,
         "candidate_queue_version": SHADOW_QUEUE_VERSION,
+        "eligible_candidate_queue_version": ELIGIBLE_QUEUE_VERSION,
         "used_for_queue_order": USED_FOR_QUEUE_ORDER,
         "active_order": [int(item["topico_id"]) for item in active],
         "candidate_order": [int(item["topico_id"]) for item in candidates],
+        "eligible_candidate_order": [
+            int(item["topico_id"])
+            for item in eligible_candidates
+        ],
         "comparisons": comparisons,
         "summary": {
             "topics_evaluated": total,
@@ -614,5 +719,6 @@ def compare_shadow_queue(
             ),
         },
         "candidates_by_topic": candidate_by_topic,
+        "eligible_candidates_by_topic": eligible_candidate_by_topic,
         "active_by_topic": active_by_topic,
     }

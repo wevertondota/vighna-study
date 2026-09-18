@@ -266,6 +266,7 @@ from banco import (
     duplicar_prompt_ia,
     obter_calibracao_foco,
     registrar_recomendacao_estudo,
+    registrar_observacao_fila_sombra_segura,
     atualizar_decisao_recomendacao,
     obter_perfil_decisoes_recomendacao,
     resolver_disciplina_id_estrutural,
@@ -8716,7 +8717,8 @@ def integrar_sessao_questoes_com_revisoes(
             acertos,
             confianca,
             proxima_revisao=proxima,
-            sessao_questoes_id=sessao_id
+            sessao_questoes_id=sessao_id,
+            concurso_id=contexto.get("concurso_id"),
         )
 
         if primeiro_contato:
@@ -20912,13 +20914,19 @@ class JanelaRevisao(QDialog):
         nome_topico,
         parent=None,
         revisao=None,
-        modo_edicao=False
+        modo_edicao=False,
+        concurso_id=None,
     ):
         super().__init__(parent)
 
         self.topico_id = topico_id
         self.revisao = revisao
         self.modo_edicao = modo_edicao
+        self.concurso_id = (
+            int(concurso_id)
+            if concurso_id not in (None, "")
+            else int(obter_concurso_ativo()[0])
+        )
 
         self.sugestao_em_uso = True
         self._atualizando_data_sugerida = False
@@ -21822,7 +21830,8 @@ class JanelaRevisao(QDialog):
                 self.observacao.toPlainText(),
                 self.texto_erros.toPlainText(),
                 self.continuacao.toPlainText(),
-                proxima
+                proxima,
+                concurso_id=self.concurso_id,
             )
 
         self.accept()
@@ -37758,6 +37767,14 @@ class SistemaEstudos(QMainWindow):
                 pass
 
         self.cache_analitico.invalidar("inteligencia:decisoes")
+
+        # Observacao significativa: o usuario confirmou a acao. Qualquer
+        # falha de telemetria e absorvida pela camada segura e nunca impede a
+        # recomendacao V3/V5 nem altera a ordem apresentada.
+        registrar_observacao_fila_sombra_segura(
+            "study_now_explicit",
+            concurso_id=obter_concurso_ativo()[0],
+        )
 
         if (
             janela.usar_modo_foco

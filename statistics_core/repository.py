@@ -225,8 +225,9 @@ class MetricsRepository:
         topic_id: int | None = None,
         subject_id: int | None = None,
     ) -> list[ReviewEvent]:
-        # A linhagem em tentativas e a unica prova de perfil disponivel hoje.
-        # Revisao manual/legada sem membros permanece explicitamente desconhecida.
+        # Bancos migrados usam revisoes.concurso_id como autoridade. Em bancos
+        # realmente antigos, ainda sem a coluna, preservamos a leitura legada
+        # por tentativas apenas para permitir abertura/migracao compativel.
         period_sql, params = self._period_clause(
             period,
             "COALESCE(r.realizada_em, r.data)",
@@ -240,6 +241,18 @@ class MetricsRepository:
             params.append(int(subject_id))
 
         with closing(self._connect()) as connection:
+            review_columns = {
+                str(row[1])
+                for row in connection.execute(
+                    "PRAGMA table_info(revisoes)"
+                ).fetchall()
+            }
+            has_direct_lineage = "concurso_id" in review_columns
+            direct_lineage_sql = (
+                "r.concurso_id"
+                if has_direct_lineage
+                else "NULL"
+            )
             rows = connection.execute(
                 f"""
                 SELECT
@@ -249,6 +262,7 @@ class MetricsRepository:
                     COALESCE(r.realizada_em, r.data),
                     COALESCE(r.questoes, 0),
                     COALESCE(r.acertos, 0),
+                    {direct_lineage_sql} AS direct_profile,
                     COUNT(tq.id) AS member_count,
                     COUNT(DISTINCT tq.concurso_id) AS profile_count,
                     MIN(tq.concurso_id) AS only_profile
@@ -264,14 +278,20 @@ class MetricsRepository:
 
         reviews = []
         for row in rows:
-            member_count = int(row[6] or 0)
-            profile_count = int(row[7] or 0)
-            only_profile = int(row[8]) if row[8] is not None else None
-            lineage_known = member_count > 0 and profile_count == 1
+            direct_profile = int(row[6]) if row[6] is not None else None
+            member_count = int(row[7] or 0)
+            profile_count = int(row[8] or 0)
+            only_profile = int(row[9]) if row[9] is not None else None
+            if has_direct_lineage:
+                qualified_profile = direct_profile
+                lineage_known = direct_profile is not None
+            else:
+                lineage_known = member_count > 0 and profile_count == 1
+                qualified_profile = only_profile if lineage_known else None
             if (
                 concurso_id is not None
                 and lineage_known
-                and only_profile != int(concurso_id)
+                and qualified_profile != int(concurso_id)
             ):
                 continue
             reviews.append(
@@ -282,7 +302,7 @@ class MetricsRepository:
                     occurred_at=str(row[3]),
                     question_count=int(row[4] or 0),
                     correct_count=int(row[5] or 0),
-                    qualified_profile_id=only_profile if lineage_known else None,
+                    qualified_profile_id=qualified_profile,
                     lineage_known=lineage_known,
                 )
             )

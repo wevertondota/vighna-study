@@ -2,6 +2,7 @@ import sqlite3
 import sys
 import random
 import json
+import logging
 import math
 import re
 import statistics
@@ -18,8 +19,15 @@ from espacamento import (
 )
 from fila_candidata import (
     ACTIVE_QUEUE_VERSION,
+    ELIGIBLE_QUEUE_VERSION,
     SHADOW_QUEUE_VERSION,
     compare_shadow_queue,
+)
+from fila_observacao import (
+    SIGNIFICANT_SHADOW_EVENTS,
+    evaluate_queue_activation_readiness,
+    observation_signature,
+    summarize_snapshot_safety,
 )
 from statistics_core import StatisticsService
 
@@ -30,6 +38,7 @@ else:
     PASTA_APLICACAO = Path(__file__).resolve().parent
 
 CAMINHO_BANCO = PASTA_APLICACAO / "estudos.db"
+LOGGER = logging.getLogger(__name__)
 
 
 def conectar():
@@ -279,6 +288,7 @@ def criar_banco():
             CREATE TABLE IF NOT EXISTS revisoes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 topico_id INTEGER NOT NULL,
+                concurso_id INTEGER,
                 data TEXT NOT NULL,
                 questoes INTEGER NOT NULL,
                 acertos INTEGER NOT NULL,
@@ -287,7 +297,10 @@ def criar_banco():
                 continuacao TEXT,
                 FOREIGN KEY (topico_id)
                     REFERENCES topicos(id)
-                    ON DELETE CASCADE
+                    ON DELETE CASCADE,
+                FOREIGN KEY (concurso_id)
+                    REFERENCES concursos(id)
+                    ON DELETE SET NULL
             )
         """)
 
@@ -320,6 +333,14 @@ def criar_banco():
                 ALTER TABLE revisoes
                 ADD COLUMN sessao_questoes_id INTEGER
                 """
+            )
+
+        if "concurso_id" not in colunas_revisoes:
+            # SQLite nao permite adicionar uma FK retroativa por ALTER TABLE.
+            # Bancos existentes recebem o vinculo logico validado pela
+            # aplicacao; bancos novos recebem tambem a FK declarativa acima.
+            conexao.execute(
+                "ALTER TABLE revisoes ADD COLUMN concurso_id INTEGER"
             )
 
         # Histórico preciso de prazo: registros antigos permanecem explicitamente
@@ -372,6 +393,18 @@ def criar_banco():
                 valor TEXT NOT NULL
             )
         """)
+
+        # Marco imutavel da migracao: revisoes ate este id sao historicas e
+        # podem permanecer sem concurso. Apenas registros posteriores podem
+        # caracterizar falha de linhagem nova.
+        conexao.execute(
+            """
+            INSERT OR IGNORE INTO configuracoes (chave, valor)
+            SELECT 'revisoes_linhagem_base_max_id',
+                   CAST(COALESCE(MAX(id), 0) AS TEXT)
+            FROM revisoes
+            """
+        )
 
         configuracoes_padrao = {
             "usar_importancia_fila": "1",
@@ -1457,12 +1490,84 @@ def criar_banco():
         """)
 
         # ------------------------------------------------------
+        # FILA CANDIDATA — TELEMETRIA SOMBRA (NAO ACADEMICA)
+        # ------------------------------------------------------
+        conexao.execute("""
+            CREATE TABLE IF NOT EXISTS fila_shadow_execucoes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                concurso_id INTEGER NOT NULL,
+                criada_em TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+                evento_origem TEXT NOT NULL,
+                assinatura TEXT NOT NULL,
+                active_queue_version TEXT NOT NULL,
+                candidate_queue_version TEXT NOT NULL,
+                metric_version TEXT NOT NULL,
+                topics_evaluated INTEGER NOT NULL DEFAULT 0,
+                same_position_rate REAL,
+                top1_match INTEGER NOT NULL DEFAULT 0,
+                top3_intersection_rate REAL,
+                top5_intersection_rate REAL,
+                mean_absolute_position_delta REAL,
+                expected_divergence_count INTEGER NOT NULL DEFAULT 0,
+                unexpected_divergence_count INTEGER NOT NULL DEFAULT 0,
+                unexpected_top3_count INTEGER NOT NULL DEFAULT 0,
+                fallback_component_count INTEGER NOT NULL DEFAULT 0,
+                moderate_high_topic_count INTEGER NOT NULL DEFAULT 0,
+                temporal_protection_violation_count INTEGER NOT NULL DEFAULT 0,
+                ineligible_topic_violation_count INTEGER NOT NULL DEFAULT 0,
+                used_for_queue_order INTEGER NOT NULL DEFAULT 0 CHECK (
+                    used_for_queue_order = 0
+                ),
+                FOREIGN KEY (concurso_id) REFERENCES concursos(id) ON DELETE CASCADE
+            )
+        """)
+        conexao.execute("""
+            CREATE TABLE IF NOT EXISTS fila_shadow_itens (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                execucao_id INTEGER NOT NULL,
+                topico_id INTEGER NOT NULL,
+                active_position INTEGER NOT NULL,
+                candidate_position INTEGER NOT NULL,
+                eligible_candidate_position INTEGER NOT NULL,
+                active_score REAL NOT NULL,
+                candidate_score REAL NOT NULL,
+                eligible_candidate_score REAL NOT NULL,
+                evidence_level TEXT NOT NULL,
+                fallback_count INTEGER NOT NULL DEFAULT 0,
+                unexpected_divergence INTEGER NOT NULL DEFAULT 0,
+                principal_difference TEXT,
+                active_main_reason TEXT,
+                candidate_main_reason TEXT,
+                used_for_queue_order INTEGER NOT NULL DEFAULT 0 CHECK (
+                    used_for_queue_order = 0
+                ),
+                UNIQUE (execucao_id, topico_id),
+                FOREIGN KEY (execucao_id)
+                    REFERENCES fila_shadow_execucoes(id) ON DELETE CASCADE,
+                FOREIGN KEY (topico_id) REFERENCES topicos(id) ON DELETE CASCADE
+            )
+        """)
+        conexao.execute("""
+            CREATE TABLE IF NOT EXISTS fila_shadow_fallbacks (
+                execucao_id INTEGER NOT NULL,
+                topico_id INTEGER NOT NULL,
+                componente TEXT NOT NULL,
+                motivo TEXT NOT NULL,
+                PRIMARY KEY (execucao_id, topico_id, componente, motivo),
+                FOREIGN KEY (execucao_id)
+                    REFERENCES fila_shadow_execucoes(id) ON DELETE CASCADE,
+                FOREIGN KEY (topico_id) REFERENCES topicos(id) ON DELETE CASCADE
+            )
+        """)
+
+        # ------------------------------------------------------
         # ÍNDICES DE PERFORMANCE — consultas mais frequentes
         # ------------------------------------------------------
         indices_performance = [
             "CREATE INDEX IF NOT EXISTS idx_revisoes_topico_data ON revisoes(topico_id, data DESC)",
             "CREATE INDEX IF NOT EXISTS idx_revisoes_data ON revisoes(data)",
             "CREATE INDEX IF NOT EXISTS idx_revisoes_prazo ON revisoes(prazo_historico_valido, realizada_em, dias_atraso)",
+            "CREATE INDEX IF NOT EXISTS idx_revisoes_concurso_topico_data ON revisoes(concurso_id, topico_id, data DESC)",
             "CREATE INDEX IF NOT EXISTS idx_controle_topico_proxima ON controle_topico(proxima_revisao, topico_id)",
             "CREATE INDEX IF NOT EXISTS idx_topicos_disciplina_nome ON topicos(disciplina_id, nome COLLATE NOCASE)",
             "CREATE INDEX IF NOT EXISTS idx_tci_concurso_incluido ON topico_concurso_importancia(concurso_id, incluido, topico_id)",
@@ -1478,6 +1583,10 @@ def criar_banco():
             "CREATE INDEX IF NOT EXISTS idx_recomendacoes_concurso_data ON recomendacoes_estudo(concurso_id, criado_em DESC)",
             "CREATE INDEX IF NOT EXISTS idx_recomendacoes_topico ON recomendacoes_estudo(topico_id, criado_em DESC)",
             "CREATE INDEX IF NOT EXISTS idx_recomendacoes_decisao ON recomendacoes_estudo(decisao, criado_em DESC)",
+            "CREATE INDEX IF NOT EXISTS idx_shadow_execucoes_concurso_data ON fila_shadow_execucoes(concurso_id, criada_em DESC)",
+            "CREATE INDEX IF NOT EXISTS idx_shadow_execucoes_assinatura_data ON fila_shadow_execucoes(assinatura, criada_em DESC)",
+            "CREATE INDEX IF NOT EXISTS idx_shadow_itens_topico ON fila_shadow_itens(topico_id, execucao_id)",
+            "CREATE INDEX IF NOT EXISTS idx_shadow_fallbacks_motivo ON fila_shadow_fallbacks(motivo, execucao_id)",
         ]
         for comando in indices_performance:
             conexao.execute(comando)
@@ -4647,6 +4756,36 @@ def _metadados_prazo_revisao(prevista_para, realizada_em):
     }
 
 
+def _resolver_concurso_linhagem_revisao(
+    conexao,
+    concurso_id=None,
+    sessao_questoes_id=None,
+):
+    """Resolve somente contexto explicito; nunca infere concurso pelo topico."""
+
+    resolvido = None
+    if concurso_id not in (None, ""):
+        resolvido = int(concurso_id)
+    elif sessao_questoes_id not in (None, ""):
+        linha = conexao.execute(
+            "SELECT concurso_id FROM sessoes_questoes WHERE id = ?",
+            (int(sessao_questoes_id),),
+        ).fetchone()
+        if linha is not None and linha[0] is not None:
+            resolvido = int(linha[0])
+
+    if resolvido is None:
+        return None
+
+    existe = conexao.execute(
+        "SELECT 1 FROM concursos WHERE id = ?",
+        (resolvido,),
+    ).fetchone()
+    if existe is None:
+        raise ValueError(f"Concurso de linhagem inexistente: {resolvido}")
+    return resolvido
+
+
 def registrar_revisao(
     topico_id,
     data,
@@ -4658,9 +4797,15 @@ def registrar_revisao(
     proxima_revisao=None,
     origem="manual",
     confianca=None,
-    sessao_questoes_id=None
+    sessao_questoes_id=None,
+    concurso_id=None,
 ):
     with conectar() as conexao:
+        concurso_id = _resolver_concurso_linhagem_revisao(
+            conexao,
+            concurso_id,
+            sessao_questoes_id,
+        )
         controle = conexao.execute(
             "SELECT proxima_revisao FROM controle_topico WHERE topico_id = ?",
             (topico_id,),
@@ -4668,17 +4813,18 @@ def registrar_revisao(
         prevista_ativa = controle[0] if controle else None
         prazo = _metadados_prazo_revisao(prevista_ativa, data)
 
-        conexao.execute(
+        cursor = conexao.execute(
             """
             INSERT INTO revisoes (
-                topico_id, data, questoes, acertos, observacao, texto_erros,
+                topico_id, concurso_id, data, questoes, acertos, observacao, texto_erros,
                 continuacao, origem, confianca, sessao_questoes_id,
                 prevista_para, realizada_em, dias_atraso, prazo_historico_valido
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
-                topico_id, data, questoes, acertos, observacao, texto_erros,
+                topico_id, concurso_id, data, questoes, acertos,
+                observacao, texto_erros,
                 continuacao, str(origem or "manual"), confianca,
                 sessao_questoes_id, prazo["prevista_para"],
                 prazo["realizada_em"], prazo["dias_atraso"],
@@ -4695,6 +4841,7 @@ def registrar_revisao(
                 "UPDATE controle_topico SET proxima_revisao = ? WHERE topico_id = ?",
                 (proxima_revisao, topico_id),
             )
+        return int(cursor.lastrowid)
 
 
 def atualizar_revisao(
@@ -9812,6 +9959,10 @@ def obter_snapshot_paridade_fila(
         comparacoes,
         key=lambda item: int(item["candidate_position"]),
     )
+    candidatos_elegiveis = sorted(
+        comparacoes,
+        key=lambda item: int(item["eligible_candidate_position"]),
+    )
     total = len(comparacoes)
     deslocamentos = [abs(int(item["position_delta"])) for item in comparacoes]
     iguais = sum(1 for item in comparacoes if int(item["position_delta"]) == 0)
@@ -9878,6 +10029,7 @@ def obter_snapshot_paridade_fila(
         },
         "active_queue_version": ACTIVE_QUEUE_VERSION,
         "candidate_queue_version": SHADOW_QUEUE_VERSION,
+        "eligible_candidate_queue_version": ELIGIBLE_QUEUE_VERSION,
         "metric_version": "1",
         "used_for_queue_order": False,
         "topics_evaluated": total,
@@ -9897,6 +10049,14 @@ def obter_snapshot_paridade_fila(
             }
             for item in candidatos
         ],
+        "eligible_candidate_order": [
+            {
+                "position": int(item["eligible_candidate_position"]),
+                "topico_id": int(item["topico_id"]),
+                "score": float(item["eligible_candidate_score"]),
+            }
+            for item in candidatos_elegiveis
+        ],
         "summary": resumo,
         "comparisons": comparacoes,
     }
@@ -9907,6 +10067,8 @@ def salvar_snapshot_paridade_fila(
     concurso_id=None,
     disciplina_id=None,
     topicos_ids=None,
+    registrar_telemetria=True,
+    evento_origem="technical_snapshot",
 ):
     """Persiste somente quando chamado explicitamente; nunca pela fila ativa."""
     destino = Path(caminho)
@@ -9920,10 +10082,318 @@ def salvar_snapshot_paridade_fila(
         json.dumps(snapshot, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
+    telemetria = None
+    if registrar_telemetria:
+        telemetria = registrar_observacao_fila_sombra_segura(
+            evento_origem,
+            concurso_id=snapshot["concurso_id"],
+            snapshot=snapshot,
+        )
     return {
         "caminho": destino,
         "snapshot": snapshot,
+        "telemetria": telemetria,
     }
+
+
+def registrar_observacao_fila_sombra(
+    evento_origem,
+    concurso_id=None,
+    snapshot=None,
+    janela_deduplicacao_minutos=10,
+):
+    """Persiste uma observacao significativa sem qualquer efeito academico."""
+
+    evento_origem = str(evento_origem or "").strip().lower()
+    if evento_origem not in SIGNIFICANT_SHADOW_EVENTS:
+        raise ValueError(f"Evento sombra nao significativo: {evento_origem}")
+    if concurso_id is None:
+        concurso_id = obter_concurso_ativo()[0]
+    concurso_id = int(concurso_id)
+    snapshot = dict(
+        snapshot
+        or obter_snapshot_paridade_fila(concurso_id)
+    )
+    if int(snapshot.get("concurso_id") or 0) != concurso_id:
+        raise ValueError("Snapshot pertence a outro concurso")
+    if bool(snapshot.get("used_for_queue_order")):
+        raise ValueError("Telemetria sombra nao admite uso na ordem ativa")
+
+    safety = summarize_snapshot_safety(snapshot)
+    summary = dict(snapshot.get("summary") or {})
+    signature = observation_signature(snapshot, evento_origem)
+    window_minutes = max(1, int(janela_deduplicacao_minutos or 10))
+    window_modifier = f"-{window_minutes} minutes"
+
+    with conectar() as connection:
+        duplicate = connection.execute(
+            """
+            SELECT id
+            FROM fila_shadow_execucoes
+            WHERE concurso_id = ?
+              AND evento_origem = ?
+              AND assinatura = ?
+              AND criada_em >= datetime('now', 'localtime', ?)
+            ORDER BY id DESC
+            LIMIT 1
+            """,
+            (concurso_id, evento_origem, signature, window_modifier),
+        ).fetchone()
+        if duplicate is not None:
+            return {
+                "gravada": False,
+                "deduplicada": True,
+                "execucao_id": int(duplicate[0]),
+                "assinatura": signature,
+                "used_for_queue_order": False,
+            }
+
+        top1 = dict(summary.get("top_1") or {})
+        top3 = dict(summary.get("top_3") or {})
+        top5 = dict(summary.get("top_5") or {})
+        cursor = connection.execute(
+            """
+            INSERT INTO fila_shadow_execucoes (
+                concurso_id, evento_origem, assinatura,
+                active_queue_version, candidate_queue_version, metric_version,
+                topics_evaluated, same_position_rate, top1_match,
+                top3_intersection_rate, top5_intersection_rate,
+                mean_absolute_position_delta, expected_divergence_count,
+                unexpected_divergence_count, unexpected_top3_count,
+                fallback_component_count, moderate_high_topic_count,
+                temporal_protection_violation_count,
+                ineligible_topic_violation_count, used_for_queue_order
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+            """,
+            (
+                concurso_id,
+                evento_origem,
+                signature,
+                str(snapshot.get("active_queue_version") or ACTIVE_QUEUE_VERSION),
+                str(snapshot.get("candidate_queue_version") or SHADOW_QUEUE_VERSION),
+                str(snapshot.get("metric_version") or "1"),
+                int(snapshot.get("topics_evaluated") or 0),
+                summary.get("same_position_rate"),
+                1 if float(top1.get("intersection_rate") or 0.0) == 100.0 else 0,
+                top3.get("intersection_rate"),
+                top5.get("intersection_rate"),
+                summary.get("mean_absolute_position_delta"),
+                int(safety["expected_divergence_count"]),
+                int(safety["unexpected_divergence_count"]),
+                int(safety["unexpected_top3_count"]),
+                int(summary.get("fallback_component_count") or 0),
+                int(safety["moderate_high_topic_count"]),
+                int(safety["temporal_protection_violation_count"]),
+                int(safety["ineligible_topic_violation_count"]),
+            ),
+        )
+        execution_id = int(cursor.lastrowid)
+
+        for comparison in snapshot.get("comparisons") or []:
+            differences = list(comparison.get("relevant_differences") or [])
+            unexpected = [
+                item for item in differences
+                if not bool(item.get("expected"))
+            ]
+            principal = differences[0].get("classification") if differences else None
+            connection.execute(
+                """
+                INSERT INTO fila_shadow_itens (
+                    execucao_id, topico_id, active_position,
+                    candidate_position, eligible_candidate_position,
+                    active_score, candidate_score, eligible_candidate_score,
+                    evidence_level, fallback_count, unexpected_divergence,
+                    principal_difference, active_main_reason,
+                    candidate_main_reason, used_for_queue_order
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+                """,
+                (
+                    execution_id,
+                    int(comparison["topico_id"]),
+                    int(comparison["active_position"]),
+                    int(comparison["candidate_position"]),
+                    int(comparison["eligible_candidate_position"]),
+                    float(comparison["active_score"]),
+                    float(comparison["candidate_score"]),
+                    float(comparison["eligible_candidate_score"]),
+                    str(comparison.get("evidence_level") or "unavailable"),
+                    len(comparison.get("fallbacks") or []),
+                    1 if unexpected else 0,
+                    principal,
+                    comparison.get("active_main_reason"),
+                    comparison.get("candidate_main_reason"),
+                ),
+            )
+            for fallback in comparison.get("fallbacks") or []:
+                connection.execute(
+                    """
+                    INSERT OR IGNORE INTO fila_shadow_fallbacks (
+                        execucao_id, topico_id, componente, motivo
+                    ) VALUES (?, ?, ?, ?)
+                    """,
+                    (
+                        execution_id,
+                        int(comparison["topico_id"]),
+                        str(fallback.get("component") or "unknown"),
+                        str(fallback.get("reason") or "unknown"),
+                    ),
+                )
+
+    return {
+        "gravada": True,
+        "deduplicada": False,
+        "execucao_id": execution_id,
+        "assinatura": signature,
+        "used_for_queue_order": False,
+    }
+
+
+def registrar_observacao_fila_sombra_segura(*args, **kwargs):
+    """Falha fechada para telemetria e aberta para o fluxo de estudo V3."""
+
+    try:
+        return registrar_observacao_fila_sombra(*args, **kwargs)
+    except Exception as error:
+        LOGGER.exception("Falha ao registrar telemetria da fila sombra")
+        return {
+            "gravada": False,
+            "deduplicada": False,
+            "erro": str(error),
+            "used_for_queue_order": False,
+        }
+
+
+def obter_sumario_observacao_fila_sombra(concurso_id=None, thresholds=None):
+    """Agrega telemetria sombra e calcula o gate sem ativar a candidata."""
+
+    if concurso_id is None:
+        concurso_id = obter_concurso_ativo()[0]
+    concurso_id = int(concurso_id)
+    with conectar() as connection:
+        execution = connection.execute(
+            """
+            SELECT COUNT(*), MIN(criada_em), MAX(criada_em),
+                   COUNT(DISTINCT SUBSTR(criada_em, 1, 10)),
+                   COALESCE(AVG(same_position_rate), 0),
+                   COALESCE(AVG(top1_match) * 100.0, 0),
+                   COALESCE(AVG(top3_intersection_rate), 0),
+                   COALESCE(AVG(top5_intersection_rate), 0),
+                   COALESCE(SUM(expected_divergence_count), 0),
+                   COALESCE(SUM(unexpected_divergence_count), 0),
+                   COALESCE(SUM(unexpected_top3_count), 0),
+                   COALESCE(SUM(fallback_component_count), 0),
+                   COALESCE(SUM(temporal_protection_violation_count), 0),
+                   COALESCE(SUM(ineligible_topic_violation_count), 0),
+                   MAX(metric_version)
+            FROM fila_shadow_execucoes
+            WHERE concurso_id = ?
+            """,
+            (concurso_id,),
+        ).fetchone()
+        item_summary = connection.execute(
+            """
+            SELECT COUNT(DISTINCT i.topico_id),
+                   SUM(CASE WHEN i.evidence_level IN ('moderate', 'high') THEN 1 ELSE 0 END),
+                   SUM(CASE WHEN i.active_position = i.candidate_position THEN 1 ELSE 0 END),
+                   COUNT(*)
+            FROM fila_shadow_itens i
+            JOIN fila_shadow_execucoes e ON e.id = i.execucao_id
+            WHERE e.concurso_id = ?
+            """,
+            (concurso_id,),
+        ).fetchone()
+        evidence_rows = connection.execute(
+            """
+            SELECT i.evidence_level, COUNT(*)
+            FROM fila_shadow_itens i
+            JOIN fila_shadow_execucoes e ON e.id = i.execucao_id
+            WHERE e.concurso_id = ?
+            GROUP BY i.evidence_level
+            """,
+            (concurso_id,),
+        ).fetchall()
+        fallback_rows = connection.execute(
+            """
+            SELECT f.motivo, COUNT(*)
+            FROM fila_shadow_fallbacks f
+            JOIN fila_shadow_execucoes e ON e.id = f.execucao_id
+            WHERE e.concurso_id = ?
+            GROUP BY f.motivo
+            ORDER BY COUNT(*) DESC, f.motivo
+            """,
+            (concurso_id,),
+        ).fetchall()
+        review_lineage = connection.execute(
+            """
+            SELECT
+                SUM(CASE WHEN concurso_id IS NOT NULL THEN 1 ELSE 0 END),
+                SUM(CASE WHEN concurso_id IS NULL THEN 1 ELSE 0 END),
+                SUM(CASE WHEN sessao_questoes_id IS NOT NULL
+                              AND concurso_id IS NULL
+                              AND id > COALESCE((
+                                  SELECT CAST(valor AS INTEGER)
+                                  FROM configuracoes
+                                  WHERE chave = 'revisoes_linhagem_base_max_id'
+                              ), 0)
+                         THEN 1 ELSE 0 END)
+            FROM revisoes
+            """,
+        ).fetchone()
+        review_lineage_mismatch = connection.execute(
+            """
+            SELECT COUNT(DISTINCT r.id)
+            FROM revisoes r
+            JOIN tentativas_questoes tq ON tq.revisao_id = r.id
+            WHERE r.concurso_id IS NOT NULL
+              AND tq.concurso_id IS NOT NULL
+              AND r.concurso_id <> tq.concurso_id
+            """,
+        ).fetchone()[0]
+
+    total_items = int(item_summary[3] or 0)
+    same_items = int(item_summary[2] or 0)
+    summary = {
+        "concurso_id": concurso_id,
+        "observation_count": int(execution[0] or 0),
+        "period_start": execution[1],
+        "period_end": execution[2],
+        "distinct_days": int(execution[3] or 0),
+        "distinct_topics": int(item_summary[0] or 0),
+        "moderate_high_item_observations": int(item_summary[1] or 0),
+        "same_position_rate": (
+            round(100.0 * same_items / total_items, 1)
+            if total_items
+            else None
+        ),
+        "top1_match_rate": round(float(execution[5] or 0.0), 1),
+        "top3_intersection_rate": round(float(execution[6] or 0.0), 1),
+        "top5_intersection_rate": round(float(execution[7] or 0.0), 1),
+        "expected_divergence_count": int(execution[8] or 0),
+        "unexpected_divergence_count": int(execution[9] or 0),
+        "unexpected_top3_count": int(execution[10] or 0),
+        "fallback_component_count": int(execution[11] or 0),
+        "temporal_protection_violation_count": int(execution[12] or 0),
+        "ineligible_topic_violation_count": int(execution[13] or 0),
+        "metric_version": str(execution[14] or "1"),
+        "evidence_distribution": {
+            str(level): int(count)
+            for level, count in evidence_rows
+        },
+        "fallbacks_by_type": {
+            str(reason): int(count)
+            for reason, count in fallback_rows
+        },
+        "reviews_with_lineage": int(review_lineage[0] or 0),
+        "legacy_reviews_without_lineage": int(review_lineage[1] or 0),
+        "known_context_without_lineage_count": int(review_lineage[2] or 0),
+        "review_lineage_mismatch_count": int(review_lineage_mismatch or 0),
+        "used_for_queue_order": False,
+    }
+    summary["readiness_gate"] = evaluate_queue_activation_readiness(
+        summary,
+        thresholds=thresholds,
+    )
+    return summary
 
 def planejar_sessao_adaptativa_global(
     concurso_id=None,
@@ -15330,6 +15800,15 @@ def obter_contextos_revisao_automatica_sessao(
     )
 
     with conectar() as conexao:
+        sessao = conexao.execute(
+            "SELECT concurso_id FROM sessoes_questoes WHERE id = ?",
+            (sessao_id,),
+        ).fetchone()
+        concurso_id = (
+            int(sessao[0])
+            if sessao is not None and sessao[0] is not None
+            else None
+        )
         pares = conexao.execute(
             """
             SELECT DISTINCT
@@ -15396,6 +15875,7 @@ def obter_contextos_revisao_automatica_sessao(
                         q.topico_id
                     ) = ?
                     AND tq.correta IS NOT NULL
+                    AND (? IS NULL OR tq.concurso_id = ?)
                     AND SUBSTR(
                         tq.respondida_em,
                         1,
@@ -15404,6 +15884,8 @@ def obter_contextos_revisao_automatica_sessao(
                 """,
                 (
                     topico_id,
+                    concurso_id,
+                    concurso_id,
                     data_resposta,
                 )
             ).fetchone()
@@ -15419,12 +15901,15 @@ def obter_contextos_revisao_automatica_sessao(
                         origem,
                         'manual'
                     ) = 'questoes_internas'
+                    AND ((? IS NULL AND concurso_id IS NULL) OR concurso_id = ?)
                 ORDER BY id
                 LIMIT 1
                 """,
                 (
                     topico_id,
                     data_resposta,
+                    concurso_id,
+                    concurso_id,
                 )
             ).fetchone()
 
@@ -15465,6 +15950,7 @@ def obter_contextos_revisao_automatica_sessao(
                 WHERE
                     topico_id = ?
                     AND data < ?
+                    AND concurso_id = ?
                 ORDER BY
                     data DESC,
                     id DESC
@@ -15473,6 +15959,7 @@ def obter_contextos_revisao_automatica_sessao(
                 (
                     topico_id,
                     data_resposta,
+                    concurso_id,
                 )
             ).fetchone()
 
@@ -15490,10 +15977,12 @@ def obter_contextos_revisao_automatica_sessao(
                 WHERE
                     topico_id = ?
                     AND data < ?
+                    AND concurso_id = ?
                 """,
                 (
                     topico_id,
                     data_resposta,
+                    concurso_id,
                 )
             ).fetchone()[0]
 
@@ -15539,6 +16028,7 @@ def obter_contextos_revisao_automatica_sessao(
                 "topico_id": int(
                     topico_id
                 ),
+                "concurso_id": concurso_id,
                 "topico": (
                     topico[0]
                     if topico
@@ -15577,21 +16067,27 @@ def obter_contextos_revisao_automatica_sessao(
 
 def salvar_revisao_automatica_questoes(
     topico_id, data, questoes, acertos, confianca,
-    proxima_revisao=None, sessao_questoes_id=None
+    proxima_revisao=None, sessao_questoes_id=None, concurso_id=None,
 ):
     """Consolida revisão interna diária e preserva o prazo histórico original."""
     topico_id = int(topico_id)
     questoes = int(questoes)
     acertos = int(acertos)
     with conectar() as conexao:
+        concurso_id = _resolver_concurso_linhagem_revisao(
+            conexao,
+            concurso_id,
+            sessao_questoes_id,
+        )
         existente = conexao.execute(
             """SELECT id, prevista_para, realizada_em, dias_atraso,
-                      COALESCE(prazo_historico_valido, 0)
+                      COALESCE(prazo_historico_valido, 0), concurso_id
                FROM revisoes
                WHERE topico_id = ? AND data = ?
                  AND COALESCE(origem, 'manual') = 'questoes_internas'
+                 AND ((? IS NULL AND concurso_id IS NULL) OR concurso_id = ?)
                ORDER BY id LIMIT 1""",
-            (topico_id, data),
+            (topico_id, data, concurso_id, concurso_id),
         ).fetchone()
         observacao = (
             "Revisão consolidada automaticamente a partir das questões "
@@ -15606,11 +16102,13 @@ def salvar_revisao_automatica_questoes(
             prazo = _metadados_prazo_revisao(controle[0] if controle else None, data)
             cursor = conexao.execute(
                 """INSERT INTO revisoes (
-                       topico_id, data, questoes, acertos, observacao, texto_erros,
+                       topico_id, concurso_id, data, questoes, acertos,
+                       observacao, texto_erros,
                        continuacao, origem, confianca, sessao_questoes_id,
                        prevista_para, realizada_em, dias_atraso, prazo_historico_valido
-                   ) VALUES (?, ?, ?, ?, ?, '', '', 'questoes_internas', ?, ?, ?, ?, ?, ?)""",
-                (topico_id, data, questoes, acertos, observacao, confianca,
+                   ) VALUES (?, ?, ?, ?, ?, ?, '', '', 'questoes_internas', ?, ?, ?, ?, ?, ?)""",
+                (topico_id, concurso_id, data, questoes, acertos,
+                 observacao, confianca,
                  sessao_questoes_id, prazo["prevista_para"], prazo["realizada_em"],
                  prazo["dias_atraso"], prazo["prazo_historico_valido"]),
             )
@@ -15638,8 +16136,9 @@ def salvar_revisao_automatica_questoes(
                  WHERE COALESCE(tq.topico_id_snapshot, q.topico_id) = ?
                    AND tq.correta IS NOT NULL
                    AND SUBSTR(tq.respondida_em, 1, 10) = ?
+                   AND (? IS NULL OR tq.concurso_id = ?)
                )""",
-            (revisao_id, topico_id, data),
+            (revisao_id, topico_id, data, concurso_id, concurso_id),
         )
         conexao.execute(
             "INSERT OR IGNORE INTO controle_topico (topico_id) VALUES (?)",
@@ -15650,7 +16149,12 @@ def salvar_revisao_automatica_questoes(
                 "UPDATE controle_topico SET proxima_revisao = ? WHERE topico_id = ?",
                 (proxima_revisao, topico_id),
             )
-    return {"revisao_id": int(revisao_id), "criada": criada, **prazo}
+    return {
+        "revisao_id": int(revisao_id),
+        "criada": criada,
+        "concurso_id": concurso_id,
+        **prazo,
+    }
 
 
 def listar_tentativas_revisao_automatica(

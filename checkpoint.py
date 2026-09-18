@@ -123,6 +123,7 @@ FONTES_NUCLEO_ATUAL = {
     "evolucao.py",
     "laboratorio.py",
     "fila_candidata.py",
+    "fila_observacao.py",
     "versao.py",
     "statistics_core/__init__.py",
     "statistics_core/models.py",
