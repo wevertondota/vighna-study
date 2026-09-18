@@ -1,0 +1,1596 @@
+diff --git a/banco.py b/banco.py
+index dabfc8b..c21e11e 100644
+--- a/banco.py
++++ b/banco.py
+@@ -16,6 +16,7 @@ from espacamento import (
+     obter_tabela_padrao,
+     normalizar_tabela_espacamento,
+ )
++from statistics_core import StatisticsService
+ 
+ 
+ if getattr(sys, "frozen", False):
+@@ -34,6 +35,210 @@ def conectar():
+     return conexao
+ 
+ 
++def obter_servico_estatistico():
++    """Retorna a fonte central de metricas ligada ao banco ativo."""
++    return StatisticsService(conectar)
++
++
++def obter_metricas_globais_nucleo(concurso_id=None, periodo=None):
++    if concurso_id is None:
++        concurso_id = obter_concurso_ativo()[0]
++    return obter_servico_estatistico().get_global_metrics(
++        int(concurso_id),
++        periodo,
++    ).to_dict()
++
++
++def obter_metricas_topico_nucleo(topico_id, concurso_id=None, periodo=None):
++    if concurso_id is None:
++        concurso_id = obter_concurso_ativo()[0]
++    return obter_servico_estatistico().get_topic_metrics(
++        int(topico_id),
++        int(concurso_id),
++        periodo,
++    ).to_dict()
++
++
++def obter_metricas_periodo_nucleo(
++    data_inicio,
++    data_fim_inclusivo,
++    concurso_id=None,
++):
++    """Adapta datas inclusivas da UI para o intervalo semiaberto oficial."""
++    if concurso_id is None:
++        concurso_id = obter_concurso_ativo()[0]
++    inicio = date.fromisoformat(str(data_inicio)[:10])
++    fim_exclusivo = date.fromisoformat(str(data_fim_inclusivo)[:10]) + timedelta(days=1)
++    return obter_servico_estatistico().get_period_metrics(
++        inicio,
++        fim_exclusivo,
++        int(concurso_id),
++    ).to_dict()
++
++
++def obter_progresso_topicos_nucleo(concurso_id=None):
++    """Snapshot em lote para Dashboard e aba Progresso, sem formulas na UI."""
++    if concurso_id is None:
++        concurso_id = obter_concurso_ativo()[0]
++    concurso_id = int(concurso_id)
++
++    with conectar() as conexao:
++        linhas = conexao.execute(
++            """
++            SELECT
++                t.id,
++                d.id,
++                d.nome,
++                t.nome,
++                COALESCE(tc.importancia, 3),
++                c.proxima_revisao
++            FROM topicos t
++            JOIN disciplinas d ON d.id = t.disciplina_id
++            JOIN disciplina_concurso_inclusao dc
++                ON dc.disciplina_id = d.id
++                AND dc.concurso_id = ?
++                AND dc.incluido = 1
++                AND COALESCE(dc.pausado, 0) = 0
++            JOIN topico_concurso_importancia tc
++                ON tc.topico_id = t.id
++                AND tc.concurso_id = ?
++                AND tc.incluido = 1
++                AND COALESCE(tc.pausado, 0) = 0
++            LEFT JOIN controle_topico c ON c.topico_id = t.id
++            ORDER BY d.nome COLLATE NOCASE, t.nome COLLATE NOCASE
++            """,
++            (concurso_id, concurso_id),
++        ).fetchall()
++
++    metricas = obter_servico_estatistico().get_topic_metrics_batch(
++        concurso_id,
++        [int(linha[0]) for linha in linhas],
++    )
++    resultados = []
++    for linha in linhas:
++        topico_id = int(linha[0])
++        nucleo = metricas[topico_id]
++        dominio_resultado = nucleo.metric("mastery_score")
++        evidencia_resultado = nucleo.metric("evidence_level")
++        cobertura_resultado = nucleo.metric("question_coverage_rate")
++        recente_resultado = nucleo.metric("recent_performance_rate")
++        tendencia_resultado = nucleo.metric("performance_trend")
++        consolidacao = nucleo.value("topic_consolidation_status")
++        tentativas = int(nucleo.value("answered_attempt_count", 0) or 0)
++        evidencia_ordem = int(
++            evidencia_resultado.parameters.get("order", 0) or 0
++        )
++        dominio = dominio_resultado.value
++
++        if tentativas <= 0:
++            estado, ordem_estado = "Não iniciado", 0
++        elif consolidacao == "consolidated":
++            estado, ordem_estado = "Consolidado", 3
++        elif dominio is not None and float(dominio) >= 70.0 and evidencia_ordem >= 2:
++            estado, ordem_estado = "Consolidando", 2
++        else:
++            estado, ordem_estado = "Em andamento", 1
++
++        parametros_dominio = dominio_resultado.parameters
++        controle_erros = parametros_dominio.get("error_control", {})
++        ultima_revisao = nucleo.value("last_review_at")
++        resultados.append({
++            "topico_id": topico_id,
++            "disciplina_id": int(linha[1]),
++            "disciplina": linha[2],
++            "topico": linha[3],
++            "revisoes": int(nucleo.value("completed_review_count", 0) or 0),
++            "estado_revisoes": nucleo.metric("completed_review_count").state,
++            "ultima": str(ultima_revisao)[:10] if ultima_revisao else None,
++            "ultima_atividade": nucleo.value("last_activity_at"),
++            "proxima": linha[5],
++            "percentual": nucleo.value("accuracy_rate"),
++            "importancia": int(linha[4] or 3),
++            "estado": estado,
++            "ordem_estado": ordem_estado,
++            "consolidacao": consolidacao,
++            "dominio": {
++                "score": dominio,
++                "score_estimado": parametros_dominio.get("estimate"),
++                "nivel": parametros_dominio.get("level", "Dados insuficientes"),
++                "qualidade_evidencia": evidencia_resultado.parameters.get(
++                    "label", "Insuficiente"
++                ),
++                "evidence_level": evidencia_resultado.value,
++                "desempenho": parametros_dominio.get("current_performance", 0.0),
++                "desempenho_recente": recente_resultado.value,
++                "tendencia": tendencia_resultado.value,
++                "cobertura": cobertura_resultado.value,
++                "estabilidade": parametros_dominio.get("temporal_stability", 50.0),
++                "recencia": parametros_dominio.get("recency", 0.0),
++                "controle_erros": controle_erros.get("score", 100.0),
++                "tentativas": tentativas,
++                "tentativas_historicas": tentativas,
++                "questoes_unicas": int(
++                    nucleo.value("answered_unique_question_count", 0) or 0
++                ),
++                "dias_ativos_historicos": int(
++                    evidencia_resultado.parameters.get("active_days", 0) or 0
++                ),
++                "taxa_duvida": parametros_dominio.get("doubt_rate", 0.0),
++                "recorrentes": int(controle_erros.get("recurring", 0) or 0),
++                "criticas": int(controle_erros.get("critical", 0) or 0),
++            },
++        })
++
++    resultados.sort(
++        key=lambda item: (
++            item["ordem_estado"],
++            -item["importancia"],
++            item["disciplina"].lower(),
++            item["topico"].lower(),
++        )
++    )
++    return resultados
++
++
++def comparar_metricas_nucleo_topico(topico_id, concurso_id=None):
++    """Compara legado e contrato 1 sem escolher silenciosamente um deles."""
++    if concurso_id is None:
++        concurso_id = obter_concurso_ativo()[0]
++    topico_id = int(topico_id)
++    concurso_id = int(concurso_id)
++    antigo = obter_indice_dominio_topico(topico_id, concurso_id)
++    novo = obter_servico_estatistico().get_topic_metrics(topico_id, concurso_id)
++
++    def valor(chave):
++        return novo.value(chave)
++
++    pares = {
++        "dominio": (antigo.get("score"), valor("mastery_score")),
++        "taxa_acerto": (antigo.get("desempenho_base"), valor("accuracy_rate")),
++        "cobertura": (antigo.get("cobertura"), valor("question_coverage_rate")),
++        "desempenho_recente": (
++            antigo.get("desempenho_recente"),
++            valor("recent_performance_rate"),
++        ),
++        "revisoes": (antigo.get("revisoes"), valor("completed_review_count")),
++    }
++    diferencas = {}
++    for chave, (valor_antigo, valor_novo) in pares.items():
++        delta = None
++        if valor_antigo is not None and valor_novo is not None:
++            delta = float(valor_novo) - float(valor_antigo)
++        diferencas[chave] = {
++            "valor_antigo": valor_antigo,
++            "valor_nucleo": valor_novo,
++            "delta": delta,
++        }
++    return {
++        "topico_id": topico_id,
++        "concurso_id": concurso_id,
++        "versao_antiga": antigo.get("versao_indice", "dominio_v2"),
++        "versao_nucleo": "1",
++        "diferencas": diferencas,
++        "estado_evidencia": novo.metric("evidence_level").to_dict(),
++    }
++
++
+ def criar_banco():
+     with conectar() as conexao:
+         # Ajustes seguros para uso local: WAL reduz bloqueios entre leituras e
+@@ -9284,6 +9489,12 @@ def obter_prioridades_sessao_adaptativa(
+         topicos_ids_set = {int(topico_id) for topico_id in topicos_ids}
+ 
+     indices = obter_indices_dominio_topicos(concurso_id)
++    # O contrato novo roda lado a lado para auditoria. Nesta etapa nenhum
++    # valor abaixo participa dos pesos, do score ou da ordenacao da fila.
++    metricas_nucleo_fila = obter_servico_estatistico().get_topic_metrics_batch(
++        concurso_id,
++        topicos_ids_set,
++    )
+ 
+     with conectar() as conexao:
+         linhas = conexao.execute(
+@@ -9524,6 +9735,30 @@ def obter_prioridades_sessao_adaptativa(
+             "componentes": componentes,
+             "contribuicoes": contribuicoes,
+             "pesos_adaptativos": pesos_percentuais,
++            "comparacao_nucleo_estatistico": {
++                "mastery_score": (
++                    metricas_nucleo_fila[topico_id].value("mastery_score")
++                    if topico_id in metricas_nucleo_fila else None
++                ),
++                "legacy_domain_v2": score_dominio,
++                "accuracy_rate": (
++                    metricas_nucleo_fila[topico_id].value("accuracy_rate")
++                    if topico_id in metricas_nucleo_fila else None
++                ),
++                "question_coverage_rate": (
++                    metricas_nucleo_fila[topico_id].value("question_coverage_rate")
++                    if topico_id in metricas_nucleo_fila else None
++                ),
++                "recent_performance_rate": (
++                    metricas_nucleo_fila[topico_id].value("recent_performance_rate")
++                    if topico_id in metricas_nucleo_fila else None
++                ),
++                "evidence_level": (
++                    metricas_nucleo_fila[topico_id].value("evidence_level")
++                    if topico_id in metricas_nucleo_fila else "insufficient"
++                ),
++                "used_for_queue_order": False,
++            },
+         })
+ 
+     resultados.sort(
+@@ -16230,9 +16465,8 @@ def obter_central_minha_evolucao(
+     Consolida a visão estratégica de evolução do perfil.
+ 
+     A evolução temporal usa tentativas internas preservadas por snapshot,
+-    enquanto o domínio atual usa o Índice de Domínio já calculado pelo
+-    VighnaStudy. Nenhuma métrica histórica é reconstruída a partir da
+-    versão atual de uma questão.
++    enquanto o domínio atual vem do Núcleo Estatístico oficial. Nenhuma
++    métrica histórica é reconstruída a partir da versão atual de uma questão.
+     """
+ 
+     if concurso_id is None:
+@@ -16360,44 +16594,34 @@ def obter_central_minha_evolucao(
+     else:
+         variacao_desempenho = None
+ 
+-    indices = obter_indices_dominio_topicos(concurso_id)
+-    indices_com_evidencia = [
+-        item for item in indices.values()
+-        if int(item.get('tentativas') or 0) > 0
+-    ]
+-    dominio_medio = (
+-        sum(float(item.get('score') or 0.0) for item in indices_com_evidencia)
+-        / len(indices_com_evidencia)
+-        if indices_com_evidencia else None
+-    )
++    servico_estatistico = obter_servico_estatistico()
++    metricas_globais = servico_estatistico.get_global_metrics(concurso_id)
++    dominio_medio = metricas_globais.value("mastery_score")
+ 
+-    # Estado corrente do edital, seguindo as mesmas regras da interface.
+-    total_topicos = 0
+-    consolidados = 0
+-    por_disciplina_indices = {}
+-
+-    for _, disciplina in listar_disciplinas(concurso_id):
+-        topicos = listar_topicos(disciplina, concurso_id)
+-        total_topicos += len(topicos)
+-        for topico in topicos:
+-            revisoes = int(topico[2] or 0)
+-            percentual = topico[5]
+-            if (
+-                revisoes >= 4
+-                and percentual is not None
+-                and float(percentual) >= 85.0
+-            ):
+-                consolidados += 1
++    # O estado corrente usa as dimensoes independentes do contrato oficial.
++    progresso_topicos = obter_progresso_topicos_nucleo(concurso_id)
++    total_topicos = len(progresso_topicos)
++    consolidados = sum(
++        1
++        for item in progresso_topicos
++        if item.get("consolidacao") == "consolidated"
++    )
++    topicos_com_evidencia = sum(
++        1
++        for item in progresso_topicos
++        if int(item.get("dominio", {}).get("tentativas") or 0) > 0
++    )
+ 
+-            dominio = indices.get(int(topico[0]))
+-            if dominio and int(dominio.get('tentativas') or 0) > 0:
+-                por_disciplina_indices.setdefault(disciplina, []).append(dominio)
++    disciplinas_ativas = listar_disciplinas(concurso_id)
++    metricas_disciplinas = servico_estatistico.get_subject_metrics_batch(
++        concurso_id,
++        [disciplina_id for disciplina_id, _ in disciplinas_ativas],
++    )
+ 
+     # Comparação por disciplina baseada em tentativas preservadas.
+-    nomes_disciplinas = [nome for _, nome in listar_disciplinas(concurso_id)]
+     disciplinas = []
+ 
+-    for nome in nomes_disciplinas:
++    for disciplina_id, nome in disciplinas_ativas:
+         itens_recentes = [item for item in recentes if item['disciplina'] == nome]
+         itens_anteriores = [item for item in anteriores if item['disciplina'] == nome]
+         rr = resumo_periodo(itens_recentes)
+@@ -16408,12 +16632,8 @@ def obter_central_minha_evolucao(
+         else:
+             delta = None
+ 
+-        evidencias_dominio = por_disciplina_indices.get(nome, [])
+-        score_dominio = (
+-            sum(float(item.get('score') or 0.0) for item in evidencias_dominio)
+-            / len(evidencias_dominio)
+-            if evidencias_dominio else None
+-        )
++        metrica_disciplina = metricas_disciplinas[int(disciplina_id)]
++        score_dominio = metrica_disciplina.value("mastery_score")
+ 
+         if score_dominio is None:
+             nivel = 'Sem evidência'
+@@ -16507,7 +16727,7 @@ def obter_central_minha_evolucao(
+         'resumo_anterior': resumo_anterior,
+         'variacao_desempenho': variacao_desempenho,
+         'dominio_medio': dominio_medio,
+-        'topicos_com_evidencia': len(indices_com_evidencia),
++        'topicos_com_evidencia': topicos_com_evidencia,
+         'total_topicos': total_topicos,
+         'consolidados': consolidados,
+         'disciplinas': disciplinas,
+@@ -16903,15 +17123,23 @@ def listar_pendencias(
+ 
+ def obter_dashboard(
+     data_referencia,
+-    concurso_id=None
++    concurso_id=None,
++    metricas_nucleo=None,
+ ):
+-    percentual = _expressao_percentual_atual()
+-
+     if concurso_id is None:
+         concurso_id = (
+             obter_concurso_ativo()[0]
+         )
+ 
++    if metricas_nucleo is None:
++        metricas_nucleo = (
++            obter_metricas_globais_nucleo(concurso_id)
++            .get("metrics", {})
++        )
++
++    def valor_nucleo(chave, padrao=None):
++        return metricas_nucleo.get(chave, {}).get("value", padrao)
++
+     with conectar() as conexao:
+         filtro = """
+             FROM topicos t
+@@ -16970,96 +17198,6 @@ def obter_dashboard(
+             )
+         ).fetchone()[0]
+ 
+-        total_questoes = conexao.execute(
+-            """
+-            SELECT COALESCE(
+-                SUM(r.questoes),
+-                0
+-            )
+-            FROM revisoes r
+-            JOIN topicos t
+-                ON t.id = r.topico_id
+-            JOIN disciplinas d
+-                ON d.id = t.disciplina_id
+-            JOIN disciplina_concurso_inclusao dc
+-                ON dc.disciplina_id = d.id
+-                AND dc.concurso_id = ?
+-                AND dc.incluido = 1
+-                AND COALESCE(dc.pausado, 0) = 0
+-            JOIN topico_concurso_importancia tc
+-                ON tc.topico_id = t.id
+-                AND tc.concurso_id = ?
+-                AND tc.incluido = 1
+-            """,
+-            (
+-                concurso_id,
+-                concurso_id
+-            )
+-        ).fetchone()[0]
+-
+-        revisoes_programa = conexao.execute(
+-            """
+-            SELECT COUNT(*)
+-            FROM revisoes r
+-            JOIN topicos t
+-                ON t.id = r.topico_id
+-            JOIN disciplinas d
+-                ON d.id = t.disciplina_id
+-            JOIN disciplina_concurso_inclusao dc
+-                ON dc.disciplina_id = d.id
+-                AND dc.concurso_id = ?
+-                AND dc.incluido = 1
+-                AND COALESCE(dc.pausado, 0) = 0
+-            JOIN topico_concurso_importancia tc
+-                ON tc.topico_id = t.id
+-                AND tc.concurso_id = ?
+-                AND tc.incluido = 1
+-            """,
+-            (
+-                concurso_id,
+-                concurso_id
+-            )
+-        ).fetchone()[0]
+-
+-        revisoes_iniciais = conexao.execute(
+-            f"""
+-            SELECT COALESCE(
+-                SUM(
+-                    COALESCE(
+-                        c.revisoes_iniciais,
+-                        0
+-                    )
+-                ),
+-                0
+-            )
+-            {filtro}
+-            """,
+-            (
+-                concurso_id,
+-                concurso_id
+-            )
+-        ).fetchone()[0]
+-
+-        media = conexao.execute(
+-            f"""
+-            SELECT ROUND(
+-                AVG(percentual_atual),
+-                1
+-            )
+-            FROM (
+-                SELECT
+-                    {percentual}
+-                    AS percentual_atual
+-                {filtro}
+-            )
+-            WHERE percentual_atual IS NOT NULL
+-            """,
+-            (
+-                concurso_id,
+-                concurso_id
+-            )
+-        ).fetchone()[0]
+-
+         return {
+             "total_topicos": int(
+                 total_topicos or 0
+@@ -17071,13 +17209,15 @@ def obter_dashboard(
+                 hoje or 0
+             ),
+             "total_questoes": int(
+-                total_questoes or 0
++                valor_nucleo("answered_attempt_count", 0) or 0
+             ),
+             "revisoes_totais": int(
+-                (revisoes_iniciais or 0)
+-                + (revisoes_programa or 0)
++                valor_nucleo("completed_review_count", 0) or 0
+             ),
+-            "media_atual": media,
++            "estado_revisoes": metricas_nucleo.get(
++                "completed_review_count", {}
++            ).get("state", "unavailable"),
++            "media_atual": valor_nucleo("accuracy_rate"),
+         }
+ 
+ 
+@@ -17223,95 +17363,53 @@ def obter_estatisticas_disciplinas(
+             obter_concurso_ativo()[0]
+         )
+ 
+-    resultados = []
+-
+-    for disciplina_id, nome_disciplina in listar_disciplinas(
+-        concurso_id
+-    ):
+-        topicos = listar_topicos(
+-            nome_disciplina,
+-            concurso_id
+-        )
+-
+-        total_topicos = len(
+-            topicos
+-        )
+-
+-        revisoes_totais = sum(
+-            int(item[2] or 0)
+-            for item in topicos
+-        )
+-
+-        percentuais = [
+-            float(item[5])
+-            for item in topicos
+-            if item[5] is not None
+-        ]
+-
+-        if percentuais:
+-            media_atual = round(
+-                sum(percentuais)
+-                / len(percentuais),
+-                1
+-            )
+-        else:
+-            media_atual = None
+-
+-        atrasadas = sum(
+-            1
+-            for item in topicos
+-            if item[4]
+-            and item[4] < data_referencia
+-        )
+-
+-        hoje = sum(
+-            1
+-            for item in topicos
+-            if item[4] == data_referencia
+-        )
+-
+-        with conectar() as conexao:
+-            questoes = conexao.execute(
+-                """
+-                SELECT COALESCE(
+-                    SUM(r.questoes),
+-                    0
+-                )
+-                FROM revisoes r
+-                JOIN topicos t
+-                    ON t.id = r.topico_id
+-                JOIN disciplinas d
+-                    ON d.id = t.disciplina_id
+-                JOIN disciplina_concurso_inclusao dc
+-                    ON dc.disciplina_id = d.id
+-                    AND dc.concurso_id = ?
+-                    AND dc.incluido = 1
+-                    AND COALESCE(dc.pausado, 0) = 0
+-                JOIN topico_concurso_importancia tc
+-                    ON tc.topico_id = t.id
+-                    AND tc.concurso_id = ?
+-                    AND tc.incluido = 1
+-                WHERE d.id = ?
+-                """,
+-                (
+-                    concurso_id,
+-                    concurso_id,
+-                    int(disciplina_id)
+-                )
+-            ).fetchone()[0]
+-
+-        resultados.append(
+-            (
+-                nome_disciplina,
+-                total_topicos,
+-                revisoes_totais,
+-                media_atual,
+-                int(questoes or 0),
+-                atrasadas,
+-                hoje
+-            )
+-        )
++    concurso_id = int(concurso_id)
++    with conectar() as conexao:
++        linhas = conexao.execute(
++            """
++            SELECT
++                d.id,
++                d.nome,
++                COUNT(DISTINCT t.id) AS total_topicos,
++                SUM(CASE WHEN c.proxima_revisao < ? THEN 1 ELSE 0 END) AS atrasadas,
++                SUM(CASE WHEN c.proxima_revisao = ? THEN 1 ELSE 0 END) AS hoje
++            FROM disciplinas d
++            JOIN disciplina_concurso_inclusao dc
++                ON dc.disciplina_id = d.id
++                AND dc.concurso_id = ?
++                AND dc.incluido = 1
++                AND COALESCE(dc.pausado, 0) = 0
++            JOIN topicos t ON t.disciplina_id = d.id
++            JOIN topico_concurso_importancia tc
++                ON tc.topico_id = t.id
++                AND tc.concurso_id = ?
++                AND tc.incluido = 1
++                AND COALESCE(tc.pausado, 0) = 0
++            LEFT JOIN controle_topico c ON c.topico_id = t.id
++            GROUP BY d.id, d.nome
++            ORDER BY d.nome COLLATE NOCASE
++            """,
++            (data_referencia, data_referencia, concurso_id, concurso_id),
++        ).fetchall()
+ 
++    servico = obter_servico_estatistico()
++    metricas = servico.get_subject_metrics_batch(
++        concurso_id,
++        [int(linha[0]) for linha in linhas],
++    )
++    resultados = []
++    for linha in linhas:
++        disciplina_id = int(linha[0])
++        nucleo = metricas[disciplina_id]
++        resultados.append((
++            linha[1],
++            int(linha[2] or 0),
++            int(nucleo.value("completed_review_count", 0) or 0),
++            nucleo.value("accuracy_rate"),
++            int(nucleo.value("answered_attempt_count", 0) or 0),
++            int(linha[3] or 0),
++            int(linha[4] or 0),
++        ))
+     return resultados
+ 
+ 
+@@ -17320,10 +17418,7 @@ def listar_ranking_topicos(
+     ordem="asc",
+     concurso_id=None
+ ):
+-    """
+-    Ranking pelo percentual atual apenas do perfil ativo.
+-    """
+-    percentual = _expressao_percentual_atual()
++    """Ranking de pontos fracos por dominio oficial e evidencia comprovavel."""
+     revisoes = _expressao_revisoes_totais()
+ 
+     if concurso_id is None:
+@@ -17331,29 +17426,14 @@ def listar_ranking_topicos(
+             obter_concurso_ativo()[0]
+         )
+ 
+-    direcao = (
+-        "DESC"
+-        if str(ordem).lower() == "desc"
+-        else "ASC"
+-    )
+-
+     with conectar() as conexao:
+-        return conexao.execute(
+-            f"""
++        linhas = conexao.execute(
++            """
+             SELECT
+                 t.id,
+                 d.nome,
+                 t.nome,
+-                {revisoes} AS revisoes_totais,
+-                {percentual} AS percentual_atual,
+-                c.proxima_revisao,
+-                (
+-                    SELECT r.data
+-                    FROM revisoes r
+-                    WHERE r.topico_id = t.id
+-                    ORDER BY r.data DESC, r.id DESC
+-                    LIMIT 1
+-                ) AS ultima_revisao
++                c.proxima_revisao
+             FROM topicos t
+             JOIN disciplinas d
+                 ON d.id = t.disciplina_id
+@@ -17369,21 +17449,41 @@ def listar_ranking_topicos(
+                 AND COALESCE(tc.pausado, 0) = 0
+             LEFT JOIN controle_topico c
+                 ON c.topico_id = t.id
+-            WHERE ({percentual}) IS NOT NULL
+-            ORDER BY
+-                percentual_atual {direcao},
+-                revisoes_totais ASC,
+-                d.nome COLLATE NOCASE,
+-                t.nome COLLATE NOCASE
+-            LIMIT ?
++            ORDER BY d.nome COLLATE NOCASE, t.nome COLLATE NOCASE
+             """,
+             (
+                 concurso_id,
+-                concurso_id,
+-                int(limite)
++                concurso_id
+             )
+         ).fetchall()
+ 
++    metricas = obter_servico_estatistico().get_topic_metrics_batch(
++        int(concurso_id),
++        [int(linha[0]) for linha in linhas],
++    )
++    resultados = []
++    for topico_id, disciplina, topico, proxima_revisao in linhas:
++        nucleo = metricas[int(topico_id)]
++        dominio = nucleo.value("mastery_score")
++        evidencia = nucleo.value("evidence_level")
++        if dominio is None or evidencia == "insufficient":
++            continue
++        resultados.append((
++            int(topico_id),
++            disciplina,
++            topico,
++            int(nucleo.value("completed_review_count", 0) or 0),
++            float(dominio),
++            proxima_revisao,
++            nucleo.value("last_review_at"),
++        ))
++    reverse = str(ordem).lower() == "desc"
++    resultados.sort(
++        key=lambda item: (item[4], item[3], item[1].lower(), item[2].lower()),
++        reverse=reverse,
++    )
++    return resultados[:max(0, int(limite))]
++
+ 
+ def listar_revisoes_recentes(
+     limite=30,
+diff --git a/checkpoint.py b/checkpoint.py
+index 03ae8a9..5ccd737 100644
+--- a/checkpoint.py
++++ b/checkpoint.py
+@@ -54,9 +54,11 @@ PASTAS_RECURSIVAS_OPCIONAIS = {
+     "recursos",
+     "icons",
+     "icones",
++    "statistics_core",
+ }
+ 
+ EXTENSOES_RECURSOS = {
++    ".py",
+     ".png",
+     ".jpg",
+     ".jpeg",
+@@ -117,6 +119,11 @@ FONTES_NUCLEO_ATUAL = {
+     "evolucao.py",
+     "laboratorio.py",
+     "versao.py",
++    "statistics_core/__init__.py",
++    "statistics_core/models.py",
++    "statistics_core/periods.py",
++    "statistics_core/repository.py",
++    "statistics_core/service.py",
+ }
+ 
+ 
+diff --git a/estudos.db b/estudos.db
+index c720a00..c8e3d53 100644
+Binary files a/estudos.db and b/estudos.db differ
+diff --git a/evolucao.py b/evolucao.py
+index 519c092..9aaccc8 100644
+--- a/evolucao.py
++++ b/evolucao.py
+@@ -232,7 +232,19 @@ def obter_evolucao_historica(concurso_id=None, dias=30):
+         chave = (item["topico_id"], item["disciplina"], item["topico"])
+         por_topico[chave].append(item)
+ 
+-    indices = banco.obter_indices_dominio_topicos(concurso_id)
++    topicos_ids = {
++        int(topico_id)
++        for topico_id, _, _ in por_topico
++        if topico_id is not None
++    }
++    metricas_topicos = (
++        banco.obter_servico_estatistico().get_topic_metrics_batch(
++            concurso_id,
++            topicos_ids,
++        )
++        if topicos_ids
++        else {}
++    )
+     topicos = []
+     for (topico_id, disciplina, topico), items in por_topico.items():
+         atuais = [i for i in items if inicio <= i["data"] <= hoje]
+@@ -251,9 +263,9 @@ def obter_evolucao_historica(concurso_id=None, dias=30):
+             delta = ra["desempenho"] - rp["desempenho"]
+         dominio = None
+         if topico_id is not None:
+-            indice = indices.get(int(topico_id))
+-            if indice and int(indice.get("tentativas") or 0) > 0:
+-                dominio = float(indice.get("score") or 0.0)
++            metricas_topico = metricas_topicos.get(int(topico_id))
++            if metricas_topico is not None:
++                dominio = metricas_topico.value("mastery_score")
+         topicos.append({
+             "topico_id": topico_id,
+             "disciplina": disciplina,
+diff --git a/main.py b/main.py
+index a7a6cb9..3080873 100644
+--- a/main.py
++++ b/main.py
+@@ -246,6 +246,9 @@ from banco import (
+     listar_historico_tentativas_questoes,
+     listar_caderno_erros_questoes,
+     obter_estatisticas_historico_questoes,
++    obter_metricas_globais_nucleo,
++    obter_metricas_periodo_nucleo,
++    obter_progresso_topicos_nucleo,
+     obter_central_minha_evolucao,
+     obter_contextos_revisao_automatica_sessao,
+     salvar_revisao_automatica_questoes,
+@@ -35694,48 +35697,23 @@ class SistemaEstudos(QMainWindow):
+             "yyyy-MM-dd"
+         )
+ 
+-        resumo_semana = obter_relatorio_periodo(
++        resumo_semana = obter_metricas_periodo_nucleo(
+             inicio_texto,
+             hoje_texto,
+             concurso_id
+-        )
+-
+-        diarios_semana = obter_relatorio_diario_periodo(
+-            inicio_texto,
+-            hoje_texto,
+-            concurso_id
+-        )
++        ).get("metrics", {})
+ 
+         questoes = int(
+-            resumo_semana.get(
+-                "questoes",
+-                0
+-            )
++            resumo_semana.get("answered_attempt_count", {}).get("value", 0)
+             or 0
+         )
+         revisoes = int(
+-            resumo_semana.get(
+-                "revisoes",
+-                0
+-            )
++            resumo_semana.get("completed_review_count", {}).get("value", 0)
+             or 0
+         )
+-
+-        dias_estudados = len(
+-            {
+-                dado[0]
+-                for dado in diarios_semana
+-                if (
+-                    int(
+-                        dado[1]
+-                        or 0
+-                    ) > 0
+-                    or int(
+-                        dado[2]
+-                        or 0
+-                    ) > 0
+-                )
+-            }
++        dias_estudados = int(
++            resumo_semana.get("study_day_count", {}).get("value", 0)
++            or 0
+         )
+ 
+         meta_questoes = max(
+@@ -35937,17 +35915,14 @@ class SistemaEstudos(QMainWindow):
+             )
+         )
+ 
+-        relatorio_hoje = obter_relatorio_periodo(
++        relatorio_hoje = obter_metricas_periodo_nucleo(
+             hoje_texto,
+             hoje_texto,
+             concurso_id
+-        )
++        ).get("metrics", {})
+ 
+         questoes_hoje = int(
+-            relatorio_hoje.get(
+-                "questoes",
+-                0
+-            )
++            relatorio_hoje.get("answered_attempt_count", {}).get("value", 0)
+             or 0
+         )
+ 
+@@ -36712,45 +36687,24 @@ class SistemaEstudos(QMainWindow):
+ 
+         # Questões Primeiro: o Dashboard mantém visível o estado do núcleo
+         # de aprendizagem, sem depender da abertura do Banco de Questões.
++        metricas_nucleo = {}
+         try:
+-            estatisticas_questoes_nucleo = obter_estatisticas_banco_questoes(
+-                concurso_id
+-            )
+-            historico_questoes_nucleo = obter_estatisticas_historico_questoes(
+-                concurso_id
+-            )
++            nucleo = obter_metricas_globais_nucleo(concurso_id)
++            metricas_nucleo = nucleo.get("metrics", {})
+ 
+-            total_nucleo = int(
+-                estatisticas_questoes_nucleo.get(
+-                    "total",
+-                    0
+-                )
+-                or 0
+-            )
++            def valor_nucleo(chave, padrao=None):
++                return metricas_nucleo.get(chave, {}).get("value", padrao)
++
++            total_nucleo = int(valor_nucleo("answered_attempt_count", 0) or 0)
+             topicos_nucleo = int(
+-                estatisticas_questoes_nucleo.get(
+-                    "topicos",
+-                    0
+-                )
+-                or 0
+-            )
+-            erros_nucleo = int(
+-                historico_questoes_nucleo.get(
+-                    "erros",
+-                    0
+-                )
++                metricas_nucleo.get("topic_coverage_rate", {})
++                .get("parameters", {})
++                .get("answered_active_topics", 0)
+                 or 0
+             )
+-            respondidas_nucleo = int(
+-                historico_questoes_nucleo.get(
+-                    "respondidas",
+-                    0
+-                )
+-                or 0
+-            )
+-            desempenho_nucleo = historico_questoes_nucleo.get(
+-                "desempenho"
+-            )
++            erros_nucleo = int(valor_nucleo("incorrect_attempt_count", 0) or 0)
++            respondidas_nucleo = total_nucleo
++            desempenho_nucleo = valor_nucleo("accuracy_rate")
+ 
+             if hasattr(
+                 self,
+@@ -36781,7 +36735,8 @@ class SistemaEstudos(QMainWindow):
+ 
+         resumo = obter_dashboard(
+             hoje,
+-            concurso_id
++            concurso_id,
++            metricas_nucleo
+         )
+ 
+         resumo_foco = obter_resumo_foco(hoje)
+@@ -36939,7 +36894,8 @@ class SistemaEstudos(QMainWindow):
+         )
+ 
+         self.atualizar_progresso_dashboard(
+-            concurso_id
++            concurso_id,
++            metricas_nucleo
+         )
+ 
+         self.card_media.setText(
+@@ -36964,7 +36920,7 @@ class SistemaEstudos(QMainWindow):
+             -13
+         )
+ 
+-        linhas_recentes = obter_relatorio_diario_periodo(
++        metricas_recentes = obter_metricas_periodo_nucleo(
+             data_inicio_recente.toString(
+                 "yyyy-MM-dd"
+             ),
+@@ -36972,9 +36928,9 @@ class SistemaEstudos(QMainWindow):
+                 "yyyy-MM-dd"
+             ),
+             concurso_id
+-        )
++        ).get("metrics", {})
+ 
+-        linhas_anteriores = obter_relatorio_diario_periodo(
++        metricas_anteriores = obter_metricas_periodo_nucleo(
+             data_inicio_anterior.toString(
+                 "yyyy-MM-dd"
+             ),
+@@ -36982,58 +36938,49 @@ class SistemaEstudos(QMainWindow):
+                 "yyyy-MM-dd"
+             ),
+             concurso_id
+-        )
++        ).get("metrics", {})
+ 
+-        def calcular_percentual_periodo(
+-            linhas
+-        ):
+-            questoes = sum(
+-                int(
+-                    linha[2]
+-                    or 0
+-                )
+-                for linha in linhas
+-            )
+-
+-            acertos = sum(
+-                int(
+-                    linha[3]
+-                    or 0
+-                )
+-                for linha in linhas
+-            )
+-
+-            if questoes <= 0:
+-                return None
+-
+-            return (
+-                100.0
+-                * acertos
+-                / questoes
+-            )
+-
+-        percentual_recente = calcular_percentual_periodo(
+-            linhas_recentes
++        percentual_recente = (
++            metricas_recentes.get("accuracy_rate", {}).get("value")
+         )
+-
+-        percentual_anterior = calcular_percentual_periodo(
+-            linhas_anteriores
++        percentual_anterior = (
++            metricas_anteriores.get("accuracy_rate", {}).get("value")
++        )
++        tentativas_recentes = int(
++            metricas_recentes.get("answered_attempt_count", {}).get("value", 0)
++            or 0
++        )
++        tentativas_anteriores = int(
++            metricas_anteriores.get("answered_attempt_count", {}).get("value", 0)
++            or 0
++        )
++        dias_recentes = int(
++            metricas_recentes.get("study_day_count", {}).get("value", 0)
++            or 0
++        )
++        dias_anteriores = int(
++            metricas_anteriores.get("study_day_count", {}).get("value", 0)
++            or 0
+         )
+ 
+         tendencia_role = "none"
+ 
+         if (
+             percentual_recente is None
++            or tentativas_recentes < 10
++            or dias_recentes < 2
+         ):
+             tendencia_texto = (
+-                "Sem dados recentes"
++                "Dados insuficientes"
+             )
+ 
+         elif (
+             percentual_anterior is None
++            or tentativas_anteriores < 10
++            or dias_anteriores < 2
+         ):
+             tendencia_texto = (
+-                "Base recente "
++                "Sem base anterior • "
+                 + (
+                     f"{percentual_recente:.1f}%"
+                     .replace(
+@@ -37049,7 +36996,7 @@ class SistemaEstudos(QMainWindow):
+                 - percentual_anterior
+             )
+ 
+-            if diferenca >= 0.5:
++            if diferenca >= 5.0:
+                 tendencia_role = "positive"
+                 tendencia_texto = (
+                     "↑ +"
+@@ -37063,7 +37010,7 @@ class SistemaEstudos(QMainWindow):
+                     + " p.p."
+                 )
+ 
+-            elif diferenca <= -0.5:
++            elif diferenca <= -5.0:
+                 tendencia_role = "negative"
+                 tendencia_texto = (
+                     "↓ "
+@@ -52733,6 +52680,11 @@ class SistemaEstudos(QMainWindow):
+             )
+             or 0
+         )
++        tentativas = int(
++            item.get("dominio", {}).get("tentativas", 0)
++            or 0
++        )
++        iniciado = tentativas > 0
+         importancia = int(
+             item.get(
+                 "importancia",
+@@ -52806,7 +52758,7 @@ class SistemaEstudos(QMainWindow):
+         # ----------------------------------------------------
+ 
+         if (
+-            revisoes <= 0
++            not iniciado
+             and importancia >= 4
+         ):
+             tipos.add(
+@@ -52862,7 +52814,7 @@ class SistemaEstudos(QMainWindow):
+         # ----------------------------------------------------
+ 
+         if (
+-            revisoes > 0
++            iniciado
+             and percentual_numerico is not None
+             and percentual_numerico < 70.0
+             and (
+@@ -52903,7 +52855,7 @@ class SistemaEstudos(QMainWindow):
+         # ----------------------------------------------------
+ 
+         if (
+-            revisoes > 0
++            iniciado
+             and not proxima_data.isValid()
+         ):
+             tipos.add(
+@@ -52927,7 +52879,7 @@ class SistemaEstudos(QMainWindow):
+         # ----------------------------------------------------
+ 
+         if (
+-            revisoes > 0
++            iniciado
+             and importancia >= 4
+             and dias_sem_revisao is not None
+             and dias_sem_revisao >= 30
+@@ -52954,7 +52906,7 @@ class SistemaEstudos(QMainWindow):
+         # ----------------------------------------------------
+ 
+         if (
+-            revisoes > 0
++            iniciado
+             and dias_sem_revisao is not None
+             and dias_sem_revisao >= 45
+             and (
+@@ -52987,7 +52939,7 @@ class SistemaEstudos(QMainWindow):
+ 
+         # Importância pesa, mas não cria alerta sozinha quando o
+         # conteúdo já foi iniciado.
+-        if revisoes > 0:
++        if iniciado:
+             if importancia >= 5:
+                 pontos += 12
+             elif importancia == 4:
+@@ -53741,138 +53693,16 @@ class SistemaEstudos(QMainWindow):
+         self.atualizar_dashboard()
+         self.atualizar_estatisticas()
+ 
+-    def classificar_progresso_topico(
+-        self,
+-        revisoes,
+-        percentual
+-    ):
+-        revisoes = int(
+-            revisoes
+-            or 0
+-        )
+-
+-        percentual_numerico = (
+-            float(
+-                percentual
+-            )
+-            if percentual is not None
+-            else None
+-        )
+-
+-        if revisoes <= 0:
+-            return (
+-                "Não iniciado",
+-                0
+-            )
+-
+-        if (
+-            revisoes >= 4
+-            and percentual_numerico is not None
+-            and percentual_numerico >= 85.0
+-        ):
+-            return (
+-                "Consolidado",
+-                3
+-            )
+-
+-        if (
+-            revisoes >= 3
+-            and percentual_numerico is not None
+-            and percentual_numerico >= 70.0
+-        ):
+-            return (
+-                "Consolidando",
+-                2
+-            )
+-
+-        return (
+-            "Em andamento",
+-            1
+-        )
+-
+     def montar_dados_progresso_edital(
+         self,
+         concurso_id
+     ):
+-        dados = []
+-
+-        indices_dominio = obter_indices_dominio_topicos(
+-            concurso_id
+-        )
+-
+-        for disciplina_id, disciplina in listar_disciplinas(
+-            concurso_id
+-        ):
+-            topicos = listar_topicos(
+-                disciplina,
+-                concurso_id
+-            )
+-
+-            for topico in topicos:
+-                estado, ordem_estado = (
+-                    self.classificar_progresso_topico(
+-                        topico[2],
+-                        topico[5]
+-                    )
+-                )
+-
+-                dados.append({
+-                    "topico_id": topico[0],
+-                    "disciplina_id": disciplina_id,
+-                    "disciplina": disciplina,
+-                    "topico": topico[1],
+-                    "revisoes": int(
+-                        topico[2]
+-                        or 0
+-                    ),
+-                    "ultima": topico[3],
+-                    "proxima": topico[4],
+-                    "percentual": topico[5],
+-                    "importancia": int(
+-                        topico[6]
+-                        or 3
+-                    ),
+-                    "estado": estado,
+-                    "ordem_estado": ordem_estado,
+-                    "dominio": indices_dominio.get(
+-                        int(
+-                            topico[0]
+-                        ),
+-                        {
+-                            "score": 0.0,
+-                            "nivel": "Sem evidência",
+-                            "qualidade_evidencia": "Sem evidência",
+-                            "desempenho": 0.0,
+-                            "cobertura": 0.0,
+-                            "estabilidade": 0.0,
+-                            "recencia": 0.0,
+-                            "controle_erros": 100.0,
+-                            "tentativas": 0,
+-                            "dias_ativos": 0,
+-                            "questoes_ativas": 0,
+-                            "questoes_respondidas": 0,
+-                            "questoes_dominadas": 0,
+-                            "criticas": 0,
+-                            "recorrentes": 0,
+-                            "motivos": [],
+-                        }
+-                    ),
+-                })
+-
+-        dados.sort(
+-            key=lambda item: (
+-                item["ordem_estado"],
+-                -item["importancia"],
+-                item["disciplina"].lower(),
+-                item["topico"].lower()
+-            )
+-        )
+-
+-        return dados
++        return obter_progresso_topicos_nucleo(concurso_id)
+ 
+     def atualizar_progresso_dashboard(
+         self,
+-        concurso_id
++        concurso_id,
++        metricas_globais=None
+     ):
+         if not hasattr(
+             self,
+@@ -53909,15 +53739,12 @@ class SistemaEstudos(QMainWindow):
+             - nao_iniciados
+         )
+ 
+-        cobertura = (
+-            round(
+-                100.0
+-                * trabalhados
+-                / total
+-            )
+-            if total > 0
+-            else 0
++        cobertura_nucleo = (
++            (metricas_globais or {})
++            .get("topic_coverage_rate", {})
++            .get("value")
+         )
++        cobertura = round(float(cobertura_nucleo)) if cobertura_nucleo is not None else 0
+ 
+         self.dashboard_progresso_trabalhado.setText(
+             f"{cobertura}%"
+@@ -53946,31 +53773,15 @@ class SistemaEstudos(QMainWindow):
+             )
+         )
+ 
+-        dominios_com_evidencia = [
+-            item[
+-                "dominio"
+-            ][
+-                "score"
+-            ]
+-            for item in dados
+-            if item[
+-                "dominio"
+-            ][
+-                "tentativas"
+-            ] > 0
+-        ]
++        dominio_global = (
++            (metricas_globais or {})
++            .get("mastery_score", {})
++            .get("value")
++        )
+ 
+-        if dominios_com_evidencia:
+-            dominio_medio = (
+-                sum(
+-                    dominios_com_evidencia
+-                )
+-                / len(
+-                    dominios_com_evidencia
+-                )
+-            )
++        if dominio_global is not None:
+             self.dashboard_dominio_medio.setText(
+-                f"{dominio_medio:.0f}/100"
++                f"{float(dominio_global):.0f}/100"
+             )
+         else:
+             self.dashboard_dominio_medio.setText(
+@@ -54039,6 +53850,9 @@ class SistemaEstudos(QMainWindow):
+         )
+ 
+         self.dados_progresso_edital = dados
++        metricas_globais_progresso = obter_metricas_globais_nucleo(
++            concurso_id
++        ).get("metrics", {})
+ 
+         total = len(
+             dados
+@@ -54063,11 +53877,14 @@ class SistemaEstudos(QMainWindow):
+             ]
+         )
+ 
++        percentual_trabalhado_nucleo = (
++            metricas_globais_progresso
++            .get("topic_coverage_rate", {})
++            .get("value")
++        )
+         percentual_trabalhado = (
+-            100.0
+-            * trabalhados
+-            / total
+-            if total > 0
++            float(percentual_trabalhado_nucleo)
++            if percentual_trabalhado_nucleo is not None
+             else 0.0
+         )
+         percentual_consolidado = (
+@@ -54125,38 +53942,26 @@ class SistemaEstudos(QMainWindow):
+             )
+         )
+ 
+-        dominios_evidencia = [
+-            item[
+-                "dominio"
+-            ]
++        dominio_global = (
++            metricas_globais_progresso
++            .get("mastery_score", {})
++            .get("value")
++        )
++        topicos_com_dominio = sum(
++            1
+             for item in dados
+-            if item[
+-                "dominio"
+-            ][
+-                "tentativas"
+-            ] > 0
+-        ]
++            if item["dominio"]["score"] is not None
++        )
+ 
+-        if dominios_evidencia:
+-            media_dominio = (
+-                sum(
+-                    item[
+-                        "score"
+-                    ]
+-                    for item in dominios_evidencia
+-                )
+-                / len(
+-                    dominios_evidencia
+-                )
+-            )
++        if dominio_global is not None:
+ 
+             self.progresso_card_dominio.setText(
+-                f"{media_dominio:.0f}/100"
++                f"{float(dominio_global):.0f}/100"
+             )
+             self.progresso_card_dominio_hint.setText(
+                 (
+-                    f"{len(dominios_evidencia)} tópico(s) "
+-                    "com evidência interna"
++                    f"{topicos_com_dominio} tópico(s) "
++                    "com domínio calculável"
+                 )
+             )
+         else:
+@@ -54515,6 +54320,13 @@ class SistemaEstudos(QMainWindow):
+         for linha, item in enumerate(
+             filtrados
+         ):
++            dominio_item = item["dominio"]
++            score_dominio = dominio_item.get("score")
++            texto_dominio = (
++                f"{float(score_dominio):.0f}/100 • {dominio_item['nivel']}"
++                if score_dominio is not None
++                else "— • Dados insuficientes"
++            )
+             valores = [
+                 item[
+                     "disciplina"
+@@ -54536,10 +54348,7 @@ class SistemaEstudos(QMainWindow):
+                     ]
+                 ),
+                 "",
+-                (
+-                    f"{item['dominio']['score']:.0f}/100 • "
+-                    f"{item['dominio']['nivel']}"
+-                ),
++                texto_dominio,
+                 formatar_data(
+                     item[
+                         "proxima"
+@@ -54589,22 +54398,36 @@ class SistemaEstudos(QMainWindow):
+                     )
+ 
+                 if coluna == 6:
+-                    dominio_item = item[
+-                        "dominio"
+-                    ]
++                    cobertura_item = dominio_item.get("cobertura")
++                    recente_item = dominio_item.get("desempenho_recente")
++                    score_tooltip = (
++                        f"{float(score_dominio):.1f}/100"
++                        if score_dominio is not None
++                        else "dados insuficientes"
++                    )
++                    recente_tooltip = (
++                        f"{float(recente_item):.1f}"
++                        if recente_item is not None
++                        else "dados insuficientes"
++                    )
++                    cobertura_tooltip = (
++                        f"{float(cobertura_item):.1f}"
++                        if cobertura_item is not None
++                        else "dados insuficientes"
++                    )
+ 
+                     celula.setToolTip(
+                         (
+-                            f"Índice de Domínio: "
+-                            f"{dominio_item['score']:.1f}/100\n"
++                            f"Índice de Domínio: {score_tooltip}\n"
+                             f"Nível: {dominio_item['nivel']}\n"
+                             f"Evidência: {dominio_item['qualidade_evidencia']}\n\n"
+-                            f"Desempenho recente: {dominio_item['desempenho']:.1f}\n"
+-                            f"Variedade: {dominio_item['variedade']:.1f}\n"
++                            f"Desempenho atual: {float(dominio_item['desempenho']):.1f}\n"
++                            f"Desempenho recente: {recente_tooltip}\n"
++                            f"Cobertura: {cobertura_tooltip}\n"
+                             f"Estabilidade: {dominio_item['estabilidade']:.1f}\n"
+                             f"Recência: {dominio_item['recencia']:.1f}\n"
+                             f"Controle de erros/recuperação: {dominio_item['controle_erros']:.1f}\n"
+-                            f"Robustez da evidência: {dominio_item['evidencia']:.1f}\n\n"
++                            f"Consolidação: {item['consolidacao']}\n\n"
+                             f"Respostas históricas: {dominio_item['tentativas_historicas']} • "
+                             f"Questões diferentes: {dominio_item['questoes_unicas']} • "
+                             f"Dias: {dominio_item['dias_ativos_historicos']} • "
+@@ -56021,23 +55844,14 @@ class SistemaEstudos(QMainWindow):
+             for item in disciplinas
+         )
+ 
+-        medias_validas = [
+-            item[3]
+-            for item in disciplinas
+-            if item[3] is not None
+-        ]
+-
+-        if medias_validas:
+-            media_disciplinas = (
+-                sum(
+-                    medias_validas
+-                )
+-                / len(
+-                    medias_validas
+-                )
+-            )
+-        else:
+-            media_disciplinas = None
++        # A taxa geral e recalculada das tentativas brutas. Nao fazemos
++        # media simples dos percentuais das disciplinas.
++        metricas_globais = obter_metricas_globais_nucleo(concurso[0])
++        media_disciplinas = (
++            metricas_globais.get("metrics", {})
++            .get("accuracy_rate", {})
++            .get("value")
++        )
+ 
+         # ----------------------------------------------------
+         # CARDS DE RESUMO
+diff --git a/testar_vighna.bat b/testar_vighna.bat
+index dc15b72..af68aa5 100644
+--- a/testar_vighna.bat
++++ b/testar_vighna.bat
+@@ -10,7 +10,7 @@ if not exist ".venv\Scripts\python.exe" (
+ 
+ call ".venv\Scripts\activate.bat"
+ 
+-python -m py_compile main.py banco.py tema.py foco.py jogos.py checkpoint.py inteligencia.py diagnostico.py navegacao.py jornada.py evolucao.py laboratorio.py versao.py
++python -m py_compile main.py banco.py tema.py foco.py jogos.py checkpoint.py inteligencia.py diagnostico.py navegacao.py jornada.py evolucao.py laboratorio.py versao.py statistics_core\__init__.py statistics_core\models.py statistics_core\periods.py statistics_core\repository.py statistics_core\service.py test_statistics_core.py
+ if errorlevel 1 (
+     echo.
+     echo ERRO na verificacao de sintaxe.
+@@ -18,6 +18,14 @@ if errorlevel 1 (
+     exit /b 1
+ )
+ 
++python -m unittest -v test_statistics_core.py
++if errorlevel 1 (
++    echo.
++    echo ERRO nos testes do Nucleo Estatistico.
++    pause
++    exit /b 1
++)
++
+ python testes_smoke.py
+ if errorlevel 1 (
+     echo.

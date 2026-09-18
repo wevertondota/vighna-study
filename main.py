@@ -246,6 +246,9 @@ from banco import (
     listar_historico_tentativas_questoes,
     listar_caderno_erros_questoes,
     obter_estatisticas_historico_questoes,
+    obter_metricas_globais_nucleo,
+    obter_metricas_periodo_nucleo,
+    obter_progresso_topicos_nucleo,
     obter_central_minha_evolucao,
     obter_contextos_revisao_automatica_sessao,
     salvar_revisao_automatica_questoes,
@@ -35694,48 +35697,23 @@ class SistemaEstudos(QMainWindow):
             "yyyy-MM-dd"
         )
 
-        resumo_semana = obter_relatorio_periodo(
+        resumo_semana = obter_metricas_periodo_nucleo(
             inicio_texto,
             hoje_texto,
             concurso_id
-        )
-
-        diarios_semana = obter_relatorio_diario_periodo(
-            inicio_texto,
-            hoje_texto,
-            concurso_id
-        )
+        ).get("metrics", {})
 
         questoes = int(
-            resumo_semana.get(
-                "questoes",
-                0
-            )
+            resumo_semana.get("answered_attempt_count", {}).get("value", 0)
             or 0
         )
         revisoes = int(
-            resumo_semana.get(
-                "revisoes",
-                0
-            )
+            resumo_semana.get("completed_review_count", {}).get("value", 0)
             or 0
         )
-
-        dias_estudados = len(
-            {
-                dado[0]
-                for dado in diarios_semana
-                if (
-                    int(
-                        dado[1]
-                        or 0
-                    ) > 0
-                    or int(
-                        dado[2]
-                        or 0
-                    ) > 0
-                )
-            }
+        dias_estudados = int(
+            resumo_semana.get("study_day_count", {}).get("value", 0)
+            or 0
         )
 
         meta_questoes = max(
@@ -35937,17 +35915,14 @@ class SistemaEstudos(QMainWindow):
             )
         )
 
-        relatorio_hoje = obter_relatorio_periodo(
+        relatorio_hoje = obter_metricas_periodo_nucleo(
             hoje_texto,
             hoje_texto,
             concurso_id
-        )
+        ).get("metrics", {})
 
         questoes_hoje = int(
-            relatorio_hoje.get(
-                "questoes",
-                0
-            )
+            relatorio_hoje.get("answered_attempt_count", {}).get("value", 0)
             or 0
         )
 
@@ -36712,45 +36687,24 @@ class SistemaEstudos(QMainWindow):
 
         # Questões Primeiro: o Dashboard mantém visível o estado do núcleo
         # de aprendizagem, sem depender da abertura do Banco de Questões.
+        metricas_nucleo = {}
         try:
-            estatisticas_questoes_nucleo = obter_estatisticas_banco_questoes(
-                concurso_id
-            )
-            historico_questoes_nucleo = obter_estatisticas_historico_questoes(
-                concurso_id
-            )
+            nucleo = obter_metricas_globais_nucleo(concurso_id)
+            metricas_nucleo = nucleo.get("metrics", {})
 
-            total_nucleo = int(
-                estatisticas_questoes_nucleo.get(
-                    "total",
-                    0
-                )
-                or 0
-            )
+            def valor_nucleo(chave, padrao=None):
+                return metricas_nucleo.get(chave, {}).get("value", padrao)
+
+            total_nucleo = int(valor_nucleo("answered_attempt_count", 0) or 0)
             topicos_nucleo = int(
-                estatisticas_questoes_nucleo.get(
-                    "topicos",
-                    0
-                )
+                metricas_nucleo.get("topic_coverage_rate", {})
+                .get("parameters", {})
+                .get("answered_active_topics", 0)
                 or 0
             )
-            erros_nucleo = int(
-                historico_questoes_nucleo.get(
-                    "erros",
-                    0
-                )
-                or 0
-            )
-            respondidas_nucleo = int(
-                historico_questoes_nucleo.get(
-                    "respondidas",
-                    0
-                )
-                or 0
-            )
-            desempenho_nucleo = historico_questoes_nucleo.get(
-                "desempenho"
-            )
+            erros_nucleo = int(valor_nucleo("incorrect_attempt_count", 0) or 0)
+            respondidas_nucleo = total_nucleo
+            desempenho_nucleo = valor_nucleo("accuracy_rate")
 
             if hasattr(
                 self,
@@ -36781,7 +36735,8 @@ class SistemaEstudos(QMainWindow):
 
         resumo = obter_dashboard(
             hoje,
-            concurso_id
+            concurso_id,
+            metricas_nucleo
         )
 
         resumo_foco = obter_resumo_foco(hoje)
@@ -36939,7 +36894,8 @@ class SistemaEstudos(QMainWindow):
         )
 
         self.atualizar_progresso_dashboard(
-            concurso_id
+            concurso_id,
+            metricas_nucleo
         )
 
         self.card_media.setText(
@@ -36964,7 +36920,7 @@ class SistemaEstudos(QMainWindow):
             -13
         )
 
-        linhas_recentes = obter_relatorio_diario_periodo(
+        metricas_recentes = obter_metricas_periodo_nucleo(
             data_inicio_recente.toString(
                 "yyyy-MM-dd"
             ),
@@ -36972,9 +36928,9 @@ class SistemaEstudos(QMainWindow):
                 "yyyy-MM-dd"
             ),
             concurso_id
-        )
+        ).get("metrics", {})
 
-        linhas_anteriores = obter_relatorio_diario_periodo(
+        metricas_anteriores = obter_metricas_periodo_nucleo(
             data_inicio_anterior.toString(
                 "yyyy-MM-dd"
             ),
@@ -36982,58 +36938,49 @@ class SistemaEstudos(QMainWindow):
                 "yyyy-MM-dd"
             ),
             concurso_id
+        ).get("metrics", {})
+
+        percentual_recente = (
+            metricas_recentes.get("accuracy_rate", {}).get("value")
         )
-
-        def calcular_percentual_periodo(
-            linhas
-        ):
-            questoes = sum(
-                int(
-                    linha[2]
-                    or 0
-                )
-                for linha in linhas
-            )
-
-            acertos = sum(
-                int(
-                    linha[3]
-                    or 0
-                )
-                for linha in linhas
-            )
-
-            if questoes <= 0:
-                return None
-
-            return (
-                100.0
-                * acertos
-                / questoes
-            )
-
-        percentual_recente = calcular_percentual_periodo(
-            linhas_recentes
+        percentual_anterior = (
+            metricas_anteriores.get("accuracy_rate", {}).get("value")
         )
-
-        percentual_anterior = calcular_percentual_periodo(
-            linhas_anteriores
+        tentativas_recentes = int(
+            metricas_recentes.get("answered_attempt_count", {}).get("value", 0)
+            or 0
+        )
+        tentativas_anteriores = int(
+            metricas_anteriores.get("answered_attempt_count", {}).get("value", 0)
+            or 0
+        )
+        dias_recentes = int(
+            metricas_recentes.get("study_day_count", {}).get("value", 0)
+            or 0
+        )
+        dias_anteriores = int(
+            metricas_anteriores.get("study_day_count", {}).get("value", 0)
+            or 0
         )
 
         tendencia_role = "none"
 
         if (
             percentual_recente is None
+            or tentativas_recentes < 10
+            or dias_recentes < 2
         ):
             tendencia_texto = (
-                "Sem dados recentes"
+                "Dados insuficientes"
             )
 
         elif (
             percentual_anterior is None
+            or tentativas_anteriores < 10
+            or dias_anteriores < 2
         ):
             tendencia_texto = (
-                "Base recente "
+                "Sem base anterior • "
                 + (
                     f"{percentual_recente:.1f}%"
                     .replace(
@@ -37049,7 +36996,7 @@ class SistemaEstudos(QMainWindow):
                 - percentual_anterior
             )
 
-            if diferenca >= 0.5:
+            if diferenca >= 5.0:
                 tendencia_role = "positive"
                 tendencia_texto = (
                     "↑ +"
@@ -37063,7 +37010,7 @@ class SistemaEstudos(QMainWindow):
                     + " p.p."
                 )
 
-            elif diferenca <= -0.5:
+            elif diferenca <= -5.0:
                 tendencia_role = "negative"
                 tendencia_texto = (
                     "↓ "
@@ -52733,6 +52680,11 @@ class SistemaEstudos(QMainWindow):
             )
             or 0
         )
+        tentativas = int(
+            item.get("dominio", {}).get("tentativas", 0)
+            or 0
+        )
+        iniciado = tentativas > 0
         importancia = int(
             item.get(
                 "importancia",
@@ -52806,7 +52758,7 @@ class SistemaEstudos(QMainWindow):
         # ----------------------------------------------------
 
         if (
-            revisoes <= 0
+            not iniciado
             and importancia >= 4
         ):
             tipos.add(
@@ -52862,7 +52814,7 @@ class SistemaEstudos(QMainWindow):
         # ----------------------------------------------------
 
         if (
-            revisoes > 0
+            iniciado
             and percentual_numerico is not None
             and percentual_numerico < 70.0
             and (
@@ -52903,7 +52855,7 @@ class SistemaEstudos(QMainWindow):
         # ----------------------------------------------------
 
         if (
-            revisoes > 0
+            iniciado
             and not proxima_data.isValid()
         ):
             tipos.add(
@@ -52927,7 +52879,7 @@ class SistemaEstudos(QMainWindow):
         # ----------------------------------------------------
 
         if (
-            revisoes > 0
+            iniciado
             and importancia >= 4
             and dias_sem_revisao is not None
             and dias_sem_revisao >= 30
@@ -52954,7 +52906,7 @@ class SistemaEstudos(QMainWindow):
         # ----------------------------------------------------
 
         if (
-            revisoes > 0
+            iniciado
             and dias_sem_revisao is not None
             and dias_sem_revisao >= 45
             and (
@@ -52987,7 +52939,7 @@ class SistemaEstudos(QMainWindow):
 
         # Importância pesa, mas não cria alerta sozinha quando o
         # conteúdo já foi iniciado.
-        if revisoes > 0:
+        if iniciado:
             if importancia >= 5:
                 pontos += 12
             elif importancia == 4:
@@ -53741,138 +53693,16 @@ class SistemaEstudos(QMainWindow):
         self.atualizar_dashboard()
         self.atualizar_estatisticas()
 
-    def classificar_progresso_topico(
-        self,
-        revisoes,
-        percentual
-    ):
-        revisoes = int(
-            revisoes
-            or 0
-        )
-
-        percentual_numerico = (
-            float(
-                percentual
-            )
-            if percentual is not None
-            else None
-        )
-
-        if revisoes <= 0:
-            return (
-                "Não iniciado",
-                0
-            )
-
-        if (
-            revisoes >= 4
-            and percentual_numerico is not None
-            and percentual_numerico >= 85.0
-        ):
-            return (
-                "Consolidado",
-                3
-            )
-
-        if (
-            revisoes >= 3
-            and percentual_numerico is not None
-            and percentual_numerico >= 70.0
-        ):
-            return (
-                "Consolidando",
-                2
-            )
-
-        return (
-            "Em andamento",
-            1
-        )
-
     def montar_dados_progresso_edital(
         self,
         concurso_id
     ):
-        dados = []
-
-        indices_dominio = obter_indices_dominio_topicos(
-            concurso_id
-        )
-
-        for disciplina_id, disciplina in listar_disciplinas(
-            concurso_id
-        ):
-            topicos = listar_topicos(
-                disciplina,
-                concurso_id
-            )
-
-            for topico in topicos:
-                estado, ordem_estado = (
-                    self.classificar_progresso_topico(
-                        topico[2],
-                        topico[5]
-                    )
-                )
-
-                dados.append({
-                    "topico_id": topico[0],
-                    "disciplina_id": disciplina_id,
-                    "disciplina": disciplina,
-                    "topico": topico[1],
-                    "revisoes": int(
-                        topico[2]
-                        or 0
-                    ),
-                    "ultima": topico[3],
-                    "proxima": topico[4],
-                    "percentual": topico[5],
-                    "importancia": int(
-                        topico[6]
-                        or 3
-                    ),
-                    "estado": estado,
-                    "ordem_estado": ordem_estado,
-                    "dominio": indices_dominio.get(
-                        int(
-                            topico[0]
-                        ),
-                        {
-                            "score": 0.0,
-                            "nivel": "Sem evidência",
-                            "qualidade_evidencia": "Sem evidência",
-                            "desempenho": 0.0,
-                            "cobertura": 0.0,
-                            "estabilidade": 0.0,
-                            "recencia": 0.0,
-                            "controle_erros": 100.0,
-                            "tentativas": 0,
-                            "dias_ativos": 0,
-                            "questoes_ativas": 0,
-                            "questoes_respondidas": 0,
-                            "questoes_dominadas": 0,
-                            "criticas": 0,
-                            "recorrentes": 0,
-                            "motivos": [],
-                        }
-                    ),
-                })
-
-        dados.sort(
-            key=lambda item: (
-                item["ordem_estado"],
-                -item["importancia"],
-                item["disciplina"].lower(),
-                item["topico"].lower()
-            )
-        )
-
-        return dados
+        return obter_progresso_topicos_nucleo(concurso_id)
 
     def atualizar_progresso_dashboard(
         self,
-        concurso_id
+        concurso_id,
+        metricas_globais=None
     ):
         if not hasattr(
             self,
@@ -53909,15 +53739,12 @@ class SistemaEstudos(QMainWindow):
             - nao_iniciados
         )
 
-        cobertura = (
-            round(
-                100.0
-                * trabalhados
-                / total
-            )
-            if total > 0
-            else 0
+        cobertura_nucleo = (
+            (metricas_globais or {})
+            .get("topic_coverage_rate", {})
+            .get("value")
         )
+        cobertura = round(float(cobertura_nucleo)) if cobertura_nucleo is not None else 0
 
         self.dashboard_progresso_trabalhado.setText(
             f"{cobertura}%"
@@ -53946,31 +53773,15 @@ class SistemaEstudos(QMainWindow):
             )
         )
 
-        dominios_com_evidencia = [
-            item[
-                "dominio"
-            ][
-                "score"
-            ]
-            for item in dados
-            if item[
-                "dominio"
-            ][
-                "tentativas"
-            ] > 0
-        ]
+        dominio_global = (
+            (metricas_globais or {})
+            .get("mastery_score", {})
+            .get("value")
+        )
 
-        if dominios_com_evidencia:
-            dominio_medio = (
-                sum(
-                    dominios_com_evidencia
-                )
-                / len(
-                    dominios_com_evidencia
-                )
-            )
+        if dominio_global is not None:
             self.dashboard_dominio_medio.setText(
-                f"{dominio_medio:.0f}/100"
+                f"{float(dominio_global):.0f}/100"
             )
         else:
             self.dashboard_dominio_medio.setText(
@@ -54039,6 +53850,9 @@ class SistemaEstudos(QMainWindow):
         )
 
         self.dados_progresso_edital = dados
+        metricas_globais_progresso = obter_metricas_globais_nucleo(
+            concurso_id
+        ).get("metrics", {})
 
         total = len(
             dados
@@ -54063,11 +53877,14 @@ class SistemaEstudos(QMainWindow):
             ]
         )
 
+        percentual_trabalhado_nucleo = (
+            metricas_globais_progresso
+            .get("topic_coverage_rate", {})
+            .get("value")
+        )
         percentual_trabalhado = (
-            100.0
-            * trabalhados
-            / total
-            if total > 0
+            float(percentual_trabalhado_nucleo)
+            if percentual_trabalhado_nucleo is not None
             else 0.0
         )
         percentual_consolidado = (
@@ -54125,38 +53942,26 @@ class SistemaEstudos(QMainWindow):
             )
         )
 
-        dominios_evidencia = [
-            item[
-                "dominio"
-            ]
+        dominio_global = (
+            metricas_globais_progresso
+            .get("mastery_score", {})
+            .get("value")
+        )
+        topicos_com_dominio = sum(
+            1
             for item in dados
-            if item[
-                "dominio"
-            ][
-                "tentativas"
-            ] > 0
-        ]
+            if item["dominio"]["score"] is not None
+        )
 
-        if dominios_evidencia:
-            media_dominio = (
-                sum(
-                    item[
-                        "score"
-                    ]
-                    for item in dominios_evidencia
-                )
-                / len(
-                    dominios_evidencia
-                )
-            )
+        if dominio_global is not None:
 
             self.progresso_card_dominio.setText(
-                f"{media_dominio:.0f}/100"
+                f"{float(dominio_global):.0f}/100"
             )
             self.progresso_card_dominio_hint.setText(
                 (
-                    f"{len(dominios_evidencia)} tópico(s) "
-                    "com evidência interna"
+                    f"{topicos_com_dominio} tópico(s) "
+                    "com domínio calculável"
                 )
             )
         else:
@@ -54515,6 +54320,13 @@ class SistemaEstudos(QMainWindow):
         for linha, item in enumerate(
             filtrados
         ):
+            dominio_item = item["dominio"]
+            score_dominio = dominio_item.get("score")
+            texto_dominio = (
+                f"{float(score_dominio):.0f}/100 • {dominio_item['nivel']}"
+                if score_dominio is not None
+                else "— • Dados insuficientes"
+            )
             valores = [
                 item[
                     "disciplina"
@@ -54536,10 +54348,7 @@ class SistemaEstudos(QMainWindow):
                     ]
                 ),
                 "",
-                (
-                    f"{item['dominio']['score']:.0f}/100 • "
-                    f"{item['dominio']['nivel']}"
-                ),
+                texto_dominio,
                 formatar_data(
                     item[
                         "proxima"
@@ -54589,22 +54398,36 @@ class SistemaEstudos(QMainWindow):
                     )
 
                 if coluna == 6:
-                    dominio_item = item[
-                        "dominio"
-                    ]
+                    cobertura_item = dominio_item.get("cobertura")
+                    recente_item = dominio_item.get("desempenho_recente")
+                    score_tooltip = (
+                        f"{float(score_dominio):.1f}/100"
+                        if score_dominio is not None
+                        else "dados insuficientes"
+                    )
+                    recente_tooltip = (
+                        f"{float(recente_item):.1f}"
+                        if recente_item is not None
+                        else "dados insuficientes"
+                    )
+                    cobertura_tooltip = (
+                        f"{float(cobertura_item):.1f}"
+                        if cobertura_item is not None
+                        else "dados insuficientes"
+                    )
 
                     celula.setToolTip(
                         (
-                            f"Índice de Domínio: "
-                            f"{dominio_item['score']:.1f}/100\n"
+                            f"Índice de Domínio: {score_tooltip}\n"
                             f"Nível: {dominio_item['nivel']}\n"
                             f"Evidência: {dominio_item['qualidade_evidencia']}\n\n"
-                            f"Desempenho recente: {dominio_item['desempenho']:.1f}\n"
-                            f"Variedade: {dominio_item['variedade']:.1f}\n"
+                            f"Desempenho atual: {float(dominio_item['desempenho']):.1f}\n"
+                            f"Desempenho recente: {recente_tooltip}\n"
+                            f"Cobertura: {cobertura_tooltip}\n"
                             f"Estabilidade: {dominio_item['estabilidade']:.1f}\n"
                             f"Recência: {dominio_item['recencia']:.1f}\n"
                             f"Controle de erros/recuperação: {dominio_item['controle_erros']:.1f}\n"
-                            f"Robustez da evidência: {dominio_item['evidencia']:.1f}\n\n"
+                            f"Consolidação: {item['consolidacao']}\n\n"
                             f"Respostas históricas: {dominio_item['tentativas_historicas']} • "
                             f"Questões diferentes: {dominio_item['questoes_unicas']} • "
                             f"Dias: {dominio_item['dias_ativos_historicos']} • "
@@ -56021,23 +55844,14 @@ class SistemaEstudos(QMainWindow):
             for item in disciplinas
         )
 
-        medias_validas = [
-            item[3]
-            for item in disciplinas
-            if item[3] is not None
-        ]
-
-        if medias_validas:
-            media_disciplinas = (
-                sum(
-                    medias_validas
-                )
-                / len(
-                    medias_validas
-                )
-            )
-        else:
-            media_disciplinas = None
+        # A taxa geral e recalculada das tentativas brutas. Nao fazemos
+        # media simples dos percentuais das disciplinas.
+        metricas_globais = obter_metricas_globais_nucleo(concurso[0])
+        media_disciplinas = (
+            metricas_globais.get("metrics", {})
+            .get("accuracy_rate", {})
+            .get("value")
+        )
 
         # ----------------------------------------------------
         # CARDS DE RESUMO

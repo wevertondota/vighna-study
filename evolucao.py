@@ -18,7 +18,7 @@ def _como_data(valor):
         return valor
     try:
         return date.fromisoformat(str(valor or "")[:10])
-    except Exception:
+    except (TypeError, ValueError):
         return None
 
 
@@ -40,7 +40,7 @@ def _resumir_foco(rows):
         "sessoes": sessoes,
         "concluidas": concluidas,
         "dias_ativos": dias_ativos,
-        "media_sessao": int(round(segundos / sessoes)) if sessoes else 0,
+        "media_sessao": round(segundos / sessoes) if sessoes else 0,
     }
 
 
@@ -69,7 +69,7 @@ def obter_evolucao_historica(concurso_id=None, dias=30):
     concurso_id = int(concurso_id)
     dias = max(7, min(365, int(dias or 30)))
 
-    hoje = date.today()
+    hoje = datetime.now().astimezone().date()
     inicio = hoje - timedelta(days=dias - 1)
     fim_anterior = inicio - timedelta(days=1)
     inicio_anterior = fim_anterior - timedelta(days=dias - 1)
@@ -232,7 +232,19 @@ def obter_evolucao_historica(concurso_id=None, dias=30):
         chave = (item["topico_id"], item["disciplina"], item["topico"])
         por_topico[chave].append(item)
 
-    indices = banco.obter_indices_dominio_topicos(concurso_id)
+    topicos_ids = {
+        int(topico_id)
+        for topico_id, _, _ in por_topico
+        if topico_id is not None
+    }
+    metricas_topicos = (
+        banco.obter_servico_estatistico().get_topic_metrics_batch(
+            concurso_id,
+            topicos_ids,
+        )
+        if topicos_ids
+        else {}
+    )
     topicos = []
     for (topico_id, disciplina, topico), items in por_topico.items():
         atuais = [i for i in items if inicio <= i["data"] <= hoje]
@@ -251,9 +263,9 @@ def obter_evolucao_historica(concurso_id=None, dias=30):
             delta = ra["desempenho"] - rp["desempenho"]
         dominio = None
         if topico_id is not None:
-            indice = indices.get(int(topico_id))
-            if indice and int(indice.get("tentativas") or 0) > 0:
-                dominio = float(indice.get("score") or 0.0)
+            metricas_topico = metricas_topicos.get(int(topico_id))
+            if metricas_topico is not None:
+                dominio = metricas_topico.value("mastery_score")
         topicos.append({
             "topico_id": topico_id,
             "disciplina": disciplina,

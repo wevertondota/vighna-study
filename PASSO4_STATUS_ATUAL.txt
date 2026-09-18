@@ -1,0 +1,13 @@
+ M banco.py
+ M checkpoint.py
+ M estudos.db
+ M evolucao.py
+ M main.py
+ M testar_vighna.bat
+?? PASSO4_DIFF_ATUAL.patch
+?? PASSO4_STATUS_ATUAL.txt
+?? PASSO_3_NUCLEO_ESTATISTICO.md
+?? PASSO_4_VALIDACAO_MIGRACAO_METRICAS.md
+?? RELATORIO_IMPLEMENTACAO_NUCLEO_ESTATISTICO.md
+?? statistics_core/
+?? test_statistics_core.py

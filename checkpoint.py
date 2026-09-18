@@ -54,9 +54,11 @@ PASTAS_RECURSIVAS_OPCIONAIS = {
     "recursos",
     "icons",
     "icones",
+    "statistics_core",
 }
 
 EXTENSOES_RECURSOS = {
+    ".py",
     ".png",
     ".jpg",
     ".jpeg",
@@ -117,6 +119,11 @@ FONTES_NUCLEO_ATUAL = {
     "evolucao.py",
     "laboratorio.py",
     "versao.py",
+    "statistics_core/__init__.py",
+    "statistics_core/models.py",
+    "statistics_core/periods.py",
+    "statistics_core/repository.py",
+    "statistics_core/service.py",
 }
 
 
