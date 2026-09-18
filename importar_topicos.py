@@ -1,5 +1,6 @@
-import sqlite3
 from pathlib import Path
+
+import banco
 
 CAMINHO_BANCO = Path(__file__).with_name("estudos.db")
 
@@ -15,25 +16,26 @@ DADOS = {
     ],
 
     "Direito Penal": [
-        "Título I: Da aplicação da lei penal",
-        "Título II: Do crime",
-        "Título III: Da imputabilidade penal",
-        "Título IV: Do concurso de pessoas",
-        "Título V: Das penas",
-        "Título VI: Das medidas de segurança",
-        "Título VII: Da ação penal",
-        "Título VIII: Da extinção da punibilidade",
-        "Título I: Dos crimes contra a pessoa",
-        "Título II: Dos crimes contra o patrimônio",
-        "Título III: Dos crimes contra a propriedade imaterial",
-        "Título IV: Dos crimes contra a organização do trabalho",
-        "Título V: Dos crimes contra o sentimento religioso e contra o respeito aos mortos",
-        "Título VI: Dos crimes contra a dignidade sexual",
-        "Título VII: Dos crimes contra a família",
-        "Título VIII: Dos crimes contra a incolumidade pública",
-        "Título IX: Dos crimes contra a paz pública",
-        "Título X: Dos crimes contra a fé pública",
-        "Título XI: Dos crimes contra a administração pública",
+        "TÍTULO I – DA APLICAÇÃO DA LEI PENAL",
+        "TÍTULO II – DO CRIME",
+        "TÍTULO III – DA IMPUTABILIDADE PENAL",
+        "TÍTULO IV – DO CONCURSO DE PESSOAS",
+        "TÍTULO V – DAS PENAS",
+        "TÍTULO VI – DAS MEDIDAS DE SEGURANÇA",
+        "TÍTULO VII – DA AÇÃO PENAL",
+        "TÍTULO VIII – DA EXTINÇÃO DA PUNIBILIDADE",
+        "TÍTULO I – DOS CRIMES CONTRA A PESSOA",
+        "TÍTULO II – DOS CRIMES CONTRA O PATRIMÔNIO",
+        "TÍTULO III – DOS CRIMES CONTRA A PROPRIEDADE IMATERIAL",
+        "TÍTULO IV – DOS CRIMES CONTRA A ORGANIZAÇÃO DO TRABALHO",
+        "TÍTULO V – DOS CRIMES CONTRA O SENTIMENTO RELIGIOSO E CONTRA O RESPEITO AOS MORTOS",
+        "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL",
+        "TÍTULO VII – DOS CRIMES CONTRA A FAMÍLIA",
+        "TÍTULO VIII – DOS CRIMES CONTRA A INCOLUMIDADE PÚBLICA",
+        "TÍTULO IX – DOS CRIMES CONTRA A PAZ PÚBLICA",
+        "TÍTULO X – DOS CRIMES CONTRA A FÉ PÚBLICA",
+        "TÍTULO XI – DOS CRIMES CONTRA A ADMINISTRAÇÃO PÚBLICA",
+        "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO",
     ],
 
     "Direito Administrativo": [
@@ -107,42 +109,28 @@ def main():
         print("Coloque importar_topicos.py dentro de C:\\SistemaEstudos.")
         return
 
-    conexao = sqlite3.connect(CAMINHO_BANCO)
-    conexao.execute("PRAGMA foreign_keys = ON")
+    # Garante schema, identidades estáveis e aliases antes de importar.
+    banco.criar_banco()
 
     inseridos = 0
     existentes = 0
 
-    try:
-        for disciplina, topicos in DADOS.items():
-            conexao.execute(
-                "INSERT OR IGNORE INTO disciplinas (nome) VALUES (?)",
-                (disciplina,)
+    for disciplina, topicos in DADOS.items():
+        disciplina_id = banco.resolver_disciplina_id_estrutural(disciplina)
+        if disciplina_id is None:
+            banco.adicionar_disciplina(disciplina)
+
+        for topico in topicos:
+            existente = banco.resolver_topico_id_estrutural(
+                disciplina, topico
             )
-
-            disciplina_id = conexao.execute(
-                "SELECT id FROM disciplinas WHERE nome = ?",
-                (disciplina,)
-            ).fetchone()[0]
-
-            for topico in topicos:
-                cursor = conexao.execute(
-                    """
-                    INSERT OR IGNORE INTO topicos (disciplina_id, nome)
-                    VALUES (?, ?)
-                    """,
-                    (disciplina_id, topico)
-                )
-
-                if cursor.rowcount == 1:
-                    inseridos += 1
-                else:
-                    existentes += 1
-
-        conexao.commit()
-
-    finally:
-        conexao.close()
+            if existente is not None:
+                existentes += 1
+                continue
+            if banco.adicionar_topico(disciplina, topico):
+                inseridos += 1
+            else:
+                existentes += 1
 
     print()
     print("IMPORTAÇÃO CONCLUÍDA")
@@ -150,6 +138,7 @@ def main():
     print(f"Tópicos novos: {inseridos}")
     print(f"Já existentes: {existentes}")
     print()
+    print("As identidades estruturais e aliases foram preservados.")
     print("Nenhuma revisão ou histórico foi apagado.")
     print("Agora abra o programa novamente com: python main.py")
 

@@ -6,8 +6,16 @@ import math
 import re
 import statistics
 import unicodedata
+import uuid
 from datetime import date, datetime, timedelta
 from pathlib import Path
+
+from espacamento import (
+    calcular_sugestao_espacamento,
+    obter_configuracao_queda_padrao,
+    obter_tabela_padrao,
+    normalizar_tabela_espacamento,
+)
 
 
 if getattr(sys, "frozen", False):
@@ -570,6 +578,24 @@ def criar_banco():
             )
         """)
 
+        # Motor de Sessão Unificado V1: ``modo`` continua sendo o rótulo
+        # humano; ``origem`` vira o identificador estável usado pela inteligência.
+        colunas_sessoes_questoes = {
+            linha[1]
+            for linha in conexao.execute(
+                "PRAGMA table_info(sessoes_questoes)"
+            ).fetchall()
+        }
+        for coluna, definicao in (
+            ("origem", "TEXT NOT NULL DEFAULT 'legado'"),
+            ("contexto_json", "TEXT"),
+            ("versao_motor", "TEXT NOT NULL DEFAULT 'sessao_legacy'"),
+        ):
+            if coluna not in colunas_sessoes_questoes:
+                conexao.execute(
+                    f"ALTER TABLE sessoes_questoes ADD COLUMN {coluna} {definicao}"
+                )
+
         # ------------------------------------------------------
         # EFETIVIDADE E CALIBRAÇÃO DAS SESSÕES
         # ------------------------------------------------------
@@ -926,6 +952,62 @@ def criar_banco():
                 """
             )
 
+        # ------------------------------------------------------
+        # MOTOR DE SESSÃO UNIFICADO V1
+        # ------------------------------------------------------
+        # Congela a fila no início da sessão para distinguir o que foi
+        # planejado, apresentado, respondido, pulado ou não alcançado.
+        conexao.execute("""
+            CREATE TABLE IF NOT EXISTS itens_sessao_questoes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                sessao_id INTEGER NOT NULL,
+                ordem INTEGER NOT NULL,
+                questao_id INTEGER,
+                estado TEXT NOT NULL DEFAULT 'planejada',
+                planejada_em TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+                apresentada_em TEXT,
+                finalizada_em TEXT,
+                tempo_segundos INTEGER,
+                questao_id_snapshot INTEGER,
+                topico_id_snapshot INTEGER,
+                capitulo_id_snapshot INTEGER,
+                disciplina_id_snapshot INTEGER,
+                disciplina_snapshot TEXT,
+                topico_snapshot TEXT,
+                capitulo_snapshot TEXT,
+                enunciado_snapshot TEXT,
+                alternativas_snapshot TEXT,
+                gabarito_snapshot TEXT,
+                explicacao_snapshot TEXT,
+                banca_snapshot TEXT,
+                ano_snapshot INTEGER,
+                fonte_snapshot TEXT,
+                dificuldade_snapshot TEXT,
+                contexto_selecao_json TEXT,
+                UNIQUE (sessao_id, ordem),
+                FOREIGN KEY (sessao_id) REFERENCES sessoes_questoes(id) ON DELETE CASCADE,
+                FOREIGN KEY (questao_id) REFERENCES questoes(id) ON DELETE SET NULL
+            )
+        """)
+
+        if "item_sessao_id" not in colunas_tentativas:
+            conexao.execute(
+                "ALTER TABLE tentativas_questoes ADD COLUMN item_sessao_id INTEGER"
+            )
+
+        conexao.execute("""
+            CREATE INDEX IF NOT EXISTS idx_itens_sessao_sessao_estado
+            ON itens_sessao_questoes(sessao_id, estado, ordem)
+        """)
+        conexao.execute("""
+            CREATE INDEX IF NOT EXISTS idx_itens_sessao_questao
+            ON itens_sessao_questoes(questao_id_snapshot, sessao_id)
+        """)
+        conexao.execute("""
+            CREATE INDEX IF NOT EXISTS idx_tentativas_item_sessao
+            ON tentativas_questoes(item_sessao_id)
+        """)
+
         conexao.execute("""
             CREATE INDEX IF NOT EXISTS idx_questoes_topico
             ON questoes(topico_id)
@@ -1189,6 +1271,17 @@ def criar_banco():
         for comando in indices_performance:
             conexao.execute(comando)
 
+        # A camada de identidade precisa existir antes das sincronizações
+        # estruturais. Assim, até uma disciplina renomeada continua sendo
+        # encontrada pelos aliases históricos. Uma segunda passagem ao fim
+        # registra conteúdos que eventualmente sejam criados pela migração.
+        _garantir_identidades_estruturais(conexao)
+
+        # Sincroniza a árvore oficial de Direito Penal antes de materializar
+        # os capítulos. A migração também consolida tópicos legados e adiciona
+        # o Título XII sem tocar no histórico de questões/revisões.
+        _sincronizar_estrutura_direito_penal(conexao)
+
         # Materializa os capítulos padrão logo na abertura. Assim, títulos de
         # Direito Penal já chegam completos, inclusive antes do primeiro
         # clique na tela de disciplina.
@@ -1213,6 +1306,12 @@ def criar_banco():
             CROSS JOIN concursos co
             """
         )
+
+        # Identidade estrutural V1: disciplina, tópico e capítulo passam a
+        # possuir uma chave persistente independente do nome exibido. O
+        # registro de aliases mantém imports e vínculos compatíveis após
+        # renomeações futuras.
+        _garantir_identidades_estruturais(conexao)
 
         try:
             conexao.execute("PRAGMA optimize")
@@ -1409,6 +1508,8 @@ def adicionar_concurso(nome):
         return None
 
     with conectar() as conexao:
+        if _alias_conflita_disciplina(conexao, nome):
+            return None
         try:
             cursor = conexao.execute(
                 """
@@ -1886,6 +1987,10 @@ def adicionar_disciplina(nome):
                 cursor.lastrowid
             )
 
+            _registrar_alias_disciplina(
+                conexao, disciplina_id, nome, "criacao"
+            )
+
             # A nova disciplina nasce visível no perfil Padrão
             # e no perfil atualmente selecionado.
             for concurso_id in {
@@ -1923,14 +2028,24 @@ def renomear_disciplina(
     disciplina_id,
     novo_nome
 ):
-    novo_nome = str(
-        novo_nome
-    ).strip()
+    novo_nome = str(novo_nome).strip()
 
     if not novo_nome:
         return False
 
     with conectar() as conexao:
+        atual = conexao.execute(
+            "SELECT nome FROM disciplinas WHERE id = ?",
+            (int(disciplina_id),),
+        ).fetchone()
+        if atual is None:
+            return False
+        nome_anterior = str(atual[0])
+        if _alias_conflita_disciplina(
+            conexao, novo_nome, ignorar_id=disciplina_id
+        ):
+            return False
+
         try:
             cursor = conexao.execute(
                 """
@@ -1938,17 +2053,17 @@ def renomear_disciplina(
                 SET nome = ?
                 WHERE id = ?
                 """,
-                (
-                    novo_nome,
-                    int(
-                        disciplina_id
-                    )
-                )
+                (novo_nome, int(disciplina_id))
             )
-
-            return (
-                cursor.rowcount > 0
+            if cursor.rowcount <= 0:
+                return False
+            _registrar_alias_disciplina(
+                conexao, disciplina_id, nome_anterior, "renomeacao"
             )
+            _registrar_alias_disciplina(
+                conexao, disciplina_id, novo_nome, "atual"
+            )
+            return True
 
         except sqlite3.IntegrityError:
             return False
@@ -2265,7 +2380,12 @@ def listar_topicos(
     filtro_pausa = "" if incluir_pausados else "AND COALESCE(tc.pausado, 0) = 0"
 
     with conectar() as conexao:
-        return conexao.execute(
+        disciplina_id = _resolver_disciplina_id_conexao(
+            conexao, nome_disciplina
+        )
+        if disciplina_id is None:
+            return []
+        linhas = conexao.execute(
             f"""
             SELECT
                 t.id,
@@ -2299,15 +2419,16 @@ def listar_topicos(
                 {filtro_pausa}
             LEFT JOIN controle_topico c
                 ON c.topico_id = t.id
-            WHERE d.nome = ?
+            WHERE d.id = ?
             ORDER BY t.nome COLLATE NOCASE
             """,
             (
                 concurso_id,
                 concurso_id,
-                nome_disciplina
+                disciplina_id
             )
         ).fetchall()
+        return _ordenar_linhas_topicos(nome_disciplina, linhas)
 
 
 def listar_topicos_gerenciamento(nome_disciplina, concurso_id=None):
@@ -2322,7 +2443,12 @@ def listar_topicos_gerenciamento(nome_disciplina, concurso_id=None):
         concurso_id = obter_concurso_ativo()[0]
 
     with conectar() as conexao:
-        return conexao.execute(
+        disciplina_id = _resolver_disciplina_id_conexao(
+            conexao, nome_disciplina
+        )
+        if disciplina_id is None:
+            return []
+        linhas = conexao.execute(
             f"""
             SELECT
                 t.id,
@@ -2352,11 +2478,12 @@ def listar_topicos_gerenciamento(nome_disciplina, concurso_id=None):
                 AND tc.incluido = 1
             LEFT JOIN controle_topico c
                 ON c.topico_id = t.id
-            WHERE d.nome = ?
+            WHERE d.id = ?
             ORDER BY t.nome COLLATE NOCASE
             """,
-            (concurso_id, concurso_id, nome_disciplina),
+            (concurso_id, concurso_id, disciplina_id),
         ).fetchall()
+        return _ordenar_linhas_topicos(nome_disciplina, linhas)
 
 
 def definir_topico_pausado(topico_id, pausado=True, concurso_id=None):
@@ -2427,113 +2554,76 @@ def adicionar_topico(
     nome_disciplina,
     nome_topico
 ):
-    concurso_ativo_id = (
-        obter_concurso_ativo()[0]
-    )
-    concurso_padrao_id = (
-        obter_concurso_padrao()[0]
-    )
+    nome_disciplina = str(nome_disciplina or "").strip()
+    nome_topico = str(nome_topico or "").strip()
+    if not nome_disciplina or not nome_topico:
+        return False
+
+    concurso_ativo_id = obter_concurso_ativo()[0]
+    concurso_padrao_id = obter_concurso_padrao()[0]
 
     with conectar() as conexao:
-        disciplina = conexao.execute(
-            """
-            SELECT id
-            FROM disciplinas
-            WHERE nome = ?
-            """,
-            (nome_disciplina,)
-        ).fetchone()
+        disciplina_id = _resolver_disciplina_id_conexao(
+            conexao, nome_disciplina
+        )
 
-        if disciplina is None:
+        if disciplina_id is None:
             cursor = conexao.execute(
-                """
-                INSERT INTO disciplinas (nome)
-                VALUES (?)
-                """,
+                "INSERT INTO disciplinas (nome) VALUES (?)",
                 (nome_disciplina,)
             )
-            disciplina_id = (
-                cursor.lastrowid
+            disciplina_id = int(cursor.lastrowid)
+            _registrar_alias_disciplina(
+                conexao, disciplina_id, nome_disciplina, "criacao"
             )
-        else:
-            disciplina_id = disciplina[0]
+
+        if _alias_conflita_topico(
+            conexao, disciplina_id, nome_topico
+        ):
+            return False
 
         try:
             cursor = conexao.execute(
                 """
-                INSERT INTO topicos (
-                    disciplina_id,
-                    nome
-                )
+                INSERT INTO topicos (disciplina_id, nome)
                 VALUES (?, ?)
                 """,
-                (
-                    disciplina_id,
-                    nome_topico
-                )
+                (disciplina_id, nome_topico)
+            )
+            topico_id = int(cursor.lastrowid)
+            _registrar_alias_topico(
+                conexao, topico_id, nome_topico, "criacao"
             )
 
-            topico_id = cursor.lastrowid
-
             conexao.execute(
-                """
-                INSERT OR IGNORE INTO controle_topico (
-                    topico_id
-                )
-                VALUES (?)
-                """,
+                "INSERT OR IGNORE INTO controle_topico (topico_id) VALUES (?)",
                 (topico_id,)
             )
 
-            perfis_iniciais = {
-                concurso_padrao_id,
-                concurso_ativo_id
-            }
-
+            perfis_iniciais = {concurso_padrao_id, concurso_ativo_id}
             for concurso_id in perfis_iniciais:
                 conexao.execute(
                     """
                     INSERT INTO disciplina_concurso_inclusao (
-                        disciplina_id,
-                        concurso_id,
-                        incluido
+                        disciplina_id, concurso_id, incluido
                     )
                     VALUES (?, ?, 1)
-                    ON CONFLICT(
-                        disciplina_id,
-                        concurso_id
-                    )
-                    DO UPDATE SET
-                        incluido = 1
+                    ON CONFLICT(disciplina_id, concurso_id)
+                    DO UPDATE SET incluido = 1
                     """,
-                    (
-                        disciplina_id,
-                        concurso_id
-                    )
+                    (disciplina_id, concurso_id)
                 )
-
                 conexao.execute(
                     """
                     INSERT INTO topico_concurso_importancia (
-                        topico_id,
-                        concurso_id,
-                        importancia,
-                        incluido
+                        topico_id, concurso_id, importancia, incluido
                     )
                     VALUES (?, ?, 3, 1)
-                    ON CONFLICT(
-                        topico_id,
-                        concurso_id
-                    )
-                    DO UPDATE SET
-                        incluido = 1
+                    ON CONFLICT(topico_id, concurso_id)
+                    DO UPDATE SET incluido = 1
                     """,
-                    (
-                        topico_id,
-                        concurso_id
-                    )
+                    (topico_id, concurso_id)
                 )
-
             return True
 
         except sqlite3.IntegrityError:
@@ -2541,11 +2631,34 @@ def adicionar_topico(
 
 
 def renomear_topico(topico_id, novo_nome):
+    novo_nome = str(novo_nome or "").strip()
+    if not novo_nome:
+        return False
     with conectar() as conexao:
+        atual = conexao.execute(
+            "SELECT nome, disciplina_id FROM topicos WHERE id = ?",
+            (int(topico_id),),
+        ).fetchone()
+        if atual is None:
+            return False
+        nome_anterior = str(atual[0])
+        disciplina_id = int(atual[1])
+        if _alias_conflita_topico(
+            conexao, disciplina_id, novo_nome, ignorar_id=topico_id
+        ):
+            return False
         try:
-            conexao.execute(
+            cursor = conexao.execute(
                 "UPDATE topicos SET nome = ? WHERE id = ?",
-                (novo_nome, topico_id)
+                (novo_nome, int(topico_id))
+            )
+            if cursor.rowcount <= 0:
+                return False
+            _registrar_alias_topico(
+                conexao, topico_id, nome_anterior, "renomeacao"
+            )
+            _registrar_alias_topico(
+                conexao, topico_id, novo_nome, "atual"
             )
             return True
         except sqlite3.IntegrityError:
@@ -2705,6 +2818,12 @@ def obter_importancia_topico(
 
 
 def _normalizar_chave_conteudo(texto):
+    """Normaliza rótulos legais ignorando caixa, acentos e separadores.
+
+    Títulos e capítulos podem aparecer com dois-pontos, hífen ou travessão
+    (ex.: ``TÍTULO I – ...`` e ``Título I: ...``). Para fins de vínculo,
+    todos esses formatos representam o mesmo conteúdo.
+    """
     texto = unicodedata.normalize(
         "NFD",
         str(texto or "")
@@ -2714,181 +2833,1341 @@ def _normalizar_chave_conteudo(texto):
         for caractere in texto
         if unicodedata.category(caractere) != "Mn"
     )
-    return " ".join(texto.lower().split())
+    texto = re.sub(r"[\W_]+", " ", texto.lower(), flags=re.UNICODE)
+    return " ".join(texto.split())
 
 
-# Estrutura de estudo baseada na organização vigente do Código Penal e nos
-# títulos já cadastrados em Direito Penal. Quando a lei não traz capítulos
-# formais, o conteúdo é apresentado como uma divisão interna estudável.
-CAPITULOS_DIREITO_PENAL = {
-    _normalizar_chave_conteudo("Título I: Da aplicação da lei penal"): (
-        "Capítulo I: Da aplicação da lei penal",
-        "Capítulo II: Da aplicação da lei penal no espaço",
+def _gerar_chave_estavel(prefixo):
+    return f"{prefixo}_{uuid.uuid4().hex}"
+
+
+def _garantir_coluna_chave_estavel(conexao, tabela, prefixo):
+    colunas = {
+        linha[1]
+        for linha in conexao.execute(
+            f"PRAGMA table_info({tabela})"
+        ).fetchall()
+    }
+    if "chave_estavel" not in colunas:
+        conexao.execute(
+            f"ALTER TABLE {tabela} ADD COLUMN chave_estavel TEXT"
+        )
+
+    linhas = conexao.execute(
+        f"SELECT id FROM {tabela} WHERE chave_estavel IS NULL OR TRIM(chave_estavel) = ''"
+    ).fetchall()
+    for (entidade_id,) in linhas:
+        conexao.execute(
+            f"UPDATE {tabela} SET chave_estavel = ? WHERE id = ?",
+            (_gerar_chave_estavel(prefixo), int(entidade_id)),
+        )
+
+    conexao.execute(
+        f"""
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_{tabela}_chave_estavel
+        ON {tabela}(chave_estavel)
+        WHERE chave_estavel IS NOT NULL
+        """
+    )
+
+    # Protege também inserções feitas por scripts legados que ainda gravam
+    # diretamente nas tabelas, sem passar pelas funções de alto nível.
+    conexao.execute(
+        f"""
+        CREATE TRIGGER IF NOT EXISTS trg_{tabela}_chave_estavel
+        AFTER INSERT ON {tabela}
+        WHEN NEW.chave_estavel IS NULL OR TRIM(NEW.chave_estavel) = ''
+        BEGIN
+            UPDATE {tabela}
+            SET chave_estavel = '{prefixo}_' || lower(hex(randomblob(16)))
+            WHERE id = NEW.id;
+        END
+        """
+    )
+
+
+def _registrar_alias_disciplina(conexao, disciplina_id, nome, origem="atual"):
+    nome = str(nome or "").strip()
+    chave = _normalizar_chave_conteudo(nome)
+    if not nome or not chave:
+        return
+    conexao.execute(
+        """
+        INSERT INTO aliases_disciplinas (
+            disciplina_id, nome, nome_normalizado, origem
+        )
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(disciplina_id, nome_normalizado)
+        DO UPDATE SET nome = excluded.nome
+        """,
+        (int(disciplina_id), nome, chave, str(origem or "atual")),
+    )
+
+
+def _registrar_alias_topico(conexao, topico_id, nome, origem="atual"):
+    nome = str(nome or "").strip()
+    chave = _normalizar_chave_conteudo(nome)
+    if not nome or not chave:
+        return
+    linha = conexao.execute(
+        "SELECT disciplina_id FROM topicos WHERE id = ?",
+        (int(topico_id),),
+    ).fetchone()
+    if linha is None:
+        return
+    conexao.execute(
+        """
+        INSERT INTO aliases_topicos (
+            topico_id, disciplina_id, nome, nome_normalizado, origem
+        )
+        VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(topico_id, nome_normalizado)
+        DO UPDATE SET nome = excluded.nome
+        """,
+        (
+            int(topico_id), int(linha[0]), nome, chave,
+            str(origem or "atual"),
+        ),
+    )
+
+
+def _registrar_alias_capitulo(conexao, capitulo_id, nome, origem="atual"):
+    nome = str(nome or "").strip()
+    chave = _normalizar_chave_conteudo(nome)
+    if not nome or not chave:
+        return
+    linha = conexao.execute(
+        "SELECT topico_id FROM capitulos_topico WHERE id = ?",
+        (int(capitulo_id),),
+    ).fetchone()
+    if linha is None:
+        return
+    conexao.execute(
+        """
+        INSERT INTO aliases_capitulos (
+            capitulo_id, topico_id, nome, nome_normalizado, origem
+        )
+        VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(capitulo_id, nome_normalizado)
+        DO UPDATE SET nome = excluded.nome
+        """,
+        (
+            int(capitulo_id), int(linha[0]), nome, chave,
+            str(origem or "atual"),
+        ),
+    )
+
+
+def _alias_conflita_disciplina(conexao, nome, ignorar_id=None):
+    chave = _normalizar_chave_conteudo(nome)
+    if not chave:
+        return False
+    parametros = [chave]
+    filtro = ""
+    if ignorar_id is not None:
+        filtro = " AND disciplina_id <> ?"
+        parametros.append(int(ignorar_id))
+    return bool(conexao.execute(
+        f"SELECT 1 FROM aliases_disciplinas WHERE nome_normalizado = ?{filtro} LIMIT 1",
+        parametros,
+    ).fetchone())
+
+
+def _alias_conflita_topico(conexao, disciplina_id, nome, ignorar_id=None):
+    chave = _normalizar_chave_conteudo(nome)
+    if not chave:
+        return False
+    parametros = [int(disciplina_id), chave]
+    filtro = ""
+    if ignorar_id is not None:
+        filtro = " AND topico_id <> ?"
+        parametros.append(int(ignorar_id))
+    return bool(conexao.execute(
+        f"""
+        SELECT 1 FROM aliases_topicos
+        WHERE disciplina_id = ? AND nome_normalizado = ?{filtro}
+        LIMIT 1
+        """,
+        parametros,
+    ).fetchone())
+
+
+def _alias_conflita_capitulo(conexao, topico_id, nome, ignorar_id=None):
+    chave = _normalizar_chave_conteudo(nome)
+    if not chave:
+        return False
+    parametros = [int(topico_id), chave]
+    filtro = ""
+    if ignorar_id is not None:
+        filtro = " AND capitulo_id <> ?"
+        parametros.append(int(ignorar_id))
+    return bool(conexao.execute(
+        f"""
+        SELECT 1 FROM aliases_capitulos
+        WHERE topico_id = ? AND nome_normalizado = ?{filtro}
+        LIMIT 1
+        """,
+        parametros,
+    ).fetchone())
+
+
+def _garantir_identidades_estruturais(conexao):
+    """Cria chaves persistentes e histórico de nomes para toda a árvore.
+
+    ``id`` continua sendo a FK operacional do SQLite. ``chave_estavel`` é a
+    identidade lógica durável: renomear um conteúdo não a altera. As tabelas
+    de aliases preservam nomes anteriores para que importadores e integrações
+    consigam reencontrar o mesmo conteúdo depois de uma renomeação.
+    """
+    _garantir_coluna_chave_estavel(conexao, "disciplinas", "disc")
+    _garantir_coluna_chave_estavel(conexao, "topicos", "top")
+    _garantir_coluna_chave_estavel(conexao, "capitulos_topico", "cap")
+
+    conexao.execute(
+        """
+        CREATE TABLE IF NOT EXISTS aliases_disciplinas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            disciplina_id INTEGER NOT NULL,
+            nome TEXT NOT NULL,
+            nome_normalizado TEXT NOT NULL,
+            origem TEXT NOT NULL DEFAULT 'atual',
+            criado_em TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+            UNIQUE (disciplina_id, nome_normalizado),
+            FOREIGN KEY (disciplina_id)
+                REFERENCES disciplinas(id)
+                ON DELETE CASCADE
+        )
+        """
+    )
+    conexao.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_alias_disciplina_nome
+        ON aliases_disciplinas(nome_normalizado, disciplina_id)
+        """
+    )
+
+    conexao.execute(
+        """
+        CREATE TABLE IF NOT EXISTS aliases_topicos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            topico_id INTEGER NOT NULL,
+            disciplina_id INTEGER NOT NULL,
+            nome TEXT NOT NULL,
+            nome_normalizado TEXT NOT NULL,
+            origem TEXT NOT NULL DEFAULT 'atual',
+            criado_em TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+            UNIQUE (topico_id, nome_normalizado),
+            FOREIGN KEY (topico_id)
+                REFERENCES topicos(id)
+                ON DELETE CASCADE,
+            FOREIGN KEY (disciplina_id)
+                REFERENCES disciplinas(id)
+                ON DELETE CASCADE
+        )
+        """
+    )
+    conexao.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_alias_topico_nome
+        ON aliases_topicos(disciplina_id, nome_normalizado, topico_id)
+        """
+    )
+
+    conexao.execute(
+        """
+        CREATE TABLE IF NOT EXISTS aliases_capitulos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            capitulo_id INTEGER NOT NULL,
+            topico_id INTEGER NOT NULL,
+            nome TEXT NOT NULL,
+            nome_normalizado TEXT NOT NULL,
+            origem TEXT NOT NULL DEFAULT 'atual',
+            criado_em TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+            UNIQUE (capitulo_id, nome_normalizado),
+            FOREIGN KEY (capitulo_id)
+                REFERENCES capitulos_topico(id)
+                ON DELETE CASCADE,
+            FOREIGN KEY (topico_id)
+                REFERENCES topicos(id)
+                ON DELETE CASCADE
+        )
+        """
+    )
+    conexao.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_alias_capitulo_nome
+        ON aliases_capitulos(topico_id, nome_normalizado, capitulo_id)
+        """
+    )
+
+    for disciplina_id, nome in conexao.execute(
+        "SELECT id, nome FROM disciplinas"
+    ).fetchall():
+        _registrar_alias_disciplina(conexao, disciplina_id, nome, "atual")
+
+    for topico_id, nome in conexao.execute(
+        "SELECT id, nome FROM topicos"
+    ).fetchall():
+        _registrar_alias_topico(conexao, topico_id, nome, "atual")
+
+    for capitulo_id, nome in conexao.execute(
+        "SELECT id, nome FROM capitulos_topico"
+    ).fetchall():
+        _registrar_alias_capitulo(conexao, capitulo_id, nome, "atual")
+
+    # Alguns rótulos antigos de Direito Penal já foram consolidados antes da
+    # criação desta camada. Eles continuam válidos como aliases de importação.
+    penal = conexao.execute(
+        "SELECT id FROM disciplinas WHERE nome = 'Direito Penal' LIMIT 1"
+    ).fetchone()
+    if penal is not None:
+        penal_id = int(penal[0])
+        aliases_legados = (
+            ("Aplicação da Lei Penal", "TÍTULO I – DA APLICAÇÃO DA LEI PENAL"),
+            ("Do Crime", "TÍTULO II – DO CRIME"),
+            ("Imputabilidade Penal", "TÍTULO III – DA IMPUTABILIDADE PENAL"),
+            ("Concurso de Pessoas", "TÍTULO IV – DO CONCURSO DE PESSOAS"),
+            ("Das Penas", "TÍTULO V – DAS PENAS"),
+            ("Crimes contra o Patrimônio", "TÍTULO II – DOS CRIMES CONTRA O PATRIMÔNIO"),
+        )
+        topicos_penal = conexao.execute(
+            "SELECT id, nome FROM topicos WHERE disciplina_id = ?",
+            (penal_id,),
+        ).fetchall()
+        por_nome = {
+            _normalizar_chave_conteudo(nome): int(topico_id)
+            for topico_id, nome in topicos_penal
+        }
+        for alias, atual in aliases_legados:
+            destino = por_nome.get(_normalizar_chave_conteudo(atual))
+            if destino is not None:
+                _registrar_alias_topico(conexao, destino, alias, "legado")
+
+
+def _resolver_disciplina_id_conexao(conexao, referencia):
+    if referencia is None:
+        return None
+    if isinstance(referencia, int):
+        linha = conexao.execute(
+            "SELECT id FROM disciplinas WHERE id = ?", (int(referencia),)
+        ).fetchone()
+        return int(linha[0]) if linha else None
+
+    texto = str(referencia or "").strip()
+    if not texto:
+        return None
+
+    linha = conexao.execute(
+        "SELECT id FROM disciplinas WHERE chave_estavel = ?",
+        (texto,),
+    ).fetchone()
+    if linha:
+        return int(linha[0])
+
+    chave = _normalizar_chave_conteudo(texto)
+    linhas = conexao.execute(
+        """
+        SELECT DISTINCT disciplina_id
+        FROM aliases_disciplinas
+        WHERE nome_normalizado = ?
+        """,
+        (chave,),
+    ).fetchall()
+    ids = {int(linha[0]) for linha in linhas}
+    return next(iter(ids)) if len(ids) == 1 else None
+
+
+def _resolver_topico_id_conexao(conexao, disciplina_referencia, topico_referencia):
+    if topico_referencia is None:
+        return None
+    if isinstance(topico_referencia, int):
+        linha = conexao.execute(
+            "SELECT id, disciplina_id FROM topicos WHERE id = ?",
+            (int(topico_referencia),),
+        ).fetchone()
+        if linha is None:
+            return None
+        if disciplina_referencia is None:
+            return int(linha[0])
+        disciplina_id = _resolver_disciplina_id_conexao(conexao, disciplina_referencia)
+        return int(linha[0]) if disciplina_id == int(linha[1]) else None
+
+    texto = str(topico_referencia or "").strip()
+    if not texto:
+        return None
+
+    parametros = [texto]
+    filtro_disciplina = ""
+    disciplina_id = None
+    if disciplina_referencia is not None:
+        disciplina_id = _resolver_disciplina_id_conexao(conexao, disciplina_referencia)
+        if disciplina_id is None:
+            return None
+        filtro_disciplina = " AND disciplina_id = ?"
+        parametros.append(disciplina_id)
+
+    linhas = conexao.execute(
+        f"SELECT id FROM topicos WHERE chave_estavel = ?{filtro_disciplina}",
+        parametros,
+    ).fetchall()
+    if len(linhas) == 1:
+        return int(linhas[0][0])
+
+    chave = _normalizar_chave_conteudo(texto)
+    if disciplina_id is None:
+        linhas = conexao.execute(
+            """
+            SELECT DISTINCT topico_id
+            FROM aliases_topicos
+            WHERE nome_normalizado = ?
+            """,
+            (chave,),
+        ).fetchall()
+    else:
+        linhas = conexao.execute(
+            """
+            SELECT DISTINCT topico_id
+            FROM aliases_topicos
+            WHERE disciplina_id = ? AND nome_normalizado = ?
+            """,
+            (disciplina_id, chave),
+        ).fetchall()
+    ids = {int(linha[0]) for linha in linhas}
+    return next(iter(ids)) if len(ids) == 1 else None
+
+
+def _resolver_capitulo_id_conexao(conexao, topico_referencia, capitulo_referencia):
+    if capitulo_referencia is None:
+        return None
+    if isinstance(capitulo_referencia, int):
+        linha = conexao.execute(
+            "SELECT id, topico_id FROM capitulos_topico WHERE id = ?",
+            (int(capitulo_referencia),),
+        ).fetchone()
+        if linha is None:
+            return None
+        if topico_referencia is None:
+            return int(linha[0])
+        topico_id = _resolver_topico_id_conexao(conexao, None, topico_referencia)
+        return int(linha[0]) if topico_id == int(linha[1]) else None
+
+    texto = str(capitulo_referencia or "").strip()
+    if not texto:
+        return None
+
+    topico_id = None
+    if topico_referencia is not None:
+        topico_id = _resolver_topico_id_conexao(conexao, None, topico_referencia)
+        if topico_id is None:
+            return None
+
+    if topico_id is None:
+        linhas = conexao.execute(
+            "SELECT id FROM capitulos_topico WHERE chave_estavel = ?",
+            (texto,),
+        ).fetchall()
+    else:
+        linhas = conexao.execute(
+            "SELECT id FROM capitulos_topico WHERE chave_estavel = ? AND topico_id = ?",
+            (texto, topico_id),
+        ).fetchall()
+    if len(linhas) == 1:
+        return int(linhas[0][0])
+
+    chave = _normalizar_chave_conteudo(texto)
+    if topico_id is None:
+        linhas = conexao.execute(
+            """
+            SELECT DISTINCT capitulo_id
+            FROM aliases_capitulos
+            WHERE nome_normalizado = ?
+            """,
+            (chave,),
+        ).fetchall()
+    else:
+        linhas = conexao.execute(
+            """
+            SELECT DISTINCT capitulo_id
+            FROM aliases_capitulos
+            WHERE topico_id = ? AND nome_normalizado = ?
+            """,
+            (topico_id, chave),
+        ).fetchall()
+    ids = {int(linha[0]) for linha in linhas}
+    return next(iter(ids)) if len(ids) == 1 else None
+
+
+def resolver_disciplina_id_estrutural(referencia):
+    with conectar() as conexao:
+        return _resolver_disciplina_id_conexao(conexao, referencia)
+
+
+def resolver_topico_id_estrutural(disciplina_referencia, topico_referencia):
+    with conectar() as conexao:
+        return _resolver_topico_id_conexao(
+            conexao, disciplina_referencia, topico_referencia
+        )
+
+
+def resolver_capitulo_id_estrutural(topico_referencia, capitulo_referencia):
+    with conectar() as conexao:
+        return _resolver_capitulo_id_conexao(
+            conexao, topico_referencia, capitulo_referencia
+        )
+
+
+def obter_identidade_conteudo(tipo, entidade_id):
+    tipo = str(tipo or "").strip().lower()
+    tabelas = {
+        "disciplina": ("disciplinas", None),
+        "topico": ("topicos", "disciplina_id"),
+        "capitulo": ("capitulos_topico", "topico_id"),
+    }
+    if tipo not in tabelas:
+        return None
+    tabela, coluna_pai = tabelas[tipo]
+    with conectar() as conexao:
+        campos = "id, nome, chave_estavel"
+        if coluna_pai:
+            campos += f", {coluna_pai}"
+        linha = conexao.execute(
+            f"SELECT {campos} FROM {tabela} WHERE id = ?",
+            (int(entidade_id),),
+        ).fetchone()
+    if linha is None:
+        return None
+    resultado = {
+        "tipo": tipo,
+        "id": int(linha[0]),
+        "nome": str(linha[1]),
+        "chave_estavel": str(linha[2] or ""),
+    }
+    if coluna_pai:
+        resultado[coluna_pai] = int(linha[3])
+    return resultado
+
+
+def auditar_estrutura_conteudos():
+    """Audita integridade lógica da árvore sem alterar qualquer registro."""
+    with conectar() as conexao:
+        totais = {
+            "disciplinas": int(conexao.execute("SELECT COUNT(*) FROM disciplinas").fetchone()[0]),
+            "topicos": int(conexao.execute("SELECT COUNT(*) FROM topicos").fetchone()[0]),
+            "capitulos": int(conexao.execute("SELECT COUNT(*) FROM capitulos_topico").fetchone()[0]),
+        }
+        sem_chave = {
+            "disciplinas": int(conexao.execute(
+                "SELECT COUNT(*) FROM disciplinas WHERE chave_estavel IS NULL OR TRIM(chave_estavel) = ''"
+            ).fetchone()[0]),
+            "topicos": int(conexao.execute(
+                "SELECT COUNT(*) FROM topicos WHERE chave_estavel IS NULL OR TRIM(chave_estavel) = ''"
+            ).fetchone()[0]),
+            "capitulos": int(conexao.execute(
+                "SELECT COUNT(*) FROM capitulos_topico WHERE chave_estavel IS NULL OR TRIM(chave_estavel) = ''"
+            ).fetchone()[0]),
+        }
+
+        colisoes_alias = {
+            "disciplinas": conexao.execute(
+                """
+                SELECT nome_normalizado, COUNT(DISTINCT disciplina_id)
+                FROM aliases_disciplinas
+                GROUP BY nome_normalizado
+                HAVING COUNT(DISTINCT disciplina_id) > 1
+                """
+            ).fetchall(),
+            "topicos": conexao.execute(
+                """
+                SELECT disciplina_id, nome_normalizado, COUNT(DISTINCT topico_id)
+                FROM aliases_topicos
+                GROUP BY disciplina_id, nome_normalizado
+                HAVING COUNT(DISTINCT topico_id) > 1
+                """
+            ).fetchall(),
+            "capitulos": conexao.execute(
+                """
+                SELECT topico_id, nome_normalizado, COUNT(DISTINCT capitulo_id)
+                FROM aliases_capitulos
+                GROUP BY topico_id, nome_normalizado
+                HAVING COUNT(DISTINCT capitulo_id) > 1
+                """
+            ).fetchall(),
+        }
+        fks = conexao.execute("PRAGMA foreign_key_check").fetchall()
+
+    ok = (
+        not any(sem_chave.values())
+        and not any(colisoes_alias.values())
+        and not fks
+    )
+    return {
+        "ok": bool(ok),
+        "totais": totais,
+        "sem_chave_estavel": sem_chave,
+        "colisoes_alias": colisoes_alias,
+        "foreign_key_check": fks,
+    }
+
+
+# Estrutura oficial de Direito Penal usada pelo VighnaStudy.
+#
+# Títulos sem capítulos formais ficam com uma tupla vazia. Isso é
+# intencional: o programa não cria subdivisões artificiais nesses casos.
+ESTRUTURA_DIREITO_PENAL = (
+    # PARTE GERAL
+    ("TÍTULO I – DA APLICAÇÃO DA LEI PENAL", ()),
+    ("TÍTULO II – DO CRIME", ()),
+    ("TÍTULO III – DA IMPUTABILIDADE PENAL", ()),
+    ("TÍTULO IV – DO CONCURSO DE PESSOAS", ()),
+    (
+        "TÍTULO V – DAS PENAS",
+        (
+            "Capítulo I – Das Espécies de Pena",
+            "Capítulo II – Da Cominação das Penas",
+            "Capítulo III – Da Aplicação da Pena",
+            "Capítulo IV – Da Suspensão Condicional da Pena",
+            "Capítulo V – Do Livramento Condicional",
+            "Capítulo VI – Dos Efeitos da Condenação",
+            "Capítulo VII – Da Reabilitação",
+        ),
     ),
-    _normalizar_chave_conteudo("Título II: Do crime"): (
-        "Capítulo I: Do crime",
-        "Capítulo II: Da relação de causalidade",
-        "Capítulo III: Da consumação e da tentativa",
-        "Capítulo IV: Da desistência voluntária e do arrependimento eficaz",
-        "Capítulo V: Do arrependimento posterior",
-        "Capítulo VI: Do crime impossível",
-        "Capítulo VII: Do crime doloso e do crime culposo",
-        "Capítulo VIII: Da agravação pelo resultado",
-        "Capítulo IX: Do erro",
-        "Capítulo X: Da ilicitude",
-        "Capítulo XI: Da culpabilidade",
-        "Capítulo XII: Do concurso de pessoas",
+    ("TÍTULO VI – DAS MEDIDAS DE SEGURANÇA", ()),
+    ("TÍTULO VII – DA AÇÃO PENAL", ()),
+    ("TÍTULO VIII – DA EXTINÇÃO DA PUNIBILIDADE", ()),
+
+    # PARTE ESPECIAL
+    (
+        "TÍTULO I – DOS CRIMES CONTRA A PESSOA",
+        (
+            "Capítulo I – Dos Crimes Contra a Vida",
+            "Capítulo II – Das Lesões Corporais",
+            "Capítulo III – Da Periclitação da Vida e da Saúde",
+            "Capítulo IV – Da Rixa",
+            "Capítulo V – Dos Crimes Contra a Honra",
+            "Capítulo VI – Dos Crimes Contra a Liberdade Individual",
+            "Capítulo VII – Dos Crimes Contra a Inviolabilidade dos Segredos",
+        ),
     ),
-    _normalizar_chave_conteudo("Título III: Da imputabilidade penal"): (
-        "Disposições gerais sobre a imputabilidade penal",
+    (
+        "TÍTULO II – DOS CRIMES CONTRA O PATRIMÔNIO",
+        (
+            "Capítulo I – Do Furto",
+            "Capítulo II – Do Roubo e da Extorsão",
+            "Capítulo III – Da Usurpação",
+            "Capítulo IV – Do Dano",
+            "Capítulo V – Da Apropriação Indébita",
+            "Capítulo VI – Do Estelionato e Outras Fraudes",
+            "Capítulo VII – Da Receptação",
+            "Capítulo VIII – Disposições Gerais",
+        ),
     ),
-    _normalizar_chave_conteudo("Título IV: Do concurso de pessoas"): (
-        "Disposições gerais sobre o concurso de pessoas",
+    (
+        "TÍTULO III – DOS CRIMES CONTRA A PROPRIEDADE IMATERIAL",
+        (
+            "Capítulo I – Dos Crimes Contra a Propriedade Intelectual",
+            "Capítulo II – Dos Crimes Contra o Privilégio de Invenção",
+            "Capítulo III – Dos Crimes Contra as Marcas de Indústria e Comércio",
+            "Capítulo IV – Dos Crimes de Concorrência Desleal",
+        ),
     ),
-    _normalizar_chave_conteudo("Título V: Das penas"): (
-        "Capítulo I: Das penas",
-        "Capítulo II: Da cominação das penas",
-        "Capítulo III: Da aplicação da pena",
-        "Capítulo IV: Da suspensão condicional da pena",
-        "Capítulo V: Do livramento condicional",
-        "Capítulo VI: Dos efeitos da condenação",
-        "Capítulo VII: Da reabilitação",
+    ("TÍTULO IV – DOS CRIMES CONTRA A ORGANIZAÇÃO DO TRABALHO", ()),
+    (
+        "TÍTULO V – DOS CRIMES CONTRA O SENTIMENTO RELIGIOSO E CONTRA O RESPEITO AOS MORTOS",
+        (
+            "Capítulo I – Dos Crimes Contra o Sentimento Religioso",
+            "Capítulo II – Dos Crimes Contra o Respeito aos Mortos",
+        ),
     ),
-    _normalizar_chave_conteudo("Título VI: Das medidas de segurança"): (
-        "Capítulo I: Das medidas de segurança",
-        "Capítulo II: Da cessação da periculosidade",
+    (
+        "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL",
+        (
+            "Capítulo I – Dos Crimes Contra a Liberdade Sexual",
+            "Capítulo II – Dos Crimes Sexuais Contra Vulnerável",
+            "Capítulo III – Do Lenocínio e do Tráfico de Pessoas para Fim de Prostituição ou Outra Forma de Exploração Sexual",
+            "Capítulo IV – Do Ultraje Público ao Pudor",
+            "Capítulo V – Disposições Gerais",
+        ),
     ),
-    _normalizar_chave_conteudo("Título VII: Da ação penal"): (
-        "Capítulo I: Da ação penal",
-        "Capítulo II: Da ação civil",
+    (
+        "TÍTULO VII – DOS CRIMES CONTRA A FAMÍLIA",
+        (
+            "Capítulo I – Dos Crimes Contra o Casamento",
+            "Capítulo II – Dos Crimes Contra o Estado de Filiação",
+            "Capítulo III – Dos Crimes Contra a Assistência Familiar",
+            "Capítulo IV – Dos Crimes Contra o Pátrio Poder, Tutela ou Curatela",
+        ),
     ),
-    _normalizar_chave_conteudo("Título VIII: Da extinção da punibilidade"): (
-        "Capítulo I: Da extinção da punibilidade",
-        "Capítulo II: Da prescrição",
+    (
+        "TÍTULO VIII – DOS CRIMES CONTRA A INCOLUMIDADE PÚBLICA",
+        (
+            "Capítulo I – Dos Crimes de Perigo Comum",
+            "Capítulo II – Dos Crimes Contra a Segurança dos Meios de Comunicação e Transporte e Outros Serviços Públicos",
+            "Capítulo III – Dos Crimes Contra a Saúde Pública",
+        ),
     ),
-    _normalizar_chave_conteudo("Título I: Dos crimes contra a pessoa"): (
-        "Capítulo I: Dos crimes contra a vida",
-        "Capítulo II: Das lesões corporais",
-        "Capítulo III: Da periclitação da vida e da saúde",
-        "Capítulo IV: Da rixa",
-        "Capítulo V: Dos crimes contra a honra",
-        "Capítulo VI: Dos crimes contra a liberdade individual",
+    ("TÍTULO IX – DOS CRIMES CONTRA A PAZ PÚBLICA", ()),
+    (
+        "TÍTULO X – DOS CRIMES CONTRA A FÉ PÚBLICA",
+        (
+            "Capítulo I – Da Moeda Falsa",
+            "Capítulo II – Da Falsidade de Títulos e Outros Papéis Públicos",
+            "Capítulo III – Da Falsidade Documental",
+            "Capítulo IV – De Outras Falsidades",
+            "Capítulo V – Das Fraudes em Certames de Interesse Público",
+        ),
     ),
-    _normalizar_chave_conteudo("Título II: Dos crimes contra o patrimônio"): (
-        "Capítulo I: Do furto",
-        "Capítulo II: Do roubo e da extorsão",
-        "Capítulo III: Da usurpação",
-        "Capítulo IV: Do dano",
-        "Capítulo V: Da apropriação indébita",
-        "Capítulo VI: Do estelionato e outras fraudes",
-        "Capítulo VII: Da receptação",
-        "Capítulo VIII: Disposições gerais",
+    (
+        "TÍTULO XI – DOS CRIMES CONTRA A ADMINISTRAÇÃO PÚBLICA",
+        (
+            "Capítulo I – Dos Crimes Praticados por Funcionário Público Contra a Administração em Geral",
+            "Capítulo II – Dos Crimes Praticados por Particular Contra a Administração em Geral",
+            "Capítulo II-A – Dos Crimes Praticados por Particular Contra a Administração Pública Estrangeira",
+            "Capítulo III – Dos Crimes Contra a Administração da Justiça",
+            "Capítulo IV – Dos Crimes Contra as Finanças Públicas",
+        ),
     ),
-    _normalizar_chave_conteudo("Título III: Dos crimes contra a propriedade imaterial"): (
-        "Capítulo I: Dos crimes contra a propriedade intelectual",
-        "Capítulo II: Dos crimes contra o privilégio de invenção",
-        "Capítulo III: Dos crimes contra as marcas de indústria e comércio",
-        "Capítulo IV: Dos crimes de concorrência desleal",
+    (
+        "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO",
+        (
+            "Capítulo I – Dos Crimes Contra a Soberania Nacional",
+            "Capítulo II – Dos Crimes Contra Instituições Democráticas",
+            "Capítulo III – Dos Crimes Contra o Funcionamento das Instituições Democráticas nas Eleições",
+            "Capítulo IV – Dos Crimes Contra o Funcionamento dos Serviços Essenciais",
+            "Capítulo V – Dos Crimes Contra a Cidadania",
+            "Capítulo VI – Disposições Comuns",
+        ),
     ),
-    _normalizar_chave_conteudo("Título IV: Dos crimes contra a organização do trabalho"): (
-        "Disposições sobre os crimes contra a organização do trabalho",
-    ),
-    _normalizar_chave_conteudo("Título V: Dos crimes contra o sentimento religioso e contra o respeito aos mortos"): (
-        "Capítulo I: Dos crimes contra o sentimento religioso",
-        "Capítulo II: Dos crimes contra o respeito aos mortos",
-    ),
-    _normalizar_chave_conteudo("Título VI: Dos crimes contra a dignidade sexual"): (
-        "Capítulo I: Dos crimes contra a liberdade sexual",
-        "Capítulo I-A: Da exposição da intimidade sexual",
-        "Capítulo II: Dos crimes sexuais contra vulnerável",
-        "Capítulo III: Do assédio sexual",
-        "Capítulo IV: Disposições gerais",
-        "Capítulo V: Do lenocínio e do tráfico de pessoa para fim de prostituição ou outra forma de exploração sexual",
-        "Capítulo VI: Disposições gerais",
-        "Capítulo VII: Da divulgação de cena de estupro ou de cena de estupro de vulnerável, de cena de sexo ou de pornografia",
-    ),
-    _normalizar_chave_conteudo("Título VII: Dos crimes contra a família"): (
-        "Capítulo I: Dos crimes contra o casamento",
-        "Capítulo II: Dos crimes contra o estado de filiação",
-        "Capítulo III: Dos crimes contra a assistência familiar",
-        "Capítulo IV: Dos crimes contra o pátrio poder, tutela ou curatela",
-    ),
-    _normalizar_chave_conteudo("Título VIII: Dos crimes contra a incolumidade pública"): (
-        "Capítulo I: Dos crimes de perigo comum",
-        "Capítulo II: Dos crimes contra a segurança dos meios de comunicação e transporte e outros serviços públicos",
-        "Capítulo III: Dos crimes contra a saúde pública",
-    ),
-    _normalizar_chave_conteudo("Título IX: Dos crimes contra a paz pública"): (
-        "Disposições sobre os crimes contra a paz pública",
-    ),
-    _normalizar_chave_conteudo("Título X: Dos crimes contra a fé pública"): (
-        "Capítulo I: Da moeda falsa",
-        "Capítulo II: Da falsidade de títulos e outros papéis públicos",
-        "Capítulo III: Da falsidade documental",
-        "Capítulo IV: De outras falsidades",
-        "Capítulo V: Das fraudes em certames de interesse público",
-        "Capítulo VI: Disposições gerais",
-    ),
-    _normalizar_chave_conteudo("Título XI: Dos crimes contra a administração pública"): (
-        "Capítulo I: Dos crimes praticados por funcionário público contra a administração em geral",
-        "Capítulo II: Dos crimes praticados por particular contra a administração em geral",
-        "Capítulo II-A: Dos crimes praticados por particular contra a administração pública estrangeira",
-        "Capítulo III: Dos crimes contra a administração da justiça",
-        "Capítulo IV: Dos crimes contra as finanças públicas",
-    ),
+)
+
+# A ordem legal não é alfabética: a Parte Geral vem inteira antes da Parte
+# Especial. Esses mapas permitem que qualquer tela preserve essa hierarquia.
+ORDEM_DIREITO_PENAL = {
+    _normalizar_chave_conteudo(titulo): indice
+    for indice, (titulo, _capitulos) in enumerate(ESTRUTURA_DIREITO_PENAL)
+}
+PARTES_DIREITO_PENAL = {
+    _normalizar_chave_conteudo(titulo): (
+        "PARTE GERAL" if indice < 8 else "PARTE ESPECIAL"
+    )
+    for indice, (titulo, _capitulos) in enumerate(ESTRUTURA_DIREITO_PENAL)
 }
 
-# A disciplina também possui alguns tópicos sem o prefixo "Título". Eles
-# representam os mesmos blocos do Código Penal e, por isso, recebem a mesma
-# árvore de capítulos ao serem exibidos na tabela.
-CAPITULOS_DIREITO_PENAL.update({
-    _normalizar_chave_conteudo("Aplicação da Lei Penal"):
-        CAPITULOS_DIREITO_PENAL[
-            _normalizar_chave_conteudo("Título I: Da aplicação da lei penal")
-        ],
-    _normalizar_chave_conteudo("Do Crime"):
-        CAPITULOS_DIREITO_PENAL[
-            _normalizar_chave_conteudo("Título II: Do crime")
-        ],
-    _normalizar_chave_conteudo("Imputabilidade Penal"):
-        CAPITULOS_DIREITO_PENAL[
-            _normalizar_chave_conteudo("Título III: Da imputabilidade penal")
-        ],
-    _normalizar_chave_conteudo("Concurso de Pessoas"):
-        CAPITULOS_DIREITO_PENAL[
-            _normalizar_chave_conteudo("Título IV: Do concurso de pessoas")
-        ],
-    _normalizar_chave_conteudo("Das Penas"):
-        CAPITULOS_DIREITO_PENAL[
-            _normalizar_chave_conteudo("Título V: Das penas")
-        ],
-    _normalizar_chave_conteudo("Crimes contra o Patrimônio"):
-        CAPITULOS_DIREITO_PENAL[
-            _normalizar_chave_conteudo(
-                "Título II: Dos crimes contra o patrimônio"
-            )
-        ],
-})
+def obter_parte_direito_penal(nome_topico):
+    chave = _normalizar_chave_conteudo(nome_topico)
+    parte = PARTES_DIREITO_PENAL.get(chave)
+    if parte is not None:
+        return parte
 
+    # Se o título foi renomeado pela interface, consulta seus aliases para
+    # recuperar a identidade legal sem depender do rótulo atual.
+    try:
+        with conectar() as conexao:
+            candidatos = conexao.execute(
+                """
+                SELECT DISTINCT topico_id
+                FROM aliases_topicos
+                WHERE nome_normalizado = ?
+                """,
+                (chave,),
+            ).fetchall()
+            partes = set()
+            for (topico_id,) in candidatos:
+                aliases = conexao.execute(
+                    "SELECT nome_normalizado FROM aliases_topicos WHERE topico_id = ?",
+                    (int(topico_id),),
+                ).fetchall()
+                for (alias_chave,) in aliases:
+                    parte_alias = PARTES_DIREITO_PENAL.get(alias_chave)
+                    if parte_alias:
+                        partes.add(parte_alias)
+            if len(partes) == 1:
+                return next(iter(partes))
+    except sqlite3.DatabaseError:
+        pass
+    return None
+
+
+def _ordenar_linhas_topicos(nome_disciplina, linhas):
+    eh_penal = (
+        _normalizar_chave_conteudo(nome_disciplina) == "direito penal"
+    )
+    ordem_por_id = {}
+    try:
+        with conectar() as conexao:
+            disciplina_id = _resolver_disciplina_id_conexao(
+                conexao, nome_disciplina
+            )
+            penal_id = _resolver_disciplina_id_conexao(
+                conexao, "Direito Penal"
+            )
+            eh_penal = (
+                penal_id is not None
+                and disciplina_id is not None
+                and int(disciplina_id) == int(penal_id)
+            )
+            if eh_penal:
+                for linha in linhas:
+                    topico_id = int(linha[0])
+                    aliases = conexao.execute(
+                        "SELECT nome_normalizado FROM aliases_topicos WHERE topico_id = ?",
+                        (topico_id,),
+                    ).fetchall()
+                    ordens = [
+                        ORDEM_DIREITO_PENAL[chave]
+                        for (chave,) in aliases
+                        if chave in ORDEM_DIREITO_PENAL
+                    ]
+                    if ordens:
+                        ordem_por_id[topico_id] = min(ordens)
+    except sqlite3.DatabaseError:
+        pass
+
+    if not eh_penal:
+        return list(linhas)
+
+    return sorted(
+        linhas,
+        key=lambda linha: (
+            ordem_por_id.get(
+                int(linha[0]),
+                ORDEM_DIREITO_PENAL.get(
+                    _normalizar_chave_conteudo(linha[1]),
+                    10_000,
+                ),
+            ),
+            _normalizar_chave_conteudo(linha[1]),
+        ),
+    )
+
+
+
+CAPITULOS_DIREITO_PENAL = {
+    _normalizar_chave_conteudo(titulo): tuple(capitulos)
+    for titulo, capitulos in ESTRUTURA_DIREITO_PENAL
+}
+
+# Tópicos antigos que existiram antes da árvore completa de títulos. A
+# migração abaixo consolida o histórico deles no título oficial equivalente.
+ALIASES_TOPICOS_DIREITO_PENAL = {
+    _normalizar_chave_conteudo("Aplicação da Lei Penal"):
+        "TÍTULO I – DA APLICAÇÃO DA LEI PENAL",
+    _normalizar_chave_conteudo("Do Crime"):
+        "TÍTULO II – DO CRIME",
+    _normalizar_chave_conteudo("Imputabilidade Penal"):
+        "TÍTULO III – DA IMPUTABILIDADE PENAL",
+    _normalizar_chave_conteudo("Concurso de Pessoas"):
+        "TÍTULO IV – DO CONCURSO DE PESSOAS",
+    _normalizar_chave_conteudo("Das Penas"):
+        "TÍTULO V – DAS PENAS",
+    _normalizar_chave_conteudo("Crimes contra o Patrimônio"):
+        "TÍTULO II – DOS CRIMES CONTRA O PATRIMÔNIO",
+}
+
+
+def _normalizar_nome_capitulo_sem_numero(texto):
+    texto = unicodedata.normalize("NFD", str(texto or "").lower())
+    texto = "".join(
+        caractere
+        for caractere in texto
+        if unicodedata.category(caractere) != "Mn"
+    )
+    texto = re.sub(
+        r"^capitulo\s+(?:[ivxlcdm]+(?:-[a-z])?|\d+(?:-[a-z])?)\s*[:.\-–—]?\s*",
+        "",
+        texto,
+    )
+    texto = re.sub(r"[^a-z0-9]+", " ", texto)
+    return " ".join(texto.split())
+
+
+def _capitulo_destino_por_nome(nome_antigo, capitulos_destino):
+    """Localiza um capítulo equivalente sem depender da numeração antiga."""
+    if not capitulos_destino:
+        return None
+
+    chave_antiga = _normalizar_nome_capitulo_sem_numero(nome_antigo)
+    aliases = {
+        "das penas": "das especies de pena",
+        "do lenocinio e do trafico de pessoa para fim de prostituicao ou outra forma de exploracao sexual":
+            "do lenocinio e do trafico de pessoas para fim de prostituicao ou outra forma de exploracao sexual",
+    }
+    chave_antiga = aliases.get(chave_antiga, chave_antiga)
+
+    candidatos = [
+        item
+        for item in capitulos_destino
+        if _normalizar_nome_capitulo_sem_numero(item[1]) == chave_antiga
+    ]
+    if len(candidatos) == 1:
+        return candidatos[0]
+    return None
+
+
+def _sincronizar_capitulos_penal_oficiais(conexao, topico_id, titulo, desejados):
+    """Ajusta os capítulos de um título preservando questões sempre que seguro."""
+    existentes = conexao.execute(
+        """
+        SELECT id, nome, ordem
+        FROM capitulos_topico
+        WHERE topico_id = ?
+        ORDER BY ordem, id
+        """,
+        (int(topico_id),),
+    ).fetchall()
+
+    if not desejados:
+        ids = [int(linha[0]) for linha in existentes]
+        if ids:
+            marcadores = ",".join("?" for _ in ids)
+            conexao.execute(
+                f"UPDATE questoes SET capitulo_id = NULL WHERE capitulo_id IN ({marcadores})",
+                ids,
+            )
+            conexao.execute(
+                "DELETE FROM capitulos_topico WHERE topico_id = ?",
+                (int(topico_id),),
+            )
+        return
+
+    por_nome_exato = {
+        _normalizar_chave_conteudo(linha[1]): linha
+        for linha in existentes
+    }
+    usados = set()
+    capitulos_destino = []
+
+    # Renomeações conhecidas em que o conteúdo permaneceu equivalente.
+    renomeacoes_legadas = {
+        (
+            _normalizar_chave_conteudo("TÍTULO V – DAS PENAS"),
+            _normalizar_chave_conteudo("Capítulo I: Das penas"),
+        ): "Capítulo I: Das espécies de pena",
+        (
+            _normalizar_chave_conteudo("Título VI: Dos crimes contra a dignidade sexual"),
+            _normalizar_chave_conteudo(
+                "Capítulo V: Do lenocínio e do tráfico de pessoa para fim de prostituição ou outra forma de exploração sexual"
+            ),
+        ): "Capítulo III: Do lenocínio e do tráfico de pessoas para fim de prostituição ou outra forma de exploração sexual",
+        (
+            _normalizar_chave_conteudo("Título VI: Dos crimes contra a dignidade sexual"),
+            _normalizar_chave_conteudo("Capítulo VI: Disposições gerais"),
+        ): "Capítulo V: Disposições gerais",
+    }
+    titulo_chave = _normalizar_chave_conteudo(titulo)
+
+    for ordem, nome_desejado in enumerate(desejados, start=1):
+        escolhido = por_nome_exato.get(_normalizar_chave_conteudo(nome_desejado))
+        if escolhido is not None and int(escolhido[0]) in usados:
+            escolhido = None
+
+        if escolhido is None:
+            for linha in existentes:
+                if int(linha[0]) in usados:
+                    continue
+                destino = renomeacoes_legadas.get(
+                    (titulo_chave, _normalizar_chave_conteudo(linha[1]))
+                )
+                if destino and _normalizar_chave_conteudo(destino) == _normalizar_chave_conteudo(nome_desejado):
+                    escolhido = linha
+                    break
+
+        if escolhido is None:
+            semanticamente_iguais = [
+                linha
+                for linha in existentes
+                if int(linha[0]) not in usados
+                and _normalizar_nome_capitulo_sem_numero(linha[1])
+                == _normalizar_nome_capitulo_sem_numero(nome_desejado)
+            ]
+            if len(semanticamente_iguais) == 1:
+                escolhido = semanticamente_iguais[0]
+
+        if escolhido is None:
+            cursor = conexao.execute(
+                """
+                INSERT INTO capitulos_topico (topico_id, nome, ordem)
+                VALUES (?, ?, ?)
+                """,
+                (int(topico_id), nome_desejado, int(ordem)),
+            )
+            capitulo_id = int(cursor.lastrowid)
+            _registrar_alias_capitulo(
+                conexao, capitulo_id, nome_desejado, "estrutura_oficial"
+            )
+        else:
+            capitulo_id = int(escolhido[0])
+            usados.add(capitulo_id)
+            if escolhido[1] != nome_desejado or int(escolhido[2]) != ordem:
+                _registrar_alias_capitulo(
+                    conexao, capitulo_id, escolhido[1], "migracao"
+                )
+                conexao.execute(
+                    """
+                    UPDATE capitulos_topico
+                    SET nome = ?, ordem = ?
+                    WHERE id = ?
+                    """,
+                    (nome_desejado, int(ordem), capitulo_id),
+                )
+            _registrar_alias_capitulo(
+                conexao, capitulo_id, nome_desejado, "atual"
+            )
+
+        capitulos_destino.append((capitulo_id, nome_desejado))
+
+    ids_destino = {item[0] for item in capitulos_destino}
+    for linha in existentes:
+        capitulo_id = int(linha[0])
+        if capitulo_id in ids_destino:
+            continue
+        destino = _capitulo_destino_por_nome(linha[1], capitulos_destino)
+        if destino is None:
+            conexao.execute(
+                "UPDATE questoes SET capitulo_id = NULL WHERE capitulo_id = ?",
+                (capitulo_id,),
+            )
+        else:
+            conexao.execute(
+                "UPDATE questoes SET capitulo_id = ? WHERE capitulo_id = ?",
+                (int(destino[0]), capitulo_id),
+            )
+            _registrar_alias_capitulo(
+                conexao, int(destino[0]), linha[1], "migracao"
+            )
+            aliases_antigos = conexao.execute(
+                "SELECT nome FROM aliases_capitulos WHERE capitulo_id = ?",
+                (capitulo_id,),
+            ).fetchall()
+            for (alias_nome,) in aliases_antigos:
+                _registrar_alias_capitulo(
+                    conexao, int(destino[0]), alias_nome, "migracao"
+                )
+        conexao.execute(
+            "DELETE FROM capitulos_topico WHERE id = ?",
+            (capitulo_id,),
+        )
+
+
+def _mesclar_topico_penal_legado(conexao, topico_antigo_id, topico_destino_id, nome_destino):
+    """Consolida um tópico legado no título oficial sem perder histórico."""
+    topico_antigo_id = int(topico_antigo_id)
+    topico_destino_id = int(topico_destino_id)
+    if topico_antigo_id == topico_destino_id:
+        return
+
+    antigo_nome = conexao.execute(
+        "SELECT nome FROM topicos WHERE id = ?",
+        (topico_antigo_id,),
+    ).fetchone()
+    if antigo_nome is not None:
+        _registrar_alias_topico(
+            conexao, topico_destino_id, antigo_nome[0], "migracao"
+        )
+    aliases_antigos_topico = conexao.execute(
+        "SELECT nome FROM aliases_topicos WHERE topico_id = ?",
+        (topico_antigo_id,),
+    ).fetchall()
+    for (alias_nome,) in aliases_antigos_topico:
+        _registrar_alias_topico(
+            conexao, topico_destino_id, alias_nome, "migracao"
+        )
+
+    capitulos_destino = conexao.execute(
+        """
+        SELECT id, nome
+        FROM capitulos_topico
+        WHERE topico_id = ?
+        ORDER BY ordem, id
+        """,
+        (topico_destino_id,),
+    ).fetchall()
+    capitulos_antigos = conexao.execute(
+        "SELECT id, nome FROM capitulos_topico WHERE topico_id = ?",
+        (topico_antigo_id,),
+    ).fetchall()
+
+    mapa_capitulos = {}
+    for capitulo_id, nome in capitulos_antigos:
+        destino = _capitulo_destino_por_nome(nome, capitulos_destino)
+        mapa_capitulos[int(capitulo_id)] = int(destino[0]) if destino else None
+
+    questoes = conexao.execute(
+        "SELECT id, capitulo_id FROM questoes WHERE topico_id = ?",
+        (topico_antigo_id,),
+    ).fetchall()
+    for questao_id, capitulo_id in questoes:
+        novo_capitulo = mapa_capitulos.get(int(capitulo_id)) if capitulo_id is not None else None
+        conexao.execute(
+            "UPDATE questoes SET topico_id = ?, capitulo_id = ? WHERE id = ?",
+            (topico_destino_id, novo_capitulo, int(questao_id)),
+        )
+
+    conexao.execute(
+        "UPDATE revisoes SET topico_id = ? WHERE topico_id = ?",
+        (topico_destino_id, topico_antigo_id),
+    )
+    conexao.execute(
+        "UPDATE sessoes_foco SET topico_id = ?, topico_nome = ? WHERE topico_id = ?",
+        (topico_destino_id, nome_destino, topico_antigo_id),
+    )
+    conexao.execute(
+        "UPDATE recomendacoes_estudo SET topico_id = ?, topico_nome = ? WHERE topico_id = ?",
+        (topico_destino_id, nome_destino, topico_antigo_id),
+    )
+    colunas_topicos = {
+        linha[1] for linha in conexao.execute("PRAGMA table_info(topicos)").fetchall()
+    }
+    if "parent_id" in colunas_topicos:
+        conexao.execute(
+            "UPDATE topicos SET parent_id = ? WHERE parent_id = ?",
+            (topico_destino_id, topico_antigo_id),
+        )
+
+    # Efetividade usa chave composta (sessão, tópico). Quando já existe uma
+    # linha equivalente no destino, preservamos o snapshot legado sem forçar
+    # uma colisão; o ON DELETE SET NULL mantém o registro histórico.
+    conexao.execute(
+        """
+        UPDATE OR IGNORE efetividade_topicos_sessao
+        SET topico_id = ?
+        WHERE topico_id = ?
+        """,
+        (topico_destino_id, topico_antigo_id),
+    )
+
+    # Configuração por perfil: transfere customizações do legado apenas quando
+    # o destino ainda está com o valor padrão.
+    configs = conexao.execute(
+        """
+        SELECT concurso_id, importancia, incluido, pausado
+        FROM topico_concurso_importancia
+        WHERE topico_id = ?
+        """,
+        (topico_antigo_id,),
+    ).fetchall()
+    for concurso_id, importancia, incluido, pausado in configs:
+        atual = conexao.execute(
+            """
+            SELECT importancia, incluido, pausado
+            FROM topico_concurso_importancia
+            WHERE topico_id = ? AND concurso_id = ?
+            """,
+            (topico_destino_id, int(concurso_id)),
+        ).fetchone()
+        if atual is None:
+            conexao.execute(
+                """
+                INSERT INTO topico_concurso_importancia
+                    (topico_id, concurso_id, importancia, incluido, pausado)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    topico_destino_id,
+                    int(concurso_id),
+                    int(importancia),
+                    int(incluido),
+                    int(pausado),
+                ),
+            )
+        elif tuple(int(v) for v in atual) == (3, 1, 0) and (
+            int(importancia), int(incluido), int(pausado)
+        ) != (3, 1, 0):
+            conexao.execute(
+                """
+                UPDATE topico_concurso_importancia
+                SET importancia = ?, incluido = ?, pausado = ?
+                WHERE topico_id = ? AND concurso_id = ?
+                """,
+                (
+                    int(importancia),
+                    int(incluido),
+                    int(pausado),
+                    topico_destino_id,
+                    int(concurso_id),
+                ),
+            )
+
+    controle_antigo = conexao.execute(
+        "SELECT * FROM controle_topico WHERE topico_id = ?",
+        (topico_antigo_id,),
+    ).fetchone()
+    controle_destino = conexao.execute(
+        "SELECT * FROM controle_topico WHERE topico_id = ?",
+        (topico_destino_id,),
+    ).fetchone()
+    if controle_antigo is not None and controle_destino is None:
+        conexao.execute(
+            """
+            INSERT INTO controle_topico (
+                topico_id, revisoes_iniciais, proxima_revisao,
+                percentual_inicial, observacao_inicial, texto_erros_inicial,
+                continuacao_inicial, importancia
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (topico_destino_id, *controle_antigo[1:]),
+        )
+    elif controle_antigo is not None and controle_destino is not None:
+        revisoes = max(int(controle_destino[1] or 0), int(controle_antigo[1] or 0))
+        importancia_destino = int(controle_destino[7] or 3)
+        importancia_antiga = int(controle_antigo[7] or 3)
+        if importancia_destino == 3 and importancia_antiga != 3:
+            importancia_destino = importancia_antiga
+        conexao.execute(
+            """
+            UPDATE controle_topico
+            SET revisoes_iniciais = ?,
+                proxima_revisao = COALESCE(proxima_revisao, ?),
+                percentual_inicial = COALESCE(percentual_inicial, ?),
+                observacao_inicial = COALESCE(observacao_inicial, ?),
+                texto_erros_inicial = COALESCE(texto_erros_inicial, ?),
+                continuacao_inicial = COALESCE(continuacao_inicial, ?),
+                importancia = ?
+            WHERE topico_id = ?
+            """,
+            (
+                revisoes,
+                controle_antigo[2],
+                controle_antigo[3],
+                controle_antigo[4],
+                controle_antigo[5],
+                controle_antigo[6],
+                importancia_destino,
+                topico_destino_id,
+            ),
+        )
+
+    conexao.execute("DELETE FROM topicos WHERE id = ?", (topico_antigo_id,))
+
+
+def _sincronizar_estrutura_direito_penal(conexao):
+    """Migração idempotente da árvore de títulos/capítulos de Direito Penal."""
+    nome_migracao = "direito_penal_nomenclatura_oficial_v2"
+    if conexao.execute(
+        "SELECT 1 FROM migracoes WHERE nome = ?",
+        (nome_migracao,),
+    ).fetchone():
+        return
+
+    disciplina_id = _resolver_disciplina_id_conexao(
+        conexao, "Direito Penal"
+    )
+    if disciplina_id is None:
+        return
+
+    existentes = conexao.execute(
+        "SELECT id, nome FROM topicos WHERE disciplina_id = ? ORDER BY id",
+        (disciplina_id,),
+    ).fetchall()
+    por_chave = {
+        _normalizar_chave_conteudo(nome): (int(topico_id), nome)
+        for topico_id, nome in existentes
+    }
+
+    ids_oficiais = {}
+    for titulo, capitulos in ESTRUTURA_DIREITO_PENAL:
+        chave = _normalizar_chave_conteudo(titulo)
+        atual = por_chave.get(chave)
+        if atual is None:
+            cursor = conexao.execute(
+                "INSERT INTO topicos (disciplina_id, nome) VALUES (?, ?)",
+                (disciplina_id, titulo),
+            )
+            topico_id = int(cursor.lastrowid)
+            _registrar_alias_topico(
+                conexao, topico_id, titulo, "estrutura_oficial"
+            )
+            conexao.execute(
+                "INSERT OR IGNORE INTO controle_topico (topico_id) VALUES (?)",
+                (topico_id,),
+            )
+            conexao.execute(
+                """
+                INSERT OR IGNORE INTO topico_concurso_importancia
+                    (topico_id, concurso_id, importancia, incluido, pausado)
+                SELECT ?, id, 3, 1, 0 FROM concursos
+                """,
+                (topico_id,),
+            )
+        else:
+            topico_id = int(atual[0])
+            if atual[1] != titulo:
+                _registrar_alias_topico(
+                    conexao, topico_id, atual[1], "migracao"
+                )
+                conexao.execute(
+                    "UPDATE topicos SET nome = ? WHERE id = ?",
+                    (titulo, topico_id),
+                )
+            _registrar_alias_topico(
+                conexao, topico_id, titulo, "atual"
+            )
+        ids_oficiais[chave] = topico_id
+        _sincronizar_capitulos_penal_oficiais(
+            conexao,
+            topico_id,
+            titulo,
+            tuple(capitulos),
+        )
+
+    # Consolida os seis tópicos antigos sem prefixo "Título".
+    topicos_agora = conexao.execute(
+        "SELECT id, nome FROM topicos WHERE disciplina_id = ? ORDER BY id",
+        (disciplina_id,),
+    ).fetchall()
+    for topico_id, nome in topicos_agora:
+        chave_alias = _normalizar_chave_conteudo(nome)
+        destino_nome = ALIASES_TOPICOS_DIREITO_PENAL.get(chave_alias)
+        if not destino_nome:
+            continue
+        destino_id = ids_oficiais.get(_normalizar_chave_conteudo(destino_nome))
+        if destino_id and int(topico_id) != int(destino_id):
+            _mesclar_topico_penal_legado(
+                conexao,
+                int(topico_id),
+                int(destino_id),
+                destino_nome,
+            )
+
+    conexao.execute(
+        """
+        INSERT INTO migracoes (nome, executada_em)
+        VALUES (?, datetime('now', 'localtime'))
+        """,
+        (nome_migracao,),
+    )
 
 def _obter_capitulos_padrao_topico(topico_id, conexao):
     linha = conexao.execute(
         """
-        SELECT d.nome, t.nome
+        SELECT t.disciplina_id, t.nome
         FROM topicos t
-        JOIN disciplinas d ON d.id = t.disciplina_id
         WHERE t.id = ?
         """,
-        (int(topico_id),)
+        (int(topico_id),),
     ).fetchone()
-
-    if linha is None or _normalizar_chave_conteudo(linha[0]) != "direito penal":
+    if linha is None:
         return ()
 
-    return CAPITULOS_DIREITO_PENAL.get(
-        _normalizar_chave_conteudo(linha[1]),
-        ()
+    penal_id = _resolver_disciplina_id_conexao(
+        conexao, "Direito Penal"
     )
+    if penal_id is None or int(linha[0]) != int(penal_id):
+        return ()
+
+    chave_atual = _normalizar_chave_conteudo(linha[1])
+    if chave_atual in CAPITULOS_DIREITO_PENAL:
+        return CAPITULOS_DIREITO_PENAL[chave_atual]
+
+    aliases = conexao.execute(
+        "SELECT nome_normalizado FROM aliases_topicos WHERE topico_id = ?",
+        (int(topico_id),),
+    ).fetchall()
+    correspondencias = [
+        CAPITULOS_DIREITO_PENAL[chave]
+        for (chave,) in aliases
+        if chave in CAPITULOS_DIREITO_PENAL
+    ]
+    return correspondencias[0] if correspondencias else ()
 
 
 def _garantir_capitulos_padrao(topico_id, conexao):
@@ -2901,6 +4180,14 @@ def _garantir_capitulos_padrao(topico_id, conexao):
             """,
             (int(topico_id), nome, ordem)
         )
+        linha = conexao.execute(
+            "SELECT id FROM capitulos_topico WHERE topico_id = ? AND nome = ?",
+            (int(topico_id), nome),
+        ).fetchone()
+        if linha is not None:
+            _registrar_alias_capitulo(
+                conexao, int(linha[0]), nome, "estrutura_padrao"
+            )
     return bool(capitulos)
 
 
@@ -2957,23 +4244,24 @@ def listar_capitulos_perfil(disciplina_nome=None, concurso_id=None):
         concurso_id = obter_concurso_ativo()[0]
 
     with conectar() as conexao:
+        disciplina_id = None
         if disciplina_nome:
+            disciplina_id = _resolver_disciplina_id_conexao(
+                conexao, disciplina_nome
+            )
+            if disciplina_id is None:
+                return []
             topicos = conexao.execute(
-                """
-                SELECT t.id
-                FROM topicos t
-                JOIN disciplinas d ON d.id = t.disciplina_id
-                WHERE d.nome = ?
-                """,
-                (str(disciplina_nome),)
+                "SELECT id FROM topicos WHERE disciplina_id = ?",
+                (int(disciplina_id),),
             ).fetchall()
             for (topico_id,) in topicos:
                 _garantir_capitulos_padrao(topico_id, conexao)
 
-        filtro_disciplina = "AND d.nome = ?" if disciplina_nome else ""
+        filtro_disciplina = "AND d.id = ?" if disciplina_id is not None else ""
         parametros = [int(concurso_id)]
-        if disciplina_nome:
-            parametros.append(str(disciplina_nome))
+        if disciplina_id is not None:
+            parametros.append(int(disciplina_id))
 
         return conexao.execute(
             f"""
@@ -2999,6 +4287,10 @@ def adicionar_capitulo(topico_id, nome_capitulo):
         return False
 
     with conectar() as conexao:
+        if _alias_conflita_capitulo(
+            conexao, topico_id, nome_capitulo
+        ):
+            return False
         try:
             proxima_ordem = conexao.execute(
                 """
@@ -3015,6 +4307,10 @@ def adicionar_capitulo(topico_id, nome_capitulo):
                 """,
                 (int(topico_id), nome_capitulo, int(proxima_ordem))
             )
+            capitulo_id = int(cursor.lastrowid)
+            _registrar_alias_capitulo(
+                conexao, capitulo_id, nome_capitulo, "criacao"
+            )
             conexao.execute(
                 """
                 INSERT OR IGNORE INTO capitulo_concurso_config (
@@ -3022,7 +4318,7 @@ def adicionar_capitulo(topico_id, nome_capitulo):
                 )
                 SELECT ?, id, 3, 0 FROM concursos
                 """,
-                (int(cursor.lastrowid),)
+                (capitulo_id,)
             )
             return True
         except sqlite3.IntegrityError:
@@ -3034,12 +4330,32 @@ def renomear_capitulo(capitulo_id, novo_nome):
     if not novo_nome:
         return False
     with conectar() as conexao:
+        atual = conexao.execute(
+            "SELECT nome, topico_id FROM capitulos_topico WHERE id = ?",
+            (int(capitulo_id),),
+        ).fetchone()
+        if atual is None:
+            return False
+        nome_anterior = str(atual[0])
+        topico_id = int(atual[1])
+        if _alias_conflita_capitulo(
+            conexao, topico_id, novo_nome, ignorar_id=capitulo_id
+        ):
+            return False
         try:
             cursor = conexao.execute(
                 "UPDATE capitulos_topico SET nome = ? WHERE id = ?",
                 (novo_nome, int(capitulo_id))
             )
-            return cursor.rowcount > 0
+            if cursor.rowcount <= 0:
+                return False
+            _registrar_alias_capitulo(
+                conexao, capitulo_id, nome_anterior, "renomeacao"
+            )
+            _registrar_alias_capitulo(
+                conexao, capitulo_id, novo_nome, "atual"
+            )
+            return True
         except sqlite3.IntegrityError:
             return False
 
@@ -3334,6 +4650,35 @@ def obter_estatisticas_prazos_revisoes(
         "historico_parcial": True,
     })
     return atual
+
+
+def obter_contexto_topico(topico_id):
+    """Retorna a identidade canônica do tópico e de sua disciplina."""
+    with conectar() as conexao:
+        linha = conexao.execute(
+            """
+            SELECT
+                t.id,
+                t.nome,
+                d.id,
+                d.nome
+            FROM topicos t
+            JOIN disciplinas d
+                ON d.id = t.disciplina_id
+            WHERE t.id = ?
+            """,
+            (int(topico_id),)
+        ).fetchone()
+
+    if linha is None:
+        return None
+
+    return {
+        "topico_id": int(linha[0]),
+        "topico_nome": str(linha[1] or ""),
+        "disciplina_id": int(linha[2]),
+        "disciplina_nome": str(linha[3] or ""),
+    }
 
 
 def obter_resumo_topico(
@@ -3950,6 +5295,197 @@ def questao_existe(
                 return True
 
     return False
+
+def listar_grupos_questoes_duplicadas(concurso_id=None):
+    """Retorna grupos de questões realmente duplicadas no perfil ativo.
+
+    A assinatura considera enunciado normalizado, alternativas e gabarito.
+    Questões na lixeira são ignoradas; ativas e arquivadas são analisadas.
+    """
+    if concurso_id is None:
+        concurso_id = obter_concurso_ativo()[0]
+
+    with conectar() as conexao:
+        questoes = conexao.execute(
+            """
+            SELECT
+                q.id,
+                q.enunciado,
+                q.topico_id,
+                t.nome,
+                d.nome,
+                q.ativa
+            FROM questoes q
+            JOIN topicos t
+                ON t.id = q.topico_id
+            JOIN disciplinas d
+                ON d.id = t.disciplina_id
+            JOIN disciplina_concurso_inclusao dc
+                ON dc.disciplina_id = d.id
+                AND dc.concurso_id = ?
+                AND dc.incluido = 1
+            JOIN topico_concurso_importancia tc
+                ON tc.topico_id = t.id
+                AND tc.concurso_id = ?
+                AND tc.incluido = 1
+            WHERE COALESCE(q.excluida, 0) = 0
+            ORDER BY q.id
+            """,
+            (int(concurso_id), int(concurso_id)),
+        ).fetchall()
+
+        if not questoes:
+            return []
+
+        ids = [int(item[0]) for item in questoes]
+        marcadores = ",".join("?" for _ in ids)
+        alternativas = conexao.execute(
+            f"""
+            SELECT questao_id, letra, texto, correta
+            FROM alternativas_questoes
+            WHERE questao_id IN ({marcadores})
+            ORDER BY questao_id, ordem, letra
+            """,
+            ids,
+        ).fetchall()
+
+    alternativas_por_questao = {}
+    for questao_id, letra, texto_alternativa, correta in alternativas:
+        alternativas_por_questao.setdefault(int(questao_id), []).append({
+            "letra": letra,
+            "texto": texto_alternativa,
+            "correta": bool(correta),
+        })
+
+    grupos = {}
+    metadados = {}
+    for questao_id, enunciado, topico_id, topico, disciplina, ativa in questoes:
+        questao_id = int(questao_id)
+        assinatura_alternativas = _assinatura_alternativas_duplicidade(
+            alternativas_por_questao.get(questao_id, [])
+        )
+        if assinatura_alternativas is None:
+            continue
+
+        assinatura = (
+            _normalizar_texto_duplicidade_questao(enunciado),
+            assinatura_alternativas,
+        )
+        if not assinatura[0]:
+            continue
+
+        grupos.setdefault(assinatura, []).append(questao_id)
+        metadados[questao_id] = {
+            "id": questao_id,
+            "enunciado": str(enunciado or ""),
+            "topico_id": int(topico_id),
+            "topico": str(topico or ""),
+            "disciplina": str(disciplina or ""),
+            "ativa": bool(ativa),
+        }
+
+    resultado = []
+    for ids_grupo in grupos.values():
+        if len(ids_grupo) < 2:
+            continue
+        itens = [metadados[questao_id] for questao_id in ids_grupo]
+        resultado.append({
+            "ids": list(ids_grupo),
+            "quantidade": len(ids_grupo),
+            "enunciado": itens[0]["enunciado"],
+            "itens": itens,
+        })
+
+    return sorted(
+        resultado,
+        key=lambda grupo: (-int(grupo["quantidade"]), min(grupo["ids"])),
+    )
+
+
+def atualizar_questoes_lote(questao_ids, campos):
+    """Atualiza campos administrativos de várias questões de uma vez.
+
+    ``campos`` aceita: topico_id/capitulo_id (classificação), dificuldade,
+    banca, ano e fonte. Campos ausentes permanecem inalterados.
+    """
+    ids = []
+    for valor in questao_ids or []:
+        try:
+            identificador = int(valor)
+        except (TypeError, ValueError):
+            continue
+        if identificador not in ids:
+            ids.append(identificador)
+
+    if not ids:
+        return 0
+
+    campos = dict(campos or {})
+    permitidos = {
+        "topico_id",
+        "capitulo_id",
+        "dificuldade",
+        "banca",
+        "ano",
+        "fonte",
+    }
+    campos = {chave: valor for chave, valor in campos.items() if chave in permitidos}
+    if not campos:
+        return 0
+
+    with conectar() as conexao:
+        atribuicoes = []
+        parametros = []
+
+        if "topico_id" in campos or "capitulo_id" in campos:
+            topico_id, capitulo_id = _resolver_classificacao_questao(
+                campos.get("topico_id"),
+                campos.get("capitulo_id"),
+                conexao,
+            )
+            atribuicoes.extend(["topico_id = ?", "capitulo_id = ?"])
+            parametros.extend([topico_id, capitulo_id])
+
+        if "dificuldade" in campos:
+            dificuldade = str(campos.get("dificuldade") or "Não informada").strip()
+            if dificuldade not in {"Não informada", "Fácil", "Média", "Difícil"}:
+                dificuldade = "Não informada"
+            atribuicoes.append("dificuldade = ?")
+            parametros.append(dificuldade)
+
+        if "banca" in campos:
+            atribuicoes.append("banca = ?")
+            parametros.append(str(campos.get("banca") or "").strip())
+
+        if "fonte" in campos:
+            atribuicoes.append("fonte = ?")
+            parametros.append(str(campos.get("fonte") or "").strip())
+
+        if "ano" in campos:
+            ano = campos.get("ano")
+            if ano in (None, "", 0, "0"):
+                ano = None
+            else:
+                ano = int(ano)
+            atribuicoes.append("ano = ?")
+            parametros.append(ano)
+
+        if not atribuicoes:
+            return 0
+
+        atribuicoes.append("atualizado_em = datetime('now', 'localtime')")
+        marcadores = ",".join("?" for _ in ids)
+        cursor = conexao.execute(
+            f"""
+            UPDATE questoes
+            SET {', '.join(atribuicoes)}
+            WHERE id IN ({marcadores})
+              AND COALESCE(excluida, 0) = 0
+            """,
+            parametros + ids,
+        )
+        return int(cursor.rowcount or 0)
+
 
 def criar_questao(
     topico_id,
@@ -7363,6 +8899,258 @@ def _pesos_topicos_adaptativa_v2():
     }
 
 
+PESOS_FILA_INTELIGENTE_V3 = {
+    "atraso": 18,
+    "dominio": 18,
+    "erros_recentes": 15,
+    "queda": 12,
+    "importancia": 12,
+    "cobertura": 9,
+    "revisoes": 7,
+    "espacamento": 9,
+}
+
+
+def _carregar_configuracao_espacamento_fila():
+    """Lê a mesma matriz de espaçamento usada pelo agendamento de revisões."""
+    tabela = obter_tabela_padrao()
+    try:
+        texto = obter_configuracao_texto("matriz_espacamento_json", None)
+        if texto:
+            tabela = normalizar_tabela_espacamento(json.loads(texto))
+    except Exception:
+        tabela = obter_tabela_padrao()
+
+    padrao_queda = obter_configuracao_queda_padrao()
+    try:
+        limite_moderada = obter_configuracao_int(
+            "queda_limite_moderada", padrao_queda["limite_moderada"]
+        )
+        limite_forte = obter_configuracao_int(
+            "queda_limite_forte", padrao_queda["limite_forte"]
+        )
+    except Exception:
+        limite_moderada = padrao_queda["limite_moderada"]
+        limite_forte = padrao_queda["limite_forte"]
+
+    if limite_forte <= limite_moderada:
+        limite_moderada = padrao_queda["limite_moderada"]
+        limite_forte = padrao_queda["limite_forte"]
+
+    return {
+        "tabela": tabela,
+        "limite_moderada": float(limite_moderada),
+        "limite_forte": float(limite_forte),
+    }
+
+
+def _score_atraso_fila(proxima_revisao, revisoes_totais=0):
+    """Pontua apenas a pressão de prazo explícita da revisão."""
+    hoje = date.today()
+    if proxima_revisao:
+        try:
+            alvo = datetime.strptime(str(proxima_revisao)[:10], "%Y-%m-%d").date()
+        except Exception:
+            alvo = None
+    else:
+        alvo = None
+
+    if alvo is None:
+        # Primeiro contato continua relevante, mas não deve parecer uma revisão vencida.
+        if int(revisoes_totais or 0) <= 0:
+            return 40.0, None, "primeiro contato sem prazo definido"
+        return 15.0, None, "sem próxima revisão definida"
+
+    dias_atraso = (hoje - alvo).days
+    if dias_atraso > 0:
+        return min(100.0, 75.0 + dias_atraso * 2.5), dias_atraso, f"{dias_atraso} dia(s) em atraso"
+    if dias_atraso == 0:
+        return 70.0, 0, "revisão prevista para hoje"
+    return 0.0, dias_atraso, f"revisão futura em {abs(dias_atraso)} dia(s)"
+
+
+def _score_queda_fila(dominio, config_espacamento):
+    tentativas = int(dominio.get("tentativas_historicas", 0) or 0)
+    if tentativas < 5:
+        return 0.0, 0.0, "amostra ainda pequena para penalizar queda"
+
+    base = dominio.get("desempenho_base")
+    recente = dominio.get("desempenho_recente")
+    try:
+        base = float(base)
+        recente = float(recente)
+    except Exception:
+        return 0.0, 0.0, "sem base comparável"
+
+    queda = max(0.0, base - recente)
+    moderada = float(config_espacamento["limite_moderada"])
+    forte = float(config_espacamento["limite_forte"])
+
+    if queda < 5.0:
+        score = 0.0
+    elif queda < moderada:
+        score = 40.0 * (queda - 5.0) / max(1.0, moderada - 5.0)
+    elif queda < forte:
+        score = 40.0 + 60.0 * (queda - moderada) / max(1.0, forte - moderada)
+    else:
+        score = 100.0
+
+    return max(0.0, min(100.0, score)), queda, f"queda de {queda:.1f} p.p."
+
+
+def _score_revisoes_fila(revisoes_totais):
+    revisoes = max(0, int(revisoes_totais or 0))
+    mapa = {0: 100.0, 1: 78.0, 2: 58.0, 3: 40.0, 4: 24.0}
+    return mapa.get(revisoes, 12.0)
+
+
+def _score_espacamento_fila(dominio, revisoes_totais, config_espacamento):
+    tentativas = int(dominio.get("tentativas_historicas", 0) or 0)
+    dias_desde = dominio.get("dias_desde_ultima")
+
+    if tentativas <= 0 or dias_desde is None:
+        return 50.0, None, None, "sem histórico temporal suficiente"
+
+    try:
+        dias_desde = max(0, int(dias_desde))
+    except Exception:
+        return 50.0, None, None, "dias desde a última prática indisponíveis"
+
+    desempenho_atual = dominio.get("desempenho_recente")
+    if desempenho_atual is None:
+        desempenho_atual = dominio.get("desempenho")
+    try:
+        desempenho_atual = float(desempenho_atual)
+    except Exception:
+        desempenho_atual = 50.0
+
+    numero_revisao = max(1, int(revisoes_totais or 0) + 1)
+    try:
+        sugestao = calcular_sugestao_espacamento(
+            numero_revisao=numero_revisao,
+            percentual_atual=desempenho_atual,
+            percentual_anterior=None,
+            aplicar_penalizacao=False,
+            tabela_espacamento=config_espacamento["tabela"],
+        )
+        intervalo_alvo = max(1, int(sugestao["dias"]))
+    except Exception:
+        intervalo_alvo = max(4, min(90, 7 * numero_revisao))
+
+    proporcao = dias_desde / max(1.0, float(intervalo_alvo))
+    if proporcao < 0.40:
+        score = 0.0
+    elif proporcao < 0.70:
+        score = 20.0 + (proporcao - 0.40) / 0.30 * 20.0
+    elif proporcao < 1.00:
+        score = 40.0 + (proporcao - 0.70) / 0.30 * 30.0
+    elif proporcao < 1.25:
+        score = 70.0 + (proporcao - 1.00) / 0.25 * 15.0
+    else:
+        score = min(100.0, 85.0 + (proporcao - 1.25) * 20.0)
+
+    detalhe = f"{dias_desde} dia(s) desde a prática • alvo ~{intervalo_alvo} dia(s)"
+    return max(0.0, min(100.0, score)), dias_desde, intervalo_alvo, detalhe
+
+
+def _calcular_score_fila_inteligente_v3(
+    dominio,
+    importancia,
+    proxima_revisao,
+    revisoes_totais,
+    score_erros,
+    config_espacamento,
+):
+    """Consolida os oito sinais centrais em uma única prioridade 0–100."""
+    score_dominio = max(0.0, min(100.0, 100.0 - float(dominio.get("score", 0.0) or 0.0)))
+    score_atraso, dias_atraso, motivo_atraso = _score_atraso_fila(
+        proxima_revisao, revisoes_totais
+    )
+    score_queda, queda_pp, motivo_queda = _score_queda_fila(
+        dominio, config_espacamento
+    )
+    score_importancia = (max(1, min(5, int(importancia or 3))) - 1) / 4.0 * 100.0
+    cobertura = max(0.0, min(100.0, float(dominio.get("cobertura", 0.0) or 0.0)))
+    score_cobertura = 100.0 - cobertura
+    score_revisoes = _score_revisoes_fila(revisoes_totais)
+    score_espacamento, dias_desde, intervalo_alvo, motivo_espacamento = _score_espacamento_fila(
+        dominio, revisoes_totais, config_espacamento
+    )
+
+    componentes = {
+        "atraso": score_atraso,
+        "dominio": score_dominio,
+        "erros_recentes": max(0.0, min(100.0, float(score_erros or 0.0))),
+        "queda": score_queda,
+        "importancia": score_importancia,
+        "cobertura": score_cobertura,
+        "revisoes": score_revisoes,
+        "espacamento": score_espacamento,
+    }
+    pesos = dict(PESOS_FILA_INTELIGENTE_V3)
+    try:
+        usar_importancia = obter_configuracao_bool("usar_importancia_fila", True)
+    except Exception:
+        usar_importancia = True
+    if not usar_importancia:
+        pesos["importancia"] = 0.0
+        total_ativo = sum(float(v) for v in pesos.values())
+        if total_ativo > 0:
+            pesos = {
+                chave: round(float(valor) * 100.0 / total_ativo, 4)
+                for chave, valor in pesos.items()
+            }
+
+    contribuicoes = {
+        chave: componentes[chave] * float(pesos[chave]) / 100.0
+        for chave in pesos
+    }
+    score_total = sum(contribuicoes.values())
+
+    principal = max(contribuicoes, key=lambda chave: (contribuicoes[chave], pesos[chave]))
+    rotulos = {
+        "atraso": "atraso da revisão",
+        "dominio": "domínio baixo",
+        "erros_recentes": "erros recentes",
+        "queda": "queda acentuada",
+        "importancia": "importância",
+        "cobertura": "cobertura insuficiente",
+        "revisoes": "poucas revisões",
+        "espacamento": "espaçamento",
+    }
+
+    if score_total >= 80:
+        nivel = "MUITO ALTA"
+    elif score_total >= 60:
+        nivel = "ALTA"
+    elif score_total >= 40:
+        nivel = "MÉDIA"
+    else:
+        nivel = "BAIXA"
+
+    detalhes = {
+        "dias_atraso": dias_atraso,
+        "motivo_atraso": motivo_atraso,
+        "queda_pp": round(queda_pp, 1),
+        "motivo_queda": motivo_queda,
+        "dias_desde_ultima": dias_desde,
+        "intervalo_alvo": intervalo_alvo,
+        "motivo_espacamento": motivo_espacamento,
+        "cobertura_atual": round(cobertura, 1),
+        "revisoes_totais": int(revisoes_totais or 0),
+    }
+    return {
+        "score": round(max(0.0, min(100.0, score_total)), 1),
+        "nivel": nivel,
+        "motivo_principal_chave": principal,
+        "motivo_principal": rotulos[principal],
+        "componentes": {k: round(v, 1) for k, v in componentes.items()},
+        "contribuicoes": {k: round(v, 2) for k, v in contribuicoes.items()},
+        "pesos": pesos,
+        "detalhes": detalhes,
+    }
+
+
 def _normalizar_pesos_adaptativos_v2(pesos):
     pesos = {
         chave: max(0.0, float(valor or 0.0))
@@ -7539,6 +9327,7 @@ def obter_prioridades_sessao_adaptativa(
 
     pesos_percentuais = _pesos_topicos_adaptativa_v2()
     pesos = {chave: valor / 100.0 for chave, valor in pesos_percentuais.items()}
+    config_espacamento_fila = _carregar_configuracao_espacamento_fila()
 
     rotulos_motivo = {
         "dominio": "domínio frágil",
@@ -7611,6 +9400,15 @@ def obter_prioridades_sessao_adaptativa(
         importancia = max(1, min(5, int(linha[4] or 3)))
         score_importancia = (importancia - 1) / 4.0 * 100.0
 
+        fila_v3 = _calcular_score_fila_inteligente_v3(
+            dominio=dominio,
+            importancia=importancia,
+            proxima_revisao=linha[5],
+            revisoes_totais=int(linha[6] or 0),
+            score_erros=score_erros,
+            config_espacamento=config_espacamento_fila,
+        )
+
         componentes = {
             "dominio": baixo_dominio,
             "erros": score_erros,
@@ -7676,6 +9474,10 @@ def obter_prioridades_sessao_adaptativa(
             "revisoes_totais": int(linha[6] or 0),
             "questoes_disponiveis": quantidade_questoes,
             "dominio": score_dominio,
+            "desempenho": round(float(dominio.get("desempenho", 0.0) or 0.0), 1),
+            "desempenho_base": round(float(dominio.get("desempenho_base", 0.0) or 0.0), 1),
+            "desempenho_recente": round(float(dominio.get("desempenho_recente", 0.0) or 0.0), 1),
+            "ultima_resposta": dominio.get("ultima_resposta"),
             "nivel_dominio": dominio.get("nivel", "Sem evidência"),
             "qualidade_evidencia": qualidade_evidencia,
             "evidencia": round(evidencia, 1),
@@ -7701,9 +9503,22 @@ def obter_prioridades_sessao_adaptativa(
             "score_variedade": round(score_variedade, 1),
             "score_estabilidade": round(score_estabilidade, 1),
             "score_recencia": round(score_recencia, 1),
-            "score_adaptativo": round(score, 1),
-            "motivo_principal_chave": motivo_principal_chave,
-            "motivo_principal": rotulos_motivo[motivo_principal_chave],
+            # A Fila Inteligente V3 passa a ser a prioridade canônica usada
+            # pelos consumidores atuais; o score adaptativo V2 é preservado
+            # para auditoria e compatibilidade histórica.
+            "versao_fila": "fila_inteligente_v3",
+            "score_adaptativo_v2": round(score, 1),
+            "score_fila": float(fila_v3["score"]),
+            "nivel_fila": fila_v3["nivel"],
+            "motivo_fila": fila_v3["motivo_principal"],
+            "motivo_fila_chave": fila_v3["motivo_principal_chave"],
+            "componentes_fila": fila_v3["componentes"],
+            "contribuicoes_fila": fila_v3["contribuicoes"],
+            "pesos_fila": fila_v3["pesos"],
+            "detalhes_fila": fila_v3["detalhes"],
+            "score_adaptativo": float(fila_v3["score"]),
+            "motivo_principal_chave": fila_v3["motivo_principal_chave"],
+            "motivo_principal": fila_v3["motivo_principal"],
             "motivo_urgencia": motivo_urgencia,
             "motivo_detalhado": " • ".join(motivos_detalhados),
             "componentes": componentes,
@@ -7713,12 +9528,14 @@ def obter_prioridades_sessao_adaptativa(
 
     resultados.sort(
         key=lambda item: (
-            -item["score_adaptativo"],
+            -item["score_fila"],
             -item["importancia"],
             item["disciplina"].lower(),
             item["topico"].lower(),
         )
     )
+    for posicao, item in enumerate(resultados, 1):
+        item["posicao_fila"] = posicao
     return resultados
 
 def planejar_sessao_adaptativa_global(
@@ -10628,9 +12445,11 @@ def listar_questoes_resolucao(
             SELECT
                 q.id,
                 q.topico_id,
+                q.capitulo_id,
                 d.id AS disciplina_id,
                 d.nome AS disciplina,
                 t.nome AS topico,
+                COALESCE(c.nome, '') AS capitulo,
                 q.enunciado,
                 q.banca,
                 q.ano,
@@ -10646,6 +12465,8 @@ def listar_questoes_resolucao(
             FROM questoes q
             JOIN topicos t
                 ON t.id = q.topico_id
+            LEFT JOIN capitulos_topico c
+                ON c.id = q.capitulo_id
             JOIN disciplinas d
                 ON d.id = t.disciplina_id
             JOIN disciplina_concurso_inclusao dc
@@ -10670,22 +12491,24 @@ def listar_questoes_resolucao(
         {
             "id": linha[0],
             "topico_id": linha[1],
-            "disciplina_id": linha[2],
-            "disciplina": linha[3],
-            "topico": linha[4],
-            "enunciado": linha[5],
-            "banca": linha[6] or "",
-            "ano": linha[7],
+            "capitulo_id": linha[2],
+            "disciplina_id": linha[3],
+            "disciplina": linha[4],
+            "topico": linha[5],
+            "capitulo": linha[6] or "",
+            "enunciado": linha[7],
+            "banca": linha[8] or "",
+            "ano": linha[9],
             "dificuldade": (
-                linha[8]
+                linha[10]
                 or "Não informada"
             ),
             "tentativas_anteriores": int(
-                linha[9] or 0
+                linha[11] or 0
             ),
             "inedita": (
                 int(
-                    linha[9] or 0
+                    linha[11] or 0
                 ) == 0
             ),
         }
@@ -12374,34 +14197,39 @@ def obter_central_efetividade(
 def iniciar_sessao_questoes(
     concurso_id,
     modo,
-    objetivo
+    objetivo,
+    origem=None,
+    contexto=None,
+    versao_motor="sessao_unificado_v1"
 ):
-    concurso_id = int(
-        concurso_id
-    )
-    objetivo = max(
-        1,
-        int(
-            objetivo
+    """Cria uma sessão no motor unificado.
+
+    ``modo`` é o rótulo humano exibido na interface; ``origem`` é o código
+    estável usado pela inteligência (manual, revisao_inteligente,
+    treino_adaptativo, simulado, algoritmo_v5 etc.).
+    """
+    concurso_id = int(concurso_id)
+    objetivo = max(1, int(objetivo))
+    origem = str(origem or "manual").strip().lower() or "manual"
+    versao_motor = str(versao_motor or "sessao_unificado_v1").strip()
+
+    try:
+        contexto_json = json.dumps(
+            contexto or {},
+            ensure_ascii=False,
+            default=str,
         )
-    )
+    except Exception:
+        contexto_json = "{}"
 
     with conectar() as conexao:
         concurso = conexao.execute(
-            """
-            SELECT 1
-            FROM concursos
-            WHERE id = ?
-            """,
-            (
-                concurso_id,
-            )
+            "SELECT 1 FROM concursos WHERE id = ?",
+            (concurso_id,),
         ).fetchone()
 
         if concurso is None:
-            raise ValueError(
-                "O perfil informado não existe."
-            )
+            raise ValueError("O perfil informado não existe.")
 
         cursor = conexao.execute(
             """
@@ -12410,30 +14238,284 @@ def iniciar_sessao_questoes(
                 iniciado_em,
                 modo,
                 objetivo,
-                concluida
+                concluida,
+                origem,
+                contexto_json,
+                versao_motor
             )
             VALUES (
                 ?,
-                datetime(
-                    'now',
-                    'localtime'
-                ),
+                datetime('now', 'localtime'),
                 ?,
                 ?,
-                0
+                0,
+                ?,
+                ?,
+                ?
             )
             """,
             (
                 concurso_id,
-                str(
-                    modo
-                    or "Aleatórias"
-                ),
+                str(modo or "Aleatórias"),
                 objetivo,
-            )
+                origem,
+                contexto_json,
+                versao_motor,
+            ),
         )
 
         return cursor.lastrowid
+
+
+def registrar_fila_sessao_questoes(sessao_id, fila):
+    """Congela a fila e a classificação de cada questão antes da resolução."""
+    sessao_id = int(sessao_id)
+    fila = list(fila or [])
+
+    if not fila:
+        return 0
+
+    with conectar() as conexao:
+        sessao = conexao.execute(
+            "SELECT encerrado_em FROM sessoes_questoes WHERE id = ?",
+            (sessao_id,),
+        ).fetchone()
+
+        if sessao is None:
+            raise ValueError("A sessão de questões não existe.")
+
+        if sessao[0] is not None:
+            raise ValueError("A sessão de questões já foi encerrada.")
+
+        existente = int(
+            conexao.execute(
+                "SELECT COUNT(*) FROM itens_sessao_questoes WHERE sessao_id = ?",
+                (sessao_id,),
+            ).fetchone()[0]
+            or 0
+        )
+
+        if existente:
+            return existente
+
+        gravadas = 0
+
+        for ordem, item in enumerate(fila, start=1):
+            questao_id = int(item.get("id"))
+            questao = conexao.execute(
+                """
+                SELECT
+                    q.id,
+                    q.topico_id,
+                    q.capitulo_id,
+                    d.id,
+                    d.nome,
+                    t.nome,
+                    c.nome,
+                    q.enunciado,
+                    q.explicacao,
+                    q.banca,
+                    q.ano,
+                    q.fonte,
+                    q.dificuldade
+                FROM questoes q
+                JOIN topicos t
+                    ON t.id = q.topico_id
+                JOIN disciplinas d
+                    ON d.id = t.disciplina_id
+                LEFT JOIN capitulos_topico c
+                    ON c.id = q.capitulo_id
+                WHERE q.id = ?
+                """,
+                (questao_id,),
+            ).fetchone()
+
+            if questao is None:
+                raise ValueError(
+                    f"A questão {questao_id} da fila não existe."
+                )
+
+            alternativas_linhas = conexao.execute(
+                """
+                SELECT letra, texto, correta, ordem
+                FROM alternativas_questoes
+                WHERE questao_id = ?
+                ORDER BY ordem, letra
+                """,
+                (questao_id,),
+            ).fetchall()
+
+            alternativas = [
+                {
+                    "letra": str(alternativa[0]).strip().upper(),
+                    "texto": alternativa[1],
+                    "correta": bool(alternativa[2]),
+                    "ordem": int(alternativa[3]),
+                }
+                for alternativa in alternativas_linhas
+            ]
+
+            gabarito = next(
+                (
+                    alternativa["letra"]
+                    for alternativa in alternativas
+                    if alternativa["correta"]
+                ),
+                None,
+            )
+
+            try:
+                contexto_item = json.dumps(
+                    item,
+                    ensure_ascii=False,
+                    default=str,
+                )
+            except Exception:
+                contexto_item = "{}"
+
+            conexao.execute(
+                """
+                INSERT INTO itens_sessao_questoes (
+                    sessao_id,
+                    ordem,
+                    questao_id,
+                    estado,
+                    questao_id_snapshot,
+                    topico_id_snapshot,
+                    capitulo_id_snapshot,
+                    disciplina_id_snapshot,
+                    disciplina_snapshot,
+                    topico_snapshot,
+                    capitulo_snapshot,
+                    enunciado_snapshot,
+                    alternativas_snapshot,
+                    gabarito_snapshot,
+                    explicacao_snapshot,
+                    banca_snapshot,
+                    ano_snapshot,
+                    fonte_snapshot,
+                    dificuldade_snapshot,
+                    contexto_selecao_json
+                )
+                VALUES (
+                    ?, ?, ?, 'planejada',
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                )
+                """,
+                (
+                    sessao_id,
+                    ordem,
+                    questao_id,
+                    questao[0],
+                    questao[1],
+                    questao[2],
+                    questao[3],
+                    questao[4],
+                    questao[5],
+                    questao[6] or "",
+                    questao[7],
+                    json.dumps(alternativas, ensure_ascii=False),
+                    gabarito,
+                    questao[8] or "",
+                    questao[9] or "",
+                    questao[10],
+                    questao[11] or "",
+                    questao[12] or "Não informada",
+                    contexto_item,
+                ),
+            )
+            gravadas += 1
+
+        return gravadas
+
+
+def marcar_item_sessao_apresentado(sessao_id, ordem, questao_id=None):
+    """Registra o instante em que a questão ficou visível na tela."""
+    sessao_id = int(sessao_id)
+    ordem = int(ordem)
+
+    with conectar() as conexao:
+        linha = conexao.execute(
+            """
+            SELECT id, questao_id_snapshot, estado
+            FROM itens_sessao_questoes
+            WHERE sessao_id = ? AND ordem = ?
+            """,
+            (sessao_id, ordem),
+        ).fetchone()
+
+        if linha is None:
+            return None
+
+        if (
+            questao_id is not None
+            and int(linha[1]) != int(questao_id)
+        ):
+            raise ValueError(
+                "A questão apresentada não corresponde à fila congelada."
+            )
+
+        if linha[2] == "planejada":
+            conexao.execute(
+                """
+                UPDATE itens_sessao_questoes
+                SET
+                    estado = 'apresentada',
+                    apresentada_em = datetime('now', 'localtime')
+                WHERE id = ?
+                """,
+                (int(linha[0]),),
+            )
+
+        return int(linha[0])
+
+
+def obter_itens_sessao_questoes(sessao_id):
+    """Retorna a telemetria item a item do motor unificado."""
+    with conectar() as conexao:
+        linhas = conexao.execute(
+            """
+            SELECT
+                id,
+                ordem,
+                questao_id_snapshot,
+                estado,
+                planejada_em,
+                apresentada_em,
+                finalizada_em,
+                tempo_segundos,
+                disciplina_snapshot,
+                topico_snapshot,
+                capitulo_snapshot,
+                dificuldade_snapshot,
+                enunciado_snapshot,
+                gabarito_snapshot
+            FROM itens_sessao_questoes
+            WHERE sessao_id = ?
+            ORDER BY ordem
+            """,
+            (int(sessao_id),),
+        ).fetchall()
+
+    return [
+        {
+            "item_id": linha[0],
+            "ordem": linha[1],
+            "questao_id": linha[2],
+            "estado": linha[3],
+            "planejada_em": linha[4],
+            "apresentada_em": linha[5],
+            "finalizada_em": linha[6],
+            "tempo_segundos": linha[7],
+            "disciplina": linha[8] or "",
+            "topico": linha[9] or "",
+            "capitulo": linha[10] or "",
+            "dificuldade": linha[11] or "Não informada",
+            "enunciado": linha[12] or "",
+            "gabarito": linha[13] or "",
+        }
+        for linha in linhas
+    ]
 
 
 def registrar_tentativa_questao(
@@ -12442,22 +14524,15 @@ def registrar_tentativa_questao(
     concurso_id,
     alternativa_marcada=None,
     marcada_duvida=False,
-    tempo_segundos=None
+    tempo_segundos=None,
+    item_sessao_id=None,
 ):
-    sessao_id = int(
-        sessao_id
-    )
-    questao_id = int(
-        questao_id
-    )
-    concurso_id = int(
-        concurso_id
-    )
+    sessao_id = int(sessao_id)
+    questao_id = int(questao_id)
+    concurso_id = int(concurso_id)
 
     alternativa = (
-        str(
-            alternativa_marcada
-        ).strip().upper()
+        str(alternativa_marcada).strip().upper()
         if alternativa_marcada
         else None
     )
@@ -12465,36 +14540,74 @@ def registrar_tentativa_questao(
     with conectar() as conexao:
         sessao = conexao.execute(
             """
-            SELECT
-                concurso_id,
-                encerrado_em
+            SELECT concurso_id, encerrado_em
             FROM sessoes_questoes
             WHERE id = ?
             """,
-            (
-                sessao_id,
-            )
+            (sessao_id,),
         ).fetchone()
 
         if sessao is None:
-            raise ValueError(
-                "A sessão de questões não existe."
-            )
+            raise ValueError("A sessão de questões não existe.")
 
         if sessao[1] is not None:
-            raise ValueError(
-                "A sessão de questões já foi encerrada."
-            )
+            raise ValueError("A sessão de questões já foi encerrada.")
 
-        if (
-            sessao[0] is not None
-            and int(
-                sessao[0]
-            ) != concurso_id
-        ):
-            raise ValueError(
-                "A sessão pertence a outro perfil."
-            )
+        if sessao[0] is not None and int(sessao[0]) != concurso_id:
+            raise ValueError("A sessão pertence a outro perfil.")
+
+        if item_sessao_id is None:
+            pendente = conexao.execute(
+                """
+                SELECT id
+                FROM itens_sessao_questoes
+                WHERE
+                    sessao_id = ?
+                    AND questao_id_snapshot = ?
+                    AND estado IN ('apresentada', 'planejada')
+                ORDER BY
+                    CASE estado
+                        WHEN 'apresentada' THEN 0
+                        ELSE 1
+                    END,
+                    ordem
+                LIMIT 1
+                """,
+                (sessao_id, questao_id),
+            ).fetchone()
+            item_sessao_id = int(pendente[0]) if pendente else None
+        else:
+            item_sessao_id = int(item_sessao_id)
+
+        if item_sessao_id is not None:
+            item_linha = conexao.execute(
+                """
+                SELECT questao_id_snapshot, estado
+                FROM itens_sessao_questoes
+                WHERE id = ? AND sessao_id = ?
+                """,
+                (item_sessao_id, sessao_id),
+            ).fetchone()
+
+            if (
+                item_linha is None
+                or int(item_linha[0]) != questao_id
+            ):
+                raise ValueError(
+                    "O item da sessão não corresponde à questão respondida."
+                )
+
+            if item_linha[1] == "planejada":
+                conexao.execute(
+                    """
+                    UPDATE itens_sessao_questoes
+                    SET
+                        estado = 'apresentada',
+                        apresentada_em = datetime('now', 'localtime')
+                    WHERE id = ?
+                    """,
+                    (item_sessao_id,),
+                )
 
         questao = conexao.execute(
             """
@@ -12518,77 +14631,51 @@ def registrar_tentativa_questao(
                 ON d.id = t.disciplina_id
             WHERE q.id = ?
             """,
-            (
-                questao_id,
-            )
+            (questao_id,),
         ).fetchone()
 
         if questao is None:
-            raise ValueError(
-                "A questão não existe."
-            )
+            raise ValueError("A questão não existe.")
 
-        if not bool(
-            questao[11]
-        ):
+        if not bool(questao[11]):
             raise ValueError(
                 "A questão está arquivada e não pode receber novas tentativas."
             )
 
         alternativas_linhas = conexao.execute(
             """
-            SELECT
-                letra,
-                texto,
-                correta,
-                ordem
+            SELECT letra, texto, correta, ordem
             FROM alternativas_questoes
             WHERE questao_id = ?
             ORDER BY ordem, letra
             """,
-            (
-                questao_id,
-            )
+            (questao_id,),
         ).fetchall()
 
         alternativas_snapshot = [
             {
-                "letra": str(
-                    item[0]
-                ).strip().upper(),
+                "letra": str(item[0]).strip().upper(),
                 "texto": item[1],
-                "correta": bool(
-                    item[2]
-                ),
-                "ordem": int(
-                    item[3]
-                ),
+                "correta": bool(item[2]),
+                "ordem": int(item[3]),
             }
             for item in alternativas_linhas
         ]
 
         gabarito = next(
             (
-                item[
-                    "letra"
-                ]
+                item["letra"]
                 for item in alternativas_snapshot
-                if item[
-                    "correta"
-                ]
+                if item["correta"]
             ),
-            None
+            None,
         )
 
         if not gabarito:
-            raise ValueError(
-                "A questão não possui gabarito válido."
-            )
+            raise ValueError("A questão não possui gabarito válido.")
 
         letras_existentes = {
-            item[
-                "letra"
-            ]
+            item["letra"]
             for item in alternativas_snapshot
         }
 
@@ -12599,22 +14686,13 @@ def registrar_tentativa_questao(
                 raise ValueError(
                     "A alternativa marcada não existe nesta questão."
                 )
+            resultado = 1 if alternativa == gabarito else 0
 
-            resultado = (
-                1
-                if alternativa == gabarito
-                else 0
-            )
-
-        if tempo_segundos is None:
-            tempo_segundos = None
-        else:
-            tempo_segundos = max(
-                0,
-                int(
-                    tempo_segundos
-                )
-            )
+        tempo_segundos = (
+            None
+            if tempo_segundos is None
+            else max(0, int(tempo_segundos))
+        )
 
         cursor = conexao.execute(
             """
@@ -12640,34 +14718,12 @@ def registrar_tentativa_questao(
                 ano_snapshot,
                 fonte_snapshot,
                 dificuldade_snapshot,
-                snapshot_origem
+                snapshot_origem,
+                item_sessao_id
             )
             VALUES (
-                ?,
-                ?,
-                ?,
-                datetime(
-                    'now',
-                    'localtime'
-                ),
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                'resposta'
+                ?, ?, ?, datetime('now', 'localtime'), ?, ?, ?, ?,
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'resposta', ?
             )
             """,
             (
@@ -12686,72 +14742,97 @@ def registrar_tentativa_questao(
                 questao[5],
                 json.dumps(
                     alternativas_snapshot,
-                    ensure_ascii=False
+                    ensure_ascii=False,
                 ),
                 gabarito,
                 questao[6] or "",
                 questao[7] or "",
                 questao[8],
                 questao[9] or "",
-                questao[10]
-                or "Não informada",
-            )
+                questao[10] or "Não informada",
+                item_sessao_id,
+            ),
         )
+
+        if item_sessao_id is not None:
+            conexao.execute(
+                """
+                UPDATE itens_sessao_questoes
+                SET
+                    estado = ?,
+                    finalizada_em = datetime('now', 'localtime'),
+                    tempo_segundos = ?
+                WHERE id = ?
+                """,
+                (
+                    "respondida" if resultado is not None else "pulada",
+                    tempo_segundos,
+                    item_sessao_id,
+                ),
+            )
 
         return {
             "tentativa_id": cursor.lastrowid,
+            "item_sessao_id": item_sessao_id,
             "gabarito": gabarito,
             "alternativa_marcada": alternativa,
             "correta": (
                 None
                 if resultado is None
-                else bool(
-                    resultado
-                )
+                else bool(resultado)
             ),
-            "pulada": (
-                resultado is None
-            ),
+            "pulada": resultado is None,
         }
 
 
-def encerrar_sessao_questoes(
-    sessao_id,
-    concluida=True
-):
+def encerrar_sessao_questoes(sessao_id, concluida=True):
+    sessao_id = int(sessao_id)
+
     with conectar() as conexao:
         cursor = conexao.execute(
             """
             UPDATE sessoes_questoes
             SET
-                encerrado_em = datetime(
-                    'now',
-                    'localtime'
-                ),
+                encerrado_em = datetime('now', 'localtime'),
                 concluida = ?
             WHERE
                 id = ?
                 AND encerrado_em IS NULL
             """,
-            (
-                1 if concluida else 0,
-                int(
-                    sessao_id
-                ),
+            (1 if concluida else 0, sessao_id),
+        )
+
+        if cursor.rowcount > 0:
+            # A questão chegou a ser exibida, mas a sessão terminou sem uma
+            # confirmação/pulo explícito.
+            conexao.execute(
+                """
+                UPDATE itens_sessao_questoes
+                SET
+                    estado = 'nao_respondida',
+                    finalizada_em = datetime('now', 'localtime')
+                WHERE sessao_id = ? AND estado = 'apresentada'
+                """,
+                (sessao_id,),
             )
-        )
 
-        return (
-            cursor.rowcount > 0
-        )
+            # Itens que sequer chegaram à tela ficam distintos dos acima.
+            conexao.execute(
+                """
+                UPDATE itens_sessao_questoes
+                SET
+                    estado = 'nao_alcancada',
+                    finalizada_em = datetime('now', 'localtime')
+                WHERE sessao_id = ? AND estado = 'planejada'
+                """,
+                (sessao_id,),
+            )
+
+        return cursor.rowcount > 0
 
 
-def obter_resumo_sessao_questoes(
-    sessao_id
-):
-    sessao_id = int(
-        sessao_id
-    )
+def obter_resumo_sessao_questoes(sessao_id):
+    sessao_id = int(sessao_id)
 
     with conectar() as conexao:
         sessao = conexao.execute(
@@ -12764,15 +14845,15 @@ def obter_resumo_sessao_questoes(
                 sq.encerrado_em,
                 sq.modo,
                 sq.objetivo,
-                sq.concluida
+                sq.concluida,
+                sq.origem,
+                sq.versao_motor
             FROM sessoes_questoes sq
             LEFT JOIN concursos c
                 ON c.id = sq.concurso_id
             WHERE sq.id = ?
             """,
-            (
-                sessao_id,
-            )
+            (sessao_id,),
         ).fetchone()
 
         if sessao is None:
@@ -12782,63 +14863,38 @@ def obter_resumo_sessao_questoes(
             """
             SELECT
                 COUNT(*) AS processadas,
-                SUM(
-                    CASE
-                        WHEN correta IS NOT NULL
-                        THEN 1
-                        ELSE 0
-                    END
-                ) AS respondidas,
-                SUM(
-                    CASE
-                        WHEN correta = 1
-                        THEN 1
-                        ELSE 0
-                    END
-                ) AS acertos,
-                SUM(
-                    CASE
-                        WHEN correta = 0
-                        THEN 1
-                        ELSE 0
-                    END
-                ) AS erros,
-                SUM(
-                    CASE
-                        WHEN correta IS NULL
-                        THEN 1
-                        ELSE 0
-                    END
-                ) AS puladas,
-                SUM(
-                    CASE
-                        WHEN marcada_duvida = 1
-                        THEN 1
-                        ELSE 0
-                    END
-                ) AS duvidas
+                SUM(CASE WHEN correta IS NOT NULL THEN 1 ELSE 0 END),
+                SUM(CASE WHEN correta = 1 THEN 1 ELSE 0 END),
+                SUM(CASE WHEN correta = 0 THEN 1 ELSE 0 END),
+                SUM(CASE WHEN correta IS NULL THEN 1 ELSE 0 END),
+                SUM(CASE WHEN marcada_duvida = 1 THEN 1 ELSE 0 END)
             FROM tentativas_questoes
             WHERE sessao_id = ?
             """,
-            (
-                sessao_id,
-            )
+            (sessao_id,),
         ).fetchone()
 
-    respondidas = int(
-        resumo[1] or 0
-    )
-    acertos = int(
-        resumo[2] or 0
-    )
+        itens = conexao.execute(
+            """
+            SELECT
+                COUNT(*),
+                SUM(CASE WHEN apresentada_em IS NOT NULL THEN 1 ELSE 0 END),
+                SUM(CASE WHEN estado = 'nao_respondida' THEN 1 ELSE 0 END),
+                SUM(CASE WHEN estado = 'nao_alcancada' THEN 1 ELSE 0 END)
+            FROM itens_sessao_questoes
+            WHERE sessao_id = ?
+            """,
+            (sessao_id,),
+        ).fetchone()
 
+    respondidas = int(resumo[1] or 0)
+    acertos = int(resumo[2] or 0)
     desempenho = (
-        100.0
-        * acertos
-        / respondidas
+        100.0 * acertos / respondidas
         if respondidas > 0
         else None
     )
+    planejadas = int(itens[0] or 0)
 
     return {
         "sessao_id": sessao[0],
@@ -12847,29 +14903,26 @@ def obter_resumo_sessao_questoes(
         "iniciado_em": sessao[3],
         "encerrado_em": sessao[4],
         "modo": sessao[5] or "",
-        "objetivo": int(
-            sessao[6] or 0
+        "objetivo": int(sessao[6] or 0),
+        "concluida": bool(sessao[7]),
+        "origem": sessao[8] or "legado",
+        "versao_motor": sessao[9] or "sessao_legacy",
+        "planejadas": (
+            planejadas
+            if planejadas
+            else int(sessao[6] or 0)
         ),
-        "concluida": bool(
-            sessao[7]
-        ),
-        "processadas": int(
-            resumo[0] or 0
-        ),
+        "apresentadas": int(itens[1] or 0),
+        "nao_respondidas": int(itens[2] or 0),
+        "nao_alcancadas": int(itens[3] or 0),
+        "processadas": int(resumo[0] or 0),
         "respondidas": respondidas,
         "acertos": acertos,
-        "erros": int(
-            resumo[3] or 0
-        ),
-        "puladas": int(
-            resumo[4] or 0
-        ),
-        "duvidas": int(
-            resumo[5] or 0
-        ),
+        "erros": int(resumo[3] or 0),
+        "puladas": int(resumo[4] or 0),
+        "duvidas": int(resumo[5] or 0),
         "desempenho": desempenho,
     }
-
 
 
 
@@ -15172,7 +17225,7 @@ def obter_estatisticas_disciplinas(
 
     resultados = []
 
-    for _, nome_disciplina in listar_disciplinas(
+    for disciplina_id, nome_disciplina in listar_disciplinas(
         concurso_id
     ):
         topicos = listar_topicos(
@@ -15238,12 +17291,12 @@ def obter_estatisticas_disciplinas(
                     ON tc.topico_id = t.id
                     AND tc.concurso_id = ?
                     AND tc.incluido = 1
-                WHERE d.nome = ?
+                WHERE d.id = ?
                 """,
                 (
                     concurso_id,
                     concurso_id,
-                    nome_disciplina
+                    int(disciplina_id)
                 )
             ).fetchone()[0]
 
@@ -17756,6 +19809,12 @@ def registrar_recomendacao_estudo(concurso_id, recomendacao):
         "versao_motor": recomendacao.get("versao_motor"),
         "score_explicado": recomendacao.get("score_explicado") or [],
         "motivos": recomendacao.get("motivos") or [],
+        "evidencias_objetivas": recomendacao.get("evidencias_objetivas") or [],
+        "resumo_decisao": recomendacao.get("resumo_decisao"),
+        "eixos_v5": recomendacao.get("eixos_v5") or {},
+        "pesos_v5": recomendacao.get("pesos_v5") or {},
+        "criterio_selecao_v5": recomendacao.get("criterio_selecao_v5"),
+        "ranking_resumo": recomendacao.get("ranking_resumo") or [],
         "calibracao_aplicada": bool(recomendacao.get("calibracao_aplicada")),
     }
     with conectar() as conexao:
