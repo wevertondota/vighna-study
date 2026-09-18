@@ -536,6 +536,18 @@ class MotorRecomendacaoV5(MotorRecomendacaoV4):
         self.proteger_revisoes_vencidas = bool(proteger_revisoes_vencidas)
 
     def _urgencia_temporal(self, item, origem):
+        componentes_fila = dict(item.get("componentes_fila") or {})
+        detalhes_fila = dict(item.get("detalhes_fila") or {})
+        if componentes_fila:
+            atraso = float(componentes_fila.get("atraso") or 0.0)
+            espacamento = float(componentes_fila.get("espacamento") or 0.0)
+            valor = _limitar(atraso * 0.65 + espacamento * 0.35, 0.0, 100.0)
+            dias = detalhes_fila.get("dias_atraso")
+            motivo = _texto_nao_vazio(detalhes_fila.get("motivo_atraso"))
+            if detalhes_fila.get("motivo_espacamento"):
+                motivo = (motivo + " • " if motivo else "") + _texto_nao_vazio(detalhes_fila.get("motivo_espacamento"))
+            return valor, dias, motivo or "pressão temporal consolidada"
+
         proxima = _texto_nao_vazio(item.get("proxima") or item.get("proxima_revisao"))
         if proxima:
             try:
@@ -559,6 +571,33 @@ class MotorRecomendacaoV5(MotorRecomendacaoV4):
 
     def _necessidade_academica(self, item, adapt=None):
         base = dict(adapt or item or {})
+        componentes_fila = dict(base.get("componentes_fila") or {})
+        if componentes_fila:
+            pesos_fila = dict(base.get("pesos_fila") or {})
+            chaves = ("dominio", "erros_recentes", "queda", "importancia", "cobertura", "revisoes")
+            pesos_ativos = {chave: float(pesos_fila.get(chave) or 0.0) for chave in chaves}
+            total = sum(pesos_ativos.values())
+            if total <= 0:
+                total = float(len(chaves))
+                pesos_ativos = {chave: 1.0 for chave in chaves}
+            valor = sum(
+                float(componentes_fila.get(chave) or 0.0) * pesos_ativos[chave] / total
+                for chave in chaves
+            )
+            sinais = []
+            rotulos = {
+                "dominio": "domínio",
+                "erros_recentes": "erros recentes",
+                "queda": "queda",
+                "importancia": "importância",
+                "cobertura": "cobertura",
+                "revisoes": "número de revisões",
+            }
+            for chave in chaves:
+                if float(componentes_fila.get(chave) or 0.0) >= 60:
+                    sinais.append(rotulos[chave])
+            return _limitar(valor, 0.0, 100.0), sinais or ["prioridade consolidada"]
+
         comp = dict(base.get("componentes") or {})
         if comp:
             # Exclui urgência do cálculo acadêmico; ela já possui eixo próprio.
@@ -624,7 +663,8 @@ class MotorRecomendacaoV5(MotorRecomendacaoV4):
                 return
             vistos.add(chave)
             adapt = adapt_por_topico.get(tid, {}) if tid is not None else {}
-            urg, dias_atraso, motivo_urg = self._urgencia_temporal(item if origem == "revisao" else adapt, origem)
+            base_temporal = ({**adapt, **item} if origem == "revisao" else adapt)
+            urg, dias_atraso, motivo_urg = self._urgencia_temporal(base_temporal, origem)
             nec, sinais = self._necessidade_academica(item, adapt)
             mom, partes_momento, motivos_momento = self._adequacao_momento({**item, "origem_candidato": origem}, adapt)
             p = self.pesos_v5
@@ -641,6 +681,10 @@ class MotorRecomendacaoV5(MotorRecomendacaoV4):
                 "necessidade": round(nec, 1),
                 "momento": round(mom, 1),
                 "score_total": round(score, 2),
+                "score_fila": round(float(adapt.get("score_fila") or item.get("score_fila") or 0.0), 2),
+                "componentes_fila": dict(adapt.get("componentes_fila") or item.get("componentes_fila") or {}),
+                "contribuicoes_fila": dict(adapt.get("contribuicoes_fila") or item.get("contribuicoes_fila") or {}),
+                "pesos_fila": dict(adapt.get("pesos_fila") or item.get("pesos_fila") or {}),
                 "dias_atraso": dias_atraso,
                 "faixa_temporal_protegida": protegido,
                 "motivo_urgencia": motivo_urg,
@@ -662,6 +706,149 @@ class MotorRecomendacaoV5(MotorRecomendacaoV4):
         for pos, c in enumerate(candidatos, 1):
             c["posicao_global"] = pos
         return candidatos
+
+    def _evidencias_objetivas(self, candidato, ranking, fila, adapt):
+        """Monta fatos concretos e auditáveis usados para explicar a recomendação."""
+        evidencias = []
+
+        def adicionar(chave, rotulo, valor, detalhe="", tom="neutral"):
+            if valor in (None, ""):
+                return
+            evidencias.append({
+                "chave": str(chave),
+                "rotulo": str(rotulo),
+                "valor": str(valor),
+                "detalhe": str(detalhe or ""),
+                "tom": str(tom or "neutral"),
+            })
+
+        atraso = candidato.get("dias_atraso")
+        if atraso is not None:
+            try:
+                atraso = int(atraso)
+            except Exception:
+                atraso = None
+        vencidas = sum(
+            1 for item in ranking
+            if item.get("origem_candidato") == "revisao"
+            and item.get("dias_atraso") is not None
+            and int(item.get("dias_atraso") or 0) > 0
+        )
+        hoje = sum(
+            1 for item in ranking
+            if item.get("origem_candidato") == "revisao"
+            and item.get("dias_atraso") is not None
+            and int(item.get("dias_atraso") or 0) == 0
+        )
+        if atraso is not None and atraso > 0:
+            adicionar("atraso", "Revisão atrasada", f"{atraso} dia(s)", "Prazo específico deste tópico.", "alert")
+            if vencidas > 0:
+                adicionar("fila_vencida", "Revisões vencidas", vencidas, "Quantidade de revisões vencidas na fila considerada.", "alert")
+        elif atraso == 0:
+            detalhe = f"{hoje} revisão(ões) prevista(s) para hoje." if hoje > 1 else "Prazo de revisão chegou hoje."
+            adicionar("revisao_hoje", "Revisão prevista", "Hoje", detalhe, "alert")
+        elif vencidas > 0:
+            adicionar("fila_vencida", "Revisões vencidas", vencidas, "A faixa temporal vencida recebeu proteção no ranking.", "alert")
+
+        dominio = adapt.get("dominio")
+        if dominio is not None:
+            try:
+                dominio = float(dominio)
+                adicionar(
+                    "dominio", "Domínio do tópico", f"{dominio:.0f}%",
+                    str(adapt.get("nivel_dominio") or "Índice de Domínio V2"),
+                    "attention" if dominio < 70 else "ok",
+                )
+            except Exception:
+                pass
+
+        recente = adapt.get("desempenho_recente")
+        base = adapt.get("desempenho_base")
+        tentativas = int(adapt.get("tentativas_historicas") or 0)
+        try:
+            recente_f = float(recente) if recente is not None else None
+            base_f = float(base) if base is not None else None
+        except Exception:
+            recente_f = base_f = None
+        if recente_f is not None and base_f is not None and tentativas >= 5:
+            queda = base_f - recente_f
+            if queda >= 5.0:
+                adicionar(
+                    "queda", "Queda recente", f"{queda:.0f} p.p.",
+                    f"Recente {recente_f:.0f}% versus base {base_f:.0f}%.",
+                    "alert" if queda >= 15 else "attention",
+                )
+            elif recente_f > 0:
+                adicionar(
+                    "desempenho_recente", "Desempenho recente", f"{recente_f:.0f}%",
+                    f"Base histórica operacional: {base_f:.0f}%.",
+                    "attention" if recente_f < 70 else "ok",
+                )
+        elif fila.get("percentual") is not None:
+            try:
+                perc = float(fila.get("percentual"))
+                adicionar("ultimo_desempenho", "Último desempenho", f"{perc:.0f}%", "Resultado registrado na fila de revisão.", "attention" if perc < 70 else "ok")
+            except Exception:
+                pass
+
+        dias_sem = adapt.get("dias_desde_ultima")
+        if dias_sem is not None:
+            try:
+                dias_sem = int(dias_sem)
+                if dias_sem > 0:
+                    adicionar(
+                        "sem_pratica", "Sem prática", f"{dias_sem} dia(s)",
+                        "Tempo desde a última resposta interna neste tópico.",
+                        "attention" if dias_sem >= 14 else "neutral",
+                    )
+            except Exception:
+                pass
+
+        importancia = adapt.get("importancia", fila.get("importancia"))
+        if importancia is not None:
+            try:
+                importancia = max(1, min(5, int(importancia)))
+                rot = "Importância alta" if importancia >= 4 else "Importância"
+                adicionar(
+                    "importancia", rot, f"{importancia}/5",
+                    "Peso configurado para este tópico no perfil ativo.",
+                    "ok" if importancia >= 4 else "neutral",
+                )
+            except Exception:
+                pass
+
+        criticas = int(adapt.get("criticas") or 0)
+        recorrentes = int(adapt.get("recorrentes") or 0)
+        recuperacao = int(adapt.get("recuperacao") or 0)
+        erros_abertos = criticas + recorrentes + recuperacao
+        if erros_abertos > 0:
+            adicionar(
+                "erros", "Erros abertos", erros_abertos,
+                f"{criticas} crítico(s) • {recorrentes} recorrente(s) • {recuperacao} em recuperação.",
+                "alert" if (criticas or recorrentes) else "attention",
+            )
+
+        cobertura = adapt.get("cobertura")
+        if cobertura is not None:
+            try:
+                cobertura = float(cobertura)
+                if cobertura < 70.0:
+                    adicionar(
+                        "cobertura", "Cobertura", f"{cobertura:.0f}%",
+                        "Parte do banco ativo deste tópico já foi efetivamente praticada.",
+                        "attention",
+                    )
+            except Exception:
+                pass
+
+        # Mantém a explicação curta: fatos de maior valor diagnóstico primeiro.
+        prioridade = {
+            "atraso": 0, "revisao_hoje": 0, "fila_vencida": 0,
+            "dominio": 1, "queda": 2, "desempenho_recente": 2, "ultimo_desempenho": 2,
+            "sem_pratica": 3, "importancia": 4, "erros": 5, "cobertura": 6,
+        }
+        evidencias.sort(key=lambda item: prioridade.get(item.get("chave"), 99))
+        return evidencias[:6]
 
     def _finalizar_v5(self, candidato, ranking):
         origem = candidato["origem_candidato"]
@@ -693,6 +880,7 @@ class MotorRecomendacaoV5(MotorRecomendacaoV4):
             {"rotulo": f"necessidade ({self.pesos_v5['necessidade']:.0f}%)", "pontos": round(candidato['necessidade']*self.pesos_v5['necessidade']/100.0, 2)},
             {"rotulo": f"momento ({self.pesos_v5['momento']:.0f}%)", "pontos": round(candidato['momento']*self.pesos_v5['momento']/100.0, 2)},
         ]
+        evidencias_objetivas = self._evidencias_objetivas(candidato, ranking, fila, adapt)
         base = self._finalizar_recomendacao(
             origem=origem,
             selo=(f"PRIORIDADE {_texto_nao_vazio(fila.get('nivel')).upper() or 'TEMPORAL'}" if origem == "revisao" else "PRIORIDADE ESTRATÉGICA"),
@@ -713,12 +901,30 @@ class MotorRecomendacaoV5(MotorRecomendacaoV4):
             "pesos_v5": {k: round(v, 1) for k, v in self.pesos_v5.items()},
             "faixa_temporal_protegida": bool(candidato.get("faixa_temporal_protegida")),
             "dias_atraso": candidato.get("dias_atraso"),
-            "ranking_resumo": [{k: c.get(k) for k in ("posicao_global","disciplina","topico_id","topico","urgencia","necessidade","momento","score_total","faixa_temporal_protegida","origem_candidato")} for c in ranking[:8]],
+            "evidencias_objetivas": evidencias_objetivas,
+            "score_fila": float(candidato.get("score_fila") or 0.0),
+            "componentes_fila": dict(candidato.get("componentes_fila") or {}),
+            "contribuicoes_fila": dict(candidato.get("contribuicoes_fila") or {}),
+            "pesos_fila": dict(candidato.get("pesos_fila") or {}),
+            "ranking_resumo": [
+                {
+                    **{k: c.get(k) for k in ("posicao_global","disciplina","topico_id","topico","urgencia","necessidade","momento","score_total","score_fila","faixa_temporal_protegida","origem_candidato")},
+                    "selecionado": bool(c.get("topico_id") == tid and c.get("origem_candidato") == origem),
+                    "motivo_urgencia": c.get("motivo_urgencia"),
+                }
+                for c in ranking[:8]
+            ],
         })
         if self.proteger_revisoes_vencidas and any(c.get("faixa_temporal_protegida") for c in ranking):
             base["criterio_selecao_v5"] = "Há revisão vencida ou prevista para hoje; o Vighna protegeu essa faixa temporal e usou necessidade/momento para ordenar dentro dela."
         else:
             base["criterio_selecao_v5"] = "Seleção pelo equilíbrio entre urgência, necessidade acadêmica e adequação ao momento."
+
+        fatos = [f"{item['rotulo']}: {item['valor']}" for item in evidencias_objetivas[:4]]
+        if fatos:
+            base["resumo_decisao"] = " • ".join(fatos)
+        else:
+            base["resumo_decisao"] = base["criterio_selecao_v5"]
         return base
 
     def montar(self):
