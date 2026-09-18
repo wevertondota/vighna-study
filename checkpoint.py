@@ -90,6 +90,10 @@ ARQUIVOS_IGNORADOS = {
     ".env",
     "estudos.db-shm",
     "estudos.db-wal",
+    # Artefatos legados/temporários não são fontes normativas do projeto.
+    "MANIFEST_SHA256.txt",
+    "PASSO4_DIFF_ATUAL.patch",
+    "PASSO4_STATUS_ATUAL.txt",
     # Metadado interno de um checkpoint extraído na raiz do projeto.
     # Ele é recriado a cada novo ZIP e nunca deve entrar no inventário,
     # senão o ZIP acaba com duas entradas de checkpoint_manifest.json.
@@ -118,6 +122,7 @@ FONTES_NUCLEO_ATUAL = {
     "jornada.py",
     "evolucao.py",
     "laboratorio.py",
+    "fila_candidata.py",
     "versao.py",
     "statistics_core/__init__.py",
     "statistics_core/models.py",

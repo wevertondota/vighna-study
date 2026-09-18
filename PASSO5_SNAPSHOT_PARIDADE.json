@@ -1,0 +1,1925 @@
+{
+  "snapshot_type": "queue_shadow_parity",
+  "generated_at": "2026-09-18T12:39:13-03:00",
+  "concurso_id": 40,
+  "filters": {
+    "disciplina_id": null,
+    "topicos_ids": null
+  },
+  "active_queue_version": "fila_inteligente_v3",
+  "candidate_queue_version": "fila_candidate_shadow_v1",
+  "metric_version": "1",
+  "used_for_queue_order": false,
+  "topics_evaluated": 6,
+  "active_order": [
+    {
+      "position": 1,
+      "topico_id": 27,
+      "score": 67.0
+    },
+    {
+      "position": 2,
+      "topico_id": 51,
+      "score": 63.8
+    },
+    {
+      "position": 3,
+      "topico_id": 31,
+      "score": 57.7
+    },
+    {
+      "position": 4,
+      "topico_id": 32,
+      "score": 57.7
+    },
+    {
+      "position": 5,
+      "topico_id": 74,
+      "score": 43.0
+    },
+    {
+      "position": 6,
+      "topico_id": 23,
+      "score": 24.4
+    }
+  ],
+  "candidate_order": [
+    {
+      "position": 1,
+      "topico_id": 27,
+      "score": 67.0
+    },
+    {
+      "position": 2,
+      "topico_id": 51,
+      "score": 63.8
+    },
+    {
+      "position": 3,
+      "topico_id": 31,
+      "score": 57.7
+    },
+    {
+      "position": 4,
+      "topico_id": 32,
+      "score": 57.7
+    },
+    {
+      "position": 5,
+      "topico_id": 74,
+      "score": 43.0
+    },
+    {
+      "position": 6,
+      "topico_id": 23,
+      "score": 25.0
+    }
+  ],
+  "summary": {
+    "topics_evaluated": 6,
+    "same_position_count": 6,
+    "same_position_rate": 100.0,
+    "mean_absolute_position_delta": 0.0,
+    "largest_rise": {
+      "topico_id": 27,
+      "disciplina": "Direito Penal",
+      "topico": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL",
+      "active_position": 1,
+      "active_score": 67.0,
+      "candidate_position": 1,
+      "candidate_score": 67.0,
+      "position_delta": 0,
+      "score_delta": 0.0,
+      "active_components": {
+        "atraso": 100.0,
+        "dominio": 100.0,
+        "erros_recentes": 0.0,
+        "queda": 0.0,
+        "importancia": 100.0,
+        "cobertura": 100.0,
+        "revisoes": 78.0,
+        "espacamento": 50.0
+      },
+      "candidate_components": {
+        "atraso": 100.0,
+        "espacamento": 50.0,
+        "importancia": 100.0,
+        "dominio": 100.0,
+        "erros_recentes": 0.0,
+        "queda": 0.0,
+        "cobertura": 100.0,
+        "revisoes": 78.0
+      },
+      "candidate_component_details": {
+        "atraso": {
+          "raw_value": 100.0,
+          "normalized_score": 100.0,
+          "weight": 18.0,
+          "contribution": 18.0,
+          "source": "operational_schedule_v3",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "espacamento": {
+          "raw_value": 50.0,
+          "normalized_score": 50.0,
+          "weight": 9.0,
+          "contribution": 4.5,
+          "source": "operational_spacing_v3",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "importancia": {
+          "raw_value": 100.0,
+          "normalized_score": 100.0,
+          "weight": 12.0,
+          "contribution": 12.0,
+          "source": "user_importance_configuration",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "dominio": {
+          "raw_value": null,
+          "normalized_score": 100.0,
+          "weight": 18.0,
+          "contribution": 18.0,
+          "source": "fallback.legacy_domain_v2",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "fallback": {
+            "reason": "official_mastery_insufficient_evidence",
+            "source": "legacy_domain_v2",
+            "value": 0.0
+          }
+        },
+        "erros_recentes": {
+          "raw_value": {
+            "error_control": 100.0,
+            "critical": 0,
+            "recurring": 0,
+            "recovering": 0,
+            "recovered": 0
+          },
+          "normalized_score": 0.0,
+          "weight": 15.0,
+          "contribution": 0.0,
+          "source": "statistics_core.mastery_score.error_control",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "fallback": null
+        },
+        "queda": {
+          "raw_value": null,
+          "normalized_score": 0.0,
+          "weight": 12.0,
+          "contribution": 0.0,
+          "source": "fallback.fila_inteligente_v3.legacy_decline",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "fallback": {
+            "reason": "official_trend_insufficient_window",
+            "source": "fila_inteligente_v3.legacy_decline",
+            "value": 0.0
+          }
+        },
+        "cobertura": {
+          "raw_value": 0.0,
+          "normalized_score": 100.0,
+          "weight": 9.0,
+          "contribution": 9.0,
+          "source": "statistics_core.question_coverage_rate",
+          "state": "ok",
+          "metric_version": "1",
+          "fallback": null
+        },
+        "revisoes": {
+          "raw_value": 0,
+          "normalized_score": 78.0,
+          "weight": 7.0,
+          "contribution": 5.46,
+          "source": "fallback.fila_inteligente_v3.legacy_review_count",
+          "state": "ok",
+          "metric_version": "1",
+          "fallback": {
+            "reason": "legacy_initial_or_unqualified_review_count",
+            "source": "fila_inteligente_v3.legacy_review_count",
+            "value": 1,
+            "official_value": 0
+          }
+        }
+      },
+      "component_deltas": {
+        "atraso": 0.0,
+        "espacamento": 0.0,
+        "importancia": 0.0,
+        "dominio": 0.0,
+        "erros_recentes": 0.0,
+        "queda": 0.0,
+        "cobertura": 0.0,
+        "revisoes": 0.0
+      },
+      "active_main_reason": "atraso da revisão",
+      "candidate_main_reason": "atraso da revisao",
+      "official_metrics": {
+        "mastery_score": {
+          "value": null,
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "warnings": [
+            "low_temporal_evidence",
+            "legacy_local_time"
+          ]
+        },
+        "evidence_level": {
+          "value": "insufficient",
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        },
+        "question_coverage_rate": {
+          "value": 0.0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": [
+            "current_catalog_snapshot"
+          ]
+        },
+        "performance_trend": {
+          "value": "insufficient_data",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "warnings": [
+            "legacy_local_time"
+          ]
+        },
+        "completed_review_count": {
+          "value": 0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        },
+        "recent_performance_rate": {
+          "value": null,
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "warnings": [
+            "legacy_local_time"
+          ]
+        },
+        "critical_open_error_count": {
+          "value": 0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        }
+      },
+      "evidence_level": "insufficient",
+      "fallbacks": [
+        {
+          "component": "dominio",
+          "reason": "official_mastery_insufficient_evidence",
+          "source": "legacy_domain_v2",
+          "value": 0.0
+        },
+        {
+          "component": "queda",
+          "reason": "official_trend_insufficient_window",
+          "source": "fila_inteligente_v3.legacy_decline",
+          "value": 0.0
+        },
+        {
+          "component": "revisoes",
+          "reason": "legacy_initial_or_unqualified_review_count",
+          "source": "fila_inteligente_v3.legacy_review_count",
+          "value": 1,
+          "official_value": 0
+        }
+      ],
+      "warnings": [],
+      "relevant_differences": [],
+      "active_queue_version": "fila_inteligente_v3",
+      "candidate_queue_version": "fila_candidate_shadow_v1",
+      "used_for_queue_order": false
+    },
+    "largest_fall": {
+      "topico_id": 27,
+      "disciplina": "Direito Penal",
+      "topico": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL",
+      "active_position": 1,
+      "active_score": 67.0,
+      "candidate_position": 1,
+      "candidate_score": 67.0,
+      "position_delta": 0,
+      "score_delta": 0.0,
+      "active_components": {
+        "atraso": 100.0,
+        "dominio": 100.0,
+        "erros_recentes": 0.0,
+        "queda": 0.0,
+        "importancia": 100.0,
+        "cobertura": 100.0,
+        "revisoes": 78.0,
+        "espacamento": 50.0
+      },
+      "candidate_components": {
+        "atraso": 100.0,
+        "espacamento": 50.0,
+        "importancia": 100.0,
+        "dominio": 100.0,
+        "erros_recentes": 0.0,
+        "queda": 0.0,
+        "cobertura": 100.0,
+        "revisoes": 78.0
+      },
+      "candidate_component_details": {
+        "atraso": {
+          "raw_value": 100.0,
+          "normalized_score": 100.0,
+          "weight": 18.0,
+          "contribution": 18.0,
+          "source": "operational_schedule_v3",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "espacamento": {
+          "raw_value": 50.0,
+          "normalized_score": 50.0,
+          "weight": 9.0,
+          "contribution": 4.5,
+          "source": "operational_spacing_v3",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "importancia": {
+          "raw_value": 100.0,
+          "normalized_score": 100.0,
+          "weight": 12.0,
+          "contribution": 12.0,
+          "source": "user_importance_configuration",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "dominio": {
+          "raw_value": null,
+          "normalized_score": 100.0,
+          "weight": 18.0,
+          "contribution": 18.0,
+          "source": "fallback.legacy_domain_v2",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "fallback": {
+            "reason": "official_mastery_insufficient_evidence",
+            "source": "legacy_domain_v2",
+            "value": 0.0
+          }
+        },
+        "erros_recentes": {
+          "raw_value": {
+            "error_control": 100.0,
+            "critical": 0,
+            "recurring": 0,
+            "recovering": 0,
+            "recovered": 0
+          },
+          "normalized_score": 0.0,
+          "weight": 15.0,
+          "contribution": 0.0,
+          "source": "statistics_core.mastery_score.error_control",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "fallback": null
+        },
+        "queda": {
+          "raw_value": null,
+          "normalized_score": 0.0,
+          "weight": 12.0,
+          "contribution": 0.0,
+          "source": "fallback.fila_inteligente_v3.legacy_decline",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "fallback": {
+            "reason": "official_trend_insufficient_window",
+            "source": "fila_inteligente_v3.legacy_decline",
+            "value": 0.0
+          }
+        },
+        "cobertura": {
+          "raw_value": 0.0,
+          "normalized_score": 100.0,
+          "weight": 9.0,
+          "contribution": 9.0,
+          "source": "statistics_core.question_coverage_rate",
+          "state": "ok",
+          "metric_version": "1",
+          "fallback": null
+        },
+        "revisoes": {
+          "raw_value": 0,
+          "normalized_score": 78.0,
+          "weight": 7.0,
+          "contribution": 5.46,
+          "source": "fallback.fila_inteligente_v3.legacy_review_count",
+          "state": "ok",
+          "metric_version": "1",
+          "fallback": {
+            "reason": "legacy_initial_or_unqualified_review_count",
+            "source": "fila_inteligente_v3.legacy_review_count",
+            "value": 1,
+            "official_value": 0
+          }
+        }
+      },
+      "component_deltas": {
+        "atraso": 0.0,
+        "espacamento": 0.0,
+        "importancia": 0.0,
+        "dominio": 0.0,
+        "erros_recentes": 0.0,
+        "queda": 0.0,
+        "cobertura": 0.0,
+        "revisoes": 0.0
+      },
+      "active_main_reason": "atraso da revisão",
+      "candidate_main_reason": "atraso da revisao",
+      "official_metrics": {
+        "mastery_score": {
+          "value": null,
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "warnings": [
+            "low_temporal_evidence",
+            "legacy_local_time"
+          ]
+        },
+        "evidence_level": {
+          "value": "insufficient",
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        },
+        "question_coverage_rate": {
+          "value": 0.0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": [
+            "current_catalog_snapshot"
+          ]
+        },
+        "performance_trend": {
+          "value": "insufficient_data",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "warnings": [
+            "legacy_local_time"
+          ]
+        },
+        "completed_review_count": {
+          "value": 0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        },
+        "recent_performance_rate": {
+          "value": null,
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "warnings": [
+            "legacy_local_time"
+          ]
+        },
+        "critical_open_error_count": {
+          "value": 0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        }
+      },
+      "evidence_level": "insufficient",
+      "fallbacks": [
+        {
+          "component": "dominio",
+          "reason": "official_mastery_insufficient_evidence",
+          "source": "legacy_domain_v2",
+          "value": 0.0
+        },
+        {
+          "component": "queda",
+          "reason": "official_trend_insufficient_window",
+          "source": "fila_inteligente_v3.legacy_decline",
+          "value": 0.0
+        },
+        {
+          "component": "revisoes",
+          "reason": "legacy_initial_or_unqualified_review_count",
+          "source": "fila_inteligente_v3.legacy_review_count",
+          "value": 1,
+          "official_value": 0
+        }
+      ],
+      "warnings": [],
+      "relevant_differences": [],
+      "active_queue_version": "fila_inteligente_v3",
+      "candidate_queue_version": "fila_candidate_shadow_v1",
+      "used_for_queue_order": false
+    },
+    "top_1": {
+      "requested_n": 1,
+      "effective_n": 1,
+      "active": [
+        27
+      ],
+      "candidate": [
+        27
+      ],
+      "intersection_count": 1,
+      "intersection_rate": 100.0
+    },
+    "top_3": {
+      "requested_n": 3,
+      "effective_n": 3,
+      "active": [
+        27,
+        51,
+        31
+      ],
+      "candidate": [
+        27,
+        51,
+        31
+      ],
+      "intersection_count": 3,
+      "intersection_rate": 100.0
+    },
+    "top_5": {
+      "requested_n": 5,
+      "effective_n": 5,
+      "active": [
+        27,
+        51,
+        31,
+        32,
+        74
+      ],
+      "candidate": [
+        27,
+        51,
+        31,
+        32,
+        74
+      ],
+      "intersection_count": 5,
+      "intersection_rate": 100.0
+    },
+    "top_10": {
+      "requested_n": 10,
+      "effective_n": 6,
+      "active": [
+        27,
+        51,
+        31,
+        32,
+        74,
+        23
+      ],
+      "candidate": [
+        27,
+        51,
+        31,
+        32,
+        74,
+        23
+      ],
+      "intersection_count": 6,
+      "intersection_rate": 100.0
+    },
+    "fallback_topic_count": 6,
+    "fallback_component_count": 15
+  },
+  "comparisons": [
+    {
+      "topico_id": 27,
+      "disciplina": "Direito Penal",
+      "topico": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL",
+      "active_position": 1,
+      "active_score": 67.0,
+      "candidate_position": 1,
+      "candidate_score": 67.0,
+      "position_delta": 0,
+      "score_delta": 0.0,
+      "active_components": {
+        "atraso": 100.0,
+        "dominio": 100.0,
+        "erros_recentes": 0.0,
+        "queda": 0.0,
+        "importancia": 100.0,
+        "cobertura": 100.0,
+        "revisoes": 78.0,
+        "espacamento": 50.0
+      },
+      "candidate_components": {
+        "atraso": 100.0,
+        "espacamento": 50.0,
+        "importancia": 100.0,
+        "dominio": 100.0,
+        "erros_recentes": 0.0,
+        "queda": 0.0,
+        "cobertura": 100.0,
+        "revisoes": 78.0
+      },
+      "candidate_component_details": {
+        "atraso": {
+          "raw_value": 100.0,
+          "normalized_score": 100.0,
+          "weight": 18.0,
+          "contribution": 18.0,
+          "source": "operational_schedule_v3",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "espacamento": {
+          "raw_value": 50.0,
+          "normalized_score": 50.0,
+          "weight": 9.0,
+          "contribution": 4.5,
+          "source": "operational_spacing_v3",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "importancia": {
+          "raw_value": 100.0,
+          "normalized_score": 100.0,
+          "weight": 12.0,
+          "contribution": 12.0,
+          "source": "user_importance_configuration",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "dominio": {
+          "raw_value": null,
+          "normalized_score": 100.0,
+          "weight": 18.0,
+          "contribution": 18.0,
+          "source": "fallback.legacy_domain_v2",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "fallback": {
+            "reason": "official_mastery_insufficient_evidence",
+            "source": "legacy_domain_v2",
+            "value": 0.0
+          }
+        },
+        "erros_recentes": {
+          "raw_value": {
+            "error_control": 100.0,
+            "critical": 0,
+            "recurring": 0,
+            "recovering": 0,
+            "recovered": 0
+          },
+          "normalized_score": 0.0,
+          "weight": 15.0,
+          "contribution": 0.0,
+          "source": "statistics_core.mastery_score.error_control",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "fallback": null
+        },
+        "queda": {
+          "raw_value": null,
+          "normalized_score": 0.0,
+          "weight": 12.0,
+          "contribution": 0.0,
+          "source": "fallback.fila_inteligente_v3.legacy_decline",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "fallback": {
+            "reason": "official_trend_insufficient_window",
+            "source": "fila_inteligente_v3.legacy_decline",
+            "value": 0.0
+          }
+        },
+        "cobertura": {
+          "raw_value": 0.0,
+          "normalized_score": 100.0,
+          "weight": 9.0,
+          "contribution": 9.0,
+          "source": "statistics_core.question_coverage_rate",
+          "state": "ok",
+          "metric_version": "1",
+          "fallback": null
+        },
+        "revisoes": {
+          "raw_value": 0,
+          "normalized_score": 78.0,
+          "weight": 7.0,
+          "contribution": 5.46,
+          "source": "fallback.fila_inteligente_v3.legacy_review_count",
+          "state": "ok",
+          "metric_version": "1",
+          "fallback": {
+            "reason": "legacy_initial_or_unqualified_review_count",
+            "source": "fila_inteligente_v3.legacy_review_count",
+            "value": 1,
+            "official_value": 0
+          }
+        }
+      },
+      "component_deltas": {
+        "atraso": 0.0,
+        "espacamento": 0.0,
+        "importancia": 0.0,
+        "dominio": 0.0,
+        "erros_recentes": 0.0,
+        "queda": 0.0,
+        "cobertura": 0.0,
+        "revisoes": 0.0
+      },
+      "active_main_reason": "atraso da revisão",
+      "candidate_main_reason": "atraso da revisao",
+      "official_metrics": {
+        "mastery_score": {
+          "value": null,
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "warnings": [
+            "low_temporal_evidence",
+            "legacy_local_time"
+          ]
+        },
+        "evidence_level": {
+          "value": "insufficient",
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        },
+        "question_coverage_rate": {
+          "value": 0.0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": [
+            "current_catalog_snapshot"
+          ]
+        },
+        "performance_trend": {
+          "value": "insufficient_data",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "warnings": [
+            "legacy_local_time"
+          ]
+        },
+        "completed_review_count": {
+          "value": 0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        },
+        "recent_performance_rate": {
+          "value": null,
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "warnings": [
+            "legacy_local_time"
+          ]
+        },
+        "critical_open_error_count": {
+          "value": 0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        }
+      },
+      "evidence_level": "insufficient",
+      "fallbacks": [
+        {
+          "component": "dominio",
+          "reason": "official_mastery_insufficient_evidence",
+          "source": "legacy_domain_v2",
+          "value": 0.0
+        },
+        {
+          "component": "queda",
+          "reason": "official_trend_insufficient_window",
+          "source": "fila_inteligente_v3.legacy_decline",
+          "value": 0.0
+        },
+        {
+          "component": "revisoes",
+          "reason": "legacy_initial_or_unqualified_review_count",
+          "source": "fila_inteligente_v3.legacy_review_count",
+          "value": 1,
+          "official_value": 0
+        }
+      ],
+      "warnings": [],
+      "relevant_differences": [],
+      "active_queue_version": "fila_inteligente_v3",
+      "candidate_queue_version": "fila_candidate_shadow_v1",
+      "used_for_queue_order": false
+    },
+    {
+      "topico_id": 51,
+      "disciplina": "CTB",
+      "topico": "Capítulo I: Disposições Preliminares",
+      "active_position": 2,
+      "active_score": 63.8,
+      "candidate_position": 2,
+      "candidate_score": 63.8,
+      "position_delta": 0,
+      "score_delta": 0.0,
+      "active_components": {
+        "atraso": 82.5,
+        "dominio": 100.0,
+        "erros_recentes": 0.0,
+        "queda": 0.0,
+        "importancia": 100.0,
+        "cobertura": 100.0,
+        "revisoes": 78.0,
+        "espacamento": 50.0
+      },
+      "candidate_components": {
+        "atraso": 82.5,
+        "espacamento": 50.0,
+        "importancia": 100.0,
+        "dominio": 100.0,
+        "erros_recentes": 0.0,
+        "queda": 0.0,
+        "cobertura": 100.0,
+        "revisoes": 78.0
+      },
+      "candidate_component_details": {
+        "atraso": {
+          "raw_value": 82.5,
+          "normalized_score": 82.5,
+          "weight": 18.0,
+          "contribution": 14.85,
+          "source": "operational_schedule_v3",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "espacamento": {
+          "raw_value": 50.0,
+          "normalized_score": 50.0,
+          "weight": 9.0,
+          "contribution": 4.5,
+          "source": "operational_spacing_v3",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "importancia": {
+          "raw_value": 100.0,
+          "normalized_score": 100.0,
+          "weight": 12.0,
+          "contribution": 12.0,
+          "source": "user_importance_configuration",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "dominio": {
+          "raw_value": null,
+          "normalized_score": 100.0,
+          "weight": 18.0,
+          "contribution": 18.0,
+          "source": "fallback.legacy_domain_v2",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "fallback": {
+            "reason": "official_mastery_insufficient_evidence",
+            "source": "legacy_domain_v2",
+            "value": 0.0
+          }
+        },
+        "erros_recentes": {
+          "raw_value": {
+            "error_control": 100.0,
+            "critical": 0,
+            "recurring": 0,
+            "recovering": 0,
+            "recovered": 0
+          },
+          "normalized_score": 0.0,
+          "weight": 15.0,
+          "contribution": 0.0,
+          "source": "statistics_core.mastery_score.error_control",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "fallback": null
+        },
+        "queda": {
+          "raw_value": null,
+          "normalized_score": 0.0,
+          "weight": 12.0,
+          "contribution": 0.0,
+          "source": "fallback.fila_inteligente_v3.legacy_decline",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "fallback": {
+            "reason": "official_trend_insufficient_window",
+            "source": "fila_inteligente_v3.legacy_decline",
+            "value": 0.0
+          }
+        },
+        "cobertura": {
+          "raw_value": 0.0,
+          "normalized_score": 100.0,
+          "weight": 9.0,
+          "contribution": 9.0,
+          "source": "statistics_core.question_coverage_rate",
+          "state": "ok",
+          "metric_version": "1",
+          "fallback": null
+        },
+        "revisoes": {
+          "raw_value": 0,
+          "normalized_score": 78.0,
+          "weight": 7.0,
+          "contribution": 5.46,
+          "source": "fallback.fila_inteligente_v3.legacy_review_count",
+          "state": "ok",
+          "metric_version": "1",
+          "fallback": {
+            "reason": "legacy_initial_or_unqualified_review_count",
+            "source": "fila_inteligente_v3.legacy_review_count",
+            "value": 1,
+            "official_value": 0
+          }
+        }
+      },
+      "component_deltas": {
+        "atraso": 0.0,
+        "espacamento": 0.0,
+        "importancia": 0.0,
+        "dominio": 0.0,
+        "erros_recentes": 0.0,
+        "queda": 0.0,
+        "cobertura": 0.0,
+        "revisoes": 0.0
+      },
+      "active_main_reason": "domínio baixo",
+      "candidate_main_reason": "dominio baixo",
+      "official_metrics": {
+        "mastery_score": {
+          "value": null,
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "warnings": [
+            "low_temporal_evidence",
+            "legacy_local_time"
+          ]
+        },
+        "evidence_level": {
+          "value": "insufficient",
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        },
+        "question_coverage_rate": {
+          "value": 0.0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": [
+            "current_catalog_snapshot"
+          ]
+        },
+        "performance_trend": {
+          "value": "insufficient_data",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "warnings": [
+            "legacy_local_time"
+          ]
+        },
+        "completed_review_count": {
+          "value": 0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        },
+        "recent_performance_rate": {
+          "value": null,
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "warnings": [
+            "legacy_local_time"
+          ]
+        },
+        "critical_open_error_count": {
+          "value": 0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        }
+      },
+      "evidence_level": "insufficient",
+      "fallbacks": [
+        {
+          "component": "dominio",
+          "reason": "official_mastery_insufficient_evidence",
+          "source": "legacy_domain_v2",
+          "value": 0.0
+        },
+        {
+          "component": "queda",
+          "reason": "official_trend_insufficient_window",
+          "source": "fila_inteligente_v3.legacy_decline",
+          "value": 0.0
+        },
+        {
+          "component": "revisoes",
+          "reason": "legacy_initial_or_unqualified_review_count",
+          "source": "fila_inteligente_v3.legacy_review_count",
+          "value": 1,
+          "official_value": 0
+        }
+      ],
+      "warnings": [],
+      "relevant_differences": [],
+      "active_queue_version": "fila_inteligente_v3",
+      "candidate_queue_version": "fila_candidate_shadow_v1",
+      "used_for_queue_order": false
+    },
+    {
+      "topico_id": 31,
+      "disciplina": "Direito Penal",
+      "topico": "TÍTULO X – DOS CRIMES CONTRA A FÉ PÚBLICA",
+      "active_position": 3,
+      "active_score": 57.7,
+      "candidate_position": 3,
+      "candidate_score": 57.7,
+      "position_delta": 0,
+      "score_delta": 0.0,
+      "active_components": {
+        "atraso": 40.0,
+        "dominio": 100.0,
+        "erros_recentes": 0.0,
+        "queda": 0.0,
+        "importancia": 100.0,
+        "cobertura": 100.0,
+        "revisoes": 100.0,
+        "espacamento": 50.0
+      },
+      "candidate_components": {
+        "atraso": 40.0,
+        "espacamento": 50.0,
+        "importancia": 100.0,
+        "dominio": 100.0,
+        "erros_recentes": 0.0,
+        "queda": 0.0,
+        "cobertura": 100.0,
+        "revisoes": 100.0
+      },
+      "candidate_component_details": {
+        "atraso": {
+          "raw_value": 40.0,
+          "normalized_score": 40.0,
+          "weight": 18.0,
+          "contribution": 7.2,
+          "source": "operational_schedule_v3",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "espacamento": {
+          "raw_value": 50.0,
+          "normalized_score": 50.0,
+          "weight": 9.0,
+          "contribution": 4.5,
+          "source": "operational_spacing_v3",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "importancia": {
+          "raw_value": 100.0,
+          "normalized_score": 100.0,
+          "weight": 12.0,
+          "contribution": 12.0,
+          "source": "user_importance_configuration",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "dominio": {
+          "raw_value": null,
+          "normalized_score": 100.0,
+          "weight": 18.0,
+          "contribution": 18.0,
+          "source": "fallback.legacy_domain_v2",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "fallback": {
+            "reason": "official_mastery_insufficient_evidence",
+            "source": "legacy_domain_v2",
+            "value": 0.0
+          }
+        },
+        "erros_recentes": {
+          "raw_value": {
+            "error_control": 100.0,
+            "critical": 0,
+            "recurring": 0,
+            "recovering": 0,
+            "recovered": 0
+          },
+          "normalized_score": 0.0,
+          "weight": 15.0,
+          "contribution": 0.0,
+          "source": "statistics_core.mastery_score.error_control",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "fallback": null
+        },
+        "queda": {
+          "raw_value": null,
+          "normalized_score": 0.0,
+          "weight": 12.0,
+          "contribution": 0.0,
+          "source": "fallback.fila_inteligente_v3.legacy_decline",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "fallback": {
+            "reason": "official_trend_insufficient_window",
+            "source": "fila_inteligente_v3.legacy_decline",
+            "value": 0.0
+          }
+        },
+        "cobertura": {
+          "raw_value": 0.0,
+          "normalized_score": 100.0,
+          "weight": 9.0,
+          "contribution": 9.0,
+          "source": "statistics_core.question_coverage_rate",
+          "state": "ok",
+          "metric_version": "1",
+          "fallback": null
+        },
+        "revisoes": {
+          "raw_value": 0,
+          "normalized_score": 100.0,
+          "weight": 7.0,
+          "contribution": 7.0,
+          "source": "statistics_core.completed_review_count",
+          "state": "ok",
+          "metric_version": "1",
+          "fallback": null
+        }
+      },
+      "component_deltas": {
+        "atraso": 0.0,
+        "espacamento": 0.0,
+        "importancia": 0.0,
+        "dominio": 0.0,
+        "erros_recentes": 0.0,
+        "queda": 0.0,
+        "cobertura": 0.0,
+        "revisoes": 0.0
+      },
+      "active_main_reason": "domínio baixo",
+      "candidate_main_reason": "dominio baixo",
+      "official_metrics": {
+        "mastery_score": {
+          "value": null,
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "warnings": [
+            "low_temporal_evidence",
+            "legacy_local_time"
+          ]
+        },
+        "evidence_level": {
+          "value": "insufficient",
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        },
+        "question_coverage_rate": {
+          "value": 0.0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": [
+            "current_catalog_snapshot"
+          ]
+        },
+        "performance_trend": {
+          "value": "insufficient_data",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "warnings": [
+            "legacy_local_time"
+          ]
+        },
+        "completed_review_count": {
+          "value": 0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        },
+        "recent_performance_rate": {
+          "value": null,
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "warnings": [
+            "legacy_local_time"
+          ]
+        },
+        "critical_open_error_count": {
+          "value": 0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        }
+      },
+      "evidence_level": "insufficient",
+      "fallbacks": [
+        {
+          "component": "dominio",
+          "reason": "official_mastery_insufficient_evidence",
+          "source": "legacy_domain_v2",
+          "value": 0.0
+        },
+        {
+          "component": "queda",
+          "reason": "official_trend_insufficient_window",
+          "source": "fila_inteligente_v3.legacy_decline",
+          "value": 0.0
+        }
+      ],
+      "warnings": [],
+      "relevant_differences": [],
+      "active_queue_version": "fila_inteligente_v3",
+      "candidate_queue_version": "fila_candidate_shadow_v1",
+      "used_for_queue_order": false
+    },
+    {
+      "topico_id": 32,
+      "disciplina": "Direito Penal",
+      "topico": "TÍTULO XI – DOS CRIMES CONTRA A ADMINISTRAÇÃO PÚBLICA",
+      "active_position": 4,
+      "active_score": 57.7,
+      "candidate_position": 4,
+      "candidate_score": 57.7,
+      "position_delta": 0,
+      "score_delta": 0.0,
+      "active_components": {
+        "atraso": 40.0,
+        "dominio": 100.0,
+        "erros_recentes": 0.0,
+        "queda": 0.0,
+        "importancia": 100.0,
+        "cobertura": 100.0,
+        "revisoes": 100.0,
+        "espacamento": 50.0
+      },
+      "candidate_components": {
+        "atraso": 40.0,
+        "espacamento": 50.0,
+        "importancia": 100.0,
+        "dominio": 100.0,
+        "erros_recentes": 0.0,
+        "queda": 0.0,
+        "cobertura": 100.0,
+        "revisoes": 100.0
+      },
+      "candidate_component_details": {
+        "atraso": {
+          "raw_value": 40.0,
+          "normalized_score": 40.0,
+          "weight": 18.0,
+          "contribution": 7.2,
+          "source": "operational_schedule_v3",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "espacamento": {
+          "raw_value": 50.0,
+          "normalized_score": 50.0,
+          "weight": 9.0,
+          "contribution": 4.5,
+          "source": "operational_spacing_v3",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "importancia": {
+          "raw_value": 100.0,
+          "normalized_score": 100.0,
+          "weight": 12.0,
+          "contribution": 12.0,
+          "source": "user_importance_configuration",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "dominio": {
+          "raw_value": null,
+          "normalized_score": 100.0,
+          "weight": 18.0,
+          "contribution": 18.0,
+          "source": "fallback.legacy_domain_v2",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "fallback": {
+            "reason": "official_mastery_insufficient_evidence",
+            "source": "legacy_domain_v2",
+            "value": 0.0
+          }
+        },
+        "erros_recentes": {
+          "raw_value": {
+            "error_control": 100.0,
+            "critical": 0,
+            "recurring": 0,
+            "recovering": 0,
+            "recovered": 0
+          },
+          "normalized_score": 0.0,
+          "weight": 15.0,
+          "contribution": 0.0,
+          "source": "statistics_core.mastery_score.error_control",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "fallback": null
+        },
+        "queda": {
+          "raw_value": null,
+          "normalized_score": 0.0,
+          "weight": 12.0,
+          "contribution": 0.0,
+          "source": "fallback.fila_inteligente_v3.legacy_decline",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "fallback": {
+            "reason": "official_trend_insufficient_window",
+            "source": "fila_inteligente_v3.legacy_decline",
+            "value": 0.0
+          }
+        },
+        "cobertura": {
+          "raw_value": 0.0,
+          "normalized_score": 100.0,
+          "weight": 9.0,
+          "contribution": 9.0,
+          "source": "statistics_core.question_coverage_rate",
+          "state": "ok",
+          "metric_version": "1",
+          "fallback": null
+        },
+        "revisoes": {
+          "raw_value": 0,
+          "normalized_score": 100.0,
+          "weight": 7.0,
+          "contribution": 7.0,
+          "source": "statistics_core.completed_review_count",
+          "state": "ok",
+          "metric_version": "1",
+          "fallback": null
+        }
+      },
+      "component_deltas": {
+        "atraso": 0.0,
+        "espacamento": 0.0,
+        "importancia": 0.0,
+        "dominio": 0.0,
+        "erros_recentes": 0.0,
+        "queda": 0.0,
+        "cobertura": 0.0,
+        "revisoes": 0.0
+      },
+      "active_main_reason": "domínio baixo",
+      "candidate_main_reason": "dominio baixo",
+      "official_metrics": {
+        "mastery_score": {
+          "value": null,
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "warnings": [
+            "low_temporal_evidence",
+            "legacy_local_time"
+          ]
+        },
+        "evidence_level": {
+          "value": "insufficient",
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        },
+        "question_coverage_rate": {
+          "value": 0.0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": [
+            "current_catalog_snapshot"
+          ]
+        },
+        "performance_trend": {
+          "value": "insufficient_data",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "warnings": [
+            "legacy_local_time"
+          ]
+        },
+        "completed_review_count": {
+          "value": 0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        },
+        "recent_performance_rate": {
+          "value": null,
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "warnings": [
+            "legacy_local_time"
+          ]
+        },
+        "critical_open_error_count": {
+          "value": 0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        }
+      },
+      "evidence_level": "insufficient",
+      "fallbacks": [
+        {
+          "component": "dominio",
+          "reason": "official_mastery_insufficient_evidence",
+          "source": "legacy_domain_v2",
+          "value": 0.0
+        },
+        {
+          "component": "queda",
+          "reason": "official_trend_insufficient_window",
+          "source": "fila_inteligente_v3.legacy_decline",
+          "value": 0.0
+        }
+      ],
+      "warnings": [],
+      "relevant_differences": [],
+      "active_queue_version": "fila_inteligente_v3",
+      "candidate_queue_version": "fila_candidate_shadow_v1",
+      "used_for_queue_order": false
+    },
+    {
+      "topico_id": 74,
+      "disciplina": "Informática",
+      "topico": "Aula 00",
+      "active_position": 5,
+      "active_score": 43.0,
+      "candidate_position": 5,
+      "candidate_score": 43.0,
+      "position_delta": 0,
+      "score_delta": 0.0,
+      "active_components": {
+        "atraso": 0.0,
+        "dominio": 100.0,
+        "erros_recentes": 0.0,
+        "queda": 0.0,
+        "importancia": 50.0,
+        "cobertura": 100.0,
+        "revisoes": 78.0,
+        "espacamento": 50.0
+      },
+      "candidate_components": {
+        "atraso": 0.0,
+        "espacamento": 50.0,
+        "importancia": 50.0,
+        "dominio": 100.0,
+        "erros_recentes": 0.0,
+        "queda": 0.0,
+        "cobertura": 100.0,
+        "revisoes": 78.0
+      },
+      "candidate_component_details": {
+        "atraso": {
+          "raw_value": 0.0,
+          "normalized_score": 0.0,
+          "weight": 18.0,
+          "contribution": 0.0,
+          "source": "operational_schedule_v3",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "espacamento": {
+          "raw_value": 50.0,
+          "normalized_score": 50.0,
+          "weight": 9.0,
+          "contribution": 4.5,
+          "source": "operational_spacing_v3",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "importancia": {
+          "raw_value": 50.0,
+          "normalized_score": 50.0,
+          "weight": 12.0,
+          "contribution": 6.0,
+          "source": "user_importance_configuration",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "dominio": {
+          "raw_value": null,
+          "normalized_score": 100.0,
+          "weight": 18.0,
+          "contribution": 18.0,
+          "source": "fallback.legacy_domain_v2",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "fallback": {
+            "reason": "official_mastery_insufficient_evidence",
+            "source": "legacy_domain_v2",
+            "value": 0.0
+          }
+        },
+        "erros_recentes": {
+          "raw_value": {
+            "error_control": 100.0,
+            "critical": 0,
+            "recurring": 0,
+            "recovering": 0,
+            "recovered": 0
+          },
+          "normalized_score": 0.0,
+          "weight": 15.0,
+          "contribution": 0.0,
+          "source": "statistics_core.mastery_score.error_control",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "fallback": null
+        },
+        "queda": {
+          "raw_value": null,
+          "normalized_score": 0.0,
+          "weight": 12.0,
+          "contribution": 0.0,
+          "source": "fallback.fila_inteligente_v3.legacy_decline",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "fallback": {
+            "reason": "official_trend_insufficient_window",
+            "source": "fila_inteligente_v3.legacy_decline",
+            "value": 0.0
+          }
+        },
+        "cobertura": {
+          "raw_value": 0.0,
+          "normalized_score": 100.0,
+          "weight": 9.0,
+          "contribution": 9.0,
+          "source": "statistics_core.question_coverage_rate",
+          "state": "ok",
+          "metric_version": "1",
+          "fallback": null
+        },
+        "revisoes": {
+          "raw_value": 0,
+          "normalized_score": 78.0,
+          "weight": 7.0,
+          "contribution": 5.46,
+          "source": "fallback.fila_inteligente_v3.legacy_review_count",
+          "state": "ok",
+          "metric_version": "1",
+          "fallback": {
+            "reason": "legacy_initial_or_unqualified_review_count",
+            "source": "fila_inteligente_v3.legacy_review_count",
+            "value": 1,
+            "official_value": 0
+          }
+        }
+      },
+      "component_deltas": {
+        "atraso": 0.0,
+        "espacamento": 0.0,
+        "importancia": 0.0,
+        "dominio": 0.0,
+        "erros_recentes": 0.0,
+        "queda": 0.0,
+        "cobertura": 0.0,
+        "revisoes": 0.0
+      },
+      "active_main_reason": "domínio baixo",
+      "candidate_main_reason": "dominio baixo",
+      "official_metrics": {
+        "mastery_score": {
+          "value": null,
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "warnings": [
+            "low_temporal_evidence",
+            "legacy_local_time"
+          ]
+        },
+        "evidence_level": {
+          "value": "insufficient",
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        },
+        "question_coverage_rate": {
+          "value": 0.0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": [
+            "current_catalog_snapshot"
+          ]
+        },
+        "performance_trend": {
+          "value": "insufficient_data",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "warnings": [
+            "legacy_local_time"
+          ]
+        },
+        "completed_review_count": {
+          "value": 0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        },
+        "recent_performance_rate": {
+          "value": null,
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "warnings": [
+            "legacy_local_time"
+          ]
+        },
+        "critical_open_error_count": {
+          "value": 0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        }
+      },
+      "evidence_level": "insufficient",
+      "fallbacks": [
+        {
+          "component": "dominio",
+          "reason": "official_mastery_insufficient_evidence",
+          "source": "legacy_domain_v2",
+          "value": 0.0
+        },
+        {
+          "component": "queda",
+          "reason": "official_trend_insufficient_window",
+          "source": "fila_inteligente_v3.legacy_decline",
+          "value": 0.0
+        },
+        {
+          "component": "revisoes",
+          "reason": "legacy_initial_or_unqualified_review_count",
+          "source": "fila_inteligente_v3.legacy_review_count",
+          "value": 1,
+          "official_value": 0
+        }
+      ],
+      "warnings": [],
+      "relevant_differences": [],
+      "active_queue_version": "fila_inteligente_v3",
+      "candidate_queue_version": "fila_candidate_shadow_v1",
+      "used_for_queue_order": false
+    },
+    {
+      "topico_id": 23,
+      "disciplina": "Direito Penal",
+      "topico": "TÍTULO II – DOS CRIMES CONTRA O PATRIMÔNIO",
+      "active_position": 6,
+      "active_score": 24.4,
+      "candidate_position": 6,
+      "candidate_score": 25.0,
+      "position_delta": 0,
+      "score_delta": 0.6,
+      "active_components": {
+        "atraso": 0.0,
+        "dominio": 24.7,
+        "erros_recentes": 34.5,
+        "queda": 0.0,
+        "importancia": 100.0,
+        "cobertura": 0.0,
+        "revisoes": 40.0,
+        "espacamento": 0.0
+      },
+      "candidate_components": {
+        "atraso": 0.0,
+        "espacamento": 0.0,
+        "importancia": 100.0,
+        "dominio": 28.0,
+        "erros_recentes": 34.5,
+        "queda": 0.0,
+        "cobertura": 0.0,
+        "revisoes": 40.0
+      },
+      "candidate_component_details": {
+        "atraso": {
+          "raw_value": 0.0,
+          "normalized_score": 0.0,
+          "weight": 18.0,
+          "contribution": 0.0,
+          "source": "operational_schedule_v3",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "espacamento": {
+          "raw_value": 0.0,
+          "normalized_score": 0.0,
+          "weight": 9.0,
+          "contribution": 0.0,
+          "source": "operational_spacing_v3",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "importancia": {
+          "raw_value": 100.0,
+          "normalized_score": 100.0,
+          "weight": 12.0,
+          "contribution": 12.0,
+          "source": "user_importance_configuration",
+          "state": "ok",
+          "metric_version": null,
+          "fallback": null
+        },
+        "dominio": {
+          "raw_value": 71.97357142857143,
+          "normalized_score": 28.0,
+          "weight": 18.0,
+          "contribution": 5.04,
+          "source": "statistics_core.mastery_score",
+          "state": "ok",
+          "metric_version": "1",
+          "fallback": null
+        },
+        "erros_recentes": {
+          "raw_value": {
+            "error_control": 65.5,
+            "critical": 0,
+            "recurring": 0,
+            "recovering": 0,
+            "recovered": 0
+          },
+          "normalized_score": 34.5,
+          "weight": 15.0,
+          "contribution": 5.17,
+          "source": "statistics_core.mastery_score.error_control",
+          "state": "ok",
+          "metric_version": "1",
+          "fallback": null
+        },
+        "queda": {
+          "raw_value": null,
+          "normalized_score": 0.0,
+          "weight": 12.0,
+          "contribution": 0.0,
+          "source": "fallback.fila_inteligente_v3.legacy_decline",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "fallback": {
+            "reason": "official_trend_insufficient_window",
+            "source": "fila_inteligente_v3.legacy_decline",
+            "value": 0.0
+          }
+        },
+        "cobertura": {
+          "raw_value": 100.0,
+          "normalized_score": 0.0,
+          "weight": 9.0,
+          "contribution": 0.0,
+          "source": "statistics_core.question_coverage_rate",
+          "state": "ok",
+          "metric_version": "1",
+          "fallback": null
+        },
+        "revisoes": {
+          "raw_value": 2,
+          "normalized_score": 40.0,
+          "weight": 7.0,
+          "contribution": 2.8,
+          "source": "fallback.fila_inteligente_v3.legacy_review_count",
+          "state": "ok",
+          "metric_version": "1",
+          "fallback": {
+            "reason": "legacy_initial_or_unqualified_review_count",
+            "source": "fila_inteligente_v3.legacy_review_count",
+            "value": 3,
+            "official_value": 2
+          }
+        }
+      },
+      "component_deltas": {
+        "atraso": 0.0,
+        "espacamento": 0.0,
+        "importancia": 0.0,
+        "dominio": 3.3,
+        "erros_recentes": 0.0,
+        "queda": 0.0,
+        "cobertura": 0.0,
+        "revisoes": 0.0
+      },
+      "active_main_reason": "importância",
+      "candidate_main_reason": "importancia",
+      "official_metrics": {
+        "mastery_score": {
+          "value": 71.97357142857143,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": [
+            "provisional_low_evidence",
+            "legacy_local_time"
+          ]
+        },
+        "evidence_level": {
+          "value": "low",
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        },
+        "question_coverage_rate": {
+          "value": 100.0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": [
+            "current_catalog_snapshot"
+          ]
+        },
+        "performance_trend": {
+          "value": "insufficient_data",
+          "state": "insufficient_data",
+          "metric_version": "1",
+          "warnings": [
+            "legacy_local_time"
+          ]
+        },
+        "completed_review_count": {
+          "value": 2,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        },
+        "recent_performance_rate": {
+          "value": 80.0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": [
+            "legacy_local_time"
+          ]
+        },
+        "critical_open_error_count": {
+          "value": 0,
+          "state": "ok",
+          "metric_version": "1",
+          "warnings": []
+        }
+      },
+      "evidence_level": "low",
+      "fallbacks": [
+        {
+          "component": "queda",
+          "reason": "official_trend_insufficient_window",
+          "source": "fila_inteligente_v3.legacy_decline",
+          "value": 0.0
+        },
+        {
+          "component": "revisoes",
+          "reason": "legacy_initial_or_unqualified_review_count",
+          "source": "fila_inteligente_v3.legacy_review_count",
+          "value": 3,
+          "official_value": 2
+        }
+      ],
+      "warnings": [
+        "provisional_mastery_low_evidence"
+      ],
+      "relevant_differences": [
+        {
+          "component": "dominio",
+          "delta": 3.3,
+          "classification": "formula_change",
+          "expected": true
+        }
+      ],
+      "active_queue_version": "fila_inteligente_v3",
+      "candidate_queue_version": "fila_candidate_shadow_v1",
+      "used_for_queue_order": false
+    }
+  ]
+}

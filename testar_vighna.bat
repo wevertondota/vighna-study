@@ -10,7 +10,7 @@ if not exist ".venv\Scripts\python.exe" (
 
 call ".venv\Scripts\activate.bat"
 
-python -m py_compile main.py banco.py tema.py foco.py jogos.py checkpoint.py inteligencia.py diagnostico.py navegacao.py jornada.py evolucao.py laboratorio.py versao.py statistics_core\__init__.py statistics_core\models.py statistics_core\periods.py statistics_core\repository.py statistics_core\service.py test_statistics_core.py
+python -m py_compile main.py banco.py tema.py foco.py jogos.py checkpoint.py inteligencia.py diagnostico.py navegacao.py jornada.py evolucao.py laboratorio.py fila_candidata.py versao.py statistics_core\__init__.py statistics_core\models.py statistics_core\periods.py statistics_core\repository.py statistics_core\service.py test_statistics_core.py test_fila_candidata.py
 if errorlevel 1 (
     echo.
     echo ERRO na verificacao de sintaxe.
@@ -22,6 +22,14 @@ python -m unittest -v test_statistics_core.py
 if errorlevel 1 (
     echo.
     echo ERRO nos testes do Nucleo Estatistico.
+    pause
+    exit /b 1
+)
+
+python -m unittest -v test_fila_candidata.py
+if errorlevel 1 (
+    echo.
+    echo ERRO nos testes da Fila Candidata em modo sombra.
     pause
     exit /b 1
 )

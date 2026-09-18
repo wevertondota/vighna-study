@@ -16,6 +16,11 @@ from espacamento import (
     obter_tabela_padrao,
     normalizar_tabela_espacamento,
 )
+from fila_candidata import (
+    ACTIVE_QUEUE_VERSION,
+    SHADOW_QUEUE_VERSION,
+    compare_shadow_queue,
+)
 from statistics_core import StatisticsService
 
 
@@ -9461,21 +9466,11 @@ def obter_prioridades_sessao_adaptativa(
     topicos_ids=None
 ):
     """
-    Ranking estratégico de tópicos da Seleção Adaptativa V2.
+    Ranking ativo da Fila Inteligente V3 com comparação candidata em sombra.
 
-    A V2 usa diretamente os sinais do Índice de Domínio V2:
-    - fragilidade do domínio: 20%
-    - erros abertos/recuperação: 18%
-    - insuficiência de evidência: 15%
-    - variedade insuficiente: 12%
-    - instabilidade recente: 10%
-    - necessidade de retenção/recência: 8%
-    - urgência da revisão: 10%
-    - importância do tópico: 7%
-
-    O objetivo é não confundir "nota baixa" com uma única causa. Um tópico
-    pode entrar na sessão por erro recorrente, pouca evidência, baixa
-    variedade, instabilidade, desatualização ou urgência temporal.
+    A ordenação retornada continua sendo exclusivamente a V3. A candidata
+    usa o mesmo universo elegível e os mesmos pesos, mas aparece somente em
+    ``comparacao_fila_sombra`` com ``used_for_queue_order = false``.
     """
 
     if concurso_id is None:
@@ -9772,7 +9767,163 @@ def obter_prioridades_sessao_adaptativa(
     )
     for posicao, item in enumerate(resultados, 1):
         item["posicao_fila"] = posicao
+
+    comparacao_sombra = compare_shadow_queue(
+        resultados,
+        metricas_nucleo_fila,
+        decline_moderate=config_espacamento_fila["limite_moderada"],
+        decline_strong=config_espacamento_fila["limite_forte"],
+    )
+    comparacao_por_topico = {
+        int(item["topico_id"]): item
+        for item in comparacao_sombra["comparisons"]
+    }
+    for item in resultados:
+        item["comparacao_fila_sombra"] = comparacao_por_topico[
+            int(item["topico_id"])
+        ]
     return resultados
+
+
+def obter_snapshot_paridade_fila(
+    concurso_id=None,
+    disciplina_id=None,
+    topicos_ids=None,
+):
+    """Retorna telemetria reprodutível sem gravar sessão ou alterar decisão."""
+    if concurso_id is None:
+        concurso_id = obter_concurso_ativo()[0]
+    concurso_id = int(concurso_id)
+    topicos_ids = (
+        [int(topico_id) for topico_id in topicos_ids]
+        if topicos_ids is not None
+        else None
+    )
+    fila = obter_prioridades_sessao_adaptativa(
+        concurso_id,
+        disciplina_id=disciplina_id,
+        topicos_ids=topicos_ids,
+    )
+    comparacoes = [
+        dict(item["comparacao_fila_sombra"])
+        for item in fila
+    ]
+    candidatos = sorted(
+        comparacoes,
+        key=lambda item: int(item["candidate_position"]),
+    )
+    total = len(comparacoes)
+    deslocamentos = [abs(int(item["position_delta"])) for item in comparacoes]
+    iguais = sum(1 for item in comparacoes if int(item["position_delta"]) == 0)
+
+    def top_n(limite):
+        efetivo = min(int(limite), total)
+        ativos = [int(item["topico_id"]) for item in comparacoes[:efetivo]]
+        sombra = [int(item["topico_id"]) for item in candidatos[:efetivo]]
+        intersecao = len(set(ativos) & set(sombra))
+        return {
+            "requested_n": int(limite),
+            "effective_n": efetivo,
+            "active": ativos,
+            "candidate": sombra,
+            "intersection_count": intersecao,
+            "intersection_rate": (
+                round(100.0 * intersecao / efetivo, 1)
+                if efetivo
+                else None
+            ),
+        }
+
+    subidas = sorted(
+        comparacoes,
+        key=lambda item: int(item["position_delta"]),
+        reverse=True,
+    )
+    quedas = sorted(
+        comparacoes,
+        key=lambda item: int(item["position_delta"]),
+    )
+    resumo = {
+        "topics_evaluated": total,
+        "same_position_count": iguais,
+        "same_position_rate": round(100.0 * iguais / total, 1) if total else None,
+        "mean_absolute_position_delta": (
+            round(sum(deslocamentos) / total, 3)
+            if total
+            else None
+        ),
+        "largest_rise": subidas[0] if subidas else None,
+        "largest_fall": quedas[0] if quedas else None,
+        "top_1": top_n(1),
+        "top_3": top_n(3),
+        "top_5": top_n(5),
+        "top_10": top_n(10),
+        "fallback_topic_count": sum(
+            1 for item in comparacoes if item.get("fallbacks")
+        ),
+        "fallback_component_count": sum(
+            len(item.get("fallbacks") or [])
+            for item in comparacoes
+        ),
+    }
+    return {
+        "snapshot_type": "queue_shadow_parity",
+        "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+        "concurso_id": concurso_id,
+        "filters": {
+            "disciplina_id": disciplina_id,
+            "topicos_ids": sorted(int(item) for item in topicos_ids)
+            if topicos_ids is not None
+            else None,
+        },
+        "active_queue_version": ACTIVE_QUEUE_VERSION,
+        "candidate_queue_version": SHADOW_QUEUE_VERSION,
+        "metric_version": "1",
+        "used_for_queue_order": False,
+        "topics_evaluated": total,
+        "active_order": [
+            {
+                "position": int(item["active_position"]),
+                "topico_id": int(item["topico_id"]),
+                "score": float(item["active_score"]),
+            }
+            for item in comparacoes
+        ],
+        "candidate_order": [
+            {
+                "position": int(item["candidate_position"]),
+                "topico_id": int(item["topico_id"]),
+                "score": float(item["candidate_score"]),
+            }
+            for item in candidatos
+        ],
+        "summary": resumo,
+        "comparisons": comparacoes,
+    }
+
+
+def salvar_snapshot_paridade_fila(
+    caminho,
+    concurso_id=None,
+    disciplina_id=None,
+    topicos_ids=None,
+):
+    """Persiste somente quando chamado explicitamente; nunca pela fila ativa."""
+    destino = Path(caminho)
+    snapshot = obter_snapshot_paridade_fila(
+        concurso_id,
+        disciplina_id=disciplina_id,
+        topicos_ids=topicos_ids,
+    )
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    destino.write_text(
+        json.dumps(snapshot, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return {
+        "caminho": destino,
+        "snapshot": snapshot,
+    }
 
 def planejar_sessao_adaptativa_global(
     concurso_id=None,
