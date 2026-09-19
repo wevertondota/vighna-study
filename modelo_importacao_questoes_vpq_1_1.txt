@@ -30,8 +30,10 @@ REGRAS DO PROTOCOLO
 2. DISCIPLINA é recomendada para a identificação precisa.
 3. Preencha TÍTULO, CAPÍTULO ou ambos. Pelo menos um deles é suficiente.
 4. Quando ambos forem usados, o capítulo deve pertencer ao título informado.
-5. Use os nomes cadastrados no perfil ativo; maiúsculas, acentos e os
+5. Para Código de Trânsito Brasileiro (CTB), use CAPÍTULO como classificação
+   principal e omita TÍTULO, pois o CTB é organizado diretamente em capítulos.
+6. Use os nomes cadastrados no perfil ativo; maiúsculas, acentos e os
    separadores ":", "-" e "–" são aceitos como equivalentes.
-6. GABARITO deve apontar para uma alternativa existente em cada questão.
+7. GABARITO deve apontar para uma alternativa existente em cada questão.
 
 Não precisa gerar o PDF, pode ser só a resposta no chat

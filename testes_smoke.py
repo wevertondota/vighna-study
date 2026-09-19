@@ -526,9 +526,9 @@ EXPLICAÇÃO: A alternativa C é a correta.
                 concurso_id = int(con.execute(
                     "SELECT id FROM concursos WHERE e_padrao = 1 ORDER BY id LIMIT 1"
                 ).fetchone()[0])
-                con.execute("INSERT OR IGNORE INTO disciplinas(nome) VALUES ('CTB')")
                 disciplina_id = int(con.execute(
-                    "SELECT id FROM disciplinas WHERE nome = 'CTB'"
+                    "SELECT id FROM disciplinas WHERE nome = ?",
+                    (banco.CTB_NOME_OFICIAL,),
                 ).fetchone()[0])
                 con.execute(
                     "INSERT OR IGNORE INTO topicos(disciplina_id, nome) VALUES (?, 'Habilitação Smoke')",
@@ -686,9 +686,9 @@ EXPLICAÇÃO: A alternativa C é a correta.
             banco.reativar_questao(qid_smoke)
 
             # Disciplina desligada: permanece administrável, mas sai de toda a operação.
-            assert_true(any(nome == "CTB" for _, nome in banco.listar_disciplinas(concurso_id)), "disciplina inicialmente ativa")
+            assert_true(any(nome == banco.CTB_NOME_OFICIAL for _, nome in banco.listar_disciplinas(concurso_id)), "disciplina inicialmente ativa")
             banco.definir_disciplina_pausada(disciplina_id, True, concurso_id)
-            assert_true(not any(nome == "CTB" for _, nome in banco.listar_disciplinas(concurso_id)), "disciplina desligada sai da operação")
+            assert_true(not any(nome == banco.CTB_NOME_OFICIAL for _, nome in banco.listar_disciplinas(concurso_id)), "disciplina desligada sai da operação")
             ger = banco.listar_disciplinas_gerenciamento(concurso_id)
             assert_true(any(i == disciplina_id and p for i, nome, p in ger), "disciplina desligada permanece administrável")
             assert_true(not banco.listar_questoes(concurso_id), "questões da disciplina desligada saem da operação")
@@ -698,7 +698,7 @@ EXPLICAÇÃO: A alternativa C é a correta.
             )
             assert_true(any(q["id"] == qid_smoke and q["disciplina_pausada"] for q in adm_q), "questões da disciplina desligada permanecem administráveis")
             banco.definir_disciplina_pausada(disciplina_id, False, concurso_id)
-            assert_true(any(nome == "CTB" for _, nome in banco.listar_disciplinas(concurso_id)), "disciplina reativada")
+            assert_true(any(nome == banco.CTB_NOME_OFICIAL for _, nome in banco.listar_disciplinas(concurso_id)), "disciplina reativada")
 
             # Banco mestre: detecção de duplicidade e edição/movimentação em lote.
             qid_duplicada = banco.criar_questao(
@@ -967,6 +967,7 @@ EXPLICAÇÃO: A alternativa C é a correta.
             banco.registrar_revisao(
                 topico_id, hoje_data.isoformat(), 10, 8, "smoke evolução",
                 proxima_revisao=(hoje_data + timedelta(days=7)).isoformat(),
+                concurso_id=concurso_id,
             )
             revisoes = banco.listar_revisoes_topico(topico_id)
             assert_true(revisoes[0][11] >= 0, "índice legado de tentativas preservado")
@@ -981,7 +982,10 @@ EXPLICAÇÃO: A alternativa C é a correta.
             assert_true(hist["resumo"]["questoes"] >= 50, "questões históricas")
             assert_true(hist["revisoes_periodo"] >= 1, "revisões históricas")
             assert_true(hist["foco"]["dias_ativos"] >= 1, "consistência histórica")
-            assert_true(hist["topicos_tendencia"], "tópicos em movimento")
+            assert_true(
+                hist["temporal_snapshot"]["topics"],
+                "tópicos presentes na análise temporal",
+            )
             assert_true(any("foco_minutos" in item for item in hist["serie"]), "série histórica integrada")
             assert_true(hist["prazos_revisao"]["total_com_prazo"] == 1, "pontualidade integrada ao histórico")
 

@@ -6,3 +6,6 @@ pypdf==6.18.1
 
 # Geracao do executavel para Windows
 PyInstaller==6.22.3
+
+# Icones vetoriais da interface
+QtAwesome==1.4.2

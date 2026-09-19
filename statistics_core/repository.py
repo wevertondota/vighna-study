@@ -5,9 +5,28 @@ from __future__ import annotations
 from collections.abc import Callable
 from contextlib import closing
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from .periods import StatisticalPeriod
+from .periods import StatisticalPeriod, statistical_timezone
+
+
+def _normalized_datetime(value: str) -> datetime | None:
+    text = str(value or "").strip().replace("Z", "+00:00")
+    try:
+        parsed = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    timezone = statistical_timezone()
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone)
+    return parsed.astimezone(timezone)
+
+
+def _in_period(value: str, period: StatisticalPeriod) -> bool:
+    parsed = _normalized_datetime(value)
+    if parsed is None or parsed >= period.end_exclusive:
+        return False
+    return period.start is None or parsed >= period.start
 
 
 @dataclass(frozen=True)
@@ -23,7 +42,8 @@ class AttemptEvent:
 
     @property
     def day(self) -> str:
-        return self.occurred_at[:10]
+        parsed = _normalized_datetime(self.occurred_at)
+        return parsed.date().isoformat() if parsed is not None else self.occurred_at[:10]
 
 
 @dataclass(frozen=True)
@@ -39,7 +59,8 @@ class ReviewEvent:
 
     @property
     def day(self) -> str:
-        return self.occurred_at[:10]
+        parsed = _normalized_datetime(self.occurred_at)
+        return parsed.date().isoformat() if parsed is not None else self.occurred_at[:10]
 
 
 @dataclass(frozen=True)
@@ -63,11 +84,16 @@ class MetricsRepository:
 
     @staticmethod
     def _period_clause(period: StatisticalPeriod, column: str) -> tuple[str, list]:
+        # O filtro SQL usa uma margem de um dia e a decisão exata é refeita em
+        # Python no timezone oficial. Isso inclui timestamps ISO com offset sem
+        # deslocar os registros legados, que são datas locais sem offset.
+        start_margin = period.start - timedelta(days=1) if period.start else None
+        end_margin = period.end_exclusive + timedelta(days=1)
         parts = [f"{column} < ?"]
-        params = [_sql_timestamp(period.end_exclusive)]
-        if period.start is not None:
+        params = [_sql_timestamp(end_margin)]
+        if start_margin is not None:
             parts.insert(0, f"{column} >= ?")
-            params.insert(0, _sql_timestamp(period.start))
+            params.insert(0, _sql_timestamp(start_margin))
         return " AND ".join(parts), params
 
     def load_attempts(
@@ -117,7 +143,7 @@ class MetricsRepository:
         with closing(self._connect()) as connection:
             rows = connection.execute(sql, params).fetchall()
 
-        return [
+        events = [
             AttemptEvent(
                 id=int(row[0]),
                 question_id=int(row[1]) if row[1] is not None else None,
@@ -130,6 +156,7 @@ class MetricsRepository:
             )
             for row in rows
         ]
+        return [item for item in events if _in_period(item.occurred_at, period)]
 
     def load_active_catalog(
         self,
@@ -306,7 +333,7 @@ class MetricsRepository:
                     lineage_known=lineage_known,
                 )
             )
-        return reviews
+        return [item for item in reviews if _in_period(item.occurred_at, period)]
 
     def count_question_sessions(
         self,
@@ -322,8 +349,8 @@ class MetricsRepository:
         if completed_only:
             where.append("sq.concluida = 1")
         with closing(self._connect()) as connection:
-            row = connection.execute(
-                f"SELECT COUNT(*) FROM sessoes_questoes sq WHERE {' AND '.join(where)}",
+            rows = connection.execute(
+                f"SELECT sq.iniciado_em FROM sessoes_questoes sq WHERE {' AND '.join(where)}",
                 params,
-            ).fetchone()
-        return int(row[0] or 0)
+            ).fetchall()
+        return sum(1 for row in rows if _in_period(str(row[0]), period))

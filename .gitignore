@@ -6,6 +6,7 @@ __pycache__/
 # PyInstaller
 build/
 build_novo/
+build_pyinstaller/
 dist_nova/
 _dados_antes_atualizacao/
 

@@ -35,7 +35,7 @@ DADOS = {
         "Conceito de Direito Administrativo e Administração Pública": (2, "2026-09-26", 100.0, None, None, None),
     },
 
-    "CTB": {
+    "Código de Trânsito Brasileiro": {
         "Capítulo I: Disposições Preliminares": (1, "2026-09-15", 0.0, None, None, None),
         "Capítulo II: Do Sistema Nacional de Trânsito": (2, "2026-10-15", 89.0, None, None, None),
         "Capítulo III: Das Normas Gerais de Circulação e Conduta": (2, "2026-11-02", 93.0, None, None, None),

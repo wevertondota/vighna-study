@@ -8,6 +8,28 @@ TEMAS_VALIDOS = {
 }
 
 
+# Design System do Dashboard — tema claro.
+#
+# A paleta fica centralizada aqui para evitar cores espalhadas pelo main.py.
+# Os estilos do Dashboard usam seletores por objectName, portanto esta camada
+# não altera indiscriminadamente outros QWidget, diálogos, tabelas ou telas.
+PALETA_DASHBOARD_CLARO = {
+    "fundo": "#EBF2FA",
+    "superficie": "#FFFFFF",
+    "borda": "#E2E8F0",
+    "borda_controle": "#DCE3EE",
+    "borda_controle_forte": "#A0AEC0",
+    "primaria": "#0F3989",
+    "primaria_hover": "#1A4BA8",
+    "primaria_pressed": "#0A3266",
+    "texto": "#1A202C",
+    "texto_secundario": "#2D3748",
+    "texto_suave": "#718096",
+    "hover_claro": "#EDF2F7",
+    "trilho": "#E2E8F0",
+}
+
+
 def normalizar_tema(tema):
     tema = str(
         tema or "claro"
@@ -2581,6 +2603,150 @@ QWidget#dashboardRoot QFrame#studyManualFooter {
     border: 1px solid #e0e6ee;
 }
 """
+
+
+# Camada final do Dashboard claro. Ela é deliberadamente curta e específica:
+# redefine somente os componentes principais do Dashboard e deixa as demais
+# telas e os temas Escuro/Futurista intactos.
+ESTILO_DESIGN_SYSTEM_DASHBOARD_CLARO = r"""
+/* ============================================================
+   VIGHNA DESIGN SYSTEM — DASHBOARD CLARO
+   ============================================================ */
+
+QWidget#dashboardPage,
+QScrollArea#dashboardScroll,
+QWidget#dashboardRoot {
+    background-color: %(fundo)s;
+}
+
+QWidget#dashboardRoot QFrame#dashboardTopBar,
+QWidget#dashboardRoot QFrame#dashboardFocusPanel,
+QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"],
+QWidget#dashboardRoot QFrame#studyNowPanel,
+QWidget#dashboardRoot QFrame#dashboardOverviewCard,
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel,
+QWidget#dashboardRoot QFrame#planningPanel,
+QWidget#dashboardRoot QFrame#dashboardProjectionPanel {
+    background-color: %(superficie)s;
+    border: 1px solid %(borda)s;
+}
+
+QWidget#dashboardRoot QFrame#focusDashboardMainCard,
+QWidget#dashboardRoot QFrame#focusQuickCard {
+    background-color: %(superficie)s;
+    border: 1px solid %(borda)s;
+    border-radius: 8px;
+}
+
+QWidget#dashboardRoot QFrame#dashboardQuickAccess[embedded="true"] {
+    background-color: %(superficie)s;
+    border: 1px solid %(borda)s;
+    border-radius: 8px;
+}
+
+QWidget#dashboardRoot QLabel#focusDashboardCardTitle,
+QWidget#dashboardRoot QLabel#algorithmDashboardTitle,
+QWidget#dashboardRoot QLabel#dashboardQuickAccessTitle,
+QWidget#dashboardRoot QPushButton#dashboardSectionToggle {
+    color: %(texto)s;
+}
+
+QWidget#dashboardRoot QLabel#focusDashboardDescription,
+QWidget#dashboardRoot QLabel#focusDashboardCaption,
+QWidget#dashboardRoot QLabel#focusDashboardDetail,
+QWidget#dashboardRoot QLabel#focusQuickHint,
+QWidget#dashboardRoot QLabel#algorithmDashboardSubtitle,
+QWidget#dashboardRoot QLabel#dashboardActionSectionSubtitle {
+    color: %(texto_suave)s;
+}
+
+QWidget#dashboardRoot QLabel#dashboardTodayFocusValue,
+QWidget#dashboardRoot QLabel#algorithmDashboardReady {
+    color: %(texto)s;
+}
+
+QWidget#dashboardRoot QLabel#dashboardProgressBadge {
+    background-color: %(primaria)s;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 21px;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+QWidget#dashboardRoot QProgressBar#dashboardTodayProgress {
+    background-color: %(trilho)s;
+    border: none;
+    border-radius: 4px;
+}
+
+QWidget#dashboardRoot QProgressBar#dashboardTodayProgress::chunk {
+    background-color: %(primaria)s;
+    border-radius: 4px;
+}
+
+/* Ações realmente primárias do Dashboard. */
+QWidget#dashboardRoot QPushButton#dashboardFocusPrimaryButton,
+QWidget#dashboardRoot QPushButton#dashboardTodayPrimaryButton {
+    background-color: %(primaria)s;
+    color: #FFFFFF;
+    border: 1px solid %(primaria)s;
+    border-radius: 6px;
+    font-weight: 800;
+}
+
+QWidget#dashboardRoot QPushButton#dashboardFocusPrimaryButton:hover,
+QWidget#dashboardRoot QPushButton#dashboardTodayPrimaryButton:hover {
+    background-color: %(primaria_hover)s;
+    border-color: %(primaria_hover)s;
+}
+
+QWidget#dashboardRoot QPushButton#dashboardFocusPrimaryButton:pressed,
+QWidget#dashboardRoot QPushButton#dashboardTodayPrimaryButton:pressed {
+    background-color: %(primaria_pressed)s;
+    border-color: %(primaria_pressed)s;
+}
+
+/* Navegação e ações secundárias permanecem vazadas. */
+QWidget#dashboardRoot QFrame#dashboardQuickAccess[embedded="true"] QPushButton#toolbarButton,
+QWidget#dashboardRoot QFrame#dashboardQuickAccess[embedded="true"] QPushButton#pauseNavButton,
+QWidget#dashboardRoot QPushButton#subtleButton,
+QWidget#dashboardRoot QPushButton#dashboardTodayButton,
+QWidget#dashboardRoot QPushButton#questionsNavButton {
+    background-color: %(superficie)s;
+    color: %(texto_secundario)s;
+    border: 1px solid %(borda_controle_forte)s;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+QWidget#dashboardRoot QFrame#dashboardQuickAccess[embedded="true"] QPushButton#toolbarButton:hover,
+QWidget#dashboardRoot QFrame#dashboardQuickAccess[embedded="true"] QPushButton#pauseNavButton:hover,
+QWidget#dashboardRoot QPushButton#subtleButton:hover,
+QWidget#dashboardRoot QPushButton#dashboardTodayButton:hover,
+QWidget#dashboardRoot QPushButton#questionsNavButton:hover {
+    background-color: %(hover_claro)s;
+    color: %(texto)s;
+    border-color: %(borda_controle_forte)s;
+}
+
+/* Configurações: somente o ícone sobre o fundo do próprio Dashboard. */
+QWidget#dashboardRoot QPushButton#topAccentButton {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 0px;
+}
+
+QWidget#dashboardRoot QPushButton#topAccentButton:hover {
+    background-color: %(hover_claro)s;
+}
+
+QWidget#dashboardRoot QFrame#topProfileBar {
+    background-color: %(superficie)s;
+    border: 1px solid %(borda_controle)s;
+}
+""" % PALETA_DASHBOARD_CLARO
 
 
 def stylesheet_claro():
@@ -9536,7 +9702,7 @@ QPushButton#sectionEditButton:hover {
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_CLARO + ESTILO_DASHBOARD_MODERNO_CLARO + ESTILO_FOCO_DASHBOARD_CLARO + ESTILO_ALGORITMO_DASHBOARD_CLARO + ESTILO_BUSCA_GLOBAL_CLARO + ESTILO_PALETA_HARMONICA_DASHBOARD_CLARO
+""" + ESTILO_JORNADA_CLARO + ESTILO_DASHBOARD_MODERNO_CLARO + ESTILO_FOCO_DASHBOARD_CLARO + ESTILO_ALGORITMO_DASHBOARD_CLARO + ESTILO_BUSCA_GLOBAL_CLARO + ESTILO_PALETA_HARMONICA_DASHBOARD_CLARO + ESTILO_DESIGN_SYSTEM_DASHBOARD_CLARO
 
 
 def stylesheet_escuro():

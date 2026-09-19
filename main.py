@@ -4,12 +4,13 @@ import json
 import csv
 import re
 import random
+import time
 import unicodedata
 from datetime import datetime
 from pathlib import Path
 
 
-from PySide6.QtCore import Qt, QDate, QPointF, QRectF, QTimer, Signal, QEventLoop
+from PySide6.QtCore import Qt, QDate, QPointF, QRectF, QTimer, Signal, QEventLoop, QSize
 from PySide6.QtGui import QColor, QPainter, QPen, QFont, QPainterPath, QBrush, QPixmap, QIcon, QTextCharFormat, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
@@ -56,6 +57,8 @@ from tema import (
     normalizar_tema
 )
 
+from icones import criar_icone
+
 from backup import (
     fazer_backup,
     PASTA_BACKUPS,
@@ -93,12 +96,16 @@ from importador_pdf import (
     detectar_vpq_1_0
 )
 
+from importador_txt import ler_arquivo_txt_questoes
+
 from jogos import JanelaPausaDesafios
 from foco import JanelaModoFoco
 from inteligencia import (
     CacheAnalitico, MotorRecomendacaoV4, MotorRecomendacaoV5,
     PESOS_PADRAO_V5, montar_preparacao_foco
 )
+from estatisticas_lazy import EstadoEstatisticasLazy
+from relatorios_lazy import EstadoRelatoriosLazy
 from diagnostico import JanelaDiagnosticoVighna
 from navegacao import JanelaBuscaGlobal
 from versao import VIGHNA_BUILD, VIGHNA_VERSION
@@ -109,6 +116,11 @@ from laboratorio import (
     explicar_topico as explicar_topico_laboratorio,
 )
 from progresso_edital import build_syllabus_forecast
+from mapa_dominio import (
+    build_domain_map_snapshot,
+    filter_domain_topics,
+    sort_domain_topics,
+)
 from jornada import (
     gerar_jornada,
     carregar_jornada,
@@ -250,6 +262,9 @@ from banco import (
     obter_metricas_globais_nucleo,
     obter_metricas_periodo_nucleo,
     obter_snapshot_progresso_edital,
+    obter_analise_temporal,
+    obter_snapshot_regularidade,
+    obter_snapshot_gamificacao,
     obter_central_minha_evolucao,
     obter_contextos_revisao_automatica_sessao,
     salvar_revisao_automatica_questoes,
@@ -273,6 +288,8 @@ from banco import (
     resolver_disciplina_id_estrutural,
     resolver_topico_id_estrutural,
     resolver_capitulo_id_estrutural,
+    eh_disciplina_ctb,
+    CTB_NOME_EXIBICAO,
 )
 
 
@@ -2590,9 +2607,11 @@ REGRAS DO PROTOCOLO
 2. DISCIPLINA é recomendada para a identificação precisa.
 3. Preencha TÍTULO, CAPÍTULO ou ambos. Pelo menos um deles é suficiente.
 4. Quando ambos forem usados, o capítulo deve pertencer ao título informado.
-5. Use os nomes cadastrados no perfil ativo; maiúsculas, acentos e os
+5. Para Código de Trânsito Brasileiro (CTB), use CAPÍTULO como classificação
+   principal e omita TÍTULO, pois o CTB é organizado diretamente em capítulos.
+6. Use os nomes cadastrados no perfil ativo; maiúsculas, acentos e os
    separadores ":", "-" e "–" são aceitos como equivalentes.
-6. GABARITO deve apontar para uma alternativa existente em cada questão.
+7. GABARITO deve apontar para uma alternativa existente em cada questão.
 """
 
 
@@ -4263,9 +4282,15 @@ class JanelaTextoExtraidoPDF(QDialog):
             parent
         )
 
-        eh_texto_colado = str(origem_tipo or "pdf").strip().lower() == "texto"
+        origem_tipo = str(origem_tipo or "pdf").strip().lower()
+        eh_texto_colado = origem_tipo == "texto"
+        eh_txt = origem_tipo == "txt"
         self.setWindowTitle(
-            "Texto colado" if eh_texto_colado else "Texto extraído do PDF"
+            (
+                "Texto colado"
+                if eh_texto_colado
+                else ("Conteúdo do arquivo TXT" if eh_txt else "Texto extraído do PDF")
+            )
         )
         self.resize(
             900,
@@ -4287,9 +4312,14 @@ class JanelaTextoExtraidoPDF(QDialog):
                 "Este é o texto que será interpretado pelo VighnaStudy. Use esta visualização para conferir a formatação antes da importação."
                 if eh_texto_colado
                 else (
-                    "Esta é a camada de texto que o VighnaStudy conseguiu "
-                    "ler do PDF. Use esta visualização para conferir PDFs "
-                    "com formatação incomum."
+                    "Este é o conteúdo do arquivo TXT que será interpretado pelo VighnaStudy. "
+                    "Use esta visualização para conferir a formatação antes da importação."
+                    if eh_txt
+                    else (
+                        "Esta é a camada de texto que o VighnaStudy conseguiu "
+                        "ler do PDF. Use esta visualização para conferir PDFs "
+                        "com formatação incomum."
+                    )
                 )
             )
         )
@@ -4339,14 +4369,14 @@ class JanelaTextoExtraidoPDF(QDialog):
 
 
 class JanelaCentralImportacaoQuestoes(QDialog):
-    """Hub único de entrada para as três formas de importação de questões."""
+    """Hub único de entrada para as formas de importação de questões."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.origem_escolhida = None
         self.setWindowTitle("Central de importação")
-        self.resize(900, 560)
-        self.setMinimumSize(760, 500)
+        self.resize(940, 660)
+        self.setMinimumSize(780, 600)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(18, 16, 18, 16)
@@ -4383,13 +4413,16 @@ class JanelaCentralImportacaoQuestoes(QDialog):
         fluxo_layout.addStretch(1)
         layout.addWidget(fluxo)
 
-        cards = QHBoxLayout()
-        cards.setSpacing(10)
+        cards = QGridLayout()
+        cards.setHorizontalSpacing(10)
+        cards.setVerticalSpacing(10)
+        cards.setColumnStretch(0, 1)
+        cards.setColumnStretch(1, 1)
 
         def criar_card(simbolo, nome, descricao, detalhes, botao_texto, origem, destaque=False):
             card = QFrame()
             card.setObjectName("questionEditorCard")
-            card.setMinimumHeight(300)
+            card.setMinimumHeight(220)
             card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
             card_layout = QVBoxLayout(card)
             card_layout.setContentsMargins(14, 14, 14, 14)
@@ -4432,7 +4465,15 @@ class JanelaCentralImportacaoQuestoes(QDialog):
             "O Vighna extrai o texto, detecta questões e abre a conferência de gabarito, título, capítulo e duplicidade.",
             "Selecionar PDF",
             "pdf",
-        ), 1)
+        ), 0, 0)
+        cards.addWidget(criar_card(
+            "TXT",
+            "Arquivo TXT",
+            "Importe questões diretamente de um arquivo de texto (.txt).",
+            "Ideal para VPQ 1.1 salvo como texto. O Vighna detecta UTF-8, UTF-16 e arquivos ANSI comuns do Windows antes da conferência.",
+            "Selecionar TXT",
+            "txt",
+        ), 0, 1)
         cards.addWidget(criar_card(
             "≡",
             "Texto colado",
@@ -4441,7 +4482,7 @@ class JanelaCentralImportacaoQuestoes(QDialog):
             "Colar e analisar",
             "texto",
             destaque=True,
-        ), 1)
+        ), 1, 0)
         cards.addWidget(criar_card(
             "▦",
             "CSV",
@@ -4449,7 +4490,7 @@ class JanelaCentralImportacaoQuestoes(QDialog):
             "O arquivo é validado antes da gravação e o Vighna mostra questões prontas, duplicadas e linhas com erro.",
             "Selecionar CSV",
             "csv",
-        ), 1)
+        ), 1, 1)
         layout.addLayout(cards, 1)
 
         nota = QLabel(
@@ -4857,12 +4898,22 @@ class JanelaImportarPDFQuestoes(QDialog):
         self.dados_pdf = dados_pdf
         self.origem_tipo = str(origem_tipo or "pdf").strip().lower()
         self.eh_texto_colado = self.origem_tipo == "texto"
+        self.eh_txt = self.origem_tipo == "txt"
+        self.eh_origem_textual = self.eh_texto_colado or self.eh_txt
         self.nome_origem = (
             str(nome_origem or "").strip()
             or ("Texto colado" if self.eh_texto_colado else self.caminho_pdf.name)
         )
-        self.titulo_operacao = "Importar texto" if self.eh_texto_colado else "Importar PDF"
-        self.rotulo_origem = "texto colado" if self.eh_texto_colado else "PDF"
+        self.titulo_operacao = (
+            "Importar texto"
+            if self.eh_texto_colado
+            else ("Importar TXT" if self.eh_txt else "Importar PDF")
+        )
+        self.rotulo_origem = (
+            "texto colado"
+            if self.eh_texto_colado
+            else ("arquivo TXT" if self.eh_txt else "PDF")
+        )
         self.analise = analise
         self.questoes = list(
             analise[
@@ -4889,6 +4940,8 @@ class JanelaImportarPDFQuestoes(QDialog):
             )
             or {}
         )
+        self.vpq_disciplina_id = None
+        self.importacao_ctb = False
         self.vpq_topico_id = None
         self.vpq_topico_rotulo = ""
         self.vpq_capitulo_id = None
@@ -4897,10 +4950,16 @@ class JanelaImportarPDFQuestoes(QDialog):
         )
         self.topicos = []
         self.capitulos = []
+        self.topicos_importacao = []
 
         for disciplina_id, disciplina in listar_disciplinas(
             self.concurso[0]
         ):
+            disciplina_exibicao = (
+                CTB_NOME_EXIBICAO
+                if eh_disciplina_ctb(disciplina_id)
+                else disciplina
+            )
             for topico in listar_topicos(
                 disciplina,
                 self.concurso[0]
@@ -4911,7 +4970,7 @@ class JanelaImportarPDFQuestoes(QDialog):
                     "disciplina": disciplina,
                     "topico": topico[1],
                     "rotulo": (
-                        f"{disciplina} › {topico[1]}"
+                        f"{disciplina_exibicao} › {topico[1]}"
                     ),
                 })
 
@@ -4931,7 +4990,27 @@ class JanelaImportarPDFQuestoes(QDialog):
                 "rotulo": f"{disciplina} › {topico} › {capitulo}",
             })
 
+        self.topicos_importacao = list(self.topicos)
+
         if self.vpq_metadados:
+            disciplina_vpq = str(
+                self.vpq_metadados.get("disciplina", "") or ""
+            ).strip()
+            self.vpq_disciplina_id = resolver_disciplina_id_estrutural(
+                disciplina_vpq or None
+            )
+            self.importacao_ctb = bool(
+                disciplina_vpq and eh_disciplina_ctb(disciplina_vpq)
+            )
+            if self.importacao_ctb and self.vpq_disciplina_id is not None:
+                self.topicos_importacao = [
+                    item
+                    for item in self.topicos
+                    if int(item["disciplina_id"]) == int(self.vpq_disciplina_id)
+                ]
+            else:
+                self.topicos_importacao = list(self.topicos)
+
             self.vpq_topico_id = (
                 self.localizar_topico_vpq()
             )
@@ -4939,11 +5018,12 @@ class JanelaImportarPDFQuestoes(QDialog):
                 self.localizar_capitulo_vpq()
             )
 
-            # Um capítulo identificado com segurança determina seu título
-            # pai. Assim, o protocolo pode trazer somente o capítulo sem
-            # exigir que o título também seja preenchido.
+            # Fora do CTB, um capítulo identificado com segurança determina
+            # seu título pai. No CTB o próprio "tópico" estrutural já é o
+            # capítulo legal, portanto não existe esse segundo nível.
             if (
-                self.vpq_topico_id is None
+                not self.importacao_ctb
+                and self.vpq_topico_id is None
                 and self.vpq_capitulo_id is not None
             ):
                 for capitulo in self.capitulos:
@@ -4965,7 +5045,7 @@ class JanelaImportarPDFQuestoes(QDialog):
                 else (
                     "Importar questões por texto"
                     if self.eh_texto_colado
-                    else "Importar questões de PDF"
+                    else ("Importar questões de TXT" if self.eh_txt else "Importar questões de PDF")
                 )
             )
         )
@@ -5009,7 +5089,7 @@ class JanelaImportarPDFQuestoes(QDialog):
                 else (
                     "Importação por texto colado"
                     if self.eh_texto_colado
-                    else "Importação por PDF"
+                    else ("Importação por arquivo TXT" if self.eh_txt else "Importação por PDF")
                 )
             )
         )
@@ -5021,7 +5101,7 @@ class JanelaImportarPDFQuestoes(QDialog):
             (
                 (
                     "O VighnaStudy reconheceu o protocolo VPQ 1.1. "
-                    "Confira a auditoria estrutural e o vínculo com o tópico."
+                    "Confira a auditoria estrutural e o vínculo com a classificação."
                 )
                 if self.vpq_detectado
                 else (
@@ -5030,7 +5110,9 @@ class JanelaImportarPDFQuestoes(QDialog):
                     )
                     if self.eh_texto_colado
                     else (
-                        "Confira o gabarito e o tópico sugerido antes de adicionar as questões ao banco."
+                        "O arquivo TXT foi analisado. Confira gabaritos e vínculos antes de adicionar as questões ao banco."
+                        if self.eh_txt
+                        else "Confira o gabarito e o tópico sugerido antes de adicionar as questões ao banco."
                     )
                 )
             )
@@ -5050,7 +5132,11 @@ class JanelaImportarPDFQuestoes(QDialog):
         )
 
         ver_texto = QPushButton(
-            "Ver texto colado" if self.eh_texto_colado else "Ver texto extraído"
+            (
+                "Ver texto colado"
+                if self.eh_texto_colado
+                else ("Ver conteúdo do TXT" if self.eh_txt else "Ver texto extraído")
+            )
         )
         ver_texto.setObjectName(
             "subtleButton"
@@ -5104,8 +5190,15 @@ class JanelaImportarPDFQuestoes(QDialog):
 
         paginas = QLabel(
             (
-                f"Caracteres: {dados_pdf.get('caracteres', 0):,}".replace(",", ".")
-                if self.eh_texto_colado
+                (
+                    f"Caracteres: {dados_pdf.get('caracteres', 0):,}".replace(",", ".")
+                    + (
+                        f" • Codificação: {dados_pdf.get('codificacao', 'texto')}"
+                        if self.eh_txt
+                        else ""
+                    )
+                )
+                if self.eh_origem_textual
                 else (
                     f"Páginas lidas: "
                     f"{dados_pdf['pagina_inicial']}–"
@@ -5257,11 +5350,24 @@ class JanelaImportarPDFQuestoes(QDialog):
                 )
             )
 
-            vpq_meta = QLabel(
-                (
-                    f"Disciplina: {disciplina_meta}  •  "
+            disciplina_exibicao = (
+                CTB_NOME_EXIBICAO
+                if self.importacao_ctb
+                else disciplina_meta
+            )
+            classificacao_meta = (
+                f"Capítulo: {capitulo_meta}  •  "
+                if self.importacao_ctb
+                else (
                     f"Título: {topico_meta}  •  "
                     f"Capítulo: {capitulo_meta}  •  "
+                )
+            )
+
+            vpq_meta = QLabel(
+                (
+                    f"Disciplina: {disciplina_exibicao}  •  "
+                    f"{classificacao_meta}"
                     f"Declaradas: "
                     f"{declaradas if declaradas is not None else '—'}  •  "
                     f"Encontradas: {encontradas}  •  "
@@ -5289,7 +5395,21 @@ class JanelaImportarPDFQuestoes(QDialog):
                 )
             )
 
-            if (
+            if self.importacao_ctb:
+                if self.vpq_topico_id is not None:
+                    vinculo_texto = (
+                        "Capítulo do CTB localizado no perfil ativo: "
+                        f"{self.vpq_topico_rotulo}."
+                    )
+                    vinculo_estado = "ok"
+                else:
+                    vinculo_texto = (
+                        "O capítulo informado no cabeçalho VPQ não foi "
+                        "localizado com segurança no perfil ativo. Selecione "
+                        "o capítulo correto antes de importar."
+                    )
+                    vinculo_estado = "warning"
+            elif (
                 self.vpq_topico_id is not None
                 and (
                     not capitulo_informado
@@ -5427,7 +5547,7 @@ class JanelaImportarPDFQuestoes(QDialog):
             None
         )
 
-        for topico in self.topicos:
+        for topico in self.topicos_importacao:
             self.pdf_topico_padrao.addItem(
                 topico[
                     "rotulo"
@@ -5447,6 +5567,26 @@ class JanelaImportarPDFQuestoes(QDialog):
             if indice_vpq >= 0:
                 self.pdf_topico_padrao.setCurrentIndex(
                     indice_vpq
+                )
+
+        self.pdf_capitulo_padrao = QComboBox()
+        self.pdf_capitulo_padrao.setMinimumHeight(32)
+        self.pdf_capitulo_padrao.addItem(
+            "Detectar automaticamente / conferir por questão",
+            None
+        )
+        for capitulo in self.capitulos:
+            self.pdf_capitulo_padrao.addItem(
+                capitulo["rotulo"],
+                capitulo["capitulo_id"]
+            )
+        if self.vpq_capitulo_id is not None:
+            indice_capitulo_vpq = self.pdf_capitulo_padrao.findData(
+                self.vpq_capitulo_id
+            )
+            if indice_capitulo_vpq >= 0:
+                self.pdf_capitulo_padrao.setCurrentIndex(
+                    indice_capitulo_vpq
                 )
 
         self.pdf_banca = QLineEdit()
@@ -5510,7 +5650,11 @@ class JanelaImportarPDFQuestoes(QDialog):
                 else (
                     "Texto colado"
                     if self.eh_texto_colado
-                    else f"PDF: {self.caminho_pdf.name}"
+                    else (
+                        f"TXT: {self.caminho_pdf.name}"
+                        if self.eh_txt
+                        else f"PDF: {self.caminho_pdf.name}"
+                    )
                 )
             )
         )
@@ -5518,87 +5662,55 @@ class JanelaImportarPDFQuestoes(QDialog):
             32
         )
 
-        defaults_layout.addWidget(
-            QLabel(
-                "Título padrão"
-            ),
-            0,
-            0
-        )
-        defaults_layout.addWidget(
-            QLabel(
-                "Banca"
-            ),
-            0,
-            1
-        )
-        defaults_layout.addWidget(
-            QLabel(
-                "Ano"
-            ),
-            0,
-            2
-        )
-        defaults_layout.addWidget(
-            QLabel(
-                "Dificuldade"
-            ),
-            0,
-            3
-        )
+        if self.importacao_ctb:
+            defaults_layout.addWidget(
+                QLabel("Capítulo padrão"),
+                0,
+                0,
+                1,
+                2
+            )
+        else:
+            defaults_layout.addWidget(
+                QLabel("Título padrão"),
+                0,
+                0
+            )
+            defaults_layout.addWidget(
+                QLabel("Capítulo padrão"),
+                0,
+                1
+            )
 
-        defaults_layout.addWidget(
-            self.pdf_topico_padrao,
-            1,
-            0
-        )
-        defaults_layout.addWidget(
-            self.pdf_banca,
-            1,
-            1
-        )
-        defaults_layout.addWidget(
-            self.pdf_ano,
-            1,
-            2
-        )
-        defaults_layout.addWidget(
-            self.pdf_dificuldade,
-            1,
-            3
-        )
+        defaults_layout.addWidget(QLabel("Banca"), 0, 2)
+        defaults_layout.addWidget(QLabel("Ano"), 0, 3)
+        defaults_layout.addWidget(QLabel("Dificuldade"), 0, 4)
 
-        defaults_layout.addWidget(
-            QLabel(
-                "Fonte"
-            ),
-            2,
-            0
-        )
-        defaults_layout.addWidget(
-            self.pdf_fonte,
-            3,
-            0,
-            1,
-            4
-        )
+        if self.importacao_ctb:
+            defaults_layout.addWidget(
+                self.pdf_topico_padrao,
+                1,
+                0,
+                1,
+                2
+            )
+            self.pdf_capitulo_padrao.setVisible(False)
+        else:
+            defaults_layout.addWidget(self.pdf_topico_padrao, 1, 0)
+            defaults_layout.addWidget(self.pdf_capitulo_padrao, 1, 1)
 
-        defaults_layout.setColumnStretch(
-            0,
-            3
-        )
-        defaults_layout.setColumnStretch(
-            1,
-            1
-        )
-        defaults_layout.setColumnStretch(
-            2,
-            1
-        )
-        defaults_layout.setColumnStretch(
-            3,
-            1
-        )
+        defaults_layout.addWidget(self.pdf_banca, 1, 2)
+        defaults_layout.addWidget(self.pdf_ano, 1, 3)
+        defaults_layout.addWidget(self.pdf_dificuldade, 1, 4)
+
+        defaults_layout.addWidget(QLabel("Fonte"), 2, 0)
+        defaults_layout.addWidget(self.pdf_fonte, 3, 0, 1, 5)
+
+        defaults_layout.setColumnStretch(0, 3)
+        defaults_layout.setColumnStretch(1, 3)
+        defaults_layout.setColumnStretch(2, 1)
+        defaults_layout.setColumnStretch(3, 1)
+        defaults_layout.setColumnStretch(4, 1)
 
         layout.addWidget(
             defaults
@@ -5607,11 +5719,20 @@ class JanelaImportarPDFQuestoes(QDialog):
         ajuda = QLabel(
             (
                 (
-                    "VPQ 1.1 usa o cabeçalho para localizar disciplina e "
-                    "classificação. Maiúsculas, acentos e pontuação são "
-                    "normalizados; ainda assim, o VighnaStudy só associa "
-                    "título ou capítulo quando houver uma correspondência "
-                    "única no perfil ativo."
+                    (
+                        "No Código de Trânsito Brasileiro (CTB), a "
+                        "classificação legal é feita diretamente por "
+                        "capítulo. O campo Título não se aplica. "
+                        "Maiúsculas, acentos e pontuação são normalizados."
+                    )
+                    if self.importacao_ctb
+                    else (
+                        "VPQ 1.1 usa o cabeçalho para localizar disciplina e "
+                        "classificação. Maiúsculas, acentos e pontuação são "
+                        "normalizados; ainda assim, o VighnaStudy só associa "
+                        "título ou capítulo quando houver uma correspondência "
+                        "única no perfil ativo."
+                    )
                 )
                 if self.vpq_detectado
                 else (
@@ -5697,12 +5818,16 @@ class JanelaImportarPDFQuestoes(QDialog):
             "Questão",
             "Alt.",
             "Gabarito",
-            "Título",
-            "Capítulo",
+            "Capítulo" if self.importacao_ctb else "Título",
+            "Detalhamento" if self.importacao_ctb else "Capítulo",
             "Status"
         ])
-        if self.eh_texto_colado:
+        if self.eh_origem_textual:
             self.tabela_pdf.setColumnHidden(2, True)
+        if self.importacao_ctb:
+            # No CTB os tópicos estruturais já são os capítulos legais.
+            # O segundo nível (capitulos_topico) não se aplica.
+            self.tabela_pdf.setColumnHidden(7, True)
         self.tabela_pdf.setEditTriggers(
             QAbstractItemView.NoEditTriggers
         )
@@ -5763,7 +5888,7 @@ class JanelaImportarPDFQuestoes(QDialog):
         )
         self.tabela_pdf.setColumnWidth(
             6,
-            220
+            320 if self.importacao_ctb else 220
         )
         header.setSectionResizeMode(
             7,
@@ -5823,6 +5948,10 @@ class JanelaImportarPDFQuestoes(QDialog):
         self.pdf_topico_padrao.currentIndexChanged.connect(
             self.aplicar_topico_padrao
         )
+        if not self.importacao_ctb:
+            self.pdf_capitulo_padrao.currentIndexChanged.connect(
+                self.aplicar_capitulo_padrao
+            )
 
         self.preencher_tabela()
 
@@ -5868,9 +5997,20 @@ class JanelaImportarPDFQuestoes(QDialog):
         disciplina_texto = str(
             self.vpq_metadados.get("disciplina", "") or ""
         ).strip()
-        topico_texto = str(
-            self.vpq_metadados.get("topico", "") or ""
-        ).strip()
+
+        if self.importacao_ctb:
+            # No CTB o capítulo legal é o próprio tópico estrutural. O
+            # metadado CAPÍTULO é, portanto, a classificação principal.
+            # TÍTULO fica apenas como fallback para VPQs antigos.
+            topico_texto = str(
+                self.vpq_metadados.get("capitulo", "")
+                or self.vpq_metadados.get("topico", "")
+                or ""
+            ).strip()
+        else:
+            topico_texto = str(
+                self.vpq_metadados.get("topico", "") or ""
+            ).strip()
 
         if self.normalizar_rotulo_vpq(topico_texto) in (
             "",
@@ -5890,7 +6030,11 @@ class JanelaImportarPDFQuestoes(QDialog):
         # atual. A identidade estrutural resolve aliases, mas não ignora a
         # configuração do concurso selecionado.
         correspondencia = next(
-            (item for item in self.topicos if int(item["topico_id"]) == int(topico_id)),
+            (
+                item
+                for item in self.topicos_importacao
+                if int(item["topico_id"]) == int(topico_id)
+            ),
             None,
         )
         if correspondencia is None:
@@ -5900,6 +6044,11 @@ class JanelaImportarPDFQuestoes(QDialog):
         return int(topico_id)
 
     def localizar_capitulo_vpq(self):
+        if self.importacao_ctb:
+            # No CTB não existe o segundo nível Título > Capítulo: os
+            # capítulos legais já são tópicos estruturais.
+            return None
+
         capitulo_texto = str(
             self.vpq_metadados.get("capitulo", "") or ""
         ).strip()
@@ -5961,11 +6110,15 @@ class JanelaImportarPDFQuestoes(QDialog):
             "pdfTopicCombo"
         )
         combo.addItem(
-            "Selecione o tópico...",
+            (
+                "Selecione o capítulo..."
+                if self.importacao_ctb
+                else "Selecione o título..."
+            ),
             None
         )
 
-        for topico in self.topicos:
+        for topico in self.topicos_importacao:
             combo.addItem(
                 topico[
                     "rotulo"
@@ -5987,15 +6140,17 @@ class JanelaImportarPDFQuestoes(QDialog):
                 )
                 combo.setToolTip(
                     (
-                    "Título identificado pelo cabeçalho do arquivo: "
-                        f"{self.vpq_topico_rotulo}."
+                        "Capítulo identificado pelo cabeçalho do arquivo: "
+                        if self.importacao_ctb
+                        else "Título identificado pelo cabeçalho do arquivo: "
                     )
+                    + f"{self.vpq_topico_rotulo}."
                 )
 
         else:
             sugestao = sugerir_topico_pdf(
                 questao,
-                self.topicos
+                self.topicos_importacao
             )
 
             if sugestao is not None:
@@ -6318,9 +6473,13 @@ class JanelaImportarPDFQuestoes(QDialog):
             else None
         )
         capitulo_id = (
-            capitulo_combo.currentData()
-            if capitulo_combo
-            else None
+            None
+            if self.importacao_ctb
+            else (
+                capitulo_combo.currentData()
+                if capitulo_combo
+                else None
+            )
         )
 
         topico_capitulo_id = None
@@ -6336,12 +6495,21 @@ class JanelaImportarPDFQuestoes(QDialog):
             status = "Sem gabarito"
             nivel = "atencao"
 
-        elif topico_id is None and capitulo_id is None:
+        elif self.importacao_ctb and topico_id is None:
+            status = "Sem capítulo"
+            nivel = "atencao"
+
+        elif (
+            not self.importacao_ctb
+            and topico_id is None
+            and capitulo_id is None
+        ):
             status = "Sem título/capítulo"
             nivel = "atencao"
 
         elif (
-            topico_id is not None
+            not self.importacao_ctb
+            and topico_id is not None
             and topico_capitulo_id is not None
             and topico_id != topico_capitulo_id
         ):
@@ -6419,7 +6587,7 @@ class JanelaImportarPDFQuestoes(QDialog):
                 else:
                     sugestao = sugerir_topico_pdf(
                         questao,
-                        self.topicos
+                        self.topicos_importacao
                     )
 
                     indice = self.indice_topico_combo(
@@ -6440,6 +6608,46 @@ class JanelaImportarPDFQuestoes(QDialog):
             self.atualizar_status_linha(
                 linha
             )
+
+
+    def aplicar_capitulo_padrao(self):
+        if self.importacao_ctb:
+            return
+
+        capitulo_id = self.pdf_capitulo_padrao.currentData()
+        topico_pai_id = None
+        if capitulo_id is not None:
+            for capitulo in self.capitulos:
+                if int(capitulo["capitulo_id"]) == int(capitulo_id):
+                    topico_pai_id = int(capitulo["topico_id"])
+                    break
+
+        # Um capítulo escolhido como padrão determina seu título pai. Mantém
+        # cabeçalho e linhas coerentes e evita status de divergência.
+        if topico_pai_id is not None:
+            self.pdf_topico_padrao.blockSignals(True)
+            indice_topico = self.pdf_topico_padrao.findData(topico_pai_id)
+            if indice_topico >= 0:
+                self.pdf_topico_padrao.setCurrentIndex(indice_topico)
+            self.pdf_topico_padrao.blockSignals(False)
+
+        for linha in range(self.tabela_pdf.rowCount()):
+            topico_combo = self.tabela_pdf.cellWidget(linha, 6)
+            capitulo_combo = self.tabela_pdf.cellWidget(linha, 7)
+            if capitulo_combo is None:
+                continue
+
+            if topico_pai_id is not None and topico_combo is not None:
+                indice_topico = self.indice_topico_combo(
+                    topico_combo, topico_pai_id
+                )
+                topico_combo.setCurrentIndex(indice_topico)
+
+            indice_capitulo = capitulo_combo.findData(capitulo_id)
+            capitulo_combo.setCurrentIndex(
+                indice_capitulo if indice_capitulo >= 0 else 0
+            )
+            self.atualizar_status_linha(linha)
 
     def marcar_todas(
         self,
@@ -6526,7 +6734,7 @@ class JanelaImportarPDFQuestoes(QDialog):
                 "texto"
             ],
             self,
-            origem_tipo=("texto" if self.eh_texto_colado else "pdf")
+            origem_tipo=self.origem_tipo
         ).exec()
 
     def importar(self):
@@ -6612,9 +6820,13 @@ class JanelaImportarPDFQuestoes(QDialog):
                 else None
             )
             capitulo_id = (
-                capitulo_combo.currentData()
-                if capitulo_combo
-                else None
+                None
+                if self.importacao_ctb
+                else (
+                    capitulo_combo.currentData()
+                    if capitulo_combo
+                    else None
+                )
             )
 
             topico_capitulo_id = None
@@ -6635,7 +6847,20 @@ class JanelaImportarPDFQuestoes(QDialog):
                 )
                 continue
 
-            if topico_id is None and capitulo_id is None:
+            if self.importacao_ctb and topico_id is None:
+                problemas.append(
+                    (
+                        questao["numero_pdf"],
+                        "sem capítulo"
+                    )
+                )
+                continue
+
+            if (
+                not self.importacao_ctb
+                and topico_id is None
+                and capitulo_id is None
+            ):
                 problemas.append(
                     (
                         questao[
@@ -6647,7 +6872,8 @@ class JanelaImportarPDFQuestoes(QDialog):
                 continue
 
             if (
-                topico_id is not None
+                not self.importacao_ctb
+                and topico_id is not None
                 and topico_capitulo_id is not None
                 and topico_id != topico_capitulo_id
             ):
@@ -6739,7 +6965,11 @@ class JanelaImportarPDFQuestoes(QDialog):
                     "Há questões selecionadas que ainda precisam "
                     "de conferência.\n\n"
                     f"{detalhes}\n\n"
-                    "Corrija o gabarito, título ou capítulo; ou desmarque essas questões."
+                    + (
+                        "Corrija o gabarito ou capítulo; ou desmarque essas questões."
+                        if self.importacao_ctb
+                        else "Corrija o gabarito, título ou capítulo; ou desmarque essas questões."
+                    )
                 )
             )
             return
@@ -6776,9 +7006,11 @@ class JanelaImportarPDFQuestoes(QDialog):
             return
 
         try:
-            fazer_backup(
-                "antes_importar_questoes_texto" if self.eh_texto_colado else "antes_importar_questoes_pdf"
-            )
+            motivo_backup = {
+                "texto": "antes_importar_questoes_texto",
+                "txt": "antes_importar_questoes_txt",
+            }.get(self.origem_tipo, "antes_importar_questoes_pdf")
+            fazer_backup(motivo_backup)
         except Exception as erro:
             QMessageBox.critical(
                 self,
@@ -30305,6 +30537,24 @@ class SistemaEstudos(QMainWindow):
         # Cache curto + barramento de atualização: evita recalcular o mesmo
         # conjunto analítico várias vezes durante uma única sequência de ações.
         self.cache_analitico = CacheAnalitico(ttl_padrao=12.0)
+        self._estado_estatisticas = EstadoEstatisticasLazy()
+        self._estado_relatorios = EstadoRelatoriosLazy()
+        self._estatisticas_refresh_agendado = False
+        self._estatisticas_refresh_em_andamento = False
+        self._estatisticas_data_referencia = None
+
+        # Navegação responsiva: Dashboard e Central de Questões mantêm estado
+        # de invalidação próprio. Voltar para uma tela já atualizada não deve
+        # disparar novamente consultas e montagem de tabelas pesadas.
+        self._dashboard_sujo = True
+        self._dashboard_refresh_agendado = False
+        self._dashboard_data_referencia = None
+        self._central_questoes_suja = True
+        self._central_questoes_refresh_agendado = False
+        self._central_questoes_concurso_id = None
+        self._relatorios_refresh_agendado = False
+        self._relatorios_refresh_em_andamento = False
+
         self._escopos_atualizacao = set()
         self._timer_atualizacao = QTimer(self)
         self._timer_atualizacao.setSingleShot(True)
@@ -30430,6 +30680,186 @@ class SistemaEstudos(QMainWindow):
         self.restaurar_estado_sessao()
         self.atualizar_dashboard()
 
+    def _marcar_dashboard_sujo(self):
+        self._dashboard_sujo = True
+
+    def _agendar_atualizacao_dashboard(self, forcar=False):
+        """Mostra o Dashboard primeiro e atualiza os dados depois do repaint.
+
+        Se nada mudou desde a última atualização, voltar ao Dashboard custa
+        apenas a troca de página. Isso remove a sensação de travamento ao usar
+        os botões Voltar.
+        """
+        if self._dashboard_refresh_agendado:
+            return
+
+        hoje = QDate.currentDate().toString("yyyy-MM-dd")
+        if self._dashboard_data_referencia != hoje:
+            self._dashboard_sujo = True
+
+        if not forcar and not self._dashboard_sujo:
+            return
+
+        self._dashboard_refresh_agendado = True
+
+        def executar():
+            self._dashboard_refresh_agendado = False
+            if not hasattr(self, "tela_inicial") or not hasattr(self, "telas"):
+                return
+            if self.telas.currentWidget() is not self.tela_inicial:
+                return
+            if not forcar and not self._dashboard_sujo:
+                return
+            self.atualizar_dashboard()
+
+        QTimer.singleShot(15, executar)
+
+    def _marcar_central_questoes_suja(self):
+        self._central_questoes_suja = True
+
+    def _agendar_carregamento_central_questoes(self, forcar=False, refiltrar=False):
+        """Carrega a Central somente depois que a página já apareceu."""
+        if self._central_questoes_refresh_agendado:
+            return
+
+        try:
+            concurso_id = int(obter_concurso_ativo()[0])
+        except Exception:
+            concurso_id = None
+
+        precisa_carregar = (
+            bool(forcar)
+            or self._central_questoes_suja
+            or self._central_questoes_concurso_id != concurso_id
+            or not hasattr(self, "dados_questoes")
+        )
+
+        if not precisa_carregar and not refiltrar:
+            return
+
+        self._central_questoes_refresh_agendado = True
+
+        def executar():
+            self._central_questoes_refresh_agendado = False
+            if not hasattr(self, "tela_questoes") or not hasattr(self, "telas"):
+                return
+            if self.telas.currentWidget() is not self.tela_questoes:
+                return
+            if precisa_carregar:
+                self.carregar_questoes()
+            elif refiltrar:
+                self.filtrar_questoes()
+
+        QTimer.singleShot(15, executar)
+
+    def invalidar_relatorios(self, atualizar_se_visivel=True):
+        """Marca Relatórios como desatualizados sem bloquear a navegação."""
+        self._estado_relatorios.marcar_sujas()
+        self.dados_relatorio_resumo = None
+        self.dados_relatorio_comparacao = None
+        self.dados_relatorio_estrategico = None
+        self.dados_relatorio_disciplinas = None
+        self.dados_relatorio_topicos = None
+        self.dados_relatorio_diario = None
+
+        if (
+            atualizar_se_visivel
+            and hasattr(self, "tela_relatorios")
+            and hasattr(self, "telas")
+            and self.telas.currentWidget() is self.tela_relatorios
+        ):
+            self._agendar_atualizacao_relatorios()
+
+    def _agendar_atualizacao_relatorios(self, forcar=False):
+        """Atualiza Relatórios depois que a página já teve chance de repintar."""
+        if self._relatorios_refresh_agendado:
+            return
+        self._relatorios_refresh_agendado = True
+
+        def executar():
+            self._relatorios_refresh_agendado = False
+            if not hasattr(self, "tela_relatorios") or not hasattr(self, "telas"):
+                return
+            if self.telas.currentWidget() is not self.tela_relatorios:
+                return
+            self.atualizar_relatorios(forcar=forcar)
+
+        QTimer.singleShot(15, executar)
+
+    def _ao_mudar_aba_relatorios(self, *args):
+        if (
+            hasattr(self, "tela_relatorios")
+            and hasattr(self, "telas")
+            and self.telas.currentWidget() is self.tela_relatorios
+        ):
+            self._agendar_atualizacao_relatorios()
+
+    def invalidar_estatisticas(self, escopo="all", atualizar_se_visivel=True):
+        """Marca análises como desatualizadas sem recalculá-las imediatamente.
+
+        A área de Estatísticas passou a carregar somente a aba visível. Isso
+        evita bloquear a navegação quando alterações acontecem em outras telas.
+        """
+        escopo = str(escopo or "all").lower()
+        if escopo == "foco":
+            abas = ("Histórico", "Regularidade", "Conquistas", "Tendências")
+            resumo = False
+        elif escopo in {"recomendacoes", "decisoes"}:
+            abas = ("Algoritmo",)
+            resumo = False
+        else:
+            abas = None
+            resumo = True
+
+        self._estado_estatisticas.marcar_sujas(abas, resumo=resumo)
+
+        # Os snapshots da UI também são caches. Invalidá-los junto dos eventos
+        # acadêmicos evita mostrar dados antigos ao abrir a aba mais tarde.
+        if escopo == "foco":
+            self.cache_analitico.invalidar("estatisticas:historico:")
+            self.cache_analitico.invalidar("estatisticas:regularidade:")
+            self.cache_analitico.invalidar("estatisticas:tendencias:")
+        elif escopo in {"recomendacoes", "decisoes"}:
+            self.cache_analitico.invalidar("estatisticas:algoritmo:")
+        else:
+            self.cache_analitico.invalidar("estatisticas:")
+            self.cache_analitico.invalidar("progresso:v2:")
+
+        if (
+            atualizar_se_visivel
+            and hasattr(self, "tela_estatisticas")
+            and hasattr(self, "telas")
+            and self.telas.currentWidget() is self.tela_estatisticas
+        ):
+            self._agendar_atualizacao_estatisticas()
+
+    def _agendar_atualizacao_estatisticas(self, forcar=False):
+        """Agenda o refresh depois que o Qt tiver oportunidade de repintar."""
+        if self._estatisticas_refresh_agendado:
+            return
+        self._estatisticas_refresh_agendado = True
+
+        def executar():
+            self._estatisticas_refresh_agendado = False
+            if not hasattr(self, "tela_estatisticas"):
+                return
+            if self.telas.currentWidget() is not self.tela_estatisticas:
+                return
+            self.atualizar_estatisticas(forcar=forcar)
+
+        # Um pequeno atraso garante uma janela para o repaint da navegação
+        # antes de qualquer consulta/ montagem de tabela mais pesada.
+        QTimer.singleShot(15, executar)
+
+    def _ao_mudar_aba_estatisticas(self, *args):
+        self.atualizar_ajuda_aba_estatisticas()
+        if (
+            hasattr(self, "tela_estatisticas")
+            and hasattr(self, "telas")
+            and self.telas.currentWidget() is self.tela_estatisticas
+        ):
+            self._agendar_atualizacao_estatisticas()
+
     def _receber_alteracao_dados(self, escopo):
         self._escopos_atualizacao.add(str(escopo or "all"))
         self._timer_atualizacao.start()
@@ -30442,29 +30872,173 @@ class SistemaEstudos(QMainWindow):
         revisões alteram domínio/prioridade.
         """
         escopo = str(escopo or "all").lower()
+        self._marcar_dashboard_sujo()
+        if escopo in {"all", "questoes", "topicos"}:
+            self._marcar_central_questoes_suja()
         if escopo == "foco":
             self.cache_analitico.invalidar("foco:")
+            self.cache_analitico.invalidar("regularidade:")
+            self.cache_analitico.invalidar("gamificacao:")
             self.cache_analitico.invalidar("inteligencia:calibracao_foco")
         elif escopo in {"questoes", "revisoes"}:
             self.cache_analitico.invalidar("adaptativas:")
             self.cache_analitico.invalidar("dashboard:")
+            self.cache_analitico.invalidar("regularidade:")
+            self.cache_analitico.invalidar("gamificacao:")
             self.cache_analitico.invalidar("inteligencia:calibracao_foco")
         elif escopo in {"recomendacoes", "decisoes"}:
             self.cache_analitico.invalidar("inteligencia:decisoes:")
         else:
             self.cache_analitico.invalidar()
+        self.invalidar_estatisticas(escopo, atualizar_se_visivel=True)
+        self.invalidar_relatorios(atualizar_se_visivel=True)
         self.dados_alterados.emit(escopo)
 
     def _processar_atualizacao_pendente(self):
         escopos = set(self._escopos_atualizacao)
         self._escopos_atualizacao.clear()
+
+        # Se o Dashboard não está visível, apenas preserve a invalidação.
+        # A atualização ocorrerá depois que a navegação já tiver acontecido.
+        if (
+            not hasattr(self, "tela_inicial")
+            or not hasattr(self, "telas")
+            or self.telas.currentWidget() is not self.tela_inicial
+        ):
+            self._marcar_dashboard_sujo()
+            return
+
         if escopos and escopos <= {"foco"}:
             try:
                 self.atualizar_dashboard_foco_rapido()
+                self._dashboard_sujo = False
+                self._dashboard_data_referencia = QDate.currentDate().toString("yyyy-MM-dd")
                 return
             except Exception:
-                pass
-        self.atualizar_dashboard()
+                self._marcar_dashboard_sujo()
+
+        self._agendar_atualizacao_dashboard(forcar=True)
+
+    def atualizar_regularidade_dashboard(self, snapshot=None):
+        if not hasattr(self, "dashboard_regularidade_sequencia"):
+            return
+        if snapshot is None:
+            hoje = QDate.currentDate().toString("yyyy-MM-dd")
+            snapshot = self.cache_analitico.obter(
+                f"regularidade:{hoje}",
+                lambda: obter_snapshot_regularidade(hoje),
+                ttl=20,
+            )
+
+        sequencia = int(snapshot.get("current_streak_days") or 0)
+        estado = str(snapshot.get("current_streak_state") or "no_history")
+        sufixo = ""
+        if estado == "pending_today" and sequencia > 0:
+            sufixo = " • hoje pendente"
+        elif estado == "active_today":
+            sufixo = " • hoje ✓"
+        self.dashboard_regularidade_sequencia.setText(
+            f"Sequência {sequencia}d{sufixo}"
+        )
+
+        semana = int(snapshot.get("current_week_active_days") or 0)
+        meta = int(snapshot.get("target_days_per_week") or 0)
+        if meta > 0:
+            self.dashboard_regularidade_semana.setText(f"Semana {semana}/{meta} dias")
+        else:
+            self.dashboard_regularidade_semana.setText(f"Semana {semana} dias")
+
+        ativos30 = int(snapshot.get("active_days_30") or 0)
+        self.dashboard_regularidade_mes.setText(f"30 dias {ativos30} ativos")
+
+        score = snapshot.get("regularity_score")
+        if score is None:
+            self.dashboard_regularidade_indice.setText(
+                "Meta de dias desativada" if meta <= 0 else "Regularidade —"
+            )
+        else:
+            marcador = " prov." if snapshot.get("regularity_state") == "provisional" else ""
+            self.dashboard_regularidade_indice.setText(
+                f"Regularidade {float(score):.0f}%{marcador}"
+            )
+
+    def atualizar_gamificacao_dashboard(
+        self,
+        snapshot=None,
+        *,
+        concurso_id=None,
+        progresso_snapshot=None,
+        regularidade_snapshot=None,
+    ):
+        if concurso_id is None:
+            concurso_id = obter_concurso_ativo()[0]
+        if snapshot is None:
+            snapshot = self.montar_snapshot_gamificacao(
+                concurso_id,
+                progresso_snapshot=progresso_snapshot,
+                regularidade_snapshot=regularidade_snapshot,
+            )
+        nivel = int(snapshot.get("level") or 1)
+        total_xp = int(snapshot.get("total_xp") or 0)
+        ganhas = int(snapshot.get("achievements_earned") or 0)
+        total = int(snapshot.get("achievements_total") or 0)
+        taxa = float(snapshot.get("level_progress_rate") or 0.0)
+        if hasattr(self, "dashboard_gamificacao_nivel"):
+            self.dashboard_gamificacao_nivel.setText(f"Nível {nivel}")
+            self.dashboard_gamificacao_xp.setText(f"{total_xp} XP")
+            self.dashboard_gamificacao_marcos.setText(f"Marcos {ganhas}/{total}")
+            self.dashboard_gamificacao_progresso.setText(
+                f"Próximo nível {taxa:.0f}%"
+            )
+        if hasattr(self, "topo_gamificacao_badge"):
+            self.topo_gamificacao_badge.setText(str(nivel))
+        if hasattr(self, "topo_gamificacao_resumo"):
+            self.topo_gamificacao_resumo.setText(f"Nível {nivel} · {total_xp} XP")
+        if hasattr(self, "topo_gamificacao_detalhe"):
+            self.topo_gamificacao_detalhe.setText(f"Próximo nível {taxa:.0f}%")
+        if hasattr(self, "topo_gamificacao_barra"):
+            self.topo_gamificacao_barra.setValue(max(0, min(100, int(round(taxa)))))
+
+        # Card principal de progresso do Dashboard.
+        progresso_xp = int(snapshot.get("level_progress_xp") or 0)
+        requerido = int(snapshot.get("level_required_xp") or 250)
+        if hasattr(self, "dashboard_progress_badge"):
+            self.dashboard_progress_badge.setText(str(nivel))
+        if hasattr(self, "dashboard_progress_nivel"):
+            self.dashboard_progress_nivel.setText(f"Nível {nivel}")
+        if hasattr(self, "dashboard_progress_xp"):
+            self.dashboard_progress_xp.setText(f"{total_xp} XP")
+        if hasattr(self, "dashboard_progress_barra"):
+            self.dashboard_progress_barra.setValue(
+                max(0, min(100, int(round(taxa))))
+            )
+        if hasattr(self, "dashboard_progress_detalhe"):
+            self.dashboard_progress_detalhe.setText(
+                f"{progresso_xp} / {requerido} XP para o nível {nivel + 1}"
+            )
+        if hasattr(self, "dashboard_progress_conquistas"):
+            self.dashboard_progress_conquistas.setText(
+                f"🏆 {ganhas}/{total} conquistas"
+            )
+        if hasattr(self, "dashboard_progress_proxima"):
+            conquistas = list(snapshot.get("achievements") or [])
+            bloqueadas = [item for item in conquistas if not item.get("earned")]
+            bloqueadas.sort(
+                key=lambda item: (
+                    -float(item.get("progress_rate") or 0.0),
+                    float(item.get("target") or 0.0),
+                )
+            )
+            if bloqueadas:
+                proxima = bloqueadas[0]
+                self.dashboard_progress_proxima.setText(
+                    f"Próxima conquista: {proxima.get('title')} • "
+                    f"{proxima.get('progress_text')}"
+                )
+            else:
+                self.dashboard_progress_proxima.setText(
+                    "Todos os marcos desta versão foram conquistados."
+                )
 
     def atualizar_dashboard_foco_rapido(self):
         """Atualiza só os cards afetados quando muda apenas o Modo Foco."""
@@ -30475,6 +31049,19 @@ class SistemaEstudos(QMainWindow):
         concurso_id = obter_concurso_ativo()[0]
         resumo_foco = obter_resumo_foco(hoje)
         resumo = obter_dashboard(hoje, concurso_id)
+        regularidade = self.cache_analitico.obter(
+            f"regularidade:{hoje}",
+            lambda: obter_snapshot_regularidade(hoje),
+            ttl=20,
+        )
+        self.atualizar_regularidade_dashboard(regularidade)
+        try:
+            self.atualizar_gamificacao_dashboard(
+                concurso_id=concurso_id,
+                regularidade_snapshot=regularidade,
+            )
+        except Exception:
+            pass
 
         hoje_foco = int(resumo_foco.get("hoje_segundos") or 0)
         semana_foco = int(resumo_foco.get("semana_segundos") or 0)
@@ -30524,7 +31111,7 @@ class SistemaEstudos(QMainWindow):
             ("Ctrl+F", self.abrir_modo_foco),
             ("Ctrl+Q", self.abrir_questoes),
             ("Ctrl+Shift+C", self.atalho_checkpoint),
-            ("Ctrl+H", lambda: self.telas.setCurrentWidget(self.tela_inicial)),
+            ("Ctrl+H", self.voltar_inicio),
         ]
         for sequencia, acao in atalhos:
             atalho = QShortcut(QKeySequence(sequencia), self)
@@ -30722,6 +31309,7 @@ class SistemaEstudos(QMainWindow):
     def ir_para_secao_dashboard(self, chave=None, widget=None):
         """Volta ao Dashboard, expande a seção desejada e a traz para a tela."""
         self.telas.setCurrentWidget(self.tela_inicial)
+        self._agendar_atualizacao_dashboard()
         if chave:
             try:
                 self.definir_estado_secao_dashboard(chave, True, salvar=False)
@@ -30744,7 +31332,7 @@ class SistemaEstudos(QMainWindow):
     def executar_comando_busca_global(self, comando_id):
         comando_id = str(comando_id or "")
         if comando_id == "dashboard":
-            self.telas.setCurrentWidget(self.tela_inicial)
+            self.voltar_inicio()
         elif comando_id == "foco":
             self.abrir_modo_foco()
         elif comando_id == "sessao_rapida":
@@ -30990,31 +31578,99 @@ class SistemaEstudos(QMainWindow):
         marca.addWidget(logo_marca)
         marca.addLayout(texto_marca)
 
-        # Cabeçalho em quatro zonas: marca | perfil ativo | busca global | ações.
-        # A busca fica sempre disponível sem aumentar a altura do cabeçalho.
+        # Cabeçalho assimétrico em duas linhas:
+        # marca (ocupando as duas linhas) | busca/ações | perfil/XP.
+        # Isso preserva largura útil mesmo em janelas próximas de 1366 px.
         topo_container = QFrame()
         topo_container.setObjectName("dashboardTopBar")
 
         topo = QGridLayout(topo_container)
-        topo.setContentsMargins(14, 8, 14, 8)
-        topo.setHorizontalSpacing(12)
-        topo.setVerticalSpacing(0)
-        topo.setColumnStretch(0, 1)
-        topo.setColumnStretch(1, 0)
+        topo.setContentsMargins(14, 9, 14, 9)
+        topo.setHorizontalSpacing(14)
+        topo.setVerticalSpacing(6)
+        topo.setColumnStretch(0, 0)
+        topo.setColumnStretch(1, 1)
         topo.setColumnStretch(2, 0)
-        topo.setColumnStretch(3, 1)
 
         topo.addLayout(
             marca,
             0,
             0,
-            Qt.AlignLeft | Qt.AlignVCenter
+            2,
+            1,
+            Qt.AlignLeft | Qt.AlignVCenter,
         )
 
+        # ----------------------------------------------------
+        # Linha superior — busca global + ações
+        # ----------------------------------------------------
+        self.botao_busca_global = QPushButton(
+            "⌕  Buscar no Vighna...                                      Ctrl+K"
+        )
+        self.botao_busca_global.setObjectName("globalSearchTrigger")
+        self.botao_busca_global.setMinimumWidth(360)
+        self.botao_busca_global.setMaximumWidth(560)
+        self.botao_busca_global.setFixedHeight(36)
+        self.botao_busca_global.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Fixed,
+        )
+        self.botao_busca_global.setCursor(Qt.PointingHandCursor)
+        self.botao_busca_global.setToolTip(
+            "Buscar telas, ferramentas, ações e tópicos do perfil ativo. Atalho: Ctrl+K."
+        )
+        self.botao_busca_global.clicked.connect(self.abrir_busca_global)
+        topo.addWidget(
+            self.botao_busca_global,
+            0,
+            1,
+            Qt.AlignVCenter,
+        )
+
+        acoes_topo = QHBoxLayout()
+        acoes_topo.setContentsMargins(0, 0, 0, 0)
+        acoes_topo.setSpacing(8)
+
+        botao_questoes = QPushButton("Central de Questões")
+        botao_questoes.setObjectName("questionsNavButton")
+        botao_questoes.setMinimumWidth(148)
+        botao_questoes.setFixedHeight(36)
+        botao_questoes.setToolTip(
+            "Abrir a Central de Questões para cadastrar, importar, editar, desativar, organizar e remover questões do banco."
+        )
+        botao_questoes.clicked.connect(self.abrir_questoes)
+        acoes_topo.addWidget(botao_questoes, 0, Qt.AlignVCenter)
+
+        self.botao_configuracoes_topo = QPushButton("")
+        self.botao_configuracoes_topo.setObjectName("topAccentButton")
+        self.botao_configuracoes_topo.setFixedSize(42, 36)
+        self.botao_configuracoes_topo.setToolTip(
+            "Abrir as configurações gerais do VighnaStudy."
+        )
+        self.botao_configuracoes_topo.setAccessibleName("Configurações")
+        self.botao_configuracoes_topo.clicked.connect(
+            self.abrir_configuracoes
+        )
+        acoes_topo.addWidget(
+            self.botao_configuracoes_topo,
+            0,
+            Qt.AlignVCenter,
+        )
+
+        topo.addLayout(
+            acoes_topo,
+            0,
+            2,
+            Qt.AlignRight | Qt.AlignVCenter,
+        )
+
+        # ----------------------------------------------------
+        # Linha inferior — perfil ativo + progressão
+        # ----------------------------------------------------
         perfil_central = QFrame()
         perfil_central.setObjectName("topProfileBar")
         perfil_central_layout = QHBoxLayout(perfil_central)
-        perfil_central_layout.setContentsMargins(10, 6, 10, 6)
+        perfil_central_layout.setContentsMargins(10, 5, 10, 5)
         perfil_central_layout.setSpacing(7)
 
         perfil_global_rotulo = QLabel("PERFIL ATIVO")
@@ -31022,13 +31678,13 @@ class SistemaEstudos(QMainWindow):
         perfil_central_layout.addWidget(
             perfil_global_rotulo,
             0,
-            Qt.AlignVCenter
+            Qt.AlignVCenter,
         )
 
         self.combo_concurso = QComboBox()
         self.combo_concurso.setObjectName("topProfileCombo")
         self.combo_concurso.setMinimumSize(185, 34)
-        self.combo_concurso.setMaximumWidth(250)
+        self.combo_concurso.setMaximumWidth(300)
         self.combo_concurso.setToolTip(
             "Trocar o concurso/perfil ativo. Todo o Dashboard, recomendações, questões, revisões e estatísticas passam a usar o perfil selecionado."
         )
@@ -31037,8 +31693,8 @@ class SistemaEstudos(QMainWindow):
         )
         perfil_central_layout.addWidget(
             self.combo_concurso,
-            0,
-            Qt.AlignVCenter
+            1,
+            Qt.AlignVCenter,
         )
 
         gerenciar_concursos = QPushButton("Gerenciar")
@@ -31051,75 +31707,14 @@ class SistemaEstudos(QMainWindow):
         perfil_central_layout.addWidget(
             gerenciar_concursos,
             0,
-            Qt.AlignVCenter
+            Qt.AlignVCenter,
         )
 
         topo.addWidget(
             perfil_central,
-            0,
             1,
-            Qt.AlignCenter
-        )
-
-        self.botao_busca_global = QPushButton(
-            "⌕  Buscar no Vighna...          Ctrl+K"
-        )
-        self.botao_busca_global.setObjectName("globalSearchTrigger")
-        self.botao_busca_global.setMinimumWidth(245)
-        self.botao_busca_global.setMaximumWidth(310)
-        self.botao_busca_global.setFixedHeight(36)
-        self.botao_busca_global.setCursor(Qt.PointingHandCursor)
-        self.botao_busca_global.setToolTip(
-            "Buscar telas, ferramentas, ações e tópicos do perfil ativo. Atalho: Ctrl+K."
-        )
-        self.botao_busca_global.clicked.connect(self.abrir_busca_global)
-        topo.addWidget(
-            self.botao_busca_global,
-            0,
-            2,
-            Qt.AlignCenter
-        )
-
-        acoes_topo = QHBoxLayout()
-        acoes_topo.setSpacing(10)
-        acoes_topo.addStretch(1)
-
-        botao_questoes = QPushButton("Central de Questões")
-        botao_questoes.setObjectName("questionsNavButton")
-        botao_questoes.setMinimumWidth(132)
-        botao_questoes.setToolTip(
-            "Abrir a Central de Questões para cadastrar, importar, editar, desativar, organizar e remover questões do banco."
-        )
-        botao_questoes.clicked.connect(
-            self.abrir_questoes
-        )
-
-        botao_configuracoes = QPushButton("Configurações")
-        botao_configuracoes.setObjectName("topAccentButton")
-        botao_configuracoes.setToolTip(
-            "Abrir as configurações gerais do VighnaStudy."
-        )
-        botao_configuracoes.clicked.connect(
-            self.abrir_configuracoes
-        )
-
-        for botao in (
-            botao_questoes,
-            botao_configuracoes,
-        ):
-            botao.setMinimumWidth(112)
-            botao.setFixedHeight(36)
-            acoes_topo.addWidget(
-                botao,
-                0,
-                Qt.AlignVCenter
-            )
-
-        topo.addLayout(
-            acoes_topo,
-            0,
-            3,
-            Qt.AlignRight | Qt.AlignVCenter
+            1,
+            Qt.AlignLeft | Qt.AlignVCenter,
         )
 
         layout.addWidget(topo_container)
@@ -31140,64 +31735,22 @@ class SistemaEstudos(QMainWindow):
             self.dashboard_hoje_painel
         )
         foco_painel_layout.setContentsMargins(
-            16, 13, 16, 14
+            12, 10, 12, 12
         )
-        foco_painel_layout.setSpacing(9)
+        foco_painel_layout.setSpacing(6)
 
-        # Cabeçalho no mesmo padrão visual de "Estudo por questões".
-        foco_header = QHBoxLayout()
-        foco_header.setSpacing(10)
-
-        foco_icone = QLabel("◎")
-        foco_icone.setObjectName("focusDashboardIcon")
-        foco_icone.setAlignment(Qt.AlignCenter)
-        foco_icone.setFixedSize(36, 36)
-
-        foco_titulos = QVBoxLayout()
-        foco_titulos.setSpacing(1)
-
-        self.dashboard_toggle_hoje = QPushButton(
-            "▾  Foco"
-        )
-        self.dashboard_toggle_hoje.setObjectName(
-            "dashboardSectionToggle"
-        )
-        self.dashboard_toggle_hoje.setCursor(
-            Qt.PointingHandCursor
-        )
-        self.dashboard_toggle_hoje.clicked.connect(
-            lambda: self.alternar_secao_dashboard("hoje")
-        )
-
-        self.dashboard_foco_subtitulo = QLabel(
-            "Organize seu tempo de concentração e escolha entre uma sessão completa ou rápida."
-        )
-        self.dashboard_foco_subtitulo.setObjectName(
-            "focusDashboardSubtitle"
-        )
-        self.dashboard_foco_subtitulo.setWordWrap(True)
-
-        foco_titulos.addWidget(self.dashboard_toggle_hoje)
-        foco_titulos.addWidget(self.dashboard_foco_subtitulo)
-
+        # O cabeçalho externo "Foco" foi removido para eliminar redundância
+        # visual. O próprio card esquerdo passa a ser a identidade do módulo.
+        # Mantemos estes objetos ocultos apenas para compatibilidade com rotinas
+        # antigas de atualização/configuração.
+        self.dashboard_toggle_hoje = QPushButton("Foco")
+        self.dashboard_toggle_hoje.setVisible(False)
+        self.dashboard_foco_subtitulo = QLabel("")
+        self.dashboard_foco_subtitulo.setVisible(False)
         self.dashboard_hoje_data = QLabel("—")
-        self.dashboard_hoje_data.setObjectName(
-            "dashboardTodayDate"
-        )
-
-        # Mantido por compatibilidade com a atualização do Dashboard, mas não
-        # exibido: alertas de revisão pertencem aos blocos de prioridade.
+        self.dashboard_hoje_data.setVisible(False)
         self.dashboard_hoje_status = QLabel("", self.dashboard_hoje_painel)
         self.dashboard_hoje_status.setVisible(False)
-
-        foco_header.addWidget(foco_icone, 0, Qt.AlignVCenter)
-        foco_header.addLayout(foco_titulos, 1)
-        foco_header.addWidget(
-            self.dashboard_hoje_data,
-            0,
-            Qt.AlignTop | Qt.AlignRight,
-        )
-        foco_painel_layout.addLayout(foco_header)
 
         self.dashboard_hoje_conteudo = QWidget()
         self.dashboard_hoje_conteudo.setObjectName(
@@ -31209,12 +31762,11 @@ class SistemaEstudos(QMainWindow):
         dashboard_hoje_conteudo_layout.setContentsMargins(
             0, 0, 0, 0
         )
-        dashboard_hoje_conteudo_layout.setSpacing(8)
+        dashboard_hoje_conteudo_layout.setSpacing(6)
 
-        # Resumo compacto — equivalente à linha de métricas do card de questões.
-        foco_metricas = QHBoxLayout()
-        foco_metricas.setSpacing(12)
-
+        # Resumo do foco mantido apenas para compatibilidade com a rotina de
+        # atualização, mas removido do topo do módulo para reduzir redundância
+        # visual e permitir que os cards subam no layout.
         self.dashboard_focus_metric_today = QLabel(
             "0 min de foco hoje"
         )
@@ -31224,6 +31776,8 @@ class SistemaEstudos(QMainWindow):
         self.dashboard_focus_metric_today.setProperty(
             "metricKind", "time"
         )
+        self.dashboard_focus_metric_today.setVisible(False)
+
         self.dashboard_focus_metric_sessions = QLabel(
             "0 sessões hoje"
         )
@@ -31233,6 +31787,8 @@ class SistemaEstudos(QMainWindow):
         self.dashboard_focus_metric_sessions.setProperty(
             "metricKind", "sessions"
         )
+        self.dashboard_focus_metric_sessions.setVisible(False)
+
         self.dashboard_focus_metric_goal = QLabel(
             "Meta semanal desativada"
         )
@@ -31242,12 +31798,7 @@ class SistemaEstudos(QMainWindow):
         self.dashboard_focus_metric_goal.setProperty(
             "metricKind", "goal"
         )
-
-        foco_metricas.addWidget(self.dashboard_focus_metric_today)
-        foco_metricas.addWidget(self.dashboard_focus_metric_sessions)
-        foco_metricas.addWidget(self.dashboard_focus_metric_goal)
-        foco_metricas.addStretch(1)
-        dashboard_hoje_conteudo_layout.addLayout(foco_metricas)
+        self.dashboard_focus_metric_goal.setVisible(False)
 
         foco_cards = QHBoxLayout()
         foco_cards.setSpacing(8)
@@ -31259,7 +31810,7 @@ class SistemaEstudos(QMainWindow):
         foco_hoje.setObjectName(
             "focusDashboardMainCard"
         )
-        foco_hoje.setMinimumHeight(194)
+        foco_hoje.setMinimumHeight(186)
         foco_hoje.setSizePolicy(
             QSizePolicy.Expanding,
             QSizePolicy.Expanding,
@@ -31280,7 +31831,7 @@ class SistemaEstudos(QMainWindow):
 
         foco_card_titulos = QHBoxLayout()
         foco_card_titulos.setSpacing(7)
-        foco_rotulo = QLabel("Modo Foco")
+        foco_rotulo = QLabel("Foco")
         foco_rotulo.setObjectName(
             "focusDashboardCardTitle"
         )
@@ -31296,7 +31847,7 @@ class SistemaEstudos(QMainWindow):
         foco_cabecalho.addLayout(foco_card_titulos, 1)
 
         foco_descricao = QLabel(
-            "Sessão completa com cronômetro, pausas e registro do tempo efetivo."
+            "Cronômetro de estudo com pausas e registro do tempo efetivo."
         )
         foco_descricao.setObjectName(
             "focusDashboardDescription"
@@ -31366,127 +31917,132 @@ class SistemaEstudos(QMainWindow):
         foco_hoje_layout.addLayout(foco_cabecalho)
         foco_hoje_layout.addWidget(foco_descricao)
         foco_hoje_layout.addLayout(foco_valor_linha)
-        foco_hoje_layout.addWidget(
-            self.dashboard_hoje_foco_detalhe
-        )
-        foco_hoje_layout.addWidget(
-            self.dashboard_hoje_foco_barra
-        )
+        # Objetivo diário + histórico recente de foco.
+        foco_objetivo_box = QFrame()
+        foco_objetivo_box.setObjectName("dashboardQuickAccess")
+        foco_objetivo_box.setProperty("embedded", True)
+        foco_objetivo_layout = QVBoxLayout(foco_objetivo_box)
+        foco_objetivo_layout.setContentsMargins(10, 7, 10, 7)
+        foco_objetivo_layout.setSpacing(4)
+
+        objetivo_topo = QHBoxLayout()
+        objetivo_topo.setSpacing(8)
+        objetivo_titulo = QLabel("Objetivo de hoje")
+        objetivo_titulo.setObjectName("dashboardQuickAccessTitle")
+        self.dashboard_focus_goal_value = QLabel("Meta não definida")
+        self.dashboard_focus_goal_value.setObjectName("focusDashboardDetail")
+        self.dashboard_focus_goal_value.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        objetivo_topo.addWidget(objetivo_titulo, 0, Qt.AlignVCenter)
+        objetivo_topo.addStretch(1)
+        objetivo_topo.addWidget(self.dashboard_focus_goal_value, 0, Qt.AlignVCenter)
+        foco_objetivo_layout.addLayout(objetivo_topo)
+        foco_objetivo_layout.addWidget(self.dashboard_hoje_foco_detalhe)
+
+        # A barra existente passa a representar explicitamente o objetivo diário.
+        foco_objetivo_layout.addWidget(self.dashboard_hoje_foco_barra)
+
+        self.dashboard_focus_last_session = QLabel("Última sessão: —")
+        self.dashboard_focus_last_session.setObjectName("focusQuickHint")
+        self.dashboard_focus_best_week = QLabel("Melhor sessão da semana: —")
+        self.dashboard_focus_best_week.setObjectName("focusQuickHint")
+        foco_objetivo_layout.addWidget(self.dashboard_focus_last_session)
+        foco_objetivo_layout.addWidget(self.dashboard_focus_best_week)
+
+        foco_hoje_layout.addWidget(foco_objetivo_box)
         foco_hoje_layout.addStretch(1)
         foco_hoje_layout.addWidget(
             self.dashboard_iniciar_foco
         )
 
         # ----------------------------------------------------
-        # Sessão rápida — alternativa para janelas curtas de tempo
+        # Seu progresso — gamificação compacta e útil
         # ----------------------------------------------------
-        sessao_rapida_card = QFrame()
-        sessao_rapida_card.setObjectName(
-            "focusQuickCard"
-        )
-        sessao_rapida_card.setMinimumHeight(194)
-        sessao_rapida_card.setSizePolicy(
+        progresso_card = QFrame()
+        progresso_card.setObjectName("focusQuickCard")
+        progresso_card.setMinimumHeight(186)
+        progresso_card.setSizePolicy(
             QSizePolicy.Expanding,
             QSizePolicy.Expanding,
         )
-        sessao_rapida_layout = QVBoxLayout(sessao_rapida_card)
-        sessao_rapida_layout.setContentsMargins(
-            14, 12, 14, 12
-        )
-        sessao_rapida_layout.setSpacing(6)
+        progresso_layout = QVBoxLayout(progresso_card)
+        progresso_layout.setContentsMargins(14, 12, 14, 12)
+        progresso_layout.setSpacing(6)
 
-        sessao_rapida_topo = QHBoxLayout()
-        sessao_rapida_topo.setSpacing(8)
-        sessao_rapida_icone = QLabel("↯")
-        sessao_rapida_icone.setObjectName("focusQuickIcon")
-        sessao_rapida_icone.setAlignment(Qt.AlignCenter)
-        sessao_rapida_icone.setFixedSize(34, 34)
-        sessao_rapida_titulo = QLabel("Sessão rápida")
-        sessao_rapida_titulo.setObjectName(
-            "focusDashboardCardTitle"
-        )
-        sessao_rapida_topo.addWidget(sessao_rapida_icone)
-        sessao_rapida_topo.addWidget(sessao_rapida_titulo, 1)
+        progresso_topo = QHBoxLayout()
+        progresso_topo.setSpacing(8)
+        progresso_icone = QLabel("✦")
+        progresso_icone.setObjectName("focusQuickIcon")
+        progresso_icone.setAlignment(Qt.AlignCenter)
+        progresso_icone.setFixedSize(34, 34)
+        progresso_titulo = QLabel("Seu progresso")
+        progresso_titulo.setObjectName("focusDashboardCardTitle")
+        progresso_topo.addWidget(progresso_icone)
+        progresso_topo.addWidget(progresso_titulo, 1)
+        progresso_layout.addLayout(progresso_topo)
 
-        sessao_rapida_descricao = QLabel(
-            "Sessão curta para quando você tiver pouco tempo, sem alterar o planejamento."
+        progresso_descricao = QLabel(
+            "XP por constância, revisão, recuperação, cobertura e consolidação."
         )
-        sessao_rapida_descricao.setObjectName(
-            "focusDashboardDescription"
-        )
-        sessao_rapida_descricao.setWordWrap(True)
+        progresso_descricao.setObjectName("focusDashboardDescription")
+        progresso_descricao.setWordWrap(True)
+        progresso_layout.addWidget(progresso_descricao)
 
-        sessao_rapida_eyebrow = QLabel("ESCOLHA A DURAÇÃO")
-        sessao_rapida_eyebrow.setObjectName(
-            "focusQuickEyebrow"
-        )
+        nivel_linha = QHBoxLayout()
+        nivel_linha.setSpacing(10)
+        self.dashboard_progress_badge = QLabel("1")
+        self.dashboard_progress_badge.setObjectName("dashboardProgressBadge")
+        self.dashboard_progress_badge.setAlignment(Qt.AlignCenter)
+        self.dashboard_progress_badge.setFixedSize(42, 42)
+        nivel_linha.addWidget(self.dashboard_progress_badge, 0, Qt.AlignVCenter)
 
-        presets_rapidos = QHBoxLayout()
-        presets_rapidos.setSpacing(8)
-        self.dashboard_quick_focus_group = QButtonGroup(self)
-        self.dashboard_quick_focus_group.setExclusive(True)
-        self.dashboard_quick_focus_buttons = {}
+        nivel_textos = QVBoxLayout()
+        nivel_textos.setSpacing(0)
+        self.dashboard_progress_nivel = QLabel("Nível 1")
+        self.dashboard_progress_nivel.setObjectName("focusDashboardCardTitle")
+        self.dashboard_progress_xp = QLabel("0 XP")
+        self.dashboard_progress_xp.setObjectName("focusDashboardDetail")
+        nivel_textos.addWidget(self.dashboard_progress_nivel)
+        nivel_textos.addWidget(self.dashboard_progress_xp)
+        nivel_linha.addLayout(nivel_textos, 1)
+        progresso_layout.addLayout(nivel_linha)
 
-        for minutos in (5, 10, 15):
-            botao_rapido = QPushButton(f"{minutos} min")
-            botao_rapido.setObjectName(
-                "focusQuickPresetButton"
-            )
-            botao_rapido.setCheckable(True)
-            botao_rapido.setMinimumHeight(34)
-            botao_rapido.setCursor(Qt.PointingHandCursor)
-            self.dashboard_quick_focus_group.addButton(
-                botao_rapido,
-                minutos,
-            )
-            self.dashboard_quick_focus_buttons[minutos] = botao_rapido
-            botao_rapido.clicked.connect(
-                lambda _checked=False, m=minutos:
-                    self.selecionar_sessao_rapida_dashboard(m)
-            )
-            presets_rapidos.addWidget(botao_rapido, 1)
+        self.dashboard_progress_barra = QProgressBar()
+        self.dashboard_progress_barra.setObjectName("dashboardTodayProgress")
+        self.dashboard_progress_barra.setRange(0, 100)
+        self.dashboard_progress_barra.setValue(0)
+        self.dashboard_progress_barra.setTextVisible(False)
+        self.dashboard_progress_barra.setFixedHeight(8)
+        progresso_layout.addWidget(self.dashboard_progress_barra)
 
-        self.dashboard_quick_focus_buttons[10].setChecked(True)
-        self.dashboard_quick_focus_minutes = 10
+        self.dashboard_progress_detalhe = QLabel("0 / 250 XP para o nível 2")
+        self.dashboard_progress_detalhe.setObjectName("focusQuickHint")
+        progresso_layout.addWidget(self.dashboard_progress_detalhe)
 
-        self.dashboard_quick_focus_hint = QLabel(
-            "10 min selecionados • início imediato"
-        )
-        self.dashboard_quick_focus_hint.setObjectName(
-            "focusQuickHint"
-        )
+        progresso_marcos_linha = QHBoxLayout()
+        progresso_marcos_linha.setSpacing(10)
+        self.dashboard_progress_conquistas = QLabel("🏆 0/0 conquistas")
+        self.dashboard_progress_conquistas.setObjectName("focusDashboardDetail")
+        progresso_marcos_linha.addWidget(self.dashboard_progress_conquistas, 0)
+        progresso_marcos_linha.addStretch(1)
+        progresso_layout.addLayout(progresso_marcos_linha)
 
-        self.dashboard_sessao_rapida_iniciar = QPushButton(
-            "▶  Começar"
-        )
-        self.dashboard_sessao_rapida_iniciar.setObjectName(
-            "focusQuickStartButton"
-        )
-        self.dashboard_sessao_rapida_iniciar.setMinimumHeight(38)
-        self.dashboard_sessao_rapida_iniciar.setCursor(
-            Qt.PointingHandCursor
-        )
-        self.dashboard_sessao_rapida_iniciar.setToolTip(
-            "Iniciar imediatamente uma sessão curta no Modo Foco."
-        )
-        self.dashboard_sessao_rapida_iniciar.clicked.connect(
-            self.iniciar_sessao_rapida_dashboard
-        )
+        self.dashboard_progress_proxima = QLabel("Próxima conquista: —")
+        self.dashboard_progress_proxima.setObjectName("focusDashboardDetail")
+        self.dashboard_progress_proxima.setWordWrap(True)
+        progresso_layout.addWidget(self.dashboard_progress_proxima)
+        progresso_layout.addStretch(1)
 
-        sessao_rapida_layout.addLayout(sessao_rapida_topo)
-        sessao_rapida_layout.addWidget(sessao_rapida_descricao)
-        sessao_rapida_layout.addWidget(sessao_rapida_eyebrow)
-        sessao_rapida_layout.addLayout(presets_rapidos)
-        sessao_rapida_layout.addWidget(
-            self.dashboard_quick_focus_hint
+        botao_ver_conquistas = QPushButton("Ver conquistas  →")
+        botao_ver_conquistas.setObjectName("subtleButton")
+        botao_ver_conquistas.setMinimumHeight(34)
+        botao_ver_conquistas.setCursor(Qt.PointingHandCursor)
+        botao_ver_conquistas.clicked.connect(
+            lambda: self.abrir_estatisticas("Conquistas")
         )
-        sessao_rapida_layout.addStretch(1)
-        sessao_rapida_layout.addWidget(
-            self.dashboard_sessao_rapida_iniciar
-        )
+        progresso_layout.addWidget(botao_ver_conquistas)
 
         foco_cards.addWidget(foco_hoje, 1)
-        foco_cards.addWidget(sessao_rapida_card, 1)
+        foco_cards.addWidget(progresso_card, 1)
         dashboard_hoje_conteudo_layout.addLayout(foco_cards)
 
         # ----------------------------------------------------
@@ -31537,45 +32093,59 @@ class SistemaEstudos(QMainWindow):
         )
         acessos_conteudo_layout.setSpacing(8)
 
-        botao_pausa = QPushButton("Pausa")
-        botao_pausa.setObjectName("pauseNavButton")
-        botao_pausa.setToolTip("Abrir Pausa & Desafios.")
-        botao_pausa.clicked.connect(self.abrir_pausa_desafios)
+        self.dashboard_botao_pausa = QPushButton("Pausa")
+        self.dashboard_botao_pausa.setObjectName("pauseNavButton")
+        self.dashboard_botao_pausa.setToolTip("Abrir Pausa & Desafios.")
+        self.dashboard_botao_pausa.clicked.connect(
+            self.abrir_pausa_desafios
+        )
 
-        botao_estatisticas = QPushButton("Estatísticas")
-        botao_estatisticas.setObjectName("toolbarButton")
-        botao_estatisticas.setToolTip(
+        self.dashboard_botao_estatisticas = QPushButton("Estatísticas")
+        self.dashboard_botao_estatisticas.setObjectName("toolbarButton")
+        self.dashboard_botao_estatisticas.setToolTip(
             "Abrir a análise de desempenho e evolução."
         )
-        botao_estatisticas.clicked.connect(self.abrir_estatisticas)
+        self.dashboard_botao_estatisticas.clicked.connect(
+            self.abrir_estatisticas
+        )
 
-        botao_relatorios = QPushButton("Relatórios")
-        botao_relatorios.setObjectName("toolbarButton")
-        botao_relatorios.setToolTip(
+        self.dashboard_botao_relatorios = QPushButton("Relatórios")
+        self.dashboard_botao_relatorios.setObjectName("toolbarButton")
+        self.dashboard_botao_relatorios.setToolTip(
             "Abrir relatórios e análises do estudo."
         )
-        botao_relatorios.clicked.connect(self.abrir_relatorios)
+        self.dashboard_botao_relatorios.clicked.connect(
+            self.abrir_relatorios
+        )
 
-        botao_calendario = QPushButton("Calendário")
-        botao_calendario.setObjectName("toolbarButton")
-        botao_calendario.setToolTip(
+        self.dashboard_botao_calendario = QPushButton("Calendário")
+        self.dashboard_botao_calendario.setObjectName("toolbarButton")
+        self.dashboard_botao_calendario.setToolTip(
             "Abrir o calendário de revisões."
         )
-        botao_calendario.clicked.connect(self.abrir_calendario)
+        self.dashboard_botao_calendario.clicked.connect(
+            self.abrir_calendario
+        )
 
         for botao in (
-            botao_pausa,
-            botao_estatisticas,
-            botao_relatorios,
-            botao_calendario,
+            self.dashboard_botao_pausa,
+            self.dashboard_botao_estatisticas,
+            self.dashboard_botao_relatorios,
+            self.dashboard_botao_calendario,
         ):
+            # Não limite a altura máxima aqui. O tema pode acrescentar
+            # padding/min-height ao QPushButton (especialmente toolbarButton),
+            # e um maximumHeight menor que o sizeHint faz o Qt recortar a
+            # borda inferior do botão. Deixamos o próprio estilo calcular a
+            # altura necessária e o rodapé cresce alguns pixels se preciso.
             botao.setMinimumHeight(34)
-            botao.setMaximumHeight(36)
             botao.setSizePolicy(
                 QSizePolicy.Expanding,
                 QSizePolicy.Fixed,
             )
             acessos_conteudo_layout.addWidget(botao, 1)
+
+        self.atualizar_icones_interface()
 
         atalhos_layout.addWidget(
             self.dashboard_acessos_conteudo,
@@ -31589,6 +32159,99 @@ class SistemaEstudos(QMainWindow):
         layout.addWidget(
             self.dashboard_hoje_painel
         )
+
+        # ----------------------------------------------------
+        # Regularidade — resumo global de hábito
+        # ----------------------------------------------------
+        self.dashboard_regularidade_painel = QFrame()
+        self.dashboard_regularidade_painel.setObjectName("myEvolutionPanel")
+        regularidade_layout = QHBoxLayout(self.dashboard_regularidade_painel)
+        regularidade_layout.setContentsMargins(14, 9, 14, 9)
+        regularidade_layout.setSpacing(14)
+
+        regularidade_textos = QVBoxLayout()
+        regularidade_textos.setSpacing(1)
+        regularidade_titulo = QLabel("Regularidade")
+        regularidade_titulo.setObjectName("dashboardQuickAccessTitle")
+        regularidade_subtitulo = QLabel(
+            "Hábito global de estudo • não interfere na fila inteligente"
+        )
+        regularidade_subtitulo.setObjectName("mutedLabel")
+        regularidade_textos.addWidget(regularidade_titulo)
+        regularidade_textos.addWidget(regularidade_subtitulo)
+        regularidade_layout.addLayout(regularidade_textos, 1)
+
+        self.dashboard_regularidade_sequencia = QLabel("Sequência —")
+        self.dashboard_regularidade_semana = QLabel("Semana —")
+        self.dashboard_regularidade_mes = QLabel("30 dias —")
+        self.dashboard_regularidade_indice = QLabel("Regularidade —")
+        for rotulo in (
+            self.dashboard_regularidade_sequencia,
+            self.dashboard_regularidade_semana,
+            self.dashboard_regularidade_mes,
+            self.dashboard_regularidade_indice,
+        ):
+            rotulo.setObjectName("focusDashboardMetricText")
+            rotulo.setAlignment(Qt.AlignCenter)
+            regularidade_layout.addWidget(rotulo, 0, Qt.AlignVCenter)
+
+        botao_regularidade = QPushButton("Ver detalhes")
+        botao_regularidade.setObjectName("subtleButton")
+        botao_regularidade.setFixedHeight(32)
+        botao_regularidade.clicked.connect(
+            lambda: self.abrir_estatisticas("Regularidade")
+        )
+        regularidade_layout.addWidget(botao_regularidade, 0, Qt.AlignVCenter)
+        layout.addWidget(self.dashboard_regularidade_painel)
+
+        # ----------------------------------------------------
+        # Conquistas — motivação sem interferência acadêmica
+        # ----------------------------------------------------
+        self.dashboard_gamificacao_painel = QFrame()
+        self.dashboard_gamificacao_painel.setObjectName("myEvolutionPanel")
+        gamificacao_layout = QHBoxLayout(self.dashboard_gamificacao_painel)
+        gamificacao_layout.setContentsMargins(14, 9, 14, 9)
+        gamificacao_layout.setSpacing(14)
+
+        gamificacao_textos = QVBoxLayout()
+        gamificacao_textos.setSpacing(1)
+        gamificacao_titulo = QLabel("Conquistas")
+        gamificacao_titulo.setObjectName("dashboardQuickAccessTitle")
+        gamificacao_subtitulo = QLabel(
+            "XP por constância, revisão, recuperação, cobertura e consolidação"
+        )
+        gamificacao_subtitulo.setObjectName("mutedLabel")
+        gamificacao_textos.addWidget(gamificacao_titulo)
+        gamificacao_textos.addWidget(gamificacao_subtitulo)
+        gamificacao_layout.addLayout(gamificacao_textos, 1)
+
+        self.dashboard_gamificacao_nivel = QLabel("Nível —")
+        self.dashboard_gamificacao_xp = QLabel("XP —")
+        self.dashboard_gamificacao_marcos = QLabel("Marcos —")
+        self.dashboard_gamificacao_progresso = QLabel("Próximo nível —")
+        for rotulo in (
+            self.dashboard_gamificacao_nivel,
+            self.dashboard_gamificacao_xp,
+            self.dashboard_gamificacao_marcos,
+            self.dashboard_gamificacao_progresso,
+        ):
+            rotulo.setObjectName("focusDashboardMetricText")
+            rotulo.setAlignment(Qt.AlignCenter)
+            gamificacao_layout.addWidget(rotulo, 0, Qt.AlignVCenter)
+
+        botao_gamificacao = QPushButton("Ver conquistas")
+        botao_gamificacao.setObjectName("subtleButton")
+        botao_gamificacao.setFixedHeight(32)
+        botao_gamificacao.clicked.connect(
+            lambda: self.abrir_estatisticas("Conquistas")
+        )
+        gamificacao_layout.addWidget(botao_gamificacao, 0, Qt.AlignVCenter)
+        layout.addWidget(self.dashboard_gamificacao_painel)
+
+        # O Dashboard inicial fica mais enxuto: Regularidade e Conquistas agora
+        # aparecem na área de Estatísticas e em um chip compacto no cabeçalho.
+        self.dashboard_regularidade_painel.setVisible(False)
+        self.dashboard_gamificacao_painel.setVisible(False)
 
         # ----------------------------------------------------
         # Compatibilidade interna do antigo "Resumo do dia"
@@ -32277,7 +32940,7 @@ class SistemaEstudos(QMainWindow):
         )
 
         self.dashboard_tendencia_label = QLabel(
-            "comparação com os 7 dias anteriores"
+            "performance_trend@1 • janelas consecutivas de tentativas"
         )
         self.dashboard_tendencia_label.setObjectName(
             "dashboardQualityTrendLabel"
@@ -34724,25 +35387,6 @@ class SistemaEstudos(QMainWindow):
 
     def obter_secoes_recolhiveis_dashboard(self):
         return {
-            "hoje": {
-                "conteudo": getattr(
-                    self,
-                    "dashboard_hoje_conteudo",
-                    None
-                ),
-                "botao": getattr(
-                    self,
-                    "dashboard_toggle_hoje",
-                    None
-                ),
-                "subtitulo": getattr(
-                    self,
-                    "dashboard_foco_subtitulo",
-                    None
-                ),
-                "titulo": "Foco",
-                "config": "dashboard_secao_hoje_expandida",
-            },
             "acessos": {
                 "conteudo": getattr(
                     self,
@@ -35233,7 +35877,7 @@ class SistemaEstudos(QMainWindow):
                 and self.telas.currentWidget()
                 == self.tela_relatorios
             ):
-                self.atualizar_relatorios()
+                self.invalidar_relatorios(atualizar_se_visivel=True)
 
             if (
                 hasattr(
@@ -35297,7 +35941,7 @@ class SistemaEstudos(QMainWindow):
             and self.telas.currentWidget()
             == self.tela_relatorios
         ):
-            self.atualizar_relatorios()
+            self.invalidar_relatorios(atualizar_se_visivel=True)
 
     def abrir_concursos(self):
         janela = JanelaConcursos(
@@ -36303,6 +36947,12 @@ class SistemaEstudos(QMainWindow):
             self.dashboard_hoje_foco_barra.setValue(
                 min(100, max(0, percentual_dia))
             )
+            if hasattr(self, "dashboard_focus_goal_value"):
+                self.dashboard_focus_goal_value.setText(
+                    formatar_tempo_foco_resumido(hoje_foco)
+                    + " / "
+                    + formatar_tempo_foco_resumido(alvo_dia)
+                )
             if restante_dia <= 0:
                 self.dashboard_hoje_foco_detalhe.setText(
                     "Ritmo diário da meta semanal atingido"
@@ -36334,8 +36984,10 @@ class SistemaEstudos(QMainWindow):
             )
         else:
             self.dashboard_hoje_foco_barra.setVisible(False)
+            if hasattr(self, "dashboard_focus_goal_value"):
+                self.dashboard_focus_goal_value.setText("Meta não definida")
             self.dashboard_hoje_foco_detalhe.setText(
-                "Meta semanal de foco desativada"
+                "Defina uma meta semanal para acompanhar seu ritmo diário."
             )
             if hasattr(self, "dashboard_focus_metric_goal"):
                 self.dashboard_focus_metric_goal.setText(
@@ -36344,6 +36996,44 @@ class SistemaEstudos(QMainWindow):
             self.dashboard_hoje_foco_detalhe.setToolTip(
                 "Ative Foco semanal em Definir metas para acompanhar um ritmo diário de referência."
             )
+
+        ultima_sessao = resumo_foco.get("ultima_sessao") or {}
+        melhor_semana = resumo_foco.get("melhor_sessao_semana") or {}
+
+        def _contexto_foco(item):
+            disciplina = str(item.get("disciplina") or "").strip()
+            topico = str(item.get("topico") or "").strip()
+            if disciplina and topico:
+                return f"{disciplina} • {topico}"
+            return disciplina or topico or "Livre / outros"
+
+        if hasattr(self, "dashboard_focus_last_session"):
+            if ultima_sessao:
+                self.dashboard_focus_last_session.setText(
+                    "Última sessão: "
+                    + formatar_tempo_foco_resumido(
+                        int(ultima_sessao.get("segundos") or 0)
+                    )
+                    + " • "
+                    + _contexto_foco(ultima_sessao)
+                )
+            else:
+                self.dashboard_focus_last_session.setText("Última sessão: —")
+
+        if hasattr(self, "dashboard_focus_best_week"):
+            if melhor_semana:
+                self.dashboard_focus_best_week.setText(
+                    "Melhor sessão da semana: "
+                    + formatar_tempo_foco_resumido(
+                        int(melhor_semana.get("segundos") or 0)
+                    )
+                    + " • "
+                    + _contexto_foco(melhor_semana)
+                )
+            else:
+                self.dashboard_focus_best_week.setText(
+                    "Melhor sessão da semana: —"
+                )
 
         # Revisões exigindo ação agora.
         revisoes_hoje = int(resumo.get("hoje", 0) or 0)
@@ -36750,6 +37440,12 @@ class SistemaEstudos(QMainWindow):
         )
 
         resumo_foco = obter_resumo_foco(hoje)
+        regularidade = self.cache_analitico.obter(
+            f"regularidade:{hoje}",
+            lambda: obter_snapshot_regularidade(hoje),
+            ttl=20,
+        )
+        self.atualizar_regularidade_dashboard(regularidade)
 
         # ----------------------------------------------------
         # Ritmo de estudo — tempo real do Modo Foco
@@ -36903,10 +37599,18 @@ class SistemaEstudos(QMainWindow):
             hoje_qdate
         )
 
-        self.atualizar_progresso_dashboard(
+        progresso_snapshot_dashboard = self.atualizar_progresso_dashboard(
             concurso_id,
             metricas_nucleo
         )
+        try:
+            self.atualizar_gamificacao_dashboard(
+                concurso_id=concurso_id,
+                progresso_snapshot=progresso_snapshot_dashboard,
+                regularidade_snapshot=regularidade,
+            )
+        except Exception:
+            pass
 
         self.card_media.setText(
             formatar_percentual(
@@ -36915,134 +37619,54 @@ class SistemaEstudos(QMainWindow):
         )
 
         # ----------------------------------------------------
-        # Tendência de desempenho — últimos 7 dias
+        # Tendência oficial de desempenho — performance_trend@1
         # ----------------------------------------------------
 
-        data_fim_recente = hoje_qdate
-        data_inicio_recente = hoje_qdate.addDays(
-            -6
-        )
-
-        data_fim_anterior = hoje_qdate.addDays(
-            -7
-        )
-        data_inicio_anterior = hoje_qdate.addDays(
-            -13
-        )
-
-        metricas_recentes = obter_metricas_periodo_nucleo(
-            data_inicio_recente.toString(
-                "yyyy-MM-dd"
-            ),
-            data_fim_recente.toString(
-                "yyyy-MM-dd"
-            ),
-            concurso_id
-        ).get("metrics", {})
-
-        metricas_anteriores = obter_metricas_periodo_nucleo(
-            data_inicio_anterior.toString(
-                "yyyy-MM-dd"
-            ),
-            data_fim_anterior.toString(
-                "yyyy-MM-dd"
-            ),
-            concurso_id
-        ).get("metrics", {})
-
-        percentual_recente = (
-            metricas_recentes.get("accuracy_rate", {}).get("value")
-        )
-        percentual_anterior = (
-            metricas_anteriores.get("accuracy_rate", {}).get("value")
-        )
-        tentativas_recentes = int(
-            metricas_recentes.get("answered_attempt_count", {}).get("value", 0)
-            or 0
-        )
-        tentativas_anteriores = int(
-            metricas_anteriores.get("answered_attempt_count", {}).get("value", 0)
-            or 0
-        )
-        dias_recentes = int(
-            metricas_recentes.get("study_day_count", {}).get("value", 0)
-            or 0
-        )
-        dias_anteriores = int(
-            metricas_anteriores.get("study_day_count", {}).get("value", 0)
-            or 0
-        )
-
+        tendencia_metrica = metricas_nucleo.get("performance_trend", {})
+        tendencia_valor = tendencia_metrica.get("value")
         tendencia_role = "none"
-
         if (
-            percentual_recente is None
-            or tentativas_recentes < 10
-            or dias_recentes < 2
+            tendencia_metrica.get("state") != "ok"
+            or tendencia_valor == "insufficient_data"
         ):
-            tendencia_texto = (
-                "Dados insuficientes"
-            )
-
-        elif (
-            percentual_anterior is None
-            or tentativas_anteriores < 10
-            or dias_anteriores < 2
-        ):
-            tendencia_texto = (
-                "Sem base anterior • "
+            tendencia_texto = "Dados insuficientes"
+            faltas = tendencia_metrica.get("missing_requirements", {})
+            detalhes_faltas = []
+            for chave, rotulo in (
+                ("attempts_needed", "tentativas"),
+                ("sessions_needed", "sessões"),
+                ("days_needed", "dias"),
+            ):
+                quantidade = int(faltas.get(chave, 0) or 0)
+                if quantidade:
+                    detalhes_faltas.append(f"{quantidade} {rotulo}")
+            self.dashboard_tendencia_label.setText(
+                "performance_trend@1"
                 + (
-                    f"{percentual_recente:.1f}%"
-                    .replace(
-                        ".",
-                        ","
-                    )
+                    " • faltam " + ", ".join(detalhes_faltas)
+                    if detalhes_faltas else " • base insuficiente"
                 )
             )
-
+        elif tendencia_valor == "improvement":
+            tendencia_role = "positive"
+            tendencia_texto = "Melhora"
+            self.dashboard_tendencia_label.setText(
+                "performance_trend@1 • janelas consecutivas de tentativas"
+            )
+        elif tendencia_valor == "decline":
+            tendencia_role = "negative"
+            tendencia_texto = "Queda"
+            self.dashboard_tendencia_label.setText(
+                "performance_trend@1 • janelas consecutivas de tentativas"
+            )
         else:
-            diferenca = (
-                percentual_recente
-                - percentual_anterior
+            tendencia_role = "stable"
+            tendencia_texto = "Estável"
+            self.dashboard_tendencia_label.setText(
+                "performance_trend@1 • janelas consecutivas de tentativas"
             )
 
-            if diferenca >= 5.0:
-                tendencia_role = "positive"
-                tendencia_texto = (
-                    "↑ +"
-                    + (
-                        f"{diferenca:.1f}"
-                        .replace(
-                            ".",
-                            ","
-                        )
-                    )
-                    + " p.p."
-                )
-
-            elif diferenca <= -5.0:
-                tendencia_role = "negative"
-                tendencia_texto = (
-                    "↓ "
-                    + (
-                        f"{diferenca:.1f}"
-                        .replace(
-                            ".",
-                            ","
-                        )
-                    )
-                    + " p.p."
-                )
-
-            else:
-                tendencia_role = "stable"
-                tendencia_texto = (
-                    "Estável"
-                )
-
-        self.dashboard_tendencia_valor.setText(
-            tendencia_texto
-        )
+        self.dashboard_tendencia_valor.setText(tendencia_texto)
         self.dashboard_tendencia_valor.setProperty(
             "trendRole",
             tendencia_role
@@ -37428,6 +38052,9 @@ class SistemaEstudos(QMainWindow):
                 32
             )
 
+        self._dashboard_sujo = False
+        self._dashboard_data_referencia = hoje
+
     def abrir_simulado(self):
         concurso = obter_concurso_ativo()
 
@@ -37483,11 +38110,8 @@ class SistemaEstudos(QMainWindow):
 
         self.atualizar_dashboard()
 
-        if hasattr(
-            self,
-            "atualizar_estatisticas"
-        ):
-            self.atualizar_estatisticas()
+        if hasattr(self, "invalidar_estatisticas"):
+            self.invalidar_estatisticas("questoes")
 
     def abrir_central_efetividade(self):
         janela = JanelaCentralEfetividade(
@@ -37549,11 +38173,8 @@ class SistemaEstudos(QMainWindow):
 
         self.atualizar_dashboard()
 
-        if hasattr(
-            self,
-            "atualizar_estatisticas"
-        ):
-            self.atualizar_estatisticas()
+        if hasattr(self, "invalidar_estatisticas"):
+            self.invalidar_estatisticas("questoes")
 
     def _contexto_ritmo_estudar_agora_v4(self):
         foco = self.cache_analitico.obter(
@@ -38976,32 +39597,27 @@ class SistemaEstudos(QMainWindow):
         janela.exec()
 
     def abrir_questoes(self):
+        # Navegação primeiro; consultas e montagem da grade ficam para o
+        # próximo ciclo do event loop. Assim o clique responde imediatamente.
+        refiltrar = False
+
         # A Central deve abrir sempre com o banco completo em destaque. O
         # botão "Para análise" continua disponível como filtro opcional, mas
         # não pode manter a grade presa à fila usada em uma visita anterior.
-        if hasattr(
-            self,
-            "questoes_para_analise"
-        ):
-            self.questoes_para_analise.blockSignals(
-                True
-            )
-            self.questoes_para_analise.setChecked(
-                False
-            )
-            self.questoes_para_analise.blockSignals(
-                False
-            )
+        if hasattr(self, "questoes_para_analise"):
+            refiltrar = refiltrar or self.questoes_para_analise.isChecked()
+            self.questoes_para_analise.blockSignals(True)
+            self.questoes_para_analise.setChecked(False)
+            self.questoes_para_analise.blockSignals(False)
 
         if hasattr(self, "questoes_somente_duplicadas"):
+            refiltrar = refiltrar or self.questoes_somente_duplicadas.isChecked()
             self.questoes_somente_duplicadas.blockSignals(True)
             self.questoes_somente_duplicadas.setChecked(False)
             self.questoes_somente_duplicadas.blockSignals(False)
 
-        self.carregar_questoes()
-        self.telas.setCurrentWidget(
-            self.tela_questoes
-        )
+        self.telas.setCurrentWidget(self.tela_questoes)
+        self._agendar_carregamento_central_questoes(refiltrar=refiltrar)
 
     def carregar_questoes(self):
         concurso = obter_concurso_ativo()
@@ -39019,19 +39635,22 @@ class SistemaEstudos(QMainWindow):
             and self.questoes_mostrar_arquivadas.isChecked()
         )
 
-        self.dados_questoes = listar_questoes(
-            concurso_id,
-            incluir_inativas=incluir_arquivadas,
-            incluir_topicos_pausados=True,
-            incluir_disciplinas_pausadas=True,
-        )
-
+        # Uma única leitura do catálogo alimenta tanto a grade quanto os
+        # contadores administrativos. Antes eram feitas duas consultas quase
+        # idênticas a cada abertura da Central.
         todas_questoes_administrativas = listar_questoes(
             concurso_id,
             incluir_inativas=True,
             incluir_topicos_pausados=True,
             incluir_disciplinas_pausadas=True,
         )
+        if incluir_arquivadas:
+            self.dados_questoes = list(todas_questoes_administrativas)
+        else:
+            self.dados_questoes = [
+                item for item in todas_questoes_administrativas
+                if item.get("ativa", True)
+            ]
 
         self.questoes_grupos_duplicadas = listar_grupos_questoes_duplicadas(
             concurso_id
@@ -39317,7 +39936,9 @@ class SistemaEstudos(QMainWindow):
 
         self.atualizar_filtro_topicos_questoes()
         self.filtrar_questoes()
-        self.atualizar_acoes_questao()
+
+        self._central_questoes_suja = False
+        self._central_questoes_concurso_id = int(concurso_id)
 
     def atualizar_filtro_topicos_questoes(self):
         if not hasattr(
@@ -39665,6 +40286,14 @@ class SistemaEstudos(QMainWindow):
             texto_contagem
         )
 
+        # QTableWidget emite sinais de seleção/item a cada inserção e também
+        # repinta a grade repetidamente. Para centenas de questões isso domina
+        # o tempo percebido. Suspenda ambos durante a montagem em lote.
+        ordenacao_ativa = self.tabela_questoes.isSortingEnabled()
+        self.tabela_questoes.setUpdatesEnabled(False)
+        self.tabela_questoes.blockSignals(True)
+        self.tabela_questoes.setSortingEnabled(False)
+
         self.tabela_questoes.setRowCount(
             len(
                 filtradas
@@ -39826,6 +40455,11 @@ class SistemaEstudos(QMainWindow):
                 linha,
                 34
             )
+
+        self.tabela_questoes.setSortingEnabled(ordenacao_ativa)
+        self.tabela_questoes.blockSignals(False)
+        self.tabela_questoes.setUpdatesEnabled(True)
+        self.tabela_questoes.viewport().update()
 
         if hasattr(self, "questoes_selecionar_todas"):
             self.questoes_selecionar_todas.blockSignals(True)
@@ -40274,7 +40908,7 @@ class SistemaEstudos(QMainWindow):
                 "A Central de Questões é a área administrativa do banco do VighnaStudy.\n\n"
                 "Aqui você organiza o conteúdo que será usado pelas revisões, pelo Motor V5, pelos treinos e pelas baterias inteligentes.\n\n"
                 "• Nova questão: cadastra uma questão manualmente.\n"
-                "• Central de importação: reúne PDF, texto colado e CSV com validação antes da gravação.\n"
+                "• Central de importação: reúne PDF, TXT, texto colado e CSV com validação antes da gravação.\n"
                 "• Arquivar: retira temporariamente a questão das novas sessões sem apagá-la.\n"
                 "• Para análise: reúne questões sinalizadas durante uma bateria para visualização e edição.\n"
                 "• Lixeira: recebe questões removidas e permite restaurar ou excluir permanentemente.\n"
@@ -40528,6 +41162,8 @@ class SistemaEstudos(QMainWindow):
 
         if origem == "pdf":
             self.importar_questoes_pdf()
+        elif origem == "txt":
+            self.importar_questoes_txt()
         elif origem == "texto":
             self.importar_questoes_texto()
         elif origem == "csv":
@@ -40540,6 +41176,78 @@ class SistemaEstudos(QMainWindow):
             if janela.importadas > 0:
                 self.carregar_questoes()
                 self.notificar_dados_alterados("questoes")
+
+    def importar_questoes_txt(self):
+        caminho, _ = QFileDialog.getOpenFileName(
+            self,
+            "Selecionar arquivo TXT de questões",
+            "",
+            "Arquivo de texto (*.txt)"
+        )
+
+        if not caminho:
+            return
+
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+
+        try:
+            dados_txt = ler_arquivo_txt_questoes(caminho)
+            analise = analisar_texto_questoes_pdf(
+                dados_txt["texto"],
+                []
+            )
+        except Exception as erro:
+            QApplication.restoreOverrideCursor()
+            QMessageBox.critical(
+                self,
+                "Importação por TXT",
+                f"Não foi possível ler o arquivo TXT.\n\n{erro}"
+            )
+            return
+
+        QApplication.restoreOverrideCursor()
+
+        if dados_txt.get("caracteres", 0) < 30:
+            QMessageBox.information(
+                self,
+                "Importação por TXT",
+                "O arquivo TXT possui pouco conteúdo para uma importação de questões."
+            )
+            return
+
+        if analise.get("quantidade", 0) <= 0:
+            resposta = QMessageBox.question(
+                self,
+                "Nenhuma questão detectada",
+                (
+                    "O VighnaStudy conseguiu ler o arquivo TXT, mas não reconheceu "
+                    "questões completas com alternativas.\n\n"
+                    "Deseja visualizar o conteúdo do arquivo para conferir a formatação?"
+                ),
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.Yes
+            )
+
+            if resposta == QMessageBox.Yes:
+                JanelaTextoExtraidoPDF(
+                    dados_txt["texto"],
+                    self,
+                    origem_tipo="txt"
+                ).exec()
+            return
+
+        janela = JanelaImportarPDFQuestoes(
+            caminho,
+            dados_txt,
+            analise,
+            self,
+            origem_tipo="txt",
+            nome_origem=Path(caminho).name,
+        )
+
+        if janela.exec() == QDialog.Accepted and janela.importadas > 0:
+            self.carregar_questoes()
+            self.notificar_dados_alterados("questoes")
 
     def importar_questoes_pdf(self):
         if not dependencia_pdf_disponivel():
@@ -43421,11 +44129,9 @@ class SistemaEstudos(QMainWindow):
 
         self.sessao_pausada = True
         self.salvar_estado_sessao()
-        self.atualizar_dashboard()
-
-        self.telas.setCurrentWidget(
-            self.tela_inicial
-        )
+        self._marcar_dashboard_sujo()
+        self.telas.setCurrentWidget(self.tela_inicial)
+        self._agendar_atualizacao_dashboard()
 
     def encerrar_sessao_estudo(self):
         if not getattr(
@@ -43507,11 +44213,9 @@ class SistemaEstudos(QMainWindow):
         self.sessao_fila = []
 
         self.salvar_estado_sessao()
-        self.atualizar_dashboard()
-
-        self.telas.setCurrentWidget(
-            self.tela_inicial
-        )
+        self._marcar_dashboard_sujo()
+        self.telas.setCurrentWidget(self.tela_inicial)
+        self._agendar_atualizacao_dashboard()
 
         janela = JanelaResumoSessao(
             resumo,
@@ -45555,7 +46259,7 @@ class SistemaEstudos(QMainWindow):
             96
         )
         atualizar.clicked.connect(
-            self.atualizar_relatorios
+            lambda checked=False: self.atualizar_relatorios(forcar=True)
         )
 
         filtros.addWidget(
@@ -45867,6 +46571,9 @@ class SistemaEstudos(QMainWindow):
         self.abas_relatorios = QTabWidget()
         self.abas_relatorios.setObjectName(
             "reportTabs"
+        )
+        self.abas_relatorios.currentChanged.connect(
+            self._ao_mudar_aba_relatorios
         )
 
         # ----------------------------------------------------
@@ -46703,9 +47410,9 @@ class SistemaEstudos(QMainWindow):
         self.dados_relatorio_resumo = None
         self.dados_relatorio_comparacao = None
         self.dados_relatorio_estrategico = None
-        self.dados_relatorio_disciplinas = []
-        self.dados_relatorio_topicos = []
-        self.dados_relatorio_diario = []
+        self.dados_relatorio_disciplinas = None
+        self.dados_relatorio_topicos = None
+        self.dados_relatorio_diario = None
 
         self.combo_periodo_relatorio.setCurrentIndex(
             1
@@ -46779,11 +47486,13 @@ class SistemaEstudos(QMainWindow):
 
     def abrir_relatorios(self):
         self.alterar_periodo_relatorio()
-        self.atualizar_relatorios()
 
+        # A navegação vem antes das consultas. O Qt consegue repintar a página
+        # imediatamente e o relatório visível é preenchido logo em seguida.
         self.telas.setCurrentWidget(
             self.tela_relatorios
         )
+        self._agendar_atualizacao_relatorios()
 
     def _comparar_numero(
         self,
@@ -46844,602 +47553,334 @@ class SistemaEstudos(QMainWindow):
             label
         )
 
-    def atualizar_relatorios(self):
-        inicio_q = (
-            self.data_inicio_relatorio.date()
-        )
-        fim_q = (
-            self.data_fim_relatorio.date()
-        )
+    def _obter_contexto_relatorios(self):
+        inicio_q = self.data_inicio_relatorio.date()
+        fim_q = self.data_fim_relatorio.date()
 
         if inicio_q > fim_q:
-            QMessageBox.warning(
-                self,
-                "Período inválido",
-                "A data inicial não pode ser posterior à data final."
-            )
-            return
-
-        inicio = inicio_q.toString(
-            "yyyy-MM-dd"
-        )
-        fim = fim_q.toString(
-            "yyyy-MM-dd"
-        )
+            return None
 
         concurso = obter_concurso_ativo()
+        inicio = inicio_q.toString("yyyy-MM-dd")
+        fim = fim_q.toString("yyyy-MM-dd")
+        quantidade_dias = inicio_q.daysTo(fim_q) + 1
+        fim_anterior_q = inicio_q.addDays(-1)
+        inicio_anterior_q = fim_anterior_q.addDays(-(quantidade_dias - 1))
 
-        self.rotulo_perfil_relatorio.setText(
-            f"Perfil: {concurso[1]}"
-        )
+        return {
+            "concurso": concurso,
+            "inicio_q": inicio_q,
+            "fim_q": fim_q,
+            "inicio": inicio,
+            "fim": fim,
+            "inicio_anterior_q": inicio_anterior_q,
+            "fim_anterior_q": fim_anterior_q,
+            "inicio_anterior": inicio_anterior_q.toString("yyyy-MM-dd"),
+            "fim_anterior": fim_anterior_q.toString("yyyy-MM-dd"),
+        }
 
-        self.rotulo_periodo_relatorio.setText(
-            (
-                f"{inicio_q.toString('dd/MM/yyyy')} "
-                f"→ {fim_q.toString('dd/MM/yyyy')}"
-            )
-        )
+    def _limpar_cache_dados_relatorios(self):
+        self.dados_relatorio_resumo = None
+        self.dados_relatorio_comparacao = None
+        self.dados_relatorio_estrategico = None
+        self.dados_relatorio_disciplinas = None
+        self.dados_relatorio_topicos = None
+        self.dados_relatorio_diario = None
+
+    def _atualizar_resumo_relatorios(self, contexto):
+        inicio_medicao = time.perf_counter()
+        concurso = contexto["concurso"]
 
         resumo = obter_relatorio_periodo(
-            inicio,
-            fim,
-            concurso[0]
+            contexto["inicio"],
+            contexto["fim"],
+            concurso[0],
         )
-
-        quantidade_dias = (
-            inicio_q.daysTo(
-                fim_q
-            )
-            + 1
-        )
-
-        fim_anterior_q = (
-            inicio_q.addDays(
-                -1
-            )
-        )
-
-        inicio_anterior_q = (
-            fim_anterior_q.addDays(
-                -(
-                    quantidade_dias
-                    - 1
-                )
-            )
-        )
-
         anterior = obter_relatorio_periodo(
-            inicio_anterior_q.toString(
-                "yyyy-MM-dd"
-            ),
-            fim_anterior_q.toString(
-                "yyyy-MM-dd"
-            ),
-            concurso[0]
-        )
-
-        disciplinas = (
-            obter_relatorio_disciplinas_periodo(
-                inicio,
-                fim,
-                concurso[0]
-            )
-        )
-
-        topicos = (
-            obter_relatorio_topicos_periodo(
-                inicio,
-                fim,
-                concurso[0]
-            )
-        )
-
-        diario = (
-            obter_relatorio_diario_periodo(
-                inicio,
-                fim,
-                concurso[0]
-            )
-        )
-
-        estrategico = (
-            obter_relatorio_estrategico(
-                inicio,
-                fim,
-                concurso[0]
-            )
+            contexto["inicio_anterior"],
+            contexto["fim_anterior"],
+            concurso[0],
         )
 
         self.dados_relatorio_resumo = resumo
         self.dados_relatorio_comparacao = anterior
-        self.dados_relatorio_estrategico = estrategico
-        self.dados_relatorio_disciplinas = disciplinas
-        self.dados_relatorio_topicos = topicos
-        self.dados_relatorio_diario = diario
 
-        self.atualizar_relatorio_estrategico(
-            estrategico
+        self.rotulo_perfil_relatorio.setText(f"Perfil: {concurso[1]}")
+        self.rotulo_periodo_relatorio.setText(
+            f"{contexto['inicio_q'].toString('dd/MM/yyyy')} "
+            f"→ {contexto['fim_q'].toString('dd/MM/yyyy')}"
         )
-
-        # ----------------------------------------------------
-        # RESUMO
-        # ----------------------------------------------------
-
-        self.rel_card_questoes.setText(
-            str(
-                resumo["questoes"]
-            )
-        )
-        self.rel_card_acertos.setText(
-            str(
-                resumo["acertos"]
-            )
-        )
-        self.rel_card_percentual.setText(
-            formatar_percentual(
-                resumo["percentual"]
-            )
-        )
-        self.rel_card_revisoes.setText(
-            str(
-                resumo["revisoes"]
-            )
-        )
-        self.rel_card_topicos.setText(
-            str(
-                resumo["topicos"]
-            )
-        )
-        self.rel_card_disciplinas.setText(
-            str(
-                resumo["disciplinas"]
-            )
-        )
-
-        # ----------------------------------------------------
-        # COMPARAÇÃO
-        # ----------------------------------------------------
-
         self.rotulo_periodo_anterior.setText(
-            (
-                f"{inicio_anterior_q.toString('dd/MM/yyyy')} "
-                f"→ {fim_anterior_q.toString('dd/MM/yyyy')}"
-            )
+            f"{contexto['inicio_anterior_q'].toString('dd/MM/yyyy')} "
+            f"→ {contexto['fim_anterior_q'].toString('dd/MM/yyyy')}"
         )
 
-        def calcular_tendencia_numero(
-            atual,
-            anterior_valor
-        ):
-            atual = float(
-                atual or 0
-            )
-            anterior_valor = float(
-                anterior_valor or 0
-            )
+        self.rel_card_questoes.setText(str(resumo["questoes"]))
+        self.rel_card_acertos.setText(str(resumo["acertos"]))
+        self.rel_card_percentual.setText(formatar_percentual(resumo["percentual"]))
+        self.rel_card_revisoes.setText(str(resumo["revisoes"]))
+        self.rel_card_topicos.setText(str(resumo["topicos"]))
+        self.rel_card_disciplinas.setText(str(resumo["disciplinas"]))
 
-            texto = self._comparar_numero(
-                atual,
-                anterior_valor
-            )
-
+        def calcular_tendencia_numero(atual, anterior_valor):
+            atual = float(atual or 0)
+            anterior_valor = float(anterior_valor or 0)
+            texto = self._comparar_numero(atual, anterior_valor)
             if anterior_valor == 0:
                 if atual > 0:
-                    return (
-                        f"▲ {texto}",
-                        "positive"
-                    )
-                return (
-                    "• 0%",
-                    "neutral"
-                )
-
-            diferenca = (
-                atual
-                - anterior_valor
-            )
-
+                    return f"▲ {texto}", "positive"
+                return "• 0%", "neutral"
+            diferenca = atual - anterior_valor
             if diferenca > 0:
-                return (
-                    f"▲ {texto}",
-                    "positive"
-                )
+                return f"▲ {texto}", "positive"
             if diferenca < 0:
-                return (
-                    f"▼ {texto}",
-                    "negative"
-                )
+                return f"▼ {texto}", "negative"
+            return "• 0,0%", "neutral"
 
-            return (
-                "• 0,0%",
-                "neutral"
-            )
-
-        texto_questoes, tendencia_questoes = (
-            calcular_tendencia_numero(
-                resumo["questoes"],
-                anterior["questoes"]
-            )
+        texto_questoes, tendencia_questoes = calcular_tendencia_numero(
+            resumo["questoes"], anterior["questoes"]
+        )
+        texto_revisoes, tendencia_revisoes = calcular_tendencia_numero(
+            resumo["revisoes"], anterior["revisoes"]
         )
 
-        texto_revisoes, tendencia_revisoes = (
-            calcular_tendencia_numero(
-                resumo["revisoes"],
-                anterior["revisoes"]
-            )
-        )
-
-        if (
-            resumo["percentual"] is None
-            and anterior["percentual"] is None
-        ):
+        if resumo["percentual"] is None and anterior["percentual"] is None:
             texto_desempenho = "• 0,0 p.p."
             tendencia_desempenho = "neutral"
-
         elif anterior["percentual"] is None:
-            texto_desempenho = (
-                "▲ novo"
-                if resumo["percentual"] is not None
-                else "• sem dados"
-            )
-            tendencia_desempenho = (
-                "positive"
-                if resumo["percentual"] is not None
-                else "neutral"
-            )
-
+            texto_desempenho = "▲ novo" if resumo["percentual"] is not None else "• sem dados"
+            tendencia_desempenho = "positive" if resumo["percentual"] is not None else "neutral"
         elif resumo["percentual"] is None:
             texto_desempenho = "▼ sem dados"
             tendencia_desempenho = "negative"
-
         else:
-            diferenca = (
-                resumo["percentual"]
-                - anterior["percentual"]
-            )
-
+            diferenca = resumo["percentual"] - anterior["percentual"]
             if diferenca > 0:
-                texto_desempenho = (
-                    f"▲ +{diferenca:.1f} p.p."
-                    .replace(
-                        ".",
-                        ","
-                    )
-                )
+                texto_desempenho = f"▲ +{diferenca:.1f} p.p.".replace(".", ",")
                 tendencia_desempenho = "positive"
-
             elif diferenca < 0:
-                texto_desempenho = (
-                    f"▼ {diferenca:.1f} p.p."
-                    .replace(
-                        ".",
-                        ","
-                    )
-                )
+                texto_desempenho = f"▼ {diferenca:.1f} p.p.".replace(".", ",")
                 tendencia_desempenho = "negative"
-
             else:
                 texto_desempenho = "• 0,0 p.p."
                 tendencia_desempenho = "neutral"
 
         self.atualizar_indicador_comparacao(
-            self.rel_comp_questoes,
-            texto_questoes,
-            tendencia_questoes
+            self.rel_comp_questoes, texto_questoes, tendencia_questoes
         )
-
         self.atualizar_indicador_comparacao(
-            self.rel_comp_revisoes,
-            texto_revisoes,
-            tendencia_revisoes
+            self.rel_comp_revisoes, texto_revisoes, tendencia_revisoes
         )
-
         self.atualizar_indicador_comparacao(
-            self.rel_comp_desempenho,
-            texto_desempenho,
-            tendencia_desempenho
+            self.rel_comp_desempenho, texto_desempenho, tendencia_desempenho
         )
-
-        # Compatibilidade interna.
         self.comparacao_relatorio.setText(
-            (
-                f"Questões {texto_questoes} | "
-                f"Revisões {texto_revisoes} | "
-                f"Desempenho {texto_desempenho}"
-            )
+            f"Questões {texto_questoes} | Revisões {texto_revisoes} | "
+            f"Desempenho {texto_desempenho}"
         )
 
-        # ----------------------------------------------------
-        # CONTADORES DAS ABAS
-        # ----------------------------------------------------
-
-        qtd_disciplinas = len(
-            disciplinas
-        )
-        qtd_topicos = len(
-            topicos
-        )
-        qtd_dias = len(
-            diario
+        self._estado_relatorios.marcar_resumo_limpo()
+        self._estado_relatorios.registrar_duracao(
+            "Resumo", (time.perf_counter() - inicio_medicao) * 1000.0
         )
 
+    def _preencher_relatorio_disciplinas(self, disciplinas):
+        quantidade = len(disciplinas)
         self.rel_contagem_disciplinas.setText(
-            (
-                "1 disciplina"
-                if qtd_disciplinas == 1
-                else f"{qtd_disciplinas} disciplinas"
-            )
+            "1 disciplina" if quantidade == 1 else f"{quantidade} disciplinas"
         )
+        tabela = self.tabela_relatorio_disciplinas
+        tabela.setUpdatesEnabled(False)
+        tabela.blockSignals(True)
+        try:
+            tabela.setRowCount(quantidade)
+            for linha, dado in enumerate(disciplinas):
+                valores = [
+                    dado[0], str(dado[1]), str(dado[2]), str(dado[3]),
+                    formatar_percentual(dado[4]), str(dado[5]),
+                ]
+                for coluna, valor in enumerate(valores):
+                    item = QTableWidgetItem(valor)
+                    if coluna in (1, 2, 3, 4, 5):
+                        item.setTextAlignment(Qt.AlignCenter)
+                    if coluna == 4 and dado[4] is not None:
+                        if dado[4] < 60:
+                            aplicar_destaque_tabela(item, "perigo", True)
+                        elif dado[4] < 70:
+                            aplicar_destaque_tabela(item, "alerta", True)
+                        elif dado[4] < 80:
+                            aplicar_destaque_tabela(item, "atencao", True)
+                        elif dado[4] >= 90:
+                            aplicar_destaque_tabela(item, "sucesso", False)
+                    tabela.setItem(linha, coluna, item)
+                tabela.setRowHeight(linha, 31)
+        finally:
+            tabela.blockSignals(False)
+            tabela.setUpdatesEnabled(True)
 
+    def _preencher_relatorio_topicos(self, topicos):
+        quantidade = len(topicos)
         self.rel_contagem_topicos.setText(
-            (
-                "1 tópico"
-                if qtd_topicos == 1
-                else f"{qtd_topicos} tópicos"
-            )
+            "1 tópico" if quantidade == 1 else f"{quantidade} tópicos"
         )
+        tabela = self.tabela_relatorio_topicos
+        tabela.setUpdatesEnabled(False)
+        tabela.blockSignals(True)
+        try:
+            tabela.setRowCount(quantidade)
+            for linha, dado in enumerate(topicos):
+                valores = [
+                    dado[1], dado[2], str(dado[3]), str(dado[4]), str(dado[5]),
+                    formatar_percentual(dado[6]), formatar_data(dado[7]),
+                    formatar_data(dado[8]),
+                ]
+                for coluna, valor in enumerate(valores):
+                    item = QTableWidgetItem(valor)
+                    if coluna == 1:
+                        item.setData(Qt.UserRole, dado[0])
+                    if coluna in (2, 3, 4, 5, 6, 7):
+                        item.setTextAlignment(Qt.AlignCenter)
+                    if coluna == 5 and dado[6] is not None:
+                        if dado[6] < 60:
+                            aplicar_destaque_tabela(item, "perigo", True)
+                        elif dado[6] < 70:
+                            aplicar_destaque_tabela(item, "alerta", True)
+                        elif dado[6] < 80:
+                            aplicar_destaque_tabela(item, "atencao", True)
+                        elif dado[6] >= 90:
+                            aplicar_destaque_tabela(item, "sucesso", False)
+                    tabela.setItem(linha, coluna, item)
+                tabela.setRowHeight(linha, 31)
+        finally:
+            tabela.blockSignals(False)
+            tabela.setUpdatesEnabled(True)
 
+    def _preencher_relatorio_diario(self, diario):
+        quantidade = len(diario)
         self.rel_contagem_dias.setText(
-            (
-                "1 dia"
-                if qtd_dias == 1
-                else f"{qtd_dias} dias"
+            "1 dia" if quantidade == 1 else f"{quantidade} dias"
+        )
+        tabela = self.tabela_relatorio_diario
+        tabela.setUpdatesEnabled(False)
+        tabela.blockSignals(True)
+        try:
+            tabela.setRowCount(quantidade)
+            for linha, dado in enumerate(diario):
+                valores = [
+                    formatar_data(dado[0]), str(dado[1]), str(dado[2]),
+                    str(dado[3]), formatar_percentual(dado[4]),
+                ]
+                for coluna, valor in enumerate(valores):
+                    item = QTableWidgetItem(valor)
+                    item.setTextAlignment(Qt.AlignCenter)
+                    if coluna == 4 and dado[4] is not None:
+                        if dado[4] < 60:
+                            aplicar_destaque_tabela(item, "perigo", False)
+                        elif dado[4] >= 90:
+                            aplicar_destaque_tabela(item, "sucesso", False)
+                    tabela.setItem(linha, coluna, item)
+                tabela.setRowHeight(linha, 31)
+        finally:
+            tabela.blockSignals(False)
+            tabela.setUpdatesEnabled(True)
+
+    def _atualizar_aba_relatorios(self, aba, contexto):
+        inicio_medicao = time.perf_counter()
+        concurso_id = contexto["concurso"][0]
+        inicio = contexto["inicio"]
+        fim = contexto["fim"]
+
+        if aba == "Estratégico":
+            dados = obter_relatorio_estrategico(inicio, fim, concurso_id)
+            self.dados_relatorio_estrategico = dados
+            self.atualizar_relatorio_estrategico(dados)
+        elif aba == "Por disciplina":
+            dados = obter_relatorio_disciplinas_periodo(inicio, fim, concurso_id)
+            self.dados_relatorio_disciplinas = dados
+            self._preencher_relatorio_disciplinas(dados)
+        elif aba == "Por tópico":
+            dados = obter_relatorio_topicos_periodo(inicio, fim, concurso_id)
+            self.dados_relatorio_topicos = dados
+            self._preencher_relatorio_topicos(dados)
+        elif aba == "Por dia":
+            dados = obter_relatorio_diario_periodo(inicio, fim, concurso_id)
+            self.dados_relatorio_diario = dados
+            self._preencher_relatorio_diario(dados)
+        else:
+            return
+
+        self._estado_relatorios.marcar_limpa(aba)
+        self._estado_relatorios.registrar_duracao(
+            aba, (time.perf_counter() - inicio_medicao) * 1000.0
+        )
+
+    def atualizar_relatorios(self, forcar=False):
+        """Atualiza o resumo e somente a aba de Relatórios atualmente visível."""
+        if self._relatorios_refresh_em_andamento:
+            return
+
+        contexto = self._obter_contexto_relatorios()
+        if contexto is None:
+            QMessageBox.warning(
+                self,
+                "Período inválido",
+                "A data inicial não pode ser posterior à data final.",
             )
-        )
+            return
 
-        # ----------------------------------------------------
-        # TABELA DISCIPLINAS
-        # ----------------------------------------------------
-
-        self.tabela_relatorio_disciplinas.setRowCount(
-            qtd_disciplinas
-        )
-
-        for linha, dado in enumerate(
-            disciplinas
-        ):
-            valores = [
-                dado[0],
-                str(
-                    dado[1]
-                ),
-                str(
-                    dado[2]
-                ),
-                str(
-                    dado[3]
-                ),
-                formatar_percentual(
-                    dado[4]
-                ),
-                str(
-                    dado[5]
-                )
-            ]
-
-            for coluna, valor in enumerate(
-                valores
-            ):
-                item = QTableWidgetItem(
-                    valor
-                )
-
-                if coluna in (
-                    1,
-                    2,
-                    3,
-                    4,
-                    5
-                ):
-                    item.setTextAlignment(
-                        Qt.AlignCenter
-                    )
-
-                if (
-                    coluna == 4
-                    and dado[4] is not None
-                ):
-                    if dado[4] < 60:
-                        aplicar_destaque_tabela(
-                            item,
-                            "perigo",
-                            True
-                        )
-                    elif dado[4] < 70:
-                        aplicar_destaque_tabela(
-                            item,
-                            "alerta",
-                            True
-                        )
-                    elif dado[4] < 80:
-                        aplicar_destaque_tabela(
-                            item,
-                            "atencao",
-                            True
-                        )
-                    elif dado[4] >= 90:
-                        aplicar_destaque_tabela(
-                            item,
-                            "sucesso",
-                            False
-                        )
-
-                self.tabela_relatorio_disciplinas.setItem(
-                    linha,
-                    coluna,
-                    item
-                )
-
-            self.tabela_relatorio_disciplinas.setRowHeight(
-                linha,
-                31
+        self._relatorios_refresh_em_andamento = True
+        try:
+            concurso = contexto["concurso"]
+            trocou_contexto = self._estado_relatorios.trocar_contexto(
+                concurso[0], contexto["inicio"], contexto["fim"]
             )
+            if trocou_contexto:
+                self._limpar_cache_dados_relatorios()
 
-        # ----------------------------------------------------
-        # TABELA TÓPICOS
-        # ----------------------------------------------------
+            if forcar:
+                self._estado_relatorios.marcar_sujas()
+                self._limpar_cache_dados_relatorios()
 
-        self.tabela_relatorio_topicos.setRowCount(
-            qtd_topicos
+            if self._estado_relatorios.resumo_sujo:
+                self._atualizar_resumo_relatorios(contexto)
+
+            indice = self.abas_relatorios.currentIndex()
+            aba = self.abas_relatorios.tabText(indice) if indice >= 0 else "Estratégico"
+            if forcar or self._estado_relatorios.precisa_atualizar(aba):
+                self._atualizar_aba_relatorios(aba, contexto)
+        finally:
+            self._relatorios_refresh_em_andamento = False
+
+    def _garantir_dados_relatorio_exportacao(self):
+        """Carrega dados faltantes para CSV sem montar abas invisíveis."""
+        contexto = self._obter_contexto_relatorios()
+        if contexto is None:
+            raise ValueError("Período inválido para exportação.")
+
+        concurso = contexto["concurso"]
+        trocou_contexto = self._estado_relatorios.trocar_contexto(
+            concurso[0], contexto["inicio"], contexto["fim"]
         )
+        if trocou_contexto:
+            self._limpar_cache_dados_relatorios()
 
-        for linha, dado in enumerate(
-            topicos
-        ):
-            valores = [
-                dado[1],
-                dado[2],
-                str(
-                    dado[3]
-                ),
-                str(
-                    dado[4]
-                ),
-                str(
-                    dado[5]
-                ),
-                formatar_percentual(
-                    dado[6]
-                ),
-                formatar_data(
-                    dado[7]
-                ),
-                formatar_data(
-                    dado[8]
-                )
-            ]
-
-            for coluna, valor in enumerate(
-                valores
-            ):
-                item = QTableWidgetItem(
-                    valor
-                )
-
-                if coluna == 1:
-                    item.setData(
-                        Qt.UserRole,
-                        dado[0]
-                    )
-
-                if coluna in (
-                    2,
-                    3,
-                    4,
-                    5,
-                    6,
-                    7
-                ):
-                    item.setTextAlignment(
-                        Qt.AlignCenter
-                    )
-
-                if (
-                    coluna == 5
-                    and dado[6] is not None
-                ):
-                    if dado[6] < 60:
-                        aplicar_destaque_tabela(
-                            item,
-                            "perigo",
-                            True
-                        )
-                    elif dado[6] < 70:
-                        aplicar_destaque_tabela(
-                            item,
-                            "alerta",
-                            True
-                        )
-                    elif dado[6] < 80:
-                        aplicar_destaque_tabela(
-                            item,
-                            "atencao",
-                            True
-                        )
-                    elif dado[6] >= 90:
-                        aplicar_destaque_tabela(
-                            item,
-                            "sucesso",
-                            False
-                        )
-
-                self.tabela_relatorio_topicos.setItem(
-                    linha,
-                    coluna,
-                    item
-                )
-
-            self.tabela_relatorio_topicos.setRowHeight(
-                linha,
-                31
+        if self.dados_relatorio_resumo is None or self.dados_relatorio_comparacao is None:
+            self._atualizar_resumo_relatorios(contexto)
+        if self.dados_relatorio_estrategico is None:
+            self.dados_relatorio_estrategico = obter_relatorio_estrategico(
+                contexto["inicio"], contexto["fim"], concurso[0]
             )
-
-        # ----------------------------------------------------
-        # TABELA DIÁRIA
-        # ----------------------------------------------------
-
-        self.tabela_relatorio_diario.setRowCount(
-            qtd_dias
-        )
-
-        for linha, dado in enumerate(
-            diario
-        ):
-            valores = [
-                formatar_data(
-                    dado[0]
-                ),
-                str(
-                    dado[1]
-                ),
-                str(
-                    dado[2]
-                ),
-                str(
-                    dado[3]
-                ),
-                formatar_percentual(
-                    dado[4]
-                )
-            ]
-
-            for coluna, valor in enumerate(
-                valores
-            ):
-                item = QTableWidgetItem(
-                    valor
-                )
-
-                item.setTextAlignment(
-                    Qt.AlignCenter
-                )
-
-                if (
-                    coluna == 4
-                    and dado[4] is not None
-                ):
-                    if dado[4] < 60:
-                        aplicar_destaque_tabela(
-                            item,
-                            "perigo",
-                            False
-                        )
-                    elif dado[4] >= 90:
-                        aplicar_destaque_tabela(
-                            item,
-                            "sucesso",
-                            False
-                        )
-
-                self.tabela_relatorio_diario.setItem(
-                    linha,
-                    coluna,
-                    item
-                )
-
-            self.tabela_relatorio_diario.setRowHeight(
-                linha,
-                31
+        if self.dados_relatorio_disciplinas is None:
+            self.dados_relatorio_disciplinas = obter_relatorio_disciplinas_periodo(
+                contexto["inicio"], contexto["fim"], concurso[0]
+            )
+        if self.dados_relatorio_topicos is None:
+            self.dados_relatorio_topicos = obter_relatorio_topicos_periodo(
+                contexto["inicio"], contexto["fim"], concurso[0]
+            )
+        if self.dados_relatorio_diario is None:
+            self.dados_relatorio_diario = obter_relatorio_diario_periodo(
+                contexto["inicio"], contexto["fim"], concurso[0]
             )
 
 
@@ -47706,71 +48147,48 @@ class SistemaEstudos(QMainWindow):
         )
 
         tabela = self.tabela_relatorio_estrategico_disciplinas
-        tabela.setRowCount(
-            len(disciplinas)
-        )
+        tabela.setUpdatesEnabled(False)
+        tabela.blockSignals(True)
+        try:
+            tabela.setRowCount(len(disciplinas))
 
-        for linha, item in enumerate(disciplinas):
-            dominio_item = item.get("dominio")
-            desempenho_item = item.get("desempenho")
-            cobertura_item = item.get("cobertura_evidencia")
-            variacao_item = item.get("variacao")
+            for linha, item in enumerate(disciplinas):
+                dominio_item = item.get("dominio")
+                desempenho_item = item.get("desempenho")
+                cobertura_item = item.get("cobertura_evidencia")
+                variacao_item = item.get("variacao")
 
-            valores = [
-                item.get("disciplina") or "—",
-                item.get("preparacao") or "—",
-                (
-                    "—"
-                    if dominio_item is None
-                    else f"{float(dominio_item):.0f}/100"
-                ),
-                percentual(desempenho_item),
-                percentual(cobertura_item),
-                pontos(variacao_item),
-            ]
+                valores = [
+                    item.get("disciplina") or "—",
+                    item.get("preparacao") or "—",
+                    "—" if dominio_item is None else f"{float(dominio_item):.0f}/100",
+                    percentual(desempenho_item),
+                    percentual(cobertura_item),
+                    pontos(variacao_item),
+                ]
 
-            for coluna, valor in enumerate(valores):
-                celula = QTableWidgetItem(str(valor))
-                if coluna == 0:
-                    celula.setTextAlignment(
-                        Qt.AlignLeft | Qt.AlignVCenter
-                    )
-                else:
-                    celula.setTextAlignment(
-                        Qt.AlignCenter
-                    )
+                for coluna, valor in enumerate(valores):
+                    celula = QTableWidgetItem(str(valor))
+                    if coluna == 0:
+                        celula.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+                    else:
+                        celula.setTextAlignment(Qt.AlignCenter)
 
-                if coluna == 1:
-                    estado = item.get("preparacao")
-                    if estado == "Atenção":
-                        aplicar_destaque_tabela(
-                            celula,
-                            "perigo",
-                            True
-                        )
-                    elif estado == "Em construção":
-                        aplicar_destaque_tabela(
-                            celula,
-                            "alerta",
-                            True
-                        )
-                    elif estado == "Forte":
-                        aplicar_destaque_tabela(
-                            celula,
-                            "sucesso",
-                            True
-                        )
+                    if coluna == 1:
+                        estado = item.get("preparacao")
+                        if estado == "Atenção":
+                            aplicar_destaque_tabela(celula, "perigo", True)
+                        elif estado == "Em construção":
+                            aplicar_destaque_tabela(celula, "alerta", True)
+                        elif estado == "Forte":
+                            aplicar_destaque_tabela(celula, "sucesso", True)
 
-                tabela.setItem(
-                    linha,
-                    coluna,
-                    celula
-                )
+                    tabela.setItem(linha, coluna, celula)
 
-            tabela.setRowHeight(
-                linha,
-                31
-            )
+                tabela.setRowHeight(linha, 31)
+        finally:
+            tabela.blockSignals(False)
+            tabela.setUpdatesEnabled(True)
 
 
     def abrir_topico_relatorio(
@@ -47798,11 +48216,18 @@ class SistemaEstudos(QMainWindow):
 
         janela.exec()
 
-        self.atualizar_relatorios()
+        self.invalidar_relatorios(atualizar_se_visivel=True)
 
     def exportar_relatorio_csv(self):
-        if self.dados_relatorio_resumo is None:
-            self.atualizar_relatorios()
+        try:
+            self._garantir_dados_relatorio_exportacao()
+        except Exception as erro:
+            QMessageBox.warning(
+                self,
+                "Relatório indisponível",
+                f"Não foi possível preparar os dados para exportação.\n\n{erro}",
+            )
+            return
 
         concurso = obter_concurso_ativo()
 
@@ -48325,6 +48750,1057 @@ class SistemaEstudos(QMainWindow):
         if 0 <= linha < len(ranking):
             item=ranking[linha]; self.lab_explicacao.setText(explicar_topico_laboratorio(self.lab_relatorio, str(item.get("topico") or item.get("disciplina") or "")))
 
+    def criar_aba_regularidade(self):
+        aba = QWidget()
+        raiz = QVBoxLayout(aba)
+        raiz.setContentsMargins(0, 0, 0, 0)
+        raiz.setSpacing(0)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.NoFrame)
+        conteudo = QWidget()
+        layout = QVBoxLayout(conteudo)
+        layout.setContentsMargins(12, 12, 12, 16)
+        layout.setSpacing(10)
+
+        topo = QFrame()
+        topo.setObjectName("myEvolutionPanel")
+        topo_layout = QHBoxLayout(topo)
+        topo_layout.setContentsMargins(14, 10, 14, 10)
+        topo_layout.setSpacing(10)
+
+        textos = QVBoxLayout()
+        textos.setSpacing(2)
+        titulo = QLabel("Regularidade e sequência")
+        titulo.setObjectName("myEvolutionSectionTitle")
+        desc = QLabel(
+            "Métrica global de hábito: reúne respostas, revisões registradas e "
+            "sessões de foco válidas. Não altera domínio nem a Fila Inteligente."
+        )
+        desc.setObjectName("mutedLabel")
+        desc.setWordWrap(True)
+        textos.addWidget(titulo)
+        textos.addWidget(desc)
+        topo_layout.addLayout(textos, 1)
+
+        botao_config = QPushButton("Ajustar meta de dias")
+        botao_config.setObjectName("subtleButton")
+        botao_config.setToolTip(
+            "A meta semanal de dias fica em Configurações > Planejamento."
+        )
+        botao_config.clicked.connect(self.abrir_configuracoes)
+        topo_layout.addWidget(botao_config, 0, Qt.AlignTop)
+        layout.addWidget(topo)
+
+        def criar_card(rotulo_texto):
+            card = QFrame()
+            card.setObjectName("myEvolutionPanel")
+            card_layout = QVBoxLayout(card)
+            card_layout.setContentsMargins(14, 10, 14, 11)
+            card_layout.setSpacing(2)
+            rotulo = QLabel(rotulo_texto)
+            rotulo.setObjectName("myEvolutionStatLabel")
+            valor = QLabel("—")
+            valor.setObjectName("myEvolutionStatValue")
+            detalhe = QLabel("—")
+            detalhe.setObjectName("myEvolutionStatDetail")
+            detalhe.setWordWrap(True)
+            card_layout.addWidget(rotulo)
+            card_layout.addWidget(valor)
+            card_layout.addWidget(detalhe)
+            return card, valor, detalhe
+
+        cards = QGridLayout()
+        cards.setHorizontalSpacing(9)
+        cards.setVerticalSpacing(9)
+        for coluna in range(4):
+            cards.setColumnStretch(coluna, 1)
+
+        card, self.regularidade_sequencia, self.regularidade_sequencia_detalhe = criar_card(
+            "Sequência atual"
+        )
+        cards.addWidget(card, 0, 0)
+        card, self.regularidade_melhor, self.regularidade_melhor_detalhe = criar_card(
+            "Melhor sequência"
+        )
+        cards.addWidget(card, 0, 1)
+        card, self.regularidade_30dias, self.regularidade_30dias_detalhe = criar_card(
+            "Últimos 30 dias"
+        )
+        cards.addWidget(card, 0, 2)
+        card, self.regularidade_indice, self.regularidade_indice_detalhe = criar_card(
+            "Regularidade"
+        )
+        cards.addWidget(card, 0, 3)
+        layout.addLayout(cards)
+
+        ritmo_card = QFrame()
+        ritmo_card.setObjectName("myEvolutionPanel")
+        ritmo_layout = QVBoxLayout(ritmo_card)
+        ritmo_layout.setContentsMargins(14, 10, 14, 12)
+        ritmo_layout.setSpacing(7)
+        ritmo_titulo = QLabel("Ritmo recente")
+        ritmo_titulo.setObjectName("myEvolutionSectionTitle")
+        ritmo_layout.addWidget(ritmo_titulo)
+
+        self.regularidade_semana_texto = QLabel("—")
+        self.regularidade_semana_texto.setObjectName("myEvolutionStatDetail")
+        self.regularidade_semana_texto.setWordWrap(True)
+        ritmo_layout.addWidget(self.regularidade_semana_texto)
+
+        self.regularidade_semana_barra = QProgressBar()
+        self.regularidade_semana_barra.setRange(0, 100)
+        self.regularidade_semana_barra.setTextVisible(False)
+        self.regularidade_semana_barra.setFixedHeight(8)
+        ritmo_layout.addWidget(self.regularidade_semana_barra)
+
+        self.regularidade_ritmo_texto = QLabel("—")
+        self.regularidade_ritmo_texto.setObjectName("mutedLabel")
+        self.regularidade_ritmo_texto.setWordWrap(True)
+        ritmo_layout.addWidget(self.regularidade_ritmo_texto)
+        layout.addWidget(ritmo_card)
+
+        semanas_card = QFrame()
+        semanas_card.setObjectName("myEvolutionPanel")
+        semanas_layout = QVBoxLayout(semanas_card)
+        semanas_layout.setContentsMargins(14, 10, 14, 12)
+        semanas_layout.setSpacing(7)
+        semanas_titulo = QLabel("Últimas 8 semanas")
+        semanas_titulo.setObjectName("myEvolutionSectionTitle")
+        semanas_desc = QLabel(
+            "● indica dia com atividade válida. Dias futuros e semanas anteriores "
+            "ao primeiro registro não contam contra sua regularidade."
+        )
+        semanas_desc.setObjectName("mutedLabel")
+        semanas_desc.setWordWrap(True)
+        semanas_layout.addWidget(semanas_titulo)
+        semanas_layout.addWidget(semanas_desc)
+
+        self.tabela_regularidade_semanas = QTableWidget()
+        self.tabela_regularidade_semanas.setColumnCount(10)
+        self.tabela_regularidade_semanas.setHorizontalHeaderLabels([
+            "Semana", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom", "Ativos", "Meta"
+        ])
+        self.tabela_regularidade_semanas.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tabela_regularidade_semanas.setSelectionMode(QAbstractItemView.NoSelection)
+        self.tabela_regularidade_semanas.verticalHeader().setVisible(False)
+        self.tabela_regularidade_semanas.setShowGrid(False)
+        self.tabela_regularidade_semanas.setAlternatingRowColors(True)
+        header = self.tabela_regularidade_semanas.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.Stretch)
+        for col in range(1, 10):
+            header.setSectionResizeMode(col, QHeaderView.ResizeToContents)
+        self.tabela_regularidade_semanas.setMinimumHeight(250)
+        semanas_layout.addWidget(self.tabela_regularidade_semanas)
+        layout.addWidget(semanas_card)
+
+        distribuicao_card = QFrame()
+        distribuicao_card.setObjectName("myEvolutionPanel")
+        dist_layout = QVBoxLayout(distribuicao_card)
+        dist_layout.setContentsMargins(14, 10, 14, 12)
+        dist_layout.setSpacing(6)
+        dist_titulo = QLabel("Distribuição dos dias ativos")
+        dist_titulo.setObjectName("myEvolutionSectionTitle")
+        self.regularidade_distribuicao = QLabel("—")
+        self.regularidade_distribuicao.setObjectName("myEvolutionStatDetail")
+        self.regularidade_distribuicao.setWordWrap(True)
+        self.regularidade_base = QLabel("—")
+        self.regularidade_base.setObjectName("mutedLabel")
+        self.regularidade_base.setWordWrap(True)
+        dist_layout.addWidget(dist_titulo)
+        dist_layout.addWidget(self.regularidade_distribuicao)
+        dist_layout.addWidget(self.regularidade_base)
+        layout.addWidget(distribuicao_card)
+        layout.addStretch()
+
+        scroll.setWidget(conteudo)
+        raiz.addWidget(scroll)
+        self.regularidade_scroll = scroll
+        return aba
+
+    def _formatar_estado_sequencia_regularidade(self, snapshot):
+        estado = str(snapshot.get("current_streak_state") or "no_history")
+        if estado == "active_today":
+            return "Atividade válida registrada hoje"
+        if estado == "pending_today":
+            return "Sequência aberta • hoje ainda pode estender a série"
+        if estado == "broken":
+            return "Sequência interrompida"
+        return "Ainda não há histórico de atividade"
+
+    def _atualizar_aba_regularidade(self, forcar=False):
+        inicio = time.perf_counter()
+        hoje = QDate.currentDate().toString("yyyy-MM-dd")
+        chave = f"estatisticas:regularidade:{hoje}"
+        if forcar:
+            self.cache_analitico.invalidar(chave)
+        snapshot = self.cache_analitico.obter(
+            chave,
+            lambda: obter_snapshot_regularidade(hoje),
+            ttl=20,
+        )
+        self.dados_regularidade = snapshot
+
+        sequencia = int(snapshot.get("current_streak_days") or 0)
+        melhor = int(snapshot.get("best_streak_days") or 0)
+        ativos30 = int(snapshot.get("active_days_30") or 0)
+        ativos7 = int(snapshot.get("active_days_7") or 0)
+        ativos90 = int(snapshot.get("active_days_90") or 0)
+        self.regularidade_sequencia.setText(
+            f"{sequencia} dia" if sequencia == 1 else f"{sequencia} dias"
+        )
+        self.regularidade_sequencia_detalhe.setText(
+            self._formatar_estado_sequencia_regularidade(snapshot)
+        )
+        self.regularidade_melhor.setText(
+            f"{melhor} dia" if melhor == 1 else f"{melhor} dias"
+        )
+        self.regularidade_melhor_detalhe.setText("maior sequência registrada no Vighna")
+        self.regularidade_30dias.setText(f"{ativos30} dias")
+        self.regularidade_30dias_detalhe.setText(
+            f"{ativos7} nos últimos 7 • {ativos90} nos últimos 90"
+        )
+
+        score = snapshot.get("regularity_score")
+        score_state = str(snapshot.get("regularity_state") or "disabled")
+        target = int(snapshot.get("target_days_per_week") or 0)
+        if score is None:
+            self.regularidade_indice.setText("—")
+            if target <= 0:
+                self.regularidade_indice_detalhe.setText(
+                    "Defina uma meta de dias/semana para calcular o índice"
+                )
+            else:
+                self.regularidade_indice_detalhe.setText("Base ainda insuficiente")
+        else:
+            self.regularidade_indice.setText(f"{float(score):.0f}%")
+            detalhe = f"meta {target} dia(s)/semana"
+            if score_state == "provisional":
+                detalhe += " • base inicial/provisória"
+            self.regularidade_indice_detalhe.setText(detalhe)
+
+        semana_ativos = int(snapshot.get("current_week_active_days") or 0)
+        if target > 0:
+            pct = snapshot.get("current_week_target_rate")
+            pct = int(round(float(pct or 0)))
+            self.regularidade_semana_texto.setText(
+                f"Esta semana: {semana_ativos}/{target} dias da meta • {pct}%"
+            )
+            self.regularidade_semana_barra.setVisible(True)
+            self.regularidade_semana_barra.setValue(max(0, min(100, pct)))
+        else:
+            self.regularidade_semana_texto.setText(
+                f"Esta semana: {semana_ativos} dia(s) ativo(s) • meta semanal desativada"
+            )
+            self.regularidade_semana_barra.setVisible(False)
+
+        ritmo = snapshot.get("pace_days_per_week_4w")
+        ritmo_ant = snapshot.get("previous_pace_days_per_week_4w")
+        gap = int(snapshot.get("current_full_gap_days") or 0)
+        gap_max = int(snapshot.get("longest_gap_days") or 0)
+        if ritmo is None:
+            ritmo_txt = "Ritmo de 4 semanas: base curta (mínimo de 7 dias observados)."
+        else:
+            ritmo_txt = f"Ritmo observado: {float(ritmo):.1f} dia(s)/semana"
+            if ritmo_ant is not None:
+                delta = float(snapshot.get("pace_delta") or 0)
+                sinal = "+" if delta > 0 else ""
+                ritmo_txt += f" • {sinal}{delta:.1f} vs. janela anterior"
+        ritmo_txt += f" • maior intervalo sem estudar: {gap_max} dia(s)"
+        if gap > 0:
+            ritmo_txt += f" • intervalo atual completo: {gap} dia(s)"
+        self.regularidade_ritmo_texto.setText(ritmo_txt)
+
+        tabela = self.tabela_regularidade_semanas
+        semanas = list(snapshot.get("weeks") or [])
+        tabela.setUpdatesEnabled(False)
+        tabela.blockSignals(True)
+        try:
+            tabela.setRowCount(len(semanas))
+            for linha, semana in enumerate(semanas):
+                inicio_sem = formatar_data(semana.get("start"))
+                fim_sem = formatar_data(semana.get("end"))
+                texto_semana = f"{inicio_sem} – {fim_sem}"
+                if semana.get("current"):
+                    texto_semana += " • atual"
+                item = QTableWidgetItem(texto_semana)
+                if not semana.get("observed"):
+                    item.setToolTip("Semana anterior ao início do histórico do Vighna.")
+                tabela.setItem(linha, 0, item)
+                for coluna, dia in enumerate(semana.get("days") or [], start=1):
+                    if dia.get("future"):
+                        texto = "·"
+                    elif not semana.get("observed"):
+                        texto = "—"
+                    else:
+                        texto = "●" if dia.get("active") else "○"
+                    celula = QTableWidgetItem(texto)
+                    celula.setTextAlignment(Qt.AlignCenter)
+                    celula.setToolTip(str(dia.get("date") or ""))
+                    tabela.setItem(linha, coluna, celula)
+                ativos = int(semana.get("active_days") or 0)
+                item_ativos = QTableWidgetItem(str(ativos) if semana.get("observed") else "—")
+                item_ativos.setTextAlignment(Qt.AlignCenter)
+                tabela.setItem(linha, 8, item_ativos)
+                if target > 0 and semana.get("observed"):
+                    meta_txt = "✓" if semana.get("target_met") else f"{ativos}/{target}"
+                elif target > 0:
+                    meta_txt = "—"
+                else:
+                    meta_txt = "Off"
+                item_meta = QTableWidgetItem(meta_txt)
+                item_meta.setTextAlignment(Qt.AlignCenter)
+                tabela.setItem(linha, 9, item_meta)
+                tabela.setRowHeight(linha, 30)
+        finally:
+            tabela.blockSignals(False)
+            tabela.setUpdatesEnabled(True)
+
+        distribuicao = list(snapshot.get("weekday_distribution") or [])
+        self.regularidade_distribuicao.setText(
+            "  •  ".join(
+                f"{item.get('label')}: {int(item.get('active_days') or 0)}"
+                for item in distribuicao
+            ) or "Sem dias ativos registrados"
+        )
+        primeira = snapshot.get("first_activity_date")
+        ultima = snapshot.get("last_activity_date")
+        span = int(snapshot.get("history_span_days") or 0)
+        if primeira:
+            self.regularidade_base.setText(
+                f"Histórico observado desde {formatar_data(primeira)} • "
+                f"{span} dia(s) de janela • última atividade {formatar_data(ultima)}. "
+                "A regularidade mede hábito, não conhecimento."
+            )
+        else:
+            self.regularidade_base.setText(
+                "A coleta começa quando houver uma resposta, revisão registrada ou "
+                "sessão de foco válida."
+            )
+
+        self._estado_estatisticas.registrar_duracao(
+            "Regularidade", (time.perf_counter() - inicio) * 1000.0
+        )
+
+    def montar_snapshot_gamificacao(
+        self,
+        concurso_id,
+        *,
+        forcar=False,
+        progresso_snapshot=None,
+        regularidade_snapshot=None,
+    ):
+        hoje = QDate.currentDate().toString("yyyy-MM-dd")
+        chave = f"gamificacao:v1:{int(concurso_id)}:{hoje}"
+        if forcar:
+            self.cache_analitico.invalidar(chave)
+        if progresso_snapshot is None:
+            progresso_snapshot = self.montar_snapshot_progresso_edital(concurso_id)
+        if regularidade_snapshot is None:
+            regularidade_snapshot = self.cache_analitico.obter(
+                f"regularidade:{hoje}",
+                lambda: obter_snapshot_regularidade(hoje),
+                ttl=20,
+            )
+        return self.cache_analitico.obter(
+            chave,
+            lambda: obter_snapshot_gamificacao(
+                concurso_id,
+                hoje,
+                progresso_snapshot=progresso_snapshot,
+                regularidade_snapshot=regularidade_snapshot,
+                sincronizar=True,
+            ),
+            ttl=20,
+        )
+
+    def criar_aba_conquistas(self):
+        aba = QWidget()
+        raiz = QVBoxLayout(aba)
+        raiz.setContentsMargins(0, 0, 0, 0)
+        raiz.setSpacing(0)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.NoFrame)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        conteudo = QWidget()
+        layout = QVBoxLayout(conteudo)
+        layout.setContentsMargins(12, 12, 12, 16)
+        layout.setSpacing(10)
+
+        topo = QFrame()
+        topo.setObjectName("myEvolutionPanel")
+        topo_layout = QVBoxLayout(topo)
+        topo_layout.setContentsMargins(14, 11, 14, 11)
+        topo_layout.setSpacing(3)
+        titulo = QLabel("Conquistas e jornada")
+        titulo.setObjectName("myEvolutionSectionTitle")
+        desc = QLabel(
+            "XP recompensa constância, revisões, recuperação de erros, cobertura e "
+            "consolidação. Acertos isolados não geram XP e a gamificação nunca altera a fila."
+        )
+        desc.setObjectName("mutedLabel")
+        desc.setWordWrap(True)
+        topo_layout.addWidget(titulo)
+        topo_layout.addWidget(desc)
+        layout.addWidget(topo)
+
+        def criar_card(rotulo_texto):
+            card = QFrame()
+            card.setObjectName("myEvolutionPanel")
+            card_layout = QVBoxLayout(card)
+            card_layout.setContentsMargins(14, 10, 14, 11)
+            card_layout.setSpacing(2)
+            rotulo = QLabel(rotulo_texto)
+            rotulo.setObjectName("myEvolutionStatLabel")
+            valor = QLabel("—")
+            valor.setObjectName("myEvolutionStatValue")
+            detalhe = QLabel("—")
+            detalhe.setObjectName("myEvolutionStatDetail")
+            detalhe.setWordWrap(True)
+            card_layout.addWidget(rotulo)
+            card_layout.addWidget(valor)
+            card_layout.addWidget(detalhe)
+            return card, valor, detalhe
+
+        cards = QGridLayout()
+        cards.setHorizontalSpacing(9)
+        cards.setVerticalSpacing(9)
+        for coluna in range(4):
+            cards.setColumnStretch(coluna, 1)
+
+        card, self.gamificacao_nivel, self.gamificacao_nivel_detalhe = criar_card("Nível")
+        cards.addWidget(card, 0, 0)
+        card, self.gamificacao_xp, self.gamificacao_xp_detalhe = criar_card("XP total")
+        cards.addWidget(card, 0, 1)
+        card, self.gamificacao_conquistas, self.gamificacao_conquistas_detalhe = criar_card("Conquistas")
+        cards.addWidget(card, 0, 2)
+        card, self.gamificacao_recuperacoes, self.gamificacao_recuperacoes_detalhe = criar_card("Erros recuperados")
+        cards.addWidget(card, 0, 3)
+        layout.addLayout(cards)
+
+        nivel_card = QFrame()
+        nivel_card.setObjectName("myEvolutionPanel")
+        nivel_layout = QVBoxLayout(nivel_card)
+        nivel_layout.setContentsMargins(14, 10, 14, 12)
+        nivel_layout.setSpacing(6)
+        nivel_titulo = QLabel("Progresso do nível")
+        nivel_titulo.setObjectName("myEvolutionSectionTitle")
+        self.gamificacao_progresso_texto = QLabel("—")
+        self.gamificacao_progresso_texto.setObjectName("myEvolutionStatDetail")
+        self.gamificacao_progresso_texto.setWordWrap(True)
+        self.gamificacao_progresso_barra = QProgressBar()
+        self.gamificacao_progresso_barra.setRange(0, 100)
+        self.gamificacao_progresso_barra.setValue(0)
+        self.gamificacao_progresso_barra.setTextVisible(False)
+        self.gamificacao_progresso_barra.setFixedHeight(9)
+        self.gamificacao_proxima = QLabel("—")
+        self.gamificacao_proxima.setObjectName("mutedLabel")
+        self.gamificacao_proxima.setWordWrap(True)
+        nivel_layout.addWidget(nivel_titulo)
+        nivel_layout.addWidget(self.gamificacao_progresso_texto)
+        nivel_layout.addWidget(self.gamificacao_progresso_barra)
+        nivel_layout.addWidget(self.gamificacao_proxima)
+        layout.addWidget(nivel_card)
+
+        breakdown_card = QFrame()
+        breakdown_card.setObjectName("myEvolutionPanel")
+        breakdown_layout = QVBoxLayout(breakdown_card)
+        breakdown_layout.setContentsMargins(14, 10, 14, 11)
+        breakdown_layout.setSpacing(4)
+        breakdown_titulo = QLabel("De onde vem o XP")
+        breakdown_titulo.setObjectName("myEvolutionSectionTitle")
+        self.gamificacao_breakdown = QLabel("—")
+        self.gamificacao_breakdown.setObjectName("myEvolutionStatDetail")
+        self.gamificacao_breakdown.setWordWrap(True)
+        regra = QLabel(
+            "Não há XP por acertar uma questão isolada. O objetivo é reforçar comportamentos "
+            "de estudo úteis, não incentivar repetição de questões fáceis."
+        )
+        regra.setObjectName("mutedLabel")
+        regra.setWordWrap(True)
+        breakdown_layout.addWidget(breakdown_titulo)
+        breakdown_layout.addWidget(self.gamificacao_breakdown)
+        breakdown_layout.addWidget(regra)
+        layout.addWidget(breakdown_card)
+
+        conquistas_card = QFrame()
+        conquistas_card.setObjectName("myEvolutionPanel")
+        conquistas_layout = QVBoxLayout(conquistas_card)
+        conquistas_layout.setContentsMargins(14, 10, 14, 12)
+        conquistas_layout.setSpacing(7)
+        conquistas_titulo = QLabel("Marcos")
+        conquistas_titulo.setObjectName("myEvolutionSectionTitle")
+        conquistas_layout.addWidget(conquistas_titulo)
+
+        self.tabela_gamificacao_conquistas = QTableWidget()
+        self.tabela_gamificacao_conquistas.setColumnCount(5)
+        self.tabela_gamificacao_conquistas.setHorizontalHeaderLabels([
+            "Estado", "Categoria", "Conquista", "Progresso", "Bônus"
+        ])
+        self.tabela_gamificacao_conquistas.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tabela_gamificacao_conquistas.setSelectionMode(QAbstractItemView.NoSelection)
+        self.tabela_gamificacao_conquistas.setAlternatingRowColors(True)
+        self.tabela_gamificacao_conquistas.setShowGrid(False)
+        self.tabela_gamificacao_conquistas.verticalHeader().setVisible(False)
+        header = self.tabela_gamificacao_conquistas.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(2, QHeaderView.Stretch)
+        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)
+        self.tabela_gamificacao_conquistas.setMinimumHeight(280)
+        conquistas_layout.addWidget(self.tabela_gamificacao_conquistas)
+        layout.addWidget(conquistas_card)
+
+        recentes_card = QFrame()
+        recentes_card.setObjectName("myEvolutionPanel")
+        recentes_layout = QVBoxLayout(recentes_card)
+        recentes_layout.setContentsMargins(14, 10, 14, 12)
+        recentes_layout.setSpacing(7)
+        recentes_titulo = QLabel("XP recente")
+        recentes_titulo.setObjectName("myEvolutionSectionTitle")
+        recentes_layout.addWidget(recentes_titulo)
+        self.tabela_gamificacao_eventos = QTableWidget()
+        self.tabela_gamificacao_eventos.setColumnCount(4)
+        self.tabela_gamificacao_eventos.setHorizontalHeaderLabels([
+            "Data", "Evento", "XP", "Detalhe"
+        ])
+        self.tabela_gamificacao_eventos.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tabela_gamificacao_eventos.setSelectionMode(QAbstractItemView.NoSelection)
+        self.tabela_gamificacao_eventos.setAlternatingRowColors(True)
+        self.tabela_gamificacao_eventos.setShowGrid(False)
+        self.tabela_gamificacao_eventos.verticalHeader().setVisible(False)
+        header_eventos = self.tabela_gamificacao_eventos.horizontalHeader()
+        header_eventos.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        header_eventos.setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        header_eventos.setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        header_eventos.setSectionResizeMode(3, QHeaderView.Stretch)
+        self.tabela_gamificacao_eventos.setMinimumHeight(220)
+        recentes_layout.addWidget(self.tabela_gamificacao_eventos)
+        layout.addWidget(recentes_card)
+        layout.addStretch()
+
+        scroll.setWidget(conteudo)
+        raiz.addWidget(scroll)
+        self.gamificacao_scroll = scroll
+        return aba
+
+    def _atualizar_aba_conquistas(self, concurso_id, forcar=False):
+        inicio = time.perf_counter()
+        snapshot = self.montar_snapshot_gamificacao(
+            concurso_id,
+            forcar=forcar,
+        )
+        self.dados_gamificacao = snapshot
+
+        nivel = int(snapshot.get("level") or 1)
+        total_xp = int(snapshot.get("total_xp") or 0)
+        progresso_xp = int(snapshot.get("level_progress_xp") or 0)
+        requerido = int(snapshot.get("level_required_xp") or 250)
+        taxa = float(snapshot.get("level_progress_rate") or 0.0)
+        ganhas = int(snapshot.get("achievements_earned") or 0)
+        total_conquistas = int(snapshot.get("achievements_total") or 0)
+        recuperadas = int(snapshot.get("recovered_questions") or 0)
+
+        self.gamificacao_nivel.setText(str(nivel))
+        self.gamificacao_nivel_detalhe.setText(
+            f"{progresso_xp}/{requerido} XP até o próximo nível"
+        )
+        self.gamificacao_xp.setText(str(total_xp))
+        self.gamificacao_xp_detalhe.setText(
+            f"{int(snapshot.get('events_count') or 0)} evento(s) válidos registrados"
+        )
+        self.gamificacao_conquistas.setText(f"{ganhas}/{total_conquistas}")
+        self.gamificacao_conquistas_detalhe.setText("marcos conquistados")
+        self.gamificacao_recuperacoes.setText(str(recuperadas))
+        self.gamificacao_recuperacoes_detalhe.setText(
+            "questões erradas recuperadas depois"
+        )
+        self.gamificacao_progresso_texto.setText(
+            f"Nível {nivel} • {progresso_xp} de {requerido} XP no nível atual"
+        )
+        self.gamificacao_progresso_barra.setValue(max(0, min(100, int(round(taxa)))))
+
+        conquistas = list(snapshot.get("achievements") or [])
+        bloqueadas = [item for item in conquistas if not item.get("earned")]
+        bloqueadas.sort(
+            key=lambda item: (
+                -float(item.get("progress_rate") or 0.0),
+                float(item.get("target") or 0.0),
+            )
+        )
+        if bloqueadas:
+            proxima = bloqueadas[0]
+            self.gamificacao_proxima.setText(
+                f"Próximo marco: {proxima.get('title')} • "
+                f"{proxima.get('progress_text')} • +{int(proxima.get('points') or 0)} XP"
+            )
+        else:
+            self.gamificacao_proxima.setText("Todos os marcos desta versão foram conquistados.")
+
+        breakdown = dict(snapshot.get("breakdown") or {})
+        self.gamificacao_breakdown.setText(
+            "  •  ".join(
+                f"{nome}: {int(valor or 0)} XP"
+                for nome, valor in breakdown.items()
+            ) or "Nenhum XP registrado ainda."
+        )
+
+        tabela = self.tabela_gamificacao_conquistas
+        tabela.setUpdatesEnabled(False)
+        tabela.blockSignals(True)
+        try:
+            tabela.setRowCount(len(conquistas))
+            for linha, item in enumerate(conquistas):
+                valores = [
+                    "✓" if item.get("earned") else "○",
+                    str(item.get("category") or "—"),
+                    str(item.get("title") or "—"),
+                    str(item.get("progress_text") or "—"),
+                    f"+{int(item.get('points') or 0)} XP",
+                ]
+                for coluna, valor in enumerate(valores):
+                    celula = QTableWidgetItem(valor)
+                    if coluna in (0, 3, 4):
+                        celula.setTextAlignment(Qt.AlignCenter)
+                    if coluna == 0 and item.get("earned"):
+                        aplicar_destaque_tabela(celula, "sucesso", False)
+                    tabela.setItem(linha, coluna, celula)
+                tabela.setRowHeight(linha, 30)
+        finally:
+            tabela.blockSignals(False)
+            tabela.setUpdatesEnabled(True)
+
+        eventos = list(snapshot.get("recent_events") or [])
+        tabela_eventos = self.tabela_gamificacao_eventos
+        tabela_eventos.setUpdatesEnabled(False)
+        tabela_eventos.blockSignals(True)
+        try:
+            tabela_eventos.setRowCount(len(eventos))
+            for linha, item in enumerate(eventos):
+                data_txt = str(item.get("occurred_at") or "")[:10]
+                valores = [
+                    formatar_data(data_txt) if data_txt else "—",
+                    str(item.get("title") or "—"),
+                    f"+{int(item.get('points') or 0)}",
+                    str(item.get("detail") or ""),
+                ]
+                for coluna, valor in enumerate(valores):
+                    celula = QTableWidgetItem(valor)
+                    if coluna in (0, 2):
+                        celula.setTextAlignment(Qt.AlignCenter)
+                    if coluna == 2:
+                        aplicar_destaque_tabela(celula, "sucesso", False)
+                    tabela_eventos.setItem(linha, coluna, celula)
+                tabela_eventos.setRowHeight(linha, 30)
+        finally:
+            tabela_eventos.blockSignals(False)
+            tabela_eventos.setUpdatesEnabled(True)
+
+        self._estado_estatisticas.registrar_duracao(
+            "Conquistas", (time.perf_counter() - inicio) * 1000.0
+        )
+
+    def criar_aba_mapa_dominio(self):
+        """Cria a visão analítica atual de domínio sem recalcular métricas."""
+        aba = QWidget()
+        raiz = QVBoxLayout(aba)
+        raiz.setContentsMargins(12, 12, 12, 12)
+        raiz.setSpacing(9)
+
+        cabecalho = QHBoxLayout()
+        textos = QVBoxLayout()
+        textos.setSpacing(1)
+        titulo = QLabel("Mapa de domínio")
+        titulo.setObjectName("sectionTitle")
+        descricao = QLabel(
+            "Veja domínio, evidência, cobertura e consolidação sem confundir "
+            "desempenho com quantidade de dados."
+        )
+        descricao.setObjectName("mutedLabel")
+        descricao.setWordWrap(True)
+        textos.addWidget(titulo)
+        textos.addWidget(descricao)
+        cabecalho.addLayout(textos)
+        cabecalho.addStretch()
+        self.mapa_dominio_contagem = QLabel("0 tópicos")
+        self.mapa_dominio_contagem.setObjectName("filterCount")
+        cabecalho.addWidget(self.mapa_dominio_contagem)
+        raiz.addLayout(cabecalho)
+
+        resumo = QGridLayout()
+        resumo.setHorizontalSpacing(9)
+        for coluna in range(4):
+            resumo.setColumnStretch(coluna, 1)
+        quadro, self.mapa_dominio_mensuraveis = self.criar_mini_indicador_disciplina(
+            "Tópicos mensuráveis"
+        )
+        resumo.addWidget(quadro, 0, 0)
+        quadro, self.mapa_dominio_evidencia = self.criar_mini_indicador_disciplina(
+            "Evidência suficiente"
+        )
+        resumo.addWidget(quadro, 0, 1)
+        quadro, self.mapa_dominio_consolidados = self.criar_mini_indicador_disciplina(
+            "Consolidados"
+        )
+        resumo.addWidget(quadro, 0, 2)
+        quadro, self.mapa_dominio_sem_base = self.criar_mini_indicador_disciplina(
+            "Sem base suficiente"
+        )
+        resumo.addWidget(quadro, 0, 3)
+        raiz.addLayout(resumo)
+
+        disciplina_card = QFrame()
+        disciplina_card.setObjectName("myEvolutionPanel")
+        disciplina_layout = QVBoxLayout(disciplina_card)
+        disciplina_layout.setContentsMargins(12, 10, 12, 10)
+        disciplina_layout.setSpacing(7)
+        disciplina_titulo = QLabel("Visão por disciplina")
+        disciplina_titulo.setObjectName("myEvolutionSectionTitle")
+        disciplina_layout.addWidget(disciplina_titulo)
+
+        self.tabela_mapa_disciplinas = QTableWidget()
+        self.tabela_mapa_disciplinas.setColumnCount(7)
+        self.tabela_mapa_disciplinas.setHorizontalHeaderLabels([
+            "Disciplina",
+            "Domínio",
+            "Evidência",
+            "Cob. tópicos",
+            "Cob. questões",
+            "Mensuráveis",
+            "Consolidados",
+        ])
+        self.tabela_mapa_disciplinas.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tabela_mapa_disciplinas.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.tabela_mapa_disciplinas.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.tabela_mapa_disciplinas.setAlternatingRowColors(True)
+        self.tabela_mapa_disciplinas.setShowGrid(False)
+        self.tabela_mapa_disciplinas.verticalHeader().setVisible(False)
+        self.tabela_mapa_disciplinas.horizontalHeader().setSectionResizeMode(
+            0, QHeaderView.Stretch
+        )
+        for coluna in range(1, 7):
+            self.tabela_mapa_disciplinas.horizontalHeader().setSectionResizeMode(
+                coluna, QHeaderView.ResizeToContents
+            )
+        self.tabela_mapa_disciplinas.setMinimumHeight(150)
+        self.tabela_mapa_disciplinas.setMaximumHeight(225)
+        disciplina_layout.addWidget(self.tabela_mapa_disciplinas)
+        raiz.addWidget(disciplina_card)
+
+        filtros = QFrame()
+        filtros.setObjectName("evolutionFilterBar")
+        filtros_layout = QHBoxLayout(filtros)
+        filtros_layout.setContentsMargins(10, 8, 10, 8)
+        filtros_layout.setSpacing(7)
+
+        self.mapa_busca = QLineEdit()
+        self.mapa_busca.setPlaceholderText("Buscar disciplina ou tópico")
+        self.mapa_busca.setMinimumWidth(190)
+        filtros_layout.addWidget(self.mapa_busca, 2)
+
+        self.mapa_filtro_disciplina = QComboBox()
+        self.mapa_filtro_disciplina.setMinimumWidth(150)
+        self.mapa_filtro_disciplina.addItem("Todas as disciplinas", None)
+        filtros_layout.addWidget(self.mapa_filtro_disciplina)
+
+        self.mapa_filtro_evidencia = QComboBox()
+        self.mapa_filtro_evidencia.addItem("Toda evidência", None)
+        self.mapa_filtro_evidencia.addItem("Insuficiente", "insufficient")
+        self.mapa_filtro_evidencia.addItem("Baixa", "low")
+        self.mapa_filtro_evidencia.addItem("Moderada", "moderate")
+        self.mapa_filtro_evidencia.addItem("Alta", "high")
+        filtros_layout.addWidget(self.mapa_filtro_evidencia)
+
+        self.mapa_filtro_estado = QComboBox()
+        self.mapa_filtro_estado.addItem("Todos os estados", None)
+        for estado in (
+            "Não iniciado",
+            "Dados insuficientes",
+            "Provisório",
+            "Mensurável",
+            "Consolidado",
+        ):
+            self.mapa_filtro_estado.addItem(estado, estado)
+        filtros_layout.addWidget(self.mapa_filtro_estado)
+
+        self.mapa_filtro_dominio = QComboBox()
+        self.mapa_filtro_dominio.addItem("Todo domínio", None)
+        self.mapa_filtro_dominio.addItem("Baixo", "baixo")
+        self.mapa_filtro_dominio.addItem("Intermediário", "intermediario")
+        self.mapa_filtro_dominio.addItem("Bom", "bom")
+        self.mapa_filtro_dominio.addItem("Alto", "alto")
+        filtros_layout.addWidget(self.mapa_filtro_dominio)
+
+        self.mapa_filtro_consolidacao = QComboBox()
+        self.mapa_filtro_consolidacao.addItem("Toda consolidação", None)
+        self.mapa_filtro_consolidacao.addItem(
+            "Dados insuficientes", "insufficient_data"
+        )
+        self.mapa_filtro_consolidacao.addItem(
+            "Não consolidado", "not_consolidated"
+        )
+        self.mapa_filtro_consolidacao.addItem("Consolidado", "consolidated")
+        filtros_layout.addWidget(self.mapa_filtro_consolidacao)
+
+        self.mapa_ordenacao = QComboBox()
+        self.mapa_ordenacao.addItem("Ordem curricular", "curricular")
+        self.mapa_ordenacao.addItem("Domínio ↑", "mastery_asc")
+        self.mapa_ordenacao.addItem("Domínio ↓", "mastery_desc")
+        self.mapa_ordenacao.addItem("Evidência ↓", "evidence_desc")
+        self.mapa_ordenacao.addItem("Cobertura ↓", "coverage_desc")
+        self.mapa_ordenacao.addItem("Atividade recente", "last_activity_desc")
+        filtros_layout.addWidget(self.mapa_ordenacao)
+        raiz.addWidget(filtros)
+
+        self.mapa_dominio_nota = QLabel(
+            "Domínio com evidência baixa é provisório. Tópicos sem base não são "
+            "classificados como fortes ou fracos."
+        )
+        self.mapa_dominio_nota.setObjectName("mutedLabel")
+        self.mapa_dominio_nota.setWordWrap(True)
+        raiz.addWidget(self.mapa_dominio_nota)
+
+        self.tabela_mapa_dominio = QTableWidget()
+        self.tabela_mapa_dominio.setColumnCount(7)
+        self.tabela_mapa_dominio.setHorizontalHeaderLabels([
+            "Disciplina",
+            "Tópico",
+            "Domínio",
+            "Evidência",
+            "Cobertura",
+            "Consolidação",
+            "Estado",
+        ])
+        self.tabela_mapa_dominio.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tabela_mapa_dominio.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.tabela_mapa_dominio.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.tabela_mapa_dominio.setAlternatingRowColors(True)
+        self.tabela_mapa_dominio.setShowGrid(False)
+        self.tabela_mapa_dominio.verticalHeader().setVisible(False)
+        self.tabela_mapa_dominio.horizontalHeader().setSectionResizeMode(
+            1, QHeaderView.Stretch
+        )
+        self.tabela_mapa_dominio.setColumnWidth(0, 150)
+        self.tabela_mapa_dominio.setColumnWidth(2, 100)
+        self.tabela_mapa_dominio.setColumnWidth(3, 105)
+        self.tabela_mapa_dominio.setColumnWidth(4, 95)
+        self.tabela_mapa_dominio.setColumnWidth(5, 125)
+        self.tabela_mapa_dominio.setColumnWidth(6, 130)
+        self.tabela_mapa_dominio.cellDoubleClicked.connect(
+            self.abrir_topico_mapa_dominio
+        )
+        raiz.addWidget(self.tabela_mapa_dominio, 1)
+
+        for controle in (
+            self.mapa_busca,
+            self.mapa_filtro_disciplina,
+            self.mapa_filtro_evidencia,
+            self.mapa_filtro_estado,
+            self.mapa_filtro_dominio,
+            self.mapa_filtro_consolidacao,
+            self.mapa_ordenacao,
+        ):
+            if isinstance(controle, QLineEdit):
+                controle.textChanged.connect(self.filtrar_mapa_dominio)
+            else:
+                controle.currentIndexChanged.connect(self.filtrar_mapa_dominio)
+
+        return aba
+
+    def _popular_mapa_disciplinas(self, disciplinas):
+        tabela = self.tabela_mapa_disciplinas
+        tabela.setUpdatesEnabled(False)
+        tabela.blockSignals(True)
+        try:
+            tabela.setRowCount(len(disciplinas))
+            for linha, item in enumerate(disciplinas):
+                dominio = item.get("dominio")
+                evidencia = str(item.get("evidencia") or "insufficient")
+                dominio_texto = "—" if dominio is None else f"{float(dominio):.0f}/100"
+                if dominio is not None and evidencia == "low":
+                    dominio_texto += " · prov."
+                valores = [
+                    item.get("disciplina") or "—",
+                    dominio_texto,
+                    item.get("evidencia_rotulo") or "Insuficiente",
+                    formatar_percentual(item.get("cobertura_topicos")),
+                    formatar_percentual(item.get("cobertura_questoes")),
+                    str(int(item.get("topicos_mensuraveis") or 0)),
+                    str(int(item.get("consolidados") or 0)),
+                ]
+                for coluna, valor in enumerate(valores):
+                    celula = QTableWidgetItem(str(valor))
+                    if coluna > 0:
+                        celula.setTextAlignment(Qt.AlignCenter)
+                    if coluna == 1:
+                        if dominio is None:
+                            aplicar_destaque_tabela(celula, "inativo", False)
+                        elif evidencia == "low":
+                            aplicar_destaque_tabela(celula, "atencao", False)
+                    if coluna == 2:
+                        if evidencia == "insufficient":
+                            aplicar_destaque_tabela(celula, "inativo", False)
+                        elif evidencia == "low":
+                            aplicar_destaque_tabela(celula, "atencao", False)
+                        elif evidencia in {"moderate", "high"}:
+                            aplicar_destaque_tabela(celula, "sucesso", False)
+                    if coluna == 6 and int(item.get("consolidados") or 0) > 0:
+                        aplicar_destaque_tabela(celula, "sucesso", False)
+                    tabela.setItem(linha, coluna, celula)
+                tabela.setRowHeight(linha, 30)
+        finally:
+            tabela.blockSignals(False)
+            tabela.setUpdatesEnabled(True)
+
+    def _atualizar_aba_mapa_dominio(self, concurso_id, forcar=False):
+        inicio = time.perf_counter()
+        if forcar:
+            self.cache_analitico.invalidar(f"progresso:v2:{int(concurso_id)}")
+        progresso = self.montar_snapshot_progresso_edital(concurso_id)
+        mapa = build_domain_map_snapshot(progresso).to_dict()
+        self.dados_mapa_dominio = mapa
+
+        total = int(mapa.get("total_topics") or 0)
+        mensuraveis = int(mapa.get("measurable_topics") or 0)
+        evidencia = int(mapa.get("sufficient_evidence_topics") or 0)
+        consolidados = int(mapa.get("consolidated_topics") or 0)
+        sem_base = int(mapa.get("unstarted_topics") or 0) + int(
+            mapa.get("insufficient_topics") or 0
+        )
+        self.mapa_dominio_mensuraveis.setText(f"{mensuraveis} de {total}")
+        self.mapa_dominio_evidencia.setText(f"{evidencia} de {total}")
+        self.mapa_dominio_consolidados.setText(f"{consolidados} de {total}")
+        self.mapa_dominio_sem_base.setText(f"{sem_base} de {total}")
+
+        self._popular_mapa_disciplinas(mapa.get("disciplines", []))
+
+        atual = self.mapa_filtro_disciplina.currentData()
+        disciplinas = [
+            str(item.get("disciplina") or "")
+            for item in mapa.get("disciplines", [])
+        ]
+        self.mapa_filtro_disciplina.blockSignals(True)
+        try:
+            self.mapa_filtro_disciplina.clear()
+            self.mapa_filtro_disciplina.addItem("Todas as disciplinas", None)
+            for nome in disciplinas:
+                self.mapa_filtro_disciplina.addItem(nome, nome)
+            if atual:
+                indice = self.mapa_filtro_disciplina.findData(atual)
+                if indice >= 0:
+                    self.mapa_filtro_disciplina.setCurrentIndex(indice)
+        finally:
+            self.mapa_filtro_disciplina.blockSignals(False)
+
+        self.filtrar_mapa_dominio()
+        self._estado_estatisticas.registrar_duracao(
+            "Mapa de domínio", (time.perf_counter() - inicio) * 1000.0
+        )
+
+    def filtrar_mapa_dominio(self, *args):
+        if not hasattr(self, "dados_mapa_dominio"):
+            return
+        topicos = filter_domain_topics(
+            self.dados_mapa_dominio.get("topics", []),
+            discipline=self.mapa_filtro_disciplina.currentData() or "",
+            evidence=self.mapa_filtro_evidencia.currentData() or "",
+            state=self.mapa_filtro_estado.currentData() or "",
+            domain=self.mapa_filtro_dominio.currentData() or "",
+            consolidation=self.mapa_filtro_consolidacao.currentData() or "",
+            search=self.mapa_busca.text(),
+        )
+        topicos = sort_domain_topics(
+            topicos,
+            self.mapa_ordenacao.currentData() or "curricular",
+        )
+        self.mapa_dominio_contagem.setText(
+            "1 tópico" if len(topicos) == 1 else f"{len(topicos)} tópicos"
+        )
+
+        tabela = self.tabela_mapa_dominio
+        tabela.setUpdatesEnabled(False)
+        tabela.blockSignals(True)
+        try:
+            tabela.setSortingEnabled(False)
+            tabela.setRowCount(len(topicos))
+            for linha, item in enumerate(topicos):
+                dominio = item.get("dominio_score")
+                evidencia = str(item.get("evidencia") or "insufficient")
+                estado = str(item.get("display_state") or "Dados insuficientes")
+                dominio_texto = "—" if dominio is None else f"{float(dominio):.0f}/100"
+                if item.get("mastery_provisional"):
+                    dominio_texto += " · provisório"
+                valores = [
+                    item.get("disciplina") or "—",
+                    item.get("topico") or "—",
+                    dominio_texto,
+                    item.get("evidence_label") or "Insuficiente",
+                    formatar_percentual(item.get("cobertura_questoes")),
+                    item.get("consolidation_label") or "Dados insuficientes",
+                    estado,
+                ]
+                for coluna, valor in enumerate(valores):
+                    celula = QTableWidgetItem(str(valor))
+                    if coluna == 1:
+                        celula.setData(Qt.UserRole, int(item["topico_id"]))
+                    if coluna >= 2:
+                        celula.setTextAlignment(Qt.AlignCenter)
+                    if coluna == 2:
+                        faixa = item.get("domain_band")
+                        if dominio is None:
+                            aplicar_destaque_tabela(celula, "inativo", False)
+                        elif evidencia == "low":
+                            aplicar_destaque_tabela(celula, "atencao", False)
+                        elif faixa == "baixo":
+                            aplicar_destaque_tabela(celula, "perigo", False)
+                        elif faixa == "intermediario":
+                            aplicar_destaque_tabela(celula, "alerta", False)
+                        elif faixa == "bom":
+                            aplicar_destaque_tabela(celula, "atencao", False)
+                        elif faixa == "alto":
+                            aplicar_destaque_tabela(celula, "sucesso", False)
+                    elif coluna == 3:
+                        if evidencia == "insufficient":
+                            aplicar_destaque_tabela(celula, "inativo", False)
+                        elif evidencia == "low":
+                            aplicar_destaque_tabela(celula, "atencao", False)
+                        else:
+                            aplicar_destaque_tabela(celula, "sucesso", False)
+                    elif coluna == 5:
+                        if item.get("consolidacao") == "consolidated":
+                            aplicar_destaque_tabela(celula, "sucesso", False)
+                        elif item.get("consolidacao") == "insufficient_data":
+                            aplicar_destaque_tabela(celula, "inativo", False)
+                    elif coluna == 6:
+                        if estado in {"Não iniciado", "Dados insuficientes"}:
+                            aplicar_destaque_tabela(celula, "inativo", False)
+                        elif estado == "Provisório":
+                            aplicar_destaque_tabela(celula, "atencao", False)
+                        elif estado == "Consolidado":
+                            aplicar_destaque_tabela(celula, "sucesso", False)
+                    tabela.setItem(linha, coluna, celula)
+                tabela.setRowHeight(linha, 31)
+        finally:
+            tabela.blockSignals(False)
+            tabela.setUpdatesEnabled(True)
+
+    def abrir_topico_mapa_dominio(self, linha, coluna):
+        item = self.tabela_mapa_dominio.item(linha, 1)
+        if item is None:
+            return
+        topico_id = item.data(Qt.UserRole)
+        if topico_id is None:
+            return
+        janela = JanelaTopico(int(topico_id), item.text(), self)
+        janela.exec()
+        self.invalidar_estatisticas("all")
+
+
     def criar_tela_estatisticas(self):
         tela = QWidget()
 
@@ -48440,7 +49916,7 @@ class SistemaEstudos(QMainWindow):
             34
         )
         atualizar.clicked.connect(
-            self.atualizar_estatisticas
+            lambda: self.atualizar_estatisticas(forcar=True)
         )
 
         cabecalho.addWidget(
@@ -48637,7 +50113,7 @@ class SistemaEstudos(QMainWindow):
         )
 
         minha_descricao = QLabel(
-            "Tendências de foco efetivo, consistência, questões, domínio e recuperação ao longo do tempo."
+            "Atividade cronológica: questões, sessões, revisões qualificadas e foco global."
         )
         minha_descricao.setObjectName(
             "mutedLabel"
@@ -48752,28 +50228,28 @@ class SistemaEstudos(QMainWindow):
 
         card, self.minha_desempenho, self.minha_desempenho_detalhe = (
             criar_card_minha_evolucao(
-                "Desempenho no período"
+                "Taxa de acerto no período"
             )
         )
         meus_indicadores.addWidget(card, 0, 0)
 
         card, self.minha_dominio, self.minha_dominio_detalhe = (
             criar_card_minha_evolucao(
-                "Domínio médio atual"
+                "Tentativas"
             )
         )
         meus_indicadores.addWidget(card, 0, 1)
 
         card, self.minha_questoes, self.minha_questoes_detalhe = (
             criar_card_minha_evolucao(
-                "Questões resolvidas"
+                "Questões únicas"
             )
         )
         meus_indicadores.addWidget(card, 0, 2)
 
         card, self.minha_consolidados, self.minha_consolidados_detalhe = (
             criar_card_minha_evolucao(
-                "Tópicos consolidados"
+                "Sessões de questões"
             )
         )
         meus_indicadores.addWidget(card, 0, 3)
@@ -48790,28 +50266,28 @@ class SistemaEstudos(QMainWindow):
 
         card, self.minha_foco, self.minha_foco_detalhe = (
             criar_card_minha_evolucao(
-                "Foco efetivo"
+                "Foco efetivo (global)"
             )
         )
         historico_indicadores.addWidget(card, 0, 0)
 
         card, self.minha_consistencia, self.minha_consistencia_detalhe = (
             criar_card_minha_evolucao(
-                "Consistência"
+                "Dias com foco (global)"
             )
         )
         historico_indicadores.addWidget(card, 0, 1)
 
         card, self.minha_sessoes_foco, self.minha_sessoes_foco_detalhe = (
             criar_card_minha_evolucao(
-                "Sessões de foco"
+                "Sessões de foco (global)"
             )
         )
         historico_indicadores.addWidget(card, 0, 2)
 
         card, self.minha_revisoes_periodo, self.minha_revisoes_periodo_detalhe = (
             criar_card_minha_evolucao(
-                "Revisões realizadas"
+                "Revisões qualificadas"
             )
         )
         historico_indicadores.addWidget(card, 0, 3)
@@ -48967,6 +50443,7 @@ class SistemaEstudos(QMainWindow):
         minha_layout.addWidget(
             insights_card
         )
+        insights_card.setVisible(False)
 
         # Evolução por disciplina.
         disciplina_card = QFrame()
@@ -49064,6 +50541,7 @@ class SistemaEstudos(QMainWindow):
         minha_layout.addWidget(
             disciplina_card
         )
+        disciplina_card.setVisible(False)
 
         # Tópicos que mais mudaram no período.
         topicos_card = QFrame()
@@ -49145,6 +50623,7 @@ class SistemaEstudos(QMainWindow):
         minha_layout.addWidget(
             topicos_card
         )
+        topicos_card.setVisible(False)
 
         # Linha do tempo com métrica selecionável.
         grafico_card = QFrame()
@@ -49175,9 +50654,8 @@ class SistemaEstudos(QMainWindow):
         self.combo_metrica_minha_evolucao.addItems([
             "Desempenho",
             "Questões resolvidas",
-            "Foco efetivo",
-            "Revisões realizadas",
-            "Domínio observado"
+            "Foco efetivo (global)",
+            "Revisões qualificadas"
         ])
         self.combo_metrica_minha_evolucao.setFixedWidth(
             160
@@ -49222,6 +50700,18 @@ class SistemaEstudos(QMainWindow):
         self.abas_estatisticas.addTab(
             self.aba_minha_evolucao,
             "Histórico"
+        )
+
+        self.aba_regularidade = self.criar_aba_regularidade()
+        self.abas_estatisticas.addTab(
+            self.aba_regularidade,
+            "Regularidade"
+        )
+
+        self.aba_conquistas = self.criar_aba_conquistas()
+        self.abas_estatisticas.addTab(
+            self.aba_conquistas,
+            "Conquistas"
         )
 
         self.aba_laboratorio_algoritmo = self.criar_aba_laboratorio_algoritmo()
@@ -49370,6 +50860,16 @@ class SistemaEstudos(QMainWindow):
         self.abas_estatisticas.addTab(
             aba_disciplinas,
             "Disciplinas"
+        )
+
+        # ----------------------------------------------------
+        # ABA MAPA DE DOMÍNIO
+        # ----------------------------------------------------
+
+        self.aba_mapa_dominio = self.criar_aba_mapa_dominio()
+        self.abas_estatisticas.addTab(
+            self.aba_mapa_dominio,
+            "Mapa de domínio"
         )
 
         # ----------------------------------------------------
@@ -49928,7 +51428,7 @@ class SistemaEstudos(QMainWindow):
             self.evolucao_desempenho,
             self.evolucao_desempenho_tendencia
         ) = criar_indicador_evolucao(
-            "Desempenho"
+            "Desempenho atual"
         )
         indicadores_evolucao.addWidget(
             card,
@@ -49941,7 +51441,7 @@ class SistemaEstudos(QMainWindow):
             self.evolucao_questoes_dia,
             self.evolucao_questoes_tendencia
         ) = criar_indicador_evolucao(
-            "Questões/dia"
+            "Comparação equivalente"
         )
         indicadores_evolucao.addWidget(
             card,
@@ -49954,7 +51454,7 @@ class SistemaEstudos(QMainWindow):
             self.evolucao_revisoes_dia,
             self.evolucao_revisoes_tendencia
         ) = criar_indicador_evolucao(
-            "Revisões/dia"
+            "Tendência oficial"
         )
         indicadores_evolucao.addWidget(
             card,
@@ -49967,7 +51467,7 @@ class SistemaEstudos(QMainWindow):
             self.evolucao_dias_estudados,
             self.evolucao_dias_tendencia
         ) = criar_indicador_evolucao(
-            "Dias estudados"
+            "Base estatística"
         )
         indicadores_evolucao.addWidget(
             card,
@@ -49978,6 +51478,13 @@ class SistemaEstudos(QMainWindow):
         lay_evolucao.addLayout(
             indicadores_evolucao
         )
+
+        self.evolucao_estado_comparacao = QLabel(
+            "Dados insuficientes para comparação"
+        )
+        self.evolucao_estado_comparacao.setObjectName("infoNotice")
+        self.evolucao_estado_comparacao.setWordWrap(True)
+        lay_evolucao.addWidget(self.evolucao_estado_comparacao)
 
         # Gráficos.
         def criar_card_grafico(
@@ -50075,7 +51582,7 @@ class SistemaEstudos(QMainWindow):
         lay_evolucao.addWidget(
             criar_card_grafico(
                 "Revisões por dia",
-                "Quantidade de sessões de revisão registradas em cada dia.",
+                "Revisões qualificadas do concurso; legado sem linhagem é excluído.",
                 self.grafico_evolucao_revisoes
             )
         )
@@ -50115,8 +51622,7 @@ class SistemaEstudos(QMainWindow):
 
         disciplinas_desc = QLabel(
             (
-                "Compara o desempenho da primeira metade com a segunda "
-                "metade do período selecionado."
+                "Compara o período selecionado com o período anterior de mesma duração."
             )
         )
         disciplinas_desc.setObjectName(
@@ -50159,11 +51665,11 @@ class SistemaEstudos(QMainWindow):
         )
         self.tabela_evolucao_disciplinas.setHorizontalHeaderLabels([
             "Disciplina",
-            "1ª metade",
-            "2ª metade",
-            "Variação",
-            "Questões",
-            "Revisões"
+            "Atual",
+            "Anterior",
+            "Delta",
+            "Tentativas",
+            "Base"
         ])
         self.tabela_evolucao_disciplinas.setEditTriggers(
             QAbstractItemView.NoEditTriggers
@@ -50212,6 +51718,70 @@ class SistemaEstudos(QMainWindow):
         lay_evolucao.addWidget(
             disciplinas_card
         )
+
+        topicos_tendencias_card = QFrame()
+        topicos_tendencias_card.setObjectName("evolutionDisciplineCard")
+        topicos_tendencias_layout = QVBoxLayout(topicos_tendencias_card)
+        topicos_tendencias_layout.setContentsMargins(14, 10, 14, 12)
+        topicos_tendencias_layout.setSpacing(8)
+        topicos_tendencias_titulo = QLabel("Comparação por tópico")
+        topicos_tendencias_titulo.setObjectName("evolutionSectionTitle")
+        self.evolucao_topicos_aviso = QLabel(
+            "Ainda não há base suficiente para comparar tópicos."
+        )
+        self.evolucao_topicos_aviso.setObjectName("mutedLabel")
+        self.evolucao_topicos_aviso.setWordWrap(True)
+        topicos_tendencias_layout.addWidget(topicos_tendencias_titulo)
+        topicos_tendencias_layout.addWidget(self.evolucao_topicos_aviso)
+        self.tabela_evolucao_topicos = QTableWidget()
+        self.tabela_evolucao_topicos.setObjectName("evolutionDisciplineTable")
+        self.tabela_evolucao_topicos.setColumnCount(7)
+        self.tabela_evolucao_topicos.setHorizontalHeaderLabels([
+            "Disciplina", "Tópico", "Atual", "Anterior", "Delta",
+            "Tentativas", "Base"
+        ])
+        self.tabela_evolucao_topicos.setEditTriggers(
+            QAbstractItemView.NoEditTriggers
+        )
+        self.tabela_evolucao_topicos.setSelectionBehavior(
+            QAbstractItemView.SelectRows
+        )
+        self.tabela_evolucao_topicos.setShowGrid(False)
+        self.tabela_evolucao_topicos.setAlternatingRowColors(True)
+        self.tabela_evolucao_topicos.verticalHeader().setVisible(False)
+        self.tabela_evolucao_topicos.setMinimumHeight(230)
+        topicos_tendencias_header = self.tabela_evolucao_topicos.horizontalHeader()
+        topicos_tendencias_header.setSectionResizeMode(1, QHeaderView.Stretch)
+        for coluna in (0, 2, 3, 4, 5, 6):
+            topicos_tendencias_header.setSectionResizeMode(
+                coluna, QHeaderView.ResizeToContents
+            )
+        topicos_tendencias_layout.addWidget(self.tabela_evolucao_topicos)
+        lay_evolucao.addWidget(topicos_tendencias_card)
+
+        progresso_historico_card = QFrame()
+        progresso_historico_card.setObjectName("evolutionChartCard")
+        progresso_historico_layout = QVBoxLayout(progresso_historico_card)
+        progresso_historico_layout.setContentsMargins(14, 10, 14, 12)
+        progresso_historico_layout.setSpacing(6)
+        progresso_historico_titulo = QLabel("Progresso do edital ao longo do tempo")
+        progresso_historico_titulo.setObjectName("evolutionSectionTitle")
+        self.evolucao_progresso_historico_aviso = QLabel(
+            "Coleta histórica ainda não iniciada."
+        )
+        self.evolucao_progresso_historico_aviso.setObjectName("mutedLabel")
+        self.evolucao_progresso_historico_aviso.setWordWrap(True)
+        self.grafico_evolucao_progresso = GraficoSerieTemporal(
+            percentual=True,
+            barras=False,
+        )
+        self.grafico_evolucao_progresso.setMinimumHeight(190)
+        progresso_historico_layout.addWidget(progresso_historico_titulo)
+        progresso_historico_layout.addWidget(
+            self.evolucao_progresso_historico_aviso
+        )
+        progresso_historico_layout.addWidget(self.grafico_evolucao_progresso)
+        lay_evolucao.addWidget(progresso_historico_card)
         lay_evolucao.addStretch()
 
         evolucao_scroll.setWidget(
@@ -51722,7 +53292,7 @@ class SistemaEstudos(QMainWindow):
                     descricao_aba
                 )
         self.abas_estatisticas.currentChanged.connect(
-            self.atualizar_ajuda_aba_estatisticas
+            self._ao_mudar_aba_estatisticas
         )
         self.atualizar_ajuda_aba_estatisticas()
 
@@ -51739,6 +53309,15 @@ class SistemaEstudos(QMainWindow):
                 "Mostra a evolução em 7, 30, 60 ou 90 dias: foco efetivo, "
                 "questões, revisões, consistência, domínio observado e pontualidade."
             ),
+            "Regularidade": (
+                "Acompanha hábito global de estudo: sequência, dias ativos, ritmo, "
+                "meta semanal e distribuição dos estudos. Não altera domínio nem a fila."
+            ),
+            "Conquistas": (
+                "Transforma comportamentos úteis em XP e marcos: dias de estudo válidos, "
+                "revisões, recuperação de erros, cobertura e consolidação. Acertos isolados "
+                "não geram XP e a gamificação nunca interfere na fila."
+            ),
             "Algoritmo": (
                 "Laboratório do Motor V5. Permite entender por que um conteúdo foi "
                 "priorizado, simular pesos e comparar candidatos sem alterar a "
@@ -51748,9 +53327,15 @@ class SistemaEstudos(QMainWindow):
                 "Compara as disciplinas do perfil por volume, desempenho, revisões, "
                 "tópicos e outros indicadores para localizar desequilíbrios."
             ),
+            "Mapa de domínio": (
+                "Mostra domínio, evidência, cobertura e consolidação por disciplina e "
+                "tópico. Valores com pouca evidência permanecem provisórios e dados "
+                "insuficientes nunca são tratados como domínio zero."
+            ),
             "Pontos fracos": (
-                "Destaca conteúdos que merecem atenção por desempenho, domínio, "
-                "recorrência de erros ou falta de evidência suficiente."
+                "Destaca conteúdos com domínio mensurável mais baixo. Evidência "
+                "baixa aparece como provisória; evidência insuficiente não é "
+                "classificada como fraqueza por domínio."
             ),
             "Revisões recentes": (
                 "Mostra as revisões registradas mais recentemente e ajuda a acompanhar "
@@ -52162,19 +53747,7 @@ class SistemaEstudos(QMainWindow):
         )
 
     def abrir_previsao_edital(self):
-        self.atualizar_estatisticas()
-
-        if hasattr(
-            self,
-            "aba_progresso_edital"
-        ):
-            self.abas_estatisticas.setCurrentWidget(
-                self.aba_progresso_edital
-            )
-
-        self.telas.setCurrentWidget(
-            self.tela_estatisticas
-        )
+        self.abrir_estatisticas("Progresso")
 
         if (
             hasattr(
@@ -53175,19 +54748,7 @@ class SistemaEstudos(QMainWindow):
         )
 
     def abrir_alertas_conteudo(self):
-        self.atualizar_estatisticas()
-
-        if hasattr(
-            self,
-            "aba_progresso_edital"
-        ):
-            self.abas_estatisticas.setCurrentWidget(
-                self.aba_progresso_edital
-            )
-
-        self.telas.setCurrentWidget(
-            self.tela_estatisticas
-        )
+        self.abrir_estatisticas("Progresso")
 
         if (
             hasattr(
@@ -53521,7 +55082,7 @@ class SistemaEstudos(QMainWindow):
         janela.exec()
 
         self.atualizar_dashboard()
-        self.atualizar_estatisticas()
+        self.invalidar_estatisticas("all")
 
     def montar_dados_progresso_edital(
         self,
@@ -53601,21 +55162,10 @@ class SistemaEstudos(QMainWindow):
         self.atualizar_alertas_dashboard(
             concurso_id
         )
+        return snapshot
 
     def abrir_progresso_edital(self):
-        self.atualizar_estatisticas()
-
-        if hasattr(
-            self,
-            "aba_progresso_edital"
-        ):
-            self.abas_estatisticas.setCurrentWidget(
-                self.aba_progresso_edital
-            )
-
-        self.telas.setCurrentWidget(
-            self.tela_estatisticas
-        )
+        self.abrir_estatisticas("Progresso")
 
     def normalizar_texto_progresso(
         self,
@@ -53771,62 +55321,49 @@ class SistemaEstudos(QMainWindow):
             )
         )
 
-        self.tabela_progresso_disciplinas.setRowCount(
-            len(
-                disciplinas
-            )
-        )
+        tabela_disciplinas = self.tabela_progresso_disciplinas
+        tabela_disciplinas.setUpdatesEnabled(False)
+        tabela_disciplinas.blockSignals(True)
+        try:
+            tabela_disciplinas.setRowCount(len(disciplinas))
 
-        for linha, info in enumerate(disciplinas):
-            def taxa_texto(valor):
-                return f"{float(valor):.0f}%" if valor is not None else "—"
+            for linha, info in enumerate(disciplinas):
+                def taxa_texto(valor):
+                    return f"{float(valor):.0f}%" if valor is not None else "—"
 
-            valores = [
-                info["disciplina"],
-                str(info["total_topicos"]),
-                taxa_texto(info["cobertura_topicos"]),
-                taxa_texto(info["cobertura_questoes"]),
-                taxa_texto(info["evidencia_suficiente_taxa"]),
-                str(info["consolidados"]),
-                (
-                    f"{float(info['dominio']):.0f}/100"
-                    if info["dominio"] is not None
-                    else "Dados insuficientes"
-                ),
-            ]
+                valores = [
+                    info["disciplina"],
+                    str(info["total_topicos"]),
+                    taxa_texto(info["cobertura_topicos"]),
+                    taxa_texto(info["cobertura_questoes"]),
+                    taxa_texto(info["evidencia_suficiente_taxa"]),
+                    str(info["consolidados"]),
+                    (
+                        f"{float(info['dominio']):.0f}/100"
+                        if info["dominio"] is not None
+                        else "Dados insuficientes"
+                    ),
+                ]
 
-            for coluna, valor in enumerate(
-                valores
-            ):
-                item_tabela = QTableWidgetItem(
-                    valor
-                )
+                for coluna, valor in enumerate(valores):
+                    item_tabela = QTableWidgetItem(valor)
 
-                if coluna > 0:
-                    item_tabela.setTextAlignment(
-                        Qt.AlignCenter
-                    )
+                    if coluna > 0:
+                        item_tabela.setTextAlignment(Qt.AlignCenter)
 
-                if (
-                    coluna == 5
-                    and info["consolidados"] > 0
-                ):
-                    aplicar_destaque_tabela(
-                        item_tabela,
-                        "sucesso",
-                        False
-                    )
+                    if coluna == 5 and info["consolidados"] > 0:
+                        aplicar_destaque_tabela(
+                            item_tabela,
+                            "sucesso",
+                            False
+                        )
 
-                self.tabela_progresso_disciplinas.setItem(
-                    linha,
-                    coluna,
-                    item_tabela
-                )
+                    tabela_disciplinas.setItem(linha, coluna, item_tabela)
 
-            self.tabela_progresso_disciplinas.setRowHeight(
-                linha,
-                34
-            )
+                tabela_disciplinas.setRowHeight(linha, 34)
+        finally:
+            tabela_disciplinas.blockSignals(False)
+            tabela_disciplinas.setUpdatesEnabled(True)
 
         # Recarrega o filtro de disciplina preservando a seleção.
         selecao_anterior = (
@@ -53864,6 +55401,8 @@ class SistemaEstudos(QMainWindow):
         self.filtrar_progresso_edital()
         self.atualizar_alertas_conteudo()
         self.atualizar_previsao_edital()
+        if hasattr(self, "_estado_estatisticas"):
+            self._estado_estatisticas.marcar_limpa("Progresso")
 
     def filtrar_progresso_edital(self):
         if not hasattr(
@@ -53963,6 +55502,8 @@ class SistemaEstudos(QMainWindow):
             )
         )
 
+        self.tabela_progresso_topicos.setUpdatesEnabled(False)
+        self.tabela_progresso_topicos.blockSignals(True)
         self.tabela_progresso_topicos.setRowCount(
             quantidade
         )
@@ -54125,6 +55666,9 @@ class SistemaEstudos(QMainWindow):
                 32
             )
 
+        self.tabela_progresso_topicos.blockSignals(False)
+        self.tabela_progresso_topicos.setUpdatesEnabled(True)
+
     def abrir_topico_progresso(
         self,
         linha,
@@ -54154,7 +55698,7 @@ class SistemaEstudos(QMainWindow):
         janela.exec()
 
         self.atualizar_dashboard()
-        self.atualizar_estatisticas()
+        self.invalidar_estatisticas("all")
 
     def alterar_periodo_evolucao(
         self,
@@ -54236,715 +55780,357 @@ class SistemaEstudos(QMainWindow):
         ):
             self.atualizar_evolucao_temporal()
 
-    def definir_tendencia_evolucao(
-        self,
-        label,
-        diferenca,
-        unidade="",
-        percentual_relativo=False
-    ):
-        if diferenca is None:
-            label.setText(
-                "• comparação indisponível"
-            )
-            estado = "neutra"
-
-        else:
-            tolerancia = (
-                0.05
-                if percentual_relativo
-                else 0.1
-            )
-
-            if abs(
-                diferenca
-            ) <= tolerancia:
-                label.setText(
-                    "• estável entre as metades"
-                )
-                estado = "neutra"
-            else:
-                seta = (
-                    "▲"
-                    if diferenca > 0
-                    else "▼"
-                )
-
-                sinal = (
-                    "+"
-                    if diferenca > 0
-                    else ""
-                )
-
-                label.setText(
-                    f"{seta} {sinal}{diferenca:.1f}{unidade}"
-                )
-
-                estado = (
-                    "positiva"
-                    if diferenca > 0
-                    else "negativa"
-                )
-
-        label.setProperty(
-            "trendState",
-            estado
-        )
-        label.style().unpolish(
-            label
-        )
-        label.style().polish(
-            label
-        )
-
-    def atualizar_evolucao_temporal(self):
-        if not hasattr(
-            self,
-            "combo_periodo_evolucao"
-        ):
+    def atualizar_evolucao_temporal(self, *args, forcar=False):
+        if not hasattr(self, "combo_periodo_evolucao"):
             return
 
-        inicio = (
-            self.data_inicio_evolucao
-            .date()
-        )
-        fim = (
-            self.data_fim_evolucao
-            .date()
-        )
-
-        if (
-            not inicio.isValid()
-            or not fim.isValid()
-        ):
+        inicio = self.data_inicio_evolucao.date()
+        fim = self.data_fim_evolucao.date()
+        if not inicio.isValid() or not fim.isValid():
             return
-
         if inicio > fim:
             QMessageBox.warning(
                 self,
                 "Período inválido",
-                (
-                    "A data inicial da evolução não pode "
-                    "ser posterior à data final."
-                )
+                "A data inicial não pode ser posterior à data final.",
             )
             return
 
-        concurso_id = (
-            obter_concurso_ativo()[0]
+        concurso_id = obter_concurso_ativo()[0]
+        inicio_iso = inicio.toString("yyyy-MM-dd")
+        fim_iso = fim.toString("yyyy-MM-dd")
+        chave_cache = (
+            f"estatisticas:tendencias:{int(concurso_id)}:"
+            f"{inicio_iso}:{fim_iso}"
         )
-
-        inicio_texto = inicio.toString(
-            "yyyy-MM-dd"
+        if forcar:
+            self.cache_analitico.invalidar(chave_cache)
+        dados = self.cache_analitico.obter(
+            chave_cache,
+            lambda: obter_analise_temporal(
+                concurso_id,
+                data_inicio=inicio_iso,
+                data_fim_inclusivo=fim_iso,
+            ),
+            ttl=20,
         )
-        fim_texto = fim.toString(
-            "yyyy-MM-dd"
-        )
-
-        total_dias = (
-            inicio.daysTo(
-                fim
-            )
-            + 1
-        )
+        self.dados_evolucao_temporal = dados
+        atual = dados["current_metrics"]
+        anterior = dados["previous_metrics"]
+        comparacao = dados["comparisons"]["accuracy"]
+        suficiente = dados["sufficiency"]
+        tendencia = dados["official_performance_trend"]
+        periodo_anterior = dados["previous_period"]
 
         self.evolucao_periodo_label.setText(
-            (
-                f"{inicio.toString('dd/MM/yyyy')} "
-                f"— {fim.toString('dd/MM/yyyy')} "
-                f"• {total_dias} dia(s)"
+            f"{inicio.toString('dd/MM/yyyy')} — {fim.toString('dd/MM/yyyy')} • "
+            f"{dados['current_period']['days']} dia(s)"
+        )
+        self.evolucao_desempenho.setText(
+            formatar_percentual(atual.get("accuracy_rate"))
+        )
+        self.evolucao_desempenho_tendencia.setText(
+            f"{atual.get('attempts', 0)} tentativas • "
+            f"{atual.get('active_days', 0)} dias ativos"
+        )
+        self.evolucao_desempenho_tendencia.setProperty("trendState", "neutra")
+
+        delta = comparacao.get("delta_pp")
+        if delta is None:
+            self.evolucao_questoes_dia.setText("Dados insuficientes")
+            self.evolucao_questoes_tendencia.setText(
+                "período atual × anterior equivalente"
             )
-        )
+            self.evolucao_questoes_tendencia.setProperty("trendState", "neutra")
+        else:
+            texto_delta = self.formatar_variacao_minha_evolucao(delta)
+            self.evolucao_questoes_dia.setText(texto_delta)
+            self.evolucao_questoes_tendencia.setText(
+                f"anterior {formatar_percentual(anterior.get('accuracy_rate'))}"
+            )
+            self.evolucao_questoes_tendencia.setProperty(
+                "trendState",
+                "positiva" if delta > 0 else "negativa" if delta < 0 else "neutra",
+            )
 
-        resumo_periodo = obter_relatorio_periodo(
-            inicio_texto,
-            fim_texto,
-            concurso_id
-        )
-
-        dados_diarios = obter_relatorio_diario_periodo(
-            inicio_texto,
-            fim_texto,
-            concurso_id
-        )
-
-        mapa_diario = {
-            dado[0]: dado
-            for dado in dados_diarios
+        mapa_tendencia = {
+            "improvement": ("Melhora", "positiva"),
+            "decline": ("Queda", "negativa"),
+            "stable": ("Estável", "neutra"),
+            "insufficient_data": ("Dados insuficientes", "neutra"),
         }
-
-        rotulos = []
-        desempenho_diario = []
-        questoes_diarias = []
-        revisoes_diarias = []
-
-        dias_estudados = 0
-
-        data_cursor = QDate(
-            inicio
+        tendencia_texto, tendencia_estado = mapa_tendencia.get(
+            tendencia.get("value"), ("Dados insuficientes", "neutra")
+        )
+        self.evolucao_revisoes_dia.setText(tendencia_texto)
+        self.evolucao_revisoes_tendencia.setText(
+            "performance_trend@1 • janelas de tentativas"
+        )
+        self.evolucao_revisoes_tendencia.setProperty(
+            "trendState", tendencia_estado
         )
 
-        while data_cursor <= fim:
-            data_texto = data_cursor.toString(
-                "yyyy-MM-dd"
-            )
+        self.evolucao_dias_estudados.setText(
+            "Base suficiente" if suficiente.get("ready") else "Dados insuficientes"
+        )
+        self.evolucao_dias_tendencia.setText(
+            f"atual {atual.get('attempts', 0)} / {atual.get('active_days', 0)}d • "
+            f"anterior {anterior.get('attempts', 0)} / "
+            f"{anterior.get('active_days', 0)}d"
+        )
+        self.evolucao_dias_tendencia.setProperty("trendState", "neutra")
 
-            dado = mapa_diario.get(
-                data_texto
-            )
+        for label in (
+            self.evolucao_desempenho_tendencia,
+            self.evolucao_questoes_tendencia,
+            self.evolucao_revisoes_tendencia,
+            self.evolucao_dias_tendencia,
+        ):
+            label.style().unpolish(label)
+            label.style().polish(label)
 
-            rotulos.append(
-                data_cursor.toString(
-                    "dd/MM"
-                )
+        faltas = suficiente.get("missing", {})
+        if suficiente.get("ready"):
+            texto_suficiencia = (
+                "Comparação válida: ambos os períodos possuem ao menos "
+                "10 tentativas e 2 dias ativos."
             )
+        else:
+            partes = []
+            rotulos_faltas = (
+                ("current_attempts", "tentativas no período atual"),
+                ("previous_attempts", "tentativas no período anterior"),
+                ("current_active_days", "dias ativos no período atual"),
+                ("previous_active_days", "dias ativos no período anterior"),
+            )
+            for chave, rotulo in rotulos_faltas:
+                quantidade = int(faltas.get(chave, 0) or 0)
+                if quantidade:
+                    partes.append(f"faltam {quantidade} {rotulo}")
+            texto_suficiencia = (
+                "Dados insuficientes para comparação"
+                + (" • " + " • ".join(partes) if partes else "")
+            )
+        inicio_ant = QDate.fromString(
+            periodo_anterior["start"][:10], "yyyy-MM-dd"
+        ).toString("dd/MM/yyyy")
+        fim_ant = QDate.fromString(
+            periodo_anterior["end_inclusive"], "yyyy-MM-dd"
+        ).toString("dd/MM/yyyy")
+        self.evolucao_estado_comparacao.setText(
+            f"{texto_suficiencia}\nPeríodo anterior equivalente: "
+            f"{inicio_ant} — {fim_ant}. Atividade maior não é, por si só, melhora acadêmica."
+        )
 
-            if dado is None:
-                desempenho_diario.append(
-                    None
-                )
-                questoes_diarias.append(
-                    0
-                )
-                revisoes_diarias.append(
-                    0
-                )
+        serie = dados.get("display_series") or dados.get("daily_series") or []
+        rotulos = []
+        for item in serie:
+            inicio_item = QDate.fromString(item["date"], "yyyy-MM-dd").toString("dd/MM")
+            fim_item = item.get("end_date")
+            if fim_item:
+                fim_formatado = QDate.fromString(
+                    fim_item, "yyyy-MM-dd"
+                ).toString("dd/MM")
+                rotulos.append(f"{inicio_item}–{fim_formatado}")
             else:
-                revisoes_valor = int(
-                    dado[1]
-                    or 0
-                )
-                questoes_valor = int(
-                    dado[2]
-                    or 0
-                )
-                percentual_valor = dado[4]
-
-                revisoes_diarias.append(
-                    revisoes_valor
-                )
-                questoes_diarias.append(
-                    questoes_valor
-                )
-                desempenho_diario.append(
-                    (
-                        float(
-                            percentual_valor
-                        )
-                        if percentual_valor
-                        is not None
-                        else None
-                    )
-                )
-
-                if (
-                    revisoes_valor > 0
-                    or questoes_valor > 0
-                ):
-                    dias_estudados += 1
-
-            data_cursor = (
-                data_cursor.addDays(
-                    1
-                )
-            )
-
+                rotulos.append(inicio_item)
         self.grafico_evolucao_desempenho.definir_dados(
-            desempenho_diario,
-            rotulos
+            [item.get("accuracy_rate") for item in serie], rotulos
         )
         self.grafico_evolucao_questoes.definir_dados(
-            questoes_diarias,
-            rotulos
+            [item.get("attempts", 0) for item in serie], rotulos
         )
         self.grafico_evolucao_revisoes.definir_dados(
-            revisoes_diarias,
-            rotulos
+            [item.get("qualified_reviews", 0) for item in serie], rotulos
         )
 
-        questoes_total = int(
-            resumo_periodo.get(
-                "questoes",
-                0
-            )
-            or 0
-        )
-        revisoes_total = int(
-            resumo_periodo.get(
-                "revisoes",
-                0
-            )
-            or 0
-        )
-        desempenho_total = (
-            resumo_periodo.get(
-                "percentual"
-            )
-        )
-
-        questoes_dia = (
-            questoes_total
-            / total_dias
-            if total_dias > 0
-            else 0.0
-        )
-        revisoes_dia = (
-            revisoes_total
-            / total_dias
-            if total_dias > 0
-            else 0.0
-        )
-
-        self.evolucao_desempenho.setText(
-            formatar_percentual(
-                desempenho_total
-            )
-        )
-        self.evolucao_questoes_dia.setText(
-            f"{questoes_dia:.1f}"
-        )
-        self.evolucao_revisoes_dia.setText(
-            f"{revisoes_dia:.1f}"
-        )
-        self.evolucao_dias_estudados.setText(
-            f"{dias_estudados} / {total_dias}"
-        )
-
-        # ----------------------------------------------------
-        # PRIMEIRA × SEGUNDA METADE
-        # ----------------------------------------------------
-
-        if total_dias >= 2:
-            tamanho_primeira = (
-                total_dias
-                // 2
-            )
-
-            inicio_segunda = inicio.addDays(
-                tamanho_primeira
-            )
-            fim_primeira = (
-                inicio_segunda.addDays(
-                    -1
-                )
-            )
-
-            resumo_primeira = obter_relatorio_periodo(
-                inicio_texto,
-                fim_primeira.toString(
-                    "yyyy-MM-dd"
-                ),
-                concurso_id
-            )
-            resumo_segunda = obter_relatorio_periodo(
-                inicio_segunda.toString(
-                    "yyyy-MM-dd"
-                ),
-                fim_texto,
-                concurso_id
-            )
-
-            dias_primeira = (
-                inicio.daysTo(
-                    fim_primeira
-                )
-                + 1
-            )
-            dias_segunda = (
-                inicio_segunda.daysTo(
-                    fim
-                )
-                + 1
-            )
-
-            desempenho_primeira = (
-                resumo_primeira.get(
-                    "percentual"
-                )
-            )
-            desempenho_segunda = (
-                resumo_segunda.get(
-                    "percentual"
-                )
-            )
-
-            if (
-                desempenho_primeira
-                is not None
-                and desempenho_segunda
-                is not None
-            ):
-                delta_desempenho = (
-                    float(
-                        desempenho_segunda
-                    )
-                    - float(
-                        desempenho_primeira
-                    )
-                )
-            else:
-                delta_desempenho = None
-
-            q_dia_primeira = (
-                float(
-                    resumo_primeira.get(
-                        "questoes",
-                        0
-                    )
-                    or 0
-                )
-                / max(
-                    1,
-                    dias_primeira
-                )
-            )
-            q_dia_segunda = (
-                float(
-                    resumo_segunda.get(
-                        "questoes",
-                        0
-                    )
-                    or 0
-                )
-                / max(
-                    1,
-                    dias_segunda
-                )
-            )
-
-            r_dia_primeira = (
-                float(
-                    resumo_primeira.get(
-                        "revisoes",
-                        0
-                    )
-                    or 0
-                )
-                / max(
-                    1,
-                    dias_primeira
-                )
-            )
-            r_dia_segunda = (
-                float(
-                    resumo_segunda.get(
-                        "revisoes",
-                        0
-                    )
-                    or 0
-                )
-                / max(
-                    1,
-                    dias_segunda
-                )
-            )
-
-            delta_questoes = (
-                q_dia_segunda
-                - q_dia_primeira
-            )
-            delta_revisoes = (
-                r_dia_segunda
-                - r_dia_primeira
-            )
-
-            dados_primeira = obter_relatorio_diario_periodo(
-                inicio_texto,
-                fim_primeira.toString(
-                    "yyyy-MM-dd"
-                ),
-                concurso_id
-            )
-            dados_segunda = obter_relatorio_diario_periodo(
-                inicio_segunda.toString(
-                    "yyyy-MM-dd"
-                ),
-                fim_texto,
-                concurso_id
-            )
-
-            dias_estudo_primeira = len(
-                {
-                    dado[0]
-                    for dado in dados_primeira
-                    if (
-                        int(
-                            dado[1]
-                            or 0
-                        ) > 0
-                        or int(
-                            dado[2]
-                            or 0
-                        ) > 0
-                    )
-                }
-            )
-            dias_estudo_segunda = len(
-                {
-                    dado[0]
-                    for dado in dados_segunda
-                    if (
-                        int(
-                            dado[1]
-                            or 0
-                        ) > 0
-                        or int(
-                            dado[2]
-                            or 0
-                        ) > 0
-                    )
-                }
-            )
-
-            taxa_dias_primeira = (
-                100.0
-                * dias_estudo_primeira
-                / max(
-                    1,
-                    dias_primeira
-                )
-            )
-            taxa_dias_segunda = (
-                100.0
-                * dias_estudo_segunda
-                / max(
-                    1,
-                    dias_segunda
-                )
-            )
-
-            delta_dias = (
-                taxa_dias_segunda
-                - taxa_dias_primeira
-            )
-
-        else:
-            fim_primeira = inicio
-            inicio_segunda = fim
-            delta_desempenho = None
-            delta_questoes = None
-            delta_revisoes = None
-            delta_dias = None
-
-        self.definir_tendencia_evolucao(
-            self.evolucao_desempenho_tendencia,
-            delta_desempenho,
-            " p.p."
-        )
-        self.definir_tendencia_evolucao(
-            self.evolucao_questoes_tendencia,
-            delta_questoes,
-            " q/dia"
-        )
-        self.definir_tendencia_evolucao(
-            self.evolucao_revisoes_tendencia,
-            delta_revisoes,
-            " rev/dia"
-        )
-        self.definir_tendencia_evolucao(
-            self.evolucao_dias_tendencia,
-            delta_dias,
-            " p.p."
-        )
-
-        # ----------------------------------------------------
-        # EVOLUÇÃO POR DISCIPLINA
-        # ----------------------------------------------------
-
-        disciplinas_periodo = (
-            obter_relatorio_disciplinas_periodo(
-                inicio_texto,
-                fim_texto,
-                concurso_id
-            )
-        )
-
-        if total_dias >= 2:
-            disciplinas_primeira = (
-                obter_relatorio_disciplinas_periodo(
-                    inicio_texto,
-                    fim_primeira.toString(
-                        "yyyy-MM-dd"
-                    ),
-                    concurso_id
-                )
-            )
-            disciplinas_segunda = (
-                obter_relatorio_disciplinas_periodo(
-                    inicio_segunda.toString(
-                        "yyyy-MM-dd"
-                    ),
-                    fim_texto,
-                    concurso_id
-                )
-            )
-        else:
-            disciplinas_primeira = []
-            disciplinas_segunda = []
-
-        mapa_periodo = {
-            dado[0]: dado
-            for dado in disciplinas_periodo
-        }
-        mapa_primeira = {
-            dado[0]: dado
-            for dado in disciplinas_primeira
-        }
-        mapa_segunda = {
-            dado[0]: dado
-            for dado in disciplinas_segunda
-        }
-
-        nomes = sorted(
-            set(
-                mapa_periodo
-            )
-            | set(
-                mapa_primeira
-            )
-            | set(
-                mapa_segunda
-            ),
-            key=lambda valor: valor.lower()
-        )
-
+        disciplinas = [
+            item for item in dados.get("subjects", [])
+            if item["current"]["attempts"] or item["previous"]["attempts"]
+        ]
         self.evolucao_contagem_disciplinas.setText(
-            (
-                "1 disciplina"
-                if len(
-                    nomes
-                ) == 1
-                else f"{len(nomes)} disciplinas"
-            )
+            "1 disciplina" if len(disciplinas) == 1
+            else f"{len(disciplinas)} disciplinas"
         )
-
-        self.tabela_evolucao_disciplinas.setRowCount(
-            len(
-                nomes
-            )
-        )
-
-        for linha, nome in enumerate(
-            nomes
-        ):
-            periodo = mapa_periodo.get(
-                nome
-            )
-            primeira = mapa_primeira.get(
-                nome
-            )
-            segunda = mapa_segunda.get(
-                nome
-            )
-
-            p1 = (
-                primeira[4]
-                if primeira is not None
-                else None
-            )
-            p2 = (
-                segunda[4]
-                if segunda is not None
-                else None
-            )
-
-            if (
-                p1 is not None
-                and p2 is not None
-            ):
-                variacao = (
-                    float(
-                        p2
-                    )
-                    - float(
-                        p1
-                    )
-                )
-                texto_variacao = (
-                    (
-                        "+"
-                        if variacao > 0
-                        else ""
-                    )
-                    + f"{variacao:.1f} p.p."
-                )
-            else:
-                variacao = None
-                texto_variacao = "—"
-
-            questoes = (
-                int(
-                    periodo[2]
-                    or 0
-                )
-                if periodo is not None
-                else 0
-            )
-            revisoes = (
-                int(
-                    periodo[1]
-                    or 0
-                )
-                if periodo is not None
-                else 0
-            )
-
+        self.tabela_evolucao_disciplinas.setRowCount(len(disciplinas))
+        for linha, item_d in enumerate(disciplinas):
+            atual_d = item_d["current"]
+            anterior_d = item_d["previous"]
+            comp_d = item_d["comparison"]["accuracy"]
+            delta_d = comp_d.get("delta_pp")
             valores = [
-                nome,
-                formatar_percentual(
-                    p1
+                item_d["name"],
+                formatar_percentual(atual_d.get("accuracy_rate")),
+                formatar_percentual(anterior_d.get("accuracy_rate")),
+                (
+                    self.formatar_variacao_minha_evolucao(delta_d)
+                    if delta_d is not None else "Dados insuficientes"
                 ),
-                formatar_percentual(
-                    p2
-                ),
-                texto_variacao,
-                str(
-                    questoes
-                ),
-                str(
-                    revisoes
-                )
+                f"{atual_d.get('attempts', 0)} / {anterior_d.get('attempts', 0)}",
+                "Comparável" if item_d.get("comparable") else "Não comparável",
             ]
+            for coluna, valor in enumerate(valores):
+                celula = QTableWidgetItem(str(valor))
+                if coluna:
+                    celula.setTextAlignment(Qt.AlignCenter)
+                if coluna == 3 and delta_d is not None:
+                    if delta_d >= 2.0:
+                        aplicar_destaque_tabela(celula, "sucesso", False)
+                    elif delta_d <= -2.0:
+                        aplicar_destaque_tabela(celula, "perigo", False)
+                self.tabela_evolucao_disciplinas.setItem(linha, coluna, celula)
+            self.tabela_evolucao_disciplinas.setRowHeight(linha, 31)
 
-            for coluna, valor in enumerate(
-                valores
-            ):
-                item = QTableWidgetItem(
-                    valor
-                )
-
-                if coluna > 0:
-                    item.setTextAlignment(
-                        Qt.AlignCenter
-                    )
-
-                if (
-                    coluna == 3
-                    and variacao is not None
-                ):
-                    if variacao > 0.1:
-                        aplicar_destaque_tabela(
-                            item,
-                            "sucesso",
-                            False
-                        )
-                    elif variacao < -0.1:
-                        aplicar_destaque_tabela(
-                            item,
-                            "perigo",
-                            False
-                        )
-
-                self.tabela_evolucao_disciplinas.setItem(
-                    linha,
-                    coluna,
-                    item
-                )
-
-            self.tabela_evolucao_disciplinas.setRowHeight(
-                linha,
-                31
+        topicos = [
+            item for item in dados.get("topics", [])
+            if item["current"]["attempts"] or item["previous"]["attempts"]
+        ]
+        topicos.sort(
+            key=lambda item: (
+                not item.get("comparable"),
+                -abs(item["comparison"]["accuracy"].get("delta_pp") or 0.0),
+                item.get("subject", "").casefold(),
+                item.get("name", "").casefold(),
             )
+        )
+        comparaveis = [item for item in topicos if item.get("comparable")]
+        positivos = [
+            item for item in comparaveis
+            if float(item["comparison"]["accuracy"]["delta_pp"]) > 0
+        ]
+        negativos = [
+            item for item in comparaveis
+            if float(item["comparison"]["accuracy"]["delta_pp"]) < 0
+        ]
+        if comparaveis:
+            mensagens = [f"{len(comparaveis)} tópico(s) comparável(is)."]
+            if positivos:
+                melhor = max(
+                    positivos,
+                    key=lambda item: item["comparison"]["accuracy"]["delta_pp"],
+                )
+                mensagens.append(
+                    f"Maior evolução: {melhor['subject']} › {melhor['name']} "
+                    f"({melhor['comparison']['accuracy']['delta_pp']:+.1f} p.p.)."
+                )
+            if negativos:
+                pior = min(
+                    negativos,
+                    key=lambda item: item["comparison"]["accuracy"]["delta_pp"],
+                )
+                mensagens.append(
+                    f"Ponto de atenção: {pior['subject']} › {pior['name']} "
+                    f"({pior['comparison']['accuracy']['delta_pp']:+.1f} p.p.)."
+                )
+            self.evolucao_topicos_aviso.setText(" ".join(mensagens))
+        else:
+            self.evolucao_topicos_aviso.setText(
+                "Ainda não há base suficiente para comparar tópicos."
+            )
+
+        self.tabela_evolucao_topicos.setRowCount(len(topicos))
+        for linha, item_t in enumerate(topicos):
+            atual_t = item_t["current"]
+            anterior_t = item_t["previous"]
+            delta_t = item_t["comparison"]["accuracy"].get("delta_pp")
+            valores = [
+                item_t.get("subject", "—"),
+                item_t.get("name", "—"),
+                formatar_percentual(atual_t.get("accuracy_rate")),
+                formatar_percentual(anterior_t.get("accuracy_rate")),
+                (
+                    self.formatar_variacao_minha_evolucao(delta_t)
+                    if delta_t is not None else "—"
+                ),
+                f"{atual_t.get('attempts', 0)} / {anterior_t.get('attempts', 0)}",
+                "Comparável" if item_t.get("comparable") else "Não comparável ainda",
+            ]
+            for coluna, valor in enumerate(valores):
+                celula = QTableWidgetItem(str(valor))
+                if coluna >= 2:
+                    celula.setTextAlignment(Qt.AlignCenter)
+                if coluna == 4 and delta_t is not None:
+                    if delta_t >= 2.0:
+                        aplicar_destaque_tabela(celula, "sucesso", False)
+                    elif delta_t <= -2.0:
+                        aplicar_destaque_tabela(celula, "perigo", False)
+                self.tabela_evolucao_topicos.setItem(linha, coluna, celula)
+            self.tabela_evolucao_topicos.setRowHeight(linha, 31)
+
+        progresso = dados.get("progress_history") or []
+        if not progresso:
+            self.evolucao_progresso_historico_aviso.setText(
+                "Coleta histórica ainda não iniciada."
+            )
+            self.grafico_evolucao_progresso.definir_dados([], [])
+        elif len(progresso) == 1:
+            inicio_coleta = QDate.fromString(
+                progresso[0]["date"], "yyyy-MM-dd"
+            ).toString("dd/MM/yyyy")
+            self.evolucao_progresso_historico_aviso.setText(
+                f"Histórico de progresso disponível a partir de {inicio_coleta}. "
+                "Coleta histórica iniciada — ainda sem série suficiente."
+            )
+            self.grafico_evolucao_progresso.definir_dados([], [])
+        else:
+            self.evolucao_progresso_historico_aviso.setText(
+                "Cobertura de questões registrada por snapshots diários reais; "
+                "não há backfill."
+            )
+            self.grafico_evolucao_progresso.definir_dados(
+                [item.get("question_coverage_rate") for item in progresso],
+                [
+                    QDate.fromString(item["date"], "yyyy-MM-dd").toString("dd/MM")
+                    for item in progresso
+                ],
+            )
+
+        if hasattr(self, "_estado_estatisticas"):
+            self._estado_estatisticas.marcar_limpa("Tendências")
+
+    def atualizar_icones_interface(self):
+        """Aplica os ícones vetoriais disponíveis sem tornar a UI dependente deles."""
+        tema = normalizar_tema(
+            getattr(self, "tema_atual", "claro")
+        )
+
+        if hasattr(self, "botao_configuracoes_topo"):
+            fallback_config = (
+                Path(__file__).resolve().parent
+                / "assets"
+                / "config_gear.png"
+            )
+            self.botao_configuracoes_topo.setIcon(
+                criar_icone(
+                    "fa6s.gear",
+                    tema=tema,
+                    papel="configuracao",
+                    fallback_path=fallback_config,
+                )
+            )
+            self.botao_configuracoes_topo.setIconSize(
+                QSize(20, 20)
+            )
+
+        botoes_acoes = (
+            ("dashboard_botao_pausa", "fa6s.pause"),
+            ("dashboard_botao_estatisticas", "fa6s.chart-pie"),
+            ("dashboard_botao_relatorios", "fa6s.file-lines"),
+            ("dashboard_botao_calendario", "fa6s.calendar-days"),
+        )
+
+        for atributo, nome_icone in botoes_acoes:
+            botao = getattr(self, atributo, None)
+            if botao is None:
+                continue
+            botao.setIcon(
+                criar_icone(
+                    nome_icone,
+                    tema=tema,
+                    papel="acao",
+                )
+            )
+            botao.setIconSize(QSize(15, 15))
 
     def abrir_configuracoes(self):
         janela = JanelaConfiguracoes(
@@ -54952,6 +56138,16 @@ class SistemaEstudos(QMainWindow):
         )
 
         if janela.exec() == QDialog.Accepted:
+            self.tema_atual = normalizar_tema(
+                obter_configuracao_texto(
+                    "tema_interface",
+                    "claro",
+                )
+            )
+            self.atualizar_icones_interface()
+            self.cache_analitico.invalidar("regularidade:")
+            self.cache_analitico.invalidar("estatisticas:regularidade:")
+            self._estado_estatisticas.marcar_sujas(("Regularidade",), resumo=False)
             self.atualizar_dashboard()
 
             QMessageBox.information(
@@ -55034,18 +56230,14 @@ class SistemaEstudos(QMainWindow):
             valores = [item.get("questoes", 0) for item in serie]
             self.grafico_minha_evolucao.percentual = False
             self.grafico_minha_evolucao.barras = True
-        elif metrica == "Foco efetivo":
+        elif metrica == "Foco efetivo (global)":
             valores = [item.get("foco_minutos", 0) for item in serie]
             self.grafico_minha_evolucao.percentual = False
             self.grafico_minha_evolucao.barras = True
-        elif metrica == "Revisões realizadas":
+        elif metrica == "Revisões qualificadas":
             valores = [item.get("revisoes", 0) for item in serie]
             self.grafico_minha_evolucao.percentual = False
             self.grafico_minha_evolucao.barras = True
-        elif metrica == "Domínio observado":
-            valores = [item.get("dominio_observado") for item in serie]
-            self.grafico_minha_evolucao.percentual = True
-            self.grafico_minha_evolucao.barras = False
         else:
             valores = [item.get("desempenho") for item in serie]
             self.grafico_minha_evolucao.percentual = True
@@ -55064,76 +56256,53 @@ class SistemaEstudos(QMainWindow):
             rotulos
         )
 
-    def atualizar_minha_evolucao(self, *args):
+    def atualizar_minha_evolucao(self, *args, forcar=False):
         if not hasattr(self, "tabela_minha_evolucao"):
             return
 
         concurso = obter_concurso_ativo()
         dias = self.obter_dias_minha_evolucao()
-        dados = obter_evolucao_historica(
-            concurso[0],
-            dias
+        chave_cache = f"estatisticas:historico:{int(concurso[0])}:{int(dias)}"
+        if forcar:
+            self.cache_analitico.invalidar(chave_cache)
+        dados = self.cache_analitico.obter(
+            chave_cache,
+            lambda: obter_evolucao_historica(concurso[0], dias),
+            ttl=20,
         )
         self.dados_minha_evolucao = dados
 
         resumo = dados.get("resumo", {})
-        anterior = dados.get("resumo_anterior", {})
         desempenho = resumo.get("desempenho")
-        delta = dados.get("variacao_desempenho")
 
         self.minha_desempenho.setText(
             formatar_percentual(desempenho)
         )
-        if delta is None:
-            detalhe_desempenho = "Sem período anterior comparável"
-        else:
-            detalhe_desempenho = (
-                self.formatar_variacao_minha_evolucao(delta)
-                + " vs. período anterior"
-            )
         self.minha_desempenho_detalhe.setText(
-            detalhe_desempenho
+            f"{resumo.get('questoes', 0)} tentativa(s) • "
+            f"{resumo.get('dias_ativos', 0)} dia(s) ativo(s)"
         )
 
-        dominio = dados.get("dominio_medio")
         self.minha_dominio.setText(
-            (
-                f"{dominio:.0f}/100"
-                if dominio is not None
-                else "—"
-            )
+            str(resumo.get("questoes", 0))
         )
-        delta_dominio_observado = dados.get("delta_dominio_observado")
-        detalhe_dominio = (
-            f"{dados.get('topicos_com_evidencia', 0)} de "
-            f"{dados.get('total_topicos', 0)} tópicos com evidência"
-        )
-        if delta_dominio_observado is not None:
-            detalhe_dominio += (
-                " • observado "
-                + self.formatar_variacao_minha_evolucao(
-                    delta_dominio_observado
-                )
-            )
         self.minha_dominio_detalhe.setText(
-            detalhe_dominio
+            f"{resumo.get('acertos', 0)} acerto(s) • "
+            f"{resumo.get('erros', 0)} erro(s)"
         )
 
         self.minha_questoes.setText(
-            str(resumo.get("questoes", 0))
+            str(resumo.get("questoes_unicas", 0))
         )
         self.minha_questoes_detalhe.setText(
-            (
-                f"{resumo.get('dias_ativos', 0)} dia(s) de prática • "
-                f"{resumo.get('questoes_unicas', 0)} questão(ões) única(s)"
-            )
+            "identidade histórica preservada"
         )
 
         self.minha_consolidados.setText(
-            str(dados.get("consolidados", 0))
+            str(resumo.get("sessoes", 0))
         )
         self.minha_consolidados_detalhe.setText(
-            f"de {dados.get('total_topicos', 0)} tópicos do perfil"
+            "sessões iniciadas no período"
         )
 
         foco = dados.get("foco", {})
@@ -55144,7 +56313,7 @@ class SistemaEstudos(QMainWindow):
             formatar_tempo_foco_resumido(foco_segundos)
         )
         self.minha_foco_detalhe.setText(
-            self.formatar_variacao_volume_historica(
+            "Métrica global de hábito • " + self.formatar_variacao_volume_historica(
                 foco_segundos,
                 foco_segundos_anterior
             )
@@ -55158,7 +56327,7 @@ class SistemaEstudos(QMainWindow):
         )
         self.minha_consistencia_detalhe.setText(
             (
-                f"{consistencia:.0f}% do período • "
+                f"{consistencia:.0f}% do período global • "
                 + self.formatar_variacao_minha_evolucao(
                     consistencia - consistencia_anterior
                 )
@@ -55185,9 +56354,13 @@ class SistemaEstudos(QMainWindow):
             str(revisoes_periodo)
         )
         self.minha_revisoes_periodo_detalhe.setText(
-            self.formatar_variacao_volume_historica(
-                revisoes_periodo,
-                revisoes_anterior
+            (
+                f"{dados.get('revisoes_legacy_excluidas', 0)} legado(s) sem concurso excluído(s)"
+                if dados.get("revisoes_estado") == "legacy_limited"
+                else self.formatar_variacao_volume_historica(
+                    revisoes_periodo,
+                    revisoes_anterior
+                )
             )
         )
 
@@ -55399,427 +56572,304 @@ class SistemaEstudos(QMainWindow):
                 self.tabela_minha_evolucao_topicos.setRowHeight(linha, 31)
 
         self.atualizar_grafico_minha_evolucao()
+        if hasattr(self, "_estado_estatisticas"):
+            self._estado_estatisticas.marcar_limpa("Histórico")
 
 
-    def abrir_estatisticas(self):
-        self.atualizar_estatisticas()
+    def _nome_aba_estatisticas_atual(self):
+        if not hasattr(self, "abas_estatisticas"):
+            return "Histórico"
+        indice = self.abas_estatisticas.currentIndex()
+        if indice < 0:
+            return "Histórico"
+        return self.abas_estatisticas.tabText(indice)
 
-        self.telas.setCurrentWidget(
-            self.tela_estatisticas
-        )
+    def _selecionar_aba_estatisticas(self, nome_aba):
+        if not nome_aba or not hasattr(self, "abas_estatisticas"):
+            return
+        for indice in range(self.abas_estatisticas.count()):
+            if self.abas_estatisticas.tabText(indice) == nome_aba:
+                self.abas_estatisticas.setCurrentIndex(indice)
+                return
 
-    def atualizar_estatisticas(self):
-        hoje = QDate.currentDate().toString(
-            "yyyy-MM-dd"
-        )
+    def abrir_estatisticas(self, aba=None):
+        # A navegação vem primeiro. O cálculo da aba é postergado para o próximo
+        # ciclo do event loop, permitindo que a tela responda visualmente ao clique.
+        if aba:
+            self._selecionar_aba_estatisticas(aba)
 
-        concurso = obter_concurso_ativo()
+        try:
+            concurso = obter_concurso_ativo()
+            if hasattr(self, "perfil_estatisticas"):
+                self.perfil_estatisticas.setText(f"Perfil: {concurso[1]}")
+        except Exception:
+            pass
 
-        if hasattr(self, "lab_tabela"):
-            self.atualizar_laboratorio_algoritmo()
+        self.telas.setCurrentWidget(self.tela_estatisticas)
+        self._agendar_atualizacao_estatisticas()
 
-        if hasattr(
-            self,
-            "perfil_estatisticas"
-        ):
-            self.perfil_estatisticas.setText(
-                f"Perfil: {concurso[1]}"
+    def _obter_resumo_estatisticas(self, concurso_id, hoje):
+        chave = f"estatisticas:resumo:{int(concurso_id)}:{hoje}"
+
+        def carregar():
+            disciplinas = obter_estatisticas_disciplinas(hoje)
+            metricas_globais = obter_metricas_globais_nucleo(concurso_id)
+            return disciplinas, metricas_globais
+
+        return self.cache_analitico.obter(chave, carregar, ttl=12)
+
+    def _atualizar_resumo_estatisticas(self, concurso, hoje, forcar=False):
+        if not forcar and not self._estado_estatisticas.resumo_sujo:
+            return None
+
+        inicio = time.perf_counter()
+        if forcar:
+            self.cache_analitico.invalidar(
+                f"estatisticas:resumo:{int(concurso[0])}:"
             )
-
-        disciplinas = obter_estatisticas_disciplinas(
-            hoje
+        disciplinas, metricas_globais = self._obter_resumo_estatisticas(
+            concurso[0], hoje
         )
 
-        total_topicos = sum(
-            item[1]
-            for item in disciplinas
-        )
-
-        total_revisoes = sum(
-            item[2]
-            for item in disciplinas
-        )
-
-        total_questoes = sum(
-            item[4]
-            for item in disciplinas
-        )
-
-        total_atrasadas = sum(
-            item[5]
-            for item in disciplinas
-        )
-
-        total_hoje = sum(
-            item[6]
-            for item in disciplinas
-        )
-
-        # A taxa geral e recalculada das tentativas brutas. Nao fazemos
-        # media simples dos percentuais das disciplinas.
-        metricas_globais = obter_metricas_globais_nucleo(concurso[0])
+        total_topicos = sum(item[1] for item in disciplinas)
+        total_revisoes = sum(item[2] for item in disciplinas)
+        total_questoes = sum(item[4] for item in disciplinas)
+        total_atrasadas = sum(item[5] for item in disciplinas)
+        total_hoje = sum(item[6] for item in disciplinas)
         media_disciplinas = (
             metricas_globais.get("metrics", {})
             .get("accuracy_rate", {})
             .get("value")
         )
 
-        # ----------------------------------------------------
-        # CARDS DE RESUMO
-        # ----------------------------------------------------
+        self.estat_total_topicos.setText(str(total_topicos))
+        self.estat_total_revisoes.setText(str(total_revisoes))
+        self.estat_total_questoes.setText(str(total_questoes))
+        self.estat_media.setText(formatar_percentual(media_disciplinas))
+        self.estat_atrasadas.setText(str(total_atrasadas))
+        self.estat_hoje.setText(str(total_hoje))
 
-        self.estat_total_topicos.setText(
-            str(
-                total_topicos
-            )
+        self._estado_estatisticas.marcar_resumo_limpo()
+        self._estado_estatisticas.registrar_duracao(
+            "Resumo", (time.perf_counter() - inicio) * 1000.0
         )
+        return disciplinas
 
-        self.estat_total_revisoes.setText(
-            str(
-                total_revisoes
-            )
-        )
-
-        self.estat_total_questoes.setText(
-            str(
-                total_questoes
-            )
-        )
-
-        self.estat_media.setText(
-            formatar_percentual(
-                media_disciplinas
-            )
-        )
-
-        self.estat_atrasadas.setText(
-            str(
-                total_atrasadas
-            )
-        )
-
-        self.estat_hoje.setText(
-            str(
-                total_hoje
-            )
-        )
-
-        # ----------------------------------------------------
-        # DISCIPLINAS
-        # ----------------------------------------------------
-
-        quantidade_disciplinas = len(
-            disciplinas
-        )
-
+    def _atualizar_aba_estatisticas_disciplinas(self, concurso, hoje):
+        inicio = time.perf_counter()
+        disciplinas, _ = self._obter_resumo_estatisticas(concurso[0], hoje)
+        quantidade_disciplinas = len(disciplinas)
         self.estat_contagem_disciplinas.setText(
-            (
-                "1 disciplina"
-                if quantidade_disciplinas == 1
-                else f"{quantidade_disciplinas} disciplinas"
-            )
+            "1 disciplina"
+            if quantidade_disciplinas == 1
+            else f"{quantidade_disciplinas} disciplinas"
         )
 
-        self.tabela_estat_disciplinas.setRowCount(
-            quantidade_disciplinas
+        tabela = self.tabela_estat_disciplinas
+        tabela.setUpdatesEnabled(False)
+        tabela.blockSignals(True)
+        try:
+            tabela.setRowCount(quantidade_disciplinas)
+            for linha, dado in enumerate(disciplinas):
+                valores = [
+                    dado[0], str(dado[1]), str(dado[2]),
+                    formatar_percentual(dado[3]), str(dado[4]),
+                    str(dado[5]), str(dado[6]),
+                ]
+                for coluna, valor in enumerate(valores):
+                    item = QTableWidgetItem(valor)
+                    if coluna in (1, 2, 3, 4, 5, 6):
+                        item.setTextAlignment(Qt.AlignCenter)
+                    if coluna == 5 and dado[5] > 0:
+                        aplicar_destaque_tabela(item, "perigo", True)
+                    if coluna == 6 and dado[6] > 0:
+                        aplicar_destaque_tabela(item, "atencao", True)
+                    tabela.setItem(linha, coluna, item)
+                tabela.setRowHeight(linha, 31)
+        finally:
+            tabela.blockSignals(False)
+            tabela.setUpdatesEnabled(True)
+
+        self._estado_estatisticas.registrar_duracao(
+            "Disciplinas", (time.perf_counter() - inicio) * 1000.0
         )
 
-        for linha, dado in enumerate(
-            disciplinas
-        ):
-            valores = [
-                dado[0],
-                str(
-                    dado[1]
-                ),
-                str(
-                    dado[2]
-                ),
-                formatar_percentual(
-                    dado[3]
-                ),
-                str(
-                    dado[4]
-                ),
-                str(
-                    dado[5]
-                ),
-                str(
-                    dado[6]
-                )
-            ]
-
-            for coluna, valor in enumerate(
-                valores
-            ):
-                item = QTableWidgetItem(
-                    valor
-                )
-
-                if coluna in (
-                    1,
-                    2,
-                    3,
-                    4,
-                    5,
-                    6
-                ):
-                    item.setTextAlignment(
-                        Qt.AlignCenter
-                    )
-
-                # Destaques concentrados somente nas células
-                # que representam pendência.
-                if (
-                    coluna == 5
-                    and dado[5] > 0
-                ):
-                    aplicar_destaque_tabela(
-                        item,
-                        "perigo",
-                        True
-                    )
-
-                if (
-                    coluna == 6
-                    and dado[6] > 0
-                ):
-                    aplicar_destaque_tabela(
-                        item,
-                        "atencao",
-                        True
-                    )
-
-                self.tabela_estat_disciplinas.setItem(
-                    linha,
-                    coluna,
-                    item
-                )
-
-            self.tabela_estat_disciplinas.setRowHeight(
-                linha,
-                31
-            )
-
-        # ----------------------------------------------------
-        # PONTOS FRACOS
-        # ----------------------------------------------------
-
-        fracos = listar_ranking_topicos(
-            limite=25,
-            ordem="asc"
+    def _atualizar_aba_estatisticas_fracos(self, concurso_id, forcar=False):
+        inicio = time.perf_counter()
+        chave = f"estatisticas:fracos:{int(concurso_id)}"
+        if forcar:
+            self.cache_analitico.invalidar(chave)
+        fracos = self.cache_analitico.obter(
+            chave,
+            lambda: listar_ranking_topicos(limite=25, ordem="asc"),
+            ttl=12,
         )
-
         self.dados_estat_fracos = fracos
-
-        quantidade_fracos = len(
-            fracos
-        )
-
+        quantidade_fracos = len(fracos)
         self.estat_contagem_fracos.setText(
-            (
-                "1 tópico"
-                if quantidade_fracos == 1
-                else f"{quantidade_fracos} tópicos"
-            )
+            "1 tópico" if quantidade_fracos == 1 else f"{quantidade_fracos} tópicos"
         )
 
-        self.tabela_fracos.setRowCount(
-            quantidade_fracos
+        tabela = self.tabela_fracos
+        tabela.setUpdatesEnabled(False)
+        tabela.blockSignals(True)
+        try:
+            tabela.setRowCount(quantidade_fracos)
+            for linha, dado in enumerate(fracos):
+                evidencia = str(dado[7] if len(dado) > 7 else "insufficient")
+                desempenho = formatar_percentual(dado[4])
+                if evidencia == "low":
+                    desempenho += " · prov."
+                valores = [
+                    dado[1], dado[2], str(dado[3]),
+                    desempenho,
+                    formatar_data(dado[6]), formatar_data(dado[5]),
+                ]
+                for coluna, valor in enumerate(valores):
+                    item = QTableWidgetItem(valor)
+                    if coluna == 1:
+                        item.setData(Qt.UserRole, dado[0])
+                    if coluna in (2, 3, 4, 5):
+                        item.setTextAlignment(Qt.AlignCenter)
+                    if coluna == 3 and dado[4] is not None:
+                        if evidencia == "low":
+                            aplicar_destaque_tabela(item, "atencao", False)
+                            item.setToolTip(
+                                "Evidência baixa: domínio provisório, ainda não "
+                                "classificado como fraqueza definitiva."
+                            )
+                        elif dado[4] < 60:
+                            aplicar_destaque_tabela(item, "perigo", True)
+                        elif dado[4] < 70:
+                            aplicar_destaque_tabela(item, "alerta", True)
+                        elif dado[4] < 80:
+                            aplicar_destaque_tabela(item, "atencao", True)
+                    tabela.setItem(linha, coluna, item)
+                tabela.setRowHeight(linha, 31)
+        finally:
+            tabela.blockSignals(False)
+            tabela.setUpdatesEnabled(True)
+
+        self._estado_estatisticas.registrar_duracao(
+            "Pontos fracos", (time.perf_counter() - inicio) * 1000.0
         )
 
-        for linha, dado in enumerate(
-            fracos
-        ):
-            valores = [
-                dado[1],
-                dado[2],
-                str(
-                    dado[3]
-                ),
-                formatar_percentual(
-                    dado[4]
-                ),
-                formatar_data(
-                    dado[6]
-                ),
-                formatar_data(
-                    dado[5]
-                )
-            ]
-
-            for coluna, valor in enumerate(
-                valores
-            ):
-                item = QTableWidgetItem(
-                    valor
-                )
-
-                if coluna == 1:
-                    item.setData(
-                        Qt.UserRole,
-                        dado[0]
-                    )
-
-                if coluna in (
-                    2,
-                    3,
-                    4,
-                    5
-                ):
-                    item.setTextAlignment(
-                        Qt.AlignCenter
-                    )
-
-                # Cor somente no percentual, não na linha inteira.
-                if (
-                    coluna == 3
-                    and dado[4] is not None
-                ):
-                    if dado[4] < 60:
-                        aplicar_destaque_tabela(
-                            item,
-                            "perigo",
-                            True
-                        )
-                    elif dado[4] < 70:
-                        aplicar_destaque_tabela(
-                            item,
-                            "alerta",
-                            True
-                        )
-                    elif dado[4] < 80:
-                        aplicar_destaque_tabela(
-                            item,
-                            "atencao",
-                            True
-                        )
-
-                self.tabela_fracos.setItem(
-                    linha,
-                    coluna,
-                    item
-                )
-
-            self.tabela_fracos.setRowHeight(
-                linha,
-                31
-            )
-
-        # ----------------------------------------------------
-        # REVISÕES RECENTES
-        # ----------------------------------------------------
-
-        recentes = listar_revisoes_recentes(
-            limite=40
+    def _atualizar_aba_estatisticas_recentes(self, concurso_id, forcar=False):
+        inicio = time.perf_counter()
+        chave = f"estatisticas:recentes:{int(concurso_id)}"
+        if forcar:
+            self.cache_analitico.invalidar(chave)
+        recentes = self.cache_analitico.obter(
+            chave,
+            lambda: listar_revisoes_recentes(limite=40),
+            ttl=12,
         )
-
         self.dados_estat_recentes = recentes
-
-        quantidade_recentes = len(
-            recentes
-        )
-
+        quantidade_recentes = len(recentes)
         self.estat_contagem_recentes.setText(
-            (
-                "1 revisão"
-                if quantidade_recentes == 1
-                else f"{quantidade_recentes} revisões"
-            )
+            "1 revisão"
+            if quantidade_recentes == 1
+            else f"{quantidade_recentes} revisões"
         )
 
-        self.tabela_recentes.setRowCount(
-            quantidade_recentes
+        tabela = self.tabela_recentes
+        tabela.setUpdatesEnabled(False)
+        tabela.blockSignals(True)
+        try:
+            tabela.setRowCount(quantidade_recentes)
+            for linha, dado in enumerate(recentes):
+                valores = [
+                    formatar_data(dado[2]), dado[3], dado[4],
+                    str(dado[5]), str(dado[6]), formatar_percentual(dado[7]),
+                ]
+                for coluna, valor in enumerate(valores):
+                    item = QTableWidgetItem(valor)
+                    if coluna == 2:
+                        item.setData(Qt.UserRole, dado[1])
+                    if coluna in (0, 3, 4, 5):
+                        item.setTextAlignment(Qt.AlignCenter)
+                    if coluna == 5 and dado[7] is not None:
+                        if dado[7] < 60:
+                            aplicar_destaque_tabela(item, "perigo", False)
+                        elif dado[7] >= 90:
+                            aplicar_destaque_tabela(item, "sucesso", False)
+                    tabela.setItem(linha, coluna, item)
+                tabela.setRowHeight(linha, 31)
+        finally:
+            tabela.blockSignals(False)
+            tabela.setUpdatesEnabled(True)
+
+        self._estado_estatisticas.registrar_duracao(
+            "Revisões recentes", (time.perf_counter() - inicio) * 1000.0
         )
 
-        for linha, dado in enumerate(
-            recentes
-        ):
-            valores = [
-                formatar_data(
-                    dado[2]
-                ),
-                dado[3],
-                dado[4],
-                str(
-                    dado[5]
-                ),
-                str(
-                    dado[6]
-                ),
-                formatar_percentual(
-                    dado[7]
-                )
-            ]
+    def atualizar_estatisticas(self, forcar=False):
+        """Atualiza somente a aba de Estatísticas atualmente visível.
 
-            for coluna, valor in enumerate(
-                valores
-            ):
-                item = QTableWidgetItem(
-                    valor
-                )
+        A versão anterior recalculava todas as abas antes de navegar para a
+        tela. Agora cada aba é carregada sob demanda e permanece limpa até que
+        um evento acadêmico relevante a invalide.
+        """
+        if self._estatisticas_refresh_em_andamento:
+            return
+        if not hasattr(self, "abas_estatisticas"):
+            return
 
-                if coluna == 2:
-                    item.setData(
-                        Qt.UserRole,
-                        dado[1]
+        self._estatisticas_refresh_em_andamento = True
+        try:
+            hoje = QDate.currentDate().toString("yyyy-MM-dd")
+            concurso = obter_concurso_ativo()
+            if self._estatisticas_data_referencia != hoje:
+                self._estatisticas_data_referencia = hoje
+                self._estado_estatisticas.marcar_sujas()
+                self.cache_analitico.invalidar("estatisticas:")
+            trocou_concurso = self._estado_estatisticas.trocar_concurso(concurso[0])
+            if trocou_concurso:
+                # As chaves possuem concurso_id, mas limpar o prefixo evita
+                # acumular snapshots de perfis alternados durante a sessão.
+                self.cache_analitico.invalidar("estatisticas:")
+
+            if hasattr(self, "perfil_estatisticas"):
+                self.perfil_estatisticas.setText(f"Perfil: {concurso[1]}")
+
+            self._atualizar_resumo_estatisticas(concurso, hoje, forcar=forcar)
+
+            aba = self._nome_aba_estatisticas_atual()
+            if not forcar and not self._estado_estatisticas.precisa_atualizar(aba):
+                return
+
+            inicio = time.perf_counter()
+            if aba == "Histórico" and hasattr(self, "tabela_minha_evolucao"):
+                self.atualizar_minha_evolucao(forcar=forcar)
+            elif aba == "Regularidade" and hasattr(self, "tabela_regularidade_semanas"):
+                self._atualizar_aba_regularidade(forcar=forcar)
+            elif aba == "Conquistas" and hasattr(self, "tabela_gamificacao_conquistas"):
+                self._atualizar_aba_conquistas(concurso[0], forcar=forcar)
+            elif aba == "Algoritmo" and hasattr(self, "lab_tabela"):
+                self.atualizar_laboratorio_algoritmo()
+            elif aba == "Disciplinas" and hasattr(self, "tabela_estat_disciplinas"):
+                self._atualizar_aba_estatisticas_disciplinas(concurso, hoje)
+            elif aba == "Mapa de domínio" and hasattr(self, "tabela_mapa_dominio"):
+                self._atualizar_aba_mapa_dominio(concurso[0], forcar=forcar)
+            elif aba == "Pontos fracos" and hasattr(self, "tabela_fracos"):
+                self._atualizar_aba_estatisticas_fracos(concurso[0], forcar=forcar)
+            elif aba == "Revisões recentes" and hasattr(self, "tabela_recentes"):
+                self._atualizar_aba_estatisticas_recentes(concurso[0], forcar=forcar)
+            elif aba == "Tendências" and hasattr(self, "combo_periodo_evolucao"):
+                self.atualizar_evolucao_temporal(forcar=forcar)
+            elif aba == "Progresso" and hasattr(self, "tabela_progresso_topicos"):
+                if forcar:
+                    self.cache_analitico.invalidar(
+                        f"progresso:v2:{int(concurso[0])}"
                     )
+                self.atualizar_progresso_edital()
 
-                if coluna in (
-                    0,
-                    3,
-                    4,
-                    5
-                ):
-                    item.setTextAlignment(
-                        Qt.AlignCenter
-                    )
-
-                if (
-                    coluna == 5
-                    and dado[7] is not None
-                ):
-                    if dado[7] < 60:
-                        aplicar_destaque_tabela(
-                            item,
-                            "perigo",
-                            False
-                        )
-                    elif dado[7] >= 90:
-                        aplicar_destaque_tabela(
-                            item,
-                            "sucesso",
-                            False
-                        )
-
-                self.tabela_recentes.setItem(
-                    linha,
-                    coluna,
-                    item
-                )
-
-            self.tabela_recentes.setRowHeight(
-                linha,
-                31
+            self._estado_estatisticas.marcar_limpa(aba)
+            self._estado_estatisticas.registrar_duracao(
+                f"aba:{aba}", (time.perf_counter() - inicio) * 1000.0
             )
-
-        if hasattr(
-            self,
-            "tabela_minha_evolucao"
-        ):
-            self.atualizar_minha_evolucao()
-
-        if hasattr(
-            self,
-            "combo_periodo_evolucao"
-        ):
-            self.atualizar_evolucao_temporal()
-
-        if hasattr(
-            self,
-            "tabela_progresso_topicos"
-        ):
-            self.atualizar_progresso_edital()
+        finally:
+            self._estatisticas_refresh_em_andamento = False
 
 
     def abrir_topico_estatistica_fraco(
@@ -55847,7 +56897,7 @@ class SistemaEstudos(QMainWindow):
 
         janela.exec()
 
-        self.atualizar_estatisticas()
+        self.invalidar_estatisticas("all")
 
     def abrir_topico_estatistica_recente(
         self,
@@ -55874,7 +56924,7 @@ class SistemaEstudos(QMainWindow):
 
         janela.exec()
 
-        self.atualizar_estatisticas()
+        self.invalidar_estatisticas("all")
 
     def criar_mini_indicador_disciplina(
         self,
@@ -57665,11 +58715,10 @@ class SistemaEstudos(QMainWindow):
         self.carregar_topicos()
 
     def voltar_inicio(self):
-        self.atualizar_dashboard()
-
-        self.telas.setCurrentWidget(
-            self.tela_inicial
-        )
+        # Troque a página antes de qualquer atualização. Se o Dashboard já está
+        # limpo, não existe trabalho adicional ao voltar.
+        self.telas.setCurrentWidget(self.tela_inicial)
+        self._agendar_atualizacao_dashboard()
 
 
     def backup_manual(self):

@@ -2,6 +2,15 @@
 setlocal EnableExtensions
 cd /d "%~dp0"
 
+set "PYINSTALLER_ESPERADO=6.22.3"
+set "QTA_ESPERADO=1.4.2"
+set "APP_ATUAL=%CD%\dist\SistemaEstudos"
+set "TEMP_DADOS=%CD%\_dados_antes_atualizacao"
+set "DIST_NOVA=%CD%\dist_nova"
+set "BUILD_CACHE=%CD%\build_pyinstaller"
+set "SAIDA_NOVA=%DIST_NOVA%\VighnaStudy"
+set "EXE_FINAL=%CD%\dist\SistemaEstudos\VighnaStudy.exe"
+
 echo.
 echo ============================================
 echo       ATUALIZANDO O VIGHNASTUDY
@@ -20,19 +29,18 @@ if not exist "main.py" (
     exit /b 1
 )
 
+if not exist "VighnaStudy.spec" (
+    echo ERRO: VighnaStudy.spec nao encontrado.
+    pause
+    exit /b 1
+)
+
 if not exist "vighnastudy.ico" (
     echo ERRO: vighnastudy.ico nao encontrado em:
     echo %CD%
     pause
     exit /b 1
 )
-
-set "APP_ATUAL=%CD%\dist\SistemaEstudos"
-set "TEMP_DADOS=%CD%\_dados_antes_atualizacao"
-set "DIST_NOVA=%CD%\dist_nova"
-set "BUILD_NOVO=%CD%\build_novo"
-set "SAIDA_NOVA=%DIST_NOVA%\VighnaStudy"
-set "EXE_FINAL=%CD%\dist\SistemaEstudos\VighnaStudy.exe"
 
 echo Fechando processos antigos, se ainda estiverem abertos...
 taskkill /IM SistemaEstudos.exe /F >nul 2>nul
@@ -79,34 +87,83 @@ call ".venv\Scripts\activate.bat"
 
 echo.
 echo Verificando PyInstaller...
-python -m pip install --upgrade pyinstaller
-if errorlevel 1 (
-    echo ERRO ao instalar/atualizar PyInstaller.
-    pause
-    exit /b 1
+set "PYI_VERSION="
+for /f "usebackq delims=" %%V in (`python -c "import PyInstaller; print(PyInstaller.__version__)" 2^>nul`) do set "PYI_VERSION=%%V"
+
+if not "%PYI_VERSION%"=="%PYINSTALLER_ESPERADO%" (
+    if defined PYI_VERSION (
+        echo PyInstaller %PYI_VERSION% encontrado; ajustando para %PYINSTALLER_ESPERADO%...
+    ) else (
+        echo PyInstaller nao encontrado; instalando %PYINSTALLER_ESPERADO%...
+    )
+    python -m pip install "PyInstaller==%PYINSTALLER_ESPERADO%"
+    if errorlevel 1 (
+        echo ERRO ao preparar PyInstaller.
+        pause
+        exit /b 1
+    )
+) else (
+    echo PyInstaller %PYI_VERSION% ja esta pronto. Nenhuma instalacao necessaria.
+)
+
+
+echo.
+echo Verificando QtAwesome...
+set "QTA_VERSION="
+for /f "usebackq delims=" %%V in (`python -c "import qtawesome; print(qtawesome.__version__)" 2^>nul`) do set "QTA_VERSION=%%V"
+
+if not "%QTA_VERSION%"=="%QTA_ESPERADO%" (
+    if defined QTA_VERSION (
+        echo QtAwesome %QTA_VERSION% encontrado; ajustando para %QTA_ESPERADO%...
+    ) else (
+        echo QtAwesome nao encontrado; instalando %QTA_ESPERADO%...
+    )
+    python -m pip install "QtAwesome==%QTA_ESPERADO%"
+    if errorlevel 1 (
+        echo ERRO ao preparar QtAwesome.
+        pause
+        exit /b 1
+    )
+) else (
+    echo QtAwesome %QTA_VERSION% ja esta pronto.
 )
 
 if exist "%DIST_NOVA%" rmdir /S /Q "%DIST_NOVA%"
-if exist "%BUILD_NOVO%" rmdir /S /Q "%BUILD_NOVO%"
+
+if /I "%VIGHNA_CLEAN_BUILD%"=="1" (
+    echo.
+    echo Build LIMPO solicitado: descartando cache do PyInstaller...
+    if exist "%BUILD_CACHE%" rmdir /S /Q "%BUILD_CACHE%"
+) else (
+    echo.
+    echo Build INCREMENTAL: reutilizando cache em:
+    echo %BUILD_CACHE%
+    echo Para um build totalmente limpo, use atualizar_exe_limpo.bat.
+)
 
 echo.
-echo Gerando VighnaStudy.exe com o novo icone...
+echo Gerando VighnaStudy.exe...
 
-python -m PyInstaller ^
-    --noconfirm ^
-    --clean ^
-    --windowed ^
-    --onedir ^
-    --icon="%CD%\vighnastudy.ico" ^
-    --name VighnaStudy ^
-    --distpath "%DIST_NOVA%" ^
-    --workpath "%BUILD_NOVO%" ^
-    main.py
+if /I "%VIGHNA_CLEAN_BUILD%"=="1" (
+    python -m PyInstaller ^
+        --noconfirm ^
+        --clean ^
+        --distpath "%DIST_NOVA%" ^
+        --workpath "%BUILD_CACHE%" ^
+        VighnaStudy.spec
+) else (
+    python -m PyInstaller ^
+        --noconfirm ^
+        --distpath "%DIST_NOVA%" ^
+        --workpath "%BUILD_CACHE%" ^
+        VighnaStudy.spec
+)
 
 if errorlevel 1 (
     echo.
     echo ERRO durante a geracao da nova versao.
     echo A versao anterior continua preservada.
+    echo Se suspeitar de cache inconsistente, execute atualizar_exe_limpo.bat.
     pause
     exit /b 1
 )
@@ -144,14 +201,16 @@ move "%SAIDA_NOVA%" "%CD%\dist\SistemaEstudos" >nul
 if errorlevel 1 (
     echo.
     echo ERRO ao mover a nova versao para a pasta final.
-    echo Verifique C:\SistemaEstudos\dist_nova.
+    echo Verifique %DIST_NOVA%.
     pause
     exit /b 1
 )
 
 if exist "%DIST_NOVA%" rmdir /S /Q "%DIST_NOVA%"
-if exist "%BUILD_NOVO%" rmdir /S /Q "%BUILD_NOVO%"
 if exist "%TEMP_DADOS%" rmdir /S /Q "%TEMP_DADOS%"
+
+REM IMPORTANTE: BUILD_CACHE NAO E APAGADO.
+REM Ele acelera builds seguintes do PyInstaller.
 
 echo.
 echo Criando atalho VighnaStudy...
@@ -188,10 +247,14 @@ echo.
 echo Executavel:
 echo %EXE_FINAL%
 echo.
+echo Cache incremental preservado em:
+echo %BUILD_CACHE%
+echo.
 echo Atalho:
 echo VighnaStudy
 echo.
 echo IMPORTANTE:
-echo O executavel antigo SistemaEstudos.exe foi substituido por VighnaStudy.exe.
+echo Se um build incremental apresentar comportamento estranho,
+echo use atualizar_exe_limpo.bat uma vez.
 echo.
 pause

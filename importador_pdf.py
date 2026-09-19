@@ -1395,7 +1395,22 @@ def analisar_vpq_1_0(
             "Disciplina não informada no cabeçalho VPQ."
         )
 
-    if not (
+    disciplina_normalizada = normalizar_texto_pdf(
+        metadados.get("disciplina", "")
+    )
+    disciplina_ctb = (
+        disciplina_normalizada == "ctb"
+        or disciplina_normalizada.startswith(
+            "codigo de transito brasileiro"
+        )
+    )
+
+    if disciplina_ctb:
+        if not _normalizar_metadado_vpq(metadados.get("capitulo")):
+            avisos.append(
+                "Capítulo não informado no cabeçalho VPQ do CTB."
+            )
+    elif not (
         _normalizar_metadado_vpq(metadados.get("topico"))
         or _normalizar_metadado_vpq(metadados.get("capitulo"))
     ):

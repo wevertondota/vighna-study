@@ -8,6 +8,7 @@ import re
 import statistics
 import unicodedata
 import uuid
+from contextlib import closing
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
@@ -29,8 +30,13 @@ from fila_observacao import (
     observation_signature,
     summarize_snapshot_safety,
 )
+from analise_temporal import build_period, build_temporal_analytics_snapshot
 from progresso_edital import build_syllabus_progress_snapshot
+from regularidade import build_regularity_snapshot
+from gamificacao import build_gamification_snapshot, ensure_gamification_schema
 from statistics_core import StatisticsService
+from statistics_core.models import METRIC_VERSION
+from statistics_core.periods import statistical_timezone
 
 
 if getattr(sys, "frozen", False):
@@ -40,6 +46,16 @@ else:
 
 CAMINHO_BANCO = PASTA_APLICACAO / "estudos.db"
 LOGGER = logging.getLogger(__name__)
+
+
+CTB_NOME_OFICIAL = "Código de Trânsito Brasileiro"
+CTB_SIGLA = "CTB"
+CTB_NOME_EXIBICAO = f"{CTB_NOME_OFICIAL} ({CTB_SIGLA})"
+CTB_ALIASES = (
+    CTB_SIGLA,
+    CTB_NOME_OFICIAL,
+    CTB_NOME_EXIBICAO,
+)
 
 
 def conectar():
@@ -96,7 +112,7 @@ def obter_progresso_topicos_nucleo(concurso_id=None):
     return obter_snapshot_progresso_edital(concurso_id)["topicos"]
 
 
-def obter_snapshot_progresso_edital(concurso_id=None):
+def obter_snapshot_progresso_edital(concurso_id=None, capturar=True):
     """Snapshot V2 compartilhado pelo Dashboard e pela aba Progresso."""
     if concurso_id is None:
         concurso_id = obter_concurso_ativo()[0]
@@ -152,13 +168,216 @@ def obter_snapshot_progresso_edital(concurso_id=None):
         disciplina_ids,
     )
     metricas_globais = servico.get_global_metrics(concurso_id)
-    return build_syllabus_progress_snapshot(
+    snapshot = build_syllabus_progress_snapshot(
         concurso_id,
         catalogo,
         metricas_topicos,
         metricas_disciplinas,
         metricas_globais,
     ).to_dict()
+    if capturar:
+        capturar_snapshot_progresso_diario(snapshot=snapshot)
+    return snapshot
+
+
+def obter_snapshot_regularidade(data_referencia=None):
+    """Resumo global de hábito; não participa da fila inteligente."""
+    if data_referencia is None:
+        referencia = None
+    elif isinstance(data_referencia, datetime):
+        referencia = data_referencia
+    elif isinstance(data_referencia, date):
+        referencia = data_referencia
+    else:
+        referencia = date.fromisoformat(str(data_referencia)[:10])
+
+    meta_dias = max(
+        0,
+        min(7, obter_configuracao_int("meta_dias_estudo_semanal", 0)),
+    )
+    return build_regularity_snapshot(
+        conectar,
+        as_of=referencia,
+        target_days_per_week=meta_dias,
+    ).to_dict()
+
+
+def obter_snapshot_gamificacao(
+    concurso_id=None,
+    data_referencia=None,
+    *,
+    progresso_snapshot=None,
+    regularidade_snapshot=None,
+    sincronizar=True,
+):
+    """Resumo motivacional global + marcos do perfil ativo.
+
+    A gamificação é uma camada secundária: escreve somente em sua própria
+    tabela de eventos e nunca interfere em domínio, fila ou agendamento.
+    """
+    if concurso_id is None:
+        concurso_id = obter_concurso_ativo()[0]
+    concurso_id = int(concurso_id)
+    if progresso_snapshot is None:
+        progresso_snapshot = obter_snapshot_progresso_edital(
+            concurso_id, capturar=False
+        )
+    if regularidade_snapshot is None:
+        regularidade_snapshot = obter_snapshot_regularidade(data_referencia)
+    referencia = None
+    if data_referencia is not None:
+        if isinstance(data_referencia, (date, datetime)):
+            referencia = data_referencia
+        else:
+            referencia = date.fromisoformat(str(data_referencia)[:10])
+    return build_gamification_snapshot(
+        conectar,
+        concurso_id,
+        progresso_snapshot,
+        regularidade_snapshot,
+        as_of=referencia,
+        synchronize=bool(sincronizar),
+    ).to_dict()
+
+
+def obter_analise_temporal(
+    concurso_id=None,
+    dias=30,
+    data_inicio=None,
+    data_fim_inclusivo=None,
+):
+    """Adaptador unico entre a UI e a camada temporal oficial."""
+    if concurso_id is None:
+        concurso_id = obter_concurso_ativo()[0]
+    if data_inicio is not None or data_fim_inclusivo is not None:
+        periodo = build_period(
+            start=date.fromisoformat(str(data_inicio)[:10]),
+            end_inclusive=date.fromisoformat(str(data_fim_inclusivo)[:10]),
+        )
+    else:
+        periodo = build_period(days=int(dias or 30))
+    return build_temporal_analytics_snapshot(
+        conectar,
+        int(concurso_id),
+        periodo,
+        obter_servico_estatistico(),
+    ).to_dict()
+
+
+def _campos_snapshot_progresso(snapshot):
+    return {
+        "total_topics": int(snapshot.get("total_topics") or 0),
+        "started_topics": int(snapshot.get("started_topics") or 0),
+        "topic_coverage_rate": snapshot.get("topic_coverage_rate"),
+        "question_coverage_rate": snapshot.get("question_coverage_rate"),
+        "insufficient_evidence_topics": int(
+            snapshot.get("insufficient_evidence_topics") or 0
+        ),
+        "low_evidence_topics": int(snapshot.get("low_evidence_topics") or 0),
+        "moderate_evidence_topics": int(
+            snapshot.get("moderate_evidence_topics") or 0
+        ),
+        "high_evidence_topics": int(snapshot.get("high_evidence_topics") or 0),
+        "sufficient_evidence_rate": snapshot.get("sufficient_evidence_rate"),
+        "consolidated_topics": int(snapshot.get("consolidated_topics") or 0),
+        "consolidated_rate": snapshot.get("consolidated_rate"),
+        "global_mastery_score": snapshot.get("global_mastery_score"),
+        "global_mastery_state": str(
+            snapshot.get("global_mastery_state") or "insufficient_data"
+        ),
+    }
+
+
+def capturar_snapshot_progresso_diario(
+    concurso_id=None,
+    snapshot=None,
+    captured_at=None,
+):
+    """Persiste somente estados reais, com no maximo uma linha por dia/versao.
+
+    Refresh sem mudanca e no-op. Se um evento academico ou alteracao de
+    catalogo mudar o estado no mesmo dia, a linha do dia e atualizada.
+    """
+    if snapshot is None:
+        if concurso_id is None:
+            concurso_id = obter_concurso_ativo()[0]
+        snapshot = obter_snapshot_progresso_edital(concurso_id, capturar=False)
+    concurso_id = int(snapshot.get("concurso_id") or concurso_id)
+    timezone = statistical_timezone()
+    if captured_at is None:
+        instante = datetime.now(timezone)
+    elif isinstance(captured_at, datetime):
+        instante = (
+            captured_at.replace(tzinfo=timezone)
+            if captured_at.tzinfo is None
+            else captured_at.astimezone(timezone)
+        )
+    else:
+        instante = datetime.fromisoformat(str(captured_at).replace("Z", "+00:00"))
+        if instante.tzinfo is None:
+            instante = instante.replace(tzinfo=timezone)
+        instante = instante.astimezone(timezone)
+
+    data_snapshot = instante.date().isoformat()
+    captured_text = instante.isoformat(timespec="seconds")
+    snapshot_version = str(snapshot.get("snapshot_version") or "syllabus_progress_v2")
+    campos = _campos_snapshot_progresso(snapshot)
+    nomes = list(campos)
+    valores = [campos[nome] for nome in nomes]
+
+    with closing(conectar()) as conexao:
+        existente = conexao.execute(
+            f"""
+            SELECT id, {', '.join(nomes)}
+            FROM progresso_snapshots_diarios
+            WHERE concurso_id = ? AND data = ?
+              AND metric_version = ? AND snapshot_version = ?
+            """,
+            (concurso_id, data_snapshot, METRIC_VERSION, snapshot_version),
+        ).fetchone()
+        if existente is not None and tuple(existente[1:]) == tuple(valores):
+            return {
+                "id": int(existente[0]),
+                "created": False,
+                "updated": False,
+                "data": data_snapshot,
+            }
+
+        placeholders = ", ".join("?" for _ in nomes)
+        updates = ", ".join(f"{nome} = excluded.{nome}" for nome in nomes)
+        cursor = conexao.execute(
+            f"""
+            INSERT INTO progresso_snapshots_diarios (
+                concurso_id, data, captured_at, metric_version,
+                snapshot_version, {', '.join(nomes)}
+            ) VALUES (?, ?, ?, ?, ?, {placeholders})
+            ON CONFLICT(concurso_id, data, metric_version, snapshot_version)
+            DO UPDATE SET captured_at = excluded.captured_at, {updates}
+            """,
+            (
+                concurso_id,
+                data_snapshot,
+                captured_text,
+                METRIC_VERSION,
+                snapshot_version,
+                *valores,
+            ),
+        )
+        row = conexao.execute(
+            """
+            SELECT id FROM progresso_snapshots_diarios
+            WHERE concurso_id = ? AND data = ?
+              AND metric_version = ? AND snapshot_version = ?
+            """,
+            (concurso_id, data_snapshot, METRIC_VERSION, snapshot_version),
+        ).fetchone()
+        conexao.commit()
+        return {
+            "id": int(row[0] if row else cursor.lastrowid),
+            "created": existente is None,
+            "updated": existente is not None,
+            "data": data_snapshot,
+        }
 
 
 def comparar_metricas_nucleo_topico(topico_id, concurso_id=None):
@@ -343,6 +562,9 @@ def criar_banco():
             )
         """)
 
+        # Gamificação comportamental — isolada das métricas acadêmicas.
+        ensure_gamification_schema(conexao)
+
         # Marco imutavel da migracao: revisoes ate este id sao historicas e
         # podem permanecer sem concurso. Apenas registros posteriores podem
         # caracterizar falha de linhagem nova.
@@ -504,7 +726,7 @@ def criar_banco():
             "Geral",
             "Direito Penal",
             "Direito Administrativo",
-            "CTB",
+            CTB_NOME_OFICIAL,
             "Português",
             "Matemática",
             "Informática"
@@ -1510,6 +1732,41 @@ def criar_banco():
         """)
 
         # ------------------------------------------------------
+        # PROGRESSO — SNAPSHOTS DIARIOS REAIS A PARTIR DO PASSO 8
+        # ------------------------------------------------------
+        conexao.execute("""
+            CREATE TABLE IF NOT EXISTS progresso_snapshots_diarios (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                concurso_id INTEGER NOT NULL,
+                data TEXT NOT NULL,
+                captured_at TEXT NOT NULL,
+                metric_version TEXT NOT NULL,
+                snapshot_version TEXT NOT NULL,
+                total_topics INTEGER NOT NULL,
+                started_topics INTEGER NOT NULL,
+                topic_coverage_rate REAL,
+                question_coverage_rate REAL,
+                insufficient_evidence_topics INTEGER NOT NULL,
+                low_evidence_topics INTEGER NOT NULL,
+                moderate_evidence_topics INTEGER NOT NULL,
+                high_evidence_topics INTEGER NOT NULL,
+                sufficient_evidence_rate REAL,
+                consolidated_topics INTEGER NOT NULL,
+                consolidated_rate REAL,
+                global_mastery_score REAL,
+                global_mastery_state TEXT NOT NULL,
+                UNIQUE (
+                    concurso_id,
+                    data,
+                    metric_version,
+                    snapshot_version
+                ),
+                FOREIGN KEY (concurso_id)
+                    REFERENCES concursos(id) ON DELETE CASCADE
+            )
+        """)
+
+        # ------------------------------------------------------
         # ÍNDICES DE PERFORMANCE — consultas mais frequentes
         # ------------------------------------------------------
         indices_performance = [
@@ -1523,6 +1780,7 @@ def criar_banco():
             "CREATE INDEX IF NOT EXISTS idx_tci_concurso_operacional ON topico_concurso_importancia(concurso_id, incluido, pausado, topico_id)",
             "CREATE INDEX IF NOT EXISTS idx_dci_concurso_incluido ON disciplina_concurso_inclusao(concurso_id, incluido, disciplina_id)",
             "CREATE INDEX IF NOT EXISTS idx_dci_concurso_estado ON disciplina_concurso_inclusao(concurso_id, incluido, pausado, disciplina_id)",
+            "CREATE INDEX IF NOT EXISTS idx_progresso_snapshot_concurso_data ON progresso_snapshots_diarios(concurso_id, data)",
             "CREATE INDEX IF NOT EXISTS idx_questoes_topico_ativa ON questoes(topico_id, ativa, id)",
             "CREATE INDEX IF NOT EXISTS idx_sessoes_questoes_concurso_inicio ON sessoes_questoes(concurso_id, iniciado_em DESC)",
             "CREATE INDEX IF NOT EXISTS idx_tentativas_concurso_data ON tentativas_questoes(concurso_id, respondida_em DESC)",
@@ -1545,6 +1803,7 @@ def criar_banco():
         # encontrada pelos aliases históricos. Uma segunda passagem ao fim
         # registra conteúdos que eventualmente sejam criados pela migração.
         _garantir_identidades_estruturais(conexao)
+        _garantir_nomenclatura_ctb(conexao)
 
         # Sincroniza a árvore oficial de Direito Penal antes de materializar
         # os capítulos. A migração também consolida tópicos legados e adiciona
@@ -2000,7 +2259,7 @@ def listar_conteudos_concurso(concurso_id):
         "Geral": 0,
         "Direito Penal": 1,
         "Direito Administrativo": 2,
-        "CTB": 3,
+        CTB_NOME_OFICIAL: 3,
         "Português": 4,
         "Matemática": 5,
         "Informática": 6,
@@ -2483,7 +2742,7 @@ def listar_disciplinas(
         "Geral": 0,
         "Direito Penal": 1,
         "Direito Administrativo": 2,
-        "CTB": 3,
+        CTB_NOME_OFICIAL: 3,
         "Português": 4,
         "Matemática": 5,
         "Informática": 6,
@@ -2532,7 +2791,7 @@ def listar_disciplinas_gerenciamento(concurso_id=None):
         concurso_id = obter_concurso_ativo()[0]
     ordem = {
         "Geral": 0, "Direito Penal": 1, "Direito Administrativo": 2,
-        "CTB": 3, "Português": 4, "Matemática": 5, "Informática": 6,
+        CTB_NOME_OFICIAL: 3, "Português": 4, "Matemática": 5, "Informática": 6,
     }
     with conectar() as conexao:
         dados = conexao.execute(
@@ -3171,6 +3430,65 @@ def _registrar_alias_disciplina(conexao, disciplina_id, nome, origem="atual"):
         """,
         (int(disciplina_id), nome, chave, str(origem or "atual")),
     )
+
+
+def _garantir_nomenclatura_ctb(conexao):
+    """Mantém o nome oficial do CTB sem perder compatibilidade com a sigla.
+
+    A identidade estrutural (id/chave_estavel) permanece a mesma. O nome
+    histórico ``CTB`` vira alias, assim como a forma de exibição com a sigla.
+    """
+    linha_oficial = conexao.execute(
+        "SELECT id FROM disciplinas WHERE nome = ? LIMIT 1",
+        (CTB_NOME_OFICIAL,),
+    ).fetchone()
+    linha_sigla = conexao.execute(
+        "SELECT id FROM disciplinas WHERE nome = ? LIMIT 1",
+        (CTB_SIGLA,),
+    ).fetchone()
+
+    disciplina_id = None
+    if linha_oficial is not None:
+        disciplina_id = int(linha_oficial[0])
+    elif linha_sigla is not None:
+        disciplina_id = int(linha_sigla[0])
+        # Guarda o rótulo antigo antes da troca; o ID e todas as FKs são
+        # preservados.
+        _registrar_alias_disciplina(
+            conexao, disciplina_id, CTB_SIGLA, "sigla"
+        )
+        conexao.execute(
+            "UPDATE disciplinas SET nome = ? WHERE id = ?",
+            (CTB_NOME_OFICIAL, disciplina_id),
+        )
+
+    if disciplina_id is None:
+        return None
+
+    for alias in CTB_ALIASES:
+        _registrar_alias_disciplina(
+            conexao, disciplina_id, alias,
+            "sigla" if alias == CTB_SIGLA else "oficial",
+        )
+    return disciplina_id
+
+
+def obter_disciplina_ctb_id():
+    """Retorna a identidade estrutural da disciplina CTB, se cadastrada."""
+    with conectar() as conexao:
+        return _resolver_disciplina_id_conexao(conexao, CTB_SIGLA)
+
+
+def eh_disciplina_ctb(referencia):
+    """Aceita ID, nome oficial, sigla ou alias de importação do CTB."""
+    with conectar() as conexao:
+        alvo = _resolver_disciplina_id_conexao(conexao, CTB_SIGLA)
+        atual = _resolver_disciplina_id_conexao(conexao, referencia)
+        return (
+            alvo is not None
+            and atual is not None
+            and int(alvo) == int(atual)
+        )
 
 
 def _registrar_alias_topico(conexao, topico_id, nome, origem="atual"):
@@ -18143,6 +18461,7 @@ def listar_ranking_topicos(
             float(dominio),
             proxima_revisao,
             nucleo.value("last_review_at"),
+            str(evidencia or "insufficient"),
         ))
     reverse = str(ordem).lower() == "desc"
     resultados.sort(
@@ -20123,6 +20442,28 @@ def obter_resumo_foco(data_referencia=None):
             """
         ).fetchone()
 
+        ultima_row = conexao.execute(
+            """
+            SELECT inicio, duracao_efetiva, disciplina_nome, topico_nome
+            FROM sessoes_foco
+            WHERE duracao_efetiva > 0
+            ORDER BY inicio DESC, id DESC
+            LIMIT 1
+            """
+        ).fetchone()
+
+        melhor_semana_row = conexao.execute(
+            """
+            SELECT inicio, duracao_efetiva, disciplina_nome, topico_nome
+            FROM sessoes_foco
+            WHERE substr(inicio, 1, 10) BETWEEN ? AND ?
+              AND duracao_efetiva > 0
+            ORDER BY duracao_efetiva DESC, inicio DESC, id DESC
+            LIMIT 1
+            """,
+            (inicio_semana.isoformat(), fim_semana.isoformat()),
+        ).fetchone()
+
     hoje_segundos = int(hoje_row[0] or 0)
     hoje_sessoes = int(hoje_row[1] or 0)
     semana_segundos = int(semana_row[0] or 0)
@@ -20160,6 +20501,26 @@ def obter_resumo_foco(data_referencia=None):
         "distribuicao_semana": distribuicao_semana,
         "total_segundos": int(total_row[0] or 0),
         "total_sessoes": int(total_row[1] or 0),
+        "ultima_sessao": (
+            {
+                "inicio": ultima_row[0],
+                "segundos": int(ultima_row[1] or 0),
+                "disciplina": ultima_row[2],
+                "topico": ultima_row[3],
+            }
+            if ultima_row
+            else None
+        ),
+        "melhor_sessao_semana": (
+            {
+                "inicio": melhor_semana_row[0],
+                "segundos": int(melhor_semana_row[1] or 0),
+                "disciplina": melhor_semana_row[2],
+                "topico": melhor_semana_row[3],
+            }
+            if melhor_semana_row
+            else None
+        ),
     }
 
 

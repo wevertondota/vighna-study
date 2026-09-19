@@ -51,6 +51,7 @@ class SyllabusProgressSnapshot:
     consolidated_topics: int
     consolidated_rate: float | None
     global_mastery_score: float | None
+    global_mastery_state: str
     disciplinas: list[dict[str, Any]] = field(default_factory=list)
     topicos: list[dict[str, Any]] = field(default_factory=list)
     gaps: dict[str, int] = field(default_factory=dict)
@@ -143,7 +144,12 @@ def _topic_item(catalog: dict[str, Any], metrics) -> dict[str, Any]:
             else None
         ),
         "tentativas": attempts,
+        "questoes_unicas": int(
+            _value(metrics, "answered_unique_question_count", 0) or 0
+        ),
         "percentual": _value(metrics, "accuracy_rate"),
+        "desempenho_recente": _value(metrics, "recent_performance_rate"),
+        "tendencia_desempenho": _value(metrics, "performance_trend"),
         "cobertura_questoes": coverage_metric.value,
         "questoes_ativas": int(coverage_metric.denominator or 0),
         "questoes_respondidas": int(
@@ -248,12 +254,20 @@ def build_syllabus_progress_snapshot(
         subject_consolidated = sum(
             1 for item in subject_topics if item["consolidacao"] == "consolidated"
         )
+        subject_evidence = str(
+            _value(metrics, "evidence_level", "insufficient") or "insufficient"
+        )
         subjects.append({
             "disciplina_id": subject_id,
             "disciplina": subject_name,
             "total_topicos": len(subject_topics),
             "cobertura_topicos": _value(metrics, "topic_coverage_rate"),
             "cobertura_questoes": _value(metrics, "question_coverage_rate"),
+            "evidencia": subject_evidence,
+            "evidencia_rotulo": EVIDENCE_LABELS.get(
+                subject_evidence, "Insuficiente"
+            ),
+            "evidencia_suficiente": subject_evidence in {"moderate", "high"},
             "evidencia_suficiente_topicos": subject_sufficient,
             "evidencia_suficiente_taxa": _rate(
                 subject_sufficient,
@@ -263,6 +277,8 @@ def build_syllabus_progress_snapshot(
             "consolidacao_taxa": _rate(subject_consolidated, len(subject_topics)),
             "dominio": _value(metrics, "mastery_score"),
             "dominio_estado": _metric(metrics, "mastery_score").state,
+            "revisoes": int(_value(metrics, "completed_review_count", 0) or 0),
+            "ultima_atividade": _value(metrics, "last_activity_at"),
         })
 
     gaps = {
@@ -291,6 +307,7 @@ def build_syllabus_progress_snapshot(
         consolidated_topics=consolidated,
         consolidated_rate=_rate(consolidated, total),
         global_mastery_score=_value(global_metrics, "mastery_score"),
+        global_mastery_state=_metric(global_metrics, "mastery_score").state,
         disciplinas=subjects,
         topicos=topics,
         gaps=gaps,

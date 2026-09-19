@@ -59,7 +59,7 @@ DADOS = {
         "Intervenção do Estado na propriedade privada",
     ],
 
-    "CTB": [
+    "Código de Trânsito Brasileiro": [
         "Capítulo I: Disposições Preliminares",
         "Capítulo II: Do Sistema Nacional de Trânsito",
         "Capítulo III: Das Normas Gerais de Circulação e Conduta",
