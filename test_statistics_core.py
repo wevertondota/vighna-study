@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from statistics_core import StatisticalPeriods, StatisticsService
+from statistics_core.periods import statistical_timezone
 
 
 class StatisticsCoreTests(unittest.TestCase):
@@ -143,7 +144,7 @@ class StatisticsCoreTests(unittest.TestCase):
                 ).fetchone()
             topic_id = topic_id if topic_id is not None else row[0]
             subject_id = subject_id if subject_id is not None else row[1]
-        timestamp = datetime.now().astimezone().replace(microsecond=0) - timedelta(days=days_ago)
+        timestamp = datetime.now(statistical_timezone()).replace(microsecond=0) - timedelta(days=days_ago)
         with closing(self.connect()) as con:
             con.execute(
                 "INSERT OR IGNORE INTO sessoes_questoes VALUES (?, ?, ?, ?, 1)",
@@ -167,7 +168,7 @@ class StatisticsCoreTests(unittest.TestCase):
         return self.attempt_id
 
     def add_review(self, review_id, attempt_id, days_ago=0, topic_id=1):
-        timestamp = datetime.now().astimezone().replace(microsecond=0) - timedelta(days=days_ago)
+        timestamp = datetime.now(statistical_timezone()).replace(microsecond=0) - timedelta(days=days_ago)
         with closing(self.connect()) as con:
             con.execute(
                 "INSERT INTO revisoes VALUES (?, ?, ?, ?, 1, 1)",
@@ -516,7 +517,7 @@ class StatisticsCoreTests(unittest.TestCase):
         self.assertEqual(self.select_count, 4)
 
     def test_global_question_session_count_includes_empty_sessions(self):
-        timestamp = datetime.now().astimezone().replace(microsecond=0)
+        timestamp = datetime.now(statistical_timezone()).replace(microsecond=0)
         with closing(self.connect()) as con:
             con.execute(
                 "INSERT INTO sessoes_questoes VALUES (99, 1, ?, ?, 1)",
@@ -532,7 +533,7 @@ class StatisticsCoreTests(unittest.TestCase):
         with closing(self.connect()) as con:
             con.execute(
                 "INSERT INTO revisoes VALUES (1, 1, ?, NULL, 10, 8)",
-                (datetime.now().astimezone().date().isoformat(),),
+                (datetime.now(statistical_timezone()).date().isoformat(),),
             )
             con.commit()
         result = self.topic().metric("completed_review_count")

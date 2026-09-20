@@ -2247,18 +2247,18 @@ QWidget#dashboardRoot QPushButton#algorithmDashboardHelp:hover {
     border-color: #b7cfe7;
 }
 QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] QPushButton#dashboardTodayPrimaryButton {
-    min-width: 360px;
-    min-height: 56px;
+    min-width: 320px;
+    min-height: 40px;
     background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
         stop:0 #245dcc, stop:0.52 #2f6edc, stop:1 #3e7fec);
     color: #ffffff;
     border: 1px solid #1d52b4;
-    border-radius: 12px;
+    border-radius: 10px;
     font-family: "Segoe UI Semibold";
-    font-size: 11.2pt;
+    font-size: 10.4pt;
     font-weight: 900;
-    letter-spacing: 0.3px;
-    padding: 8px 22px;
+    letter-spacing: 0.2px;
+    padding: 5px 18px;
 }
 QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] QPushButton#dashboardTodayPrimaryButton:hover {
     background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
@@ -2327,18 +2327,18 @@ QWidget#dashboardRoot QPushButton#algorithmDashboardHelp:hover {
     border-color: #4c6682;
 }
 QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] QPushButton#dashboardTodayPrimaryButton {
-    min-width: 360px;
-    min-height: 56px;
+    min-width: 320px;
+    min-height: 40px;
     background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
         stop:0 #315fae, stop:0.52 #3f72c8, stop:1 #5488de);
     color: #ffffff;
     border: 1px solid #78a7ee;
-    border-radius: 12px;
+    border-radius: 10px;
     font-family: "Segoe UI Semibold";
-    font-size: 11.2pt;
+    font-size: 10.4pt;
     font-weight: 900;
-    letter-spacing: 0.3px;
-    padding: 8px 22px;
+    letter-spacing: 0.2px;
+    padding: 5px 18px;
 }
 QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] QPushButton#dashboardTodayPrimaryButton:hover {
     background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
@@ -2413,18 +2413,18 @@ QWidget#dashboardRoot QPushButton#algorithmDashboardHelp:hover {
     border-color: #55a0c5;
 }
 QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] QPushButton#dashboardTodayPrimaryButton {
-    min-width: 360px;
-    min-height: 56px;
+    min-width: 320px;
+    min-height: 40px;
     background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
         stop:0 #255cb1, stop:0.5 #3777d6, stop:1 #4d91f2);
     color: #ffffff;
     border: 1px solid #8bc0ff;
-    border-radius: 13px;
+    border-radius: 10px;
     font-family: "Segoe UI Semibold";
-    font-size: 11.2pt;
+    font-size: 10.4pt;
     font-weight: 900;
-    letter-spacing: 0.3px;
-    padding: 8px 22px;
+    letter-spacing: 0.2px;
+    padding: 5px 18px;
 }
 QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] QPushButton#dashboardTodayPrimaryButton:hover {
     background: qlineargradient(x1:0, y1:0, x2:1, y2:0,

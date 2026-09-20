@@ -107,6 +107,7 @@ from inteligencia import (
 from estatisticas_lazy import EstadoEstatisticasLazy
 from relatorios_lazy import EstadoRelatoriosLazy
 from diagnostico import JanelaDiagnosticoVighna
+from ciclo_estudo import integrar_sessao_questoes_com_revisoes as integrar_sessao_questoes_com_revisoes_core
 from navegacao import JanelaBuscaGlobal
 from versao import VIGHNA_BUILD, VIGHNA_VERSION
 from evolucao import obter_evolucao_historica
@@ -8861,302 +8862,9 @@ class JanelaVisualizarQuestao(QDialog):
         )
 
 
-def integrar_sessao_questoes_com_revisoes(
-    sessao_id
-):
-    """
-    Converte as tentativas internas em revisões consolidadas por
-    tópico e por dia.
-
-    Regra geral:
-    1–4  questões: atividade registrada; não cria revisão.
-    5–9  questões: revisão de baixa confiança; agenda é preservada.
-    10+  questões: revisão normal; próxima data é recalculada.
-
-    Exceção de primeiro contato:
-    se o tópico ainda não possui revisão anterior, a primeira resolução
-    efetiva já cria a revisão e agenda a próxima data com base no
-    desempenho do dia. A confiança continua refletindo o tamanho da
-    amostra para impedir intervalos excessivamente longos.
-    """
-
-    minimo_registro = max(
-        1,
-        obter_configuracao_int(
-            "questoes_revisao_min_registro",
-            5
-        )
-    )
-
-    minimo_agendamento = max(
-        minimo_registro,
-        obter_configuracao_int(
-            "questoes_revisao_min_agendamento",
-            10
-        )
-    )
-
-    contextos = (
-        obter_contextos_revisao_automatica_sessao(
-            sessao_id
-        )
-    )
-
-    resultados = []
-
-    aplicar_penalizacao = (
-        obter_configuracao_bool(
-            "aplicar_penalizacao_queda",
-            True
-        )
-    )
-
-    config_espacamento = (
-        carregar_configuracao_espacamento()
-    )
-
-    for contexto in contextos:
-        questoes = int(
-            contexto[
-                "questoes"
-            ]
-            or 0
-        )
-        acertos = int(
-            contexto[
-                "acertos"
-            ]
-            or 0
-        )
-
-        base = {
-            "topico_id": contexto[
-                "topico_id"
-            ],
-            "disciplina": contexto[
-                "disciplina"
-            ],
-            "topico": contexto[
-                "topico"
-            ],
-            "data": contexto[
-                "data"
-            ],
-            "questoes": questoes,
-            "acertos": acertos,
-            "percentual": contexto[
-                "percentual"
-            ],
-            "revisao_id": None,
-            "revisao_registrada": False,
-            "agendamento_atualizado": False,
-            "proxima_revisao": None,
-            "confianca": None,
-        }
-
-        primeiro_contato = bool(
-            contexto.get(
-                "primeiro_contato",
-                False
-            )
-        )
-
-        # Para tópicos já conhecidos, mantém-se a proteção original
-        # contra amostras pequenas.
-        if (
-            questoes < minimo_registro
-            and not primeiro_contato
-        ):
-            resultados.append({
-                **base,
-                "status_integracao": "atividade",
-                "descricao": (
-                    f"{questoes} questão(ões): atividade registrada. "
-                    f"A revisão automática começa em {minimo_registro}."
-                ),
-            })
-            continue
-
-        if questoes < minimo_registro:
-            confianca = "muito_baixa"
-        elif questoes < minimo_agendamento:
-            confianca = "baixa"
-        else:
-            confianca = "normal"
-
-        proxima = None
-        sugestao = None
-        dias_aplicados = None
-
-        # No primeiro contato sempre precisamos criar uma próxima data,
-        # pois ainda não existe agendamento anterior a preservar.
-        deve_agendar = (
-            primeiro_contato
-            or confianca == "normal"
-        )
-
-        if deve_agendar:
-            sugestao = calcular_sugestao_espacamento(
-                numero_revisao=contexto[
-                    "numero_revisao"
-                ],
-                percentual_atual=contexto[
-                    "percentual"
-                ],
-                percentual_anterior=contexto[
-                    "percentual_anterior"
-                ],
-                # Não há "queda" no primeiro contato porque não existe
-                # um desempenho anterior real para comparação.
-                aplicar_penalizacao=(
-                    aplicar_penalizacao
-                    and not primeiro_contato
-                ),
-                tabela_espacamento=config_espacamento[
-                    "tabela"
-                ],
-                limite_queda_moderada=config_espacamento[
-                    "limite_moderada"
-                ],
-                limite_queda_forte=config_espacamento[
-                    "limite_forte"
-                ],
-                penalizacao_moderada=config_espacamento[
-                    "penalizacao_moderada"
-                ],
-                penalizacao_forte=config_espacamento[
-                    "penalizacao_forte"
-                ]
-            )
-
-            dias_aplicados = int(
-                sugestao[
-                    "dias"
-                ]
-            )
-
-            # Uma única questão correta não pode produzir a mesma
-            # confiança temporal de uma amostra robusta. O desempenho
-            # continua sendo considerado, mas o intervalo do primeiro
-            # contato recebe um teto conservador.
-            if primeiro_contato:
-                if confianca == "muito_baixa":
-                    dias_aplicados = min(
-                        dias_aplicados,
-                        7
-                    )
-                elif confianca == "baixa":
-                    dias_aplicados = min(
-                        dias_aplicados,
-                        14
-                    )
-
-            data_base = QDate.fromString(
-                contexto[
-                    "data"
-                ],
-                "yyyy-MM-dd"
-            )
-
-            if data_base.isValid():
-                proxima = data_base.addDays(
-                    dias_aplicados
-                ).toString(
-                    "yyyy-MM-dd"
-                )
-
-        salvo = salvar_revisao_automatica_questoes(
-            contexto[
-                "topico_id"
-            ],
-            contexto[
-                "data"
-            ],
-            questoes,
-            acertos,
-            confianca,
-            proxima_revisao=proxima,
-            sessao_questoes_id=sessao_id,
-            concurso_id=contexto.get("concurso_id"),
-        )
-
-        if primeiro_contato:
-            if confianca == "muito_baixa":
-                rotulo_confianca = (
-                    "amostra muito pequena"
-                )
-            elif confianca == "baixa":
-                rotulo_confianca = (
-                    "baixa confiança"
-                )
-            else:
-                rotulo_confianca = (
-                    "confiança normal"
-                )
-
-            descricao = (
-                f"Primeiro contato com o tópico: {questoes} questão(ões), "
-                f"{rotulo_confianca}. "
-                "A primeira revisão foi registrada"
-                + (
-                    f" e a próxima ficou agendada para "
-                    f"{formatar_data(proxima)}."
-                    if proxima
-                    else "."
-                )
-            )
-            status_integracao = (
-                "primeiro_contato"
-            )
-
-        elif confianca == "baixa":
-            descricao = (
-                f"{questoes} questão(ões): revisão automática de "
-                "baixa confiança registrada. O agendamento anterior "
-                f"foi preservado; com {minimo_agendamento}+ questões "
-                "a data será recalculada."
-            )
-            status_integracao = (
-                "baixa_confianca"
-            )
-
-        else:
-            descricao = (
-                f"{questoes} questão(ões): revisão automática registrada"
-                + (
-                    f" e próxima revisão agendada para "
-                    f"{formatar_data(proxima)}."
-                    if proxima
-                    else "."
-                )
-            )
-            status_integracao = (
-                "revisao_normal"
-            )
-
-        resultados.append({
-            **base,
-            "revisao_id": salvo[
-                "revisao_id"
-            ],
-            "revisao_registrada": True,
-            "agendamento_atualizado": (
-                proxima is not None
-            ),
-            "proxima_revisao": proxima,
-            "confianca": confianca,
-            "status_integracao": (
-                status_integracao
-            ),
-            "descricao": descricao,
-            "dias_sugeridos": (
-                dias_aplicados
-                if sugestao
-                else None
-            ),
-        })
-
-    return resultados
+def integrar_sessao_questoes_com_revisoes(sessao_id):
+    """Delega a integração acadêmica ao núcleo puro e testável."""
+    return integrar_sessao_questoes_com_revisoes_core(sessao_id)
 
 
 
@@ -32684,8 +32392,8 @@ class SistemaEstudos(QMainWindow):
         self.dashboard_hoje_acao.setProperty("simpleHero", True)
 
         acao_layout = QVBoxLayout(self.dashboard_hoje_acao)
-        acao_layout.setContentsMargins(16, 13, 16, 14)
-        acao_layout.setSpacing(8)
+        acao_layout.setContentsMargins(16, 10, 16, 10)
+        acao_layout.setSpacing(6)
 
         algoritmo_header = QHBoxLayout()
         algoritmo_header.setSpacing(9)
@@ -32743,22 +32451,29 @@ class SistemaEstudos(QMainWindow):
         inteligencia_conteudo = QFrame()
         inteligencia_conteudo.setObjectName("algorithmRecommendationBody")
         inteligencia_conteudo_layout = QVBoxLayout(inteligencia_conteudo)
-        inteligencia_conteudo_layout.setContentsMargins(14, 10, 14, 12)
-        inteligencia_conteudo_layout.setSpacing(6)
+        inteligencia_conteudo_layout.setContentsMargins(14, 7, 14, 8)
+        inteligencia_conteudo_layout.setSpacing(4)
 
         self.dashboard_algoritmo_pronto = QLabel("PRÓXIMA SESSÃO PRONTA")
         self.dashboard_algoritmo_pronto.setObjectName("algorithmDashboardReady")
         self.dashboard_algoritmo_pronto.setAlignment(Qt.AlignCenter)
 
-        inteligencia_conteudo_layout.addStretch(1)
         inteligencia_conteudo_layout.addWidget(self.dashboard_algoritmo_pronto)
-        inteligencia_conteudo_layout.addSpacing(4)
+        inteligencia_conteudo_layout.addSpacing(2)
 
         botoes_ia = QVBoxLayout()
         botoes_ia.setSpacing(4)
         self.dashboard_hoje_um_clique = QPushButton("▶  COMEÇAR AGORA")
         self.dashboard_hoje_um_clique.setObjectName("dashboardTodayPrimaryButton")
-        self.dashboard_hoje_um_clique.setMinimumHeight(44)
+        # CTA principal proporcional ao card: mantém destaque sem assumir
+        # aparência de banner. A largura acompanha a janela e é limitada.
+        self.dashboard_hoje_um_clique.setMinimumWidth(320)
+        self.dashboard_hoje_um_clique.setMaximumWidth(540)
+        self.dashboard_hoje_um_clique.setFixedHeight(42)
+        self.dashboard_hoje_um_clique.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Fixed,
+        )
         self.dashboard_hoje_um_clique.setCursor(Qt.PointingHandCursor)
         self.dashboard_hoje_um_clique.setToolTip(
             "Abrir a recomendação de estudo para hoje."
@@ -32778,18 +32493,23 @@ class SistemaEstudos(QMainWindow):
         self.dashboard_hoje_botao.clicked.connect(
             self.explicar_recomendacao_dashboard
         )
-        botoes_ia.addWidget(self.dashboard_hoje_um_clique)
+        botao_principal_linha = QHBoxLayout()
+        botao_principal_linha.setContentsMargins(0, 0, 0, 0)
+        botao_principal_linha.setSpacing(0)
+        botao_principal_linha.addStretch(1)
+        botao_principal_linha.addWidget(self.dashboard_hoje_um_clique, 3)
+        botao_principal_linha.addStretch(1)
+        botoes_ia.addLayout(botao_principal_linha)
         botoes_ia.addWidget(self.dashboard_hoje_botao, 0, Qt.AlignCenter)
         inteligencia_conteudo_layout.addLayout(botoes_ia)
-        inteligencia_conteudo_layout.addStretch(1)
-        acao_layout.addWidget(inteligencia_conteudo, 1)
+        acao_layout.addWidget(inteligencia_conteudo)
 
         # Resumo compacto do dia — substitui informação tabular no Dashboard.
         self.dashboard_resumo_ia = QFrame()
         self.dashboard_resumo_ia.setObjectName("dashboardInsightSummary")
         resumo_ia_layout = QVBoxLayout(self.dashboard_resumo_ia)
-        resumo_ia_layout.setContentsMargins(14, 12, 14, 12)
-        resumo_ia_layout.setSpacing(7)
+        resumo_ia_layout.setContentsMargins(14, 8, 14, 8)
+        resumo_ia_layout.setSpacing(4)
 
         resumo_ia_header = QHBoxLayout()
         resumo_ia_header.setSpacing(8)
@@ -32814,7 +32534,7 @@ class SistemaEstudos(QMainWindow):
             linha.setObjectName("dashboardInsightSummaryRow")
             linha.setProperty("summaryRole", papel)
             linha_layout = QHBoxLayout(linha)
-            linha_layout.setContentsMargins(10, 7, 10, 7)
+            linha_layout.setContentsMargins(10, 4, 10, 4)
             linha_layout.setSpacing(8)
             textos = QVBoxLayout()
             textos.setSpacing(0)
@@ -39853,6 +39573,7 @@ class SistemaEstudos(QMainWindow):
                 quantidade_padrao=quantidade,
                 quantidade_exata=quantidade,
                 modo_nome=f"Foco • {atividade}",
+                origem_sessao=contexto.get("origem_sessao"),
             )
         except Exception as erro:
             QMessageBox.warning(

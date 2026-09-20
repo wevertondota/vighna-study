@@ -83,6 +83,11 @@ def montar_preparacao_foco(
     rotulo = _texto_nao_vazio(rotulo or recomendacao.get("rotulo_sessao") or "sessão recomendada")
     meta_questoes = max(0, int(recomendacao.get("questoes_alvo") or 0))
     origem = _texto_nao_vazio(recomendacao.get("origem_texto") or "Estudar agora V5")
+    try:
+        versao_motor = int(recomendacao.get("versao_motor") or 0)
+    except (TypeError, ValueError):
+        versao_motor = 0
+    origem_sessao = "algoritmo_v5" if versao_motor >= 5 else None
 
     if atividade in {"Questões", "Treino adaptativo", "Teste de retenção"} and meta_questoes > 0:
         # Impede que uma alternativa muito curta preserve uma meta incompatível.
@@ -105,6 +110,7 @@ def montar_preparacao_foco(
         "observacao": " • ".join(parte for parte in observacoes if parte),
         "questoes_alvo": meta_questoes,
         "origem": origem,
+        "origem_sessao": origem_sessao,
         "plano_chave": None,
         "abrir_questoes_ao_iniciar": bool(meta_questoes > 0),
     }

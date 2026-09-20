@@ -20,6 +20,7 @@ import laboratorio
 import checkpoint
 from importador_pdf import analisar_texto_questoes_pdf
 from versao import VIGHNA_VERSION
+from statistics_core.periods import statistical_timezone
 
 
 def assert_true(cond, msg):
@@ -927,7 +928,7 @@ EXPLICAÇÃO: A alternativa C é a correta.
             assert_true(cache.obter("x", carregar) == 42 and contador["n"] == 1, "cache reaproveita")
 
             # Calibração: cinco sessões reais de 20 min com 10 respostas cada.
-            agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            agora = datetime.now(statistical_timezone()).strftime("%Y-%m-%d %H:%M:%S")
             with closing(banco.conectar()) as con, con:
                 for _ in range(5):
                     foco_id = int(con.execute(
@@ -959,7 +960,7 @@ EXPLICAÇÃO: A alternativa C é a correta.
             assert_true(calibracao["por_disciplina"]["CTB"]["amostras_questoes"] == 5, "amostras de calibração")
             assert_true(abs(calibracao["por_disciplina"]["CTB"]["segundos_por_questao"] - 120.0) < 0.01, "ritmo real por questão")
 
-            hoje_data = datetime.now().date()
+            hoje_data = datetime.now(statistical_timezone()).date()
             prevista = hoje_data - timedelta(days=2)
             with closing(banco.conectar()) as con, con:
                 con.execute("INSERT OR IGNORE INTO controle_topico(topico_id) VALUES (?)", (topico_id,))
@@ -1036,7 +1037,7 @@ EXPLICAÇÃO: A alternativa C é a correta.
                     "motivo": "revisão pendente",
                 }],
                 plano={"itens": []},
-                data_ref=datetime.now().date().isoformat(),
+                data_ref=datetime.now(statistical_timezone()).date().isoformat(),
             )
             assert_true(jd["itens"], "jornada possui atividades")
             item = jornada.proximo_item(jd)

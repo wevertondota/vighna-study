@@ -23,6 +23,7 @@ from banco import CAMINHO_BANCO, conectar
 from backup import listar_backups
 from checkpoint import obter_ultimo_checkpoint, localizar_pasta_projeto
 from versao import VIGHNA_BUILD, VIGHNA_SCHEMA, VIGHNA_VERSION
+from auditoria_ciclo_estudo import auditar_ciclo_estudo, texto_auditoria_ciclo, texto_recomendacao_diagnostica
 
 
 def coletar_diagnostico() -> dict:
@@ -171,6 +172,12 @@ class JanelaDiagnosticoVighna(QDialog):
         atualizar = QPushButton("Executar diagnóstico")
         atualizar.setObjectName("toolbarButton")
         atualizar.clicked.connect(self.atualizar)
+        auditar_ciclo = QPushButton("Auditar ciclo de estudo")
+        auditar_ciclo.setObjectName("toolbarButton")
+        auditar_ciclo.setToolTip(
+            "Verificar o ciclo recomendação → sessão → respostas → revisão → métricas."
+        )
+        auditar_ciclo.clicked.connect(self.auditar_ciclo)
         otimizar = QPushButton("Otimização segura")
         otimizar.setObjectName("primaryButton")
         otimizar.clicked.connect(self.otimizar)
@@ -181,6 +188,7 @@ class JanelaDiagnosticoVighna(QDialog):
         fechar.setObjectName("subtleButton")
         fechar.clicked.connect(self.accept)
         botoes.addWidget(atualizar)
+        botoes.addWidget(auditar_ciclo)
         botoes.addWidget(otimizar)
         botoes.addWidget(copiar)
         botoes.addStretch(1)
@@ -194,6 +202,29 @@ class JanelaDiagnosticoVighna(QDialog):
             self.texto.setPlainText(texto_diagnostico(self.dados))
         except Exception as erro:
             self.texto.setPlainText(f"Falha no diagnóstico:\n{erro}")
+
+
+    def auditar_ciclo(self):
+        try:
+            dados = auditar_ciclo_estudo()
+            partes = [texto_auditoria_ciclo(dados)]
+            principal = self.parentWidget()
+            if principal is not None and hasattr(principal, "montar_recomendacao_estudar_agora_v5"):
+                try:
+                    if hasattr(principal, "cache_analitico"):
+                        principal.cache_analitico.invalidar()
+                    recomendacao = principal.montar_recomendacao_estudar_agora_v5()
+                    if hasattr(principal, "_enriquecer_recomendacao_com_bateria"):
+                        recomendacao = principal._enriquecer_recomendacao_com_bateria(recomendacao)
+                    partes.append(texto_recomendacao_diagnostica(recomendacao))
+                except Exception as erro_recomendacao:
+                    partes.append(
+                        "RECOMENDAÇÃO ATUAL — MOTOR V5\n"
+                        f"Não foi possível recalcular a recomendação: {erro_recomendacao}"
+                    )
+            self.texto.setPlainText("\n\n".join(partes))
+        except Exception as erro:
+            self.texto.setPlainText(f"Falha na auditoria do ciclo de estudo:\n{erro}")
 
     def otimizar(self):
         try:

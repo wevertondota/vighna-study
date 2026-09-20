@@ -306,6 +306,7 @@ class JanelaModoFoco(QDialog):
         self.expiracao_aberta = False
         self.meta_questoes_preparada = 0
         self.origem_preparacao = None
+        self.origem_sessao_preparacao = None
         self.plano_chave_preparacao = None
         self.abrir_questoes_ao_iniciar = False
         self.contexto_questoes_preparado = None
@@ -642,6 +643,7 @@ class JanelaModoFoco(QDialog):
         observacao=None,
         questoes_alvo=None,
         origem=None,
+        origem_sessao=None,
         plano_chave=None,
         abrir_questoes_ao_iniciar=None,
     ):
@@ -720,6 +722,7 @@ class JanelaModoFoco(QDialog):
         except Exception:
             self.meta_questoes_preparada = 0
         self.origem_preparacao = str(origem or "").strip() or None
+        self.origem_sessao_preparacao = str(origem_sessao or "").strip().lower() or None
         self.plano_chave_preparacao = str(plano_chave or "").strip() or None
         if abrir_questoes_ao_iniciar is None:
             self.abrir_questoes_ao_iniciar = bool(
@@ -747,6 +750,7 @@ class JanelaModoFoco(QDialog):
                 "quantidade": int(self.meta_questoes_preparada),
                 "atividade": self.atividade.currentText() or "Questões",
                 "origem": self.origem_preparacao,
+                "origem_sessao": self.origem_sessao_preparacao,
                 "plano_chave": self.plano_chave_preparacao,
             }
             self.aviso_bateria_automatica.setText(
@@ -877,6 +881,7 @@ class JanelaModoFoco(QDialog):
                     "quantidade": int(self.meta_questoes_preparada),
                     "atividade": self.atividade.currentText() or "Questões",
                     "origem": self.origem_preparacao,
+                    "origem_sessao": self.origem_sessao_preparacao,
                     "plano_chave": self.plano_chave_preparacao,
                 }
             elif self.contexto_questoes_preparado:
@@ -1151,6 +1156,7 @@ class JanelaModoFoco(QDialog):
                 "observacao": observacao,
                 "meta_questoes": int(self.meta_questoes_preparada or 0),
                 "origem": self.origem_preparacao,
+                "origem_sessao": self.origem_sessao_preparacao,
                 "plano_chave": self.plano_chave_preparacao,
                 "resultado_questoes": resultado_questoes,
             }
@@ -1162,6 +1168,7 @@ class JanelaModoFoco(QDialog):
         self.expiracao_aberta = False
         self.meta_questoes_preparada = 0
         self.origem_preparacao = None
+        self.origem_sessao_preparacao = None
         self.plano_chave_preparacao = None
         self.abrir_questoes_ao_iniciar = False
         self.contexto_questoes_preparado = None

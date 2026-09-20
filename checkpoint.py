@@ -118,6 +118,8 @@ FONTES_NUCLEO_ATUAL = {
     "importador_pdf.py",
     "inteligencia.py",
     "diagnostico.py",
+    "auditoria_ciclo_estudo.py",
+    "ciclo_estudo.py",
     "navegacao.py",
     "jornada.py",
     "evolucao.py",
