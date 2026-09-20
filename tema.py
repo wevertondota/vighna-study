@@ -16462,6 +16462,304 @@ def stylesheet_futurista():
         color: #87a6c2;
     }
 
+    /* Resolver questões — futurista
+       Evita faixas escuras internas herdadas do background genérico de QWidget
+       e harmoniza a estrutura dos cards de enunciado/alternativas. */
+    QFrame#questionSolverStatementCard,
+    QFrame#questionSolverAlternative {
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+            stop:0 #0f1f31,
+            stop:0.58 #0b1828,
+            stop:1 #091523);
+        border: 1px solid #345a7d;
+        border-radius: 10px;
+    }
+    QFrame#questionSolverAlternative[answerState="correta"] {
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+            stop:0 #123126,
+            stop:1 #0d241c);
+        border-color: #3ecf8e;
+    }
+    QFrame#questionSolverAlternative[answerState="errada"] {
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+            stop:0 #3a1820,
+            stop:1 #2a1017);
+        border-color: #ff6677;
+    }
+    QLabel#questionSolverStatement,
+    QLabel#questionSolverAlternativeText,
+    QLabel#questionSolverMeta,
+    QRadioButton#questionSolverRadio,
+    QToolButton#questionSolverEliminateButton,
+    QCheckBox#questionSessionDoubt,
+    QCheckBox#questionSessionAnalysisFlag {
+        background: transparent;
+    }
+    QLabel#questionSolverStatement {
+        color: #eef9ff;
+    }
+    QLabel#questionSolverAlternativeText {
+        color: #e6f2fb;
+    }
+    QLabel#questionSolverAlternativeText[eliminated="true"] {
+        color: #7f9ab0;
+    }
+    QRadioButton#questionSolverRadio {
+        color: #d9ecff;
+        font-weight: 800;
+    }
+    QToolButton#questionSolverEliminateButton {
+        color: #7f9ab0;
+    }
+    QToolButton#questionSolverEliminateButton:hover {
+        background-color: rgba(124, 176, 221, 0.14);
+        color: #dcefff;
+        border-radius: 6px;
+    }
+    QToolButton#questionSolverEliminateButton:checked {
+        background-color: rgba(124, 176, 221, 0.20);
+        color: #eef9ff;
+        border-radius: 6px;
+    }
+
+    /* Refinos globais — Futurista
+       Camada sutil para os controles de uso geral do programa. */
+    QPushButton {
+        background-color: #11253a;
+        color: #d8eeff;
+        border: 1px solid #386688;
+        border-radius: 9px;
+        padding: 6px 12px;
+    }
+    QPushButton:hover {
+        background-color: #17314b;
+        border-color: #58a6d3;
+        color: #f4fbff;
+    }
+    QPushButton:pressed {
+        background-color: #0f2235;
+        border-color: #4b88b0;
+    }
+    QPushButton:disabled {
+        background-color: #0d1827;
+        color: #638097;
+        border-color: #28465d;
+    }
+
+    QToolButton {
+        background-color: transparent;
+        color: #bddcff;
+        border: 1px solid transparent;
+        border-radius: 7px;
+        padding: 4px 8px;
+    }
+    QToolButton:hover {
+        background-color: rgba(108, 168, 214, 0.10);
+        border-color: #376688;
+        color: #edf9ff;
+    }
+
+    QLineEdit,
+    QTextEdit,
+    QPlainTextEdit,
+    QAbstractSpinBox,
+    QComboBox {
+        background-color: #0d1d2d;
+        color: #e7f5ff;
+        border: 1px solid #355f82;
+        border-radius: 9px;
+        padding: 6px 10px;
+        selection-background-color: #285b8d;
+        selection-color: #ffffff;
+    }
+    QLineEdit:hover,
+    QTextEdit:hover,
+    QPlainTextEdit:hover,
+    QAbstractSpinBox:hover,
+    QComboBox:hover {
+        border-color: #4f8ebd;
+    }
+    QLineEdit:focus,
+    QTextEdit:focus,
+    QPlainTextEdit:focus,
+    QAbstractSpinBox:focus,
+    QComboBox:focus {
+        border: 1px solid #70c6e8;
+        background-color: #102436;
+    }
+    QLineEdit[readOnly="true"],
+    QTextEdit[readOnly="true"],
+    QPlainTextEdit[readOnly="true"] {
+        background-color: #0b1724;
+        color: #9cb4c8;
+    }
+    QComboBox QAbstractItemView {
+        background-color: #0d1d2d;
+        color: #e7f5ff;
+        border: 1px solid #3a688c;
+        selection-background-color: #1d466d;
+        selection-color: #ffffff;
+        outline: none;
+    }
+
+    QListWidget,
+    QTreeWidget,
+    QTableWidget,
+    QTableView {
+        background-color: #0c1a29;
+        alternate-background-color: #102032;
+        color: #e4f3ff;
+        border: 1px solid #315a7a;
+        border-radius: 10px;
+        gridline-color: #264760;
+        selection-background-color: #1d4f79;
+        selection-color: #ffffff;
+    }
+    QHeaderView::section {
+        background-color: #102235;
+        color: #cfe9ff;
+        border: 1px solid #315a7a;
+        padding: 6px 8px;
+        font-weight: 800;
+    }
+
+    QTabWidget::pane {
+        border: 1px solid #315a7a;
+        background-color: #0c1a29;
+        border-radius: 10px;
+        top: -1px;
+    }
+    QTabBar::tab {
+        background-color: #0f2235;
+        color: #a9cae2;
+        border: 1px solid #315a7a;
+        border-bottom: none;
+        border-top-left-radius: 9px;
+        border-top-right-radius: 9px;
+        padding: 7px 12px;
+        margin-right: 3px;
+        font-weight: 700;
+    }
+    QTabBar::tab:selected {
+        background-color: #17344e;
+        color: #f1fbff;
+        border-color: #5faed8;
+    }
+    QTabBar::tab:hover:!selected {
+        background-color: #13304a;
+        color: #dff4ff;
+    }
+
+    QGroupBox {
+        border: 1px solid #315a7a;
+        border-radius: 10px;
+        margin-top: 12px;
+        padding-top: 10px;
+        color: #e4f3ff;
+        background-color: rgba(12, 26, 41, 0.35);
+    }
+    QGroupBox::title {
+        subcontrol-origin: margin;
+        left: 10px;
+        padding: 0 5px;
+        color: #9fd6f5;
+        font-weight: 800;
+    }
+
+    QCheckBox,
+    QRadioButton {
+        color: #d9ecff;
+        spacing: 8px;
+    }
+    QCheckBox::indicator,
+    QRadioButton::indicator {
+        width: 16px;
+        height: 16px;
+    }
+    QCheckBox::indicator {
+        background-color: #0d1d2d;
+        border: 1px solid #5a8bb1;
+        border-radius: 4px;
+    }
+    QRadioButton::indicator {
+        background-color: #0d1d2d;
+        border: 1px solid #5a8bb1;
+        border-radius: 8px;
+    }
+    QCheckBox::indicator:checked,
+    QRadioButton::indicator:checked {
+        background-color: #2c6fa0;
+        border-color: #7fd5ef;
+    }
+
+    QProgressBar {
+        background-color: #102235;
+        color: #eaf7ff;
+        border: 1px solid #315a7a;
+        border-radius: 6px;
+        text-align: center;
+    }
+    QProgressBar::chunk {
+        background-color: #4aa5d3;
+        border-radius: 5px;
+    }
+
+    QMenu {
+        background-color: #0d1d2d;
+        color: #e7f5ff;
+        border: 1px solid #376486;
+    }
+    QMenu::item {
+        padding: 6px 22px 6px 16px;
+        background-color: transparent;
+    }
+    QMenu::item:selected {
+        background-color: #17324b;
+        color: #ffffff;
+    }
+    QToolTip {
+        background-color: #102235;
+        color: #eef9ff;
+        border: 1px solid #4d88b4;
+        padding: 5px 7px;
+    }
+
+    QScrollBar:vertical {
+        background-color: #08131f;
+        width: 12px;
+        margin: 2px;
+        border-radius: 6px;
+    }
+    QScrollBar::handle:vertical {
+        background-color: #274761;
+        min-height: 28px;
+        border-radius: 6px;
+    }
+    QScrollBar::handle:vertical:hover {
+        background-color: #35658b;
+    }
+    QScrollBar:horizontal {
+        background-color: #08131f;
+        height: 12px;
+        margin: 2px;
+        border-radius: 6px;
+    }
+    QScrollBar::handle:horizontal {
+        background-color: #274761;
+        min-width: 28px;
+        border-radius: 6px;
+    }
+    QScrollBar::handle:horizontal:hover {
+        background-color: #35658b;
+    }
+    QScrollBar::add-line,
+    QScrollBar::sub-line,
+    QScrollBar::add-page,
+    QScrollBar::sub-page {
+        background: none;
+        border: none;
+    }
+
     QFrame#dashboardCenterBar,
     QFrame#contextBar,
     QFrame#syllabusProgressPanel,

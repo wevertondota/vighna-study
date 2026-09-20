@@ -2,10 +2,21 @@ import re
 import unicodedata
 from pathlib import Path
 
-try:
-    from pypdf import PdfReader
-except Exception:
-    PdfReader = None
+PdfReader = None
+_PDF_READER_CARREGADO = False
+
+
+def _obter_pdf_reader():
+    """Carrega pypdf apenas quando a importação de PDF for realmente usada."""
+    global PdfReader, _PDF_READER_CARREGADO
+    if not _PDF_READER_CARREGADO:
+        _PDF_READER_CARREGADO = True
+        try:
+            from pypdf import PdfReader as _PdfReader
+            PdfReader = _PdfReader
+        except Exception:
+            PdfReader = None
+    return PdfReader
 
 
 PADRAO_QUESTAO = re.compile(
@@ -99,7 +110,7 @@ STOPWORDS_TOPICO = {
 
 
 def dependencia_pdf_disponivel():
-    return PdfReader is not None
+    return _obter_pdf_reader() is not None
 
 
 def normalizar_texto_pdf(texto):
@@ -130,7 +141,8 @@ def extrair_texto_pdf_questoes(
     pagina_inicial=None,
     pagina_final=None
 ):
-    if PdfReader is None:
+    leitor_pdf = _obter_pdf_reader()
+    if leitor_pdf is None:
         raise RuntimeError(
             "A biblioteca pypdf não está instalada. "
             "Execute: python -m pip install pypdf"
@@ -141,7 +153,7 @@ def extrair_texto_pdf_questoes(
     if not caminho.exists():
         raise FileNotFoundError(caminho)
 
-    reader = PdfReader(str(caminho))
+    reader = leitor_pdf(str(caminho))
 
     if reader.is_encrypted:
         try:

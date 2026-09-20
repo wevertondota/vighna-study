@@ -98,17 +98,13 @@ from importador_pdf import (
 
 from importador_txt import ler_arquivo_txt_questoes
 
-from jogos import JanelaPausaDesafios
-from foco import JanelaModoFoco
 from inteligencia import (
     CacheAnalitico, MotorRecomendacaoV4, MotorRecomendacaoV5,
     PESOS_PADRAO_V5, montar_preparacao_foco
 )
 from estatisticas_lazy import EstadoEstatisticasLazy
 from relatorios_lazy import EstadoRelatoriosLazy
-from diagnostico import JanelaDiagnosticoVighna
 from ciclo_estudo import integrar_sessao_questoes_com_revisoes as integrar_sessao_questoes_com_revisoes_core
-from navegacao import JanelaBuscaGlobal
 from versao import VIGHNA_BUILD, VIGHNA_VERSION
 from evolucao import obter_evolucao_historica
 from laboratorio import (
@@ -27837,6 +27833,7 @@ class JanelaConfiguracoes(QDialog):
         janela.exec()
 
     def abrir_diagnostico(self):
+        from diagnostico import JanelaDiagnosticoVighna
         JanelaDiagnosticoVighna(self).exec()
 
     def atualizar_status_checkpoint(self):
@@ -30669,17 +30666,10 @@ class SistemaEstudos(QMainWindow):
             )
         )
 
-        aplicar_tema(
-            QApplication.instance(),
-            self.tema_atual
-        )
-
-        # Backup automático ao abrir o programa.
-        try:
-            fazer_backup("abertura")
-        except Exception:
-            # O programa continua funcionando mesmo se o backup falhar.
-            pass
+        # O stylesheet global é aplicado somente depois que a primeira tela
+        # estiver montada. Criar centenas de widgets sob um QSS grande faz o
+        # Qt recalcular estilo repetidamente e aumenta perceptivelmente o tempo
+        # de abertura, sobretudo no executável Windows.
 
         self.disciplina_atual = None
 
@@ -30694,70 +30684,100 @@ class SistemaEstudos(QMainWindow):
 
         self.telas = QStackedWidget()
 
-        self.tela_inicial = (
-            self.criar_tela_inicial()
-        )
+        # Startup enxuto: somente o Dashboard é construído antes da primeira
+        # exibição. As telas secundárias são criadas no primeiro acesso e então
+        # permanecem vivas no QStackedWidget pelo restante da execução.
+        self.tela_inicial = self.criar_tela_inicial()
+        self.telas.addWidget(self.tela_inicial)
 
-        self.tela_disciplina = (
-            self.criar_tela_disciplina()
-        )
+        self.setCentralWidget(self.telas)
 
-        self.tela_sessao_estudo = (
-            self.criar_tela_sessao_estudo()
-        )
-
-        self.tela_resumo_dia = (
-            self.criar_tela_resumo_dia()
-        )
-
-        self.tela_calendario = (
-            self.criar_tela_calendario()
-        )
-
-        self.tela_questoes = (
-            self.criar_tela_questoes()
-        )
-
-        self.tela_estatisticas = (
-            self.criar_tela_estatisticas()
-        )
-
-        self.tela_relatorios = (
-            self.criar_tela_relatorios()
-        )
-
-        self.telas.addWidget(
-            self.tela_inicial
-        )
-        self.telas.addWidget(
-            self.tela_disciplina
-        )
-        self.telas.addWidget(
-            self.tela_sessao_estudo
-        )
-        self.telas.addWidget(
-            self.tela_resumo_dia
-        )
-        self.telas.addWidget(
-            self.tela_calendario
-        )
-        self.telas.addWidget(
-            self.tela_questoes
-        )
-        self.telas.addWidget(
-            self.tela_estatisticas
-        )
-        self.telas.addWidget(
-            self.tela_relatorios
-        )
-
-        self.setCentralWidget(
-            self.telas
+        # Aplicar o tema uma única vez sobre a árvore inicial pronta é mais
+        # barato do que manter o QSS ativo enquanto milhares de widgets das
+        # telas secundárias ainda estão sendo construídos. Telas criadas depois
+        # herdam automaticamente o stylesheet da aplicação.
+        aplicar_tema(
+            QApplication.instance(),
+            self.tema_atual
         )
 
         self.configurar_atalhos_globais()
         self.restaurar_estado_sessao()
-        self.atualizar_dashboard()
+
+        # O Dashboard aparece antes das consultas analíticas. O refresh roda no
+        # event loop logo após o primeiro repaint, eliminando a espera com a
+        # janela ainda invisível.
+        self._agendar_atualizacao_dashboard(forcar=True)
+
+        # Backup de abertura continua existindo, mas não participa mais do
+        # caminho crítico do primeiro frame.
+        self._agendar_backup_abertura()
+
+    def _garantir_tela_secundaria(self, atributo, construtor):
+        """Cria uma tela pesada somente no primeiro acesso."""
+        tela = getattr(self, atributo, None)
+        if tela is not None:
+            return tela
+
+        tela = construtor()
+        setattr(self, atributo, tela)
+        self.telas.addWidget(tela)
+        return tela
+
+    def _garantir_tela_disciplina(self):
+        return self._garantir_tela_secundaria(
+            "tela_disciplina", self.criar_tela_disciplina
+        )
+
+    def _garantir_tela_sessao_estudo(self):
+        return self._garantir_tela_secundaria(
+            "tela_sessao_estudo", self.criar_tela_sessao_estudo
+        )
+
+    def _garantir_tela_resumo_dia(self):
+        return self._garantir_tela_secundaria(
+            "tela_resumo_dia", self.criar_tela_resumo_dia
+        )
+
+    def _garantir_tela_calendario(self):
+        return self._garantir_tela_secundaria(
+            "tela_calendario", self.criar_tela_calendario
+        )
+
+    def _garantir_tela_questoes(self):
+        return self._garantir_tela_secundaria(
+            "tela_questoes", self.criar_tela_questoes
+        )
+
+    def _garantir_tela_estatisticas(self):
+        return self._garantir_tela_secundaria(
+            "tela_estatisticas", self.criar_tela_estatisticas
+        )
+
+    def _garantir_tela_relatorios(self):
+        return self._garantir_tela_secundaria(
+            "tela_relatorios", self.criar_tela_relatorios
+        )
+
+    def _agendar_backup_abertura(self):
+        """Executa o backup de abertura fora do caminho crítico da interface."""
+        def iniciar():
+            import threading
+
+            def executar():
+                try:
+                    fazer_backup("abertura")
+                except Exception:
+                    # O programa continua funcionando mesmo se o backup falhar.
+                    pass
+
+            threading.Thread(
+                target=executar,
+                name="VighnaBackupAbertura",
+                daemon=True,
+            ).start()
+
+        QTimer.singleShot(700, iniciar)
 
     def _marcar_dashboard_sujo(self):
         self._dashboard_sujo = True
@@ -31229,6 +31249,7 @@ class SistemaEstudos(QMainWindow):
         )
 
     def abrir_diagnostico_vighna(self):
+        from diagnostico import JanelaDiagnosticoVighna
         JanelaDiagnosticoVighna(self).exec()
 
     def obter_comandos_busca_global(self):
@@ -31452,6 +31473,7 @@ class SistemaEstudos(QMainWindow):
             self.abrir_diagnostico_vighna()
 
     def abrir_busca_global(self):
+        from navegacao import JanelaBuscaGlobal
         concurso = obter_concurso_ativo()
         conteudos = listar_conteudos_concurso(concurso[0])
         topicos = []
@@ -39522,6 +39544,7 @@ class SistemaEstudos(QMainWindow):
             self._janela_modo_foco = None
 
     def abrir_modo_foco(self, preparacao=None):
+        from foco import JanelaModoFoco
         # Modo Foco é uma janela de apoio, não um diálogo modal.
         # Mantemos uma referência para o cronômetro continuar ativo enquanto
         # o usuário navega normalmente pelo restante do VighnaStudy.
@@ -39713,6 +39736,7 @@ class SistemaEstudos(QMainWindow):
             return
 
     def abrir_pausa_desafios(self):
+        from jogos import JanelaPausaDesafios
         janela = JanelaPausaDesafios(self)
         janela.exec()
 
@@ -39865,6 +39889,7 @@ class SistemaEstudos(QMainWindow):
         return None
 
     def abrir_questoes(self):
+        self._garantir_tela_questoes()
         # Navegação primeiro; consultas e montagem da grade ficam para o
         # próximo ciclo do event loop. Assim o clique responde imediatamente.
         refiltrar = False
@@ -42881,6 +42906,7 @@ class SistemaEstudos(QMainWindow):
         return tela
 
     def abrir_resumo_dia(self):
+        self._garantir_tela_resumo_dia()
         self.atualizar_resumo_dia()
 
         self.telas.setCurrentWidget(
@@ -44339,6 +44365,7 @@ class SistemaEstudos(QMainWindow):
         return "Concluir as pendências disponíveis"
 
     def abrir_sessao_estudo(self):
+        self._garantir_tela_sessao_estudo()
         if (
             getattr(
                 self,
@@ -45800,6 +45827,7 @@ class SistemaEstudos(QMainWindow):
         return tela
 
     def abrir_calendario(self):
+        self._garantir_tela_calendario()
         self.atualizar_calendario()
 
         self.telas.setCurrentWidget(
@@ -47820,6 +47848,7 @@ class SistemaEstudos(QMainWindow):
         )
 
     def abrir_relatorios(self):
+        self._garantir_tela_relatorios()
         self.alterar_periodo_relatorio()
 
         # A navegação vem antes das consultas. O Qt consegue repintar a página
@@ -56958,6 +56987,7 @@ class SistemaEstudos(QMainWindow):
                 return
 
     def abrir_estatisticas(self, aba=None):
+        self._garantir_tela_estatisticas()
         # A navegação vem primeiro. O cálculo da aba é postergado para o próximo
         # ciclo do event loop, permitindo que a tela responda visualmente ao clique.
         if aba:
@@ -57969,6 +57999,7 @@ class SistemaEstudos(QMainWindow):
         self,
         nome_disciplina
     ):
+        self._garantir_tela_disciplina()
         self.disciplina_atual = (
             nome_disciplina
         )
