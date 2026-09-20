@@ -13,6 +13,196 @@ TEMAS_VALIDOS = {
 # A paleta fica centralizada aqui para evitar cores espalhadas pelo main.py.
 # Os estilos do Dashboard usam seletores por objectName, portanto esta camada
 # não altera indiscriminadamente outros QWidget, diálogos, tabelas ou telas.
+
+# ============================================================
+# Dashboard — Recomendação do algoritmo + resumo compacto
+# ============================================================
+ESTILO_INTELIGENCIA_RESUMO_CLARO = r"""
+QWidget#dashboardRoot QFrame#dashboardInsightSummary {
+    background-color: #FFFFFF;
+    border: 1px solid #DCE4ED;
+    border-radius: 11px;
+}
+QWidget#dashboardRoot QFrame#algorithmRecommendationBody {
+    background-color: #F8FBFF;
+    border: 1px solid #E1EAF4;
+    border-radius: 10px;
+}
+QWidget#dashboardRoot QLabel#algorithmDashboardBadge {
+    color: #2F6EAA;
+    background-color: #EDF5FF;
+    border: 1px solid #CFE2F6;
+    border-radius: 8px;
+    padding: 2px 7px;
+    font-size: 8pt;
+    font-weight: 800;
+}
+QWidget#dashboardRoot QLabel#algorithmDashboardSignature {
+    color: #6484A4;
+    font-size: 8.5pt;
+    font-weight: 700;
+}
+QWidget#dashboardRoot QLabel#algorithmRecommendationTitle {
+    color: #17263A;
+    font-size: 13pt;
+    font-weight: 800;
+}
+QWidget#dashboardRoot QLabel#algorithmRecommendationDetail {
+    color: #6C7C90;
+    font-size: 9pt;
+}
+QWidget#dashboardRoot QLabel#algorithmInsightChip {
+    border-radius: 7px;
+    padding: 5px 8px;
+    font-size: 8.5pt;
+    font-weight: 700;
+}
+QWidget#dashboardRoot QLabel#algorithmInsightChip[chipRole="review"] {
+    color: #B93846;
+    background-color: #FFF1F3;
+    border: 1px solid #F5D3D8;
+}
+QWidget#dashboardRoot QLabel#algorithmInsightChip[chipRole="attention"] {
+    color: #9A6614;
+    background-color: #FFF8E8;
+    border: 1px solid #F0DEB4;
+}
+QWidget#dashboardRoot QLabel#algorithmInsightChip[chipRole="focus"] {
+    color: #28679E;
+    background-color: #EEF6FF;
+    border: 1px solid #D2E6FA;
+}
+QWidget#dashboardRoot QLabel#dashboardInsightSummaryIcon {
+    color: #377DB4;
+    background-color: #EFF7FE;
+    border: 1px solid #D4E8F7;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 900;
+}
+QWidget#dashboardRoot QLabel#dashboardInsightSummaryTitle {
+    color: #18263A;
+    font-size: 11pt;
+    font-weight: 800;
+}
+QWidget#dashboardRoot QLabel#dashboardInsightSummaryDate {
+    color: #7C899B;
+    font-size: 8.5pt;
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummaryRow {
+    background-color: #FAFCFE;
+    border: 1px solid #E3EAF2;
+    border-radius: 8px;
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummaryRow[summaryRole="pending"] {
+    background-color: #FFF8F9;
+    border-color: #F2DADD;
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummaryRow[summaryRole="streak"] {
+    background-color: #FFFBF2;
+    border-color: #F1E5C9;
+}
+QWidget#dashboardRoot QLabel#dashboardInsightSummaryRowTitle {
+    color: #24344A;
+    font-size: 9pt;
+    font-weight: 800;
+}
+QWidget#dashboardRoot QLabel#dashboardInsightSummaryRowDetail {
+    color: #8490A1;
+    font-size: 8pt;
+}
+QWidget#dashboardRoot QLabel#dashboardInsightSummaryRowValue {
+    color: #183A6B;
+    font-size: 10pt;
+    font-weight: 800;
+}
+QWidget#dashboardRoot QProgressBar#dashboardInsightSummaryProgress {
+    background-color: #E8EDF3;
+    border: none;
+    border-radius: 3px;
+}
+QWidget#dashboardRoot QProgressBar#dashboardInsightSummaryProgress::chunk {
+    background-color: #2F73C9;
+    border-radius: 3px;
+}
+"""
+
+ESTILO_INTELIGENCIA_RESUMO_ESCURO = r"""
+QWidget#dashboardRoot QFrame#dashboardInsightSummary,
+QWidget#dashboardRoot QFrame#algorithmRecommendationBody {
+    background-color: #162333;
+    border: 1px solid #354B62;
+    border-radius: 11px;
+}
+QWidget#dashboardRoot QLabel#algorithmDashboardBadge,
+QWidget#dashboardRoot QLabel#algorithmInsightChip,
+QWidget#dashboardRoot QFrame#dashboardInsightSummaryRow {
+    background-color: #1B2C3E;
+    color: #CFE0EF;
+    border: 1px solid #3A536B;
+    border-radius: 8px;
+}
+QWidget#dashboardRoot QLabel#algorithmRecommendationTitle,
+QWidget#dashboardRoot QLabel#dashboardInsightSummaryTitle,
+QWidget#dashboardRoot QLabel#dashboardInsightSummaryRowTitle,
+QWidget#dashboardRoot QLabel#dashboardInsightSummaryRowValue {
+    color: #F1F6FB;
+}
+QWidget#dashboardRoot QLabel#algorithmRecommendationDetail,
+QWidget#dashboardRoot QLabel#algorithmDashboardSignature,
+QWidget#dashboardRoot QLabel#dashboardInsightSummaryDate,
+QWidget#dashboardRoot QLabel#dashboardInsightSummaryRowDetail {
+    color: #9FB1C3;
+}
+QWidget#dashboardRoot QProgressBar#dashboardInsightSummaryProgress {
+    background-color: #263A4D;
+    border: none;
+    border-radius: 3px;
+}
+QWidget#dashboardRoot QProgressBar#dashboardInsightSummaryProgress::chunk {
+    background-color: #4C7FD1;
+    border-radius: 3px;
+}
+"""
+
+ESTILO_INTELIGENCIA_RESUMO_FUTURISTA = r"""
+QWidget#dashboardRoot QFrame#dashboardInsightSummary,
+QWidget#dashboardRoot QFrame#algorithmRecommendationBody {
+    background-color: #10283C;
+    border: 1px solid #3F7599;
+    border-radius: 11px;
+}
+QWidget#dashboardRoot QLabel#algorithmDashboardBadge,
+QWidget#dashboardRoot QLabel#algorithmInsightChip,
+QWidget#dashboardRoot QFrame#dashboardInsightSummaryRow {
+    background-color: #123149;
+    color: #D9F3FF;
+    border: 1px solid #447DA1;
+    border-radius: 8px;
+}
+QWidget#dashboardRoot QLabel#algorithmRecommendationTitle,
+QWidget#dashboardRoot QLabel#dashboardInsightSummaryTitle,
+QWidget#dashboardRoot QLabel#dashboardInsightSummaryRowTitle,
+QWidget#dashboardRoot QLabel#dashboardInsightSummaryRowValue {
+    color: #F2FCFF;
+}
+QWidget#dashboardRoot QLabel#algorithmRecommendationDetail,
+QWidget#dashboardRoot QLabel#algorithmDashboardSignature,
+QWidget#dashboardRoot QLabel#dashboardInsightSummaryDate,
+QWidget#dashboardRoot QLabel#dashboardInsightSummaryRowDetail {
+    color: #9BCBDD;
+}
+QWidget#dashboardRoot QProgressBar#dashboardInsightSummaryProgress {
+    background-color: #17384F;
+    border: none;
+    border-radius: 3px;
+}
+QWidget#dashboardRoot QProgressBar#dashboardInsightSummaryProgress::chunk {
+    background-color: #5ED8FF;
+    border-radius: 3px;
+}
+"""
+
 PALETA_DASHBOARD_CLARO = {
     "fundo": "#EBF2FA",
     "superficie": "#FFFFFF",
@@ -28,6 +218,142 @@ PALETA_DASHBOARD_CLARO = {
     "hover_claro": "#EDF2F7",
     "trilho": "#E2E8F0",
 }
+
+
+# Lista de tópicos da disciplina.
+#
+# Esta tabela possui regras próprias porque precisa comunicar três estados sem
+# misturá-los: linha normal/ativa, conteúdo desligado e seleção atual. A cor de
+# fundo fica reservada à zebragem e à seleção; conteúdo desligado é sinalizado
+# principalmente pela tipografia esmaecida.
+ESTILO_TOPICOS_DISCIPLINA_CLARO = r"""
+QTableWidget#disciplineTopicsTable {
+    background-color: #ffffff;
+    alternate-background-color: #f8fbff;
+    color: #1f2937;
+    border: 1px solid #dbe3ed;
+    border-radius: 8px;
+    gridline-color: #e8edf4;
+    selection-background-color: #dbeafe;
+    selection-color: #111827;
+}
+QTableWidget#disciplineTopicsTable::item:selected {
+    background-color: #dbeafe;
+    color: #111827;
+}
+QTableWidget#disciplineTopicsTable QHeaderView::section {
+    background-color: #f8fafc;
+    color: #475569;
+    border: none;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #dbe3ed;
+}
+QWidget#disciplineTopicCell,
+QWidget#disciplineTopicCell QLabel#disciplineTopicCellLabel {
+    background: transparent;
+}
+QWidget#disciplineTopicCell QLabel#disciplineTopicCellLabel {
+    color: #1f2937;
+}
+QWidget#disciplineTopicCell[inactive="true"] QLabel#disciplineTopicCellLabel {
+    color: #64748b;
+}
+QWidget#disciplineTopicCell QToolButton#topicExpandButton {
+    background: transparent;
+    border: none;
+    color: #475569;
+    padding: 0px;
+}
+QWidget#disciplineTopicCell[inactive="true"] QToolButton#topicExpandButton {
+    color: #94a3b8;
+}
+"""
+
+ESTILO_TOPICOS_DISCIPLINA_ESCURO = r"""
+QTableWidget#disciplineTopicsTable {
+    background-color: #182235;
+    alternate-background-color: #1b2739;
+    color: #e5e7eb;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    gridline-color: #334155;
+    selection-background-color: #24496f;
+    selection-color: #ffffff;
+}
+QTableWidget#disciplineTopicsTable::item:selected {
+    background-color: #24496f;
+    color: #ffffff;
+}
+QTableWidget#disciplineTopicsTable QHeaderView::section {
+    background-color: #1f2937;
+    color: #cbd5e1;
+    border: none;
+    border-right: 1px solid #334155;
+    border-bottom: 1px solid #475569;
+}
+QWidget#disciplineTopicCell,
+QWidget#disciplineTopicCell QLabel#disciplineTopicCellLabel {
+    background: transparent;
+}
+QWidget#disciplineTopicCell QLabel#disciplineTopicCellLabel {
+    color: #e5e7eb;
+}
+QWidget#disciplineTopicCell[inactive="true"] QLabel#disciplineTopicCellLabel {
+    color: #94a3b8;
+}
+QWidget#disciplineTopicCell QToolButton#topicExpandButton {
+    background: transparent;
+    border: none;
+    color: #cbd5e1;
+    padding: 0px;
+}
+QWidget#disciplineTopicCell[inactive="true"] QToolButton#topicExpandButton {
+    color: #64748b;
+}
+"""
+
+ESTILO_TOPICOS_DISCIPLINA_FUTURISTA = r"""
+QTableWidget#disciplineTopicsTable {
+    background-color: #0a192b;
+    alternate-background-color: #0d2131;
+    color: #e7f3ff;
+    border: 1px solid #305474;
+    border-radius: 10px;
+    gridline-color: #20394f;
+    selection-background-color: #155073;
+    selection-color: #ffffff;
+}
+QTableWidget#disciplineTopicsTable::item:selected {
+    background-color: #155073;
+    color: #ffffff;
+}
+QTableWidget#disciplineTopicsTable QHeaderView::section {
+    background-color: #10243a;
+    color: #b7cede;
+    border: none;
+    border-right: 1px solid #284965;
+    border-bottom: 1px solid #346080;
+}
+QWidget#disciplineTopicCell,
+QWidget#disciplineTopicCell QLabel#disciplineTopicCellLabel {
+    background: transparent;
+}
+QWidget#disciplineTopicCell QLabel#disciplineTopicCellLabel {
+    color: #e7f3ff;
+}
+QWidget#disciplineTopicCell[inactive="true"] QLabel#disciplineTopicCellLabel {
+    color: #8fa8b8;
+}
+QWidget#disciplineTopicCell QToolButton#topicExpandButton {
+    background: transparent;
+    border: none;
+    color: #b7cede;
+    padding: 0px;
+}
+QWidget#disciplineTopicCell[inactive="true"] QToolButton#topicExpandButton {
+    color: #688395;
+}
+"""
 
 
 def normalizar_tema(tema):
@@ -9702,7 +10028,7 @@ QPushButton#sectionEditButton:hover {
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_CLARO + ESTILO_DASHBOARD_MODERNO_CLARO + ESTILO_FOCO_DASHBOARD_CLARO + ESTILO_ALGORITMO_DASHBOARD_CLARO + ESTILO_BUSCA_GLOBAL_CLARO + ESTILO_PALETA_HARMONICA_DASHBOARD_CLARO + ESTILO_DESIGN_SYSTEM_DASHBOARD_CLARO
+""" + ESTILO_JORNADA_CLARO + ESTILO_DASHBOARD_MODERNO_CLARO + ESTILO_FOCO_DASHBOARD_CLARO + ESTILO_ALGORITMO_DASHBOARD_CLARO + ESTILO_BUSCA_GLOBAL_CLARO + ESTILO_PALETA_HARMONICA_DASHBOARD_CLARO + ESTILO_DESIGN_SYSTEM_DASHBOARD_CLARO + ESTILO_INTELIGENCIA_RESUMO_CLARO + ESTILO_TOPICOS_DISCIPLINA_CLARO
 
 
 def stylesheet_escuro():
@@ -16095,7 +16421,7 @@ def stylesheet_escuro():
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_ESCURO + ESTILO_DASHBOARD_MODERNO_ESCURO + ESTILO_FOCO_DASHBOARD_ESCURO + ESTILO_ALGORITMO_DASHBOARD_ESCURO + ESTILO_BUSCA_GLOBAL_ESCURO
+""" + ESTILO_JORNADA_ESCURO + ESTILO_DASHBOARD_MODERNO_ESCURO + ESTILO_FOCO_DASHBOARD_ESCURO + ESTILO_ALGORITMO_DASHBOARD_ESCURO + ESTILO_BUSCA_GLOBAL_ESCURO + ESTILO_INTELIGENCIA_RESUMO_ESCURO + ESTILO_TOPICOS_DISCIPLINA_ESCURO
 
 
 
@@ -19175,7 +19501,7 @@ def stylesheet_futurista():
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_FUTURISTA + ESTILO_DASHBOARD_MODERNO_FUTURISTA + ESTILO_FOCO_DASHBOARD_FUTURISTA + ESTILO_ALGORITMO_DASHBOARD_FUTURISTA + ESTILO_BUSCA_GLOBAL_FUTURISTA
+""" + ESTILO_JORNADA_FUTURISTA + ESTILO_DASHBOARD_MODERNO_FUTURISTA + ESTILO_FOCO_DASHBOARD_FUTURISTA + ESTILO_ALGORITMO_DASHBOARD_FUTURISTA + ESTILO_BUSCA_GLOBAL_FUTURISTA + ESTILO_INTELIGENCIA_RESUMO_FUTURISTA + ESTILO_TOPICOS_DISCIPLINA_FUTURISTA
 
 def aplicar_tema(
     app,

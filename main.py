@@ -150,6 +150,9 @@ from banco import (
     obter_parte_direito_penal,
     adicionar_capitulo,
     renomear_capitulo,
+    excluir_capitulo,
+    contar_questoes_capitulo,
+    contar_questoes_topico,
     definir_capitulo_pausado,
     atualizar_dificuldade_capitulo,
     adicionar_topico,
@@ -442,6 +445,30 @@ def formatar_percentual(valor, casas=1):
         return "—"
 
     return f"{valor:.{casas}f}%".replace(".", ",")
+
+
+def formatar_nome_conteudo_tabela(valor):
+    """Converte nomes estruturais em uma linha apenas para exibição na tabela.
+
+    O nome salvo no banco permanece intacto. Isso evita que uma quebra de linha
+    entre, por exemplo, "TÍTULO I" e sua descrição faça o Qt aplicar reticências
+    cedo demais mesmo quando há largura horizontal disponível.
+    """
+    bruto = str(valor or "")
+    partes = []
+    for parte in re.split(r"[\r\n]+", bruto):
+        parte = re.sub(r"\s+", " ", parte).strip()
+        parte = parte.strip(" -–—")
+        if parte:
+            partes.append(parte)
+
+    if not partes:
+        return ""
+
+    if len(partes) > 1:
+        return " — ".join(partes)
+
+    return partes[0]
 
 
 def formatar_tempo_foco_resumido(segundos):
@@ -4371,9 +4398,19 @@ class JanelaTextoExtraidoPDF(QDialog):
 class JanelaCentralImportacaoQuestoes(QDialog):
     """Hub único de entrada para as formas de importação de questões."""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, topico_id_padrao=None):
         super().__init__(parent)
         self.origem_escolhida = None
+        self.topico_id_padrao = (
+            int(topico_id_padrao)
+            if topico_id_padrao is not None
+            else None
+        )
+        self.contexto_topico = (
+            obter_contexto_topico(self.topico_id_padrao)
+            if self.topico_id_padrao is not None
+            else None
+        )
         self.setWindowTitle("Central de importação")
         self.resize(940, 660)
         self.setMinimumSize(780, 600)
@@ -4391,6 +4428,24 @@ class JanelaCentralImportacaoQuestoes(QDialog):
         subtitulo.setWordWrap(True)
         layout.addWidget(titulo)
         layout.addWidget(subtitulo)
+
+        if self.contexto_topico:
+            destino = QFrame()
+            destino.setObjectName("pdfImportSummary")
+            destino_layout = QHBoxLayout(destino)
+            destino_layout.setContentsMargins(12, 8, 12, 8)
+            destino_layout.setSpacing(8)
+            destino_rotulo = QLabel("Destino inicial")
+            destino_rotulo.setObjectName("pdfImportMeta")
+            destino_valor = QLabel(
+                f"{self.contexto_topico.get('disciplina_nome', '')} › "
+                f"{self.contexto_topico.get('topico_nome', '')}"
+            )
+            destino_valor.setObjectName("sectionTitle")
+            destino_valor.setWordWrap(True)
+            destino_layout.addWidget(destino_rotulo)
+            destino_layout.addWidget(destino_valor, 1)
+            layout.addWidget(destino)
 
         fluxo = QFrame()
         fluxo.setObjectName("pdfImportSummary")
@@ -4659,8 +4714,13 @@ class JanelaImportarTextoQuestoes(QDialog):
 
     EXEMPLO_FORMATO = VPQ_1_1_PROMPT
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, topico_id_padrao=None):
         super().__init__(parent)
+        self.topico_id_padrao = (
+            int(topico_id_padrao)
+            if topico_id_padrao is not None
+            else None
+        )
         self.setWindowTitle("Importar questões por texto")
         self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
         self.resize(980, 720)
@@ -4865,6 +4925,7 @@ class JanelaImportarTextoQuestoes(QDialog):
             self,
             origem_tipo="texto",
             nome_origem="Texto colado",
+            topico_id_padrao=self.topico_id_padrao,
         )
         if revisao.exec() == QDialog.Accepted and revisao.importadas > 0:
             self.importadas = revisao.importadas
@@ -4880,6 +4941,7 @@ class JanelaImportarPDFQuestoes(QDialog):
         parent=None,
         origem_tipo="pdf",
         nome_origem=None,
+        topico_id_padrao=None,
     ):
         super().__init__(
             parent
@@ -4903,6 +4965,11 @@ class JanelaImportarPDFQuestoes(QDialog):
         self.nome_origem = (
             str(nome_origem or "").strip()
             or ("Texto colado" if self.eh_texto_colado else self.caminho_pdf.name)
+        )
+        self.topico_id_padrao_contexto = (
+            int(topico_id_padrao)
+            if topico_id_padrao is not None
+            else None
         )
         self.titulo_operacao = (
             "Importar texto"
@@ -4947,6 +5014,11 @@ class JanelaImportarPDFQuestoes(QDialog):
         self.vpq_capitulo_id = None
         self.concurso = (
             obter_concurso_ativo()
+        )
+        self.contexto_topico_importacao = (
+            obter_contexto_topico(self.topico_id_padrao_contexto)
+            if self.topico_id_padrao_contexto is not None
+            else None
         )
         self.topicos = []
         self.capitulos = []
@@ -5037,6 +5109,58 @@ class JanelaImportarPDFQuestoes(QDialog):
                             f"{capitulo['topico']}"
                         )
                         break
+
+        # Quando a importação nasce de dentro de um tópico, esse tópico vira
+        # o destino inicial da conferência. A classificação continua editável,
+        # mas o usuário não precisa localizar novamente o conteúdo que já
+        # estava aberto.
+        if self.contexto_topico_importacao:
+            contexto_disciplina_id = int(
+                self.contexto_topico_importacao["disciplina_id"]
+            )
+            contexto_topico_id = int(
+                self.contexto_topico_importacao["topico_id"]
+            )
+            contexto_disciplina = str(
+                self.contexto_topico_importacao["disciplina_nome"]
+            )
+            contexto_topico = str(
+                self.contexto_topico_importacao["topico_nome"]
+            )
+            self.importacao_ctb = eh_disciplina_ctb(contexto_disciplina_id)
+            if self.importacao_ctb:
+                self.topicos_importacao = [
+                    item
+                    for item in self.topicos
+                    if int(item["disciplina_id"]) == contexto_disciplina_id
+                ]
+            else:
+                self.topicos_importacao = list(self.topicos)
+            self.vpq_topico_rotulo = (
+                f"{contexto_disciplina} › {contexto_topico}"
+            )
+            # Um capítulo do VPQ só é aproveitado automaticamente se ele
+            # pertencer ao mesmo título/tópico aberto.
+            if self.vpq_capitulo_id is not None:
+                capitulo_contexto = next(
+                    (
+                        item
+                        for item in self.capitulos
+                        if int(item["capitulo_id"]) == int(self.vpq_capitulo_id)
+                    ),
+                    None,
+                )
+                if (
+                    capitulo_contexto is None
+                    or int(capitulo_contexto["topico_id"]) != contexto_topico_id
+                ):
+                    self.vpq_capitulo_id = None
+
+        self.topico_id_inicial_importacao = (
+            int(self.contexto_topico_importacao["topico_id"])
+            if self.contexto_topico_importacao
+            else self.vpq_topico_id
+        )
 
         self.setWindowTitle(
             (
@@ -5557,10 +5681,10 @@ class JanelaImportarPDFQuestoes(QDialog):
                 ]
             )
 
-        if self.vpq_topico_id is not None:
+        if self.topico_id_inicial_importacao is not None:
             indice_vpq = (
                 self.pdf_topico_padrao.findData(
-                    self.vpq_topico_id
+                    self.topico_id_inicial_importacao
                 )
             )
 
@@ -6128,24 +6252,29 @@ class JanelaImportarPDFQuestoes(QDialog):
                 ]
             )
 
-        if self.vpq_topico_id is not None:
+        if self.topico_id_inicial_importacao is not None:
             indice = self.indice_topico_combo(
                 combo,
-                self.vpq_topico_id
+                self.topico_id_inicial_importacao
             )
 
             if indice >= 0:
                 combo.setCurrentIndex(
                     indice
                 )
-                combo.setToolTip(
-                    (
-                        "Capítulo identificado pelo cabeçalho do arquivo: "
-                        if self.importacao_ctb
-                        else "Título identificado pelo cabeçalho do arquivo: "
+                if self.contexto_topico_importacao:
+                    combo.setToolTip(
+                        "Destino inicial definido pelo tópico aberto."
                     )
-                    + f"{self.vpq_topico_rotulo}."
-                )
+                else:
+                    combo.setToolTip(
+                        (
+                            "Capítulo identificado pelo cabeçalho do arquivo: "
+                            if self.importacao_ctb
+                            else "Título identificado pelo cabeçalho do arquivo: "
+                        )
+                        + f"{self.vpq_topico_rotulo}."
+                    )
 
         else:
             sugestao = sugerir_topico_pdf(
@@ -6576,13 +6705,10 @@ class JanelaImportarPDFQuestoes(QDialog):
                     indice
                 )
             else:
-                if (
-                    self.vpq_detectado
-                    and self.vpq_topico_id is not None
-                ):
+                if self.topico_id_inicial_importacao is not None:
                     indice = self.indice_topico_combo(
                         combo,
-                        self.vpq_topico_id
+                        self.topico_id_inicial_importacao
                     )
                 else:
                     sugestao = sugerir_topico_pdf(
@@ -9048,8 +9174,13 @@ class JanelaGerenciarQuestoesTopico(QDialog):
         )
         self.disciplina_atual = ""
         self.topico_atual = ""
+        self.aberto_em_topico = topico_id_inicial is not None
 
-        self.setWindowTitle("Gerenciar e Editar questões")
+        self.setWindowTitle(
+            "Questões do tópico"
+            if self.aberto_em_topico
+            else "Gerenciar e Editar questões"
+        )
         self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
         self.resize(1180, 720)
         self.setMinimumSize(900, 560)
@@ -9061,10 +9192,18 @@ class JanelaGerenciarQuestoesTopico(QDialog):
         cabecalho = QHBoxLayout()
         textos = QVBoxLayout()
         textos.setSpacing(1)
-        titulo = QLabel("Gerenciar e Editar")
+        titulo = QLabel(
+            "Questões do tópico"
+            if self.aberto_em_topico
+            else "Gerenciar e Editar"
+        )
         titulo.setObjectName("pageTitle")
         subtitulo = QLabel(
-            "Selecione uma disciplina ou tópico à esquerda para visualizar, editar e administrar as questões correspondentes."
+            (
+                "Consulte todas as questões vinculadas ao tópico, inclusive as classificadas em seus capítulos, e adicione novas por importação ou cadastro manual."
+                if self.aberto_em_topico
+                else "Selecione uma disciplina ou tópico à esquerda para visualizar, editar e administrar as questões correspondentes."
+            )
         )
         subtitulo.setObjectName("pageSubtitle")
         subtitulo.setWordWrap(True)
@@ -9168,14 +9307,33 @@ class JanelaGerenciarQuestoesTopico(QDialog):
         self.status_filtro.addItems(["Todas", "Ativas", "Desativadas"])
         self.status_filtro.currentTextChanged.connect(self.preencher_tabela)
         filtros.addWidget(self.status_filtro)
+
+        self.capitulo_filtro = QComboBox()
+        self.capitulo_filtro.addItem("Todos os capítulos", None)
+        self.capitulo_filtro.setEnabled(False)
+        self.capitulo_filtro.setMinimumWidth(190)
+        self.capitulo_filtro.currentIndexChanged.connect(self.preencher_tabela)
+        filtros.addWidget(self.capitulo_filtro)
         dl.addLayout(filtros)
 
         acoes = QHBoxLayout()
         self.marcar_todas_questoes = QCheckBox("Selecionar todas")
         self.marcar_todas_questoes.stateChanged.connect(self.alternar_marcacao_todas_questoes)
         acoes.addWidget(self.marcar_todas_questoes)
-        self.botao_nova = QPushButton("+ Nova neste tópico")
-        self.botao_nova.setObjectName("questionsNewHeroButton")
+
+        self.botao_importar = QPushButton("+ Importar para este tópico")
+        self.botao_importar.setObjectName("questionsNewHeroButton")
+        self.botao_importar.setToolTip(
+            "Abrir a Central de importação já usando este tópico como destino inicial."
+        )
+        self.botao_importar.clicked.connect(self.importar_questoes_topico)
+        acoes.addWidget(self.botao_importar)
+
+        self.botao_nova = QPushButton("+ Nova manualmente")
+        self.botao_nova.setObjectName("studyManualButton")
+        self.botao_nova.setToolTip(
+            "Cadastrar uma nova questão manualmente já vinculada a este tópico."
+        )
         self.botao_nova.clicked.connect(self.nova_questao)
         acoes.addWidget(self.botao_nova)
         acoes.addStretch()
@@ -9210,9 +9368,9 @@ class JanelaGerenciarQuestoesTopico(QDialog):
 
         self.tabela = QTableWidget()
         self.tabela.setObjectName("questionsTable")
-        self.tabela.setColumnCount(8)
+        self.tabela.setColumnCount(9)
         self.tabela.setHorizontalHeaderLabels([
-            "", "#", "Questão", "Banca", "Ano", "Dificuldade", "Gabarito", "Status"
+            "", "#", "Questão", "Capítulo", "Banca", "Ano", "Dificuldade", "Gabarito", "Status"
         ])
         self.tabela.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tabela.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -9226,7 +9384,9 @@ class JanelaGerenciarQuestoesTopico(QDialog):
         h.setSectionResizeMode(0, QHeaderView.ResizeToContents)
         h.setSectionResizeMode(1, QHeaderView.ResizeToContents)
         h.setSectionResizeMode(2, QHeaderView.Stretch)
-        for c in range(3, 8):
+        h.setSectionResizeMode(3, QHeaderView.Interactive)
+        self.tabela.setColumnWidth(3, 220)
+        for c in range(4, 9):
             h.setSectionResizeMode(c, QHeaderView.ResizeToContents)
         dl.addWidget(self.tabela, 1)
         corpo.addWidget(direita, 1)
@@ -9265,8 +9425,8 @@ class JanelaGerenciarQuestoesTopico(QDialog):
                 "A coluna da esquerda agrupa o banco por disciplina e tópico. O botão Questões desativadas, no cabeçalho, abre a lista completa de itens desligados.\n\n"
                 "Ao selecionar um tópico, a tabela da direita mostra todas as questões "
                 "desse tópico, incluindo as desativadas quando o filtro estiver em Todas.\n\n"
-                "Você pode visualizar ou editar qualquer questão, cadastrar uma nova já "
-                "vinculada ao tópico selecionado e desativar/reativar sem perder o histórico.\n\n"
+                "Você pode visualizar ou editar qualquer questão, importar novas pelo fluxo PDF/TXT/texto/CSV, "
+                "cadastrar uma nova manualmente já vinculada ao tópico selecionado e desativar/reativar sem perder o histórico.\n\n"
                 "Um duplo clique em uma questão abre diretamente a edição."
             )
         )
@@ -9393,6 +9553,22 @@ class JanelaGerenciarQuestoesTopico(QDialog):
             if termo and pai_visivel:
                 pai.setExpanded(True)
 
+    def carregar_filtro_capitulos(self):
+        self.capitulo_filtro.blockSignals(True)
+        self.capitulo_filtro.clear()
+        self.capitulo_filtro.addItem("Todos os capítulos", None)
+
+        capitulos = []
+        if self.topico_id_atual is not None:
+            capitulos = listar_capitulos_topico(int(self.topico_id_atual))
+            for capitulo_id, nome, _ordem, _dificuldade, _pausado in capitulos:
+                self.capitulo_filtro.addItem(str(nome), int(capitulo_id))
+            if capitulos:
+                self.capitulo_filtro.addItem("Sem capítulo", -1)
+
+        self.capitulo_filtro.setEnabled(bool(capitulos))
+        self.capitulo_filtro.blockSignals(False)
+
     def atualizar_lista(self):
         selecionados = self.arvore.selectedItems()
         if not selecionados:
@@ -9401,7 +9577,9 @@ class JanelaGerenciarQuestoesTopico(QDialog):
             self.topico_atual = ""
             self.contexto_titulo.setText("Selecione um tópico")
             self.contexto_subtitulo.setText("—")
+            self.botao_importar.setEnabled(False)
             self.botao_nova.setEnabled(False)
+            self.carregar_filtro_capitulos()
             self.preencher_tabela()
             return
 
@@ -9417,6 +9595,7 @@ class JanelaGerenciarQuestoesTopico(QDialog):
                 if disciplina_pausada
                 else "Todas as questões da disciplina."
             )
+            self.botao_importar.setEnabled(False)
             self.botao_nova.setEnabled(False)
         else:
             self.contexto_titulo.setText(self.topico_atual or "Tópico")
@@ -9426,8 +9605,18 @@ class JanelaGerenciarQuestoesTopico(QDialog):
                     f"{self.disciplina_atual} › {self.topico_atual} • tópico desligado no perfil"
                 )
             else:
-                self.contexto_subtitulo.setText(f"{self.disciplina_atual} › {self.topico_atual}")
+                capitulos = listar_capitulos_topico(int(self.topico_id_atual))
+                complemento = (
+                    f" • {len(capitulos)} capítulo(s) incluído(s)"
+                    if capitulos
+                    else ""
+                )
+                self.contexto_subtitulo.setText(
+                    f"{self.disciplina_atual} › {self.topico_atual}{complemento}"
+                )
+            self.botao_importar.setEnabled(True)
             self.botao_nova.setEnabled(True)
+        self.carregar_filtro_capitulos()
         self.preencher_tabela()
 
     def questoes_contexto(self):
@@ -9445,13 +9634,29 @@ class JanelaGerenciarQuestoesTopico(QDialog):
         elif status == "Desativadas":
             itens = [q for q in itens if not q.get("ativa", True)]
 
+        capitulo_id = (
+            self.capitulo_filtro.currentData()
+            if hasattr(self, "capitulo_filtro")
+            else None
+        )
+        if capitulo_id == -1:
+            itens = [q for q in itens if q.get("capitulo_id") is None]
+        elif capitulo_id is not None:
+            itens = [
+                q
+                for q in itens
+                if q.get("capitulo_id") is not None
+                and int(q.get("capitulo_id")) == int(capitulo_id)
+            ]
+
         busca = self._normalizar(self.busca_questoes.text()) if hasattr(self, "busca_questoes") else ""
         if busca:
             filtrados = []
             termos = [t for t in busca.split() if t]
             for q in itens:
                 alvo = self._normalizar(
-                    f"{q.get('id')} {q.get('enunciado')} {q.get('banca')} {q.get('fonte')} {q.get('dificuldade')}"
+                    f"{q.get('id')} {q.get('enunciado')} {q.get('capitulo')} "
+                    f"{q.get('banca')} {q.get('fonte')} {q.get('dificuldade')}"
                 )
                 if all(t in alvo for t in termos):
                     filtrados.append(q)
@@ -9479,6 +9684,7 @@ class JanelaGerenciarQuestoesTopico(QDialog):
             vals = [
                 str(q.get("id") or "—"),
                 enunciado,
+                str(q.get("capitulo") or "—"),
                 str(q.get("banca") or "—"),
                 str(q.get("ano") or "—"),
                 str(q.get("dificuldade") or "Não informada"),
@@ -9490,7 +9696,7 @@ class JanelaGerenciarQuestoesTopico(QDialog):
                 if deslocamento == 2:
                     celula.setData(Qt.UserRole, q.get("id"))
                     celula.setToolTip(enunciado)
-                if deslocamento in (1, 4, 5, 6, 7):
+                if deslocamento in (1, 5, 6, 7, 8):
                     celula.setTextAlignment(Qt.AlignCenter)
                 if not q.get("ativa", True):
                     aplicar_destaque_tabela(celula, "inativo", True)
@@ -9570,6 +9776,42 @@ class JanelaGerenciarQuestoesTopico(QDialog):
         if janela.exec() == QDialog.Accepted:
             self.recarregar()
 
+    def importar_questoes_topico(self):
+        if self.topico_id_atual is None:
+            QMessageBox.information(
+                self,
+                "Importar questões",
+                "Selecione um tópico específico antes de iniciar a importação."
+            )
+            return
+
+        # Reaproveita a Central de importação da janela principal para manter
+        # PDF, TXT, texto colado e CSV em um único fluxo. O tópico aberto é
+        # encaminhado como destino inicial, sem impedir ajustes na conferência.
+        alvo = self.parentWidget()
+        while alvo is not None:
+            metodo = getattr(alvo, "abrir_central_importacao_questoes", None)
+            if callable(metodo):
+                metodo(topico_id_padrao=self.topico_id_atual)
+                self.recarregar()
+                return
+            alvo = alvo.parentWidget()
+
+        app = QApplication.instance()
+        if app is not None:
+            for janela in app.topLevelWidgets():
+                metodo = getattr(janela, "abrir_central_importacao_questoes", None)
+                if callable(metodo):
+                    metodo(topico_id_padrao=self.topico_id_atual)
+                    self.recarregar()
+                    return
+
+        QMessageBox.warning(
+            self,
+            "Importar questões",
+            "A Central de importação não pôde ser localizada nesta janela."
+        )
+
     def nova_questao(self):
         if self.topico_id_atual is None:
             QMessageBox.information(
@@ -9586,6 +9828,7 @@ class JanelaGerenciarQuestoesTopico(QDialog):
         indice_top = janela.questao_topico.findData(self.topico_id_atual)
         if indice_top >= 0:
             janela.questao_topico.setCurrentIndex(indice_top)
+            janela.carregar_capitulos()
         if janela.exec() == QDialog.Accepted:
             self.recarregar()
 
@@ -22070,6 +22313,107 @@ class JanelaRevisao(QDialog):
         self.accept()
 
 
+class JanelaNovoTopicoEstruturado(QDialog):
+    """Cria um tópico/título com um capítulo inicial opcional."""
+
+    def __init__(self, disciplina_nome, parent=None):
+        super().__init__(parent)
+        self.disciplina_nome = str(disciplina_nome or "").strip()
+        self.nome_topico = ""
+        self.nome_capitulo = ""
+        self.permite_capitulo = not eh_disciplina_ctb(self.disciplina_nome)
+
+        self.setWindowTitle("Adicionar tópico")
+        self.resize(760, 235 if self.permite_capitulo else 205)
+        self.setMinimumWidth(660)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(22, 18, 22, 18)
+        layout.setSpacing(12)
+
+        titulo = QLabel("Adicionar tópico")
+        titulo.setObjectName("pageTitle")
+        layout.addWidget(titulo)
+
+        if self.permite_capitulo:
+            subtitulo = QLabel(
+                "Informe o título do tópico e, se desejar, já cadastre o primeiro capítulo. "
+                "Quando existir ao menos um capítulo, o Vighna exibirá o botão + ao lado do tópico."
+            )
+        else:
+            subtitulo = QLabel(
+                "No CTB, o capítulo legal é cadastrado diretamente como tópico estrutural."
+            )
+        subtitulo.setObjectName("pageSubtitle")
+        subtitulo.setWordWrap(True)
+        layout.addWidget(subtitulo)
+
+        campos = QGridLayout()
+        campos.setHorizontalSpacing(12)
+        campos.setVerticalSpacing(5)
+
+        rotulo_topico = QLabel("Título / tópico")
+        rotulo_topico.setObjectName("fieldLabel")
+        self.campo_topico = QLineEdit()
+        self.campo_topico.setPlaceholderText(
+            "Ex.: TÍTULO II — Dos Direitos e Garantias Fundamentais"
+        )
+        self.campo_topico.setClearButtonEnabled(True)
+
+        campos.addWidget(rotulo_topico, 0, 0)
+        campos.addWidget(self.campo_topico, 1, 0)
+
+        if self.permite_capitulo:
+            rotulo_capitulo = QLabel("Capítulo inicial (opcional)")
+            rotulo_capitulo.setObjectName("fieldLabel")
+            self.campo_capitulo = QLineEdit()
+            self.campo_capitulo.setPlaceholderText(
+                "Ex.: CAPÍTULO I — Dos Direitos e Deveres Individuais e Coletivos"
+            )
+            self.campo_capitulo.setClearButtonEnabled(True)
+            campos.addWidget(rotulo_capitulo, 0, 1)
+            campos.addWidget(self.campo_capitulo, 1, 1)
+            campos.setColumnStretch(0, 1)
+            campos.setColumnStretch(1, 1)
+        else:
+            self.campo_capitulo = None
+            campos.setColumnStretch(0, 1)
+
+        layout.addLayout(campos)
+
+        botoes = QDialogButtonBox(
+            QDialogButtonBox.Save | QDialogButtonBox.Cancel
+        )
+        botao_salvar = botoes.button(QDialogButtonBox.Save)
+        if botao_salvar is not None:
+            botao_salvar.setText("Adicionar")
+            botao_salvar.setObjectName("primaryButton")
+        botoes.accepted.connect(self.validar_e_aceitar)
+        botoes.rejected.connect(self.reject)
+        layout.addWidget(botoes)
+
+        self.campo_topico.setFocus()
+
+    def validar_e_aceitar(self):
+        nome_topico = self.campo_topico.text().strip()
+        if not nome_topico:
+            QMessageBox.information(
+                self,
+                "Título obrigatório",
+                "Informe o título ou nome do tópico."
+            )
+            self.campo_topico.setFocus()
+            return
+
+        self.nome_topico = nome_topico
+        self.nome_capitulo = (
+            self.campo_capitulo.text().strip()
+            if self.campo_capitulo is not None
+            else ""
+        )
+        self.accept()
+
+
 class JanelaCapitulosTopico(QDialog):
     """Gerencia a divisão interna de um título sem alterar sua agenda."""
 
@@ -23575,12 +23919,34 @@ class JanelaTopico(QDialog):
             self.carregar_historico()
 
     def ver_questoes_topico(self):
-        janela = JanelaGerenciarQuestoesTopico(
+        # A Central de Questões é a fonte administrativa oficial. Ao sair da
+        # página do tópico, fechamos este diálogo modal e abrimos a Central já
+        # filtrada no conteúdo atual, onde também ficam Importar e Nova questão.
+        alvo = self.parentWidget()
+        while alvo is not None:
+            metodo = getattr(alvo, "abrir_questoes_topico_contextual", None)
+            if callable(metodo):
+                topico_id = self.topico_id
+                self.accept()
+                QTimer.singleShot(0, lambda m=metodo, tid=topico_id: m(tid))
+                return
+            alvo = alvo.parentWidget()
+
+        app = QApplication.instance()
+        if app is not None:
+            for janela in app.topLevelWidgets():
+                metodo = getattr(janela, "abrir_questoes_topico_contextual", None)
+                if callable(metodo):
+                    topico_id = self.topico_id
+                    self.accept()
+                    QTimer.singleShot(0, lambda m=metodo, tid=topico_id: m(tid))
+                    return
+
+        QMessageBox.warning(
             self,
-            topico_id_inicial=self.topico_id,
+            "Ver questões",
+            "A Central de Questões não pôde ser localizada."
         )
-        janela.exec()
-        self.carregar_historico()
 
     def resolver_questoes(self):
         # Compatibilidade com atalhos antigos: "resolver" agora equivale
@@ -30552,6 +30918,11 @@ class SistemaEstudos(QMainWindow):
         self._central_questoes_suja = True
         self._central_questoes_refresh_agendado = False
         self._central_questoes_concurso_id = None
+        # Quando a Central é aberta a partir de um tópico, este contexto fica
+        # pendente até o carregamento da grade terminar. Isso evita a disputa
+        # entre a navegação lazy da Central e a aplicação dos filtros.
+        self._central_questoes_contexto_pendente = None
+        self._central_questoes_contexto_ativo = None
         self._relatorios_refresh_agendado = False
         self._relatorios_refresh_em_andamento = False
 
@@ -30940,6 +31311,10 @@ class SistemaEstudos(QMainWindow):
         self.dashboard_regularidade_sequencia.setText(
             f"Sequência {sequencia}d{sufixo}"
         )
+        if hasattr(self, "dashboard_resumo_sequencia"):
+            self.dashboard_resumo_sequencia.setText(
+                f"{sequencia} " + ("dia" if sequencia == 1 else "dias")
+            )
 
         semana = int(snapshot.get("current_week_active_days") or 0)
         meta = int(snapshot.get("target_days_per_week") or 0)
@@ -31531,15 +31906,17 @@ class SistemaEstudos(QMainWindow):
             conteudo
         )
 
+        # Compactação vertical do Dashboard: preserva a mesma hierarquia visual,
+        # mas mantém a ação principal visível em telas com menor altura útil.
         layout.setContentsMargins(
             28,
-            20,
+            16,
             28,
-            22
+            20
         )
 
         layout.setSpacing(
-            12
+            10
         )
 
         # ====================================================
@@ -31585,9 +31962,9 @@ class SistemaEstudos(QMainWindow):
         topo_container.setObjectName("dashboardTopBar")
 
         topo = QGridLayout(topo_container)
-        topo.setContentsMargins(14, 9, 14, 9)
+        topo.setContentsMargins(14, 7, 14, 7)
         topo.setHorizontalSpacing(14)
-        topo.setVerticalSpacing(6)
+        topo.setVerticalSpacing(4)
         topo.setColumnStretch(0, 0)
         topo.setColumnStretch(1, 1)
         topo.setColumnStretch(2, 0)
@@ -31735,9 +32112,9 @@ class SistemaEstudos(QMainWindow):
             self.dashboard_hoje_painel
         )
         foco_painel_layout.setContentsMargins(
-            12, 10, 12, 12
+            12, 8, 12, 8
         )
-        foco_painel_layout.setSpacing(6)
+        foco_painel_layout.setSpacing(5)
 
         # O cabeçalho externo "Foco" foi removido para eliminar redundância
         # visual. O próprio card esquerdo passa a ser a identidade do módulo.
@@ -31810,16 +32187,16 @@ class SistemaEstudos(QMainWindow):
         foco_hoje.setObjectName(
             "focusDashboardMainCard"
         )
-        foco_hoje.setMinimumHeight(186)
+        foco_hoje.setMinimumHeight(174)
         foco_hoje.setSizePolicy(
             QSizePolicy.Expanding,
             QSizePolicy.Expanding,
         )
         foco_hoje_layout = QVBoxLayout(foco_hoje)
         foco_hoje_layout.setContentsMargins(
-            14, 12, 14, 12
+            14, 10, 14, 10
         )
-        foco_hoje_layout.setSpacing(6)
+        foco_hoje_layout.setSpacing(5)
 
         foco_cabecalho = QHBoxLayout()
         foco_cabecalho.setSpacing(8)
@@ -31903,7 +32280,7 @@ class SistemaEstudos(QMainWindow):
         self.dashboard_iniciar_foco.setObjectName(
             "dashboardFocusPrimaryButton"
         )
-        self.dashboard_iniciar_foco.setMinimumHeight(38)
+        self.dashboard_iniciar_foco.setMinimumHeight(36)
         self.dashboard_iniciar_foco.setCursor(
             Qt.PointingHandCursor
         )
@@ -31922,8 +32299,8 @@ class SistemaEstudos(QMainWindow):
         foco_objetivo_box.setObjectName("dashboardQuickAccess")
         foco_objetivo_box.setProperty("embedded", True)
         foco_objetivo_layout = QVBoxLayout(foco_objetivo_box)
-        foco_objetivo_layout.setContentsMargins(10, 7, 10, 7)
-        foco_objetivo_layout.setSpacing(4)
+        foco_objetivo_layout.setContentsMargins(10, 6, 10, 6)
+        foco_objetivo_layout.setSpacing(3)
 
         objetivo_topo = QHBoxLayout()
         objetivo_topo.setSpacing(8)
@@ -31959,14 +32336,14 @@ class SistemaEstudos(QMainWindow):
         # ----------------------------------------------------
         progresso_card = QFrame()
         progresso_card.setObjectName("focusQuickCard")
-        progresso_card.setMinimumHeight(186)
+        progresso_card.setMinimumHeight(174)
         progresso_card.setSizePolicy(
             QSizePolicy.Expanding,
             QSizePolicy.Expanding,
         )
         progresso_layout = QVBoxLayout(progresso_card)
-        progresso_layout.setContentsMargins(14, 12, 14, 12)
-        progresso_layout.setSpacing(6)
+        progresso_layout.setContentsMargins(14, 10, 14, 10)
+        progresso_layout.setSpacing(5)
 
         progresso_topo = QHBoxLayout()
         progresso_topo.setSpacing(8)
@@ -31992,7 +32369,7 @@ class SistemaEstudos(QMainWindow):
         self.dashboard_progress_badge = QLabel("1")
         self.dashboard_progress_badge.setObjectName("dashboardProgressBadge")
         self.dashboard_progress_badge.setAlignment(Qt.AlignCenter)
-        self.dashboard_progress_badge.setFixedSize(42, 42)
+        self.dashboard_progress_badge.setFixedSize(40, 40)
         nivel_linha.addWidget(self.dashboard_progress_badge, 0, Qt.AlignVCenter)
 
         nivel_textos = QVBoxLayout()
@@ -32034,7 +32411,7 @@ class SistemaEstudos(QMainWindow):
 
         botao_ver_conquistas = QPushButton("Ver conquistas  →")
         botao_ver_conquistas.setObjectName("subtleButton")
-        botao_ver_conquistas.setMinimumHeight(34)
+        botao_ver_conquistas.setMinimumHeight(32)
         botao_ver_conquistas.setCursor(Qt.PointingHandCursor)
         botao_ver_conquistas.clicked.connect(
             lambda: self.abrir_estatisticas("Conquistas")
@@ -32046,7 +32423,9 @@ class SistemaEstudos(QMainWindow):
         dashboard_hoje_conteudo_layout.addLayout(foco_cards)
 
         # ----------------------------------------------------
-        # Ações rápidas — mantidas no rodapé do módulo de Foco
+        # Acessos rápidos — construídos aqui, mas posicionados depois da
+        # recomendação. Assim, a ação principal do Vighna aparece antes dos
+        # atalhos secundários mesmo em telas com menor altura útil.
         # ----------------------------------------------------
         separador_foco = QFrame()
         separador_foco.setObjectName("dashboardTodaySeparator")
@@ -32057,13 +32436,13 @@ class SistemaEstudos(QMainWindow):
 
         atalhos_rapidos = QFrame()
         atalhos_rapidos.setObjectName("dashboardQuickAccess")
-        atalhos_rapidos.setProperty("embedded", True)
+        atalhos_rapidos.setProperty("embedded", False)
         atalhos_layout = QHBoxLayout(atalhos_rapidos)
-        atalhos_layout.setContentsMargins(12, 7, 12, 7)
+        atalhos_layout.setContentsMargins(12, 5, 12, 5)
         atalhos_layout.setSpacing(6)
 
         self.dashboard_toggle_acessos = QPushButton(
-            "▾  Ações rápidas"
+            "▾  Acessos rápidos"
         )
         self.dashboard_toggle_acessos.setObjectName(
             "dashboardSectionToggle"
@@ -32138,7 +32517,7 @@ class SistemaEstudos(QMainWindow):
             # e um maximumHeight menor que o sizeHint faz o Qt recortar a
             # borda inferior do botão. Deixamos o próprio estilo calcular a
             # altura necessária e o rodapé cresce alguns pixels se preciso.
-            botao.setMinimumHeight(34)
+            botao.setMinimumHeight(32)
             botao.setSizePolicy(
                 QSizePolicy.Expanding,
                 QSizePolicy.Fixed,
@@ -32151,7 +32530,8 @@ class SistemaEstudos(QMainWindow):
             self.dashboard_acessos_conteudo,
             1,
         )
-        dashboard_hoje_conteudo_layout.addWidget(atalhos_rapidos)
+        # O frame de acessos rápidos será inserido abaixo do bloco de
+        # recomendação/resumo. Não o adicionamos mais ao painel de Foco.
 
         foco_painel_layout.addWidget(
             self.dashboard_hoje_conteudo
@@ -32295,53 +32675,34 @@ class SistemaEstudos(QMainWindow):
         self.dashboard_hoje_meta_revisoes_valor = QLabel("0", compat_hoje)
         self.dashboard_hoje_meta_revisoes_detalhe = QLabel("", compat_hoje)
 
-        # Recomendação do algoritmo — launcher simples e direto.
-        # A composição segue a mesma gramática visual do bloco
-        # "Estudo por questões": um único painel, cabeçalho claro e CTA central.
+        # Recomendação inteligente — decisão operacional do Dashboard.
+        # A interface mostra a conclusão útil da inteligência; os detalhes
+        # técnicos continuam disponíveis nas telas analíticas.
         self.dashboard_hoje_acao = QFrame()
-        self.dashboard_hoje_acao.setObjectName(
-            "dashboardTodayAction"
-        )
-        self.dashboard_hoje_acao.setProperty(
-            "actionRole",
-            "neutral"
-        )
-        self.dashboard_hoje_acao.setProperty(
-            "simpleHero",
-            True
-        )
+        self.dashboard_hoje_acao.setObjectName("dashboardTodayAction")
+        self.dashboard_hoje_acao.setProperty("actionRole", "neutral")
+        self.dashboard_hoje_acao.setProperty("simpleHero", True)
 
-        acao_layout = QVBoxLayout(
-            self.dashboard_hoje_acao
-        )
-        acao_layout.setContentsMargins(
-            16, 12, 16, 12
-        )
-        acao_layout.setSpacing(7)
+        acao_layout = QVBoxLayout(self.dashboard_hoje_acao)
+        acao_layout.setContentsMargins(16, 13, 16, 14)
+        acao_layout.setSpacing(8)
 
-        # Cabeçalho no mesmo padrão dos demais módulos principais.
         algoritmo_header = QHBoxLayout()
-        algoritmo_header.setSpacing(10)
+        algoritmo_header.setSpacing(9)
 
         algoritmo_icone = QLabel("✦")
-        algoritmo_icone.setObjectName(
-            "algorithmDashboardIcon"
-        )
+        algoritmo_icone.setObjectName("algorithmDashboardIcon")
         algoritmo_icone.setAlignment(Qt.AlignCenter)
-        algoritmo_icone.setFixedSize(32, 32)
+        algoritmo_icone.setFixedSize(34, 34)
 
         algoritmo_titulos = QVBoxLayout()
-        algoritmo_titulos.setSpacing(1)
+        algoritmo_titulos.setSpacing(2)
 
-        algoritmo_titulo = QLabel(
-            "Recomendado pelo algoritmo"
-        )
-        algoritmo_titulo.setObjectName(
-            "algorithmDashboardTitle"
-        )
+        algoritmo_titulo = QLabel("Recomendação do algoritmo")
+        algoritmo_titulo.setObjectName("algorithmDashboardTitle")
 
         self.dashboard_algoritmo_subtitulo = QLabel(
-            "O Vighna já definiu sua próxima sessão de estudo."
+            "Sua próxima sessão foi definida com base no motor de inteligência do Vighna."
         )
         self.dashboard_algoritmo_subtitulo.setObjectName(
             "algorithmDashboardSubtitle"
@@ -32349,150 +32710,162 @@ class SistemaEstudos(QMainWindow):
         self.dashboard_algoritmo_subtitulo.setWordWrap(True)
 
         algoritmo_titulos.addWidget(algoritmo_titulo)
-        algoritmo_titulos.addWidget(
-            self.dashboard_algoritmo_subtitulo
-        )
+        algoritmo_titulos.addWidget(self.dashboard_algoritmo_subtitulo)
 
         self.dashboard_hoje_acao_ajuda = QPushButton("?")
-        self.dashboard_hoje_acao_ajuda.setObjectName(
-            "algorithmDashboardHelp"
-        )
+        self.dashboard_hoje_acao_ajuda.setObjectName("algorithmDashboardHelp")
         self.dashboard_hoje_acao_ajuda.setFixedSize(30, 30)
-        self.dashboard_hoje_acao_ajuda.setCursor(
-            Qt.PointingHandCursor
-        )
+        self.dashboard_hoje_acao_ajuda.setCursor(Qt.PointingHandCursor)
         self.dashboard_hoje_acao_ajuda.setToolTip(
-            "Entender o que esta recomendação faz."
+            "Entender como o algoritmo escolhe a próxima sessão."
         )
         self.dashboard_hoje_acao_ajuda.clicked.connect(
             lambda: QMessageBox.information(
                 self,
-                "Recomendado pelo algoritmo",
+                "Recomendação do algoritmo",
                 (
-                    "Este bloco mostra a próxima sessão sugerida automaticamente pelo Vighna.\n\n"
-                    "O algoritmo considera revisões vencidas e de hoje, domínio por tópico, urgência, desempenho recente, atrasos e ritmo de estudo.\n\n"
-                    "Use 'Começar agora' para abrir a recomendação do dia e conferir o que o Vighna sugere antes de iniciar qualquer sessão. Se preferir decidir manualmente, use o bloco logo abaixo para escolher questões por conta própria."
-                )
+                    "Este bloco apresenta a próxima sessão definida pelo motor de inteligência do Vighna.\n\n"
+                    "A decisão usa a Fila Inteligente V3 e considera revisões vencidas ou de hoje, domínio, desempenho recente, importância, cobertura, erros e espaçamento.\n\n"
+                    "Os critérios permanecem determinísticos e auditáveis."
+                ),
             )
         )
 
-        algoritmo_header.addWidget(
-            algoritmo_icone,
-            0,
-            Qt.AlignVCenter
-        )
-        algoritmo_header.addLayout(
-            algoritmo_titulos,
-            1
-        )
+        algoritmo_header.addWidget(algoritmo_icone, 0, Qt.AlignTop)
+        algoritmo_header.addLayout(algoritmo_titulos, 1)
         algoritmo_header.addWidget(
             self.dashboard_hoje_acao_ajuda,
             0,
-            Qt.AlignTop | Qt.AlignRight
+            Qt.AlignTop | Qt.AlignRight,
         )
         acao_layout.addLayout(algoritmo_header)
 
-        # Mantidos para compatibilidade com a lógica de atualização existente.
-        # Permanecem ocultos para que o launcher não volte a acumular informação.
-        self.dashboard_hoje_acao_titulo = QLabel(
-            "Encontrar próxima sessão",
-            self.dashboard_hoje_acao
-        )
-        self.dashboard_hoje_acao_titulo.setVisible(False)
+        inteligencia_conteudo = QFrame()
+        inteligencia_conteudo.setObjectName("algorithmRecommendationBody")
+        inteligencia_conteudo_layout = QVBoxLayout(inteligencia_conteudo)
+        inteligencia_conteudo_layout.setContentsMargins(14, 10, 14, 12)
+        inteligencia_conteudo_layout.setSpacing(6)
 
-        self.dashboard_hoje_acao_detalhe = QLabel(
-            "O Vighna vai analisar as prioridades atuais.",
-            self.dashboard_hoje_acao
-        )
-        self.dashboard_hoje_acao_detalhe.setVisible(False)
+        self.dashboard_algoritmo_pronto = QLabel("PRÓXIMA SESSÃO PRONTA")
+        self.dashboard_algoritmo_pronto.setObjectName("algorithmDashboardReady")
+        self.dashboard_algoritmo_pronto.setAlignment(Qt.AlignCenter)
 
-        self.dashboard_algoritmo_pronto = QLabel(
-            "PRÓXIMA SESSÃO PRONTA"
-        )
-        self.dashboard_algoritmo_pronto.setObjectName(
-            "algorithmDashboardReady"
-        )
-        self.dashboard_algoritmo_pronto.setAlignment(
-            Qt.AlignHCenter | Qt.AlignVCenter
-        )
+        inteligencia_conteudo_layout.addStretch(1)
+        inteligencia_conteudo_layout.addWidget(self.dashboard_algoritmo_pronto)
+        inteligencia_conteudo_layout.addSpacing(4)
 
-        self.dashboard_hoje_um_clique = QPushButton(
-            "▶  COMEÇAR AGORA"
-        )
-        self.dashboard_hoje_um_clique.setObjectName(
-            "dashboardTodayPrimaryButton"
-        )
-        self.dashboard_hoje_um_clique.setMinimumSize(
-            340,
-            48
-        )
-        self.dashboard_hoje_um_clique.setMaximumWidth(430)
-        self.dashboard_hoje_um_clique.setCursor(
-            Qt.PointingHandCursor
-        )
+        botoes_ia = QVBoxLayout()
+        botoes_ia.setSpacing(4)
+        self.dashboard_hoje_um_clique = QPushButton("▶  COMEÇAR AGORA")
+        self.dashboard_hoje_um_clique.setObjectName("dashboardTodayPrimaryButton")
+        self.dashboard_hoje_um_clique.setMinimumHeight(44)
+        self.dashboard_hoje_um_clique.setCursor(Qt.PointingHandCursor)
         self.dashboard_hoje_um_clique.setToolTip(
-            "Abrir a recomendação de estudo para hoje. O Vighna mostra o que priorizou antes de qualquer sessão ser iniciada."
+            "Abrir a recomendação de estudo para hoje."
         )
-        self.dashboard_hoje_um_clique.clicked.connect(
-            self.iniciar_estudo_um_clique
-        )
+        self.dashboard_hoje_um_clique.clicked.connect(self.iniciar_estudo_um_clique)
         self.dashboard_hoje_um_clique.setVisible(
-            obter_configuracao_bool(
-                "mostrar_modo_um_clique",
-                True
-            )
+            obter_configuracao_bool("mostrar_modo_um_clique", True)
         )
 
-        self.dashboard_hoje_botao = QPushButton(
-            "Por que esta recomendação?"
-        )
-        self.dashboard_hoje_botao.setObjectName(
-            "dashboardTodayButton"
-        )
-        self.dashboard_hoje_botao.setMinimumSize(
-            220,
-            26
-        )
-        self.dashboard_hoje_botao.setCursor(
-            Qt.PointingHandCursor
-        )
+        self.dashboard_hoje_botao = QPushButton("Por que esta recomendação?")
+        self.dashboard_hoje_botao.setObjectName("dashboardTodayButton")
+        self.dashboard_hoje_botao.setMinimumHeight(26)
+        self.dashboard_hoje_botao.setCursor(Qt.PointingHandCursor)
         self.dashboard_hoje_botao.setToolTip(
             "Ver os critérios usados pelo Vighna sem iniciar a sessão."
         )
         self.dashboard_hoje_botao.clicked.connect(
             self.explicar_recomendacao_dashboard
         )
+        botoes_ia.addWidget(self.dashboard_hoje_um_clique)
+        botoes_ia.addWidget(self.dashboard_hoje_botao, 0, Qt.AlignCenter)
+        inteligencia_conteudo_layout.addLayout(botoes_ia)
+        inteligencia_conteudo_layout.addStretch(1)
+        acao_layout.addWidget(inteligencia_conteudo, 1)
 
-        acao_layout.addSpacing(0)
-        acao_layout.addWidget(
-            self.dashboard_algoritmo_pronto,
-            0,
-            Qt.AlignHCenter
-        )
-        acao_layout.addWidget(
-            self.dashboard_hoje_um_clique,
-            0,
-            Qt.AlignHCenter
-        )
-        acao_layout.addWidget(
-            self.dashboard_hoje_botao,
-            0,
-            Qt.AlignHCenter
-        )
-        acao_layout.addSpacing(0)
+        # Resumo compacto do dia — substitui informação tabular no Dashboard.
+        self.dashboard_resumo_ia = QFrame()
+        self.dashboard_resumo_ia.setObjectName("dashboardInsightSummary")
+        resumo_ia_layout = QVBoxLayout(self.dashboard_resumo_ia)
+        resumo_ia_layout.setContentsMargins(14, 12, 14, 12)
+        resumo_ia_layout.setSpacing(7)
 
+        resumo_ia_header = QHBoxLayout()
+        resumo_ia_header.setSpacing(8)
+        resumo_ia_icone = QLabel("▥")
+        resumo_ia_icone.setObjectName("dashboardInsightSummaryIcon")
+        resumo_ia_icone.setAlignment(Qt.AlignCenter)
+        resumo_ia_icone.setFixedSize(34, 34)
+        resumo_ia_titulos = QVBoxLayout()
+        resumo_ia_titulos.setSpacing(1)
+        resumo_ia_titulo = QLabel("Seu resumo de hoje")
+        resumo_ia_titulo.setObjectName("dashboardInsightSummaryTitle")
+        self.dashboard_resumo_data = QLabel("Hoje")
+        self.dashboard_resumo_data.setObjectName("dashboardInsightSummaryDate")
+        resumo_ia_titulos.addWidget(resumo_ia_titulo)
+        resumo_ia_titulos.addWidget(self.dashboard_resumo_data)
+        resumo_ia_header.addWidget(resumo_ia_icone, 0, Qt.AlignTop)
+        resumo_ia_header.addLayout(resumo_ia_titulos, 1)
+        resumo_ia_layout.addLayout(resumo_ia_header)
 
-        # ====================================================
-        # HERO CENTRAL — ENTRADA GUIADA
-        # ====================================================
+        def criar_linha_resumo_ia(rotulo, detalhe, papel):
+            linha = QFrame()
+            linha.setObjectName("dashboardInsightSummaryRow")
+            linha.setProperty("summaryRole", papel)
+            linha_layout = QHBoxLayout(linha)
+            linha_layout.setContentsMargins(10, 7, 10, 7)
+            linha_layout.setSpacing(8)
+            textos = QVBoxLayout()
+            textos.setSpacing(0)
+            titulo = QLabel(rotulo)
+            titulo.setObjectName("dashboardInsightSummaryRowTitle")
+            subtitulo = QLabel(detalhe)
+            subtitulo.setObjectName("dashboardInsightSummaryRowDetail")
+            textos.addWidget(titulo)
+            textos.addWidget(subtitulo)
+            valor = QLabel("—")
+            valor.setObjectName("dashboardInsightSummaryRowValue")
+            valor.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            linha_layout.addLayout(textos, 1)
+            linha_layout.addWidget(valor, 0, Qt.AlignVCenter)
+            resumo_ia_layout.addWidget(linha)
+            return valor
 
-        self.dashboard_hoje_acao.setProperty(
-            "heroCentral",
-            True
+        self.dashboard_resumo_hoje = criar_linha_resumo_ia(
+            "Hoje", "Tempo efetivo de foco", "today"
         )
-        layout.addWidget(
-            self.dashboard_hoje_acao
+        self.dashboard_resumo_pendencias = criar_linha_resumo_ia(
+            "Pendências", "Revisões que pedem atenção", "pending"
         )
+        self.dashboard_resumo_sequencia = criar_linha_resumo_ia(
+            "Sequência", "Dias seguidos estudando", "streak"
+        )
+        self.dashboard_resumo_meta = criar_linha_resumo_ia(
+            "Meta semanal", "Progresso do tempo de foco", "goal"
+        )
+
+        self.dashboard_resumo_meta_barra = QProgressBar()
+        self.dashboard_resumo_meta_barra.setObjectName("dashboardInsightSummaryProgress")
+        self.dashboard_resumo_meta_barra.setRange(0, 100)
+        self.dashboard_resumo_meta_barra.setValue(0)
+        self.dashboard_resumo_meta_barra.setTextVisible(False)
+        self.dashboard_resumo_meta_barra.setFixedHeight(6)
+        resumo_ia_layout.addWidget(self.dashboard_resumo_meta_barra)
+        resumo_ia_layout.addStretch(1)
+
+        self.dashboard_hoje_acao.setProperty("heroCentral", True)
+        inteligencia_linha = QHBoxLayout()
+        inteligencia_linha.setContentsMargins(0, 0, 0, 0)
+        inteligencia_linha.setSpacing(10)
+        inteligencia_linha.addWidget(self.dashboard_hoje_acao, 3)
+        inteligencia_linha.addWidget(self.dashboard_resumo_ia, 1)
+        layout.addLayout(inteligencia_linha)
+
+        # Os acessos rápidos ficam depois da recomendação: primeiro o usuário
+        # vê seu estado e a próxima ação sugerida; depois, as ferramentas
+        # auxiliares. Esta ordem também melhora a primeira dobra em 1366×768.
+        layout.addWidget(atalhos_rapidos)
 
         # ====================================================
         # ESTUDO POR QUESTÕES — slot prioritário
@@ -35242,6 +35615,10 @@ class SistemaEstudos(QMainWindow):
         layout.addWidget(
             fila_painel
         )
+        # A fila técnica continua sendo atualizada para compatibilidade, mas
+        # deixa de ocupar o Dashboard. O resumo útil aparece na Recomendação
+        # da IA e no card "Seu resumo de hoje".
+        fila_painel.setVisible(False)
 
         # ====================================================
         # DISCIPLINAS
@@ -35488,21 +35865,6 @@ class SistemaEstudos(QMainWindow):
                 ),
                 "titulo": "Estudo por questões",
                 "config": "dashboard_secao_estudar_expandida",
-            },
-            "fila": {
-                "conteudo": getattr(
-                    self,
-                    "dashboard_fila_conteudo",
-                    None
-                ),
-                "botao": getattr(
-                    self,
-                    "dashboard_toggle_fila",
-                    None
-                ),
-                "subtitulo": None,
-                "titulo": "Revisões prioritárias",
-                "config": "dashboard_secao_fila_expandida",
             },
             "disciplinas": {
                 "conteudo": getattr(
@@ -36900,6 +37262,10 @@ class SistemaEstudos(QMainWindow):
         self.dashboard_hoje_data.setText(
             f"{nome_dia} • {hoje_qdate.toString('dd/MM')}"
         )
+        if hasattr(self, "dashboard_resumo_data"):
+            self.dashboard_resumo_data.setText(
+                f"{nome_dia} • {hoje_qdate.toString('dd/MM')}"
+            )
 
         hoje_iso = hoje_qdate.toString("yyyy-MM-dd")
         hoje_foco = int(resumo_foco.get("hoje_segundos", 0) or 0)
@@ -36911,6 +37277,10 @@ class SistemaEstudos(QMainWindow):
         self.dashboard_hoje_foco_valor.setText(
             formatar_tempo_foco_resumido(hoje_foco)
         )
+        if hasattr(self, "dashboard_resumo_hoje"):
+            self.dashboard_resumo_hoje.setText(
+                formatar_tempo_foco_resumido(hoje_foco)
+            )
         if hasattr(self, "dashboard_focus_metric_today"):
             self.dashboard_focus_metric_today.setText(
                 formatar_tempo_foco_resumido(hoje_foco)
@@ -37039,6 +37409,8 @@ class SistemaEstudos(QMainWindow):
         revisoes_hoje = int(resumo.get("hoje", 0) or 0)
         revisoes_atrasadas = int(resumo.get("atrasadas", 0) or 0)
         revisoes_pendentes = revisoes_hoje + revisoes_atrasadas
+        if hasattr(self, "dashboard_resumo_pendencias"):
+            self.dashboard_resumo_pendencias.setText(str(revisoes_pendentes))
         if revisoes_pendentes <= 0:
             revisoes_detalhe = "Fila em dia"
             revisao_role = "ok"
@@ -37147,7 +37519,9 @@ class SistemaEstudos(QMainWindow):
 
             if recomendacao:
                 estado_pronto = "PRÓXIMA SESSÃO PRONTA"
-                subtitulo_algoritmo = "O Vighna já definiu sua próxima sessão."
+                subtitulo_algoritmo = (
+                    "Sua próxima sessão foi definida com base no motor de inteligência do Vighna."
+                )
                 disciplina = str(recomendacao.get("disciplina") or "").strip()
                 topico = str(recomendacao.get("topico") or "").strip()
                 origem = str(recomendacao.get("origem") or "").strip().lower()
@@ -37182,8 +37556,6 @@ class SistemaEstudos(QMainWindow):
                 titulo_acao = "Encontrar próxima sessão"
                 detalhe_acao = "O Estudar Agora pode analisar o momento atual."
 
-        self.dashboard_hoje_acao_titulo.setText(titulo_acao)
-        self.dashboard_hoje_acao_detalhe.setText(detalhe_acao)
         self.dashboard_hoje_botao.setText(botao_texto)
         if hasattr(self, "dashboard_algoritmo_pronto"):
             self.dashboard_algoritmo_pronto.setText(estado_pronto)
@@ -37491,6 +37863,23 @@ class SistemaEstudos(QMainWindow):
                 0
             )
         )
+
+        if hasattr(self, "dashboard_resumo_meta"):
+            if meta_foco_horas > 0:
+                meta_foco_segundos_resumo = meta_foco_horas * 3600
+                percentual_meta_resumo = int(round(
+                    100.0 * semana_foco / meta_foco_segundos_resumo
+                )) if meta_foco_segundos_resumo else 0
+                self.dashboard_resumo_meta.setText(
+                    formatar_tempo_foco_resumido(semana_foco)
+                    + f" / {meta_foco_horas}h"
+                )
+                self.dashboard_resumo_meta_barra.setValue(
+                    min(100, max(0, percentual_meta_resumo))
+                )
+            else:
+                self.dashboard_resumo_meta.setText("Não definida")
+                self.dashboard_resumo_meta_barra.setValue(0)
 
         if meta_foco_horas > 0:
             meta_foco_segundos = meta_foco_horas * 3600
@@ -37832,6 +38221,16 @@ class SistemaEstudos(QMainWindow):
                 )
             ) == hoje
         )
+
+        criticos_fila = sum(
+            1
+            for item in fila
+            if str(item.get("nivel") or "").strip().upper() in {
+                "ALTA", "CRÍTICA", "CRITICA"
+            }
+        )
+        if hasattr(self, "dashboard_resumo_pendencias"):
+            self.dashboard_resumo_pendencias.setText(str(len(fila)))
 
         if len(fila) == 0:
             self.revisao_inteligente_resumo.setText(
@@ -39596,6 +39995,154 @@ class SistemaEstudos(QMainWindow):
         janela = JanelaPausaDesafios(self)
         janela.exec()
 
+    def abrir_questoes_topico_contextual(self, topico_id):
+        """Abre a Central de Questões já filtrada no tópico informado.
+
+        O filtro é aplicado somente depois que a carga lazy da Central termina,
+        evitando o comportamento anterior em que o clique parecia não fazer
+        nada ou o filtro era perdido durante a reconstrução dos combos.
+        """
+        try:
+            topico_id = int(topico_id)
+        except (TypeError, ValueError):
+            QMessageBox.warning(
+                self,
+                "Ver questões",
+                "O tópico selecionado não possui uma identificação válida."
+            )
+            return
+
+        contexto = obter_contexto_topico(topico_id)
+        if not contexto:
+            QMessageBox.warning(
+                self,
+                "Ver questões",
+                "O tópico selecionado não foi encontrado no banco de dados."
+            )
+            return
+
+        self._central_questoes_contexto_pendente = {
+            "topico_id": topico_id,
+            "disciplina": str(contexto.get("disciplina_nome") or "").strip(),
+            "topico": str(contexto.get("topico_nome") or "").strip(),
+        }
+
+        # Força uma leitura atual do banco para que questões recém-importadas
+        # também estejam presentes quando o filtro contextual for aplicado.
+        self._central_questoes_suja = True
+        self.abrir_questoes()
+        QTimer.singleShot(30, self._aplicar_contexto_pendente_central_questoes)
+
+    def _aplicar_contexto_pendente_central_questoes(self):
+        contexto = getattr(self, "_central_questoes_contexto_pendente", None)
+        if not contexto:
+            return
+
+        if (
+            not hasattr(self, "telas")
+            or not hasattr(self, "tela_questoes")
+            or self.telas.currentWidget() is not self.tela_questoes
+        ):
+            return
+
+        # Se a carga lazy ainda estiver em andamento, aguarda o próximo ciclo.
+        if getattr(self, "_central_questoes_refresh_agendado", False):
+            QTimer.singleShot(35, self._aplicar_contexto_pendente_central_questoes)
+            return
+
+        disciplina = str(contexto.get("disciplina") or "").strip()
+        topico = str(contexto.get("topico") or "").strip()
+
+        if not (
+            hasattr(self, "questoes_filtro_disciplina")
+            and hasattr(self, "questoes_filtro_topico")
+        ):
+            return
+
+        indice_disciplina = self.questoes_filtro_disciplina.findText(
+            disciplina,
+            Qt.MatchFixedString,
+        )
+        if indice_disciplina < 0:
+            self._central_questoes_contexto_pendente = None
+            QMessageBox.warning(
+                self,
+                "Ver questões",
+                "A disciplina do tópico não pôde ser localizada na Central de Questões."
+            )
+            return
+
+        self.questoes_filtro_disciplina.setCurrentIndex(indice_disciplina)
+        self.atualizar_filtro_topicos_questoes()
+
+        indice_topico = self.questoes_filtro_topico.findText(
+            topico,
+            Qt.MatchFixedString,
+        )
+        if indice_topico < 0:
+            # Tópicos ainda sem questões não aparecem naturalmente no combo,
+            # mas precisam poder ser abertos para receber a primeira questão.
+            self.questoes_filtro_topico.addItem(topico)
+            indice_topico = self.questoes_filtro_topico.findText(
+                topico,
+                Qt.MatchFixedString,
+            )
+
+        if indice_topico < 0:
+            self._central_questoes_contexto_pendente = None
+            QMessageBox.warning(
+                self,
+                "Ver questões",
+                "O tópico não pôde ser aplicado como filtro na Central de Questões."
+            )
+            return
+
+        self.questoes_filtro_topico.setCurrentIndex(indice_topico)
+
+        if hasattr(self, "questoes_filtro_capitulo"):
+            indice_todos = self.questoes_filtro_capitulo.findData(None)
+            if indice_todos >= 0:
+                self.questoes_filtro_capitulo.setCurrentIndex(indice_todos)
+
+        self.filtrar_questoes()
+        self._central_questoes_contexto_ativo = dict(contexto)
+        self._central_questoes_contexto_pendente = None
+
+    def _obter_topico_id_contexto_central_questoes(self):
+        """Retorna o tópico específico atualmente selecionado na Central."""
+        if not (
+            hasattr(self, "questoes_filtro_disciplina")
+            and hasattr(self, "questoes_filtro_topico")
+        ):
+            return None
+
+        disciplina = str(self.questoes_filtro_disciplina.currentText() or "").strip()
+        topico = str(self.questoes_filtro_topico.currentText() or "").strip()
+        if (
+            not disciplina
+            or disciplina == "Todas disciplinas"
+            or not topico
+            or topico == "Todos tópicos"
+        ):
+            return None
+
+        for item in getattr(self, "dados_questoes", []):
+            if (
+                str(item.get("disciplina") or "") == disciplina
+                and str(item.get("topico") or "") == topico
+                and item.get("topico_id") is not None
+            ):
+                return int(item.get("topico_id"))
+
+        contexto = getattr(self, "_central_questoes_contexto_ativo", None) or {}
+        if (
+            str(contexto.get("disciplina") or "") == disciplina
+            and str(contexto.get("topico") or "") == topico
+            and contexto.get("topico_id") is not None
+        ):
+            return int(contexto.get("topico_id"))
+        return None
+
     def abrir_questoes(self):
         # Navegação primeiro; consultas e montagem da grade ficam para o
         # próximo ciclo do event loop. Assim o clique responde imediatamente.
@@ -39939,6 +40486,11 @@ class SistemaEstudos(QMainWindow):
 
         self._central_questoes_suja = False
         self._central_questoes_concurso_id = int(concurso_id)
+
+        # Se a navegação veio de um tópico, aplica o contexto somente agora,
+        # depois que disciplinas/tópicos e a grade já foram reconstruídos.
+        if getattr(self, "_central_questoes_contexto_pendente", None):
+            QTimer.singleShot(0, self._aplicar_contexto_pendente_central_questoes)
 
     def atualizar_filtro_topicos_questoes(self):
         if not hasattr(
@@ -40942,6 +41494,25 @@ class SistemaEstudos(QMainWindow):
             parent=self
         )
 
+        # Quando a Central está filtrada em um tópico específico (inclusive
+        # quando veio do botão Ver questões), o cadastro manual já nasce nesse
+        # contexto, sem exigir que o usuário refaça a classificação.
+        topico_id_contexto = self._obter_topico_id_contexto_central_questoes()
+        if topico_id_contexto is not None:
+            contexto = obter_contexto_topico(topico_id_contexto) or {}
+            disciplina = str(contexto.get("disciplina_nome") or "")
+            indice_disc = janela.questao_disciplina.findText(
+                disciplina,
+                Qt.MatchFixedString,
+            )
+            if indice_disc >= 0:
+                janela.questao_disciplina.setCurrentIndex(indice_disc)
+                janela.carregar_topicos()
+            indice_top = janela.questao_topico.findData(topico_id_contexto)
+            if indice_top >= 0:
+                janela.questao_topico.setCurrentIndex(indice_top)
+                janela.carregar_capitulos()
+
         if janela.exec() == QDialog.Accepted:
             self.carregar_questoes()
 
@@ -41152,8 +41723,19 @@ class SistemaEstudos(QMainWindow):
         )
         janela.exec()
 
-    def abrir_central_importacao_questoes(self):
-        janela = JanelaCentralImportacaoQuestoes(self)
+    def abrir_central_importacao_questoes(self, topico_id_padrao=None):
+        # clicked(bool) de QPushButton/QToolButton pode fornecer False como
+        # argumento. Isso não é um ID de tópico e deve ser tratado como ausência
+        # de contexto explícito.
+        if isinstance(topico_id_padrao, bool):
+            topico_id_padrao = None
+        if topico_id_padrao is None:
+            topico_id_padrao = self._obter_topico_id_contexto_central_questoes()
+
+        janela = JanelaCentralImportacaoQuestoes(
+            self,
+            topico_id_padrao=topico_id_padrao,
+        )
 
         if janela.exec() != QDialog.Accepted:
             return
@@ -41161,23 +41743,38 @@ class SistemaEstudos(QMainWindow):
         origem = janela.origem_escolhida
 
         if origem == "pdf":
-            self.importar_questoes_pdf()
+            if topico_id_padrao is None:
+                self.importar_questoes_pdf()
+            else:
+                self.importar_questoes_pdf(topico_id_padrao=topico_id_padrao)
         elif origem == "txt":
-            self.importar_questoes_txt()
+            if topico_id_padrao is None:
+                self.importar_questoes_txt()
+            else:
+                self.importar_questoes_txt(topico_id_padrao=topico_id_padrao)
         elif origem == "texto":
-            self.importar_questoes_texto()
+            if topico_id_padrao is None:
+                self.importar_questoes_texto()
+            else:
+                self.importar_questoes_texto(topico_id_padrao=topico_id_padrao)
         elif origem == "csv":
-            self.importar_questoes_csv()
+            if topico_id_padrao is None:
+                self.importar_questoes_csv()
+            else:
+                self.importar_questoes_csv(topico_id_padrao=topico_id_padrao)
 
-    def importar_questoes_texto(self):
-        janela = JanelaImportarTextoQuestoes(self)
+    def importar_questoes_texto(self, topico_id_padrao=None):
+        janela = JanelaImportarTextoQuestoes(
+            self,
+            topico_id_padrao=topico_id_padrao,
+        )
 
         if janela.exec() == QDialog.Accepted:
             if janela.importadas > 0:
                 self.carregar_questoes()
                 self.notificar_dados_alterados("questoes")
 
-    def importar_questoes_txt(self):
+    def importar_questoes_txt(self, topico_id_padrao=None):
         caminho, _ = QFileDialog.getOpenFileName(
             self,
             "Selecionar arquivo TXT de questões",
@@ -41243,13 +41840,14 @@ class SistemaEstudos(QMainWindow):
             self,
             origem_tipo="txt",
             nome_origem=Path(caminho).name,
+            topico_id_padrao=topico_id_padrao,
         )
 
         if janela.exec() == QDialog.Accepted and janela.importadas > 0:
             self.carregar_questoes()
             self.notificar_dados_alterados("questoes")
 
-    def importar_questoes_pdf(self):
+    def importar_questoes_pdf(self, topico_id_padrao=None):
         if not dependencia_pdf_disponivel():
             QMessageBox.warning(
                 self,
@@ -41355,7 +41953,8 @@ class SistemaEstudos(QMainWindow):
             caminho,
             dados_pdf,
             analise,
-            self
+            self,
+            topico_id_padrao=topico_id_padrao,
         )
 
         if janela.exec() == QDialog.Accepted:
@@ -41453,7 +42052,7 @@ class SistemaEstudos(QMainWindow):
             )
         )
 
-    def importar_questoes_csv(self):
+    def importar_questoes_csv(self, topico_id_padrao=None):
         caminho, _ = QFileDialog.getOpenFileName(
             self,
             "Importar questões",
@@ -41466,6 +42065,21 @@ class SistemaEstudos(QMainWindow):
 
         concurso_id = (
             obter_concurso_ativo()[0]
+        )
+        contexto_padrao = (
+            obter_contexto_topico(topico_id_padrao)
+            if topico_id_padrao is not None
+            else None
+        )
+        disciplina_padrao = (
+            str(contexto_padrao.get("disciplina_nome") or "")
+            if contexto_padrao
+            else ""
+        )
+        topico_padrao = (
+            str(contexto_padrao.get("topico_nome") or "")
+            if contexto_padrao
+            else ""
         )
 
         mapa_topicos = {}
@@ -41605,13 +42219,13 @@ class SistemaEstudos(QMainWindow):
                             or ""
                         ).strip()
 
-                disciplina = linha.get(
-                    "disciplina",
-                    ""
+                disciplina = (
+                    linha.get("disciplina", "").strip()
+                    or disciplina_padrao
                 )
-                topico = linha.get(
-                    "topico",
-                    ""
+                topico = (
+                    linha.get("topico", "").strip()
+                    or topico_padrao
                 )
                 enunciado = linha.get(
                     "enunciado",
@@ -56132,6 +56746,36 @@ class SistemaEstudos(QMainWindow):
             )
             botao.setIconSize(QSize(15, 15))
 
+        botoes_disciplina = (
+            ("botao_adicionar_topico", "fa6s.circle-plus", "destaque", 17),
+            ("botao_estudar_topico_disciplina", "fa6s.play", "destaque", 14),
+            ("botao_ver_questoes_topico_disciplina", "fa6s.list", "acao", 15),
+            ("botao_mais_topico_disciplina", "fa6s.ellipsis", "acao", 15),
+        )
+        for atributo, nome_icone, papel, tamanho in botoes_disciplina:
+            botao = getattr(self, atributo, None)
+            if botao is None:
+                continue
+            botao.setIcon(
+                criar_icone(
+                    nome_icone,
+                    tema=tema,
+                    papel=papel,
+                )
+            )
+            botao.setIconSize(QSize(tamanho, tamanho))
+
+        botao_mais_disciplina = getattr(self, "botao_mais_disciplina", None)
+        if botao_mais_disciplina is not None:
+            icone_mais = criar_icone(
+                "fa6s.ellipsis",
+                tema=tema,
+                papel="acao",
+            )
+            botao_mais_disciplina.setIcon(icone_mais)
+            botao_mais_disciplina.setIconSize(QSize(16, 16))
+            botao_mais_disciplina.setText("" if not icone_mais.isNull() else "⋯")
+
     def abrir_configuracoes(self):
         janela = JanelaConfiguracoes(
             self
@@ -57044,60 +57688,84 @@ class SistemaEstudos(QMainWindow):
         )
         cabecalho.addStretch()
 
-        self.botao_estado_disciplina = QPushButton(
+        # A ação principal da disciplina recebe destaque próprio. Comandos de
+        # manutenção menos frequentes ficam concentrados no menu compacto ao lado.
+        self.botao_adicionar_topico = QPushButton("Adicionar tópico")
+        self.botao_adicionar_topico.setObjectName("primaryButton")
+        self.botao_adicionar_topico.setFixedHeight(42)
+        self.botao_adicionar_topico.setMinimumWidth(174)
+        self.botao_adicionar_topico.setToolTip(
+            "Adicionar um novo título/tópico à disciplina atual."
+        )
+        self.botao_adicionar_topico.clicked.connect(self.novo_topico)
+
+        self.botao_mais_disciplina = QPushButton("⋯")
+        self.botao_mais_disciplina.setObjectName("subtleButton")
+        self.botao_mais_disciplina.setFixedSize(44, 42)
+        self.botao_mais_disciplina.setAccessibleName("Mais ações da disciplina")
+        self.botao_mais_disciplina.setToolTip("Mais ações da disciplina")
+
+        self.menu_disciplina = QMenu(self.botao_mais_disciplina)
+        self.acao_questoes_arquivadas_disciplina = self.menu_disciplina.addAction(
+            "Questões arquivadas"
+        )
+        self.acao_questoes_arquivadas_disciplina.triggered.connect(
+            self.abrir_questoes_desativadas_disciplina_atual
+        )
+        self.acao_lixeira_disciplina = self.menu_disciplina.addAction("Lixeira")
+        self.acao_lixeira_disciplina.triggered.connect(
+            lambda: JanelaLixeiraQuestoes(self).exec()
+        )
+        self.menu_disciplina.addSeparator()
+        self.acao_estado_disciplina = self.menu_disciplina.addAction(
             "Desligar disciplina"
         )
-        self.botao_estado_disciplina.setObjectName(
-            "toolbarButton"
+        self.acao_estado_disciplina.triggered.connect(
+            self.alternar_estado_disciplina_atual
         )
-        self.botao_estado_disciplina.setFixedHeight(
-            34
+        self.botao_mais_disciplina.setMenu(self.menu_disciplina)
+
+        # Controles mantidos apenas como proxies internos para preservar
+        # compatibilidade com rotinas legadas. Eles precisam ter um pai oculto:
+        # um QWidget/QPushButton criado sem parent vira uma janela top-level e,
+        # se alguma rotina chamar setVisible(True), pode aparecer como uma
+        # pequena janela flutuante sobre a disciplina.
+        self._proxies_disciplina = QWidget(tela)
+        self._proxies_disciplina.setObjectName("disciplineLegacyProxyContainer")
+        self._proxies_disciplina.setVisible(False)
+
+        self.botao_estado_disciplina = QPushButton(
+            "Desligar disciplina", self._proxies_disciplina
         )
-        self.botao_estado_disciplina.setToolTip(
-            "Desliga temporariamente toda a disciplina no perfil atual, sem apagar dados."
-        )
+        self.botao_estado_disciplina.setVisible(False)
         self.botao_estado_disciplina.clicked.connect(
             self.alternar_estado_disciplina_atual
         )
 
-        adicionar = QPushButton(
-            "+ Adicionar tópico"
+        self.botao_capitulos = QPushButton(
+            "Capítulos", self._proxies_disciplina
         )
-        adicionar.setObjectName(
-            "primaryButton"
+        self.botao_capitulos.setObjectName("toolbarButton")
+        self.botao_capitulos.setFixedHeight(34)
+        self.botao_capitulos.setEnabled(False)
+        self.botao_capitulos.setToolTip(
+            "Adicionar, renomear ou desligar capítulos do tópico selecionado."
         )
-        adicionar.setFixedHeight(
-            34
-        )
-        adicionar.clicked.connect(
-            self.novo_topico
+        self.botao_capitulos.clicked.connect(
+            self.abrir_capitulos_topico_selecionado
         )
 
-        renomear = QPushButton(
-            "Renomear"
-        )
-        renomear.setObjectName(
-            "toolbarButton"
-        )
-        renomear.setFixedHeight(
-            34
-        )
-        renomear.setToolTip(
-            "Renomear o tópico selecionado."
-        )
-        renomear.clicked.connect(
-            self.renomear_topico_selecionado
-        )
+        renomear = QPushButton("Renomear", self._proxies_disciplina)
+        renomear.setObjectName("toolbarButton")
+        renomear.setFixedHeight(34)
+        renomear.setToolTip("Renomear o tópico selecionado.")
+        renomear.clicked.connect(self.renomear_topico_selecionado)
 
         self.botao_estado_topico = QPushButton(
-            "Desligar tópico"
+            "Desligar tópico", self._proxies_disciplina
         )
-        self.botao_estado_topico.setObjectName(
-            "toolbarButton"
-        )
-        self.botao_estado_topico.setFixedHeight(
-            34
-        )
+        self.botao_estado_topico.setObjectName("toolbarButton")
+        self.botao_estado_topico.setFixedHeight(34)
         self.botao_estado_topico.setToolTip(
             "Desliga temporariamente o tópico no perfil atual, sem apagar histórico, agenda ou questões."
         )
@@ -57105,104 +57773,50 @@ class SistemaEstudos(QMainWindow):
             self.alternar_estado_topico_selecionado
         )
 
-        excluir = QPushButton(
-            "Excluir"
-        )
-        excluir.setObjectName(
-            "dangerButton"
-        )
-        excluir.setFixedHeight(
-            34
-        )
+        excluir = QPushButton("Excluir", self._proxies_disciplina)
+        excluir.setObjectName("dangerButton")
+        excluir.setFixedHeight(34)
         excluir.setToolTip(
-            "Excluir permanentemente o tópico selecionado."
+            "Excluir permanentemente o título/tópico ou capítulo selecionado."
         )
-        excluir.clicked.connect(
-            self.excluir_topico_selecionado
-        )
+        excluir.clicked.connect(self.excluir_topico_selecionado)
 
-        cabecalho.addWidget(
-            self.botao_estado_disciplina
-        )
-        cabecalho.addWidget(
-            adicionar
-        )
-        cabecalho.addWidget(
-            renomear
-        )
-        cabecalho.addWidget(
-            self.botao_estado_topico
-        )
-        cabecalho.addWidget(
-            excluir
-        )
+        cabecalho.addWidget(self.botao_adicionar_topico)
+        cabecalho.addWidget(self.botao_mais_disciplina)
 
-        layout.addLayout(
-            cabecalho
-        )
+        layout.addLayout(cabecalho)
 
         # ====================================================
         # PERFIL + RESUMO DA DISCIPLINA
         # ====================================================
 
         faixa_contexto = QHBoxLayout()
-        faixa_contexto.setSpacing(
-            10
-        )
+        faixa_contexto.setSpacing(10)
 
-        self.perfil_disciplina = QLabel(
-            "Perfil: —"
-        )
-        self.perfil_disciplina.setObjectName(
-            "profileBadge"
-        )
-
-        faixa_contexto.addWidget(
-            self.perfil_disciplina
-        )
+        self.perfil_disciplina = QLabel("Perfil: —")
+        self.perfil_disciplina.setObjectName("profileBadge")
+        faixa_contexto.addWidget(self.perfil_disciplina)
         faixa_contexto.addStretch()
 
+        # Proxies mantidos para chamadas legadas; as ações visíveis agora ficam
+        # no menu da disciplina.
         self.botao_questoes_desativadas_disciplina = QPushButton(
-            "Questões arquivadas"
+            "Questões arquivadas", self._proxies_disciplina
         )
-        self.botao_questoes_desativadas_disciplina.setObjectName(
-            "subtleButton"
-        )
-        self.botao_questoes_desativadas_disciplina.setFixedHeight(
-            32
-        )
-        self.botao_questoes_desativadas_disciplina.setToolTip(
-            "Ver somente as questões desativadas desta disciplina e reativá-las."
-        )
+        self.botao_questoes_desativadas_disciplina.setVisible(False)
         self.botao_questoes_desativadas_disciplina.clicked.connect(
             self.abrir_questoes_desativadas_disciplina_atual
         )
-        faixa_contexto.addWidget(
-            self.botao_questoes_desativadas_disciplina
-        )
 
         self.botao_lixeira_disciplina = QPushButton(
-            "Lixeira"
+            "Lixeira", self._proxies_disciplina
         )
-        self.botao_lixeira_disciplina.setObjectName(
-            "subtleButton"
-        )
-        self.botao_lixeira_disciplina.setFixedHeight(
-            32
-        )
-        self.botao_lixeira_disciplina.setToolTip(
-            "Ver as questões excluídas desta disciplina."
-        )
+        self.botao_lixeira_disciplina.setVisible(False)
         self.botao_lixeira_disciplina.clicked.connect(
             lambda: JanelaLixeiraQuestoes(self).exec()
         )
-        faixa_contexto.addWidget(
-            self.botao_lixeira_disciplina
-        )
 
-        layout.addLayout(
-            faixa_contexto
-        )
+        layout.addLayout(faixa_contexto)
 
         resumo = QGridLayout()
         resumo.setHorizontalSpacing(
@@ -57346,10 +57960,127 @@ class SistemaEstudos(QMainWindow):
         )
 
         # ====================================================
+        # AÇÕES DO TÓPICO SELECIONADO
+        # ====================================================
+
+        self.painel_acoes_topico = QFrame()
+        self.painel_acoes_topico.setObjectName("dialogCard")
+
+        painel_acoes_layout = QHBoxLayout(self.painel_acoes_topico)
+        painel_acoes_layout.setContentsMargins(14, 10, 14, 10)
+        painel_acoes_layout.setSpacing(12)
+
+        bloco_selecao = QVBoxLayout()
+        bloco_selecao.setSpacing(1)
+
+        self.rotulo_contexto_topico = QLabel("TÓPICO SELECIONADO")
+        self.rotulo_contexto_topico.setObjectName("metricLabel")
+
+        self.rotulo_topico_selecionado = QLabel("Selecione um tópico")
+        self.rotulo_topico_selecionado.setObjectName("sectionTitle")
+        self.rotulo_topico_selecionado.setWordWrap(True)
+
+        self.subtitulo_topico_selecionado = QLabel(
+            "Selecione uma linha abaixo para estudar, ver questões ou administrar o conteúdo."
+        )
+        self.subtitulo_topico_selecionado.setObjectName("pageSubtitle")
+        self.subtitulo_topico_selecionado.setWordWrap(True)
+
+        bloco_selecao.addWidget(self.rotulo_contexto_topico)
+        bloco_selecao.addWidget(self.rotulo_topico_selecionado)
+        bloco_selecao.addWidget(self.subtitulo_topico_selecionado)
+        painel_acoes_layout.addLayout(bloco_selecao, 1)
+
+        acoes_selecao = QHBoxLayout()
+        acoes_selecao.setSpacing(8)
+
+        self.botao_estudar_topico_disciplina = QPushButton("Estudar")
+        self.botao_estudar_topico_disciplina.setObjectName("primaryButton")
+        self.botao_estudar_topico_disciplina.setFixedHeight(38)
+        self.botao_estudar_topico_disciplina.setMinimumWidth(104)
+        self.botao_estudar_topico_disciplina.setToolTip(
+            "Montar uma sessão usando somente questões do tópico selecionado."
+        )
+        self.botao_estudar_topico_disciplina.clicked.connect(
+            self.estudar_topico_selecionado
+        )
+
+        self.botao_ver_questoes_topico_disciplina = QPushButton("Ver questões")
+        self.botao_ver_questoes_topico_disciplina.setObjectName("subtleButton")
+        self.botao_ver_questoes_topico_disciplina.setFixedHeight(38)
+        self.botao_ver_questoes_topico_disciplina.setMinimumWidth(128)
+        self.botao_ver_questoes_topico_disciplina.setToolTip(
+            "Abrir a Central de Questões já filtrada no tópico selecionado."
+        )
+        self.botao_ver_questoes_topico_disciplina.clicked.connect(
+            self.ver_questoes_topico_selecionado
+        )
+
+        # As ações administrativas ficam agrupadas num único menu. Isso dá
+        # protagonismo a Estudar e Ver questões sem perder nenhuma função.
+        self.botao_mais_topico_disciplina = QPushButton("Mais")
+        self.botao_mais_topico_disciplina.setObjectName("subtleButton")
+        self.botao_mais_topico_disciplina.setFixedHeight(38)
+        self.botao_mais_topico_disciplina.setMinimumWidth(88)
+        self.botao_mais_topico_disciplina.setToolTip(
+            "Detalhes e ações administrativas do conteúdo selecionado."
+        )
+
+        self.menu_mais_topico = QMenu(self.botao_mais_topico_disciplina)
+        self.acao_detalhes_topico = self.menu_mais_topico.addAction("Detalhes")
+        self.acao_detalhes_topico.triggered.connect(
+            self.abrir_detalhes_topico_selecionado
+        )
+        self.acao_capitulos_topico = self.menu_mais_topico.addAction("Capítulos")
+        self.acao_capitulos_topico.triggered.connect(
+            self.abrir_capitulos_topico_selecionado
+        )
+        self.separador_menu_topico_1 = self.menu_mais_topico.addSeparator()
+        self.acao_renomear_topico = self.menu_mais_topico.addAction(
+            "Renomear tópico"
+        )
+        self.acao_renomear_topico.triggered.connect(
+            self.renomear_conteudo_selecionado
+        )
+        self.acao_estado_topico = self.menu_mais_topico.addAction(
+            "Desligar tópico"
+        )
+        self.acao_estado_topico.triggered.connect(
+            self.alternar_estado_topico_selecionado
+        )
+        self.separador_menu_topico_2 = self.menu_mais_topico.addSeparator()
+        self.acao_excluir_topico = self.menu_mais_topico.addAction("Excluir")
+        self.acao_excluir_topico.triggered.connect(
+            self.excluir_topico_selecionado
+        )
+        self.botao_mais_topico_disciplina.setMenu(self.menu_mais_topico)
+
+        # Proxy interno para preservar chamadas antigas; a ação visível fica
+        # dentro de "Mais".
+        self.botao_detalhes_topico_disciplina = QPushButton(
+            "Detalhes", self._proxies_disciplina
+        )
+        self.botao_detalhes_topico_disciplina.setVisible(False)
+        self.botao_detalhes_topico_disciplina.clicked.connect(
+            self.abrir_detalhes_topico_selecionado
+        )
+
+        acoes_selecao.addWidget(self.botao_estudar_topico_disciplina)
+        acoes_selecao.addWidget(self.botao_ver_questoes_topico_disciplina)
+        acoes_selecao.addWidget(self.botao_mais_topico_disciplina)
+
+        painel_acoes_layout.addLayout(acoes_selecao, 0)
+        layout.addWidget(self.painel_acoes_topico)
+
+        self.botao_renomear_topico = renomear
+        self.botao_excluir_topico = excluir
+
+        # ====================================================
         # TABELA DE TÓPICOS
         # ====================================================
 
         self.tabela_topicos = QTableWidget()
+        self.tabela_topicos.setObjectName("disciplineTopicsTable")
 
         self.tabela_topicos.setColumnCount(
             8
@@ -57390,45 +58121,30 @@ class SistemaEstudos(QMainWindow):
             False
         )
 
-        self.tabela_topicos.horizontalHeader().setSectionResizeMode(
-            0,
-            QHeaderView.Stretch
-        )
+        cabecalho_topicos = self.tabela_topicos.horizontalHeader()
+        cabecalho_topicos.setStretchLastSection(False)
+        cabecalho_topicos.setSectionResizeMode(0, QHeaderView.Stretch)
+        for coluna_fixa in range(1, 8):
+            cabecalho_topicos.setSectionResizeMode(
+                coluna_fixa,
+                QHeaderView.Fixed
+            )
 
-        self.tabela_topicos.setColumnWidth(
-            1,
-            78
-        )
+        # As colunas operacionais permanecem compactas e previsíveis. Todo o
+        # espaço horizontal excedente fica para o nome do tópico.
+        larguras_topicos = {
+            1: 74,   # Atualizar
+            2: 54,   # Rev.
+            3: 94,   # Última
+            4: 94,   # Próxima
+            5: 74,   # % atual
+            6: 122,  # Nível
+            7: 84,   # Estado
+        }
+        for coluna, largura in larguras_topicos.items():
+            self.tabela_topicos.setColumnWidth(coluna, largura)
 
-        self.tabela_topicos.setColumnWidth(
-            2,
-            62
-        )
-
-        self.tabela_topicos.setColumnWidth(
-            3,
-            110
-        )
-
-        self.tabela_topicos.setColumnWidth(
-            4,
-            110
-        )
-
-        self.tabela_topicos.setColumnWidth(
-            5,
-            82
-        )
-
-        self.tabela_topicos.setColumnWidth(
-            6,
-            132
-        )
-
-        self.tabela_topicos.setColumnWidth(
-            7,
-            96
-        )
+        self.tabela_topicos.setTextElideMode(Qt.ElideRight)
 
         self.topicos_expandidos = set()
 
@@ -57457,15 +58173,24 @@ class SistemaEstudos(QMainWindow):
         if not hasattr(self, "botao_estado_disciplina"):
             return
         disciplina_id, pausada = self.obter_disciplina_atual_estado()
-        self.botao_estado_disciplina.setEnabled(disciplina_id is not None)
-        self.botao_estado_disciplina.setText(
-            "Reativar disciplina" if pausada else "Desligar disciplina"
-        )
-        self.botao_estado_disciplina.setToolTip(
+        habilitado = disciplina_id is not None
+        texto_estado = "Reativar disciplina" if pausada else "Desligar disciplina"
+        dica_estado = (
             "Reativa a disciplina e devolve seus conteúdos às filas e recomendações."
             if pausada
             else "Desliga temporariamente toda a disciplina no perfil atual, sem apagar tópicos, questões ou histórico."
         )
+
+        self.botao_estado_disciplina.setEnabled(habilitado)
+        self.botao_estado_disciplina.setText(texto_estado)
+        self.botao_estado_disciplina.setToolTip(dica_estado)
+
+        if hasattr(self, "acao_estado_disciplina"):
+            self.acao_estado_disciplina.setEnabled(habilitado)
+            self.acao_estado_disciplina.setText(texto_estado)
+            self.acao_estado_disciplina.setToolTip(dica_estado)
+        if hasattr(self, "botao_mais_disciplina"):
+            self.botao_mais_disciplina.setEnabled(habilitado)
 
     def alternar_estado_disciplina_atual(self):
         disciplina_id, pausada = self.obter_disciplina_atual_estado()
@@ -57531,6 +58256,12 @@ class SistemaEstudos(QMainWindow):
             nome_disciplina
         )
         self.atualizar_estado_disciplina_atual()
+
+        if hasattr(self, "botao_capitulos"):
+            self.botao_capitulos.setVisible(
+                not eh_disciplina_ctb(nome_disciplina)
+            )
+            self.botao_capitulos.setEnabled(False)
 
         if hasattr(
             self,
@@ -57824,6 +58555,15 @@ class SistemaEstudos(QMainWindow):
         )
 
     def renderizar_topicos(self, dados):
+        selecao_id = None
+        selecao_tipo = None
+        linha_anterior = self.tabela_topicos.currentRow()
+        if linha_anterior >= 0:
+            item_anterior = self.tabela_topicos.item(linha_anterior, 0)
+            if item_anterior is not None:
+                selecao_id = item_anterior.data(Qt.UserRole)
+                selecao_tipo = item_anterior.data(Qt.UserRole + 2)
+
         self.tabela_topicos.setRowCount(
             0
         )
@@ -57864,26 +58604,23 @@ class SistemaEstudos(QMainWindow):
             importancia = dado[6]
             pausado = bool(dado[7])
 
-            # Tópico
-            item_topico = QTableWidgetItem(
-                nome
-            )
-            item_topico.setData(
-                Qt.UserRole,
-                topico_id
-            )
-            item_topico.setData(
-                Qt.UserRole + 1,
-                pausado
-            )
-            item_topico.setData(
-                Qt.UserRole + 2,
-                "topico"
-            )
-            if pausado:
-                item_topico.setToolTip(
-                    "Tópico desligado temporariamente no perfil atual. O histórico continua preservado."
+            # Tópico: a tabela usa uma representação em linha única para
+            # aproveitar a largura disponível, mas o nome original fica
+            # preservado nos dados do item para todas as operações.
+            nome_exibicao = formatar_nome_conteudo_tabela(nome)
+            item_topico = QTableWidgetItem(nome_exibicao)
+            item_topico.setData(Qt.UserRole, topico_id)
+            item_topico.setData(Qt.UserRole + 1, pausado)
+            item_topico.setData(Qt.UserRole + 2, "topico")
+            item_topico.setData(Qt.UserRole + 4, nome)
+            item_topico.setToolTip(
+                (
+                    f"{nome}\n\nTópico desligado temporariamente no perfil atual. "
+                    "O histórico continua preservado."
                 )
+                if pausado
+                else nome
+            )
             self.tabela_topicos.setItem(
                 linha,
                 0,
@@ -57893,11 +58630,14 @@ class SistemaEstudos(QMainWindow):
             tem_capitulos = topico_possui_capitulos(topico_id)
             if tem_capitulos:
                 celula_topico = QWidget()
+                celula_topico.setObjectName("disciplineTopicCell")
+                celula_topico.setProperty("inactive", pausado)
                 layout_topico = QHBoxLayout(celula_topico)
                 layout_topico.setContentsMargins(3, 0, 3, 0)
                 layout_topico.setSpacing(4)
 
                 botao_expandir = QToolButton()
+                botao_expandir.setObjectName("topicExpandButton")
                 botao_expandir.setText(
                     "−" if topico_id in self.topicos_expandidos else "+"
                 )
@@ -57912,9 +58652,14 @@ class SistemaEstudos(QMainWindow):
                     self.alternar_expansao_topico(tid)
                 )
 
-                texto_topico = QLabel(nome)
+                texto_topico = QLabel(nome_exibicao)
+                texto_topico.setObjectName("disciplineTopicCellLabel")
+                texto_topico.setSizePolicy(
+                    QSizePolicy.Expanding,
+                    QSizePolicy.Preferred
+                )
                 texto_topico.setToolTip(
-                    "Clique no + para exibir os capítulos deste título."
+                    f"{nome}\n\nClique no + para exibir os capítulos deste título."
                 )
                 layout_topico.addWidget(botao_expandir)
                 layout_topico.addWidget(texto_topico, 1)
@@ -58089,6 +58834,16 @@ class SistemaEstudos(QMainWindow):
                 item_estado
             )
 
+            if not pausado:
+                # Estado ativo usa apenas a cor do texto. O fundo da linha fica
+                # reservado à zebragem/seleção da tabela para não competir com
+                # a seleção atual do usuário.
+                aplicar_destaque_tabela(
+                    item_estado,
+                    "sucesso",
+                    False
+                )
+
             if pausado:
                 # A linha inteira usa o mesmo sinal visual de conteúdo inativo.
                 # Os dados continuam legíveis, mas deixam de competir visualmente
@@ -58102,7 +58857,7 @@ class SistemaEstudos(QMainWindow):
                         aplicar_destaque_tabela(
                             item_inativo,
                             "inativo",
-                            True
+                            False
                         )
                 seletor.setEnabled(False)
                 seletor.setToolTip(
@@ -58141,7 +58896,32 @@ class SistemaEstudos(QMainWindow):
             self.contador_topicos.setText(
                 f"{visiveis} de {total}"
             )
-        self.atualizar_botao_estado_topico()
+
+        linha_restaurar = -1
+        primeira_linha_topico = -1
+        for linha_tabela in range(self.tabela_topicos.rowCount()):
+            item_linha = self.tabela_topicos.item(linha_tabela, 0)
+            if item_linha is None:
+                continue
+            tipo_linha = item_linha.data(Qt.UserRole + 2) or "topico"
+            if primeira_linha_topico < 0 and tipo_linha == "topico":
+                primeira_linha_topico = linha_tabela
+            if (
+                selecao_id is not None
+                and item_linha.data(Qt.UserRole) == selecao_id
+                and tipo_linha == selecao_tipo
+            ):
+                linha_restaurar = linha_tabela
+                break
+
+        if linha_restaurar < 0:
+            linha_restaurar = primeira_linha_topico
+
+        if linha_restaurar >= 0:
+            self.tabela_topicos.setCurrentCell(linha_restaurar, 0)
+        else:
+            self.tabela_topicos.clearSelection()
+            self.atualizar_botao_estado_topico()
 
     def _reaplicar_filtros_topicos_preservando_scroll(self, valor_scroll=None):
         """Reconstrói a tabela sem devolver o usuário ao topo da lista."""
@@ -58183,13 +58963,15 @@ class SistemaEstudos(QMainWindow):
         linha = self.tabela_topicos.rowCount()
         self.tabela_topicos.insertRow(linha)
 
-        item_capitulo = QTableWidgetItem(f"    ↳ {nome}")
+        nome_exibicao = formatar_nome_conteudo_tabela(nome)
+        item_capitulo = QTableWidgetItem(f"    ↳ {nome_exibicao}")
         item_capitulo.setData(Qt.UserRole, capitulo_id)
         item_capitulo.setData(Qt.UserRole + 1, pausado)
         item_capitulo.setData(Qt.UserRole + 2, "capitulo")
         item_capitulo.setData(Qt.UserRole + 3, topico_id)
+        item_capitulo.setData(Qt.UserRole + 4, nome)
         item_capitulo.setToolTip(
-            "Capítulo interno. As estrelas representam sua dificuldade."
+            f"{nome}\n\nCapítulo interno. As estrelas representam sua dificuldade."
         )
         self.tabela_topicos.setItem(linha, 0, item_capitulo)
 
@@ -58225,12 +59007,19 @@ class SistemaEstudos(QMainWindow):
         )
         self.tabela_topicos.setItem(linha, 7, item_estado)
 
+        if not pausado:
+            aplicar_destaque_tabela(
+                item_estado,
+                "sucesso",
+                False
+            )
+
         if pausado:
             for coluna in (0, 1, 2, 3, 4, 5, 7):
                 aplicar_destaque_tabela(
                     self.tabela_topicos.item(linha, coluna),
                     "inativo",
-                    True
+                    False
                 )
             seletor.setToolTip(
                 "Capítulo desligado. Reative-o para alterar a dificuldade."
@@ -58310,40 +59099,158 @@ class SistemaEstudos(QMainWindow):
                     self._reaplicar_filtros_topicos_preservando_scroll(valor)
             )
 
+    def _obter_topico_pai_conteudo_selecionado(self):
+        conteudo_id, nome, tipo, pai_id, _pausado = (
+            self.obter_conteudo_selecionado()
+        )
+        if conteudo_id is None or tipo == "parte":
+            return None, None
+
+        if tipo == "capitulo":
+            topico_id = pai_id
+            nome_topico = None
+            for dado in getattr(self, "dados_topicos_atuais", []):
+                if int(dado[0]) == int(topico_id):
+                    nome_topico = str(dado[1])
+                    break
+            return topico_id, nome_topico or "Tópico"
+
+        return conteudo_id, nome
+
+    def _obter_topico_acao_selecionado(self):
+        topico_id, nome_topico = self._obter_topico_pai_conteudo_selecionado()
+        if topico_id is None:
+            QMessageBox.information(
+                self,
+                "Selecione um tópico",
+                "Selecione primeiro um tópico da tabela."
+            )
+            return None, None
+        return int(topico_id), str(nome_topico or "Tópico")
+
+    def estudar_topico_selecionado(self):
+        topico_id, nome_topico = self._obter_topico_acao_selecionado()
+        if topico_id is None:
+            return
+        if topico_esta_pausado(topico_id):
+            QMessageBox.information(
+                self,
+                "Tópico desligado",
+                "Reative este tópico antes de iniciar uma nova sessão de estudo."
+            )
+            return
+
+        janela_config = JanelaEstudoTopico(
+            topico_id,
+            nome_topico,
+            self,
+        )
+        if janela_config.exec() != QDialog.Accepted:
+            return
+
+        configuracao = janela_config.configuracao or {}
+        fila = configuracao.get("fila") or []
+        if not fila:
+            return
+
+        janela = JanelaResolverQuestoes(configuracao, self)
+        janela.exec_nao_modal()
+        self.carregar_topicos()
+
+    def ver_questoes_topico_selecionado(self):
+        topico_id, _nome_topico = self._obter_topico_acao_selecionado()
+        if topico_id is None:
+            return
+
+        # Esta tela já pertence à janela principal; navegar para a Central
+        # evita uma segunda janela administrativa e mantém importação, cadastro
+        # manual, edição e filtros no mesmo lugar.
+        self.abrir_questoes_topico_contextual(topico_id)
+
+    def abrir_detalhes_topico_selecionado(self):
+        topico_id, nome_topico = self._obter_topico_acao_selecionado()
+        if topico_id is None:
+            return
+
+        janela = JanelaTopico(
+            topico_id,
+            nome_topico,
+            self,
+        )
+        janela.exec()
+        self.carregar_topicos()
+
+    def abrir_capitulos_topico_selecionado(self):
+        if not self.disciplina_atual or eh_disciplina_ctb(self.disciplina_atual):
+            return
+
+        topico_id, nome_topico = self._obter_topico_pai_conteudo_selecionado()
+        if topico_id is None:
+            QMessageBox.information(
+                self,
+                "Selecione um tópico",
+                "Selecione primeiro o tópico ao qual os capítulos pertencem."
+            )
+            return
+
+        janela = JanelaCapitulosTopico(
+            topico_id,
+            nome_topico,
+            self
+        )
+        janela.exec()
+
+        if topico_possui_capitulos(topico_id):
+            self.topicos_expandidos.add(int(topico_id))
+
+        self.carregar_topicos()
+
     def novo_topico(self):
         if not self.disciplina_atual:
             return
 
-        nome, confirmou = (
-            QInputDialog.getText(
-                self,
-                "Novo tópico",
-                f"Novo tópico de "
-                f"{self.disciplina_atual}:"
-            )
+        janela = JanelaNovoTopicoEstruturado(
+            self.disciplina_atual,
+            self
         )
-
-        if not confirmou:
+        if janela.exec() != QDialog.Accepted:
             return
 
-        nome = nome.strip()
-
-        if not nome:
-            return
+        nome = janela.nome_topico.strip()
+        nome_capitulo = janela.nome_capitulo.strip()
 
         criado = adicionar_topico(
             self.disciplina_atual,
             nome
         )
 
-        if criado:
-            self.carregar_topicos()
-        else:
+        if not criado:
             QMessageBox.information(
                 self,
                 "Tópico existente",
                 "Esse tópico já está cadastrado."
             )
+            return
+
+        topico_id = resolver_topico_id_estrutural(
+            self.disciplina_atual,
+            nome
+        )
+
+        if nome_capitulo and topico_id is not None:
+            if adicionar_capitulo(topico_id, nome_capitulo):
+                self.topicos_expandidos.add(int(topico_id))
+            else:
+                QMessageBox.warning(
+                    self,
+                    "Capítulo não criado",
+                    (
+                        "O tópico foi criado, mas não foi possível cadastrar "
+                        "o capítulo inicial. Você pode adicioná-lo depois pelo botão Capítulos."
+                    )
+                )
+
+        self.carregar_topicos()
 
     def obter_conteudo_selecionado(self):
         linha = self.tabela_topicos.currentRow()
@@ -58359,9 +59266,13 @@ class SistemaEstudos(QMainWindow):
         if item is None:
             return None, None, None, None, False
 
+        nome_original = item.data(Qt.UserRole + 4)
+        if nome_original is None:
+            nome_original = item.text().replace("    ↳ ", "", 1)
+
         return (
             item.data(Qt.UserRole),
-            item.text().replace("    ↳ ", "", 1),
+            str(nome_original),
             item.data(Qt.UserRole + 2) or "topico",
             item.data(Qt.UserRole + 3),
             bool(item.data(Qt.UserRole + 1))
@@ -58380,32 +59291,171 @@ class SistemaEstudos(QMainWindow):
     def atualizar_botao_estado_topico(self):
         if not hasattr(self, "botao_estado_topico"):
             return
-        conteudo_id, _nome, tipo, _pai_id, pausado = (
+
+        conteudo_id, nome_conteudo, tipo, pai_id, pausado = (
             self.obter_conteudo_selecionado()
         )
+
+        topico_pai_id, nome_topico_pai = (
+            self._obter_topico_pai_conteudo_selecionado()
+        )
+        topico_pausado = (
+            topico_esta_pausado(topico_pai_id)
+            if topico_pai_id is not None
+            else False
+        )
+
+        permite_capitulos = (
+            bool(self.disciplina_atual)
+            and not eh_disciplina_ctb(self.disciplina_atual)
+        )
+        tem_topico = topico_pai_id is not None
+
+        # Painel contextual: o tipo selecionado fica explícito e o resumo usa
+        # somente informações que ajudam a decidir o próximo passo.
+        if hasattr(self, "rotulo_topico_selecionado"):
+            if conteudo_id is None:
+                if hasattr(self, "rotulo_contexto_topico"):
+                    self.rotulo_contexto_topico.setText("CONTEÚDO")
+                self.rotulo_topico_selecionado.setText("Selecione um tópico")
+                self.subtitulo_topico_selecionado.setText(
+                    "Selecione uma linha abaixo para estudar, ver questões ou administrar o conteúdo."
+                )
+            elif tipo == "capitulo":
+                if hasattr(self, "rotulo_contexto_topico"):
+                    self.rotulo_contexto_topico.setText("CAPÍTULO SELECIONADO")
+                self.rotulo_topico_selecionado.setText(nome_conteudo or "Capítulo")
+                self.subtitulo_topico_selecionado.setText(
+                    f"Título pai: {nome_topico_pai or '—'} • "
+                    "Estudar e Ver questões usam o título completo."
+                )
+            else:
+                if hasattr(self, "rotulo_contexto_topico"):
+                    self.rotulo_contexto_topico.setText("TÓPICO SELECIONADO")
+
+                quantidade_capitulos = (
+                    len(listar_capitulos_topico(int(conteudo_id)))
+                    if permite_capitulos and conteudo_id is not None
+                    else 0
+                )
+                quantidade_questoes = (
+                    contar_questoes_topico(int(conteudo_id))
+                    if conteudo_id is not None
+                    else 0
+                )
+                dado_topico = next(
+                    (
+                        dado
+                        for dado in getattr(self, "dados_topicos_atuais", [])
+                        if int(dado[0]) == int(conteudo_id)
+                    ),
+                    None,
+                )
+                informacoes = [
+                    f"{quantidade_questoes} questão"
+                    + ("" if quantidade_questoes == 1 else "ões")
+                ]
+                if quantidade_capitulos:
+                    informacoes.append(
+                        f"{quantidade_capitulos} capítulo"
+                        + ("" if quantidade_capitulos == 1 else "s")
+                    )
+                if dado_topico is not None:
+                    revisoes = int(dado_topico[2])
+                    informacoes.append(
+                        f"{revisoes} revisão" + ("" if revisoes == 1 else "ões")
+                    )
+                    if dado_topico[5] is not None:
+                        informacoes.append(
+                            f"{formatar_percentual(dado_topico[5])} atual"
+                        )
+                self.rotulo_topico_selecionado.setText(nome_conteudo or "Tópico")
+                self.subtitulo_topico_selecionado.setText(" • ".join(informacoes))
+
+        if hasattr(self, "botao_estudar_topico_disciplina"):
+            self.botao_estudar_topico_disciplina.setEnabled(
+                tem_topico and not topico_pausado
+            )
+            self.botao_estudar_topico_disciplina.setToolTip(
+                "Tópico desligado: reative-o para iniciar uma nova sessão."
+                if tem_topico and topico_pausado
+                else "Montar uma sessão usando somente questões do tópico selecionado."
+            )
+
+        if hasattr(self, "botao_ver_questoes_topico_disciplina"):
+            self.botao_ver_questoes_topico_disciplina.setEnabled(tem_topico)
+
+        if hasattr(self, "botao_detalhes_topico_disciplina"):
+            self.botao_detalhes_topico_disciplina.setEnabled(tem_topico)
+
+        # Proxies internos usados por rotinas legadas.
+        if hasattr(self, "botao_renomear_topico"):
+            self.botao_renomear_topico.setEnabled(
+                conteudo_id is not None and tipo == "topico"
+            )
+        if hasattr(self, "botao_excluir_topico"):
+            self.botao_excluir_topico.setEnabled(conteudo_id is not None)
+        if hasattr(self, "botao_capitulos"):
+            # Proxy legado: nunca deve participar da interface visível. A ação
+            # real de capítulos está no menu "Mais". Mantê-lo oculto evita que
+            # o Qt o promova visualmente para uma janela flutuante.
+            self.botao_capitulos.setVisible(False)
+            self.botao_capitulos.setEnabled(permite_capitulos and tem_topico)
+
+        # Menu "Mais": adapta rótulos e disponibilidade ao nível selecionado.
+        if hasattr(self, "botao_mais_topico_disciplina"):
+            self.botao_mais_topico_disciplina.setEnabled(conteudo_id is not None)
+
+        if hasattr(self, "acao_detalhes_topico"):
+            self.acao_detalhes_topico.setEnabled(tem_topico)
+            self.acao_detalhes_topico.setText(
+                "Detalhes do título" if tipo == "capitulo" else "Detalhes"
+            )
+
+        if hasattr(self, "acao_capitulos_topico"):
+            self.acao_capitulos_topico.setVisible(permite_capitulos and tem_topico)
+            self.acao_capitulos_topico.setEnabled(permite_capitulos and tem_topico)
+            self.acao_capitulos_topico.setText("Gerenciar capítulos")
+
+        if hasattr(self, "acao_renomear_topico"):
+            self.acao_renomear_topico.setEnabled(conteudo_id is not None)
+            self.acao_renomear_topico.setText(
+                "Renomear capítulo" if tipo == "capitulo" else "Renomear tópico"
+            )
+
+        if hasattr(self, "acao_excluir_topico"):
+            self.acao_excluir_topico.setEnabled(conteudo_id is not None)
+            self.acao_excluir_topico.setText(
+                "Excluir capítulo" if tipo == "capitulo" else "Excluir tópico"
+            )
+
         if conteudo_id is None:
             self.botao_estado_topico.setEnabled(False)
             self.botao_estado_topico.setText("Desligar tópico")
+            if hasattr(self, "acao_estado_topico"):
+                self.acao_estado_topico.setEnabled(False)
+                self.acao_estado_topico.setText("Desligar tópico")
             return
 
         if tipo == "capitulo":
-            self.botao_estado_topico.setEnabled(True)
-            self.botao_estado_topico.setText(
-                "Reativar capítulo" if pausado else "Desligar capítulo"
-            )
-            self.botao_estado_topico.setToolTip(
+            texto_estado = "Reativar capítulo" if pausado else "Desligar capítulo"
+            dica_estado = (
                 "Reativar o capítulo no perfil atual."
                 if pausado
                 else "Desligar temporariamente este capítulo no perfil atual."
             )
+            self.botao_estado_topico.setEnabled(True)
+            self.botao_estado_topico.setText(texto_estado)
+            self.botao_estado_topico.setToolTip(dica_estado)
+            if hasattr(self, "acao_estado_topico"):
+                self.acao_estado_topico.setEnabled(True)
+                self.acao_estado_topico.setText(texto_estado)
+                self.acao_estado_topico.setToolTip(dica_estado)
             return
 
         pausado = topico_esta_pausado(conteudo_id)
-        self.botao_estado_topico.setEnabled(True)
-        self.botao_estado_topico.setText(
-            "Reativar tópico" if pausado else "Desligar tópico"
-        )
-        self.botao_estado_topico.setToolTip(
+        texto_estado = "Reativar tópico" if pausado else "Desligar tópico"
+        dica_estado = (
             "Reativar o tópico no perfil atual."
             if pausado
             else (
@@ -58413,6 +59463,13 @@ class SistemaEstudos(QMainWindow):
                 "Ele ficará fora de recomendações, Jornada, revisões automáticas e novas baterias, sem perder histórico."
             )
         )
+        self.botao_estado_topico.setEnabled(True)
+        self.botao_estado_topico.setText(texto_estado)
+        self.botao_estado_topico.setToolTip(dica_estado)
+        if hasattr(self, "acao_estado_topico"):
+            self.acao_estado_topico.setEnabled(True)
+            self.acao_estado_topico.setText(texto_estado)
+            self.acao_estado_topico.setToolTip(dica_estado)
 
     def alternar_estado_topico_selecionado(self):
         conteudo_id, nome_conteudo, tipo, _pai_id, pausado = (
@@ -58540,6 +59597,43 @@ class SistemaEstudos(QMainWindow):
 
         self.carregar_topicos()
 
+    def renomear_conteudo_selecionado(self):
+        conteudo_id, nome_atual, tipo, _pai_id, _pausado = (
+            self.obter_conteudo_selecionado()
+        )
+        if conteudo_id is None:
+            QMessageBox.information(
+                self,
+                "Selecione um conteúdo",
+                "Primeiro selecione um título/tópico ou capítulo da tabela."
+            )
+            return
+
+        if tipo != "capitulo":
+            self.renomear_topico_selecionado()
+            return
+
+        novo_nome, confirmou = QInputDialog.getText(
+            self,
+            "Renomear capítulo",
+            "Novo nome:",
+            text=nome_atual or "",
+        )
+        if not confirmou:
+            return
+        novo_nome = novo_nome.strip()
+        if not novo_nome or novo_nome == (nome_atual or ""):
+            return
+
+        if renomear_capitulo(conteudo_id, novo_nome):
+            self.carregar_topicos()
+        else:
+            QMessageBox.information(
+                self,
+                "Nome já utilizado",
+                "Já existe um capítulo com esse nome neste título/tópico."
+            )
+
     def renomear_topico_selecionado(self):
         topico_id, nome_atual = (
             self.obter_topico_selecionado()
@@ -58586,17 +59680,68 @@ class SistemaEstudos(QMainWindow):
             )
 
     def excluir_topico_selecionado(self):
-        topico_id, nome_topico = (
-            self.obter_topico_selecionado()
+        conteudo_id, nome_conteudo, tipo, pai_id, _pausado = (
+            self.obter_conteudo_selecionado()
         )
 
-        if topico_id is None:
+        if conteudo_id is None:
             QMessageBox.information(
                 self,
-                "Selecione um tópico",
-                "Primeiro selecione um tópico da tabela."
+                "Selecione um conteúdo",
+                "Primeiro selecione um título/tópico ou capítulo da tabela."
             )
             return
+
+        if tipo == "capitulo":
+            quantidade_questoes = contar_questoes_capitulo(conteudo_id)
+            resposta = QMessageBox.question(
+                self,
+                "Excluir capítulo",
+                (
+                    f"Excluir permanentemente o capítulo:\n\n{nome_conteudo}\n\n"
+                    f"Questões atualmente classificadas neste capítulo: "
+                    f"{quantidade_questoes}\n\n"
+                    "As questões NÃO serão apagadas. Elas permanecerão no "
+                    "título/tópico pai, mas ficarão sem capítulo até serem "
+                    "reclassificadas.\n\n"
+                    "Deseja continuar?"
+                ),
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            if resposta != QMessageBox.Yes:
+                return
+
+            if not excluir_capitulo(conteudo_id):
+                QMessageBox.warning(
+                    self,
+                    "Excluir capítulo",
+                    "Não foi possível excluir o capítulo selecionado."
+                )
+                return
+
+            try:
+                self.cache_analitico.invalidar()
+            except Exception:
+                pass
+
+            # Mantém o usuário no mesmo título, agora sem a divisão removida.
+            self.aplicar_filtros_topicos()
+            if pai_id is not None:
+                for linha in range(self.tabela_topicos.rowCount()):
+                    item = self.tabela_topicos.item(linha, 0)
+                    if (
+                        item is not None
+                        and item.data(Qt.UserRole) == int(pai_id)
+                        and (item.data(Qt.UserRole + 2) or "topico") == "topico"
+                    ):
+                        self.tabela_topicos.setCurrentCell(linha, 0)
+                        break
+            self.notificar_dados_alterados("all")
+            return
+
+        topico_id = conteudo_id
+        nome_topico = nome_conteudo
 
         qtd_programa = contar_revisoes_programa(
             topico_id
@@ -58605,18 +59750,29 @@ class SistemaEstudos(QMainWindow):
         resumo = obter_resumo_topico(
             topico_id
         )
+        quantidade_capitulos = (
+            len(listar_capitulos_topico(int(topico_id)))
+            if not eh_disciplina_ctb(self.disciplina_atual)
+            else 0
+        )
+        texto_capitulos = (
+            f"Capítulos internos associados: {quantidade_capitulos}\n"
+            if quantidade_capitulos
+            else ""
+        )
 
         resposta = QMessageBox.question(
             self,
-            "Excluir tópico",
+            "Excluir título/tópico",
             (
-                f"Excluir o tópico:\n\n{nome_topico}\n\n"
+                f"Excluir permanentemente o título/tópico:\n\n{nome_topico}\n\n"
+                f"{texto_capitulos}"
                 f"Revisões totais associadas: "
                 f"{resumo['revisoes_totais']}\n"
                 f"Revisões detalhadas criadas no programa: "
                 f"{qtd_programa}\n\n"
-                "O tópico, sua agenda e suas revisões detalhadas "
-                "serão removidos do banco de dados.\n\n"
+                "O título/tópico, seus capítulos, suas questões, sua agenda "
+                "e suas revisões detalhadas serão removidos do banco de dados.\n\n"
                 "Deseja continuar?"
             ),
             QMessageBox.Yes | QMessageBox.No,
@@ -58630,7 +59786,12 @@ class SistemaEstudos(QMainWindow):
             topico_id
         )
 
+        try:
+            self.cache_analitico.invalidar()
+        except Exception:
+            pass
         self.carregar_topicos()
+        self.notificar_dados_alterados("all")
 
     def atualizar_revisao_topico(
         self,

@@ -817,6 +817,21 @@ def criar_banco():
             )
         """)
 
+        # Registra capítulos-padrão removidos explicitamente pelo usuário.
+        # Isso evita que estruturas automáticas (hoje usadas em Direito Penal)
+        # recriem um capítulo que foi excluído pela interface.
+        conexao.execute("""
+            CREATE TABLE IF NOT EXISTS capitulos_padrao_excluidos (
+                topico_id INTEGER NOT NULL,
+                nome_normalizado TEXT NOT NULL,
+                excluido_em TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+                PRIMARY KEY (topico_id, nome_normalizado),
+                FOREIGN KEY (topico_id)
+                    REFERENCES topicos(id)
+                    ON DELETE CASCADE
+            )
+        """)
+
         colunas_topico_concurso = {
             linha[1]
             for linha in conexao.execute(
@@ -4757,8 +4772,30 @@ def _obter_capitulos_padrao_topico(topico_id, conexao):
     return correspondencias[0] if correspondencias else ()
 
 
-def _garantir_capitulos_padrao(topico_id, conexao):
+def _capitulos_padrao_disponiveis(topico_id, conexao):
     capitulos = _obter_capitulos_padrao_topico(topico_id, conexao)
+    if not capitulos:
+        return ()
+
+    excluidos = {
+        str(linha[0])
+        for linha in conexao.execute(
+            """
+            SELECT nome_normalizado
+            FROM capitulos_padrao_excluidos
+            WHERE topico_id = ?
+            """,
+            (int(topico_id),),
+        ).fetchall()
+    }
+    return tuple(
+        nome for nome in capitulos
+        if _normalizar_chave_conteudo(nome) not in excluidos
+    )
+
+
+def _garantir_capitulos_padrao(topico_id, conexao):
+    capitulos = _capitulos_padrao_disponiveis(topico_id, conexao)
     for ordem, nome in enumerate(capitulos, start=1):
         conexao.execute(
             """
@@ -4785,7 +4822,7 @@ def topico_possui_capitulos(topico_id):
             (int(topico_id),)
         ).fetchone()
         return bool(existe) or bool(
-            _obter_capitulos_padrao_topico(topico_id, conexao)
+            _capitulos_padrao_disponiveis(topico_id, conexao)
         )
 
 
@@ -4879,6 +4916,15 @@ def adicionar_capitulo(topico_id, nome_capitulo):
         ):
             return False
         try:
+            # Se o usuário recriar manualmente um capítulo-padrão que havia
+            # excluído, a exclusão deixa de bloquear sua materialização.
+            conexao.execute(
+                """
+                DELETE FROM capitulos_padrao_excluidos
+                WHERE topico_id = ? AND nome_normalizado = ?
+                """,
+                (int(topico_id), _normalizar_chave_conteudo(nome_capitulo)),
+            )
             proxima_ordem = conexao.execute(
                 """
                 SELECT COALESCE(MAX(ordem), 0) + 1
@@ -4945,6 +4991,103 @@ def renomear_capitulo(capitulo_id, novo_nome):
             return True
         except sqlite3.IntegrityError:
             return False
+
+
+def contar_questoes_topico(topico_id, incluir_lixeira=False):
+    """Conta questões vinculadas ao tópico sem depender do estado ativo/arquivado.
+
+    Por padrão, questões enviadas à lixeira não entram no resumo visual do
+    tópico. Isso mantém o número exibido na disciplina alinhado à Central de
+    Questões, onde a lixeira é tratada separadamente.
+    """
+    filtro_lixeira = "" if incluir_lixeira else " AND COALESCE(excluida, 0) = 0"
+    with conectar() as conexao:
+        return int(
+            conexao.execute(
+                f"SELECT COUNT(*) FROM questoes WHERE topico_id = ?{filtro_lixeira}",
+                (int(topico_id),),
+            ).fetchone()[0]
+        )
+
+
+def contar_questoes_capitulo(capitulo_id):
+    with conectar() as conexao:
+        return int(
+            conexao.execute(
+                "SELECT COUNT(*) FROM questoes WHERE capitulo_id = ?",
+                (int(capitulo_id),),
+            ).fetchone()[0]
+        )
+
+
+def excluir_capitulo(capitulo_id):
+    """Exclui a divisão estrutural sem apagar as questões do título pai.
+
+    Questões classificadas no capítulo permanecem no tópico/título e perdem
+    apenas ``capitulo_id``. O procedimento também funciona em bancos legados
+    nos quais a coluna ``questoes.capitulo_id`` foi adicionada por migração e
+    pode não possuir a FK ``ON DELETE SET NULL`` declarada no banco novo.
+    """
+    with conectar() as conexao:
+        linha = conexao.execute(
+            """
+            SELECT c.topico_id, c.nome
+            FROM capitulos_topico c
+            WHERE c.id = ?
+            """,
+            (int(capitulo_id),),
+        ).fetchone()
+        if linha is None:
+            return False
+
+        topico_id = int(linha[0])
+        nome_capitulo = str(linha[1])
+
+        # Se fizer parte de uma estrutura-padrão automática, memoriza a
+        # exclusão para que listar o tópico não recrie o capítulo em seguida.
+        capitulos_padrao = _obter_capitulos_padrao_topico(topico_id, conexao)
+        chaves_padrao = {
+            _normalizar_chave_conteudo(nome)
+            for nome in capitulos_padrao
+        }
+        chave_capitulo = _normalizar_chave_conteudo(nome_capitulo)
+        if chave_capitulo in chaves_padrao:
+            conexao.execute(
+                """
+                INSERT OR REPLACE INTO capitulos_padrao_excluidos (
+                    topico_id, nome_normalizado, excluido_em
+                ) VALUES (?, ?, datetime('now', 'localtime'))
+                """,
+                (topico_id, chave_capitulo),
+            )
+
+        # Preserva o banco de questões: excluir o capítulo remove apenas sua
+        # classificação interna, nunca as questões pertencentes ao título.
+        conexao.execute(
+            """
+            UPDATE questoes
+            SET capitulo_id = NULL,
+                atualizado_em = datetime('now', 'localtime')
+            WHERE capitulo_id = ?
+            """,
+            (int(capitulo_id),),
+        )
+
+        # Deletes explícitos mantêm compatibilidade com bancos antigos que
+        # possam ter sido criados antes das FKs com ON DELETE CASCADE.
+        conexao.execute(
+            "DELETE FROM capitulo_concurso_config WHERE capitulo_id = ?",
+            (int(capitulo_id),),
+        )
+        conexao.execute(
+            "DELETE FROM aliases_capitulos WHERE capitulo_id = ?",
+            (int(capitulo_id),),
+        )
+        cursor = conexao.execute(
+            "DELETE FROM capitulos_topico WHERE id = ?",
+            (int(capitulo_id),),
+        )
+        return cursor.rowcount > 0
 
 
 def definir_capitulo_pausado(capitulo_id, pausado=True, concurso_id=None):
