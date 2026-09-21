@@ -15,6 +15,7 @@ from banco import (
     obter_configuracao_int,
     obter_configuracao_texto,
     obter_contextos_revisao_automatica_sessao,
+    obter_resultado_cobertura_revisao,
     salvar_revisao_automatica_questoes,
 )
 from espacamento import (
@@ -113,6 +114,104 @@ def integrar_sessao_questoes_com_revisoes(sessao_id: int) -> list[dict]:
             "confianca": None,
         }
         primeiro_contato = bool(contexto.get("primeiro_contato", False))
+
+        # Revisão por cobertura integral: enquanto a data prevista estiver
+        # vencida/hoje, o tópico só avança na agenda depois de todas as
+        # questões ativas terem recebido ao menos uma resposta efetiva na
+        # rodada. O resultado final usa uma observação (a mais recente) por
+        # questão, evitando que repetições pesem artificialmente no percentual.
+        cobertura = obter_resultado_cobertura_revisao(
+            contexto["topico_id"],
+            contexto.get("concurso_id"),
+        )
+        if cobertura and cobertura.get("ativa"):
+            total_cobertura = int(cobertura.get("total") or 0)
+            restantes_cobertura = int(cobertura.get("restantes") or 0)
+            cobertas_cobertura = int(cobertura.get("cobertas") or 0)
+            if total_cobertura > 0 and restantes_cobertura > 0:
+                resultados.append({
+                    **base,
+                    "questoes": cobertas_cobertura,
+                    "revisao_registrada": False,
+                    "agendamento_atualizado": False,
+                    "confianca": "cobertura_parcial",
+                    "status_integracao": "cobertura_parcial",
+                    "cobertura_revisao": cobertura,
+                    "descricao": (
+                        f"Rodada de revisão em andamento: {cobertas_cobertura}/{total_cobertura} "
+                        f"questões cobertas ({restantes_cobertura} restante(s)). "
+                        "A data da próxima revisão foi preservada até a cobertura completa."
+                    ),
+                })
+                continue
+
+            if total_cobertura > 0 and restantes_cobertura == 0:
+                questoes = int(cobertura.get("questoes") or total_cobertura)
+                acertos = int(cobertura.get("acertos") or 0)
+                percentual_cobertura = cobertura.get("percentual_resultado")
+                contexto = dict(contexto)
+                contexto["questoes"] = questoes
+                contexto["acertos"] = acertos
+                contexto["percentual"] = percentual_cobertura
+                primeiro_contato = False
+                base.update({
+                    "questoes": questoes,
+                    "acertos": acertos,
+                    "percentual": percentual_cobertura,
+                })
+                confianca = "normal"
+                sugestao = calcular_sugestao_espacamento(
+                    numero_revisao=contexto["numero_revisao"],
+                    percentual_atual=percentual_cobertura,
+                    percentual_anterior=contexto["percentual_anterior"],
+                    aplicar_penalizacao=aplicar_penalizacao,
+                    tabela_espacamento=config["tabela"],
+                    limite_queda_moderada=config["limite_moderada"],
+                    limite_queda_forte=config["limite_forte"],
+                    penalizacao_moderada=config["penalizacao_moderada"],
+                    penalizacao_forte=config["penalizacao_forte"],
+                )
+                dias_aplicados = int(sugestao["dias"])
+                try:
+                    data_base = date.fromisoformat(str(contexto["data"])[:10])
+                except ValueError:
+                    data_base = None
+                proxima = (
+                    (data_base + timedelta(days=dias_aplicados)).isoformat()
+                    if data_base is not None
+                    else None
+                )
+                salvo = salvar_revisao_automatica_questoes(
+                    contexto["topico_id"],
+                    contexto["data"],
+                    questoes,
+                    acertos,
+                    confianca,
+                    proxima_revisao=proxima,
+                    sessao_questoes_id=sessao_id,
+                    concurso_id=contexto.get("concurso_id"),
+                    tentativas_desde=cobertura.get("referencia"),
+                )
+                resultados.append({
+                    **base,
+                    "revisao_id": salvo["revisao_id"],
+                    "revisao_registrada": True,
+                    "agendamento_atualizado": proxima is not None,
+                    "proxima_revisao": proxima,
+                    "confianca": confianca,
+                    "status_integracao": "cobertura_completa",
+                    "cobertura_revisao": cobertura,
+                    "descricao": (
+                        f"Cobertura completa da revisão: {questoes}/{questoes} questões. "
+                        f"Desempenho consolidado: {percentual_cobertura:.1f}%. "
+                        + (
+                            f"Próxima revisão agendada para {_formatar_data(proxima)}."
+                            if proxima else "Revisão concluída."
+                        )
+                    ),
+                    "dias_sugeridos": dias_aplicados,
+                })
+                continue
 
         if questoes < minimo_registro and not primeiro_contato:
             resultados.append({

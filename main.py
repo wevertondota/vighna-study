@@ -270,6 +270,9 @@ from banco import (
     salvar_revisao_automatica_questoes,
     listar_tentativas_revisao_automatica,
     obter_perfil_selecao_inteligente_questoes,
+    obter_estado_cobertura_revisao,
+    selecionar_questoes_revisao_cobertura,
+    reabrir_revisoes_parciais_recentes,
     selecionar_questoes_inteligentes,
     selecionar_questoes_por_modo,
     contar_questoes_disponiveis_por_modo,
@@ -12210,990 +12213,599 @@ class JanelaCentralEfetividade(QDialog):
 
 
 class JanelaConfigurarSessaoAdaptativa(QDialog):
-    def __init__(
-        self,
-        parent=None
-    ):
-        super().__init__(
-            parent
-        )
+    def __init__(self, parent=None):
+        super().__init__(parent)
 
-        # Janela operacional ampla: permite maximizar/restaurar
-        # pelo botão nativo do Windows e por duplo clique na barra.
-        self.setWindowFlag(
-            Qt.WindowMaximizeButtonHint,
-            True
-        )
-
+        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
         self.configuracao = None
         self.concurso = obter_concurso_ativo()
         self._atualizando_topicos = False
+        self._atualizando_recorte = False
 
-        self.setWindowTitle(
-            "Treino adaptativo"
-        )
-        self.resize(
-            980,
-            760
-        )
-        self.setMinimumSize(
-            860,
-            660
-        )
+        self.setWindowTitle("Treino adaptativo")
+        self.resize(1180, 790)
+        self.setMinimumSize(980, 680)
 
-        layout = QVBoxLayout(
-            self
-        )
-        layout.setContentsMargins(
-            18,
-            16,
-            18,
-            16
-        )
-        layout.setSpacing(
-            10
-        )
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(18, 16, 18, 16)
+        layout.setSpacing(10)
 
         # ----------------------------------------------------
         # CABEÇALHO
         # ----------------------------------------------------
-
-        titulo = QLabel(
-            "Sessão Adaptativa V2"
-        )
-        titulo.setObjectName(
-            "pageTitle"
-        )
+        titulo = QLabel("Sessão Adaptativa V2")
+        titulo.setObjectName("pageTitle")
 
         subtitulo = QLabel(
-            (
-                "A V2 combina domínio, erros, evidência, variedade, estabilidade, "
-                "recência, urgência e importância; depois ajusta o tipo de questão "
-                "dentro de cada tópico."
-            )
+            "A V2 combina domínio, erros, evidência, variedade, estabilidade, "
+            "recência, urgência e importância; depois ajusta o tipo de questão "
+            "dentro de cada tópico. Escolha o recorte abaixo para trabalhar o "
+            "concurso inteiro, uma disciplina, um título ou um capítulo específico."
         )
-        subtitulo.setObjectName(
-            "pageSubtitle"
-        )
-        subtitulo.setWordWrap(
-            True
-        )
+        subtitulo.setObjectName("pageSubtitle")
+        subtitulo.setWordWrap(True)
 
-        perfil = QLabel(
-            f"Perfil ativo: {self.concurso[1]}"
-        )
-        perfil.setObjectName(
-            "questionSessionProfile"
-        )
+        perfil = QLabel(f"Perfil ativo: {self.concurso[1]}")
+        perfil.setObjectName("questionSessionProfile")
 
-        layout.addWidget(
-            titulo
-        )
-        layout.addWidget(
-            subtitulo
-        )
-        layout.addWidget(
-            perfil
-        )
+        layout.addWidget(titulo)
+        layout.addWidget(subtitulo)
+        layout.addWidget(perfil)
 
         # ----------------------------------------------------
-        # CONFIGURAÇÃO
+        # CONFIGURAÇÃO / RECORTE HIERÁRQUICO
         # ----------------------------------------------------
-
         config_card = QFrame()
-        config_card.setObjectName(
-            "adaptiveSessionConfigCard"
-        )
-
-        config_layout = QGridLayout(
-            config_card
-        )
-        config_layout.setContentsMargins(
-            14,
-            11,
-            14,
-            11
-        )
-        config_layout.setHorizontalSpacing(
-            10
-        )
-        config_layout.setVerticalSpacing(
-            7
-        )
+        config_card.setObjectName("adaptiveSessionConfigCard")
+        config_layout = QGridLayout(config_card)
+        config_layout.setContentsMargins(14, 11, 14, 11)
+        config_layout.setHorizontalSpacing(10)
+        config_layout.setVerticalSpacing(7)
 
         self.escopo = QComboBox()
-        self.escopo.setMinimumHeight(
-            34
-        )
+        self.escopo.setMinimumHeight(36)
         self.escopo.addItems([
             "Concurso inteiro",
             "Disciplina",
-            "Tópicos selecionados"
+            "Título / tópico",
+            "Capítulo",
+            "Tópicos selecionados",
         ])
+        self.escopo.setToolTip(
+            "Defina o nível do recorte. Em 'Tópicos selecionados' você pode "
+            "marcar vários títulos de disciplinas diferentes."
+        )
 
         self.disciplina = QComboBox()
-        self.disciplina.setMinimumHeight(
-            34
-        )
-
-        for disciplina_id, nome in listar_disciplinas(
-            self.concurso[0]
-        ):
-            self.disciplina.addItem(
+        self.disciplina.setMinimumHeight(36)
+        for disciplina_id, nome in listar_disciplinas(self.concurso[0]):
+            self.disciplina.addItem(nome, disciplina_id)
+            self.disciplina.setItemData(
+                self.disciplina.count() - 1,
                 nome,
-                disciplina_id
+                Qt.ToolTipRole,
             )
 
+        self.topico = QComboBox()
+        self.topico.setMinimumHeight(36)
+        self.topico.setToolTip("Título / tópico dentro da disciplina selecionada.")
+
+        self.capitulo = QComboBox()
+        self.capitulo.setMinimumHeight(36)
+        self.capitulo.setToolTip("Capítulo interno do título selecionado.")
+
+        # Popups mais largos: preservam nomes jurídicos longos sem obrigar o
+        # usuário a adivinhar pela parte inicial do texto.
+        for combo in (self.disciplina, self.topico, self.capitulo):
+            try:
+                combo.setMinimumContentsLength(18)
+                combo.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
+                combo.view().setMinimumWidth(560)
+            except Exception:
+                pass
+
         self.quantidade = QSpinBox()
-        self.quantidade.setRange(
-            1,
-            30
-        )
-        self.quantidade.setValue(
-            30
-        )
-        self.quantidade.setMinimumHeight(
-            34
-        )
+        self.quantidade.setRange(1, 30)
+        self.quantidade.setValue(30)
+        self.quantidade.setMinimumHeight(36)
+        self.quantidade.setSuffix(" questões")
 
-        config_layout.addWidget(
-            QLabel(
-                "Escopo"
-            ),
-            0,
-            0
-        )
-        config_layout.addWidget(
-            QLabel(
-                "Disciplina"
-            ),
-            0,
-            1
-        )
-        config_layout.addWidget(
-            QLabel(
-                "Quantidade"
-            ),
-            0,
-            2
-        )
+        self.rotulo_escopo = QLabel("Escopo")
+        self.rotulo_disciplina = QLabel("Disciplina")
+        self.rotulo_topico = QLabel("Título / tópico")
+        self.rotulo_capitulo = QLabel("Capítulo")
+        self.rotulo_quantidade = QLabel("Quantidade")
 
-        config_layout.addWidget(
-            self.escopo,
-            1,
-            0
+        rotulos = (
+            self.rotulo_escopo,
+            self.rotulo_disciplina,
+            self.rotulo_topico,
+            self.rotulo_capitulo,
+            self.rotulo_quantidade,
         )
-        config_layout.addWidget(
-            self.disciplina,
-            1,
-            1
-        )
-        config_layout.addWidget(
-            self.quantidade,
-            1,
-            2
-        )
+        for rotulo in rotulos:
+            rotulo.setObjectName("fieldLabel")
 
-        config_layout.setColumnStretch(
-            0,
-            2
-        )
-        config_layout.setColumnStretch(
-            1,
-            2
-        )
-        config_layout.setColumnStretch(
-            2,
-            1
-        )
+        for coluna, (rotulo, widget) in enumerate((
+            (self.rotulo_escopo, self.escopo),
+            (self.rotulo_disciplina, self.disciplina),
+            (self.rotulo_topico, self.topico),
+            (self.rotulo_capitulo, self.capitulo),
+            (self.rotulo_quantidade, self.quantidade),
+        )):
+            config_layout.addWidget(rotulo, 0, coluna)
+            config_layout.addWidget(widget, 1, coluna)
 
-        layout.addWidget(
-            config_card
-        )
+        config_layout.setColumnStretch(0, 2)
+        config_layout.setColumnStretch(1, 2)
+        config_layout.setColumnStretch(2, 4)
+        config_layout.setColumnStretch(3, 4)
+        config_layout.setColumnStretch(4, 1)
+        layout.addWidget(config_card)
 
         # ----------------------------------------------------
         # TÓPICOS SELECIONADOS
         # ----------------------------------------------------
-
         self.topicos_card = QFrame()
-        self.topicos_card.setObjectName(
-            "adaptiveTopicsCard"
-        )
-
-        topicos_layout = QVBoxLayout(
-            self.topicos_card
-        )
-        topicos_layout.setContentsMargins(
-            12,
-            9,
-            12,
-            10
-        )
-        topicos_layout.setSpacing(
-            7
-        )
+        self.topicos_card.setObjectName("adaptiveTopicsCard")
+        topicos_layout = QVBoxLayout(self.topicos_card)
+        topicos_layout.setContentsMargins(12, 9, 12, 10)
+        topicos_layout.setSpacing(7)
 
         linha_topicos = QHBoxLayout()
+        topicos_titulo = QLabel("Tópicos permitidos na sessão")
+        topicos_titulo.setObjectName("adaptiveSectionTitle")
 
-        topicos_titulo = QLabel(
-            "Tópicos permitidos na sessão"
-        )
-        topicos_titulo.setObjectName(
-            "adaptiveSectionTitle"
-        )
+        self.busca_topicos = QLineEdit()
+        self.busca_topicos.setPlaceholderText("Buscar disciplina ou título / tópico...")
+        self.busca_topicos.setClearButtonEnabled(True)
+        self.busca_topicos.setMinimumWidth(310)
+        self.busca_topicos.setFixedHeight(32)
 
-        marcar = QPushButton(
-            "Marcar todos"
-        )
-        marcar.setObjectName(
-            "subtleButton"
-        )
-        marcar.setFixedHeight(
-            30
-        )
-        marcar.clicked.connect(
-            lambda:
-                self.marcar_topicos(
-                    True
-                )
-        )
+        marcar = QPushButton("Marcar visíveis")
+        marcar.setObjectName("subtleButton")
+        marcar.setFixedHeight(30)
+        marcar.clicked.connect(lambda: self.marcar_topicos(True, somente_visiveis=True))
 
-        desmarcar = QPushButton(
-            "Limpar"
-        )
-        desmarcar.setObjectName(
-            "subtleButton"
-        )
-        desmarcar.setFixedHeight(
-            30
-        )
-        desmarcar.clicked.connect(
-            lambda:
-                self.marcar_topicos(
-                    False
-                )
-        )
+        desmarcar = QPushButton("Limpar")
+        desmarcar.setObjectName("subtleButton")
+        desmarcar.setFixedHeight(30)
+        desmarcar.clicked.connect(lambda: self.marcar_topicos(False, somente_visiveis=False))
 
-        linha_topicos.addWidget(
-            topicos_titulo
-        )
+        linha_topicos.addWidget(topicos_titulo)
         linha_topicos.addStretch()
-        linha_topicos.addWidget(
-            marcar
-        )
-        linha_topicos.addWidget(
-            desmarcar
-        )
+        linha_topicos.addWidget(self.busca_topicos)
+        linha_topicos.addWidget(marcar)
+        linha_topicos.addWidget(desmarcar)
 
         self.arvore_topicos = QTreeWidget()
-        self.arvore_topicos.setObjectName(
-            "adaptiveTopicsTree"
-        )
-        self.arvore_topicos.setColumnCount(
-            5
-        )
+        self.arvore_topicos.setObjectName("adaptiveTopicsTree")
+        self.arvore_topicos.setColumnCount(5)
         self.arvore_topicos.setHeaderLabels([
-            "Disciplina / tópico",
+            "Disciplina / título / tópico",
             "Domínio",
             "Prioridade",
             "Importância",
-            "Questões"
+            "Questões",
         ])
-        self.arvore_topicos.setRootIsDecorated(
-            True
-        )
-        self.arvore_topicos.setAlternatingRowColors(
-            True
-        )
-        self.arvore_topicos.setMinimumHeight(
-            180
-        )
-        self.arvore_topicos.header().setSectionResizeMode(
-            0,
-            QHeaderView.Stretch
-        )
+        self.arvore_topicos.setRootIsDecorated(True)
+        self.arvore_topicos.setAlternatingRowColors(True)
+        self.arvore_topicos.setMinimumHeight(190)
+        self.arvore_topicos.header().setSectionResizeMode(0, QHeaderView.Stretch)
+        for coluna in (1, 2, 3, 4):
+            self.arvore_topicos.header().setSectionResizeMode(coluna, QHeaderView.ResizeToContents)
 
-        for coluna in (
-            1,
-            2,
-            3,
-            4
-        ):
-            self.arvore_topicos.header().setSectionResizeMode(
-                coluna,
-                QHeaderView.ResizeToContents
-            )
-
-        topicos_layout.addLayout(
-            linha_topicos
-        )
-        topicos_layout.addWidget(
-            self.arvore_topicos
-        )
-
-        layout.addWidget(
-            self.topicos_card
-        )
+        topicos_layout.addLayout(linha_topicos)
+        topicos_layout.addWidget(self.arvore_topicos)
+        layout.addWidget(self.topicos_card)
 
         # ----------------------------------------------------
         # PRÉVIA DO PLANO
         # ----------------------------------------------------
-
         preview_card = QFrame()
-        preview_card.setObjectName(
-            "adaptivePreviewCard"
-        )
-
-        preview_layout = QVBoxLayout(
-            preview_card
-        )
-        preview_layout.setContentsMargins(
-            12,
-            10,
-            12,
-            10
-        )
-        preview_layout.setSpacing(
-            7
-        )
+        preview_card.setObjectName("adaptivePreviewCard")
+        preview_layout = QVBoxLayout(preview_card)
+        preview_layout.setContentsMargins(12, 10, 12, 10)
+        preview_layout.setSpacing(7)
 
         preview_header = QHBoxLayout()
-
-        preview_titulo = QLabel(
-            "Plano proposto"
-        )
-        preview_titulo.setObjectName(
-            "adaptiveSectionTitle"
-        )
-
-        self.preview_resumo = QLabel(
-            ""
-        )
-        self.preview_resumo.setObjectName(
-            "adaptivePreviewSummary"
-        )
-
-        preview_header.addWidget(
-            preview_titulo
-        )
+        preview_titulo = QLabel("Plano proposto")
+        preview_titulo.setObjectName("adaptiveSectionTitle")
+        self.preview_resumo = QLabel("")
+        self.preview_resumo.setObjectName("adaptivePreviewSummary")
+        preview_header.addWidget(preview_titulo)
         preview_header.addStretch()
-        preview_header.addWidget(
-            self.preview_resumo
-        )
+        preview_header.addWidget(self.preview_resumo)
+
+        self.preview_recorte = QLabel("")
+        self.preview_recorte.setObjectName("adaptivePreviewReasons")
+        self.preview_recorte.setWordWrap(True)
+        self.preview_recorte.setTextInteractionFlags(Qt.TextSelectableByMouse)
 
         self.preview_tabela = QTableWidget()
-        self.preview_tabela.setObjectName(
-            "adaptivePreviewTable"
-        )
-        self.preview_tabela.setColumnCount(
-            6
-        )
+        self.preview_tabela.setObjectName("adaptivePreviewTable")
+        self.preview_tabela.setColumnCount(6)
         self.preview_tabela.setHorizontalHeaderLabels([
             "Disciplina",
-            "Tópico",
+            "Título / tópico",
             "Domínio",
             "Prioridade",
             "Questões",
-            "Motivo principal"
+            "Motivo principal",
         ])
-        self.preview_tabela.setEditTriggers(
-            QAbstractItemView.NoEditTriggers
-        )
-        self.preview_tabela.setSelectionBehavior(
-            QAbstractItemView.SelectRows
-        )
-        self.preview_tabela.setShowGrid(
-            False
-        )
-        self.preview_tabela.verticalHeader().setVisible(
-            False
-        )
-        self.preview_tabela.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarAlwaysOff
-        )
-        self.preview_tabela.setMinimumHeight(
-            170
-        )
+        self.preview_tabela.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.preview_tabela.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.preview_tabela.setShowGrid(False)
+        self.preview_tabela.setWordWrap(True)
+        self.preview_tabela.verticalHeader().setVisible(False)
+        self.preview_tabela.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.preview_tabela.setMinimumHeight(190)
 
-        preview_header_tabela = (
-            self.preview_tabela.horizontalHeader()
-        )
+        header = self.preview_tabela.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.Fixed)
+        self.preview_tabela.setColumnWidth(0, 150)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
+        for coluna, largura in ((2, 130), (3, 90), (4, 76), (5, 215)):
+            header.setSectionResizeMode(coluna, QHeaderView.Fixed)
+            self.preview_tabela.setColumnWidth(coluna, largura)
 
-        preview_header_tabela.setSectionResizeMode(
-            1,
-            QHeaderView.Stretch
-        )
-        preview_header_tabela.setSectionResizeMode(
-            5,
-            QHeaderView.Stretch
-        )
-
-        for coluna, largura in (
-            (0, 140),
-            (2, 115),
-            (3, 90),
-            (4, 70),
-        ):
-            preview_header_tabela.setSectionResizeMode(
-                coluna,
-                QHeaderView.Fixed
-            )
-            self.preview_tabela.setColumnWidth(
-                coluna,
-                largura
-            )
-
-        self.preview_motivos = QLabel(
-            ""
-        )
-        self.preview_motivos.setObjectName(
-            "adaptivePreviewReasons"
-        )
-        self.preview_motivos.setWordWrap(
-            True
-        )
+        self.preview_motivos = QLabel("")
+        self.preview_motivos.setObjectName("adaptivePreviewReasons")
+        self.preview_motivos.setWordWrap(True)
 
         self.preview_aviso = QLabel(
-            (
-                "Seleção Adaptativa V2: a sessão muda o foco conforme a causa da "
-                "fragilidade do tópico. Os intervalos de revisão continuam independentes."
-            )
+            "Seleção Adaptativa V2: a sessão muda o foco conforme a causa da "
+            "fragilidade do tópico. Os intervalos de revisão continuam independentes."
         )
-        self.preview_aviso.setObjectName(
-            "adaptivePreviewNotice"
-        )
-        self.preview_aviso.setWordWrap(
-            True
-        )
+        self.preview_aviso.setObjectName("adaptivePreviewNotice")
+        self.preview_aviso.setWordWrap(True)
 
-        preview_layout.addLayout(
-            preview_header
-        )
-        preview_layout.addWidget(
-            self.preview_tabela
-        )
-        preview_layout.addWidget(
-            self.preview_motivos
-        )
-        preview_layout.addWidget(
-            self.preview_aviso
-        )
-
-        layout.addWidget(
-            preview_card,
-            1
-        )
+        preview_layout.addLayout(preview_header)
+        preview_layout.addWidget(self.preview_recorte)
+        preview_layout.addWidget(self.preview_tabela)
+        preview_layout.addWidget(self.preview_motivos)
+        preview_layout.addWidget(self.preview_aviso)
+        layout.addWidget(preview_card, 1)
 
         # ----------------------------------------------------
         # BOTÕES
         # ----------------------------------------------------
-
-        botoes = QDialogButtonBox(
-            QDialogButtonBox.Cancel
-        )
-
+        botoes = QDialogButtonBox(QDialogButtonBox.Cancel)
         self.botao_iniciar = botoes.addButton(
             "▶ Iniciar treino adaptativo",
-            QDialogButtonBox.AcceptRole
+            QDialogButtonBox.AcceptRole,
         )
-        self.botao_iniciar.setObjectName(
-            "adaptiveSessionStartButton"
-        )
-
-        cancelar = botoes.button(
-            QDialogButtonBox.Cancel
-        )
-        cancelar.setText(
-            "Cancelar"
-        )
-
-        self.botao_iniciar.clicked.connect(
-            self.confirmar
-        )
-        botoes.rejected.connect(
-            self.reject
-        )
-
-        layout.addWidget(
-            botoes
-        )
+        self.botao_iniciar.setObjectName("adaptiveSessionStartButton")
+        cancelar = botoes.button(QDialogButtonBox.Cancel)
+        cancelar.setText("Cancelar")
+        self.botao_iniciar.clicked.connect(self.confirmar)
+        botoes.rejected.connect(self.reject)
+        layout.addWidget(botoes)
 
         self.carregar_arvore_topicos()
+        self.carregar_topicos_disciplina()
+        self.carregar_capitulos_topico()
 
-        self.escopo.currentTextChanged.connect(
-            self.atualizar_visibilidade_escopo
-        )
-        self.disciplina.currentIndexChanged.connect(
-            self.atualizar_planejamento
-        )
-        self.quantidade.valueChanged.connect(
-            self.atualizar_planejamento
-        )
+        self.escopo.currentTextChanged.connect(self.atualizar_visibilidade_escopo)
+        self.disciplina.currentIndexChanged.connect(self.ao_mudar_disciplina)
+        self.topico.currentIndexChanged.connect(self.ao_mudar_topico)
+        self.capitulo.currentIndexChanged.connect(self.atualizar_planejamento)
+        self.quantidade.valueChanged.connect(self.atualizar_planejamento)
+        self.busca_topicos.textChanged.connect(self.filtrar_arvore_topicos)
         self.arvore_topicos.itemChanged.connect(
-            lambda _item, _coluna:
-                self.atualizar_planejamento()
+            lambda _item, _coluna: self.atualizar_planejamento()
         )
 
         self.atualizar_visibilidade_escopo()
         self.atualizar_planejamento()
 
+    def carregar_topicos_disciplina(self):
+        self._atualizando_recorte = True
+        disciplina_nome = self.disciplina.currentText().strip()
+        self.topico.blockSignals(True)
+        self.topico.clear()
+        self.topico.addItem("Selecione um título / tópico...", None)
+        if disciplina_nome:
+            for topico in listar_topicos(
+                disciplina_nome,
+                concurso_id=self.concurso[0],
+            ):
+                topico_id, nome = int(topico[0]), str(topico[1])
+                self.topico.addItem(nome, topico_id)
+                self.topico.setItemData(
+                    self.topico.count() - 1,
+                    nome,
+                    Qt.ToolTipRole,
+                )
+        self.topico.blockSignals(False)
+        self._atualizando_recorte = False
+
+    def carregar_capitulos_topico(self):
+        self._atualizando_recorte = True
+        topico_id = self.topico.currentData()
+        self.capitulo.blockSignals(True)
+        self.capitulo.clear()
+        self.capitulo.addItem("Selecione um capítulo...", None)
+        if topico_id is not None:
+            for capitulo_id, nome, _ordem, _dificuldade, pausado in listar_capitulos_topico(
+                int(topico_id),
+                concurso_id=self.concurso[0],
+            ):
+                if bool(pausado):
+                    continue
+                nome = str(nome)
+                self.capitulo.addItem(nome, int(capitulo_id))
+                self.capitulo.setItemData(
+                    self.capitulo.count() - 1,
+                    nome,
+                    Qt.ToolTipRole,
+                )
+        self.capitulo.blockSignals(False)
+        self._atualizando_recorte = False
+
+    def ao_mudar_disciplina(self):
+        if self._atualizando_recorte:
+            return
+        self.carregar_topicos_disciplina()
+        self.carregar_capitulos_topico()
+        self.atualizar_planejamento()
+
+    def ao_mudar_topico(self):
+        if self._atualizando_recorte:
+            return
+        self.carregar_capitulos_topico()
+        self.atualizar_planejamento()
+
     def carregar_arvore_topicos(self):
         self._atualizando_topicos = True
         self.arvore_topicos.clear()
-
-        prioridades = obter_prioridades_sessao_adaptativa(
-            self.concurso[0]
-        )
-
+        prioridades = obter_prioridades_sessao_adaptativa(self.concurso[0])
         agrupado = {}
-
         for item in prioridades:
             agrupado.setdefault(
-                (
-                    item[
-                        "disciplina_id"
-                    ],
-                    item[
-                        "disciplina"
-                    ],
-                ),
-                []
-            ).append(
-                item
-            )
+                (item["disciplina_id"], item["disciplina"]), []
+            ).append(item)
 
-        for (
-            disciplina_id,
-            disciplina
-        ), topicos in agrupado.items():
+        for (disciplina_id, disciplina), topicos in agrupado.items():
             raiz = QTreeWidgetItem([
                 disciplina,
                 "",
                 "",
                 "",
-                str(
-                    sum(
-                        item[
-                            "questoes_disponiveis"
-                        ]
-                        for item in topicos
-                    )
-                ),
+                str(sum(item["questoes_disponiveis"] for item in topicos)),
             ])
-
-            raiz.setData(
-                0,
-                Qt.UserRole,
-                (
-                    "disciplina",
-                    disciplina_id
-                )
-            )
-
-            self.arvore_topicos.addTopLevelItem(
-                raiz
-            )
+            raiz.setData(0, Qt.UserRole, ("disciplina", disciplina_id))
+            raiz.setToolTip(0, disciplina)
+            self.arvore_topicos.addTopLevelItem(raiz)
 
             for item in topicos:
                 filho = QTreeWidgetItem([
-                    item[
-                        "topico"
-                    ],
-                    (
-                        f"{item['dominio']:.0f}/100 • "
-                        f"{item['nivel_dominio']}"
-                    ),
-                    (
-                        f"{item['score_adaptativo']:.1f}"
-                    ),
-                    (
-                        f"{item['importancia']}/5"
-                    ),
-                    str(
-                        item[
-                            "questoes_disponiveis"
-                        ]
-                    ),
+                    item["topico"],
+                    f"{item['dominio']:.0f}/100 • {item['nivel_dominio']}",
+                    f"{item['score_adaptativo']:.1f}",
+                    f"{item['importancia']}/5",
+                    str(item["questoes_disponiveis"]),
                 ])
-
-                filho.setFlags(
-                    filho.flags()
-                    | Qt.ItemIsUserCheckable
-                )
-                filho.setCheckState(
-                    0,
-                    Qt.Unchecked
-                )
-                filho.setData(
-                    0,
-                    Qt.UserRole,
-                    (
-                        "topico",
-                        item[
-                            "topico_id"
-                        ]
-                    )
-                )
+                filho.setFlags(filho.flags() | Qt.ItemIsUserCheckable)
+                filho.setCheckState(0, Qt.Unchecked)
+                filho.setData(0, Qt.UserRole, ("topico", item["topico_id"]))
                 filho.setToolTip(
                     0,
-                    (
-                        f"{item['disciplina']} › {item['topico']}\n"
-                        f"Prioridade adaptativa V2: "
-                        f"{item['score_adaptativo']:.1f}/100\n"
-                        f"Evidência: {item.get('evidencia', 0):.0f}/100 • "
-                        f"{item.get('qualidade_evidencia', '—')}\n"
-                        f"Variedade: {item.get('variedade', 0):.0f}/100 • "
-                        f"Estabilidade: {item.get('estabilidade', 0):.0f}/100 • "
-                        f"Recência: {item.get('recencia', 0):.0f}/100\n"
-                        f"Motivo: {item['motivo_detalhado']}"
-                    )
+                    f"{item['disciplina']} › {item['topico']}\n"
+                    f"Prioridade adaptativa V2: {item['score_adaptativo']:.1f}/100\n"
+                    f"Evidência: {item.get('evidencia', 0):.0f}/100 • "
+                    f"{item.get('qualidade_evidencia', '—')}\n"
+                    f"Variedade: {item.get('variedade', 0):.0f}/100 • "
+                    f"Estabilidade: {item.get('estabilidade', 0):.0f}/100 • "
+                    f"Recência: {item.get('recencia', 0):.0f}/100\n"
+                    f"Motivo: {item['motivo_detalhado']}",
                 )
-
-                raiz.addChild(
-                    filho
-                )
-
-            raiz.setExpanded(
-                True
-            )
+                raiz.addChild(filho)
+            raiz.setExpanded(True)
 
         self._atualizando_topicos = False
 
-    def marcar_topicos(
-        self,
-        marcado
-    ):
+    def filtrar_arvore_topicos(self, texto):
+        termo = str(texto or "").strip().casefold()
+        for indice_raiz in range(self.arvore_topicos.topLevelItemCount()):
+            raiz = self.arvore_topicos.topLevelItem(indice_raiz)
+            disciplina_combina = termo in raiz.text(0).casefold()
+            algum_visivel = False
+            for indice in range(raiz.childCount()):
+                filho = raiz.child(indice)
+                visivel = (not termo) or disciplina_combina or termo in filho.text(0).casefold()
+                filho.setHidden(not visivel)
+                algum_visivel = algum_visivel or visivel
+            raiz.setHidden(bool(termo) and not algum_visivel)
+            if algum_visivel:
+                raiz.setExpanded(True)
+
+    def marcar_topicos(self, marcado, somente_visiveis=False):
         self._atualizando_topicos = True
-
-        estado = (
-            Qt.Checked
-            if marcado
-            else Qt.Unchecked
-        )
-
-        for indice_raiz in range(
-            self.arvore_topicos.topLevelItemCount()
-        ):
-            raiz = self.arvore_topicos.topLevelItem(
-                indice_raiz
-            )
-
-            for indice in range(
-                raiz.childCount()
-            ):
-                raiz.child(
-                    indice
-                ).setCheckState(
-                    0,
-                    estado
-                )
-
+        estado = Qt.Checked if marcado else Qt.Unchecked
+        for indice_raiz in range(self.arvore_topicos.topLevelItemCount()):
+            raiz = self.arvore_topicos.topLevelItem(indice_raiz)
+            if somente_visiveis and raiz.isHidden():
+                continue
+            for indice in range(raiz.childCount()):
+                filho = raiz.child(indice)
+                if somente_visiveis and filho.isHidden():
+                    continue
+                filho.setCheckState(0, estado)
         self._atualizando_topicos = False
         self.atualizar_planejamento()
 
-    def topicos_selecionados(
-        self
-    ):
+    def topicos_selecionados(self):
         ids = []
-
-        for indice_raiz in range(
-            self.arvore_topicos.topLevelItemCount()
-        ):
-            raiz = self.arvore_topicos.topLevelItem(
-                indice_raiz
-            )
-
-            for indice in range(
-                raiz.childCount()
-            ):
-                filho = raiz.child(
-                    indice
-                )
-
-                if filho.checkState(
-                    0
-                ) != Qt.Checked:
+        for indice_raiz in range(self.arvore_topicos.topLevelItemCount()):
+            raiz = self.arvore_topicos.topLevelItem(indice_raiz)
+            for indice in range(raiz.childCount()):
+                filho = raiz.child(indice)
+                if filho.checkState(0) != Qt.Checked:
                     continue
-
-                dado = filho.data(
-                    0,
-                    Qt.UserRole
-                )
-
-                if (
-                    isinstance(
-                        dado,
-                        tuple
-                    )
-                    and len(
-                        dado
-                    ) == 2
-                    and dado[0]
-                    == "topico"
-                ):
-                    ids.append(
-                        int(
-                            dado[1]
-                        )
-                    )
-
+                dado = filho.data(0, Qt.UserRole)
+                if isinstance(dado, tuple) and len(dado) == 2 and dado[0] == "topico":
+                    ids.append(int(dado[1]))
         return ids
 
-    def parametros_escopo(
-        self
-    ):
+    def parametros_escopo(self):
         escopo = self.escopo.currentText()
-
         if escopo == "Disciplina":
+            return self.disciplina.currentData(), None, None
+        if escopo == "Título / tópico":
+            topico_id = self.topico.currentData()
             return (
                 self.disciplina.currentData(),
-                None
-            )
-
-        if escopo == "Tópicos selecionados":
-            return (
+                [int(topico_id)] if topico_id is not None else [],
                 None,
-                self.topicos_selecionados()
             )
+        if escopo == "Capítulo":
+            topico_id = self.topico.currentData()
+            capitulo_id = self.capitulo.currentData()
+            return (
+                self.disciplina.currentData(),
+                [int(topico_id)] if topico_id is not None else [],
+                [int(capitulo_id)] if capitulo_id is not None else [],
+            )
+        if escopo == "Tópicos selecionados":
+            return None, self.topicos_selecionados(), None
+        return None, None, None
 
-        return (
-            None,
-            None
-        )
-
-    def atualizar_visibilidade_escopo(
-        self
-    ):
+    def mensagem_escopo_incompleto(self):
         escopo = self.escopo.currentText()
+        if escopo in {"Disciplina", "Título / tópico", "Capítulo"} and self.disciplina.currentData() is None:
+            return "Selecione uma disciplina."
+        if escopo in {"Título / tópico", "Capítulo"} and self.topico.currentData() is None:
+            return "Selecione um título / tópico."
+        if escopo == "Capítulo" and self.capitulo.currentData() is None:
+            return "Selecione um capítulo."
+        if escopo == "Tópicos selecionados" and not self.topicos_selecionados():
+            return "Selecione ao menos um tópico."
+        return ""
 
-        self.disciplina.setEnabled(
-            escopo == "Disciplina"
-        )
+    def descricao_recorte(self):
+        escopo = self.escopo.currentText()
+        if escopo == "Concurso inteiro":
+            return f"Recorte: concurso inteiro • {self.concurso[1]}"
+        if escopo == "Disciplina":
+            return f"Recorte: {self.disciplina.currentText()}"
+        if escopo == "Título / tópico":
+            return f"Recorte: {self.disciplina.currentText()} › {self.topico.currentText()}"
+        if escopo == "Capítulo":
+            return (
+                f"Recorte: {self.disciplina.currentText()} › "
+                f"{self.topico.currentText()} › {self.capitulo.currentText()}"
+            )
+        selecionados = self.topicos_selecionados()
+        return f"Recorte: {len(selecionados)} tópico(s) selecionado(s) manualmente"
 
-        self.topicos_card.setVisible(
-            escopo == "Tópicos selecionados"
-        )
+    def atualizar_visibilidade_escopo(self):
+        escopo = self.escopo.currentText()
+        usa_disciplina = escopo in {"Disciplina", "Título / tópico", "Capítulo"}
+        usa_topico = escopo in {"Título / tópico", "Capítulo"}
+        usa_capitulo = escopo == "Capítulo"
 
+        for widget in (self.rotulo_disciplina, self.disciplina):
+            widget.setVisible(usa_disciplina)
+        for widget in (self.rotulo_topico, self.topico):
+            widget.setVisible(usa_topico)
+        for widget in (self.rotulo_capitulo, self.capitulo):
+            widget.setVisible(usa_capitulo)
+
+        self.topicos_card.setVisible(escopo == "Tópicos selecionados")
         self.atualizar_planejamento()
 
-    def atualizar_planejamento(
-        self
-    ):
-        if self._atualizando_topicos:
+    def limpar_preview(self, mensagem):
+        self.preview_tabela.setRowCount(0)
+        self.preview_resumo.setText(mensagem)
+        self.preview_recorte.setText(self.descricao_recorte())
+        self.preview_motivos.setText("")
+        self.botao_iniciar.setEnabled(False)
+
+    def atualizar_planejamento(self):
+        if self._atualizando_topicos or self._atualizando_recorte:
             return
 
-        disciplina_id, topicos_ids = (
-            self.parametros_escopo()
-        )
-
-        if (
-            self.escopo.currentText()
-            == "Tópicos selecionados"
-            and not topicos_ids
-        ):
-            self.preview_tabela.setRowCount(
-                0
-            )
-            self.preview_resumo.setText(
-                "Selecione ao menos um tópico."
-            )
-            self.preview_motivos.setText(
-                ""
-            )
-            self.botao_iniciar.setEnabled(
-                False
-            )
+        mensagem = self.mensagem_escopo_incompleto()
+        if mensagem:
+            self.limpar_preview(mensagem)
             return
+
+        disciplina_id, topicos_ids, capitulos_ids = self.parametros_escopo()
+        self.preview_recorte.setText(self.descricao_recorte())
 
         try:
-            prioridades = (
-                obter_prioridades_sessao_adaptativa(
-                    self.concurso[0],
-                    disciplina_id=disciplina_id,
-                    topicos_ids=topicos_ids
-                )
+            prioridades = obter_prioridades_sessao_adaptativa(
+                self.concurso[0],
+                disciplina_id=disciplina_id,
+                topicos_ids=topicos_ids,
+                capitulos_ids=capitulos_ids,
             )
         except Exception as erro:
-            self.preview_tabela.setRowCount(
-                0
-            )
-            self.preview_resumo.setText(
-                "Não foi possível calcular o plano."
-            )
-            self.preview_motivos.setText(
-                str(
-                    erro
-                )
-            )
-            self.botao_iniciar.setEnabled(
-                False
-            )
+            self.limpar_preview("Não foi possível calcular o plano.")
+            self.preview_motivos.setText(str(erro))
             return
 
-        total_disponivel = sum(
-            item[
-                "questoes_disponiveis"
-            ]
-            for item in prioridades
-        )
-
+        total_disponivel = sum(item["questoes_disponiveis"] for item in prioridades)
         if total_disponivel <= 0:
-            self.quantidade.blockSignals(
-                True
-            )
-            self.quantidade.setRange(
-                1,
-                1
-            )
-            self.quantidade.setValue(
-                1
-            )
-            self.quantidade.setEnabled(
-                False
-            )
-            self.quantidade.blockSignals(
-                False
-            )
-
-            self.preview_tabela.setRowCount(
-                0
-            )
-            self.preview_resumo.setText(
-                "Nenhuma questão ativa disponível neste escopo."
-            )
-            self.preview_motivos.setText(
-                ""
-            )
-            self.botao_iniciar.setEnabled(
-                False
-            )
+            self.quantidade.blockSignals(True)
+            self.quantidade.setRange(1, 1)
+            self.quantidade.setValue(1)
+            self.quantidade.setEnabled(False)
+            self.quantidade.blockSignals(False)
+            self.limpar_preview("Nenhuma questão ativa disponível neste recorte.")
             return
 
         valor_atual = self.quantidade.value()
-
-        self.quantidade.blockSignals(
-            True
-        )
-        self.quantidade.setEnabled(
-            True
-        )
-        self.quantidade.setRange(
-            1,
-            total_disponivel
-        )
-        self.quantidade.setValue(
-            min(
-                max(
-                    1,
-                    valor_atual
-                ),
-                total_disponivel
-            )
-        )
-        self.quantidade.blockSignals(
-            False
-        )
+        self.quantidade.blockSignals(True)
+        self.quantidade.setEnabled(True)
+        self.quantidade.setRange(1, total_disponivel)
+        self.quantidade.setValue(min(max(1, valor_atual), total_disponivel))
+        self.quantidade.blockSignals(False)
 
         plano = planejar_sessao_adaptativa_global(
             self.concurso[0],
             quantidade=self.quantidade.value(),
             disciplina_id=disciplina_id,
-            topicos_ids=topicos_ids
+            topicos_ids=topicos_ids,
+            capitulos_ids=capitulos_ids,
         )
 
-        self.preview_tabela.setRowCount(
-            len(
-                plano[
-                    "alocacoes"
-                ]
-            )
-        )
-
-        for linha, item in enumerate(
-            plano[
-                "alocacoes"
-            ]
-        ):
+        self.preview_tabela.setRowCount(len(plano["alocacoes"]))
+        for linha, item in enumerate(plano["alocacoes"]):
             valores = [
-                item[
-                    "disciplina"
-                ],
-                item[
-                    "topico"
-                ],
-                (
-                    f"{item['dominio']:.0f}/100 • "
-                    f"{item['nivel_dominio']}"
-                ),
-                (
-                    f"{item['score_adaptativo']:.1f}"
-                ),
-                str(
-                    item[
-                        "quantidade"
-                    ]
-                ),
-                item[
-                    "motivo_principal"
-                ],
+                item["disciplina"],
+                item["topico"],
+                f"{item['dominio']:.0f}/100 • {item['nivel_dominio']}",
+                f"{item['score_adaptativo']:.1f}",
+                str(item["quantidade"]),
+                item["motivo_principal"],
             ]
-
-            for coluna, valor in enumerate(
-                valores
-            ):
-                celula = QTableWidgetItem(
-                    valor
-                )
-
-                if coluna in (
-                    2,
-                    3,
-                    4
-                ):
-                    celula.setTextAlignment(
-                        Qt.AlignCenter
-                    )
-
+            for coluna, valor in enumerate(valores):
+                celula = QTableWidgetItem(valor)
+                if coluna in (2, 3, 4):
+                    celula.setTextAlignment(Qt.AlignCenter)
+                if coluna in (0, 1):
+                    celula.setToolTip(str(valor))
                 if coluna == 2:
                     celula.setToolTip(
-                        (
-                            f"Evidência: {item.get('evidencia', 0):.0f}/100 • "
-                            f"{item.get('qualidade_evidencia', '—')}\n"
-                            f"Variedade: {item.get('variedade', 0):.0f}/100 • "
-                            f"Estabilidade: {item.get('estabilidade', 0):.0f}/100 • "
-                            f"Recência: {item.get('recencia', 0):.0f}/100"
-                        )
+                        f"Evidência: {item.get('evidencia', 0):.0f}/100 • "
+                        f"{item.get('qualidade_evidencia', '—')}\n"
+                        f"Variedade: {item.get('variedade', 0):.0f}/100 • "
+                        f"Estabilidade: {item.get('estabilidade', 0):.0f}/100 • "
+                        f"Recência: {item.get('recencia', 0):.0f}/100"
                     )
-
                 if coluna == 3:
-                    celula.setToolTip(
-                        "Score estratégico da Seleção Adaptativa V2."
-                    )
-
+                    celula.setToolTip("Score estratégico da Seleção Adaptativa V2.")
                 if coluna == 5:
-                    celula.setToolTip(
-                        item[
-                            "motivo_detalhado"
-                        ]
-                    )
-
-                self.preview_tabela.setItem(
-                    linha,
-                    coluna,
-                    celula
-                )
-
-            self.preview_tabela.setRowHeight(
-                linha,
-                30
-            )
+                    celula.setToolTip(item["motivo_detalhado"])
+                self.preview_tabela.setItem(linha, coluna, celula)
+            self.preview_tabela.setRowHeight(linha, 42)
 
         self.preview_resumo.setText(
-            (
-                f"{plano['quantidade']} questão(ões) • "
-                f"{plano['topicos_utilizados']} tópico(s) • "
-                f"≈ {plano['tempo_estimado_minutos']} min"
-            )
+            f"{plano['quantidade']} questão(ões) • "
+            f"{plano['topicos_utilizados']} tópico(s) • "
+            f"≈ {plano['tempo_estimado_minutos']} min"
         )
 
         mapa_rotulo = {
@@ -13206,86 +12818,45 @@ class JanelaConfigurarSessaoAdaptativa(QDialog):
             "revisão vencida ou próxima": "revisão vencida/próxima",
             "importância do tópico": "importância",
         }
-
         partes = []
-
         for motivo, quantidade_motivo in sorted(
-            plano[
-                "resumo_motivos"
-            ].items(),
-            key=lambda par: (
-                -par[1],
-                par[0]
-            )
+            plano["resumo_motivos"].items(),
+            key=lambda par: (-par[1], par[0]),
         ):
             partes.append(
-                (
-                    f"{quantidade_motivo} por "
-                    f"{mapa_rotulo.get(motivo, motivo)}"
-                )
+                f"{quantidade_motivo} por {mapa_rotulo.get(motivo, motivo)}"
             )
-
         self.preview_motivos.setText(
-            (
-                "Motivos predominantes: "
-                + " • ".join(
-                    partes
-                )
-                if partes
-                else "Sem composição disponível."
-            )
+            "Motivos predominantes: " + " • ".join(partes)
+            if partes else "Sem composição disponível."
         )
-
-        self.botao_iniciar.setEnabled(
-            plano[
-                "quantidade"
-            ] > 0
-        )
+        self.botao_iniciar.setEnabled(plano["quantidade"] > 0)
 
     def confirmar(self):
-        disciplina_id, topicos_ids = (
-            self.parametros_escopo()
-        )
-
-        if (
-            self.escopo.currentText()
-            == "Tópicos selecionados"
-            and not topicos_ids
-        ):
-            QMessageBox.information(
-                self,
-                "Treino adaptativo",
-                "Selecione ao menos um tópico."
-            )
+        mensagem = self.mensagem_escopo_incompleto()
+        if mensagem:
+            QMessageBox.information(self, "Treino adaptativo", mensagem)
             return
 
+        disciplina_id, topicos_ids, capitulos_ids = self.parametros_escopo()
         selecao = selecionar_sessao_adaptativa_global(
             self.concurso[0],
             quantidade=self.quantidade.value(),
             disciplina_id=disciplina_id,
-            topicos_ids=topicos_ids
+            topicos_ids=topicos_ids,
+            capitulos_ids=capitulos_ids,
         )
-
-        fila = selecao[
-            "fila"
-        ]
-
+        fila = selecao["fila"]
         if not fila:
             QMessageBox.information(
                 self,
                 "Treino adaptativo",
-                (
-                    "Não foi possível montar uma sessão com "
-                    "o escopo selecionado."
-                )
+                "Não foi possível montar uma sessão com o recorte selecionado.",
             )
             self.atualizar_planejamento()
             return
 
-        plano = selecao[
-            "plano"
-        ]
-
+        plano = selecao["plano"]
         self.configuracao = {
             "concurso_id": self.concurso[0],
             "concurso_nome": self.concurso[1],
@@ -13295,41 +12866,29 @@ class JanelaConfigurarSessaoAdaptativa(QDialog):
                 if disciplina_id is not None
                 else "Múltiplas disciplinas"
             ),
+            # Mantém a sessão adaptativa como multi-recorte para não alterar
+            # a integração acadêmica já estabilizada. O recorte detalhado fica
+            # registrado em estrategia_adaptativa.
             "topico_id": None,
             "topico_nome": "Múltiplos tópicos",
             "modo": "Treino adaptativo",
             "origem_sessao": "treino_adaptativo",
-            "quantidade": len(
-                fila
-            ),
+            "quantidade": len(fila),
             "fila": fila,
-            "composicao_inteligente": (
-                selecao[
-                    "composicao_inteligente"
-                ]
-            ),
-            "perfil_inteligente": (
-                "Seleção Adaptativa V2"
-            ),
+            "composicao_inteligente": selecao["composicao_inteligente"],
+            "perfil_inteligente": "Seleção Adaptativa V2",
             "estrategia_adaptativa": {
                 "versao": "adaptativa_v2",
-                "escopo": (
-                    self.escopo.currentText()
-                ),
+                "escopo": self.escopo.currentText(),
+                "recorte_rotulo": self.descricao_recorte(),
+                "disciplina_id": disciplina_id,
+                "topicos_ids": list(topicos_ids) if topicos_ids is not None else None,
+                "capitulos_ids": list(capitulos_ids) if capitulos_ids is not None else None,
                 "plano": plano,
-                "composicao_topicos": (
-                    selecao[
-                        "composicao_topicos"
-                    ]
-                ),
-                "resumo_motivos": (
-                    selecao[
-                        "resumo_motivos"
-                    ]
-                ),
+                "composicao_topicos": selecao["composicao_topicos"],
+                "resumo_motivos": selecao["resumo_motivos"],
             },
         }
-
         self.accept()
 
 
@@ -14090,6 +13649,23 @@ class JanelaResumoResolucaoQuestoes(QDialog):
         self.fila_original = list(fila_original or [])
         self.configuracao_original = dict(configuracao_original or {})
         self.permitir_acoes_pos_bateria = bool(permitir_acoes_pos_bateria)
+        self.proxima_acao = None
+
+        origem_fluxo = str(
+            self.configuracao_original.get("origem_sessao")
+            or resumo.get("origem")
+            or ""
+        ).strip().lower()
+        modo_fluxo = unicodedata.normalize(
+            "NFKD",
+            str(self.configuracao_original.get("modo") or resumo.get("modo") or ""),
+        ).encode("ascii", "ignore").decode("ascii").lower()
+        self.fluxo_algoritmo = (
+            origem_fluxo == "algoritmo_v5"
+            or "motor v5" in modo_fluxo
+        )
+        self.integracao_dados = list(integracao or [])
+        self.efetividade_dados = dict(efetividade or {})
 
         simulado = dict(
             simulado
@@ -14097,6 +13673,7 @@ class JanelaResumoResolucaoQuestoes(QDialog):
         )
 
         if simulado:
+            self.fluxo_algoritmo = False
             self.resize(
                 1040,
                 780
@@ -14127,7 +13704,15 @@ class JanelaResumoResolucaoQuestoes(QDialog):
                 else (
                     "Resultado do simulado"
                     if simulado
-                    else "Resumo da sessão"
+                    else (
+                        "Sessão concluída"
+                        if self.fluxo_algoritmo and resumo.get("concluida")
+                        else (
+                            "Sessão encerrada"
+                            if self.fluxo_algoritmo
+                            else "Resumo da sessão"
+                        )
+                    )
                 )
             )
         )
@@ -14135,10 +13720,24 @@ class JanelaResumoResolucaoQuestoes(QDialog):
             "pageTitle"
         )
 
+        if self.fluxo_algoritmo:
+            disciplina_resumo = str(
+                self.configuracao_original.get("disciplina_nome")
+                or (self.registros_bateria[0].get("disciplina") if self.registros_bateria else "")
+                or ""
+            ).strip()
+            topico_resumo = str(
+                self.configuracao_original.get("topico_nome")
+                or (self.registros_bateria[0].get("topico") if self.registros_bateria else "")
+                or ""
+            ).strip()
+            partes_resumo = [parte for parte in (disciplina_resumo, topico_resumo) if parte]
+            descricao_texto = "\n".join(partes_resumo) or str(resumo.get("modo") or "Sessão recomendada")
+        else:
+            descricao_texto = f"{resumo['concurso']} • {resumo['modo']} • {motivo}"
+
         descricao = QLabel(
-            (
-                f"{resumo['concurso']} • {resumo['modo']} • {motivo}"
-            )
+            descricao_texto
         )
         descricao.setObjectName(
             "pageSubtitle"
@@ -14244,42 +13843,82 @@ class JanelaResumoResolucaoQuestoes(QDialog):
             )
         )
 
-        valores = [
-            (
-                "Respondidas",
-                resumo[
-                    "respondidas"
-                ]
-            ),
-            (
-                "Acertos",
-                resumo[
-                    "acertos"
-                ]
-            ),
-            (
-                "Erros",
-                resumo[
-                    "erros"
-                ]
-            ),
-            (
-                "Desempenho",
-                desempenho
-            ),
-            (
-                "Puladas",
-                resumo[
-                    "puladas"
-                ]
-            ),
-            (
-                "Dúvidas",
-                resumo[
-                    "duvidas"
-                ]
-            ),
-        ]
+        def _formatar_duracao_resumo():
+            inicio = resumo.get("iniciado_em")
+            fim = resumo.get("encerrado_em")
+            if not inicio or not fim:
+                return "—"
+            try:
+                dt_inicio = datetime.fromisoformat(str(inicio).replace("Z", "+00:00"))
+                dt_fim = datetime.fromisoformat(str(fim).replace("Z", "+00:00"))
+                segundos = max(0, int((dt_fim - dt_inicio).total_seconds()))
+            except Exception:
+                return "—"
+            if segundos < 60:
+                return f"{segundos} s"
+            minutos, resto = divmod(segundos, 60)
+            if minutos < 60:
+                return f"{minutos} min" if resto < 30 else f"{minutos + 1} min"
+            horas, minutos = divmod(minutos, 60)
+            return f"{horas}h {minutos:02d}min"
+
+        tempo_medio = self.efetividade_dados.get("tempo_medio_questao")
+        if tempo_medio is None:
+            tempo_medio_texto = "—"
+        else:
+            tempo_medio = float(tempo_medio)
+            tempo_medio_texto = (
+                f"{tempo_medio:.0f} s"
+                if tempo_medio < 60
+                else f"{tempo_medio / 60.0:.1f} min"
+            )
+
+        if self.fluxo_algoritmo:
+            valores = [
+                ("Questões", int(resumo.get("processadas") or 0)),
+                ("Acertos", int(resumo.get("acertos") or 0)),
+                ("Erros", int(resumo.get("erros") or 0)),
+                ("Aproveitamento", desempenho),
+                ("Tempo total", _formatar_duracao_resumo()),
+                ("Tempo médio", tempo_medio_texto),
+            ]
+        else:
+            valores = [
+                (
+                    "Respondidas",
+                    resumo[
+                        "respondidas"
+                    ]
+                ),
+                (
+                    "Acertos",
+                    resumo[
+                        "acertos"
+                    ]
+                ),
+                (
+                    "Erros",
+                    resumo[
+                        "erros"
+                    ]
+                ),
+                (
+                    "Desempenho",
+                    desempenho
+                ),
+                (
+                    "Puladas",
+                    resumo[
+                        "puladas"
+                    ]
+                ),
+                (
+                    "Dúvidas",
+                    resumo[
+                        "duvidas"
+                    ]
+                ),
+            ]
 
         for indice, (
             rotulo,
@@ -14305,8 +13944,16 @@ class JanelaResumoResolucaoQuestoes(QDialog):
                 "Reforço isolado: nenhuma resposta desta rodada foi gravada no histórico ou usada pela inteligência do Vighna."
                 if reforco_sem_impacto
                 else (
-                    f"Questões inéditas respondidas nesta sessão: "
-                    f"{ineditas_respondidas}"
+                    (
+                        f"Puladas: {int(resumo.get('puladas') or 0)} • "
+                        f"Dúvidas: {int(resumo.get('duvidas') or 0)} • "
+                        f"Inéditas respondidas: {ineditas_respondidas}"
+                    )
+                    if self.fluxo_algoritmo
+                    else (
+                        f"Questões inéditas respondidas nesta sessão: "
+                        f"{ineditas_respondidas}"
+                    )
                 )
             )
         )
@@ -14318,7 +13965,166 @@ class JanelaResumoResolucaoQuestoes(QDialog):
             detalhe
         )
 
-        if self.permitir_acoes_pos_bateria and self.fila_original:
+        if self.fluxo_algoritmo:
+            integracao_alvo = None
+            topico_id_fluxo = self.configuracao_original.get("topico_id")
+            for item_integracao in self.integracao_dados:
+                if (
+                    topico_id_fluxo is not None
+                    and item_integracao.get("topico_id") is not None
+                    and int(item_integracao.get("topico_id")) == int(topico_id_fluxo)
+                ):
+                    integracao_alvo = item_integracao
+                    break
+            if integracao_alvo is None and self.integracao_dados:
+                integracao_alvo = self.integracao_dados[0]
+            integracao_alvo = dict(integracao_alvo or {})
+            cobertura = dict(integracao_alvo.get("cobertura_revisao") or {})
+
+            cobertura_card = QFrame()
+            cobertura_card.setObjectName("questionReviewIntegrationCard")
+            cobertura_layout = QVBoxLayout(cobertura_card)
+            cobertura_layout.setContentsMargins(12, 10, 12, 10)
+            cobertura_layout.setSpacing(7)
+
+            cobertura_titulo = QLabel("Cobertura e revisão")
+            cobertura_titulo.setObjectName("questionReviewIntegrationTitle")
+            cobertura_layout.addWidget(cobertura_titulo)
+
+            cobertura_grid = QGridLayout()
+            cobertura_grid.setHorizontalSpacing(16)
+            cobertura_grid.setVerticalSpacing(5)
+            cobertura_grid.setColumnStretch(1, 1)
+
+            total_cobertura = int(cobertura.get("total") or 0)
+            cobertas_cobertura = int(cobertura.get("cobertas") or 0)
+            restantes_cobertura = int(cobertura.get("restantes") or 0)
+            percentual_cobertura = cobertura.get("percentual")
+
+            if total_cobertura > 0:
+                rodada_texto = f"{cobertas_cobertura}/{total_cobertura}"
+                percentual_texto = (
+                    f"{float(percentual_cobertura):.0f}%"
+                    if percentual_cobertura is not None
+                    else "—"
+                )
+                restantes_texto = str(restantes_cobertura)
+                if restantes_cobertura > 0:
+                    status_revisao = "Revisão em andamento"
+                    proxima_revisao_texto = "Ainda não reagendada"
+                else:
+                    status_revisao = "Revisão concluída"
+                    proxima_revisao = integracao_alvo.get("proxima_revisao")
+                    proxima_revisao_texto = (
+                        formatar_data(proxima_revisao)
+                        if proxima_revisao
+                        else "Concluída"
+                    )
+            else:
+                rodada_texto = str(int(resumo.get("processadas") or 0))
+                percentual_texto = "—"
+                restantes_texto = "—"
+                if integracao_alvo.get("revisao_registrada"):
+                    status_revisao = "Revisão registrada"
+                elif integracao_alvo:
+                    status_revisao = "Atividade registrada"
+                else:
+                    status_revisao = "Sem alteração de agenda"
+                proxima_revisao = integracao_alvo.get("proxima_revisao")
+                proxima_revisao_texto = (
+                    formatar_data(proxima_revisao)
+                    if proxima_revisao
+                    else "—"
+                )
+
+            dados_cobertura = [
+                ("Questões desta rodada", rodada_texto),
+                ("Cobertura", percentual_texto),
+                ("Restantes", restantes_texto),
+                ("Status", status_revisao),
+                ("Próxima revisão", proxima_revisao_texto),
+            ]
+            for linha_cobertura, (rotulo_cobertura, valor_cobertura) in enumerate(dados_cobertura):
+                rotulo_widget = QLabel(rotulo_cobertura)
+                rotulo_widget.setObjectName("miniStatLabel")
+                valor_widget = QLabel(str(valor_cobertura))
+                valor_widget.setObjectName("questionReviewIntegrationText")
+                valor_widget.setWordWrap(True)
+                cobertura_grid.addWidget(rotulo_widget, linha_cobertura, 0)
+                cobertura_grid.addWidget(valor_widget, linha_cobertura, 1)
+
+            cobertura_layout.addLayout(cobertura_grid)
+            layout.addWidget(cobertura_card)
+
+            aviso_proxima = QLabel(
+                "A próxima sessão será recalculada com os resultados desta bateria."
+            )
+            aviso_proxima.setObjectName("questionSessionSummaryDetail")
+            aviso_proxima.setAlignment(Qt.AlignCenter)
+            aviso_proxima.setWordWrap(True)
+            layout.addWidget(aviso_proxima)
+
+            continuar_algoritmo = QPushButton("▶  CONTINUAR PELO ALGORITMO")
+            continuar_algoritmo.setObjectName("primaryButton")
+            continuar_algoritmo.setMinimumHeight(46)
+            continuar_algoritmo.setMinimumWidth(320)
+            continuar_algoritmo.clicked.connect(self.continuar_pelo_algoritmo)
+            layout.addWidget(continuar_algoritmo, 0, Qt.AlignHCenter)
+
+            if self.permitir_acoes_pos_bateria and self.fila_original:
+                reforco_botoes = QHBoxLayout()
+                reforco_botoes.setSpacing(8)
+
+                revisar_bateria = QPushButton("Revisar toda a bateria")
+                revisar_bateria.setObjectName("subtleButton")
+                revisar_bateria.setMinimumHeight(36)
+                revisar_bateria.clicked.connect(self.revisar_toda_bateria)
+
+                self.refazer_erradas_btn = QPushButton("Rever erradas")
+                self.refazer_erradas_btn.setObjectName("subtleButton")
+                self.refazer_erradas_btn.setMinimumHeight(36)
+                quantidade_erradas = sum(
+                    1 for item in self.registros_bateria
+                    if item.get("status") == "Errada"
+                )
+                self.refazer_erradas_btn.setEnabled(quantidade_erradas > 0)
+                self.refazer_erradas_btn.setText(
+                    f"Rever erradas ({quantidade_erradas})"
+                    if quantidade_erradas > 0
+                    else "Nenhuma questão errada"
+                )
+                self.refazer_erradas_btn.clicked.connect(self.refazer_questoes_erradas)
+
+                reforco_botoes.addStretch(1)
+                reforco_botoes.addWidget(revisar_bateria)
+                reforco_botoes.addWidget(self.refazer_erradas_btn)
+                reforco_botoes.addStretch(1)
+                layout.addLayout(reforco_botoes)
+
+            navegacao_botoes = QHBoxLayout()
+            navegacao_botoes.setSpacing(8)
+            navegacao_botoes.addStretch(1)
+
+            voltar_dashboard = QPushButton("Voltar ao Dashboard")
+            voltar_dashboard.setObjectName("subtleButton")
+            voltar_dashboard.setMinimumHeight(34)
+            voltar_dashboard.clicked.connect(self.voltar_ao_dashboard)
+
+            abrir_banco = QPushButton("Banco de questões")
+            abrir_banco.setObjectName("subtleButton")
+            abrir_banco.setMinimumHeight(34)
+            abrir_banco.clicked.connect(self.ir_para_banco_questoes)
+
+            navegacao_botoes.addWidget(voltar_dashboard)
+            navegacao_botoes.addWidget(abrir_banco)
+            navegacao_botoes.addStretch(1)
+            layout.addLayout(navegacao_botoes)
+
+        if (
+            not self.fluxo_algoritmo
+            and self.permitir_acoes_pos_bateria
+            and self.fila_original
+        ):
             pos_card = QFrame()
             pos_card.setObjectName("questionReviewIntegrationCard")
             pos_layout = QVBoxLayout(pos_card)
@@ -14372,7 +14178,7 @@ class JanelaResumoResolucaoQuestoes(QDialog):
             or {}
         )
 
-        if efetividade:
+        if efetividade and not self.fluxo_algoritmo:
             impacto_card = QFrame()
             impacto_card.setObjectName(
                 "effectivenessImpactCard"
@@ -14605,7 +14411,7 @@ class JanelaResumoResolucaoQuestoes(QDialog):
             or {}
         )
 
-        if estrategia:
+        if estrategia and not self.fluxo_algoritmo:
             plano = dict(
                 estrategia.get(
                     "plano",
@@ -14713,7 +14519,7 @@ class JanelaResumoResolucaoQuestoes(QDialog):
             or []
         )
 
-        if integracao:
+        if integracao and not self.fluxo_algoritmo:
             integracao_card = QFrame()
             integracao_card.setObjectName(
                 "questionReviewIntegrationCard"
@@ -15370,30 +15176,46 @@ class JanelaResumoResolucaoQuestoes(QDialog):
                 31
             )
 
+        tabela.setVisible(not self.fluxo_algoritmo)
         layout.addWidget(
             tabela,
             1
         )
 
-        fechar = QDialogButtonBox(
-            QDialogButtonBox.Close
-        )
-        fechar.button(
-            QDialogButtonBox.Close
-        ).setText(
-            "Voltar ao banco de questões"
-        )
-        fechar.rejected.connect(
-            self.reject
-        )
-        fechar.clicked.connect(
-            self.accept
-        )
+        if not self.fluxo_algoritmo:
+            fechar = QDialogButtonBox(
+                QDialogButtonBox.Close
+            )
+            fechar.button(
+                QDialogButtonBox.Close
+            ).setText(
+                "Voltar ao resumo da bateria"
+                if reforco_sem_impacto
+                else "Voltar ao banco de questões"
+            )
+            fechar.rejected.connect(
+                self.reject
+            )
+            fechar.clicked.connect(
+                self.accept
+            )
 
-        layout.addWidget(
-            fechar
-        )
+            layout.addWidget(
+                fechar
+            )
 
+
+    def continuar_pelo_algoritmo(self):
+        self.proxima_acao = "continuar_algoritmo"
+        self.accept()
+
+    def voltar_ao_dashboard(self):
+        self.proxima_acao = "dashboard"
+        self.accept()
+
+    def ir_para_banco_questoes(self):
+        self.proxima_acao = "banco_questoes"
+        self.accept()
 
     def revisar_toda_bateria(self):
         if not self.fila_original:
@@ -15534,6 +15356,7 @@ class JanelaResolverQuestoes(QDialog):
         self.resultados_integracao = []
         self.resumo_final = None
         self.efetividade_final = None
+        self.proxima_acao_final = None
         self.modo_simulado = bool(
             configuracao.get(
                 "modo_simulado",
@@ -17381,7 +17204,7 @@ class JanelaResolverQuestoes(QDialog):
         self.resumo_final = resumo
 
         if resumo is not None:
-            JanelaResumoResolucaoQuestoes(
+            janela_resumo = JanelaResumoResolucaoQuestoes(
                 resumo,
                 self.registros,
                 motivo,
@@ -17402,7 +17225,9 @@ class JanelaResolverQuestoes(QDialog):
                 fila_original=self.fila,
                 configuracao_original=self.configuracao,
                 permitir_acoes_pos_bateria=True,
-            ).exec()
+            )
+            janela_resumo.exec()
+            self.proxima_acao_final = janela_resumo.proxima_acao
 
         self.accept()
 
@@ -17609,6 +17434,31 @@ def abrir_resolvedor_topico(
         disponiveis
     )
 
+    modo_chave = unicodedata.normalize(
+        "NFKD", str(modo_nome or "")
+    ).encode("ascii", "ignore").decode("ascii").lower()
+    origem_chave = str(origem_sessao or "").strip().lower()
+    modo_revisao_cobertura = (
+        "revisao" in modo_chave
+        or origem_chave in {"revisao_inteligente", "topico_revisao"}
+    )
+    cobertura_revisao = None
+    if modo_revisao_cobertura:
+        try:
+            cobertura_revisao = obter_estado_cobertura_revisao(
+                topico_id, concurso[0]
+            )
+        except Exception:
+            cobertura_revisao = None
+        if (
+            cobertura_revisao
+            and cobertura_revisao.get("ativa")
+            and int(cobertura_revisao.get("restantes") or 0) > 0
+        ):
+            # Uma revisão não repete questões já cobertas enquanto ainda há
+            # itens pendentes. A bateria é limitada ao saldo da rodada.
+            maximo = int(cobertura_revisao["restantes"])
+
     minimo_registro = max(
         1,
         obter_configuracao_int(
@@ -17639,7 +17489,22 @@ def abrir_resolvedor_topico(
         ) == 0
     )
 
-    if primeiro_contato:
+    if (
+        cobertura_revisao
+        and cobertura_revisao.get("ativa")
+        and int(cobertura_revisao.get("total") or 0) > 0
+        and int(cobertura_revisao.get("restantes") or 0) > 0
+    ):
+        mensagem = (
+            f"{cobertura_revisao['total']} questão(ões) compõem a rodada desta revisão.\n\n"
+            f"Cobertura atual: {cobertura_revisao['cobertas']}/{cobertura_revisao['total']} "
+            f"({cobertura_revisao['percentual']:.0f}%).\n"
+            f"Restam {cobertura_revisao['restantes']} questão(ões).\n\n"
+            "Enquanto houver questões pendentes, elas serão priorizadas sem repetição. "
+            "A próxima data de revisão só será calculada após a cobertura completa."
+            f"{aviso_topico_equivalente}"
+        )
+    elif primeiro_contato:
         mensagem = (
             f"{maximo} questão(ões) disponível(is) para {nome_topico}.\n\n"
             "Primeiro contato com este tópico: ao finalizar a resolução, "
@@ -17674,11 +17539,23 @@ def abrir_resolvedor_topico(
         if not ok:
             return None
 
-    selecao = selecionar_questoes_inteligentes(
-        concurso[0],
-        topico_id=topico_id,
-        quantidade=quantidade
-    )
+    if (
+        cobertura_revisao
+        and cobertura_revisao.get("ativa")
+        and int(cobertura_revisao.get("restantes") or 0) > 0
+        and modo_revisao_cobertura
+    ):
+        selecao = selecionar_questoes_revisao_cobertura(
+            concurso[0],
+            topico_id=topico_id,
+            quantidade=quantidade,
+        )
+    else:
+        selecao = selecionar_questoes_inteligentes(
+            concurso[0],
+            topico_id=topico_id,
+            quantidade=quantidade
+        )
 
     fila = selecao[
         "fila"
@@ -17711,6 +17588,9 @@ def abrir_resolvedor_topico(
             "perfil_rotulo",
             ""
         ),
+        "cobertura_revisao": selecao.get(
+            "cobertura_revisao"
+        ),
     }
     if origem_sessao:
         configuracao["origem_sessao"] = str(origem_sessao)
@@ -17726,6 +17606,7 @@ def abrir_resolvedor_topico(
         "integracao": janela.resultados_integracao,
         "efetividade": janela.efetividade_final,
         "sessao_id": getattr(janela, "sessao_id", None),
+        "proxima_acao": getattr(janela, "proxima_acao_final", None),
     }
     try:
         resumo_atual = obter_resumo_topico(topico_id)
@@ -20370,6 +20251,84 @@ class JanelaEstudarAgoraV5(QDialog):
             self.preparacao = None
         self.accept()
 
+
+
+class JanelaProximaRecomendacaoAlgoritmo(QDialog):
+    """Confirma a próxima prioridade depois de uma bateria guiada pelo Motor V5."""
+
+    def __init__(self, recomendacao, parent=None):
+        super().__init__(parent)
+        self.recomendacao = dict(recomendacao or {})
+
+        self.setWindowTitle("Próxima recomendação")
+        self.resize(660, 390)
+        self.setMinimumSize(560, 340)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(20, 18, 20, 18)
+        layout.setSpacing(12)
+
+        titulo = QLabel("PRÓXIMA RECOMENDAÇÃO")
+        titulo.setObjectName("pageTitle")
+        titulo.setAlignment(Qt.AlignCenter)
+        layout.addWidget(titulo)
+
+        subtitulo = QLabel(
+            "O Vighna recalculou a prioridade usando os resultados da bateria que você acabou de concluir."
+        )
+        subtitulo.setObjectName("pageSubtitle")
+        subtitulo.setAlignment(Qt.AlignCenter)
+        subtitulo.setWordWrap(True)
+        layout.addWidget(subtitulo)
+
+        card = QFrame()
+        card.setObjectName("studyActionCard")
+        card_layout = QVBoxLayout(card)
+        card_layout.setContentsMargins(16, 14, 16, 14)
+        card_layout.setSpacing(6)
+
+        disciplina = QLabel(str(self.recomendacao.get("disciplina") or "Estudo livre"))
+        disciplina.setObjectName("studyActionTitle")
+        disciplina.setWordWrap(True)
+        disciplina.setAlignment(Qt.AlignCenter)
+        card_layout.addWidget(disciplina)
+
+        topico = QLabel(str(self.recomendacao.get("topico") or "Sem tópico específico"))
+        topico.setObjectName("studyActionMetric")
+        topico.setWordWrap(True)
+        topico.setAlignment(Qt.AlignCenter)
+        card_layout.addWidget(topico)
+
+        motivos = list(self.recomendacao.get("motivos") or [])
+        motivo = str(motivos[0] if motivos else self.recomendacao.get("motivo") or "Prioridade atual do Motor V5.")
+        motivo_label = QLabel(motivo)
+        motivo_label.setObjectName("studyActionDescription")
+        motivo_label.setWordWrap(True)
+        motivo_label.setAlignment(Qt.AlignCenter)
+        card_layout.addWidget(motivo_label)
+
+        layout.addWidget(card)
+        layout.addStretch(1)
+
+        acoes = QHBoxLayout()
+        acoes.setSpacing(8)
+        acoes.addStretch(1)
+
+        dashboard = QPushButton("Voltar ao Dashboard")
+        dashboard.setObjectName("subtleButton")
+        dashboard.setMinimumHeight(38)
+        dashboard.clicked.connect(self.reject)
+
+        comecar = QPushButton("▶  COMEÇAR")
+        comecar.setObjectName("primaryButton")
+        comecar.setMinimumHeight(42)
+        comecar.setMinimumWidth(190)
+        comecar.clicked.connect(self.accept)
+
+        acoes.addWidget(dashboard)
+        acoes.addWidget(comecar)
+        acoes.addStretch(1)
+        layout.addLayout(acoes)
 
 
 class JanelaInicioSessao(QDialog):
@@ -30658,6 +30617,13 @@ class SistemaEstudos(QMainWindow):
                 raise SystemExit(2)
 
         criar_banco()
+        # Compatibilidade 0.29.8: se a versão anterior reagendou uma revisão
+        # deliberada recente antes de percorrer todo o banco do tópico,
+        # reabre apenas essa rodada. As tentativas permanecem intactas.
+        try:
+            reabrir_revisoes_parciais_recentes(dias=2)
+        except Exception:
+            pass
 
         self.tema_atual = normalizar_tema(
             obter_configuracao_texto(
@@ -38034,6 +38000,23 @@ class SistemaEstudos(QMainWindow):
                 detalhe_partes.append(contexto_fila)
             if motivo_prioridade:
                 detalhe_partes.append(motivo_prioridade)
+            try:
+                cobertura_prioridade = obter_estado_cobertura_revisao(
+                    int(prioridade_agora.get("topico_id")),
+                    concurso_id,
+                )
+            except Exception:
+                cobertura_prioridade = None
+            if (
+                cobertura_prioridade
+                and cobertura_prioridade.get("ativa")
+                and int(cobertura_prioridade.get("total") or 0) > 0
+            ):
+                detalhe_partes.append(
+                    "Cobertura da revisão: "
+                    f"{cobertura_prioridade['cobertas']}/{cobertura_prioridade['total']} "
+                    f"• {cobertura_prioridade['restantes']} restante(s)"
+                )
             self.revisao_inteligente_detalhe.setText(
                 " • ".join(detalhe_partes)
                 or "A Revisão Inteligente começa pelo conteúdo mais prioritário da fila."
@@ -38549,7 +38532,79 @@ class SistemaEstudos(QMainWindow):
 
         # Com um Foco já ativo, a recomendação é executada diretamente. O
         # cronômetro segue em sua janela, sem receber ou impor contexto.
-        self.executar_recomendacao_estudar_agora_v5(recomendacao)
+        resultado = self.executar_recomendacao_estudar_agora_v5(recomendacao)
+        self._processar_fluxo_pos_bateria_algoritmo(resultado)
+
+    def _processar_fluxo_pos_bateria_algoritmo(self, resultado):
+        """Mantém o usuário no fluxo guiado após uma bateria do Motor V5."""
+        atual = resultado
+
+        while isinstance(atual, dict):
+            acao = str(atual.get("proxima_acao") or "").strip().lower()
+
+            if acao == "banco_questoes":
+                self.abrir_questoes()
+                return
+
+            if acao != "continuar_algoritmo":
+                return
+
+            try:
+                self.cache_analitico.invalidar()
+                self.atualizar_dashboard()
+                proxima = self.montar_recomendacao_estudar_agora_v5()
+                proxima = self._enriquecer_recomendacao_com_bateria(proxima)
+            except Exception as erro:
+                QMessageBox.critical(
+                    self,
+                    "Próxima recomendação",
+                    f"Não foi possível recalcular a próxima recomendação.\n\n{erro}",
+                )
+                return
+
+            if not proxima:
+                QMessageBox.information(
+                    self,
+                    "Próxima recomendação",
+                    "Não há uma nova prioridade disponível neste momento.",
+                )
+                return
+
+            registro_id = None
+            if obter_configuracao_bool("aprender_decisoes_estudar_agora", True):
+                try:
+                    registro_id = registrar_recomendacao_estudo(
+                        obter_concurso_ativo()[0],
+                        proxima,
+                    )
+                except Exception:
+                    registro_id = None
+
+            confirmacao = JanelaProximaRecomendacaoAlgoritmo(proxima, self)
+            if confirmacao.exec() != QDialog.Accepted:
+                if registro_id is not None:
+                    try:
+                        atualizar_decisao_recomendacao(registro_id, "ignorada")
+                    except Exception:
+                        pass
+                return
+
+            if registro_id is not None:
+                try:
+                    atualizar_decisao_recomendacao(
+                        registro_id,
+                        "aceita",
+                        int(proxima.get("minutos") or 0) or None,
+                    )
+                except Exception:
+                    pass
+
+            registrar_observacao_fila_sombra_segura(
+                "study_now_explicit",
+                concurso_id=obter_concurso_ativo()[0],
+            )
+
+            atual = self.executar_recomendacao_estudar_agora_v5(proxima)
 
     def executar_recomendacao_estudar_agora_v5(self, recomendacao):
         """Executa exatamente a recomendação já escolhida pelo Motor V5.
@@ -38583,6 +38638,7 @@ class SistemaEstudos(QMainWindow):
                 quantidade_padrao=max(1, questoes_alvo),
                 quantidade_exata=max(1, questoes_alvo),
                 modo_nome=modo,
+                origem_sessao="algoritmo_v5",
             )
             if resultado is not None:
                 self.cache_analitico.invalidar()
@@ -58359,8 +58415,18 @@ class SistemaEstudos(QMainWindow):
             # Tópico: a tabela usa uma representação em linha única para
             # aproveitar a largura disponível, mas o nome original fica
             # preservado nos dados do item para todas as operações.
+            #
+            # Quando há capítulos, a célula recebe um QWidget com botão +/-
+            # e QLabel. Nesse caso o QTableWidgetItem continua existindo para
+            # carregar IDs/metadados e manter seleção/navegação, mas fica sem
+            # texto visível para evitar que o nome seja desenhado duas vezes
+            # por baixo do widget da célula (especialmente em temas com fundo
+            # transparente).
             nome_exibicao = formatar_nome_conteudo_tabela(nome)
-            item_topico = QTableWidgetItem(nome_exibicao)
+            tem_capitulos = topico_possui_capitulos(topico_id)
+            item_topico = QTableWidgetItem(
+                "" if tem_capitulos else nome_exibicao
+            )
             item_topico.setData(Qt.UserRole, topico_id)
             item_topico.setData(Qt.UserRole + 1, pausado)
             item_topico.setData(Qt.UserRole + 2, "topico")
@@ -58379,7 +58445,6 @@ class SistemaEstudos(QMainWindow):
                 item_topico
             )
 
-            tem_capitulos = topico_possui_capitulos(topico_id)
             if tem_capitulos:
                 celula_topico = QWidget()
                 celula_topico.setObjectName("disciplineTopicCell")

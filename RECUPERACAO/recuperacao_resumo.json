@@ -1,0 +1,415 @@
+{
+  "base": "estudos(3).db",
+  "inserted": 42,
+  "skipped": 0,
+  "integrity": "ok",
+  "foreign_key_issues": 0,
+  "counts": {
+    "total": 2564,
+    "penal": 312,
+    "sexual": 54,
+    "dem": 29
+  },
+  "sexual_chapters": [
+    [
+      "(sem capítulo)",
+      19
+    ],
+    [
+      "Capítulo I – Dos Crimes Contra a Liberdade Sexual",
+      7
+    ],
+    [
+      "Capítulo II – Dos Crimes Sexuais Contra Vulnerável",
+      18
+    ],
+    [
+      "Capítulo IV – Do Ultraje Público ao Pudor",
+      6
+    ],
+    [
+      "Capítulo V – Disposições Gerais",
+      4
+    ]
+  ],
+  "inserted_rows": [
+    {
+      "new_id": 2523,
+      "category": "VPQ Capítulo I — Liberdade Sexual",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 79,
+      "enunciado": "Sobre o crime de estupro, assinale a alternativa que apresenta corretamente a conduta, o meio de execução e a pena previstos.",
+      "origin": "Vighna_Direito_Penal_Crimes_Contra_a_Liberdade_Sexual_7Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2524,
+      "category": "VPQ Capítulo I — Liberdade Sexual",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 79,
+      "enunciado": "Em relação ao estupro quando da conduta resulta lesão corporal de natureza grave ou quando a vítima é menor de 18 e maior de 14 anos, assinale a alternativa correta.",
+      "origin": "Vighna_Direito_Penal_Crimes_Contra_a_Liberdade_Sexual_7Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2525,
+      "category": "VPQ Capítulo I — Liberdade Sexual",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 79,
+      "enunciado": "Se da conduta de estupro resulta a morte da vítima, assinale a alternativa que apresenta corretamente a pena prevista.",
+      "origin": "Vighna_Direito_Penal_Crimes_Contra_a_Liberdade_Sexual_7Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2526,
+      "category": "VPQ Capítulo I — Liberdade Sexual",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 79,
+      "enunciado": "Sobre a violação sexual mediante fraude, assinale a alternativa que apresenta corretamente a conduta, a pena e a consequência prevista quando o crime é cometido com o fim de obter vantagem econômica.",
+      "origin": "Vighna_Direito_Penal_Crimes_Contra_a_Liberdade_Sexual_7Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2527,
+      "category": "VPQ Capítulo I — Liberdade Sexual",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 79,
+      "enunciado": "Sobre a importunação sexual, assinale a alternativa que apresenta corretamente a conduta, a finalidade e a pena previstas.",
+      "origin": "Vighna_Direito_Penal_Crimes_Contra_a_Liberdade_Sexual_7Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2528,
+      "category": "VPQ Capítulo I — Liberdade Sexual",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 79,
+      "enunciado": "Sobre o assédio sexual, assinale a alternativa que apresenta corretamente a conduta, a finalidade, a condição de superior hierárquico ou a ascendência de que se prevalece o agente e a pena prevista.",
+      "origin": "Vighna_Direito_Penal_Crimes_Contra_a_Liberdade_Sexual_7Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2529,
+      "category": "VPQ Capítulo I — Liberdade Sexual",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 79,
+      "enunciado": "Quanto à causa de aumento expressamente prevista para o assédio sexual, assinale a alternativa correta.",
+      "origin": "Vighna_Direito_Penal_Crimes_Contra_a_Liberdade_Sexual_7Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2530,
+      "category": "VPQ Capítulo I-A — Exposição da Intimidade Sexual (sem capítulo na taxonomia atual)",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": null,
+      "enunciado": "Sobre o registro não autorizado da intimidade sexual, assinale a alternativa que apresenta corretamente as condutas previstas, a amplitude do meio empregado e o conteúdo protegido.",
+      "origin": "Vighna_Direito_Penal_Exposicao_da_Intimidade_Sexual_5Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2531,
+      "category": "VPQ Capítulo I-A — Exposição da Intimidade Sexual (sem capítulo na taxonomia atual)",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": null,
+      "enunciado": "Quanto ao conteúdo abrangido pelo registro não autorizado da intimidade sexual e à exigência relativa à autorização, assinale a alternativa correta.",
+      "origin": "Vighna_Direito_Penal_Exposicao_da_Intimidade_Sexual_5Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2532,
+      "category": "VPQ Capítulo I-A — Exposição da Intimidade Sexual (sem capítulo na taxonomia atual)",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": null,
+      "enunciado": "Quanto à pena prevista para o registro não autorizado da intimidade sexual, assinale a alternativa correta.",
+      "origin": "Vighna_Direito_Penal_Exposicao_da_Intimidade_Sexual_5Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2533,
+      "category": "VPQ Capítulo I-A — Exposição da Intimidade Sexual (sem capítulo na taxonomia atual)",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": null,
+      "enunciado": "Em relação à montagem destinada a incluir pessoa em cena de conteúdo sexual íntimo, assinale a alternativa que apresenta corretamente a conduta, os suportes abrangidos e a finalidade prevista.",
+      "origin": "Vighna_Direito_Penal_Exposicao_da_Intimidade_Sexual_5Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2534,
+      "category": "VPQ Capítulo I-A — Exposição da Intimidade Sexual (sem capítulo na taxonomia atual)",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": null,
+      "enunciado": "Quanto ao conteúdo da montagem e à consequência penal prevista para essa conduta, assinale a alternativa correta.",
+      "origin": "Vighna_Direito_Penal_Exposicao_da_Intimidade_Sexual_5Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2535,
+      "category": "VPQ Capítulo II — Crimes Sexuais Contra Vulnerável",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 81,
+      "enunciado": "Sobre o estupro de vulnerável praticado em razão da idade da vítima, assinale a alternativa que apresenta corretamente a conduta, a faixa etária e a pena previstas.",
+      "origin": "Vighna_Direito_Penal_Crimes_Sexuais_Contra_Vulneravel_18Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2536,
+      "category": "VPQ Capítulo II — Crimes Sexuais Contra Vulnerável",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 81,
+      "enunciado": "No favorecimento da prostituição ou de outra forma de exploração sexual de criança, adolescente ou vulnerável, assinale a alternativa que apresenta corretamente o conjunto de condutas previstas.",
+      "origin": "Vighna_Direito_Penal_Crimes_Sexuais_Contra_Vulneravel_18Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2537,
+      "category": "VPQ Capítulo II — Crimes Sexuais Contra Vulnerável",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 81,
+      "enunciado": "Sobre as formas de disponibilização ou divulgação de registro audiovisual abrangidas pelo crime de divulgação de cena de estupro, sexo, nudez ou pornografia, assinale a alternativa correta.",
+      "origin": "Vighna_Direito_Penal_Crimes_Sexuais_Contra_Vulneravel_18Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2538,
+      "category": "VPQ Capítulo II — Crimes Sexuais Contra Vulnerável",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 81,
+      "enunciado": "Quanto às outras hipóteses de vulnerabilidade abrangidas pelo estupro de vulnerável, assinale a alternativa correta.",
+      "origin": "Vighna_Direito_Penal_Crimes_Sexuais_Contra_Vulneravel_18Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2539,
+      "category": "VPQ Capítulo II — Crimes Sexuais Contra Vulnerável",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 81,
+      "enunciado": "Sobre a satisfação de lascívia mediante presença de criança ou adolescente, assinale a alternativa que apresenta corretamente as formas de execução e a idade da pessoa envolvida.",
+      "origin": "Vighna_Direito_Penal_Crimes_Sexuais_Contra_Vulneravel_18Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2540,
+      "category": "VPQ Capítulo II — Crimes Sexuais Contra Vulnerável",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 81,
+      "enunciado": "Considerando as formas qualificadas pelo resultado no estupro de vulnerável, assinale a alternativa que apresenta corretamente as consequências penais da lesão corporal grave e da morte.",
+      "origin": "Vighna_Direito_Penal_Crimes_Sexuais_Contra_Vulneravel_18Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2541,
+      "category": "VPQ Capítulo II — Crimes Sexuais Contra Vulnerável",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 81,
+      "enunciado": "Sobre o crime de corrupção de menores previsto entre os crimes sexuais contra vulnerável, assinale a alternativa correta.",
+      "origin": "Vighna_Direito_Penal_Crimes_Sexuais_Contra_Vulneravel_18Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2542,
+      "category": "VPQ Capítulo II — Crimes Sexuais Contra Vulnerável",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 81,
+      "enunciado": "No favorecimento da prostituição ou de outra forma de exploração sexual, uma das hipóteses de incidência das mesmas penas alcança quem pratica conjunção carnal ou outro ato libidinoso com pessoa na situação de prostituição ou exploração sexual. Assinale a alternativa correta.",
+      "origin": "Vighna_Direito_Penal_Crimes_Sexuais_Contra_Vulneravel_18Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2543,
+      "category": "VPQ Capítulo II — Crimes Sexuais Contra Vulnerável",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 81,
+      "enunciado": "Quanto à natureza da presunção de vulnerabilidade no estupro de vulnerável, assinale a alternativa correta.",
+      "origin": "Vighna_Direito_Penal_Crimes_Sexuais_Contra_Vulneravel_18Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2544,
+      "category": "VPQ Capítulo II — Crimes Sexuais Contra Vulnerável",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 81,
+      "enunciado": "No favorecimento da prostituição ou de outra forma de exploração sexual, assinale a alternativa que identifica corretamente os responsáveis pelo local que incorrem nas mesmas penas previstas para o crime.",
+      "origin": "Vighna_Direito_Penal_Crimes_Sexuais_Contra_Vulneravel_18Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2545,
+      "category": "VPQ Capítulo II — Crimes Sexuais Contra Vulnerável",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 81,
+      "enunciado": "Quanto à pena do crime de divulgação de cena de estupro, de estupro de vulnerável, de sexo, nudez ou pornografia, assinale a alternativa correta.",
+      "origin": "Vighna_Direito_Penal_Crimes_Sexuais_Contra_Vulneravel_18Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2546,
+      "category": "VPQ Capítulo II — Crimes Sexuais Contra Vulnerável",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 81,
+      "enunciado": "Quando o proprietário, o gerente ou o responsável pelo local incorre nas penas do favorecimento da prostituição ou de outra forma de exploração sexual, assinale a alternativa que apresenta corretamente o efeito da condenação previsto.",
+      "origin": "Vighna_Direito_Penal_Crimes_Sexuais_Contra_Vulneravel_18Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2547,
+      "category": "VPQ Capítulo II — Crimes Sexuais Contra Vulnerável",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 81,
+      "enunciado": "Quanto à causa de aumento prevista para a divulgação de cena de estupro, sexo, nudez ou pornografia, assinale a alternativa correta.",
+      "origin": "Vighna_Direito_Penal_Crimes_Sexuais_Contra_Vulneravel_18Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2548,
+      "category": "VPQ Capítulo II — Crimes Sexuais Contra Vulnerável",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 81,
+      "enunciado": "Em relação à exclusão de ilicitude prevista para determinadas publicações envolvendo os conteúdos abrangidos pelo crime de divulgação, assinale a alternativa correta.",
+      "origin": "Vighna_Direito_Penal_Crimes_Sexuais_Contra_Vulneravel_18Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2549,
+      "category": "VPQ Capítulo II — Crimes Sexuais Contra Vulnerável",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 81,
+      "enunciado": "Considerando a regra expressa sobre a incidência das penas do estupro de vulnerável, assinale a alternativa que reproduz corretamente seu alcance e as circunstâncias da vítima que não afastam sua aplicação.",
+      "origin": "Vighna_Direito_Penal_Crimes_Sexuais_Contra_Vulneravel_18Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2550,
+      "category": "VPQ Capítulo II — Crimes Sexuais Contra Vulnerável",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 81,
+      "enunciado": "Quanto ao conteúdo do registro audiovisual abrangido pelo crime de divulgação de cena de estupro, sexo, nudez ou pornografia, assinale a alternativa correta.",
+      "origin": "Vighna_Direito_Penal_Crimes_Sexuais_Contra_Vulneravel_18Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2551,
+      "category": "VPQ Capítulo II — Crimes Sexuais Contra Vulnerável",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 81,
+      "enunciado": "Na satisfação de lascívia mediante presença de criança ou adolescente, assinale a alternativa que apresenta corretamente a finalidade exigida e a pena prevista.",
+      "origin": "Vighna_Direito_Penal_Crimes_Sexuais_Contra_Vulneravel_18Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2552,
+      "category": "VPQ Capítulo II — Crimes Sexuais Contra Vulnerável",
+      "old_id": null,
+      "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+      "chapter_id": 81,
+      "enunciado": "Quanto às pessoas que podem ser submetidas, induzidas ou atraídas à prostituição ou outra forma de exploração sexual e à pena correspondente, assinale a alternativa correta.",
+      "origin": "Vighna_Direito_Penal_Crimes_Sexuais_Contra_Vulneravel_18Q_VPQ11.pdf"
+    },
+    {
+      "new_id": 2553,
+      "category": "Recuperação histórica — Capítulo IV — Ultraje Público ao Pudor",
+      "old_id": 157,
+      "title": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL",
+      "chapter_id": 2400,
+      "enunciado": "Em relação ao ato obsceno, assinale a alternativa que apresenta corretamente o local de prática e a pena correspondente.",
+      "origin": "VighnaStudy_checkpoint_2026-09-17_central_questoes_banco_mestre_v1.zip"
+    },
+    {
+      "new_id": 2554,
+      "category": "Recuperação histórica — Capítulo IV — Ultraje Público ao Pudor",
+      "old_id": 158,
+      "title": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL",
+      "chapter_id": 2400,
+      "enunciado": "Quanto às condutas relacionadas ao escrito ou objeto obsceno destinado ao comércio, à distribuição ou à exposição pública, assinale a alternativa correta.",
+      "origin": "VighnaStudy_checkpoint_2026-09-17_central_questoes_banco_mestre_v1.zip"
+    },
+    {
+      "new_id": 2555,
+      "category": "Recuperação histórica — Capítulo IV — Ultraje Público ao Pudor",
+      "old_id": 159,
+      "title": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL",
+      "chapter_id": 2400,
+      "enunciado": "Considerando a finalidade, os objetos abrangidos e a pena do crime relacionado a escrito ou objeto obsceno, assinale a alternativa correta.",
+      "origin": "VighnaStudy_checkpoint_2026-09-17_central_questoes_banco_mestre_v1.zip"
+    },
+    {
+      "new_id": 2556,
+      "category": "Recuperação histórica — Capítulo IV — Ultraje Público ao Pudor",
+      "old_id": 160,
+      "title": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL",
+      "chapter_id": 2400,
+      "enunciado": "Em relação às condutas praticadas com os objetos obscenos abrangidos pela norma, assinale a alternativa que corresponde a hipótese submetida à mesma pena de detenção de seis meses a dois anos, ou multa.",
+      "origin": "VighnaStudy_checkpoint_2026-09-17_central_questoes_banco_mestre_v1.zip"
+    },
+    {
+      "new_id": 2557,
+      "category": "Recuperação histórica — Capítulo IV — Ultraje Público ao Pudor",
+      "old_id": 161,
+      "title": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL",
+      "chapter_id": 2400,
+      "enunciado": "Quanto à representação teatral, à exibição cinematográfica e a outro espetáculo de caráter obsceno realizados em lugar público ou acessível ao público, assinale a alternativa correta.",
+      "origin": "VighnaStudy_checkpoint_2026-09-17_central_questoes_banco_mestre_v1.zip"
+    },
+    {
+      "new_id": 2558,
+      "category": "Recuperação histórica — Capítulo IV — Ultraje Público ao Pudor",
+      "old_id": 162,
+      "title": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL",
+      "chapter_id": 2400,
+      "enunciado": "Considerando a realização de audição ou recitação de caráter obsceno, assinale a alternativa que apresenta corretamente os locais ou meios abrangidos e a pena correspondente.",
+      "origin": "VighnaStudy_checkpoint_2026-09-17_central_questoes_banco_mestre_v1.zip"
+    },
+    {
+      "new_id": 2559,
+      "category": "Recuperação histórica — Título XII Capítulo II",
+      "old_id": 237,
+      "title": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO",
+      "chapter_id": 2402,
+      "enunciado": "Um agente tenta, mediante violência ou grave ameaça, abolir o Estado Democrático de Direito, impedindo ou restringindo o exercício dos poderes constitucionais. Assinale a alternativa correta.",
+      "origin": "VighnaStudy_checkpoint_2026-09-18_14-05-46.zip"
+    },
+    {
+      "new_id": 2560,
+      "category": "Recuperação histórica — Título XII Capítulo II",
+      "old_id": 238,
+      "title": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO",
+      "chapter_id": 2402,
+      "enunciado": "Um agente tenta, por meio de violência ou grave ameaça, depor o governo legitimamente constituído. Assinale a alternativa correta.",
+      "origin": "VighnaStudy_checkpoint_2026-09-18_14-05-46.zip"
+    },
+    {
+      "new_id": 2561,
+      "category": "Recuperação histórica — Título XII Capítulo II",
+      "old_id": 239,
+      "title": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO",
+      "chapter_id": 2402,
+      "enunciado": "Quanto à relação entre as penas dos crimes de abolição violenta do Estado Democrático de Direito e de golpe de Estado e a pena correspondente à violência, assinale a alternativa correta.",
+      "origin": "VighnaStudy_checkpoint_2026-09-18_14-05-46.zip"
+    },
+    {
+      "new_id": 2562,
+      "category": "Recuperação histórica — Título XII Capítulo II",
+      "old_id": 240,
+      "title": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO",
+      "chapter_id": 2402,
+      "enunciado": "Quanto à aplicação das penas dos delitos contra as instituições democráticas quando considerados em conjunto, assinale a alternativa correta.",
+      "origin": "VighnaStudy_checkpoint_2026-09-18_14-05-46.zip"
+    },
+    {
+      "new_id": 2563,
+      "category": "Recuperação histórica — Título XII Capítulo II",
+      "old_id": 241,
+      "title": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO",
+      "chapter_id": 2402,
+      "enunciado": "Considerando agente que não tenha praticado ato de financiamento nem exercido papel de liderança, assinale a alternativa correta quanto aos crimes contra as instituições democráticas.",
+      "origin": "VighnaStudy_checkpoint_2026-09-18_14-05-46.zip"
+    },
+    {
+      "new_id": 2564,
+      "category": "Recuperação histórica — Título XII Capítulo II",
+      "old_id": 242,
+      "title": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO",
+      "chapter_id": 2402,
+      "enunciado": "Nos crimes contra as instituições democráticas praticados em contexto de multidão, assinale a alternativa que apresenta corretamente as condições relativas ao agente para a redução da pena.",
+      "origin": "VighnaStudy_checkpoint_2026-09-18_14-05-46.zip"
+    }
+  ]
+}

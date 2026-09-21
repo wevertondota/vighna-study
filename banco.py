@@ -1,5 +1,4 @@
 import sqlite3
-import sys
 import random
 import json
 import logging
@@ -37,14 +36,10 @@ from gamificacao import build_gamification_snapshot, ensure_gamification_schema
 from statistics_core import StatisticsService
 from statistics_core.models import METRIC_VERSION
 from statistics_core.periods import statistical_timezone
+from caminhos import CAMINHO_BANCO, PASTA_DADOS
 
 
-if getattr(sys, "frozen", False):
-    PASTA_APLICACAO = Path(sys.executable).resolve().parent
-else:
-    PASTA_APLICACAO = Path(__file__).resolve().parent
-
-CAMINHO_BANCO = PASTA_APLICACAO / "estudos.db"
+PASTA_APLICACAO = PASTA_DADOS
 LOGGER = logging.getLogger(__name__)
 
 
@@ -8965,7 +8960,8 @@ def obter_estatisticas_banco_questoes(
 def obter_perfil_selecao_inteligente_questoes(
     concurso_id=None,
     disciplina_id=None,
-    topico_id=None
+    topico_id=None,
+    capitulos_ids=None
 ):
     """
     Analisa todas as questões visíveis no recorte atual e classifica
@@ -9017,6 +9013,22 @@ def obter_perfil_selecao_inteligente_questoes(
                 topico_id
             )
         )
+
+    if capitulos_ids is not None:
+        capitulos_ids = [
+            int(capitulo_id)
+            for capitulo_id in capitulos_ids
+        ]
+        if capitulos_ids:
+            marcadores_capitulos = ",".join(
+                "?" for _ in capitulos_ids
+            )
+            filtros.append(
+                f"q.capitulo_id IN ({marcadores_capitulos})"
+            )
+            parametros.extend(capitulos_ids)
+        else:
+            filtros.append("1 = 0")
 
     with conectar() as conexao:
         linhas = conexao.execute(
@@ -9436,6 +9448,345 @@ def obter_perfil_selecao_inteligente_questoes(
             questoes
         ),
     }
+
+
+
+def _sessao_tem_natureza_revisao(origem, modo):
+    """Indica se a sessão representa uma revisão deliberada do conteúdo."""
+    origem = str(origem or "").strip().lower()
+    modo_ascii = unicodedata.normalize(
+        "NFKD", str(modo or "")
+    ).encode("ascii", "ignore").decode("ascii").lower()
+    if origem in {"revisao_inteligente", "topico_revisao"}:
+        return True
+    if "revisao" in modo_ascii:
+        return True
+    return False
+
+
+def _ids_questoes_ativas_topico(conexao, topico_id):
+    return [
+        int(linha[0])
+        for linha in conexao.execute(
+            """
+            SELECT id
+            FROM questoes
+            WHERE topico_id = ? AND ativa = 1
+            ORDER BY id
+            """,
+            (int(topico_id),),
+        ).fetchall()
+    ]
+
+
+def _ultima_tentativa_efetiva_por_questao_desde(
+    conexao,
+    concurso_id,
+    topico_id,
+    referencia,
+):
+    """Retorna a tentativa efetiva mais recente de cada questão desde a referência."""
+    linhas = conexao.execute(
+        """
+        SELECT
+            COALESCE(tq.questao_id_snapshot, tq.questao_id) AS questao_id,
+            tq.correta,
+            tq.respondida_em,
+            tq.id
+        FROM tentativas_questoes tq
+        LEFT JOIN questoes q ON q.id = tq.questao_id
+        WHERE tq.concurso_id = ?
+          AND COALESCE(tq.topico_id_snapshot, q.topico_id) = ?
+          AND tq.correta IS NOT NULL
+          AND SUBSTR(tq.respondida_em, 1, 10) >= ?
+        ORDER BY
+            COALESCE(tq.questao_id_snapshot, tq.questao_id),
+            tq.respondida_em DESC,
+            tq.id DESC
+        """,
+        (int(concurso_id), int(topico_id), str(referencia)[:10]),
+    ).fetchall()
+    resultado = {}
+    for questao_id, correta, respondida_em, tentativa_id in linhas:
+        if questao_id is None:
+            continue
+        questao_id = int(questao_id)
+        if questao_id in resultado:
+            continue
+        resultado[questao_id] = {
+            "correta": bool(correta),
+            "respondida_em": respondida_em,
+            "tentativa_id": int(tentativa_id),
+        }
+    return resultado
+
+
+def obter_estado_cobertura_revisao(topico_id, concurso_id=None):
+    """Estado da rodada de cobertura da revisão atualmente vencida.
+
+    Enquanto ``controle_topico.proxima_revisao`` estiver vencida/hoje, todas
+    as questões ativas do tópico formam a rodada atual. Uma questão é coberta
+    quando possui ao menos uma resposta efetiva desde a data prevista.
+    Puladas não contam. Questões novas entram automaticamente na rodada;
+    questões desativadas deixam de compor o denominador.
+    """
+    if concurso_id is None:
+        concurso_id = obter_concurso_ativo()[0]
+    concurso_id = int(concurso_id)
+    topico_id = int(topico_id)
+    hoje = date.today().isoformat()
+
+    with conectar() as conexao:
+        linha = conexao.execute(
+            "SELECT proxima_revisao FROM controle_topico WHERE topico_id = ?",
+            (topico_id,),
+        ).fetchone()
+        referencia = linha[0] if linha and linha[0] else None
+        if not referencia or str(referencia)[:10] > hoje:
+            return {
+                "ativa": False,
+                "topico_id": topico_id,
+                "concurso_id": concurso_id,
+                "referencia": referencia,
+                "total": 0,
+                "cobertas": 0,
+                "restantes": 0,
+                "percentual": None,
+                "ids_restantes": [],
+                "ids_cobertas": [],
+            }
+
+        ids_ativas = _ids_questoes_ativas_topico(conexao, topico_id)
+        if not ids_ativas:
+            return {
+                "ativa": True,
+                "topico_id": topico_id,
+                "concurso_id": concurso_id,
+                "referencia": str(referencia)[:10],
+                "total": 0,
+                "cobertas": 0,
+                "restantes": 0,
+                "percentual": 100.0,
+                "ids_restantes": [],
+                "ids_cobertas": [],
+            }
+
+        ultimas = _ultima_tentativa_efetiva_por_questao_desde(
+            conexao,
+            concurso_id,
+            topico_id,
+            str(referencia)[:10],
+        )
+        conjunto_ativas = set(ids_ativas)
+        ids_cobertas = sorted(conjunto_ativas.intersection(ultimas))
+        ids_restantes = sorted(conjunto_ativas.difference(ultimas))
+        total = len(ids_ativas)
+        cobertas = len(ids_cobertas)
+        percentual = 100.0 * cobertas / total if total else 100.0
+
+    return {
+        "ativa": True,
+        "topico_id": topico_id,
+        "concurso_id": concurso_id,
+        "referencia": str(referencia)[:10],
+        "total": total,
+        "cobertas": cobertas,
+        "restantes": len(ids_restantes),
+        "percentual": percentual,
+        "ids_restantes": ids_restantes,
+        "ids_cobertas": ids_cobertas,
+    }
+
+
+def obter_resultado_cobertura_revisao(topico_id, concurso_id=None):
+    """Resultado consolidado da rodada usando uma observação por questão."""
+    estado = obter_estado_cobertura_revisao(topico_id, concurso_id)
+    if not estado.get("ativa"):
+        return None
+    concurso_id = int(estado["concurso_id"])
+    topico_id = int(estado["topico_id"])
+    referencia = estado["referencia"]
+    with conectar() as conexao:
+        ids_ativas = _ids_questoes_ativas_topico(conexao, topico_id)
+        ultimas = _ultima_tentativa_efetiva_por_questao_desde(
+            conexao, concurso_id, topico_id, referencia
+        )
+    respostas = [ultimas[qid] for qid in ids_ativas if qid in ultimas]
+    acertos = sum(1 for item in respostas if item["correta"])
+    return {
+        **estado,
+        "questoes": len(ids_ativas),
+        "respondidas_unicas": len(respostas),
+        "acertos": acertos,
+        "percentual_resultado": (
+            100.0 * acertos / len(respostas) if respostas else None
+        ),
+        "tentativas_ids": [item["tentativa_id"] for item in respostas],
+    }
+
+
+def selecionar_questoes_revisao_cobertura(
+    concurso_id=None,
+    topico_id=None,
+    quantidade=20,
+):
+    """Seleciona primeiro — e somente — questões ainda não cobertas na rodada.
+
+    A prioridade interna continua valorizando erros/recuperação, mas nenhuma
+    questão já coberta reaparece antes de todas as pendentes terem sido vistas.
+    """
+    if concurso_id is None:
+        concurso_id = obter_concurso_ativo()[0]
+    concurso_id = int(concurso_id)
+    topico_id = int(topico_id)
+    estado = obter_estado_cobertura_revisao(topico_id, concurso_id)
+    if not estado.get("ativa") or estado.get("restantes", 0) <= 0:
+        return selecionar_questoes_inteligentes(
+            concurso_id,
+            topico_id=topico_id,
+            quantidade=quantidade,
+        )
+
+    perfil = obter_perfil_selecao_inteligente_questoes(
+        concurso_id,
+        topico_id=topico_id,
+    )
+    pendentes_ids = set(int(qid) for qid in estado.get("ids_restantes", []))
+    candidatos = [
+        item for item in perfil.get("questoes", [])
+        if int(item["id"]) in pendentes_ids
+    ]
+    ordem_categoria = {
+        "recorrente": 0,
+        "recuperacao": 1,
+        "erro": 2,
+        "inedita": 3,
+        "controle": 4,
+        "dominada": 5,
+    }
+    random.shuffle(candidatos)
+    candidatos.sort(
+        key=lambda item: (
+            ordem_categoria.get(item.get("categoria_inteligente"), 9),
+            -float(item.get("prioridade_base") or 0.0),
+            item.get("ultima_resposta") or "",
+        )
+    )
+    quantidade = max(1, int(quantidade or 1))
+    quantidade = min(quantidade, len(candidatos))
+    fila = []
+    for item in candidatos[:quantidade]:
+        novo = dict(item)
+        novo["motivo_inteligente"] = (
+            "Questão ainda não coberta na rodada atual de revisão."
+        )
+        novo["score_inteligente"] = round(
+            float(item.get("prioridade_base") or 0.0), 1
+        )
+        fila.append(novo)
+
+    composicao = {}
+    for item in fila:
+        rotulo = item.get("categoria_rotulo") or "Revisão"
+        composicao[rotulo] = composicao.get(rotulo, 0) + 1
+
+    return {
+        **perfil,
+        "fila": fila,
+        "composicao": composicao,
+        "modo": "Revisão por cobertura",
+        "cobertura_revisao": estado,
+    }
+
+
+def reabrir_revisoes_parciais_recentes(concurso_id=None, dias=2):
+    """Corrige revisões recentes que foram reagendadas antes de cobrir o banco.
+
+    A correção é deliberadamente conservadora: considera apenas revisões
+    automáticas recentes cuja sessão tenha natureza explícita de revisão.
+    As tentativas permanecem intactas; remove-se somente o registro prematuro
+    de revisão e restaura-se a data prevista anterior.
+    """
+    if concurso_id is None:
+        try:
+            concurso_id = obter_concurso_ativo()[0]
+        except Exception:
+            return {"reabertas": 0, "topicos": []}
+    concurso_id = int(concurso_id)
+    dias = max(0, min(7, int(dias or 0)))
+    limite = (date.today() - timedelta(days=dias)).isoformat()
+    hoje = date.today().isoformat()
+    reabertas = []
+
+    with conectar() as conexao:
+        linhas = conexao.execute(
+            """
+            SELECT
+                r.id, r.topico_id, r.data, r.prevista_para,
+                sq.origem, sq.modo
+            FROM revisoes r
+            JOIN sessoes_questoes sq ON sq.id = r.sessao_questoes_id
+            WHERE r.concurso_id = ?
+              AND COALESCE(r.origem, 'manual') = 'questoes_internas'
+              AND r.data >= ?
+              AND r.prevista_para IS NOT NULL
+            ORDER BY r.data DESC, r.id DESC
+            """,
+            (concurso_id, limite),
+        ).fetchall()
+        vistos = set()
+        for revisao_id, topico_id, data_rev, prevista_para, origem, modo in linhas:
+            topico_id = int(topico_id)
+            if topico_id in vistos:
+                continue
+            vistos.add(topico_id)
+            if not _sessao_tem_natureza_revisao(origem, modo):
+                continue
+            referencia = str(prevista_para or "")[:10]
+            if not referencia or referencia > hoje:
+                continue
+            ids_ativas = _ids_questoes_ativas_topico(conexao, topico_id)
+            if not ids_ativas:
+                continue
+            ultimas = _ultima_tentativa_efetiva_por_questao_desde(
+                conexao, concurso_id, topico_id, referencia
+            )
+            cobertas = len(set(ids_ativas).intersection(ultimas))
+            if cobertas >= len(ids_ativas):
+                continue
+            atual = conexao.execute(
+                "SELECT proxima_revisao FROM controle_topico WHERE topico_id = ?",
+                (topico_id,),
+            ).fetchone()
+            atual = atual[0] if atual else None
+            # Só reabre se a revisão prematura de fato tiver empurrado a agenda
+            # para a frente. Se a agenda já está vencida, não há o que reparar.
+            if atual and str(atual)[:10] <= hoje:
+                continue
+            conexao.execute(
+                "UPDATE tentativas_questoes SET revisao_id = NULL WHERE revisao_id = ?",
+                (int(revisao_id),),
+            )
+            conexao.execute("DELETE FROM revisoes WHERE id = ?", (int(revisao_id),))
+            conexao.execute(
+                "INSERT OR IGNORE INTO controle_topico (topico_id) VALUES (?)",
+                (topico_id,),
+            )
+            conexao.execute(
+                "UPDATE controle_topico SET proxima_revisao = ? WHERE topico_id = ?",
+                (referencia, topico_id),
+            )
+            reabertas.append({
+                "topico_id": topico_id,
+                "referencia": referencia,
+                "total": len(ids_ativas),
+                "cobertas": cobertas,
+                "restantes": len(ids_ativas) - cobertas,
+                "revisao_removida": int(revisao_id),
+                "data_revisao_prematura": data_rev,
+            })
+
+    return {"reabertas": len(reabertas), "topicos": reabertas}
 
 
 def _pesos_selecao_inteligente(
@@ -10020,7 +10371,8 @@ def _pesos_categorias_adaptativas_v2(indice):
 def obter_prioridades_sessao_adaptativa(
     concurso_id=None,
     disciplina_id=None,
-    topicos_ids=None
+    topicos_ids=None,
+    capitulos_ids=None
 ):
     """
     Ranking ativo da Fila Inteligente V3 com comparação candidata em sombra.
@@ -10041,6 +10393,13 @@ def obter_prioridades_sessao_adaptativa(
     else:
         topicos_ids_set = {int(topico_id) for topico_id in topicos_ids}
 
+    if capitulos_ids is None:
+        capitulos_ids_set = None
+    else:
+        capitulos_ids_set = {int(capitulo_id) for capitulo_id in capitulos_ids}
+        if not capitulos_ids_set:
+            return []
+
     indices = obter_indices_dominio_topicos(concurso_id)
     # O contrato novo roda lado a lado para auditoria. Nesta etapa nenhum
     # valor abaixo participa dos pesos, do score ou da ordenacao da fila.
@@ -10048,6 +10407,25 @@ def obter_prioridades_sessao_adaptativa(
         concurso_id,
         topicos_ids_set,
     )
+
+    questoes_por_topico_capitulo = None
+    if capitulos_ids_set is not None:
+        marcadores = ",".join("?" for _ in capitulos_ids_set)
+        with conectar() as conexao:
+            linhas_capitulos = conexao.execute(
+                f"""
+                SELECT q.topico_id, COUNT(*)
+                FROM questoes q
+                WHERE q.ativa = 1
+                  AND q.capitulo_id IN ({marcadores})
+                GROUP BY q.topico_id
+                """,
+                tuple(sorted(capitulos_ids_set)),
+            ).fetchall()
+        questoes_por_topico_capitulo = {
+            int(topico_id): int(total or 0)
+            for topico_id, total in linhas_capitulos
+        }
 
     with conectar() as conexao:
         linhas = conexao.execute(
@@ -10119,7 +10497,12 @@ def obter_prioridades_sessao_adaptativa(
         if dominio is None:
             continue
 
-        quantidade_questoes = int(dominio.get("questoes_ativas", 0) or 0)
+        if questoes_por_topico_capitulo is not None:
+            quantidade_questoes = int(
+                questoes_por_topico_capitulo.get(topico_id, 0)
+            )
+        else:
+            quantidade_questoes = int(dominio.get("questoes_ativas", 0) or 0)
         if quantidade_questoes <= 0:
             continue
 
@@ -10809,7 +11192,8 @@ def planejar_sessao_adaptativa_global(
     concurso_id=None,
     quantidade=30,
     disciplina_id=None,
-    topicos_ids=None
+    topicos_ids=None,
+    capitulos_ids=None
 ):
     """
     Distribui o objetivo da sessão entre os tópicos mais estratégicos.
@@ -10831,7 +11215,8 @@ def planejar_sessao_adaptativa_global(
     prioridades = obter_prioridades_sessao_adaptativa(
         concurso_id,
         disciplina_id=disciplina_id,
-        topicos_ids=topicos_ids
+        topicos_ids=topicos_ids,
+        capitulos_ids=capitulos_ids
     )
 
     total_disponivel = sum(
@@ -11238,12 +11623,14 @@ def selecionar_questoes_adaptativas_v2(
     concurso_id,
     topico_id,
     quantidade,
-    indice_topico=None
+    indice_topico=None,
+    capitulos_ids=None
 ):
     """Seleciona as questões de um tópico com composição dinâmica V2."""
     perfil = obter_perfil_selecao_inteligente_questoes(
         concurso_id,
-        topico_id=topico_id
+        topico_id=topico_id,
+        capitulos_ids=capitulos_ids
     )
 
     quantidade = max(1, int(quantidade or 1))
@@ -11336,7 +11723,8 @@ def selecionar_sessao_adaptativa_global(
     concurso_id=None,
     quantidade=30,
     disciplina_id=None,
-    topicos_ids=None
+    topicos_ids=None,
+    capitulos_ids=None
 ):
     """
     Constrói a fila final da Seleção Adaptativa V2.
@@ -11349,7 +11737,8 @@ def selecionar_sessao_adaptativa_global(
         concurso_id,
         quantidade=quantidade,
         disciplina_id=disciplina_id,
-        topicos_ids=topicos_ids
+        topicos_ids=topicos_ids,
+        capitulos_ids=capitulos_ids
     )
 
     if concurso_id is None:
@@ -11364,7 +11753,8 @@ def selecionar_sessao_adaptativa_global(
             concurso_id,
             topico_id=alocacao["topico_id"],
             quantidade=alocacao["quantidade"],
-            indice_topico=alocacao
+            indice_topico=alocacao,
+            capitulos_ids=capitulos_ids
         )
 
         fila_topico = []
@@ -16478,6 +16868,7 @@ def obter_contextos_revisao_automatica_sessao(
 def salvar_revisao_automatica_questoes(
     topico_id, data, questoes, acertos, confianca,
     proxima_revisao=None, sessao_questoes_id=None, concurso_id=None,
+    tentativas_desde=None,
 ):
     """Consolida revisão interna diária e preserva o prazo histórico original."""
     topico_id = int(topico_id)
@@ -16538,18 +16929,36 @@ def salvar_revisao_automatica_questoes(
                 "dias_atraso": existente[3], "prazo_historico_valido": int(existente[4] or 0),
             }
 
-        conexao.execute(
-            """UPDATE tentativas_questoes SET revisao_id = ?
-               WHERE id IN (
-                 SELECT tq.id FROM tentativas_questoes tq
-                 LEFT JOIN questoes q ON q.id = tq.questao_id
-                 WHERE COALESCE(tq.topico_id_snapshot, q.topico_id) = ?
-                   AND tq.correta IS NOT NULL
-                   AND SUBSTR(tq.respondida_em, 1, 10) = ?
-                   AND (? IS NULL OR tq.concurso_id = ?)
-               )""",
-            (revisao_id, topico_id, data, concurso_id, concurso_id),
-        )
+        if tentativas_desde:
+            conexao.execute(
+                """UPDATE tentativas_questoes SET revisao_id = ?
+                   WHERE id IN (
+                     SELECT tq.id FROM tentativas_questoes tq
+                     LEFT JOIN questoes q ON q.id = tq.questao_id
+                     WHERE COALESCE(tq.topico_id_snapshot, q.topico_id) = ?
+                       AND tq.correta IS NOT NULL
+                       AND SUBSTR(tq.respondida_em, 1, 10) >= ?
+                       AND SUBSTR(tq.respondida_em, 1, 10) <= ?
+                       AND (? IS NULL OR tq.concurso_id = ?)
+                   )""",
+                (
+                    revisao_id, topico_id, str(tentativas_desde)[:10], data,
+                    concurso_id, concurso_id,
+                ),
+            )
+        else:
+            conexao.execute(
+                """UPDATE tentativas_questoes SET revisao_id = ?
+                   WHERE id IN (
+                     SELECT tq.id FROM tentativas_questoes tq
+                     LEFT JOIN questoes q ON q.id = tq.questao_id
+                     WHERE COALESCE(tq.topico_id_snapshot, q.topico_id) = ?
+                       AND tq.correta IS NOT NULL
+                       AND SUBSTR(tq.respondida_em, 1, 10) = ?
+                       AND (? IS NULL OR tq.concurso_id = ?)
+                   )""",
+                (revisao_id, topico_id, data, concurso_id, concurso_id),
+            )
         conexao.execute(
             "INSERT OR IGNORE INTO controle_topico (topico_id) VALUES (?)",
             (topico_id,),

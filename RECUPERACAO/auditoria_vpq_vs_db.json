@@ -1,0 +1,382 @@
+[
+  {
+    "file": "Agentes_Publicos_VPQ_1_1_110_Questoes.txt",
+    "discipline": "Direito Administrativo",
+    "title": "Agentes Públicos",
+    "chapter": "",
+    "declared": 110,
+    "parsed": 110,
+    "current_match": 110,
+    "recovered_match": 110
+  },
+  {
+    "file": "Artigo_5_CF_VPQ_1_1_94_Questoes.txt",
+    "discipline": "Direito Constitucional",
+    "title": "Título II: Dos Direitos e Garantias Fundamentais",
+    "chapter": "Capítulo I: Dos Direitos e Deveres Individuais e Coletivos",
+    "declared": 94,
+    "parsed": 94,
+    "current_match": 94,
+    "recovered_match": 94
+  },
+  {
+    "file": "Atos_Administrativos_VPQ_1_1_78_Questoes.txt",
+    "discipline": "Direito Administrativo",
+    "title": "Atos Administrativos",
+    "chapter": "",
+    "declared": 78,
+    "parsed": 78,
+    "current_match": 78,
+    "recovered_match": 78
+  },
+  {
+    "file": "CTB_CAPITULO_I_DISPOSICOES_PRELIMINARES_VPQ_1_1_8_QUESTOES.pdf",
+    "discipline": "Código de Trânsito Brasileiro (CTB)",
+    "title": "",
+    "chapter": "Capítulo I: Disposições Preliminares",
+    "declared": 8,
+    "parsed": 8,
+    "current_match": 6,
+    "recovered_match": 6
+  },
+  {
+    "file": "CTB_CAPITULO_I_DISPOSICOES_PRELIMINARES_VPQ_1_1_8_QUESTOES.txt",
+    "discipline": "Código de Trânsito Brasileiro (CTB)",
+    "title": "",
+    "chapter": "Capítulo I: Disposições Preliminares",
+    "declared": 8,
+    "parsed": 8,
+    "current_match": 8,
+    "recovered_match": 8
+  },
+  {
+    "file": "Competencias_e_Poderes_Administrativos_VPQ_1_1_46_Questoes.txt",
+    "discipline": "Direito Administrativo",
+    "title": "Competências Administrativas e Poderes Administrativos",
+    "chapter": "",
+    "declared": 46,
+    "parsed": 46,
+    "current_match": 46,
+    "recovered_match": 46
+  },
+  {
+    "file": "Controle_da_Administracao_Publica_VPQ_1_1_59_Questoes.txt",
+    "discipline": "Direito Administrativo",
+    "title": "Controle da Administração Pública",
+    "chapter": "",
+    "declared": 59,
+    "parsed": 59,
+    "current_match": 59,
+    "recovered_match": 59
+  },
+  {
+    "file": "Direito_Penal_Titulo_I_Aplicacao_da_Lei_Penal_VPQ_1_1_11_Questoes.txt",
+    "discipline": "Direito Penal",
+    "title": "Título I: Da Aplicação da Lei Penal",
+    "chapter": "",
+    "declared": 11,
+    "parsed": 11,
+    "current_match": 0,
+    "recovered_match": 0
+  },
+  {
+    "file": "Direito_Penal_Titulo_I_Aplicacao_da_Lei_Penal_VPQ_1_1_26_Questoes.txt",
+    "discipline": "Direito Penal",
+    "title": "Título I: Da Aplicação da Lei Penal",
+    "chapter": "",
+    "declared": 26,
+    "parsed": 26,
+    "current_match": 26,
+    "recovered_match": 26
+  },
+  {
+    "file": "Direitos_Politicos_CF_VPQ_1_1_51_Questoes.txt",
+    "discipline": "Direito Constitucional",
+    "title": "Título II: Dos Direitos e Garantias Fundamentais",
+    "chapter": "Capítulo IV: Dos Direitos Políticos",
+    "declared": 51,
+    "parsed": 51,
+    "current_match": 51,
+    "recovered_match": 51
+  },
+  {
+    "file": "Direitos_Sociais_CF_VPQ_1_1_95_Questoes.txt",
+    "discipline": "Direito Constitucional",
+    "title": "Título II: Dos Direitos e Garantias Fundamentais",
+    "chapter": "Capítulo II: Dos Direitos Sociais",
+    "declared": 95,
+    "parsed": 95,
+    "current_match": 95,
+    "recovered_match": 95
+  },
+  {
+    "file": "Estatuto_Geral_Guardas_Municipais_Disposicoes_Preliminares_VPQ_1_1_4_Questoes.txt",
+    "discipline": "Estatuto Geral das Guardas Municipais",
+    "title": "Disposições Preliminares",
+    "chapter": "",
+    "declared": 4,
+    "parsed": 4,
+    "current_match": 4,
+    "recovered_match": 4
+  },
+  {
+    "file": "FGV_Redes_Internet_20_Questoes_VPQ_1_1.txt",
+    "discipline": "Informática",
+    "title": "Redes de Computadores e Internet",
+    "chapter": "Conceitos de Redes, Conectividade e Tecnologias de Comunicação",
+    "declared": 20,
+    "parsed": 20,
+    "current_match": 20,
+    "recovered_match": 20
+  },
+  {
+    "file": "Improbidade_Administrativa_VPQ_1_1_64_Questoes.txt",
+    "discipline": "Direito Administrativo",
+    "title": "Improbidade Administrativa",
+    "chapter": "",
+    "declared": 64,
+    "parsed": 64,
+    "current_match": 64,
+    "recovered_match": 64
+  },
+  {
+    "file": "Leis_Complementares_Disposicoes_Preliminares_VPQ_1_1_4_Questoes(1).txt",
+    "discipline": "Leis Complementares",
+    "title": "",
+    "chapter": "Disposições Preliminares",
+    "declared": 4,
+    "parsed": 4,
+    "current_match": 4,
+    "recovered_match": 4
+  },
+  {
+    "file": "Leis_Complementares_Disposicoes_Preliminares_VPQ_1_1_4_Questoes.txt",
+    "discipline": "Leis Complementares",
+    "title": "",
+    "chapter": "Disposições Preliminares",
+    "declared": 4,
+    "parsed": 4,
+    "current_match": 4,
+    "recovered_match": 4
+  },
+  {
+    "file": "Leis_Complementares_Estatuto_Geral_Guardas_Municipais_Disposicoes_Preliminares_VPQ_1_1_4_Questoes.txt",
+    "discipline": "Leis Complementares",
+    "title": "Estatuto Geral das Guardas Municipais LEI Nº 13.022/2014",
+    "chapter": "Disposições Preliminares",
+    "declared": 4,
+    "parsed": 4,
+    "current_match": 4,
+    "recovered_match": 4
+  },
+  {
+    "file": "Leis_Complementares_Lei_13022_Disposicoes_Preliminares_VPQ_1_1_4_Questoes.txt",
+    "discipline": "Leis Complementares",
+    "title": "",
+    "chapter": "Lei nº 13.022/2014 — Disposições Preliminares",
+    "declared": 4,
+    "parsed": 4,
+    "current_match": 4,
+    "recovered_match": 4
+  },
+  {
+    "file": "Nacionalidade_CF_VPQ_1_1_28_Questoes.txt",
+    "discipline": "Direito Constitucional",
+    "title": "Título II: Dos Direitos e Garantias Fundamentais",
+    "chapter": "Capítulo III: Da Nacionalidade",
+    "declared": 28,
+    "parsed": 28,
+    "current_match": 28,
+    "recovered_match": 28
+  },
+  {
+    "file": "Organizacao_da_Administracao_Publica_VPQ_1_1_80_Questoes.txt",
+    "discipline": "Direito Administrativo",
+    "title": "Organização da Administração Pública",
+    "chapter": "",
+    "declared": 80,
+    "parsed": 80,
+    "current_match": 80,
+    "recovered_match": 80
+  },
+  {
+    "file": "Partidos_Politicos_CF_VPQ_1_1_32_Questoes.txt",
+    "discipline": "Direito Constitucional",
+    "title": "Título II: Dos Direitos e Garantias Fundamentais",
+    "chapter": "Capítulo V: Dos Partidos Políticos",
+    "declared": 32,
+    "parsed": 32,
+    "current_match": 32,
+    "recovered_match": 32
+  },
+  {
+    "file": "Principios_Fundamentais_CF_VPQ_1_1_14_Questoes.txt",
+    "discipline": "Direito Constitucional",
+    "title": "Título I: Dos Princípios Fundamentais",
+    "chapter": "",
+    "declared": 14,
+    "parsed": 14,
+    "current_match": 14,
+    "recovered_match": 14
+  },
+  {
+    "file": "Regime_Juridico_Disciplinar_VPQ_1_1_54_Questoes.txt",
+    "discipline": "Direito Administrativo",
+    "title": "Regime Jurídico Disciplinar dos Agentes Públicos",
+    "chapter": "",
+    "declared": 54,
+    "parsed": 54,
+    "current_match": 54,
+    "recovered_match": 54
+  },
+  {
+    "file": "Responsabilidade_Civil_do_Estado_VPQ_1_1_58_Questoes.txt",
+    "discipline": "Direito Administrativo",
+    "title": "Responsabilidade Civil do Estado",
+    "chapter": "",
+    "declared": 58,
+    "parsed": 58,
+    "current_match": 58,
+    "recovered_match": 58
+  },
+  {
+    "file": "Servicos_Publicos_VPQ_1_1_25_Questoes.txt",
+    "discipline": "Direito Administrativo",
+    "title": "Serviços Públicos",
+    "chapter": "",
+    "declared": 25,
+    "parsed": 25,
+    "current_match": 25,
+    "recovered_match": 25
+  },
+  {
+    "file": "Vighna_CTB_Capitulo_XV_Das_Infracoes_153Q_VPQ11.pdf",
+    "discipline": "Código de Trânsito Brasileiro (CTB)",
+    "title": "",
+    "chapter": "Capítulo XV: Das Infrações",
+    "declared": 153,
+    "parsed": 153,
+    "current_match": 153,
+    "recovered_match": 153
+  },
+  {
+    "file": "Vighna_CTB_Capitulo_XV_Das_Infracoes_153Q_VPQ11_EXPLICADO.pdf",
+    "discipline": "Código de Trânsito Brasileiro (CTB)",
+    "title": "",
+    "chapter": "Capítulo XV: Das Infrações",
+    "declared": 153,
+    "parsed": 153,
+    "current_match": 153,
+    "recovered_match": 153
+  },
+  {
+    "file": "Vighna_Direito_Penal_Aplicacao_do_art_155_2o_aos_crimes_do_Capitulo_V_Art_170_1Q_VPQ11.pdf",
+    "discipline": "Direito Penal",
+    "title": "TÍTULO II - DOS CRIMES CONTRA O PATRIMÔNIO",
+    "chapter": "CAPÍTULO V - DA APROPRIAÇÃO INDÉBITA",
+    "declared": 1,
+    "parsed": 1,
+    "current_match": 0,
+    "recovered_match": 0
+  },
+  {
+    "file": "Vighna_Direito_Penal_Apropriacao_Indebita_17Q_VPQ11.pdf",
+    "discipline": "Direito Penal",
+    "title": "Título II: Dos Crimes Contra o Patrimônio",
+    "chapter": "Capítulo V: Da Apropriação Indébita",
+    "declared": 17,
+    "parsed": 17,
+    "current_match": 0,
+    "recovered_match": 0
+  },
+  {
+    "file": "Vighna_Direito_Penal_Aumento_de_pena_na_apropriacao_indebita_Art_168_1o_3Q_VPQ11.pdf",
+    "discipline": "Direito Penal",
+    "title": "TÍTULO II - DOS CRIMES CONTRA O PATRIMÔNIO",
+    "chapter": "CAPÍTULO V - DA APROPRIAÇÃO INDÉBITA",
+    "declared": 3,
+    "parsed": 3,
+    "current_match": 3,
+    "recovered_match": 3
+  },
+  {
+    "file": "Vighna_Direito_Penal_Crimes_Contra_a_Liberdade_Sexual_7Q_VPQ11.pdf",
+    "discipline": "Direito Penal",
+    "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+    "chapter": "Capítulo I: Dos Crimes Contra a Liberdade Sexual",
+    "declared": 7,
+    "parsed": 7,
+    "current_match": 0,
+    "recovered_match": 7
+  },
+  {
+    "file": "Vighna_Direito_Penal_Crimes_Sexuais_Contra_Vulneravel_18Q_VPQ11.pdf",
+    "discipline": "Direito Penal",
+    "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+    "chapter": "Capítulo II: Dos Crimes Sexuais Contra Vulnerável",
+    "declared": 18,
+    "parsed": 18,
+    "current_match": 0,
+    "recovered_match": 18
+  },
+  {
+    "file": "Vighna_Direito_Penal_Dano_10Q_VPQ11.pdf",
+    "discipline": "Direito Penal",
+    "title": "Título II: Dos Crimes Contra o Patrimônio",
+    "chapter": "Capítulo IV: Do Dano",
+    "declared": 10,
+    "parsed": 10,
+    "current_match": 0,
+    "recovered_match": 0
+  },
+  {
+    "file": "Vighna_Direito_Penal_Disposicoes_Gerais_13Q_VPQ11.pdf",
+    "discipline": "Direito Penal",
+    "title": "Título II: Dos Crimes Contra o Patrimônio",
+    "chapter": "Capítulo VIII: Disposições Gerais",
+    "declared": 13,
+    "parsed": 13,
+    "current_match": 13,
+    "recovered_match": 13
+  },
+  {
+    "file": "Vighna_Direito_Penal_Estelionato_e_Outras_Fraudes_36Q_VPQ11.pdf",
+    "discipline": "Direito Penal",
+    "title": "Título II: Dos crimes contra o patrimônio",
+    "chapter": "Capítulo VI: Do estelionato e outras fraudes",
+    "declared": 36,
+    "parsed": 36,
+    "current_match": 35,
+    "recovered_match": 35
+  },
+  {
+    "file": "Vighna_Direito_Penal_Exposicao_da_Intimidade_Sexual_5Q_VPQ11.pdf",
+    "discipline": "Direito Penal",
+    "title": "Título VI: Dos Crimes Contra a Dignidade Sexual",
+    "chapter": "Capítulo I-A: Da Exposição da Intimidade Sexual",
+    "declared": 5,
+    "parsed": 5,
+    "current_match": 0,
+    "recovered_match": 5
+  },
+  {
+    "file": "Vighna_Direito_Penal_Receptacao_17Q_VPQ11.pdf",
+    "discipline": "Direito Penal",
+    "title": "Título II: Dos Crimes Contra o Patrimônio",
+    "chapter": "Capítulo VII: Da Receptação",
+    "declared": 17,
+    "parsed": 17,
+    "current_match": 14,
+    "recovered_match": 14
+  },
+  {
+    "file": "Vighna_Direito_Penal_Usurpacao_5Q_VPQ11.pdf",
+    "discipline": "Direito Penal",
+    "title": "Título II: Dos Crimes Contra o Patrimônio",
+    "chapter": "Capítulo III: Da Usurpação",
+    "declared": 5,
+    "parsed": 5,
+    "current_match": 0,
+    "recovered_match": 0
+  }
+]

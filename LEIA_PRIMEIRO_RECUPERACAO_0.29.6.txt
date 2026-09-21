@@ -1,0 +1,25 @@
+VighnaStudy 0.29.6 - recuperação consolidada
+
+Este pacote foi montado sobre a pasta SistemaEstudos enviada em 20/09/2026.
+O estudos.db da raiz foi corrigido diretamente, preservando os 2.522 registros
+que já existiam e acrescentando somente as 42 questões recuperadas.
+
+CONTAGENS ESPERADAS
+- Questões ativas: 2.551
+- Registros físicos: 2.564
+- Direito Penal: 312 ativas
+- Crimes contra a Dignidade Sexual: 54 ativas
+- Lixeira: 13
+- SQLite integrity_check: ok
+- foreign_key_check: 0 problema(s)
+
+VALIDAÇÃO
+1. Feche o Vighna.
+2. Copie os arquivos deste pacote sobre C:\SistemaEstudos, aceitando substituir.
+3. Execute VERIFICAR_BANCO_ATIVO.bat.
+4. O status deve informar RECUPERAÇÃO CONFIRMADA.
+5. Teste: python main.py
+6. Na Central de Questões, confira 2.551 ativas e 54 em Dignidade Sexual.
+7. Só depois execute atualizar_exe.bat.
+
+O executável e o modo Python usam o mesmo C:\SistemaEstudos\estudos.db.

@@ -1,0 +1,2343 @@
+{
+  "schema": 1,
+  "quantidade": 42,
+  "questoes": [
+    {
+      "source_id": 2523,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_9111dc1723374e7a983ba4f1acb692d0",
+        "nome": "Capítulo I – Dos Crimes Contra a Liberdade Sexual"
+      },
+      "questao": {
+        "enunciado": "Sobre o crime de estupro, assinale a alternativa que apresenta corretamente a conduta, o meio de execução e a pena previstos.",
+        "explicacao": "A) Errada. A fraude ou outro meio que impeça ou dificulte a livre manifestação de vontade da vítima integra a violação sexual mediante fraude. No estupro, o meio de execução previsto é violência ou grave ameaça. B) Errada. A conduta e os meios de execução estão corretos, mas a pena do estupro é reclusão de 6 a 10 anos, e não de 2 a 6 anos. C) Certa. O estupro consiste em constranger alguém, mediante violência ou grave ameaça, a ter conjunção carnal ou a praticar ou permitir que com ele se pratique outro ato libidinoso. A pena é reclusão de 6 a 10 anos. D) Errada. Prevalecer-se da condição de superior hierárquico ou de ascendência inerente ao exercício de emprego, cargo ou função constitui elemento do assédio sexual. O estupro exige violência ou grave ameaça.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 213, 215, 215-A e 216-A",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Constranger alguém, mediante fraude ou outro meio que impeça ou dificulte a livre manifestação de vontade, a ter conjunção carnal ou a praticar ou permitir que com ele se pratique outro ato libidinoso, com reclusão de 6 a 10 anos.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Constranger alguém, mediante violência ou grave ameaça, a ter conjunção carnal ou a praticar ou permitir que com ele se pratique outro ato libidinoso, com reclusão de 2 a 6 anos.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Constranger alguém, mediante violência ou grave ameaça, a ter conjunção carnal ou a praticar ou permitir que com ele se pratique outro ato libidinoso, com reclusão de 6 a 10 anos.",
+          "correta": 1,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Constranger alguém, prevalecendo-se de sua condição de superior hierárquico ou da ascendência inerente ao exercício de emprego, cargo ou função, a ter conjunção carnal ou a praticar ou permitir que com ele se pratique outro ato libidinoso, com reclusão de 6 a 10 anos.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2524,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_9111dc1723374e7a983ba4f1acb692d0",
+        "nome": "Capítulo I – Dos Crimes Contra a Liberdade Sexual"
+      },
+      "questao": {
+        "enunciado": "Em relação ao estupro quando da conduta resulta lesão corporal de natureza grave ou quando a vítima é menor de 18 e maior de 14 anos, assinale a alternativa correta.",
+        "explicacao": "A) Certa. A pena é de reclusão de 8 a 12 anos quando da conduta resulta lesão corporal de natureza grave ou quando a vítima é menor de 18 e maior de 14 anos. B) Errada. As hipóteses não são cumulativas. O texto utiliza a conjunção “ou”, de modo que cada uma delas, isoladamente, conduz à pena de 8 a 12 anos. C) Errada. A pena de 12 a 30 anos é prevista quando da conduta resulta morte. Para lesão corporal grave ou vítima na faixa etária indicada, a pena é de 8 a 12 anos. D) Errada. Se da conduta resulta morte, a pena é de reclusão de 12 a 30 anos, e não de 8 a 12 anos.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 213, 215, 215-A e 216-A",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "A ocorrência de lesão corporal de natureza grave ou a idade da vítima nas condições indicadas sujeita o agente à reclusão de 8 a 12 anos.",
+          "correta": 1,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "A ocorrência de lesão corporal de natureza grave e a idade da vítima nas condições indicadas devem estar presentes conjuntamente, com reclusão de 8 a 12 anos.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "A ocorrência de lesão corporal de natureza grave ou a idade da vítima nas condições indicadas sujeita o agente à reclusão de 12 a 30 anos.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "A ocorrência de morte ou a idade da vítima nas condições indicadas sujeita o agente à reclusão de 8 a 12 anos.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2525,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_9111dc1723374e7a983ba4f1acb692d0",
+        "nome": "Capítulo I – Dos Crimes Contra a Liberdade Sexual"
+      },
+      "questao": {
+        "enunciado": "Se da conduta de estupro resulta a morte da vítima, assinale a alternativa que apresenta corretamente a pena prevista.",
+        "explicacao": "A) Errada. Reclusão de 6 a 10 anos é a pena prevista para o estupro na forma básica. B) Errada. Reclusão de 8 a 12 anos é a pena prevista quando resulta lesão corporal de natureza grave ou quando a vítima é menor de 18 e maior de 14 anos. C) Errada. Reclusão de 2 a 6 anos é a pena da violação sexual mediante fraude. D) Certa. Se da conduta de estupro resulta morte, a pena prevista é reclusão de 12 a 30 anos.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 213, 215, 215-A e 216-A",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Reclusão de 6 a 10 anos.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Reclusão de 8 a 12 anos.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Reclusão de 2 a 6 anos.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Reclusão de 12 a 30 anos.",
+          "correta": 1,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2526,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_9111dc1723374e7a983ba4f1acb692d0",
+        "nome": "Capítulo I – Dos Crimes Contra a Liberdade Sexual"
+      },
+      "questao": {
+        "enunciado": "Sobre a violação sexual mediante fraude, assinale a alternativa que apresenta corretamente a conduta, a pena e a consequência prevista quando o crime é cometido com o fim de obter vantagem econômica.",
+        "explicacao": "A) Errada. A conduta e a consequência da finalidade econômica estão corretamente associadas, mas a pena da violação sexual mediante fraude é reclusão de 2 a 6 anos, e não de 1 a 5 anos. B) Certa. A violação sexual mediante fraude consiste em ter conjunção carnal ou praticar outro ato libidinoso mediante fraude ou outro meio que impeça ou dificulte a livre manifestação de vontade da vítima. A pena é reclusão de 2 a 6 anos e, se houver o fim de obter vantagem econômica, aplica-se também multa. C) Errada. Violência ou grave ameaça são meios de execução previstos para o estupro. Na violação sexual mediante fraude, emprega-se fraude ou outro meio que impeça ou dificulte a livre manifestação de vontade da vítima. D) Errada. O fim de obter vantagem econômica não produz aumento de até um terço. Nessa hipótese, aplica-se também multa.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 213, 215, 215-A e 216-A",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Ter conjunção carnal ou praticar outro ato libidinoso com alguém, mediante fraude ou outro meio que impeça ou dificulte sua livre manifestação de vontade, com reclusão de 1 a 5 anos e aplicação também de multa se o crime for cometido com o fim de obter vantagem econômica.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Ter conjunção carnal ou praticar outro ato libidinoso com alguém, mediante fraude ou outro meio que impeça ou dificulte sua livre manifestação de vontade, com reclusão de 2 a 6 anos e aplicação também de multa se o crime for cometido com o fim de obter vantagem econômica.",
+          "correta": 1,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Ter conjunção carnal ou praticar outro ato libidinoso com alguém, mediante violência ou grave ameaça, com reclusão de 2 a 6 anos e aplicação também de multa se o crime for cometido com o fim de obter vantagem econômica.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Ter conjunção carnal ou praticar outro ato libidinoso com alguém, mediante fraude ou outro meio que impeça ou dificulte sua livre manifestação de vontade, com reclusão de 2 a 6 anos e aumento de até um terço se o crime for cometido com o fim de obter vantagem econômica.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2527,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_9111dc1723374e7a983ba4f1acb692d0",
+        "nome": "Capítulo I – Dos Crimes Contra a Liberdade Sexual"
+      },
+      "questao": {
+        "enunciado": "Sobre a importunação sexual, assinale a alternativa que apresenta corretamente a conduta, a finalidade e a pena previstas.",
+        "explicacao": "A) Errada. Na importunação sexual, a finalidade é satisfazer a própria lascívia ou a de terceiro. O intuito de obter vantagem ou favorecimento sexual integra a descrição do assédio sexual. B) Errada. A conduta e a finalidade estão corretamente descritas, mas a pena da importunação sexual é reclusão de 1 a 5 anos, e não de 2 a 6 anos. C) Certa. A importunação sexual consiste em praticar contra alguém e sem sua anuência ato libidinoso com o objetivo de satisfazer a própria lascívia ou a de terceiro. A pena é reclusão de 1 a 5 anos, se o ato não constitui crime mais grave. D) Errada. Fraude ou outro meio que impeça ou dificulte a livre manifestação de vontade da vítima são elementos da violação sexual mediante fraude. Na importunação sexual, o texto exige que o ato seja praticado contra alguém sem sua anuência.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 213, 215, 215-A e 216-A",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Praticar contra alguém e sem sua anuência ato libidinoso com o objetivo de obter vantagem ou favorecimento sexual, com reclusão de 1 a 5 anos, se o ato não constitui crime mais grave.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Praticar contra alguém e sem sua anuência ato libidinoso com o objetivo de satisfazer a própria lascívia ou a de terceiro, com reclusão de 2 a 6 anos, se o ato não constitui crime mais grave.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Praticar contra alguém e sem sua anuência ato libidinoso com o objetivo de satisfazer a própria lascívia ou a de terceiro, com reclusão de 1 a 5 anos, se o ato não constitui crime mais grave.",
+          "correta": 1,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Praticar contra alguém, mediante fraude ou outro meio que impeça ou dificulte a livre manifestação de vontade da vítima, ato libidinoso com o objetivo de satisfazer a própria lascívia ou a de terceiro, com reclusão de 1 a 5 anos, se o ato não constitui crime mais grave.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2528,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_9111dc1723374e7a983ba4f1acb692d0",
+        "nome": "Capítulo I – Dos Crimes Contra a Liberdade Sexual"
+      },
+      "questao": {
+        "enunciado": "Sobre o assédio sexual, assinale a alternativa que apresenta corretamente a conduta, a finalidade, a condição de superior hierárquico ou a ascendência de que se prevalece o agente e a pena prevista.",
+        "explicacao": "A) Errada. A relação de superioridade ou ascendência e a pena estão corretamente indicadas, mas a finalidade do assédio sexual é obter vantagem ou favorecimento sexual. Satisfazer a própria lascívia ou a de terceiro é finalidade prevista na importunação sexual. B) Errada. A conduta, a finalidade e a relação funcional estão corretas, mas a pena não é reclusão de 1 a 5 anos. O assédio sexual é punido com detenção de 1 a 2 anos. C) Errada. O intervalo de 1 a 2 anos está correto, mas a espécie de pena está incorreta. O texto prevê detenção, e não reclusão. D) Certa. O assédio sexual consiste em constranger alguém com o intuito de obter vantagem ou favorecimento sexual, prevalecendo-se o agente de sua condição de superior hierárquico ou da ascendência inerente ao exercício de emprego, cargo ou função. A pena é detenção de 1 a 2 anos.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 213, 215, 215-A e 216-A",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Constranger alguém com o intuito de satisfazer a própria lascívia ou a de terceiro, prevalecendo-se de sua condição de superior hierárquico ou da ascendência inerente ao exercício de emprego, cargo ou função, com detenção de 1 a 2 anos.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Constranger alguém com o intuito de obter vantagem ou favorecimento sexual, prevalecendo-se de sua condição de superior hierárquico ou da ascendência inerente ao exercício de emprego, cargo ou função, com reclusão de 1 a 5 anos.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Constranger alguém com o intuito de obter vantagem ou favorecimento sexual, prevalecendo-se de sua condição de superior hierárquico ou da ascendência inerente ao exercício de emprego, cargo ou função, com reclusão de 1 a 2 anos.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Constranger alguém com o intuito de obter vantagem ou favorecimento sexual, prevalecendo-se de sua condição de superior hierárquico ou da ascendência inerente ao exercício de emprego, cargo ou função, com detenção de 1 a 2 anos.",
+          "correta": 1,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2529,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_9111dc1723374e7a983ba4f1acb692d0",
+        "nome": "Capítulo I – Dos Crimes Contra a Liberdade Sexual"
+      },
+      "questao": {
+        "enunciado": "Quanto à causa de aumento expressamente prevista para o assédio sexual, assinale a alternativa correta.",
+        "explicacao": "A) Certa. No assédio sexual, a pena é aumentada em até um terço quando a vítima é menor de 18 anos. B) Errada. O texto não estabelece, para essa causa de aumento, a exigência de que a vítima seja maior de 14 anos. Basta que seja menor de 18 anos. C) Errada. O fim de obter vantagem econômica está relacionado à aplicação adicional de multa na violação sexual mediante fraude. Não constitui a causa de aumento prevista para o assédio sexual. D) Errada. A menoridade da vítima não determina aplicação de multa no assédio sexual. A consequência prevista é aumento da pena em até um terço.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 213, 215, 215-A e 216-A",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "A pena é aumentada em até um terço se a vítima é menor de 18 anos.",
+          "correta": 1,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "A pena é aumentada em até um terço se a vítima é maior de 14 e menor de 18 anos.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "A pena é aumentada em até um terço se o crime é cometido com o fim de obter vantagem econômica.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "A pena é acrescida de multa se a vítima é menor de 18 anos.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2530,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": null,
+      "questao": {
+        "enunciado": "Sobre o registro não autorizado da intimidade sexual, assinale a alternativa que apresenta corretamente as condutas previstas, a amplitude do meio empregado e o conteúdo protegido.",
+        "explicacao": "A) Errada. O texto prevê que a conduta pode ser praticada por qualquer meio, e não exclusivamente por meio audiovisual. B) Errada. O caput prevê produzir, fotografar, filmar ou registrar; realizar montagem pertence ao parágrafo único. C) Certa. A alternativa reproduz corretamente os quatro verbos do caput, a expressão por qualquer meio, o conteúdo de caráter íntimo e privado e a ausência de autorização dos participantes. D) Errada. Realizar montagem não integra o rol de verbos do caput; essa conduta é tratada no parágrafo único.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Art. 216-B",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Produzir, fotografar, filmar ou registrar, exclusivamente por meio audiovisual, conteúdo com cena de nudez ou ato sexual ou libidinoso de caráter íntimo e privado, sem autorização dos participantes.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Produzir, fotografar, realizar montagem ou registrar, por qualquer meio, conteúdo com cena de nudez ou ato sexual ou libidinoso de caráter íntimo e privado, sem autorização dos participantes.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Produzir, fotografar, filmar ou registrar, por qualquer meio, conteúdo com cena de nudez ou ato sexual ou libidinoso de caráter íntimo e privado, sem autorização dos participantes.",
+          "correta": 1,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Produzir, realizar montagem, filmar ou registrar, por qualquer meio, conteúdo com cena de nudez ou ato sexual ou libidinoso de caráter íntimo e privado, sem autorização dos participantes.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2531,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": null,
+      "questao": {
+        "enunciado": "Quanto ao conteúdo abrangido pelo registro não autorizado da intimidade sexual e à exigência relativa à autorização, assinale a alternativa correta.",
+        "explicacao": "A) Certa. A alternativa reproduz corretamente o conteúdo protegido: cena de nudez ou ato sexual ou libidinoso de caráter íntimo e privado, sem autorização dos participantes. B) Errada. O texto exige caráter íntimo e privado, de forma cumulativa. C) Errada. As modalidades de conteúdo são alternativas: cena de nudez ou ato sexual ou libidinoso, e não cumulativas. D) Errada. O tipo exige ausência de autorização dos participantes.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Art. 216-B",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "O conteúdo deve envolver cena de nudez ou ato sexual ou libidinoso de caráter íntimo e privado, sem autorização dos participantes.",
+          "correta": 1,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "O conteúdo deve envolver cena de nudez ou ato sexual ou libidinoso de caráter íntimo ou privado, sem autorização dos participantes.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "O conteúdo deve envolver conjuntamente cena de nudez, ato sexual e ato libidinoso de caráter íntimo e privado, sem autorização dos participantes.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "O conteúdo deve envolver cena de nudez ou ato sexual ou libidinoso de caráter íntimo e privado, com autorização dos participantes.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2532,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": null,
+      "questao": {
+        "enunciado": "Quanto à pena prevista para o registro não autorizado da intimidade sexual, assinale a alternativa correta.",
+        "explicacao": "A) Errada. A pena é cumulativa: detenção de 6 meses a 1 ano e multa. B) Errada. O intervalo correto é de 6 meses a 1 ano. C) Errada. A espécie de pena prevista é detenção, e não reclusão. D) Certa. A pena prevista é detenção de 6 meses a 1 ano e multa.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Art. 216-B",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Detenção de 6 meses a 1 ano ou multa.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Detenção de 1 a 2 anos e multa.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Reclusão de 6 meses a 1 ano e multa.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Detenção de 6 meses a 1 ano e multa.",
+          "correta": 1,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2533,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": null,
+      "questao": {
+        "enunciado": "Em relação à montagem destinada a incluir pessoa em cena de conteúdo sexual íntimo, assinale a alternativa que apresenta corretamente a conduta, os suportes abrangidos e a finalidade prevista.",
+        "explicacao": "A) Errada. O texto menciona fotografia, vídeo, áudio ou qualquer outro registro; filmagem não substitui o suporte áudio previsto expressamente. B) Certa. A alternativa reproduz corretamente a montagem em fotografia, vídeo, áudio ou qualquer outro registro, com o fim de incluir pessoa em cena íntima de nudez ou ato sexual ou libidinoso. C) Errada. O texto menciona vídeo, e não filmagem, na enumeração dos suportes. D) Errada. A finalidade prevista é incluir pessoa na cena, e não simplesmente registrá-la.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Art. 216-B",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Realizar montagem em fotografia, vídeo, filmagem ou qualquer outro registro com o fim de incluir pessoa em cena de nudez ou ato sexual ou libidinoso de caráter íntimo.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Realizar montagem em fotografia, vídeo, áudio ou qualquer outro registro com o fim de incluir pessoa em cena de nudez ou ato sexual ou libidinoso de caráter íntimo.",
+          "correta": 1,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Realizar montagem em fotografia, filmagem, áudio ou qualquer outro registro com o fim de incluir pessoa em cena de nudez ou ato sexual ou libidinoso de caráter íntimo.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Realizar montagem em fotografia, vídeo, áudio ou qualquer outro registro com o fim de registrar pessoa em cena de nudez ou ato sexual ou libidinoso de caráter íntimo.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2534,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": null,
+      "questao": {
+        "enunciado": "Quanto ao conteúdo da montagem e à consequência penal prevista para essa conduta, assinale a alternativa correta.",
+        "explicacao": "A) Errada. O parágrafo único exige caráter íntimo; a redação apresentada substitui esse qualificativo por privado. B) Errada. A montagem recebe a mesma pena do caput, e não detenção de 1 a 2 anos e multa. C) Certa. A alternativa reproduz corretamente o conteúdo da montagem e a regra de que o agente incorre na mesma pena do caput. D) Errada. A pena do caput é detenção de 6 meses a 1 ano e multa, de forma cumulativa, e não alternativa.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Art. 216-B",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "A montagem deve incluir pessoa em cena de nudez ou ato sexual ou libidinoso de caráter privado, incidindo a mesma pena prevista para o registro não autorizado.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "A montagem deve incluir pessoa em cena de nudez ou ato sexual ou libidinoso de caráter íntimo, com pena de detenção de 1 a 2 anos e multa.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "A montagem deve incluir pessoa em cena de nudez ou ato sexual ou libidinoso de caráter íntimo, incidindo a mesma pena prevista para o registro não autorizado.",
+          "correta": 1,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "A montagem deve incluir pessoa em cena de nudez ou ato sexual ou libidinoso de caráter íntimo, com pena de detenção de 6 meses a 1 ano ou multa.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2535,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_be86ad6cbe5c43fe9baf7945aa8c6bb5",
+        "nome": "Capítulo II – Dos Crimes Sexuais Contra Vulnerável"
+      },
+      "questao": {
+        "enunciado": "Sobre o estupro de vulnerável praticado em razão da idade da vítima, assinale a alternativa que apresenta corretamente a conduta, a faixa etária e a pena previstas.",
+        "explicacao": "A) Errada. O critério etário do caput é vítima menor de 14 anos, e não menor de 18. B) Errada. A idade está correta, mas a pena é de reclusão de 10 a 18 anos e multa. C) Certa. O estupro de vulnerável consiste em ter conjunção carnal ou praticar outro ato libidinoso com menor de 14 anos, com reclusão de 10 a 18 anos e multa. D) Errada. A faixa entre maior de 14 e menor de 18 anos não corresponde à vulnerabilidade etária prevista no caput.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 217-A, 218, 218-A, 218-B e 218-C",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Ter conjunção carnal ou praticar outro ato libidinoso com menor de 18 anos, com reclusão de 10 a 18 anos e multa.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Ter conjunção carnal ou praticar outro ato libidinoso com menor de 14 anos, com reclusão de 6 a 14 anos e multa.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Ter conjunção carnal ou praticar outro ato libidinoso com menor de 14 anos, com reclusão de 10 a 18 anos e multa.",
+          "correta": 1,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Ter conjunção carnal ou praticar outro ato libidinoso com pessoa maior de 14 e menor de 18 anos, com reclusão de 10 a 18 anos e multa.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2536,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_be86ad6cbe5c43fe9baf7945aa8c6bb5",
+        "nome": "Capítulo II – Dos Crimes Sexuais Contra Vulnerável"
+      },
+      "questao": {
+        "enunciado": "No favorecimento da prostituição ou de outra forma de exploração sexual de criança, adolescente ou vulnerável, assinale a alternativa que apresenta corretamente o conjunto de condutas previstas.",
+        "explicacao": "A) Certa. O texto prevê submeter, induzir ou atrair à prostituição ou outra forma de exploração sexual, facilitá-la e impedir ou dificultar que a vítima a abandone. B) Errada. A conduta prevista é impedir ou dificultar que a pessoa abandone a situação, e não que nela ingresse. C) Errada. O texto utiliza o verbo induzir, e não constranger, nessa enumeração. D) Errada. O texto prevê impedir ou dificultar que a pessoa abandone a situação, e não promover ou estimular seu abandono.\nVPQ 1.1 - Direito Penal - pág. 2",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 217-A, 218, 218-A, 218-B e 218-C",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Submeter, induzir ou atrair à prostituição ou outra forma de exploração sexual, facilitá-la, impedir ou dificultar que a pessoa a abandone.",
+          "correta": 1,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Submeter, induzir ou atrair à prostituição ou outra forma de exploração sexual, facilitá-la, impedir ou dificultar que a pessoa nela ingresse.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Submeter, constranger ou atrair à prostituição ou outra forma de exploração sexual, facilitá-la, impedir ou dificultar que a pessoa a abandone.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Submeter, induzir ou atrair à prostituição ou outra forma de exploração sexual, facilitá-la, promover ou estimular que a pessoa a abandone.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2537,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_be86ad6cbe5c43fe9baf7945aa8c6bb5",
+        "nome": "Capítulo II – Dos Crimes Sexuais Contra Vulnerável"
+      },
+      "questao": {
+        "enunciado": "Sobre as formas de disponibilização ou divulgação de registro audiovisual abrangidas pelo crime de divulgação de cena de estupro, sexo, nudez ou pornografia, assinale a alternativa correta.",
+        "explicacao": "A) Errada. O verbo previsto é divulgar, e não armazenar. B) Errada. O objeto indicado pelo texto é fotografia, vídeo ou outro registro audiovisual, e não fotografia, áudio ou outro registro audiovisual. C) Errada. O texto menciona sistema de informática ou telemática, e não telefonia ou telemática. D) Certa. Reproduz adequadamente as condutas, os meios e os registros audiovisuais abrangidos.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 217-A, 218, 218-A, 218-B e 218-C",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Oferecer, trocar, disponibilizar, transmitir, vender ou expor à venda, distribuir, publicar ou armazenar, por qualquer meio, inclusive por meio de comunicação de massa ou sistema de informática ou telemática, fotografia, vídeo ou outro registro audiovisual.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Oferecer, trocar, disponibilizar, transmitir, vender ou expor à venda, distribuir, publicar ou divulgar, por qualquer meio, inclusive por meio de comunicação de massa ou sistema de informática ou telemática, fotografia, áudio ou outro registro audiovisual.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Oferecer, trocar, disponibilizar, transmitir, vender ou expor à venda, distribuir, publicar ou divulgar, por qualquer meio, inclusive por meio de comunicação de massa ou sistema de telefonia ou telemática, fotografia, vídeo ou outro registro audiovisual.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Oferecer, trocar, disponibilizar, transmitir, vender ou expor à venda, distribuir, publicar ou divulgar, por qualquer meio, inclusive por meio de comunicação de massa ou sistema de informática ou telemática, fotografia, vídeo ou outro registro audiovisual.",
+          "correta": 1,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2538,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_be86ad6cbe5c43fe9baf7945aa8c6bb5",
+        "nome": "Capítulo II – Dos Crimes Sexuais Contra Vulnerável"
+      },
+      "questao": {
+        "enunciado": "Quanto às outras hipóteses de vulnerabilidade abrangidas pelo estupro de vulnerável, assinale a alternativa correta.",
+        "explicacao": "A) Errada. O § 1º não estabelece genericamente a condição de pessoa menor de 18 anos; contempla enfermidade ou deficiência mental sem o necessário discernimento ou impossibilidade de oferecer resistência por outra causa. B) Certa. Reproduz as duas hipóteses adicionais de vulnerabilidade previstas no § 1º. C) Errada. Embora descreva corretamente as hipóteses, atribui pena de 6 a 14 anos. O § 1º determina a mesma pena do caput: 10 a 18 anos e multa. D) Errada. A hipótese legal exige que a pessoa não possa oferecer resistência.\nVPQ 1.1 - Direito Penal - pág. 3",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 217-A, 218, 218-A, 218-B e 218-C",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Incorre na mesma pena quem pratica as condutas sexuais com pessoa menor de 18 anos ou que, por qualquer outra causa, não possa oferecer resistência.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Incorre na mesma pena quem pratica as condutas sexuais com pessoa que, por enfermidade ou deficiência mental, não tenha o necessário discernimento para a prática do ato, ou que, por qualquer outra causa, não possa oferecer resistência.",
+          "correta": 1,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Incorre na mesma pena quem pratica as condutas sexuais com pessoa que, por enfermidade ou deficiência mental, não tenha o necessário discernimento para a prática do ato, ou que, por qualquer outra causa, não possa oferecer resistência, aplicando-se reclusão de 6 a 14 anos e multa.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Incorre na mesma pena quem pratica as condutas sexuais com pessoa que, por enfermidade ou deficiência mental, não tenha o necessário discernimento para a prática do ato, ou que, por qualquer outra causa, possa oferecer resistência.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2539,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_be86ad6cbe5c43fe9baf7945aa8c6bb5",
+        "nome": "Capítulo II – Dos Crimes Sexuais Contra Vulnerável"
+      },
+      "questao": {
+        "enunciado": "Sobre a satisfação de lascívia mediante presença de criança ou adolescente, assinale a alternativa que apresenta corretamente as formas de execução e a idade da pessoa envolvida.",
+        "explicacao": "A) Certa. O tipo abrange praticar, na presença de menor de 14 anos, ou induzi-lo a presenciar, conjunção carnal ou outro ato libidinoso. B) Errada. O texto não prevê induzir o menor a participar do ato nessa figura típica. C) Errada. A idade prevista é menor de 14 anos, e não menor de 18. D) Errada. A modalidade prevista é induzir o menor a presenciar, não a praticar o ato.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 217-A, 218, 218-A, 218-B e 218-C",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Praticar, na presença de alguém menor de 14 anos, ou induzi-lo a presenciar, conjunção carnal ou outro ato libidinoso.",
+          "correta": 1,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Praticar, na presença de alguém menor de 14 anos, ou induzi-lo a participar de conjunção carnal ou outro ato libidinoso.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Praticar, na presença de alguém menor de 18 anos, ou induzi-lo a presenciar, conjunção carnal ou outro ato libidinoso.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Praticar, na presença de alguém menor de 14 anos, ou induzi-lo a praticar conjunção carnal ou outro ato libidinoso.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2540,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_be86ad6cbe5c43fe9baf7945aa8c6bb5",
+        "nome": "Capítulo II – Dos Crimes Sexuais Contra Vulnerável"
+      },
+      "questao": {
+        "enunciado": "Considerando as formas qualificadas pelo resultado no estupro de vulnerável, assinale a alternativa que apresenta corretamente as consequências penais da lesão corporal grave e da morte.",
+        "explicacao": "A) Errada. Se resulta lesão corporal grave, a pena é de 12 a 24 anos, e não de 10 a 18. B) Errada. A pena de 12 a 24 anos corresponde à lesão grave; se resulta morte, a pena é de 20 a 40 anos. C) Certa. Lesão corporal grave: reclusão de 12 a 24 anos e multa; morte: reclusão de 20 a 40 anos e multa. D) Errada. Inverte as penas previstas para os dois resultados.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 217-A, 218, 218-A, 218-B e 218-C",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Se resulta lesão corporal de natureza grave, a pena é reclusão de 10 a 18 anos e multa; se resulta morte, reclusão de 20 a 40 anos e multa.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Se resulta lesão corporal de natureza grave, a pena é reclusão de 12 a 24 anos e multa; se resulta morte, reclusão de 12 a 24 anos e multa.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Se resulta lesão corporal de natureza grave, a pena é reclusão de 12 a 24 anos e multa; se resulta morte, reclusão de 20 a 40 anos e multa.",
+          "correta": 1,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Se resulta lesão corporal de natureza grave, a pena é reclusão de 20 a 40 anos e multa; se resulta morte, reclusão de 12 a 24 anos e multa.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2541,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_be86ad6cbe5c43fe9baf7945aa8c6bb5",
+        "nome": "Capítulo II – Dos Crimes Sexuais Contra Vulnerável"
+      },
+      "questao": {
+        "enunciado": "Sobre o crime de corrupção de menores previsto entre os crimes sexuais contra vulnerável, assinale a alternativa correta.",
+        "explicacao": "A) Errada. A finalidade prevista é satisfazer a lascívia de outrem, e não a própria. B) Certa. Induzir menor de 14 anos a satisfazer a lascívia de outrem é punido com reclusão de 6 a 14 anos e multa. C) Errada. A conduta está correta, mas a pena não é de 5 a 12 anos; é de 6 a 14 anos e multa. D) Errada. A vítima indicada pelo tipo é pessoa menor de 14 anos.\nVPQ 1.1 - Direito Penal - pág. 4",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 217-A, 218, 218-A, 218-B e 218-C",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Induzir alguém menor de 14 anos a satisfazer a própria lascívia, com reclusão de 6 a 14 anos e multa.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Induzir alguém menor de 14 anos a satisfazer a lascívia de outrem, com reclusão de 6 a 14 anos e multa.",
+          "correta": 1,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Induzir alguém menor de 14 anos a satisfazer a lascívia de outrem, com reclusão de 5 a 12 anos e multa.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Induzir alguém menor de 18 anos a satisfazer a lascívia de outrem, com reclusão de 6 a 14 anos e multa.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2542,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_be86ad6cbe5c43fe9baf7945aa8c6bb5",
+        "nome": "Capítulo II – Dos Crimes Sexuais Contra Vulnerável"
+      },
+      "questao": {
+        "enunciado": "No favorecimento da prostituição ou de outra forma de exploração sexual, uma das hipóteses de incidência das mesmas penas alcança quem pratica conjunção carnal ou outro ato libidinoso com pessoa na situação de prostituição ou exploração sexual. Assinale a alternativa correta.",
+        "explicacao": "A) Errada. A hipótese específica alcança pessoa menor de 18 e maior de 14 anos. B) Errada. O texto estabelece expressamente também o limite inferior: a pessoa deve ser maior de 14 anos. C) Errada. A faixa etária está adequada, mas a pena indicada não corresponde às mesmas penas do caput, que são de 7 a 16 anos e multa. D) Certa. Incorre nas mesmas penas quem pratica conjunção carnal ou outro ato libidinoso com pessoa menor de 18 e maior de 14 anos na situação descrita.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 217-A, 218, 218-A, 218-B e 218-C",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Incorre nas mesmas penas quem pratica conjunção carnal ou outro ato libidinoso com pessoa menor de 14 anos na situação de prostituição ou exploração sexual descrita.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Incorre nas mesmas penas quem pratica conjunção carnal ou outro ato libidinoso com pessoa menor de 18 anos, sem consideração de limite etário mínimo, na situação descrita.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Incorre nas mesmas penas quem pratica conjunção carnal ou outro ato libidinoso com pessoa maior de 14 e menor de 18 anos na situação descrita, aplicando-se reclusão de 5 a 12 anos e multa.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Incorre nas mesmas penas quem pratica conjunção carnal ou outro ato libidinoso com pessoa menor de 18 e maior de 14 anos na situação de prostituição ou exploração sexual descrita.",
+          "correta": 1,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2543,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_be86ad6cbe5c43fe9baf7945aa8c6bb5",
+        "nome": "Capítulo II – Dos Crimes Sexuais Contra Vulnerável"
+      },
+      "questao": {
+        "enunciado": "Quanto à natureza da presunção de vulnerabilidade no estupro de vulnerável, assinale a alternativa correta.",
+        "explicacao": "A) Errada. A presunção não é relativa em razão do consentimento. B) Errada. A experiência sexual da vítima não autoriza relativização. C) Certa. O texto estabelece que a presunção de vulnerabilidade é absoluta e que sua relativização é inadmissível. D) Errada. Relações sexuais anteriores não tornam relativa a presunção de vulnerabilidade.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 217-A, 218, 218-A, 218-B e 218-C",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "A presunção é relativa e admite relativização diante do consentimento da vítima.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "A presunção é relativa e admite relativização diante da experiência sexual da vítima.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "A presunção é absoluta e não admite relativização diante do consentimento da vítima.",
+          "correta": 1,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "A presunção é relativa e admite relativização diante de relações sexuais anteriores da vítima.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2544,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_be86ad6cbe5c43fe9baf7945aa8c6bb5",
+        "nome": "Capítulo II – Dos Crimes Sexuais Contra Vulnerável"
+      },
+      "questao": {
+        "enunciado": "No favorecimento da prostituição ou de outra forma de exploração sexual, assinale a alternativa que identifica corretamente os responsáveis pelo local que incorrem nas mesmas penas previstas para o crime.",
+        "explicacao": "A) Errada. O texto menciona o responsável pelo local, e não genericamente o empregado. B) Certa. Incorrem nas mesmas penas o proprietário, o gerente ou o responsável pelo local em que se verifiquem as práticas referidas. C) Errada. A responsabilidade prevista está ligada ao local, e não à condição de responsável pela vítima. D) Errada. O texto menciona gerente, e não administrador público.\nVPQ 1.1 - Direito Penal - pág. 5",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 217-A, 218, 218-A, 218-B e 218-C",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "O proprietário, o gerente ou o empregado do local em que se verifiquem as práticas descritas.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "O proprietário, o gerente ou o responsável pelo local em que se verifiquem as práticas descritas.",
+          "correta": 1,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "O proprietário, o gerente ou o responsável pela vítima submetida às práticas descritas.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "O proprietário, o administrador público ou o responsável pelo local em que se verifiquem as práticas descritas.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2545,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_be86ad6cbe5c43fe9baf7945aa8c6bb5",
+        "nome": "Capítulo II – Dos Crimes Sexuais Contra Vulnerável"
+      },
+      "questao": {
+        "enunciado": "Quanto à pena do crime de divulgação de cena de estupro, de estupro de vulnerável, de sexo, nudez ou pornografia, assinale a alternativa correta.",
+        "explicacao": "A) Errada. A pena se aplica se o fato não constitui crime mais grave. B) Errada. O intervalo correto é de 4 a 10 anos, e não 7 a 16. C) Errada. A pena é reclusão de 4 a 10 anos e multa, não alternativamente multa. D) Certa. A pena é reclusão de 4 a 10 anos e multa, se o fato não constitui crime mais grave.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 217-A, 218, 218-A, 218-B e 218-C",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Reclusão de 4 a 10 anos e multa, se o fato constitui crime mais grave.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Reclusão de 7 a 16 anos e multa, se o fato não constitui crime mais grave.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Reclusão de 4 a 10 anos ou multa, se o fato não constitui crime mais grave.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Reclusão de 4 a 10 anos e multa, se o fato não constitui crime mais grave.",
+          "correta": 1,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2546,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_be86ad6cbe5c43fe9baf7945aa8c6bb5",
+        "nome": "Capítulo II – Dos Crimes Sexuais Contra Vulnerável"
+      },
+      "questao": {
+        "enunciado": "Quando o proprietário, o gerente ou o responsável pelo local incorre nas penas do favorecimento da prostituição ou de outra forma de exploração sexual, assinale a alternativa que apresenta corretamente o efeito da condenação previsto.",
+        "explicacao": "A) Certa. Constitui efeito obrigatório da condenação a cassação da licença de localização e de funcionamento do estabelecimento. B) Errada. O efeito previsto é cassação, e não suspensão. C) Errada. A cassação é efeito obrigatório, e não facultativo. D) Errada. O texto refere-se à licença de localização e de funcionamento, não a registro administrativo.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 217-A, 218, 218-A, 218-B e 218-C",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Constitui efeito obrigatório da condenação a cassação da licença de localização e de funcionamento do estabelecimento.",
+          "correta": 1,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Constitui efeito obrigatório da condenação a suspensão da licença de localização e de funcionamento do estabelecimento.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Constitui efeito facultativo da condenação a cassação da licença de localização e de funcionamento do estabelecimento.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Constitui efeito obrigatório da condenação a cassação do registro administrativo e da licença de funcionamento do estabelecimento.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2547,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_be86ad6cbe5c43fe9baf7945aa8c6bb5",
+        "nome": "Capítulo II – Dos Crimes Sexuais Contra Vulnerável"
+      },
+      "questao": {
+        "enunciado": "Quanto à causa de aumento prevista para a divulgação de cena de estupro, sexo, nudez ou pornografia, assinale a alternativa correta.",
+        "explicacao": "A) Errada. O limite máximo da causa de aumento é de dois terços, e não metade. B) Certa. A pena aumenta de um terço a dois terços se o agente mantém ou tenha mantido relação íntima de afeto com a vítima ou atua com o fim de vingança ou humilhação. C) Errada. As hipóteses são alternativas, não cumulativas. D) Errada. O limite mínimo é de um terço, e não metade.\nVPQ 1.1 - Direito Penal - pág. 6",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 217-A, 218, 218-A, 218-B e 218-C",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "A pena é aumentada de um terço até metade quando o agente mantém ou tenha mantido relação íntima de afeto com a vítima, ou quando atua com o fim de vingança ou humilhação.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "A pena é aumentada de um terço a dois terços quando o agente mantém ou tenha mantido relação íntima de afeto com a vítima, ou quando atua com o fim de vingança ou humilhação.",
+          "correta": 1,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "A pena é aumentada de um terço a dois terços quando o agente mantém ou tenha mantido relação íntima de afeto com a vítima e também atua com o fim de vingança ou humilhação.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "A pena é aumentada de metade a dois terços quando o agente mantém ou tenha mantido relação íntima de afeto com a vítima, ou quando atua com o fim de vingança ou humilhação.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2548,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_be86ad6cbe5c43fe9baf7945aa8c6bb5",
+        "nome": "Capítulo II – Dos Crimes Sexuais Contra Vulnerável"
+      },
+      "questao": {
+        "enunciado": "Em relação à exclusão de ilicitude prevista para determinadas publicações envolvendo os conteúdos abrangidos pelo crime de divulgação, assinale a alternativa correta.",
+        "explicacao": "A) Errada. O recurso deve impossibilitar a identificação da vítima, não apenas dificultá-la. B) Errada. A enumeração legal compreende publicação jornalística, científica, cultural ou acadêmica, e não de comunicação de massa como quarta categoria. C) Errada. A ressalva da prévia autorização refere-se à vítima maior de 18 anos. D) Certa. Reproduz as naturezas de publicação, a exigência de recurso que impossibilite a identificação e a ressalva de prévia autorização da vítima maior de 18 anos.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 217-A, 218, 218-A, 218-B e 218-C",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Não há crime quando a conduta ocorre em publicação de natureza jornalística, científica, cultural ou acadêmica, com a adoção de recurso que dificulte a identificação da vítima, ressalvada sua prévia autorização, caso seja maior de 18 anos.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Não há crime quando a conduta ocorre em publicação de natureza jornalística, científica, cultural ou de comunicação de massa, com a adoção de recurso que impossibilite a identificação da vítima, ressalvada sua prévia autorização, caso seja maior de 18 anos.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Não há crime quando a conduta ocorre em publicação de natureza jornalística, científica, cultural ou acadêmica, com a adoção de recurso que impossibilite a identificação da vítima, ressalvada sua prévia autorização, caso seja menor de 18 anos.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Não há crime quando a conduta ocorre em publicação de natureza jornalística, científica, cultural ou acadêmica, com a adoção de recurso que impossibilite a identificação da vítima, ressalvada sua prévia autorização, caso seja maior de 18 anos.",
+          "correta": 1,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2549,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_be86ad6cbe5c43fe9baf7945aa8c6bb5",
+        "nome": "Capítulo II – Dos Crimes Sexuais Contra Vulnerável"
+      },
+      "questao": {
+        "enunciado": "Considerando a regra expressa sobre a incidência das penas do estupro de vulnerável, assinale a alternativa que reproduz corretamente seu alcance e as circunstâncias da vítima que não afastam sua aplicação.",
+        "explicacao": "A) Certa. As penas mencionadas aplicam-se independentemente do consentimento, da experiência sexual, de relações sexuais anteriores e de gravidez resultante do crime. B) Errada. Substitui a ocorrência de gravidez por relação íntima de afeto, circunstância que não integra essa regra. C) Errada. Inclui a corrupção de menores no lugar da forma com resultado morte, contrariando o alcance indicado no texto. D) Errada. Substitui a circunstância relativa às relações sexuais anteriormente mantidas pelo fim de vingança ou humilhação do agente, que pertence a outra figura do texto-base.\nVPQ 1.1 - Direito Penal - pág. 7",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 217-A, 218, 218-A, 218-B e 218-C",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "As penas da forma básica, da hipótese de ausência do necessário discernimento ou incapacidade de resistência e das formas com resultado de lesão corporal grave ou morte aplicam-se independentemente do consentimento da vítima, de sua experiência sexual, do fato de ter mantido relações sexuais anteriormente ao crime ou da ocorrência de gravidez resultante da prática do crime.",
+          "correta": 1,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "As penas da forma básica, da hipótese de ausência do necessário discernimento ou incapacidade de resistência e das formas com resultado de lesão corporal grave ou morte aplicam-se independentemente do consentimento da vítima, de sua experiência sexual, do fato de ter mantido relações sexuais anteriormente ao crime ou de o agente manter relação íntima de afeto com ela.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "As penas da forma básica, da hipótese de ausência do necessário discernimento ou incapacidade de resistência, da forma com resultado de lesão corporal grave e da corrupção de menores aplicam-se independentemente do consentimento da vítima, de sua experiência sexual, do fato de ter mantido relações sexuais anteriormente ao crime ou da ocorrência de gravidez resultante da prática do crime.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "As penas da forma básica, da hipótese de ausência do necessário discernimento ou incapacidade de resistência e das formas com resultado de lesão corporal grave ou morte aplicam-se independentemente do consentimento da vítima, de sua experiência sexual, da ocorrência de gravidez resultante da prática do crime ou do fim de vingança ou humilhação do agente.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2550,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_be86ad6cbe5c43fe9baf7945aa8c6bb5",
+        "nome": "Capítulo II – Dos Crimes Sexuais Contra Vulnerável"
+      },
+      "questao": {
+        "enunciado": "Quanto ao conteúdo do registro audiovisual abrangido pelo crime de divulgação de cena de estupro, sexo, nudez ou pornografia, assinale a alternativa correta.",
+        "explicacao": "A) Errada. Quanto a cena de sexo, nudez ou pornografia, o texto exige divulgação sem o consentimento da vítima. B) Errada. O conteúdo previsto é cena de sexo, nudez ou pornografia, e não violência, nudez ou pornografia. C) Certa. Abrange cena de estupro ou estupro de vulnerável, apologia ou induzimento à sua prática e, sem consentimento da vítima, cena de sexo, nudez ou pornografia. D) Errada. O texto menciona pornografia, e não ato libidinoso nessa parte da enumeração.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 217-A, 218, 218-A, 218-B e 218-C",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "O registro pode conter cena de estupro ou de estupro de vulnerável, ou fazer apologia ou induzir a sua prática, ou, com o consentimento da vítima, conter cena de sexo, nudez ou pornografia.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "O registro pode conter cena de estupro ou de estupro de vulnerável, ou fazer apologia ou induzir a sua prática, ou, sem o consentimento da vítima, conter cena de violência, nudez ou pornografia.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "O registro pode conter cena de estupro ou de estupro de vulnerável, ou fazer apologia ou induzir a sua prática, ou, sem o consentimento da vítima, conter cena de sexo, nudez ou pornografia.",
+          "correta": 1,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "O registro pode conter cena de estupro ou de estupro de vulnerável, ou fazer apologia ou induzir a sua prática, ou, sem o consentimento da vítima, conter cena de sexo, nudez ou ato libidinoso.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2551,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_be86ad6cbe5c43fe9baf7945aa8c6bb5",
+        "nome": "Capítulo II – Dos Crimes Sexuais Contra Vulnerável"
+      },
+      "questao": {
+        "enunciado": "Na satisfação de lascívia mediante presença de criança ou adolescente, assinale a alternativa que apresenta corretamente a finalidade exigida e a pena prevista.",
+        "explicacao": "A) Errada. A finalidade prevista é satisfazer lascívia própria ou de outrem, não obter vantagem ou favorecimento sexual. B) Certa. A finalidade é satisfazer lascívia própria ou de outrem, com pena de reclusão de 5 a 12 anos e multa. C) Errada. A pena indicada está incorreta; o intervalo é de 5 a 12 anos. D) Errada. A multa é cumulativa com a reclusão, e não alternativa.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 217-A, 218, 218-A, 218-B e 218-C",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "A conduta deve ser praticada com o fim de obter vantagem ou favorecimento sexual, com reclusão de 5 a 12 anos e multa.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "A conduta deve ser praticada a fim de satisfazer lascívia própria ou de outrem, com reclusão de 5 a 12 anos e multa.",
+          "correta": 1,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "A conduta deve ser praticada a fim de satisfazer lascívia própria ou de outrem, com reclusão de 6 a 14 anos e multa.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "A conduta deve ser praticada a fim de satisfazer lascívia própria ou de outrem, com reclusão de 5 a 12 anos ou multa.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2552,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_be86ad6cbe5c43fe9baf7945aa8c6bb5",
+        "nome": "Capítulo II – Dos Crimes Sexuais Contra Vulnerável"
+      },
+      "questao": {
+        "enunciado": "Quanto às pessoas que podem ser submetidas, induzidas ou atraídas à prostituição ou outra forma de exploração sexual e à pena correspondente, assinale a alternativa correta.",
+        "explicacao": "A) Certa. O tipo alcança menor de 18 anos ou pessoa que, por enfermidade ou deficiência mental, não tenha o necessário discernimento, com reclusão de 7 a 16 anos e multa. B) Errada. O limite etário previsto no caput é menor de 18 anos, não menor de 14. C) Errada. A hipótese exige que a pessoa não tenha o necessário discernimento para a prática do ato. D) Errada. A pena correta é de 7 a 16 anos e multa, não de 6 a 14 anos.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 217-A, 218, 218-A, 218-B e 218-C",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "A regra alcança pessoa menor de 18 anos ou pessoa que, por enfermidade ou deficiência mental, não tenha o necessário discernimento para a prática do ato, com reclusão de 7 a 16 anos e multa.",
+          "correta": 1,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "A regra alcança pessoa menor de 14 anos ou pessoa que, por enfermidade ou deficiência mental, não tenha o necessário discernimento para a prática do ato, com reclusão de 7 a 16 anos e multa.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "A regra alcança pessoa menor de 18 anos ou pessoa que, por enfermidade ou deficiência mental, tenha o necessário discernimento para a prática do ato, com reclusão de 7 a 16 anos e multa.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "A regra alcança pessoa menor de 18 anos ou pessoa que, por enfermidade ou deficiência mental, não tenha o necessário discernimento para a prática do ato, com reclusão de 6 a 14 anos e multa.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2553,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_435a89887ed94741892763767f1e9a34",
+        "nome": "Capítulo IV – Do Ultraje Público ao Pudor"
+      },
+      "questao": {
+        "enunciado": "Em relação ao ato obsceno, assinale a alternativa que apresenta corretamente o local de prática e a pena correspondente.",
+        "explicacao": "A) Errada. O local está corretamente indicado, mas a pena do ato obsceno é de detenção de três meses a um ano, ou multa, e não de seis meses a dois anos.\nB) Errada. O intervalo da pena privativa de liberdade está correto, porém as sanções são alternativas: detenção de três meses a um ano, ou multa.\nC) Correta. O ato obsceno deve ser praticado em lugar público, aberto ou exposto ao público, com pena de detenção de três meses a um ano, ou multa.\nD) Errada. O intervalo de detenção está incorreto e a multa foi apresentada cumulativamente. A pena correta é detenção de três meses a um ano, ou multa.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 233 e 234",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Praticar ato obsceno em lugar público, ou aberto ou exposto ao público, com pena de detenção de seis meses a dois anos, ou multa.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Praticar ato obsceno em lugar público, ou aberto ou exposto ao público, com pena de detenção de três meses a um ano, e multa.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Praticar ato obsceno em lugar público, ou aberto ou exposto ao público, com pena de detenção de três meses a um ano, ou multa.",
+          "correta": 1,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Praticar ato obsceno em lugar público, ou aberto ou exposto ao público, com pena de detenção de seis meses a dois anos, e multa.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2554,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_435a89887ed94741892763767f1e9a34",
+        "nome": "Capítulo IV – Do Ultraje Público ao Pudor"
+      },
+      "questao": {
+        "enunciado": "Quanto às condutas relacionadas ao escrito ou objeto obsceno destinado ao comércio, à distribuição ou à exposição pública, assinale a alternativa correta.",
+        "explicacao": "A) Correta. O texto prevê as condutas de fazer, importar, exportar, adquirir ou ter sob sua guarda escrito, desenho, pintura, estampa ou qualquer objeto obsceno, para a finalidade indicada na norma.\nB) Errada. Substitui exportar por vender. A venda aparece em hipótese equiparada distinta.\nC) Errada. Substitui importar por distribuir. A distribuição aparece em outra hipótese submetida à mesma pena.\nD) Errada. Substitui ter sob sua guarda por expor à venda. A exposição à venda pertence à hipótese equiparada.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 233 e 234",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Fazer, importar, exportar, adquirir ou ter sob sua guarda escrito, desenho, pintura, estampa ou qualquer objeto obsceno.",
+          "correta": 1,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Fazer, importar, vender, adquirir ou ter sob sua guarda escrito, desenho, pintura, estampa ou qualquer objeto obsceno.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Fazer, distribuir, exportar, adquirir ou ter sob sua guarda escrito, desenho, pintura, estampa ou qualquer objeto obsceno.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Fazer, importar, exportar, adquirir ou expor à venda escrito, desenho, pintura, estampa ou qualquer objeto obsceno.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2555,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_435a89887ed94741892763767f1e9a34",
+        "nome": "Capítulo IV – Do Ultraje Público ao Pudor"
+      },
+      "questao": {
+        "enunciado": "Considerando a finalidade, os objetos abrangidos e a pena do crime relacionado a escrito ou objeto obsceno, assinale a alternativa correta.",
+        "explicacao": "A) Errada. A finalidade e a pena estão corretas, mas representação teatral não integra a enumeração dos objetos dessa forma.\nB) Errada. A enumeração dos objetos e a pena estão corretas, mas a finalidade prevista é comércio, distribuição ou exposição pública, e não exibição cinematográfica.\nC) Errada. A finalidade e os objetos estão corretamente apresentados, porém a pena é de detenção de seis meses a dois anos, ou multa.\nD) Correta. A finalidade é comércio, distribuição ou exposição pública; os objetos abrangidos incluem escrito, desenho, pintura, estampa ou qualquer objeto obsceno; e a pena é detenção de seis meses a dois anos, ou multa.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 233 e 234",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "A conduta é praticada para fim de comércio, distribuição ou exposição pública e pode recair sobre escrito, desenho, pintura, representação teatral ou qualquer objeto obsceno, com detenção de seis meses a dois anos, ou multa.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "A conduta é praticada para fim de comércio, distribuição ou exibição cinematográfica e pode recair sobre escrito, desenho, pintura, estampa ou qualquer objeto obsceno, com detenção de seis meses a dois anos, ou multa.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "A conduta é praticada para fim de comércio, distribuição ou exposição pública e pode recair sobre escrito, desenho, pintura, estampa ou qualquer objeto obsceno, com detenção de três meses a um ano, ou multa.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "A conduta é praticada para fim de comércio, distribuição ou exposição pública e pode recair sobre escrito, desenho, pintura, estampa ou qualquer objeto obsceno, com detenção de seis meses a dois anos, ou multa.",
+          "correta": 1,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2556,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_435a89887ed94741892763767f1e9a34",
+        "nome": "Capítulo IV – Do Ultraje Público ao Pudor"
+      },
+      "questao": {
+        "enunciado": "Em relação às condutas praticadas com os objetos obscenos abrangidos pela norma, assinale a alternativa que corresponde a hipótese submetida à mesma pena de detenção de seis meses a dois anos, ou multa.",
+        "explicacao": "A) Errada. As condutas estão corretas, mas a pena aplicável é de detenção de seis meses a dois anos, ou multa.\nB) Correta. Incorre na mesma pena quem vende, distribui ou expõe à venda ou ao público qualquer dos objetos referidos.\nC) Errada. A hipótese equiparada enumera vender, distribuir ou expor à venda ou ao público; a alternativa substitui vender por adquirir.\nD) Errada. A hipótese equiparada utiliza distribuir, e não importar.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 233 e 234",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Vender, distribuir ou expor à venda ou ao público qualquer dos objetos referidos, com pena de detenção de três meses a um ano, ou multa.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Vender, distribuir ou expor à venda ou ao público qualquer dos objetos referidos, com pena de detenção de seis meses a dois anos, ou multa.",
+          "correta": 1,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Adquirir, distribuir ou expor à venda ou ao público qualquer dos objetos referidos, com pena de detenção de seis meses a dois anos, ou multa.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Vender, importar ou expor à venda ou ao público qualquer dos objetos referidos, com pena de detenção de seis meses a dois anos, ou multa.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2557,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_435a89887ed94741892763767f1e9a34",
+        "nome": "Capítulo IV – Do Ultraje Público ao Pudor"
+      },
+      "questao": {
+        "enunciado": "Quanto à representação teatral, à exibição cinematográfica e a outro espetáculo de caráter obsceno realizados em lugar público ou acessível ao público, assinale a alternativa correta.",
+        "explicacao": "A) Errada. A pena é de detenção de seis meses a dois anos, ou multa, e não de três meses a um ano.\nB) Correta. A realização, em lugar público ou acessível ao público, de representação teatral, exibição cinematográfica de caráter obsceno ou outro espetáculo de igual caráter sujeita o agente à detenção de seis meses a dois anos, ou multa.\nC) Errada. A detenção e a multa não são cumulativas; o texto utiliza a alternativa ou.\nD) Errada. Além de apresentar aplicação cumulativa da multa, utiliza o intervalo de três meses a um ano, que não corresponde à hipótese.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 233 e 234",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Essas condutas sujeitam o agente à detenção de três meses a um ano, ou multa.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Essas condutas sujeitam o agente à detenção de seis meses a dois anos, ou multa.",
+          "correta": 1,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Essas condutas sujeitam o agente à detenção de seis meses a dois anos, e multa.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Essas condutas sujeitam o agente à detenção de três meses a um ano, e multa.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2558,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_bd4853d4e26f4fa3903a277219bcc233",
+        "nome": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_435a89887ed94741892763767f1e9a34",
+        "nome": "Capítulo IV – Do Ultraje Público ao Pudor"
+      },
+      "questao": {
+        "enunciado": "Considerando a realização de audição ou recitação de caráter obsceno, assinale a alternativa que apresenta corretamente os locais ou meios abrangidos e a pena correspondente.",
+        "explicacao": "A) Errada. Os locais e meios estão corretos, mas a pena é de detenção de seis meses a dois anos, ou multa.\nB) Errada. Para audição ou recitação, o texto prevê lugar público ou acessível ao público, ou pelo rádio; a alternativa substitui acessível ao público por aberto ou exposto ao público.\nC) Errada. Os locais, meios e intervalo de detenção estão corretos, mas a pena é alternativa: detenção de seis meses a dois anos, ou multa.\nD) Correta. A audição ou recitação de caráter obsceno pode ser realizada em lugar público ou acessível ao público, ou pelo rádio, com pena de detenção de seis meses a dois anos, ou multa.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 233 e 234",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Em lugar público ou acessível ao público, ou pelo rádio, com detenção de três meses a um ano, ou multa.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Em lugar público ou aberto ou exposto ao público, ou pelo rádio, com detenção de seis meses a dois anos, ou multa.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Em lugar público ou acessível ao público, ou pelo rádio, com detenção de seis meses a dois anos, e multa.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Em lugar público ou acessível ao público, ou pelo rádio, com detenção de seis meses a dois anos, ou multa.",
+          "correta": 1,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2559,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_f82eb25bfc0c4565a27aa12c07435116",
+        "nome": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_cad47a95e0b54ea885d13fc26468855a",
+        "nome": "Capítulo II – Dos Crimes Contra Instituições Democráticas"
+      },
+      "questao": {
+        "enunciado": "Um agente tenta, mediante violência ou grave ameaça, abolir o Estado Democrático de Direito, impedindo ou restringindo o exercício dos poderes constitucionais. Assinale a alternativa correta.",
+        "explicacao": "A) Errada. A conduta descrita não configura golpe de Estado. O núcleo apresentado é a tentativa de abolir o Estado Democrático de Direito, impedindo ou restringindo o exercício dos poderes constitucionais. Além disso, a pena indicada corresponde à abolição violenta, e não ao golpe de Estado. B) Errada. A classificação está incorreta. O golpe de Estado consiste em tentar depor o governo legitimamente constituído, e não em tentar abolir o Estado Democrático de Direito mediante impedimento ou restrição dos poderes constitucionais. C) Correta. A conduta configura abolição violenta do Estado Democrático de Direito, cuja pena é de reclusão de quatro a oito anos, além da pena correspondente à violência. D) Errada. A classificação do crime está correta, mas a pena está incorreta. A abolição violenta é punida com reclusão de quatro a oito anos, e não de quatro a doze anos.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 359-L a 359-M-B",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "A conduta configura golpe de Estado, punido com reclusão de quatro a oito anos, além da pena correspondente à violência.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "A conduta configura golpe de Estado, punido com reclusão de quatro a doze anos, além da pena correspondente à violência.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "A conduta configura abolição violenta do Estado Democrático de Direito, punida com reclusão de quatro a oito anos, além da pena correspondente à violência.",
+          "correta": 1,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "A conduta configura abolição violenta do Estado Democrático de Direito, punida com reclusão de quatro a doze anos, além da pena correspondente à violência.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2560,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_f82eb25bfc0c4565a27aa12c07435116",
+        "nome": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_cad47a95e0b54ea885d13fc26468855a",
+        "nome": "Capítulo II – Dos Crimes Contra Instituições Democráticas"
+      },
+      "questao": {
+        "enunciado": "Um agente tenta, por meio de violência ou grave ameaça, depor o governo legitimamente constituído. Assinale a alternativa correta.",
+        "explicacao": "A) Correta. Tentar, por meio de violência ou grave ameaça, depor o governo legitimamente constituído configura golpe de Estado. A pena é de reclusão de quatro a doze anos, além da pena correspondente à violência. B) Errada. A conduta descrita no enunciado caracteriza golpe de Estado, e não abolição violenta do Estado Democrático de Direito. C) Errada. A classificação como golpe de Estado está correta, mas a pena está incorreta. O intervalo é de quatro a doze anos, e não de quatro a oito anos. D) Errada. Tanto a classificação quanto a pena estão incorretas para a situação apresentada. A conduta é golpe de Estado e recebe reclusão de quatro a doze anos.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 359-L a 359-M-B",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "A conduta configura golpe de Estado, punido com reclusão de quatro a doze anos, além da pena correspondente à violência.",
+          "correta": 1,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "A conduta configura abolição violenta do Estado Democrático de Direito, punida com reclusão de quatro a doze anos, além da pena correspondente à violência.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "A conduta configura golpe de Estado, punido com reclusão de quatro a oito anos, além da pena correspondente à violência.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "A conduta configura abolição violenta do Estado Democrático de Direito, punida com reclusão de quatro a oito anos, além da pena correspondente à violência.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2561,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_f82eb25bfc0c4565a27aa12c07435116",
+        "nome": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_cad47a95e0b54ea885d13fc26468855a",
+        "nome": "Capítulo II – Dos Crimes Contra Instituições Democráticas"
+      },
+      "questao": {
+        "enunciado": "Quanto à relação entre as penas dos crimes de abolição violenta do Estado Democrático de Direito e de golpe de Estado e a pena correspondente à violência, assinale a alternativa correta.",
+        "explicacao": "A) Errada. Na abolição violenta, a pena correspondente à violência não substitui a pena de reclusão. Ambas são aplicadas. B) Errada. A afirmação está correta quanto à abolição violenta, mas incorreta quanto ao golpe de Estado. Neste também a reclusão é aplicada além da pena correspondente à violência. C) Errada. Em nenhum dos dois crimes a pena correspondente à violência substitui a pena de reclusão prevista para o delito. D) Correta. Tanto na abolição violenta do Estado Democrático de Direito quanto no golpe de Estado, a respectiva pena de reclusão é aplicada além da pena correspondente à violência.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 359-L a 359-M-B",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Na abolição violenta, a pena correspondente à violência substitui a reclusão; no golpe de Estado, a reclusão é aplicada além da pena correspondente à violência.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Na abolição violenta, a reclusão é aplicada além da pena correspondente à violência; no golpe de Estado, a pena correspondente à violência substitui a reclusão.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Na abolição violenta e no golpe de Estado, a pena correspondente à violência substitui a respectiva pena de reclusão.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Na abolição violenta e no golpe de Estado, a respectiva pena de reclusão é aplicada além da pena correspondente à violência.",
+          "correta": 1,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2562,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_f82eb25bfc0c4565a27aa12c07435116",
+        "nome": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_cad47a95e0b54ea885d13fc26468855a",
+        "nome": "Capítulo II – Dos Crimes Contra Instituições Democráticas"
+      },
+      "questao": {
+        "enunciado": "Quanto à aplicação das penas dos delitos contra as instituições democráticas quando considerados em conjunto, assinale a alternativa correta.",
+        "explicacao": "A) Errada. A regra especial pressupõe que os delitos estejam inseridos no mesmo contexto, e não em contextos distintos. B) Correta. Quando os delitos do capítulo estão inseridos no mesmo contexto, a pena deve ser aplicada na forma do concurso formal próprio, ainda que exista desígnio autônomo, ficando vedado o cômputo cumulativo indicado no texto-base. C) Errada. Embora indique corretamente o mesmo contexto, o concurso formal próprio e a possibilidade de desígnio autônomo, a alternativa erra ao admitir cômputo cumulativo das penas, que é vedado. D) Errada. A existência de desígnio autônomo não autoriza substituir o concurso formal próprio pelo cômputo cumulativo. O texto determina a aplicação do concurso formal próprio e veda a cumulação.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 359-L a 359-M-B",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Quando os delitos estão inseridos em contextos distintos, ainda que exista desígnio autônomo, aplica-se o concurso formal próprio, vedado o cômputo cumulativo das penas.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Quando os delitos estão inseridos no mesmo contexto, ainda que exista desígnio autônomo, aplica-se o concurso formal próprio, vedado o cômputo cumulativo das penas.",
+          "correta": 1,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Quando os delitos estão inseridos no mesmo contexto, ainda que exista desígnio autônomo, aplica-se o concurso formal próprio, com cômputo cumulativo das penas.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Quando os delitos estão inseridos no mesmo contexto, ainda que exista desígnio autônomo, aplica-se o cômputo cumulativo das penas em lugar do concurso formal próprio.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2563,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_f82eb25bfc0c4565a27aa12c07435116",
+        "nome": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_cad47a95e0b54ea885d13fc26468855a",
+        "nome": "Capítulo II – Dos Crimes Contra Instituições Democráticas"
+      },
+      "questao": {
+        "enunciado": "Considerando agente que não tenha praticado ato de financiamento nem exercido papel de liderança, assinale a alternativa correta quanto aos crimes contra as instituições democráticas.",
+        "explicacao": "A) Correta. Nos crimes previstos no capítulo, quando praticados em contexto de multidão, a pena é reduzida de um terço a dois terços, desde que estejam atendidas as condições relativas ao agente indicadas no enunciado. B) Errada. A redução não decorre simplesmente de os crimes estarem inseridos no mesmo contexto. A hipótese específica exige contexto de multidão. C) Errada. O limite máximo da redução é de dois terços, e não de metade. D) Errada. O intervalo correto começa em um terço e pode chegar a dois terços; não começa na metade.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 359-L a 359-M-B",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Quando praticados em contexto de multidão, a pena é reduzida de um terço a dois terços.",
+          "correta": 1,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "Quando praticados no mesmo contexto, a pena é reduzida de um terço a dois terços.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "Quando praticados em contexto de multidão, a pena é reduzida de um terço até a metade.",
+          "correta": 0,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "Quando praticados em contexto de multidão, a pena é reduzida da metade a dois terços.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    },
+    {
+      "source_id": 2564,
+      "disciplina": {
+        "chave_estavel": "disc_441e50806de54a56ae36fdd4c189dfcc",
+        "nome": "Direito Penal"
+      },
+      "topico": {
+        "chave_estavel": "top_f82eb25bfc0c4565a27aa12c07435116",
+        "nome": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO"
+      },
+      "capitulo": {
+        "chave_estavel": "cap_cad47a95e0b54ea885d13fc26468855a",
+        "nome": "Capítulo II – Dos Crimes Contra Instituições Democráticas"
+      },
+      "questao": {
+        "enunciado": "Nos crimes contra as instituições democráticas praticados em contexto de multidão, assinale a alternativa que apresenta corretamente as condições relativas ao agente para a redução da pena.",
+        "explicacao": "A) Errada. A redução exige que o agente não tenha praticado ato de financiamento. A prática de financiamento impede o enquadramento na hipótese descrita. B) Errada. A redução também exige que o agente não tenha exercido papel de liderança. Quem exerce liderança não preenche as condições previstas. C) Correta. A redução é aplicável quando o agente não praticou ato de financiamento nem exerceu papel de liderança, desde que o crime tenha sido praticado em contexto de multidão. D) Errada. A alternativa reúne as duas circunstâncias que afastam o benefício: prática de ato de financiamento e exercício de papel de liderança.",
+        "banca": "",
+        "ano": null,
+        "fonte": "Código Penal - Arts. 359-L a 359-M-B",
+        "dificuldade": "Não informada",
+        "ativa": 1,
+        "criado_em": "2026-09-20 23:42:16",
+        "atualizado_em": "2026-09-20 23:42:16",
+        "excluida": 0,
+        "excluida_em": null,
+        "analise_pendente": 0,
+        "analise_solicitada_em": null
+      },
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "A redução incide quando o agente pratica ato de financiamento e não exerce papel de liderança.",
+          "correta": 0,
+          "ordem": 1
+        },
+        {
+          "letra": "B",
+          "texto": "A redução incide quando o agente exerce papel de liderança e não pratica ato de financiamento.",
+          "correta": 0,
+          "ordem": 2
+        },
+        {
+          "letra": "C",
+          "texto": "A redução incide quando o agente não pratica ato de financiamento nem exerce papel de liderança.",
+          "correta": 1,
+          "ordem": 3
+        },
+        {
+          "letra": "D",
+          "texto": "A redução incide quando o agente pratica ato de financiamento e exerce papel de liderança.",
+          "correta": 0,
+          "ordem": 4
+        }
+      ]
+    }
+  ]
+}

@@ -22,3 +22,13 @@ dist/SistemaEstudos/backups/
 dist/SistemaEstudos/*.db
 dist/SistemaEstudos/*.db-shm
 dist/SistemaEstudos/*.db-wal
+estudos.db
+
+# Bancos SQLite operacionais e de recuperacao
+estudos.db
+RECUPERACAO/*.db
+backups/*.db
+
+# Artefatos de compilacao
+/dist/
+/build/

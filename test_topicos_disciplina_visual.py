@@ -12,6 +12,14 @@ class TopicosDisciplinaVisualTests(unittest.TestCase):
         self.assertIn('alternate-background-color: #f8fbff;', TEMA)
         self.assertIn('selection-background-color: #dbeafe;', TEMA)
 
+    def test_topico_com_capitulos_nao_desenha_texto_duas_vezes(self):
+        inicio = MAIN.index('def renderizar_topicos(self, dados):')
+        fim = MAIN.index('def _reaplicar_filtros_topicos_preservando_scroll', inicio)
+        trecho = MAIN[inicio:fim]
+        self.assertIn('tem_capitulos = topico_possui_capitulos(topico_id)', trecho)
+        self.assertIn('"" if tem_capitulos else nome_exibicao', trecho)
+        self.assertIn('texto_topico = QLabel(nome_exibicao)', trecho)
+
     def test_celula_de_topico_com_capitulos_e_transparente(self):
         self.assertIn('celula_topico.setObjectName("disciplineTopicCell")', MAIN)
         self.assertIn('celula_topico.setProperty("inactive", pausado)', MAIN)

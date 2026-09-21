@@ -45,6 +45,11 @@ def coletar_diagnostico() -> dict:
         "tabelas": 0,
         "freelist": 0,
         "paginas": 0,
+        "questoes_fisicas": 0,
+        "questoes_ativas": 0,
+        "questoes_excluidas": 0,
+        "dignidade_sexual_ativas": 0,
+        "banco_legado_dist": None,
         "ultimo_checkpoint": None,
         "ultimo_backup": None,
     }
@@ -63,6 +68,41 @@ def coletar_diagnostico() -> dict:
             ).fetchone()[0] or 0)
             resultado["freelist"] = int(conexao.execute("PRAGMA freelist_count").fetchone()[0] or 0)
             resultado["paginas"] = int(conexao.execute("PRAGMA page_count").fetchone()[0] or 0)
+            tabelas = {
+                str(linha[0])
+                for linha in conexao.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table'"
+                ).fetchall()
+            }
+            if "questoes" in tabelas:
+                resultado["questoes_fisicas"] = int(conexao.execute(
+                    "SELECT COUNT(*) FROM questoes"
+                ).fetchone()[0] or 0)
+                resultado["questoes_ativas"] = int(conexao.execute(
+                    "SELECT COUNT(*) FROM questoes WHERE ativa=1 AND COALESCE(excluida,0)=0"
+                ).fetchone()[0] or 0)
+                resultado["questoes_excluidas"] = int(conexao.execute(
+                    "SELECT COUNT(*) FROM questoes WHERE COALESCE(excluida,0)=1"
+                ).fetchone()[0] or 0)
+                if "topicos" in tabelas:
+                    resultado["dignidade_sexual_ativas"] = int(conexao.execute(
+                        """
+                        SELECT COUNT(*)
+                        FROM questoes q
+                        JOIN topicos t ON t.id=q.topico_id
+                        WHERE q.ativa=1
+                          AND COALESCE(q.excluida,0)=0
+                          AND UPPER(t.nome) LIKE '%DIGNIDADE SEXUAL%'
+                        """
+                    ).fetchone()[0] or 0)
+
+    try:
+        raiz = Path(resultado["pasta_projeto"])
+        legado = raiz / "dist" / "SistemaEstudos" / "estudos.db"
+        if legado.is_file() and legado.resolve() != banco.resolve():
+            resultado["banco_legado_dist"] = str(legado)
+    except Exception:
+        pass
 
     try:
         ultimo = obter_ultimo_checkpoint()
@@ -128,6 +168,11 @@ def texto_diagnostico(dados: dict) -> str:
         f"Tabelas: {dados.get('tabelas')} • Índices: {dados.get('indices')}",
         f"Páginas livres: {livres}/{paginas} ({fragmentacao:.1f}%)",
         "",
+        f"Questões ativas: {int(dados.get('questoes_ativas') or 0)}",
+        f"Questões físicas: {int(dados.get('questoes_fisicas') or 0)}",
+        f"Questões na lixeira: {int(dados.get('questoes_excluidas') or 0)}",
+        f"Dignidade Sexual — ativas: {int(dados.get('dignidade_sexual_ativas') or 0)}",
+        "",
         "Último checkpoint: " + (
             f"{ultimo.get('nome')} • {_formatar_bytes(ultimo.get('tamanho'))}"
             if ultimo else "nenhum encontrado"
@@ -137,6 +182,13 @@ def texto_diagnostico(dados: dict) -> str:
             if ultimo_backup else "nenhum encontrado"
         ),
     ]
+    if dados.get("banco_legado_dist"):
+        linhas += [
+            "",
+            "ATENÇÃO: existe um estudos.db legado dentro de dist\\SistemaEstudos.",
+            f"Cópia legada: {dados.get('banco_legado_dist')}",
+            "O banco ativo continua sendo o indicado acima; a cópia em dist não deve ser usada.",
+        ]
     if str(dados.get("integridade")).lower() != "ok":
         linhas += ["", "ATENÇÃO: a verificação de integridade do SQLite não retornou 'ok'."]
     return "\n".join(linhas)

@@ -220,18 +220,12 @@ def localizar_pasta_projeto() -> Path:
 
 
 def localizar_banco_ativo(pasta_projeto: Path | None = None) -> Path:
-    """Retorna o banco usado pela execução atual do Vighna.
+    """Retorna a fonte única de dados usada por Python e pelo executável.
 
-    No executável, banco.py usa a pasta do .exe. Em execução pelo fonte, usa
-    a pasta do projeto. Mantemos exatamente a mesma convenção aqui para que a
-    opção 'incluir banco' fotografe os dados realmente em uso.
+    Desde a unificação do banco, o executável em ``dist`` não mantém uma
+    segunda cópia operacional de ``estudos.db``. O checkpoint sempre fotografa
+    o banco da raiz do projeto.
     """
-    if getattr(sys, "frozen", False):
-        try:
-            return Path(sys.executable).resolve().parent / "estudos.db"
-        except OSError:
-            pass
-
     pasta = pasta_projeto or localizar_pasta_projeto()
     return pasta / "estudos.db"
 

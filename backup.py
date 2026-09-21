@@ -1,18 +1,14 @@
 from datetime import datetime
 from pathlib import Path
 import shutil
-import sys
 import sqlite3
 import os
 
 
-if getattr(sys, "frozen", False):
-    PASTA_PROJETO = Path(sys.executable).resolve().parent
-else:
-    PASTA_PROJETO = Path(__file__).resolve().parent
+from caminhos import CAMINHO_BANCO, PASTA_BACKUPS, PASTA_DADOS
 
-ARQUIVO_BANCO = PASTA_PROJETO / "estudos.db"
-PASTA_BACKUPS = PASTA_PROJETO / "backups"
+PASTA_PROJETO = PASTA_DADOS
+ARQUIVO_BANCO = CAMINHO_BANCO
 MAX_BACKUPS = 30
 
 

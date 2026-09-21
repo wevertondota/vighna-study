@@ -50,37 +50,35 @@ if exist "%TEMP_DADOS%" rmdir /S /Q "%TEMP_DADOS%"
 mkdir "%TEMP_DADOS%"
 
 echo.
-echo Preservando banco e backups...
+echo Preservando o banco unico da pasta principal...
 
-if exist "%APP_ATUAL%\estudos.db" (
-    ".venv\Scripts\python.exe" copiar_banco_consistente.py "%APP_ATUAL%\estudos.db" "%TEMP_DADOS%\estudos.db"
-    if errorlevel 1 (
-        echo ERRO: o banco ativo nao passou pela copia consistente do SQLite.
-        echo A atualizacao foi cancelada para proteger seus dados.
-        pause
-        exit /b 1
-    )
-    copy /Y "%TEMP_DADOS%\estudos.db" "%CD%\estudos.db" >nul
-    echo Banco ativo preservado por snapshot SQLite consistente.
-) else (
-    if exist "%CD%\estudos.db" (
-        ".venv\Scripts\python.exe" copiar_banco_consistente.py "%CD%\estudos.db" "%TEMP_DADOS%\estudos.db"
-        if errorlevel 1 (
-            echo ERRO: o banco da pasta principal nao passou pela verificacao de integridade.
-            echo Execute recuperar_banco.bat antes de atualizar.
-            pause
-            exit /b 1
-        )
-        echo Usando snapshot consistente do banco da pasta principal.
-    ) else (
-        echo ERRO: nenhum estudos.db foi encontrado.
-        pause
-        exit /b 1
-    )
+if not exist "%CD%\estudos.db" (
+    echo ERRO: estudos.db nao foi encontrado na raiz do projeto.
+    echo A atualizacao foi cancelada para proteger seus dados.
+    pause
+    exit /b 1
 )
 
-if exist "%APP_ATUAL%\backups" (
-    xcopy "%APP_ATUAL%\backups" "%TEMP_DADOS%\backups\" /E /I /Y >nul
+".venv\Scripts\python.exe" copiar_banco_consistente.py "%CD%\estudos.db" "%TEMP_DADOS%\estudos.db"
+if errorlevel 1 (
+    echo ERRO: o banco principal nao passou pela copia consistente do SQLite.
+    echo Execute recuperar_banco.bat antes de atualizar.
+    pause
+    exit /b 1
+)
+echo Banco principal preservado por snapshot SQLite consistente.
+
+REM Versoes antigas do Vighna mantinham outro estudos.db dentro de dist.
+REM Ele nunca volta a sobrescrever o banco principal. Antes de remover a
+REM versao antiga, guardamos essa copia apenas como contingencia historica.
+if exist "%APP_ATUAL%\estudos.db" (
+    if not exist "%CD%\backups" mkdir "%CD%\backups"
+    ".venv\Scripts\python.exe" copiar_banco_consistente.py "%APP_ATUAL%\estudos.db" "%CD%\backups\estudos_legado_dist_antes_unificacao.db" >nul
+    echo Banco legado de dist arquivado em backups; ele nao sera usado como banco ativo.
+)
+
+if exist "%CD%\backups" (
+    xcopy "%CD%\backups" "%TEMP_DADOS%\backups\" /E /I /Y >nul
 )
 
 call ".venv\Scripts\activate.bat"
@@ -177,14 +175,18 @@ if not exist "%SAIDA_NOVA%\VighnaStudy.exe" (
 )
 
 echo.
-echo Restaurando banco e backups na nova versao...
+echo Validando novamente o banco principal...
 
-copy /Y "%TEMP_DADOS%\estudos.db" "%SAIDA_NOVA%\estudos.db" >nul
-
-if exist "%TEMP_DADOS%\backups" (
-    xcopy "%TEMP_DADOS%\backups" "%SAIDA_NOVA%\backups\" /E /I /Y >nul
+".venv\Scripts\python.exe" copiar_banco_consistente.py "%TEMP_DADOS%\estudos.db" "%TEMP_DADOS%\estudos_validado.db"
+if errorlevel 1 (
+    echo ERRO: a copia protegida do banco falhou na validacao final.
+    echo A versao anterior continua preservada.
+    pause
+    exit /b 1
 )
 
+REM O executavel nao recebe mais uma segunda copia operacional do banco.
+REM Tanto python main.py quanto VighnaStudy.exe usam %CD%\estudos.db.
 copy /Y "%CD%\vighnastudy.ico" "%SAIDA_NOVA%\vighnastudy.ico" >nul
 
 echo.

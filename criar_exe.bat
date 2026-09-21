@@ -106,7 +106,7 @@ if not exist "%CD%\dist" mkdir "%CD%\dist"
 move "%DIST_NOVA%\VighnaStudy" "%CD%\dist\SistemaEstudos" >nul
 if exist "%DIST_NOVA%" rmdir /S /Q "%DIST_NOVA%"
 
-copy /Y "estudos.db" "dist\SistemaEstudos\estudos.db" >nul
+REM Banco unico permanece somente na raiz do projeto; nao copiar para dist.
 copy /Y "vighnastudy.ico" "dist\SistemaEstudos\vighnastudy.ico" >nul
 
 echo.

@@ -1,0 +1,920 @@
+{
+  "version": "0.29.6",
+  "files": [
+    {
+      "path": ".gitignore",
+      "size": 355,
+      "sha256": "322b714afe1de1cbb30fb0ea768dc74651d913401c51c5c936119108a40c0f99"
+    },
+    {
+      "path": "AGENTS.md",
+      "size": 841,
+      "sha256": "35299a8b122ae5785238ff3c36557512a1b5dc3451e95203baf42f82704ff616"
+    },
+    {
+      "path": "APLICAR_CORRECAO_RECUPERACAO.bat",
+      "size": 1505,
+      "sha256": "9dfbb839f0258e1df64aabfcd48db27af369a59ce9c29b69b60f2721cbbf0fb5"
+    },
+    {
+      "path": "ESPECIFICACAO_TECNICA_NUCLEO_ESTATISTICO.md",
+      "size": 57229,
+      "sha256": "15b5ece232e9e7a16ba590ab48133e08baab919420f0427ed2fcadc21f3a995d"
+    },
+    {
+      "path": "LEIA_PRIMEIRO.txt",
+      "size": 1176,
+      "sha256": "48b8c6b169cac060b5d1d5c7b0d107dad8945391473a8fb92d9e864bc20880c0"
+    },
+    {
+      "path": "LEIA_PRIMEIRO_RECUPERACAO_0.29.6.txt",
+      "size": 918,
+      "sha256": "78d97e0add83c94390f284822e05c14721867e5220e1dffadd7b3393e9c63ff4"
+    },
+    {
+      "path": "MANIFEST_SHA256.txt",
+      "size": 5034,
+      "sha256": "0eda945cf0331adc0134eb6b18e8b9980e2f1b4bec6b1302cf3b4315a1b887d7"
+    },
+    {
+      "path": "Manual do programa/Manual_Oficial_VighnaStudy_0.29.4.docx",
+      "size": 57650,
+      "sha256": "980139c4476fba41212b45a380b5676be256a776ae6df1523458006249ccc1e4"
+    },
+    {
+      "path": "Manual do programa/Manual_Oficial_VighnaStudy_0.29.4.pdf",
+      "size": 365748,
+      "sha256": "8cf88020aa113dd863ba660a5f60a30ace7f581f0a74df69245ebf7ea405857d"
+    },
+    {
+      "path": "PASSO4_DIFF_ATUAL.patch",
+      "size": 53296,
+      "sha256": "acb0ec9c821e6b39484d5f91c2e3a519bf72ecd13861fe4f7dd41af8d98eee98"
+    },
+    {
+      "path": "PASSO4_STATUS_ATUAL.txt",
+      "size": 315,
+      "sha256": "df70633722180b2b90e2e3622c7973dd82e371b2c311304dbb281fc1fa7790cd"
+    },
+    {
+      "path": "PASSO5_SNAPSHOT_PARIDADE.json",
+      "size": 56032,
+      "sha256": "8ee48ebf6e9d462f1bf9225138199027283765aa725e283bf6d0fe38d72b251a"
+    },
+    {
+      "path": "PASSO_3_NUCLEO_ESTATISTICO.md",
+      "size": 9896,
+      "sha256": "cf468dffb7736dade0b3085e32fc55c79e5d935b87f245e11fbe8277c543e348"
+    },
+    {
+      "path": "PASSO_4_VALIDACAO_MIGRACAO_METRICAS.md",
+      "size": 13411,
+      "sha256": "bf0a544f57580d1367dec67f24982b9ac40b2ac2ca88e6e4376e1f947d89f7b5"
+    },
+    {
+      "path": "PASSO_5_PARIDADE_FILA_INTELIGENTE.md",
+      "size": 17276,
+      "sha256": "38bfb9684a483cc85e81b8f94c12411aa45e26be6a59c411b99daa85c3755b19"
+    },
+    {
+      "path": "PASSO_6_BLOQUEADORES_FILA_E_OBSERVACAO_SOMBRA.md",
+      "size": 17032,
+      "sha256": "513e979386c4a945fd195a30c4d9431be2a8ce833b17a245f38056396978cce0"
+    },
+    {
+      "path": "PASSO_7_PROGRESSO_EDITAL_V2.md",
+      "size": 14112,
+      "sha256": "9778f71e9ce6a2588354718c3a99f428e729d4246be3f90ad757aab40d33f3b0"
+    },
+    {
+      "path": "PASSO_8_TENDENCIAS_TEMPORAIS_V2.md",
+      "size": 19614,
+      "sha256": "08a02e08a5608da12cce74b4a11ffa78f8c1e138da3d40acb580477543ebe4a8"
+    },
+    {
+      "path": "PASSO_9_MAPA_DOMINIO_V2.md",
+      "size": 16176,
+      "sha256": "cf8bfd0bc95dc8c001e9c44be02bdde8f71ae1eeaa86cd41b7b0403db3903fc3"
+    },
+    {
+      "path": "RECUPERACAO/LEIA_ME_RECUPERACAO.md",
+      "size": 1794,
+      "sha256": "79a7af60642c4319beeede5f2bc46ee091180c9acf18ff7dda291fcb42d7f19b"
+    },
+    {
+      "path": "RECUPERACAO/QUESTOES_RECUPERADAS_42.txt",
+      "size": 11443,
+      "sha256": "3c3cc0bd56561b6ce0c99217386642341e28f542f9293803f2a992f8fcef63ec"
+    },
+    {
+      "path": "RECUPERACAO/RELATORIO_AUDITORIA_RECUPERACAO_BANCO_2026-09-20.md",
+      "size": 7303,
+      "sha256": "526277646ba6d36fd8e21fa58bfa98bd7da9f10e314af6d405dddf490ddf7e16"
+    },
+    {
+      "path": "RECUPERACAO/RELATORIO_RECUPERACAO_ATUALIZADA_2026-09-20.md",
+      "size": 3116,
+      "sha256": "355310308dccb98c15c6ac3f27477f17a26e7f5758687457731c40d5e537685a"
+    },
+    {
+      "path": "RECUPERACAO/RELATORIO_RECUPERACAO_CONSOLIDADA_0.29.6.md",
+      "size": 2317,
+      "sha256": "6e24bbdc173017ae04a84ff605ad68898e26a2e20d5382b35f1e2433d40c7aa7"
+    },
+    {
+      "path": "RECUPERACAO/auditoria_historico_checkpoints.json",
+      "size": 19142,
+      "sha256": "6531796c237c84ad00831443eb1ef2c927eb2527fe924c5f5ca5987e8e8d6ae1"
+    },
+    {
+      "path": "RECUPERACAO/auditoria_vpq_vs_db.json",
+      "size": 11684,
+      "sha256": "08804e56dd6ddffa9a3a3bd02441a61c49f4071f44fb995a405a7eb2101d0ec4"
+    },
+    {
+      "path": "RECUPERACAO/estudos_pre_recuperacao.db",
+      "size": 7249920,
+      "sha256": "c752d9c4ef3aba00bfef083c322b314db7b3cb46f25e028cbf70669bc156518a"
+    },
+    {
+      "path": "RECUPERACAO/estudos_recuperado.db",
+      "size": 7286784,
+      "sha256": "804b7fe59800a3bed1762242442d87a1c9d82825d18cb65d5b71363ade759901"
+    },
+    {
+      "path": "RECUPERACAO/recuperacao_resumo.json",
+      "size": 21845,
+      "sha256": "494e3c8fc48e0730c4c70022805426320bff714f3f06c57ef6e7e992c8b6ba82"
+    },
+    {
+      "path": "RELATORIO_AJUSTE_ACESSOS_RAPIDOS_PRIMEIRA_DOBRA_2026-09-20.md",
+      "size": 839,
+      "sha256": "c5898f5f6c50e811b408dc54e4d2895b9eba6aef61944ed3428a85eecca90020"
+    },
+    {
+      "path": "RELATORIO_AJUSTE_BOTAO_COMECAR_AGORA_PROPORCIONAL_2026-09-20.md",
+      "size": 713,
+      "sha256": "b1880c45c63269f1ac606b7c784f71d0e9c3455779abc5b7c382c096a2c2d0f5"
+    },
+    {
+      "path": "RELATORIO_AJUSTE_CABECALHO_DUAS_LINHAS_2026-09-18.md",
+      "size": 1751,
+      "sha256": "7c451f3abf9db9aa78f469909dc517e9cd2c3e0d9456a56ceb8ce5b1a621c8a8"
+    },
+    {
+      "path": "RELATORIO_AJUSTE_CTB_IMPORTACAO_2026-09-18.md",
+      "size": 5247,
+      "sha256": "100a30bbac476d0a774db075eef622fbe58d95bbef839299e2e37c53580fc01d"
+    },
+    {
+      "path": "RELATORIO_AJUSTE_DASHBOARD_PRIMEIRA_DOBRA_2026-09-19.md",
+      "size": 1320,
+      "sha256": "9b7b6eb17f85dd1117cb1e75003919791b620e2d12f5def62014ef882a2a2ced"
+    },
+    {
+      "path": "RELATORIO_AJUSTE_DASHBOARD_XP_COMPACTO_2026-09-18.md",
+      "size": 1831,
+      "sha256": "4efaf0eb326ea69f1ee9bd338e1896f6035005c23d31561f8f410ef042606555"
+    },
+    {
+      "path": "RELATORIO_AJUSTE_ENGRENAGEM_CONFIGURACOES_2026-09-18.md",
+      "size": 1364,
+      "sha256": "6443609cbb7b29792375c76ae44833f5ea2fa7d1481abc6e3460cab364814b00"
+    },
+    {
+      "path": "RELATORIO_AJUSTE_ENGRENAGEM_CONFIGURACOES_LIMPA_2026-09-18.md",
+      "size": 1166,
+      "sha256": "0fac3105a8798eee5bf49a4e8c7652a9a376489790c4cbbfd27d85ac68ac1718"
+    },
+    {
+      "path": "RELATORIO_AJUSTE_FOCO_OBJETIVO_HISTORICO_2026-09-18.md",
+      "size": 1918,
+      "sha256": "ba8fbf31c8345f0a45c70031fa99493f4fbc5e2c1bb693ab68dd4aacaf86035b"
+    },
+    {
+      "path": "RELATORIO_AJUSTE_FOCO_PROGRESSO_2026-09-18.md",
+      "size": 2074,
+      "sha256": "71568737dc327b503c4281da68faf264c1578a09ce0219512335cea056440dd8"
+    },
+    {
+      "path": "RELATORIO_AJUSTE_FOCO_PROGRESSO_COMPACTO_2026-09-18.md",
+      "size": 1687,
+      "sha256": "8ad405144e55997d2494dadfbeeee1f2bf4592a3c54e73cc9ba115f15a56d8da"
+    },
+    {
+      "path": "RELATORIO_AJUSTE_FOCO_SESSAO_RAPIDA_2026-09-17.md",
+      "size": 2368,
+      "sha256": "7e9620a0b2f523447522cecb157237eeafc6e2840330f3c73b7dd199d616629e"
+    },
+    {
+      "path": "RELATORIO_AJUSTE_QUADRANTE_DASHBOARD_2026-09-17.md",
+      "size": 745,
+      "sha256": "ee073a87f04d138e6770acb7f794d8f641bcce64e49647db75c4040d63274f52"
+    },
+    {
+      "path": "RELATORIO_AJUSTE_TEMA_FUTURISTA_QUESTOES_2026-09-20.md",
+      "size": 980,
+      "sha256": "f35f917ba052a668c96810515336c6ffc4003282e1a4af3ef1e27e13bb29cde6"
+    },
+    {
+      "path": "RELATORIO_AUDITORIA_CICLO_ESTUDO_2026-09-20.md",
+      "size": 5450,
+      "sha256": "c29fa3e50ef305d46c5d2d1efec08f95132638abdf7c1aefdc80a4a2d8f8efab"
+    },
+    {
+      "path": "RELATORIO_AUDITORIA_NUCLEO_ESTATISTICO.md",
+      "size": 44844,
+      "sha256": "9a1648f93a1b748a039f2ee0184da455652299eae7fb8acbabbb3e44b6ce985b"
+    },
+    {
+      "path": "RELATORIO_AUDITORIA_RECUPERACAO_BANCO_2026-09-20.md",
+      "size": 7303,
+      "sha256": "526277646ba6d36fd8e21fa58bfa98bd7da9f10e314af6d405dddf490ddf7e16"
+    },
+    {
+      "path": "RELATORIO_CORRECAO_ACESSOS_RAPIDOS_2026-09-19.md",
+      "size": 1668,
+      "sha256": "b1831c89c7613d39d5714d3518a2bacd5029edea660b23c6f7fd86679ae2dfd6"
+    },
+    {
+      "path": "RELATORIO_CORRECAO_CHECKPOINT_MANIFEST_2026-09-17.md",
+      "size": 1266,
+      "sha256": "4f108e1befcdebf7e48b06264d3b9741d5e349496c0fc7418d76afdb33f37e0b"
+    },
+    {
+      "path": "RELATORIO_CORRECAO_LISTAGEM_TOPICOS_DUPLICADA_2026-09-20.md",
+      "size": 1121,
+      "sha256": "593d8d0f541af5e7d3d741afc6d097bc3376405af2806addfe1a7343a5bfb828"
+    },
+    {
+      "path": "RELATORIO_DESIGN_SYSTEM_DASHBOARD_CLARO_2026-09-19.md",
+      "size": 2584,
+      "sha256": "0a8c6b3ce08322dc2d638420662f40fb8396a40751199f9f0f9825f4c309d912"
+    },
+    {
+      "path": "RELATORIO_EXCLUSAO_CAPITULOS_TITULOS_2026-09-19.md",
+      "size": 2315,
+      "sha256": "198c229a6159d6db2271ca8251a74840208ad6153b4c3e75f80a797976ec2c7b"
+    },
+    {
+      "path": "RELATORIO_IMPLEMENTACAO_NUCLEO_ESTATISTICO.md",
+      "size": 13876,
+      "sha256": "d88728bf402dc7bdde4e4717c5e186dc718444958d6a8819f793d73416ba76bb"
+    },
+    {
+      "path": "RELATORIO_IMPORTACAO_TXT_2026-09-19.md",
+      "size": 2770,
+      "sha256": "b54c1e8dd03620723bbeb46a3a9c105efd2f7f9ce32f6b62e6ec593401a0dd23"
+    },
+    {
+      "path": "RELATORIO_INTEGRACAO_QTAWESOME_2026-09-19.md",
+      "size": 3295,
+      "sha256": "e12658bc000d9cac0e0718be6b70a191317ad24f8f283f61ee98f65400f27d8d"
+    },
+    {
+      "path": "RELATORIO_OTIMIZACAO_ABERTURA_2026-09-20.md",
+      "size": 1545,
+      "sha256": "5374e9a4601fdb38517efec07f9acb1dc3d734286905ae525066b1988d9143da"
+    },
+    {
+      "path": "RELATORIO_OTIMIZACAO_BUILD_PYINSTALLER_2026-09-18.md",
+      "size": 5379,
+      "sha256": "694f1048fff69ee5661a0d38f2c5fca3c74af398a9d9fd818d2832cfdf8db869"
+    },
+    {
+      "path": "RELATORIO_OTIMIZACAO_RESPONSIVIDADE_2026-09-18.md",
+      "size": 5175,
+      "sha256": "090313ca9460e86fa07be6a2ac4092ebaf60ae8f6680b37c5888e31c45a4b14c"
+    },
+    {
+      "path": "RELATORIO_OTIMIZACAO_RESPONSIVIDADE_NAVEGACAO_2026-09-18.md",
+      "size": 5858,
+      "sha256": "be59918bcac20ed6a75ee287c233153da9d65ab26108873a66b025c1bc1c4d26"
+    },
+    {
+      "path": "RELATORIO_OTIMIZACAO_RESPONSIVIDADE_RELATORIOS_2026-09-18.md",
+      "size": 4767,
+      "sha256": "e89dc563a7a4644e04e21edf26a26f93cac8e2ce27b36746bdacb894a621e9c3"
+    },
+    {
+      "path": "RELATORIO_PARIDADE_FILA_INTELIGENTE.md",
+      "size": 15631,
+      "sha256": "c8aa97e7e987dc6b07c613605547362208348b3199429a40ad5a64d1d825adbd"
+    },
+    {
+      "path": "RELATORIO_PASSO_10_REGULARIDADE_SEQUENCIA.md",
+      "size": 7051,
+      "sha256": "2f225a8a1a33de2b58c3b33def89672d76f1e5fc4c9a2c64a0638899acb5c710"
+    },
+    {
+      "path": "RELATORIO_PASSO_11_GAMIFICACAO.md",
+      "size": 7513,
+      "sha256": "e01dfb450697542489c6d9ac503dbeaa36f5c2713dbe5403aae191f2f1bc620a"
+    },
+    {
+      "path": "RELATORIO_PASSO_6_BLOQUEADORES_FILA.md",
+      "size": 9560,
+      "sha256": "fac05630a6525030d4b3f37f81646b3cb9bffd7ea3f6823217e49ac19522c39a"
+    },
+    {
+      "path": "RELATORIO_PASSO_7_PROGRESSO_EDITAL_V2.md",
+      "size": 8209,
+      "sha256": "ab2ea8f0826f86aeca0e8c8b95fc28d4be2c5fc4c23ef6e4b5cdecdcc0840020"
+    },
+    {
+      "path": "RELATORIO_PASSO_8_TENDENCIAS_TEMPORAIS_V2.md",
+      "size": 14572,
+      "sha256": "e5874ab68890627eeb29cd4370281724989642bb47fa52aa5d1106a32d5a0e60"
+    },
+    {
+      "path": "RELATORIO_PASSO_9_MAPA_DOMINIO_V2.md",
+      "size": 8254,
+      "sha256": "74609270d9227cefdb3c781e7fefc274ee345b2982593428466c37f4cd7093d9"
+    },
+    {
+      "path": "RELATORIO_PASTA_ATUAL.md",
+      "size": 4687,
+      "sha256": "3487141a421793d70cb2df3f3da05a996f494599522640742bce05e714edbad1"
+    },
+    {
+      "path": "RELATORIO_REFINO_GLOBAL_TEMA_FUTURISTA_2026-09-20.md",
+      "size": 1243,
+      "sha256": "339e669a19e9d05836d5acb3d19a29d4e791f308ae9e484aa082369ec9672890"
+    },
+    {
+      "path": "RELATORIO_REFINO_VISUAL_FOCO_MODERNO_2026-09-17.md",
+      "size": 1786,
+      "sha256": "0f9bdb7e5156c694fa337d552b73e560ea6f28245dd3d0dfb8fe0d413e29235f"
+    },
+    {
+      "path": "RELATORIO_VALIDACAO_NUCLEO_ESTATISTICO.md",
+      "size": 15349,
+      "sha256": "7e9d9e9cc53f1800da088eca59ac2a2c242932b2e3f9ab08fc26d9d2b77ebc2f"
+    },
+    {
+      "path": "SistemaEstudos.spec",
+      "size": 847,
+      "sha256": "289f86740e0b6088603485aa6f34ac9043355479c9d8d38086ef35bc2a6477c8"
+    },
+    {
+      "path": "VERIFICAR_BANCO_ATIVO.bat",
+      "size": 315,
+      "sha256": "b19b029ba854bd0c278e62d72c34ab576dc4fc068b5d333cdc96b06e47d742cc"
+    },
+    {
+      "path": "VighnaStudy.spec",
+      "size": 2451,
+      "sha256": "f9f208adb1375a3d0818e72c02ff9e734fe8f2a7208adbee709b3cc77918a6af"
+    },
+    {
+      "path": "analise_temporal.py",
+      "size": 19849,
+      "sha256": "7dfeab96d6766ae66b9f880996b12f92eba583e2758c8e43a659ae15f6c85a93"
+    },
+    {
+      "path": "aplicar_recuperacao_banco.bat",
+      "size": 1505,
+      "sha256": "9dfbb839f0258e1df64aabfcd48db27af369a59ce9c29b69b60f2721cbbf0fb5"
+    },
+    {
+      "path": "assets/config_gear.png",
+      "size": 5119,
+      "sha256": "72d38a03e2fa506244c907fbca0f175992fee3ce8c6d04ad4dd43e4fb15b4e6e"
+    },
+    {
+      "path": "assets/config_gear_clean.png",
+      "size": 5119,
+      "sha256": "72d38a03e2fa506244c907fbca0f175992fee3ce8c6d04ad4dd43e4fb15b4e6e"
+    },
+    {
+      "path": "atualizar_exe.bat",
+      "size": 7436,
+      "sha256": "0c22a07c2f652a1eaf43ab1f1b4290c7ea513c257a45fbf8cda04803eb3a2249"
+    },
+    {
+      "path": "atualizar_exe_limpo.bat",
+      "size": 460,
+      "sha256": "21599103c263769bc0abfa01b1f06c5c055cf39d3c6317c26f04fe8f8e2f14fb"
+    },
+    {
+      "path": "auditar_banco_ativo.py",
+      "size": 2891,
+      "sha256": "3149574aae29870700c35329c3fe5927f4f979eb7d78bef6eacfd433750483f7"
+    },
+    {
+      "path": "auditoria_ciclo_estudo.py",
+      "size": 20961,
+      "sha256": "75910ab2a52eae5a4b6c6aed8c09e64f49b93d3b27ead704f1e4a544488d48b1"
+    },
+    {
+      "path": "backup.py",
+      "size": 7932,
+      "sha256": "fde3519af9c007246c99ad56e9f3f65b853575a7327d15908fc435faec539630"
+    },
+    {
+      "path": "backup_backup_antes_exe.py",
+      "size": 1115,
+      "sha256": "1aada6c5019f419266bc1e5b26d99871cb5fc8da500f043241e9c795ef349ff6"
+    },
+    {
+      "path": "banco.py",
+      "size": 619308,
+      "sha256": "b63b5efa1c3ab3b175d264a8aa0747b1438722d84aea8831bfb32d273ebbf05a"
+    },
+    {
+      "path": "banco_antes_migracao.py",
+      "size": 7854,
+      "sha256": "dff87af3e030b5bd1c87cc61c542ac95733bf033405f095ec50f57272bb33cc7"
+    },
+    {
+      "path": "banco_backup.py",
+      "size": 7015,
+      "sha256": "a1ff72da6f551e14a10d92b56dac8ae3d242c9a3beb401c809ac4f78bae5cd54"
+    },
+    {
+      "path": "banco_backup_antes_dashboard.py",
+      "size": 12792,
+      "sha256": "d6f1a2c1fbc532a18f25b13f65608b004d8ca99b3825f54f1b8b1b9ce32d13ef"
+    },
+    {
+      "path": "banco_backup_antes_edicao.py",
+      "size": 12792,
+      "sha256": "d6f1a2c1fbc532a18f25b13f65608b004d8ca99b3825f54f1b8b1b9ce32d13ef"
+    },
+    {
+      "path": "banco_backup_antes_exe.py",
+      "size": 14767,
+      "sha256": "2c7337552b266cc21a6903df102b8521a1268547b77d098fcd4f90a277632d15"
+    },
+    {
+      "path": "banco_backup_penal_funcionando.py",
+      "size": 7871,
+      "sha256": "9616009fdc46b0a5c1d3e43533f23121e86cf209dbf5496b8b313205f178d081"
+    },
+    {
+      "path": "caminhos.py",
+      "size": 1970,
+      "sha256": "033f6496299c18b2f0e6eace3065ea3b632612de6186d3fb28d6dfa25e7e2c48"
+    },
+    {
+      "path": "checkpoint.py",
+      "size": 27979,
+      "sha256": "c596b465b580fbd93477660c72ac8325ce24f9c6a41d203eb790204cd45f52a8"
+    },
+    {
+      "path": "checkpoint_manifest.json",
+      "size": 25248,
+      "sha256": "626d2118f7f24ce679a23770d15a5a36b7094754321131557af882ec8cb38385"
+    },
+    {
+      "path": "ciclo_estudo.py",
+      "size": 8221,
+      "sha256": "5e0f7dafef3268984ab38ee4314f4ea4ad3f3a59f8f974945688f32091bd6ba5"
+    },
+    {
+      "path": "copiar_banco_consistente.py",
+      "size": 998,
+      "sha256": "bd126f10f148598402b37d0be89161969ce4ff5444911d359ac3dbe8c02d87a1"
+    },
+    {
+      "path": "criar_atalho.bat",
+      "size": 803,
+      "sha256": "ba94d954c860c4555013231eeddbed7370935aa83c64c3173fa16c3daca09ac2"
+    },
+    {
+      "path": "criar_atalho_vighnastudy.bat",
+      "size": 1082,
+      "sha256": "42889f75d5a53577f3b5524a5303b7d3c06c00be04065fdac5cb627f0d5b15c5"
+    },
+    {
+      "path": "criar_exe.bat",
+      "size": 3173,
+      "sha256": "5a2c3b87120c9064ba1cea455828da0f9b892f7a73ff3200c48abdbddc70f72a"
+    },
+    {
+      "path": "diagnostico.py",
+      "size": 11813,
+      "sha256": "d89735d8ed2895a6901a75e120f2f15b44b2236b4e9aa48f9c115330334e48bb"
+    },
+    {
+      "path": "espacamento.py",
+      "size": 10876,
+      "sha256": "810cc9efed17689f7e68809efd7e5d49e83c6c73a160d9309368f526859d3809"
+    },
+    {
+      "path": "estatisticas_lazy.py",
+      "size": 2270,
+      "sha256": "e98073549311531b31426bc7098f8ad292ee5538fc27246ec5c3ae219ac6b90b"
+    },
+    {
+      "path": "estudos.db",
+      "size": 7286784,
+      "sha256": "804b7fe59800a3bed1762242442d87a1c9d82825d18cb65d5b71363ade759901"
+    },
+    {
+      "path": "evolucao.py",
+      "size": 4349,
+      "sha256": "b991fd8b8e7d12ba85f4e628d33c22e58b2b30f58d7cd4a06ac06a3d77431c01"
+    },
+    {
+      "path": "fila_candidata.py",
+      "size": 26084,
+      "sha256": "7995b8f467b665d3db8d3fb8787e89c96891774d77a79229e9a9d0c3d15c08f9"
+    },
+    {
+      "path": "fila_observacao.py",
+      "size": 8814,
+      "sha256": "b51417d7ca669b529b5ce31d69f3f84b8f28732e3ff4f70bef3b2a7327c7da3f"
+    },
+    {
+      "path": "foco.py",
+      "size": 50277,
+      "sha256": "f583412d9b5547ea09cb9b3a1fe1ce2c4b954624df48054bb3ab505d56bd8d6c"
+    },
+    {
+      "path": "gamificacao.py",
+      "size": 20927,
+      "sha256": "0b7ac332f9787338c97a1d3ec7cde83c7065762b9e937064ed4ee95e5b0473a5"
+    },
+    {
+      "path": "icones.py",
+      "size": 1718,
+      "sha256": "25b2a5653966584eee5de1901467d334a33218a640bddaea6c16f0b7f6297c20"
+    },
+    {
+      "path": "importador_pdf.py",
+      "size": 35894,
+      "sha256": "a02efc0ac231ae73139dfd3f9ba5ab0dd2362da7ea310906367d890d9d27c250"
+    },
+    {
+      "path": "importador_txt.py",
+      "size": 2779,
+      "sha256": "7af856de6365501af4856195160c6941d6f46b6f7fe53c18f2d1b527cef78ec0"
+    },
+    {
+      "path": "importar_topicos.py",
+      "size": 5722,
+      "sha256": "cf93b094c8f16d03fdf407f6c507bdd3410f2dac79c46148fd3139900a41c997"
+    },
+    {
+      "path": "instalar_dependencia_pdf.bat",
+      "size": 501,
+      "sha256": "23e4e6d54a0095c89ec51bc6ab1031e93f0ac34cb3044b2b7f105737903a5b4b"
+    },
+    {
+      "path": "inteligencia.py",
+      "size": 44793,
+      "sha256": "49a4d5ab31ee8135f20d5a562e89bd16574e35a827c929c899e29fa0a2863f28"
+    },
+    {
+      "path": "jogos.py",
+      "size": 33355,
+      "sha256": "eab8df4f8d242aff6fb8a8008900dd3f1e831c415a673367234a348ee69e264b"
+    },
+    {
+      "path": "jornada.py",
+      "size": 16107,
+      "sha256": "015fe9f237b6eea73892a2259370d600dfe41b7200ff41b518d721d685e0856a"
+    },
+    {
+      "path": "laboratorio.py",
+      "size": 4932,
+      "sha256": "4e2232cfe37becdd31b94331f422a8d9f51c80336b6083631442472a86c1c26e"
+    },
+    {
+      "path": "limpar_cache_icones.bat",
+      "size": 337,
+      "sha256": "02087f85e87bcfedb49dd6d06fc7d6fea4ccb66e591275eb76c0f0a2cd4a1b45"
+    },
+    {
+      "path": "main.py",
+      "size": 1770508,
+      "sha256": "a4c373c222070cedc579466cd3e3df473890047deae18e4eec6d8fb27200848b"
+    },
+    {
+      "path": "main_antes_migracao.py",
+      "size": 15480,
+      "sha256": "57fd75522ad9cf91e03dac1a62d12547cd07f6d009581edd4de16f8a76399062"
+    },
+    {
+      "path": "main_backup.py",
+      "size": 13895,
+      "sha256": "bb4b0e50f33b35a6a3127caa81b2dd13520a78f41dc3409ce32b8664aaa4847f"
+    },
+    {
+      "path": "main_backup_antes_backup_automatico.py",
+      "size": 40131,
+      "sha256": "fabbd262c1e8b482b762fb996beb14356abe41d16d4e70f6dd9d7bdb4b68d68f"
+    },
+    {
+      "path": "main_backup_antes_dashboard.py",
+      "size": 22897,
+      "sha256": "491bbbf73bb63ce03d7b69af4186343056d0f43ab18c7350e7f77a05b3fbe0b8"
+    },
+    {
+      "path": "main_backup_antes_edicao.py",
+      "size": 30677,
+      "sha256": "2b8ac15f373b67d9b6b775357b32c8485f9ce33e6250c72e975cc6738103766b"
+    },
+    {
+      "path": "main_backup_antes_prioridade.py",
+      "size": 22897,
+      "sha256": "491bbbf73bb63ce03d7b69af4186343056d0f43ab18c7350e7f77a05b3fbe0b8"
+    },
+    {
+      "path": "main_backup_funcionando.py",
+      "size": 13926,
+      "sha256": "4108b0ee488460907fd36a71704f6ab8c17ff6280ec50b1a411dae99258b3989"
+    },
+    {
+      "path": "main_backup_penal_funcionando.py",
+      "size": 19595,
+      "sha256": "b38d396305f2da08fe1c22be9b0c8ba4b7289cb7aea704377931d9d3bb9b0d28"
+    },
+    {
+      "path": "mapa_dominio.py",
+      "size": 10710,
+      "sha256": "4f99ca7b518e4f32ffe8901e55379416201757735db471c49f494f9094f70f96"
+    },
+    {
+      "path": "mesclar_questoes_recuperadas.py",
+      "size": 6018,
+      "sha256": "215384c48ca938d3edf14b29fe0a9ab23365f11153ec01aa6385407f1e8d7b34"
+    },
+    {
+      "path": "migrar_dados_excel.py",
+      "size": 7990,
+      "sha256": "eff74cdbf828e67c9b80076df5893ed89f20c3f30f4b30fc5278c554a5c44962"
+    },
+    {
+      "path": "modelo_importacao_questoes.csv",
+      "size": 150,
+      "sha256": "d351a6c6428572ef5a946ae62f335c4e2c0bbc9628d1431ec372e58413414dfe"
+    },
+    {
+      "path": "modelo_importacao_questoes_vpq_1_1.txt",
+      "size": 1323,
+      "sha256": "1cbf09f3f030aea6135d088bfcb65e23a46d62e2a18601dc9e05f95edce886c9"
+    },
+    {
+      "path": "navegacao.py",
+      "size": 10570,
+      "sha256": "2cb3439a580cf867af9870750a82e06777718961dd84819e0705a96838c8b862"
+    },
+    {
+      "path": "progresso_edital.py",
+      "size": 17364,
+      "sha256": "ec81bfdcf1bebc4c9c3412deec414a28f3e648e351b1025484f923414c0370ba"
+    },
+    {
+      "path": "questoes_recuperadas_42.json",
+      "size": 116089,
+      "sha256": "9ee5822255c2278620b33f0318eb0cdc9e421538d1e8867e00521a2d68c02684"
+    },
+    {
+      "path": "recuperar_banco.bat",
+      "size": 519,
+      "sha256": "c19b8e7a02dcd5b06ae5337a9e47f9993163cea343d811e1971c80d559807100"
+    },
+    {
+      "path": "recuperar_banco.py",
+      "size": 8252,
+      "sha256": "20b29a76bc2bdc0ab4287036480c0e26b3a29109cf41d9384aa6db3f5faf951d"
+    },
+    {
+      "path": "regularidade.py",
+      "size": 13532,
+      "sha256": "243bc99c07e21eae0106cd537b9a38585386e829647fbea9d506d98ccbb3ec67"
+    },
+    {
+      "path": "relatorios_lazy.py",
+      "size": 2214,
+      "sha256": "1d34423794c87a8eaca0f2c81534cb549eb864a2bae8a7dadf3fe9fbca053278"
+    },
+    {
+      "path": "requirements.txt",
+      "size": 198,
+      "sha256": "1b7f91785ec00536850c856efa82907eaac34b0e842ce8346d22dddcd3b980a9"
+    },
+    {
+      "path": "statistics_core/__init__.py",
+      "size": 510,
+      "sha256": "6d5cb4884ee73a69f5c43b84d5be6320890af8a90bb41d87fc1334c46fd0bd8b"
+    },
+    {
+      "path": "statistics_core/__pycache__/__init__.cpython-313.pyc",
+      "size": 621,
+      "sha256": "f0449a85fb9035a579762bdd2dc1e936aa9ffae7de065d90155c63c1b905e690"
+    },
+    {
+      "path": "statistics_core/__pycache__/models.cpython-313.pyc",
+      "size": 2988,
+      "sha256": "968f245c9773ccf77ce00b99f64e5955fc409758785d197fbfe5c7d0cef93b7d"
+    },
+    {
+      "path": "statistics_core/__pycache__/periods.cpython-313.pyc",
+      "size": 6134,
+      "sha256": "a8d3e174d10087b8a0b8c10b124f6a12df65d1df923b76f27bc112cfb05a8bf7"
+    },
+    {
+      "path": "statistics_core/__pycache__/repository.cpython-313.pyc",
+      "size": 16715,
+      "sha256": "64ac156c9d7dea1444e491a1d14c958766e8d45f80587f8dc64a1af2e8195b8f"
+    },
+    {
+      "path": "statistics_core/__pycache__/service.cpython-313.pyc",
+      "size": 37130,
+      "sha256": "7da5c65502c76679eec4f43c198e24c42ed2b3d474affe89c76c156172d6a027"
+    },
+    {
+      "path": "statistics_core/models.py",
+      "size": 1601,
+      "sha256": "04603d06c2214ce7dd7df54306e3c0beb0043174d52d60a3102c1cd15025cc92"
+    },
+    {
+      "path": "statistics_core/periods.py",
+      "size": 3867,
+      "sha256": "8e47262e592d476ef72665ab366e4b155e005781fd3736cd5152189ba5528bcc"
+    },
+    {
+      "path": "statistics_core/repository.py",
+      "size": 12876,
+      "sha256": "8548898e6d0d71c09c760e5cafd9092ee78092579fded3cec559ac5ea1159063"
+    },
+    {
+      "path": "statistics_core/service.py",
+      "size": 32178,
+      "sha256": "51da812851c873811cc20c09af2b46296a60d5067f9a2f490c92903c642bd8f0"
+    },
+    {
+      "path": "tema.py",
+      "size": 509869,
+      "sha256": "707dd0f516dba531d028e9ba0abc16959e77b2ca9358f541a1d61089a78ffab6"
+    },
+    {
+      "path": "test_analise_temporal.py",
+      "size": 17072,
+      "sha256": "8f5d881a9975afddcb4f8a83ff404551236ffcb0a972d15a0afbd2e5f0f71860"
+    },
+    {
+      "path": "test_banco_unico.py",
+      "size": 1681,
+      "sha256": "40e9f4b736394b257541a20d479e5a7d4de91a0acf4d5d7eeb7666d7d80d713b"
+    },
+    {
+      "path": "test_build_pyinstaller.py",
+      "size": 2003,
+      "sha256": "d4c9f8ae365888a0e29c242c0a3e02fbf81c544c41afd1c17d7fd25ad0215add"
+    },
+    {
+      "path": "test_capitulos_genericos.py",
+      "size": 2932,
+      "sha256": "632280b8ac1646ac8bc8108d0bd75d7e95cb9b4bf58986ad7a1d4b5eb25523f8"
+    },
+    {
+      "path": "test_ciclo_estudo.py",
+      "size": 7261,
+      "sha256": "d59c1662c38d693ca73827a38395cace0d636cf9b7e8df6f5c1e2550a066c594"
+    },
+    {
+      "path": "test_ctb_importacao.py",
+      "size": 4961,
+      "sha256": "2aa1372f649a1ecef146cff40c11f4bc44d51a0afca77b3170561269734fc209"
+    },
+    {
+      "path": "test_dashboard_inteligencia.py",
+      "size": 2710,
+      "sha256": "efab267137703f23fc02cb94ccbf860366af7f93d3a2e23c7ec1c4d41217886c"
+    },
+    {
+      "path": "test_disciplina_proxy_widgets.py",
+      "size": 783,
+      "sha256": "b21a64b062d11e90218c84c625a452a548c9c674f7a214b048bd3d8a4e8acbcc"
+    },
+    {
+      "path": "test_estatisticas_lazy.py",
+      "size": 1869,
+      "sha256": "29e33a78f88c4965128ddec0c7343cf3b3313a033449514f1e654aa8493f7ff0"
+    },
+    {
+      "path": "test_exclusao_capitulo.py",
+      "size": 3544,
+      "sha256": "813cc0765eea6f17ee8f6e58e2f2eeae00fad00c77f1829d0c00b65cf1afdc65"
+    },
+    {
+      "path": "test_exclusao_conteudo_disciplina_ui.py",
+      "size": 1180,
+      "sha256": "dcb8ec1ed3b1e9ee0392381265d5d4f8da03c26164606d374b3b8e42c565c752"
+    },
+    {
+      "path": "test_fila_candidata.py",
+      "size": 23667,
+      "sha256": "53652f0b45fa5a41129d60224a162c3ec4f91f12e5a90239a09d901b14642fb4"
+    },
+    {
+      "path": "test_fila_observacao.py",
+      "size": 20038,
+      "sha256": "41fa4ea349ba9c1ad84093ac05e79941273402de282205813ed95d7d220e23b8"
+    },
+    {
+      "path": "test_gamificacao.py",
+      "size": 6869,
+      "sha256": "ce80d6063b70918631c2ca9e9fcb3bbcceabb5298bc699ed3d6c9d0bebc14524"
+    },
+    {
+      "path": "test_importacao_txt_integracao.py",
+      "size": 942,
+      "sha256": "c65e99d7dd20e7d1dd20086b071312b74c2e31405015ccb4f315ee86d460791a"
+    },
+    {
+      "path": "test_importador_txt.py",
+      "size": 2025,
+      "sha256": "095c3e5d439a3e7ac27624dc27d9e276d52ac414287d6e086dd063a11e319440"
+    },
+    {
+      "path": "test_mapa_dominio.py",
+      "size": 12598,
+      "sha256": "00d4f8fe52c711dc3b123e2d940a7ec42fa87b5198813d402277f743c9a9d9f5"
+    },
+    {
+      "path": "test_progresso_edital.py",
+      "size": 11296,
+      "sha256": "a5553253407fe98aa30405f2800c95b900afb64b3a422b288235f917fe10a03e"
+    },
+    {
+      "path": "test_qtawesome_integracao.py",
+      "size": 1411,
+      "sha256": "4a296fd36b3123a7dc9cc45a31b06e2c4773cd76a4655321e28722494db53cf6"
+    },
+    {
+      "path": "test_regularidade.py",
+      "size": 6466,
+      "sha256": "ed04b8ab0a10fd84c6d1fd6136ff2ea0e46038594b917fc7b1b20f068a5e7fe9"
+    },
+    {
+      "path": "test_relatorios_lazy.py",
+      "size": 1794,
+      "sha256": "71390d5afe2cb39d24d1832a0bae23d282622ee5d53b3628f1809c6a5a6185f9"
+    },
+    {
+      "path": "test_responsividade_estatisticas.py",
+      "size": 2311,
+      "sha256": "6f7a3f7f35783d6e8f12145e6e1db2aa7b9cd1f3e3d0b61475d1c4af4f4797d8"
+    },
+    {
+      "path": "test_responsividade_navegacao.py",
+      "size": 2701,
+      "sha256": "739cc0654dbb67b7979e130c3d4901b5b2e1b817b0114f3fed1005a652817e1d"
+    },
+    {
+      "path": "test_responsividade_relatorios.py",
+      "size": 2000,
+      "sha256": "4940daeaa73ecdedd1f8d481360a62ae4f0da14f6a204d933adf4c32bd715b22"
+    },
+    {
+      "path": "test_startup_rapido.py",
+      "size": 2984,
+      "sha256": "7087032827369def1315467b3a66c5ebf17b25efc41d84373cf69f0aaa6dcb0a"
+    },
+    {
+      "path": "test_statistics_core.py",
+      "size": 24139,
+      "sha256": "c08221e4b449128b2ebfda4ea637fcd8abaac682626fb227ec3a533b99eb29e2"
+    },
+    {
+      "path": "test_topico_questoes_workspace.py",
+      "size": 1483,
+      "sha256": "c66938cceaee4fbbce9119dc9da163bd15d854171414182b543b68ad33c087ad"
+    },
+    {
+      "path": "test_topicos_disciplina_visual.py",
+      "size": 2853,
+      "sha256": "4838087fe9667a99793af20c60711c8d00af1ff1addad74847968c27fafb4d15"
+    },
+    {
+      "path": "test_ver_questoes_topico_navegacao.py",
+      "size": 1580,
+      "sha256": "e0612bcd43343087972a0778e6dcbccb766fee6e38944680df6e9cadc30776e1"
+    },
+    {
+      "path": "testar_vighna.bat",
+      "size": 1545,
+      "sha256": "7b153f3599812b61c9c6e505183cef531f4c68b67e68cec3cc89c1003d1df049"
+    },
+    {
+      "path": "testes_smoke.py",
+      "size": 55334,
+      "sha256": "250242f77b88e1b31214970456d97064ba4aa1ee96e1a2843c9e856b557f249e"
+    },
+    {
+      "path": "versao.py",
+      "size": 150,
+      "sha256": "a26b373c6229b1e71c66c6ae5fba4a23d31fcf373befc40a965d245dad8fd5bc"
+    },
+    {
+      "path": "vighnastudy.ico",
+      "size": 48708,
+      "sha256": "2314c814061ada2de7dddacf740b702cd24637d2c820f2b5743f1872c0b19412"
+    }
+  ]
+}

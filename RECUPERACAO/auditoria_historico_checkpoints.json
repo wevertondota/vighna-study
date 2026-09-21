@@ -1,0 +1,333 @@
+{
+  "checked_databases": 58,
+  "historical_unique_questions": 2492,
+  "missing_from_current": 19,
+  "by_discipline": {
+    "Direito Penal": 19
+  },
+  "missing": [
+    {
+      "id": 114,
+      "disciplina": "Direito Penal",
+      "topico": "Título II: Dos crimes contra o patrimônio",
+      "capitulo": "Capítulo VI: Do estelionato e outras fraudes",
+      "enunciado": "Como garantia de crédito social, diretor ou gerente aceita determinadas ações em penhor ou caução.\nAssinale a alternativa correta.",
+      "fonte": "Código Penal — arts. 171 a 179",
+      "excluida": 0,
+      "checkpoint": "VighnaStudy_checkpoint_2026-09-17_14-42-28.zip",
+      "current_same_id": {
+        "disciplina": "Direito Penal",
+        "topico": "TÍTULO II – DOS CRIMES CONTRA O PATRIMÔNIO",
+        "capitulo": "Capítulo VI – Do Estelionato e Outras Fraudes",
+        "enunciado": "Um diretor ou gerente aceita ações como garantia de determinada obrigação. Considerando a natureza do crédito, a origem das ações e a forma da garantia, assinale a alternativa correta.",
+        "fonte": "Código Penal — arts. 171 a 179"
+      }
+    },
+    {
+      "id": 125,
+      "disciplina": "Direito Penal",
+      "topico": "Título II: Dos crimes contra o patrimônio",
+      "capitulo": "Capítulo VII: Da receptação",
+      "enunciado": "Considere as expressões empregadas pelo texto-base para indicar a relação do agente com a origem\ncriminosa da coisa. Assinale a associação correta.",
+      "fonte": "Código Penal - Arts. 180 e 180-A",
+      "excluida": 0,
+      "checkpoint": "VighnaStudy_checkpoint_2026-09-17_14-42-28.zip",
+      "current_same_id": {
+        "disciplina": "Direito Penal",
+        "topico": "TÍTULO II – DOS CRIMES CONTRA O PATRIMÔNIO",
+        "capitulo": "Capítulo VII – Da Receptação",
+        "enunciado": "A receptação utiliza expressões diferentes para indicar o grau de conhecimento do agente sobre a origem criminosa da coisa. Assinale a alternativa que associa corretamente cada modalidade à expressão correspondente.",
+        "fonte": "Código Penal - Arts. 180 e 180-A"
+      }
+    },
+    {
+      "id": 126,
+      "disciplina": "Direito Penal",
+      "topico": "Título II: Dos crimes contra o patrimônio",
+      "capitulo": "Capítulo VII: Da receptação",
+      "enunciado": "No exercício de atividade comercial ou industrial, a receptação qualificada admite conjunto mais amplo\nde condutas. Assinale a alternativa que reproduz corretamente esse conjunto.",
+      "fonte": "Código Penal - Arts. 180 e 180-A",
+      "excluida": 0,
+      "checkpoint": "VighnaStudy_checkpoint_2026-09-17_14-42-28.zip",
+      "current_same_id": {
+        "disciplina": "Direito Penal",
+        "topico": "TÍTULO II – DOS CRIMES CONTRA O PATRIMÔNIO",
+        "capitulo": "Capítulo VII – Da Receptação",
+        "enunciado": "Na receptação qualificada praticada no exercício de atividade comercial ou industrial, qual alternativa apresenta corretamente o conjunto de condutas previsto para essa modalidade?",
+        "fonte": "Código Penal - Arts. 180 e 180-A"
+      }
+    },
+    {
+      "id": 132,
+      "disciplina": "Direito Penal",
+      "topico": "Título II: Dos crimes contra o patrimônio",
+      "capitulo": "Capítulo VII: Da receptação",
+      "enunciado": "Quando a receptação envolve bens pertencentes a determinados integrantes da Administração Pública\nou entidades expressamente indicadas, assinale a alternativa correta.",
+      "fonte": "Código Penal - Arts. 180 e 180-A",
+      "excluida": 0,
+      "checkpoint": "VighnaStudy_checkpoint_2026-09-17_14-42-28.zip",
+      "current_same_id": {
+        "disciplina": "Direito Penal",
+        "topico": "TÍTULO II – DOS CRIMES CONTRA O PATRIMÔNIO",
+        "capitulo": "Capítulo VII – Da Receptação",
+        "enunciado": "Quando o bem objeto da receptação pertence à União, aos Estados, ao Distrito Federal, aos Municípios, às autarquias, às fundações públicas, às empresas públicas, às sociedades de economia mista ou às concessionárias de serviços públicos, qual consequência é aplicada?",
+        "fonte": "Código Penal - Arts. 180 e 180-A"
+      }
+    },
+    {
+      "id": 157,
+      "disciplina": "Direito Penal",
+      "topico": "Título VI: Dos crimes contra a dignidade sexual",
+      "capitulo": "",
+      "enunciado": "Em relação ao ato obsceno, assinale a alternativa que apresenta corretamente o local de prática e a pena correspondente.",
+      "fonte": "Código Penal - Arts. 233 e 234",
+      "excluida": 0,
+      "checkpoint": "VighnaStudy_checkpoint_2026-09-17_21-22-08.zip",
+      "current_same_id": {
+        "disciplina": "Direito Penal",
+        "topico": "TÍTULO X – DOS CRIMES CONTRA A FÉ PÚBLICA",
+        "capitulo": "Capítulo III – Da Falsidade Documental",
+        "enunciado": "Sobre a falsificação de selo ou sinal público, assinale a alternativa correta quanto à forma de execução e à pena aplicável.",
+        "fonte": "Código Penal - Arts. 296 a 305"
+      }
+    },
+    {
+      "id": 158,
+      "disciplina": "Direito Penal",
+      "topico": "Título VI: Dos crimes contra a dignidade sexual",
+      "capitulo": "",
+      "enunciado": "Quanto às condutas relacionadas ao escrito ou objeto obsceno destinado ao comércio, à distribuição ou à exposição pública, assinale a alternativa correta.",
+      "fonte": "Código Penal - Arts. 233 e 234",
+      "excluida": 0,
+      "checkpoint": "VighnaStudy_checkpoint_2026-09-17_21-22-08.zip",
+      "current_same_id": {
+        "disciplina": "Direito Penal",
+        "topico": "TÍTULO X – DOS CRIMES CONTRA A FÉ PÚBLICA",
+        "capitulo": "Capítulo III – Da Falsidade Documental",
+        "enunciado": "Quanto aos selos e sinais que podem constituir objeto da falsificação de selo ou sinal público, assinale a alternativa correta.",
+        "fonte": "Código Penal - Arts. 296 a 305"
+      }
+    },
+    {
+      "id": 159,
+      "disciplina": "Direito Penal",
+      "topico": "Título VI: Dos crimes contra a dignidade sexual",
+      "capitulo": "",
+      "enunciado": "Considerando a finalidade, os objetos abrangidos e a pena do crime relacionado a escrito ou objeto obsceno, assinale a alternativa correta.",
+      "fonte": "Código Penal - Arts. 233 e 234",
+      "excluida": 0,
+      "checkpoint": "VighnaStudy_checkpoint_2026-09-17_21-22-08.zip",
+      "current_same_id": {
+        "disciplina": "Direito Penal",
+        "topico": "TÍTULO X – DOS CRIMES CONTRA A FÉ PÚBLICA",
+        "capitulo": "Capítulo III – Da Falsidade Documental",
+        "enunciado": "Sobre a falsidade material de atestado ou certidão, assinale a alternativa correta.",
+        "fonte": "Código Penal - Arts. 296 a 305"
+      }
+    },
+    {
+      "id": 160,
+      "disciplina": "Direito Penal",
+      "topico": "Título VI: Dos crimes contra a dignidade sexual",
+      "capitulo": "",
+      "enunciado": "Em relação às condutas praticadas com os objetos obscenos abrangidos pela norma, assinale a alternativa que corresponde a hipótese submetida à mesma pena de detenção de seis meses a dois anos, ou multa.",
+      "fonte": "Código Penal - Arts. 233 e 234",
+      "excluida": 0,
+      "checkpoint": "VighnaStudy_checkpoint_2026-09-17_21-22-08.zip",
+      "current_same_id": {
+        "disciplina": "Direito Penal",
+        "topico": "TÍTULO X – DOS CRIMES CONTRA A FÉ PÚBLICA",
+        "capitulo": "Capítulo III – Da Falsidade Documental",
+        "enunciado": "Quanto à falsidade ideológica, assinale a alternativa correta em relação às condutas e às finalidades previstas.",
+        "fonte": "Código Penal - Arts. 296 a 305"
+      }
+    },
+    {
+      "id": 161,
+      "disciplina": "Direito Penal",
+      "topico": "Título VI: Dos crimes contra a dignidade sexual",
+      "capitulo": "",
+      "enunciado": "Quanto à representação teatral, à exibição cinematográfica e a outro espetáculo de caráter obsceno realizados em lugar público ou acessível ao público, assinale a alternativa correta.",
+      "fonte": "Código Penal - Arts. 233 e 234",
+      "excluida": 0,
+      "checkpoint": "VighnaStudy_checkpoint_2026-09-17_21-22-08.zip",
+      "current_same_id": {
+        "disciplina": "Direito Penal",
+        "topico": "TÍTULO X – DOS CRIMES CONTRA A FÉ PÚBLICA",
+        "capitulo": "Capítulo III – Da Falsidade Documental",
+        "enunciado": "Sobre a reprodução ou alteração de selo ou peça filatélica com valor para coleção, assinale a alternativa correta.",
+        "fonte": "Código Penal - Arts. 296 a 305"
+      }
+    },
+    {
+      "id": 162,
+      "disciplina": "Direito Penal",
+      "topico": "Título VI: Dos crimes contra a dignidade sexual",
+      "capitulo": "",
+      "enunciado": "Considerando a realização de audição ou recitação de caráter obsceno, assinale a alternativa que apresenta corretamente os locais ou meios abrangidos e a pena correspondente.",
+      "fonte": "Código Penal - Arts. 233 e 234",
+      "excluida": 0,
+      "checkpoint": "VighnaStudy_checkpoint_2026-09-17_21-22-08.zip",
+      "current_same_id": {
+        "disciplina": "Direito Penal",
+        "topico": "TÍTULO X – DOS CRIMES CONTRA A FÉ PÚBLICA",
+        "capitulo": "Capítulo III – Da Falsidade Documental",
+        "enunciado": "Nas hipóteses relacionadas à prova perante a previdência social, assinale a alternativa correta.",
+        "fonte": "Código Penal - Arts. 296 a 305"
+      }
+    },
+    {
+      "id": 237,
+      "disciplina": "Direito Penal",
+      "topico": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO",
+      "capitulo": "Capítulo II – Dos Crimes Contra Instituições Democráticas",
+      "enunciado": "Um agente tenta, mediante violência ou grave ameaça, abolir o Estado Democrático de Direito, impedindo ou restringindo o exercício dos poderes constitucionais. Assinale a alternativa correta.",
+      "fonte": "Código Penal - Arts. 359-L a 359-M-B",
+      "excluida": 0,
+      "checkpoint": "VighnaStudy_checkpoint_2026-09-18_14-05-46.zip",
+      "current_same_id": {
+        "disciplina": "Direito Penal",
+        "topico": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO",
+        "capitulo": "Capítulo I – Dos Crimes Contra a Soberania Nacional",
+        "enunciado": "Quanto à espionagem em sua forma básica, assinale a alternativa correta.",
+        "fonte": "Código Penal - Arts. 359-I a 359-K"
+      }
+    },
+    {
+      "id": 238,
+      "disciplina": "Direito Penal",
+      "topico": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO",
+      "capitulo": "Capítulo II – Dos Crimes Contra Instituições Democráticas",
+      "enunciado": "Um agente tenta, por meio de violência ou grave ameaça, depor o governo legitimamente constituído. Assinale a alternativa correta.",
+      "fonte": "Código Penal - Arts. 359-L a 359-M-B",
+      "excluida": 0,
+      "checkpoint": "VighnaStudy_checkpoint_2026-09-18_14-05-46.zip",
+      "current_same_id": {
+        "disciplina": "Direito Penal",
+        "topico": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO",
+        "capitulo": "Capítulo I – Dos Crimes Contra a Soberania Nacional",
+        "enunciado": "Quanto à comunicação, entrega ou publicação de informações ou documentos no contexto da espionagem, assinale a alternativa correta.",
+        "fonte": "Código Penal - Arts. 359-I a 359-K"
+      }
+    },
+    {
+      "id": 239,
+      "disciplina": "Direito Penal",
+      "topico": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO",
+      "capitulo": "Capítulo V – Dos Crimes Contra a Cidadania",
+      "enunciado": "Quanto à relação entre as penas dos crimes de abolição violenta do Estado Democrático de Direito e de golpe de Estado e a pena correspondente à violência, assinale a alternativa correta.",
+      "fonte": "Código Penal - Arts. 359-L a 359-M-B",
+      "excluida": 0,
+      "checkpoint": "VighnaStudy_checkpoint_2026-09-18_14-05-46.zip",
+      "current_same_id": {
+        "disciplina": "Direito Penal",
+        "topico": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO",
+        "capitulo": "Capítulo I – Dos Crimes Contra a Soberania Nacional",
+        "enunciado": "Quanto ao atentado à soberania nacional em sua forma básica, assinale a alternativa correta.",
+        "fonte": "Código Penal - Arts. 359-I a 359-K"
+      }
+    },
+    {
+      "id": 240,
+      "disciplina": "Direito Penal",
+      "topico": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO",
+      "capitulo": "Capítulo II – Dos Crimes Contra Instituições Democráticas",
+      "enunciado": "Quanto à aplicação das penas dos delitos contra as instituições democráticas quando considerados em conjunto, assinale a alternativa correta.",
+      "fonte": "Código Penal - Arts. 359-L a 359-M-B",
+      "excluida": 0,
+      "checkpoint": "VighnaStudy_checkpoint_2026-09-18_14-05-46.zip",
+      "current_same_id": {
+        "disciplina": "Direito Penal",
+        "topico": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO",
+        "capitulo": "Capítulo I – Dos Crimes Contra a Soberania Nacional",
+        "enunciado": "Quanto ao atentado à integridade nacional, assinale a alternativa correta.",
+        "fonte": "Código Penal - Arts. 359-I a 359-K"
+      }
+    },
+    {
+      "id": 241,
+      "disciplina": "Direito Penal",
+      "topico": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO",
+      "capitulo": "Capítulo V – Dos Crimes Contra a Cidadania",
+      "enunciado": "Considerando agente que não tenha praticado ato de financiamento nem exercido papel de liderança, assinale a alternativa correta quanto aos crimes contra as instituições democráticas.",
+      "fonte": "Código Penal - Arts. 359-L a 359-M-B",
+      "excluida": 0,
+      "checkpoint": "VighnaStudy_checkpoint_2026-09-18_14-05-46.zip",
+      "current_same_id": {
+        "disciplina": "Direito Penal",
+        "topico": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO",
+        "capitulo": "Capítulo I – Dos Crimes Contra a Soberania Nacional",
+        "enunciado": "No atentado à soberania nacional, assinale a alternativa correta quanto à consequência da declaração de guerra decorrente da conduta praticada.",
+        "fonte": "Código Penal - Arts. 359-I a 359-K"
+      }
+    },
+    {
+      "id": 242,
+      "disciplina": "Direito Penal",
+      "topico": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO",
+      "capitulo": "Capítulo II – Dos Crimes Contra Instituições Democráticas",
+      "enunciado": "Nos crimes contra as instituições democráticas praticados em contexto de multidão, assinale a alternativa que apresenta corretamente as condições relativas ao agente para a redução da pena.",
+      "fonte": "Código Penal - Arts. 359-L a 359-M-B",
+      "excluida": 0,
+      "checkpoint": "VighnaStudy_checkpoint_2026-09-18_14-05-46.zip",
+      "current_same_id": {
+        "disciplina": "Direito Penal",
+        "topico": "TÍTULO XII – DOS CRIMES CONTRA O ESTADO DEMOCRÁTICO DE DIREITO",
+        "capitulo": "Capítulo I – Dos Crimes Contra a Soberania Nacional",
+        "enunciado": "Quanto à prestação de auxílio a espião, assinale a alternativa correta.",
+        "fonte": "Código Penal - Arts. 359-I a 359-K"
+      }
+    },
+    {
+      "id": 153,
+      "disciplina": "Direito Penal",
+      "topico": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL",
+      "capitulo": "Capítulo V – Disposições Gerais",
+      "enunciado": "Nos termos do Artigo 225 do Código Penal Brasileiro, com as alterações trazidas pela Lei nº 13.718/2018, os crimes contra a dignidade sexual descritos nos Capítulos I e II do Título VI (como o estupro e o estupro de vulnerável) passaram a seguir uma regra única quanto à iniciativa processual.\nDiante do atual ordenamento jurídico, assinale a alternativa que indica a modalidade de ação penal cabível para esses crimes:",
+      "fonte": "Código Penal - Arts. 225 e 226",
+      "excluida": 0,
+      "checkpoint": "VighnaStudy_checkpoint_2026-09-20_19-55-08.zip",
+      "current_same_id": {
+        "disciplina": "Direito Penal",
+        "topico": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL",
+        "capitulo": "Capítulo V – Disposições Gerais",
+        "enunciado": "Quanto à modalidade de ação penal prevista para os crimes abrangidos pela regra apresentada, assinale a alternativa correta.",
+        "fonte": "Código Penal - Arts. 225 e 226"
+      }
+    },
+    {
+      "id": 154,
+      "disciplina": "Direito Penal",
+      "topico": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL",
+      "capitulo": "Capítulo V – Disposições Gerais",
+      "enunciado": "De acordo com as alterações promovidas pela Lei nº 13.718/2018 no Código Penal Brasileiro, foram inseridas novas causas de aumento de pena no capítulo dos crimes contra a dignidade sexual, incluindo a figura do estupro coletivo.\nConsiderando as regras atuais sobre o concurso de pessoas e as frações de aumento estabelecidas na legislação penal, assinale a alternativa correta:",
+      "fonte": "Código Penal - Arts. 225 e 226",
+      "excluida": 0,
+      "checkpoint": "VighnaStudy_checkpoint_2026-09-20_19-55-08.zip",
+      "current_same_id": {
+        "disciplina": "Direito Penal",
+        "topico": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL",
+        "capitulo": "Capítulo V – Disposições Gerais",
+        "enunciado": "Considerando as previsões de aumento de pena relacionadas ao concurso de pessoas e ao estupro coletivo, assinale a alternativa correta.",
+        "fonte": "Código Penal - Arts. 225 e 226"
+      }
+    },
+    {
+      "id": 155,
+      "disciplina": "Direito Penal",
+      "topico": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL",
+      "capitulo": "Capítulo V – Disposições Gerais",
+      "enunciado": "O Código Penal Brasileiro, no seu Artigo 226, prevê causas de aumento de pena aplicáveis aos crimes contra a dignidade sexual. Uma dessas majorantes leva em consideração a relação de parentesco, o vínculo de confiança ou a autoridade exercida pelo agressor em relação à vítima.\nDiante das regras expressas do Código Penal, assinale a alternativa que indica o vínculo correto e a fração de aumento prevista em lei para essa hipótese:",
+      "fonte": "Código Penal - Arts. 225 e 226",
+      "excluida": 0,
+      "checkpoint": "VighnaStudy_checkpoint_2026-09-20_19-55-08.zip",
+      "current_same_id": {
+        "disciplina": "Direito Penal",
+        "topico": "TÍTULO VI – DOS CRIMES CONTRA A DIGNIDADE SEXUAL",
+        "capitulo": "Capítulo V – Disposições Gerais",
+        "enunciado": "Em relação ao aumento de pena decorrente do vínculo do agente com a vítima ou da autoridade exercida sobre ela, assinale a alternativa correta.",
+        "fonte": "Código Penal - Arts. 225 e 226"
+      }
+    }
+  ]
+}
