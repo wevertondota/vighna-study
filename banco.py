@@ -16183,6 +16183,7 @@ def registrar_tentativa_questao(
     marcada_duvida=False,
     tempo_segundos=None,
     item_sessao_id=None,
+    tratar_pulo_como_erro=False,
 ):
     sessao_id = int(sessao_id)
     questao_id = int(questao_id)
@@ -16336,8 +16337,13 @@ def registrar_tentativa_questao(
             for item in alternativas_snapshot
         }
 
+        pulo_convertido_erro = bool(
+            tratar_pulo_como_erro
+            and alternativa is None
+        )
+
         if alternativa is None:
-            resultado = None
+            resultado = 0 if pulo_convertido_erro else None
         else:
             if alternativa not in letras_existentes:
                 raise ValueError(
@@ -16380,7 +16386,7 @@ def registrar_tentativa_questao(
             )
             VALUES (
                 ?, ?, ?, datetime('now', 'localtime'), ?, ?, ?, ?,
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'resposta', ?
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )
             """,
             (
@@ -16407,6 +16413,15 @@ def registrar_tentativa_questao(
                 questao[8],
                 questao[9] or "",
                 questao[10] or "Não informada",
+                (
+                    "pulo_reincidente"
+                    if pulo_convertido_erro
+                    else (
+                        "pulo"
+                        if alternativa is None
+                        else "resposta"
+                    )
+                ),
                 item_sessao_id,
             ),
         )
@@ -16439,6 +16454,159 @@ def registrar_tentativa_questao(
                 else bool(resultado)
             ),
             "pulada": resultado is None,
+            "pulo_convertido_erro": pulo_convertido_erro,
+        }
+
+
+def reagendar_questao_pulada_no_fim_sessao(
+    sessao_id,
+    questao_id,
+):
+    """Adiciona uma segunda passagem da questão ao fim da sessão.
+
+    A primeira ocorrência permanece registrada como ``pulada`` para telemetria.
+    A nova ocorrência reutiliza os snapshots congelados da própria sessão, de
+    modo que a questão reaparece depois de todos os itens originalmente
+    planejados. O retorno não altera o objetivo acadêmico original da bateria.
+    """
+    sessao_id = int(sessao_id)
+    questao_id = int(questao_id)
+
+    with conectar() as conexao:
+        sessao = conexao.execute(
+            """
+            SELECT encerrado_em
+            FROM sessoes_questoes
+            WHERE id = ?
+            """,
+            (sessao_id,),
+        ).fetchone()
+
+        if sessao is None:
+            raise ValueError("A sessão de questões não existe.")
+
+        if sessao[0] is not None:
+            raise ValueError("A sessão de questões já foi encerrada.")
+
+        origem = conexao.execute(
+            """
+            SELECT
+                questao_id,
+                questao_id_snapshot,
+                topico_id_snapshot,
+                capitulo_id_snapshot,
+                disciplina_id_snapshot,
+                disciplina_snapshot,
+                topico_snapshot,
+                capitulo_snapshot,
+                enunciado_snapshot,
+                alternativas_snapshot,
+                gabarito_snapshot,
+                explicacao_snapshot,
+                banca_snapshot,
+                ano_snapshot,
+                fonte_snapshot,
+                dificuldade_snapshot,
+                contexto_selecao_json
+            FROM itens_sessao_questoes
+            WHERE
+                sessao_id = ?
+                AND questao_id_snapshot = ?
+            ORDER BY ordem
+            LIMIT 1
+            """,
+            (sessao_id, questao_id),
+        ).fetchone()
+
+        if origem is None:
+            raise ValueError(
+                "A questão pulada não pertence à fila congelada desta sessão."
+            )
+
+        proxima_ordem = int(
+            conexao.execute(
+                """
+                SELECT COALESCE(MAX(ordem), 0) + 1
+                FROM itens_sessao_questoes
+                WHERE sessao_id = ?
+                """,
+                (sessao_id,),
+            ).fetchone()[0]
+        )
+
+        contexto_original = {}
+        try:
+            contexto_original = json.loads(origem[16] or "{}")
+            if not isinstance(contexto_original, dict):
+                contexto_original = {}
+        except Exception:
+            contexto_original = {}
+
+        contexto_original["retorno_pulo"] = True
+        contexto_original["motivo_retorno"] = (
+            "Primeiro pulo: questão reagendada automaticamente para o fim."
+        )
+
+        cursor = conexao.execute(
+            """
+            INSERT INTO itens_sessao_questoes (
+                sessao_id,
+                ordem,
+                questao_id,
+                estado,
+                questao_id_snapshot,
+                topico_id_snapshot,
+                capitulo_id_snapshot,
+                disciplina_id_snapshot,
+                disciplina_snapshot,
+                topico_snapshot,
+                capitulo_snapshot,
+                enunciado_snapshot,
+                alternativas_snapshot,
+                gabarito_snapshot,
+                explicacao_snapshot,
+                banca_snapshot,
+                ano_snapshot,
+                fonte_snapshot,
+                dificuldade_snapshot,
+                contexto_selecao_json
+            )
+            VALUES (
+                ?, ?, ?, 'planejada',
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+            )
+            """,
+            (
+                sessao_id,
+                proxima_ordem,
+                origem[0],
+                origem[1],
+                origem[2],
+                origem[3],
+                origem[4],
+                origem[5],
+                origem[6],
+                origem[7],
+                origem[8],
+                origem[9],
+                origem[10],
+                origem[11],
+                origem[12],
+                origem[13],
+                origem[14],
+                origem[15],
+                json.dumps(
+                    contexto_original,
+                    ensure_ascii=False,
+                    default=str,
+                ),
+            ),
+        )
+
+        return {
+            "item_id": int(cursor.lastrowid),
+            "ordem": proxima_ordem,
+            "questao_id": questao_id,
         }
 
 

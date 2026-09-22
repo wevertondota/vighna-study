@@ -1,0 +1,362 @@
+[
+  {
+    "numero": 1,
+    "old_enunciado_sha256": "e50435d93f559fa4c9661f24d37e9236826b0470349e7526df6a8bb22814e0e2",
+    "old_gabarito": "A"
+  },
+  {
+    "numero": 2,
+    "old_enunciado_sha256": "afcf3da319940addd1b15305582e3af67174208da324de38d340914a5a1173e1",
+    "old_gabarito": "C"
+  },
+  {
+    "numero": 3,
+    "old_enunciado_sha256": "aebb96725577609631b73da861e3a5075359bdf444779f5efb0b3993f5be28be",
+    "old_gabarito": "B"
+  },
+  {
+    "numero": 4,
+    "old_enunciado_sha256": "b44395a4620d7bda460f07ebbddcd679996245a8f9ab874085c80bc38515dad6",
+    "old_gabarito": "A"
+  },
+  {
+    "numero": 5,
+    "old_enunciado_sha256": "f5d76509c677002159ef29788254cdbd990e9b3047c52c9401316d4847fda53f",
+    "old_gabarito": "A"
+  },
+  {
+    "numero": 6,
+    "old_enunciado_sha256": "f0f763ceb03dec6e835914b659c169689e35e91573a1566ef7b0d4720ffe2e22",
+    "old_gabarito": "C"
+  },
+  {
+    "numero": 7,
+    "old_enunciado_sha256": "5484714dc8d32f1ebbf63084a0a81c96848ebfaf89e75ae7c3c7dda08a158425",
+    "old_gabarito": "D"
+  },
+  {
+    "numero": 8,
+    "old_enunciado_sha256": "dae1c5ff4e281539b89c23747a1cd5d7641564038786fb3638ea23fee611df89",
+    "old_gabarito": "C"
+  },
+  {
+    "numero": 9,
+    "old_enunciado_sha256": "b4b3f47d083212b346432a617b1654683a8584bff842b3cf93e00dbff1933e32",
+    "old_gabarito": "A"
+  },
+  {
+    "numero": 10,
+    "old_enunciado_sha256": "2605238a7a93c49c0bba0d13c88a4ae9428e4030e837103f3269b200601cebf3",
+    "old_gabarito": "B"
+  },
+  {
+    "numero": 11,
+    "old_enunciado_sha256": "eb813513d2062682d2b67d3e543ac5f595a221730aa640bdc9c49bdac27214f0",
+    "old_gabarito": "D"
+  },
+  {
+    "numero": 12,
+    "old_enunciado_sha256": "bc65f944856cabfea3810d5097c42105b7c3e96a0d5e3d9a75405160fdd52a50",
+    "old_gabarito": "D"
+  },
+  {
+    "numero": 13,
+    "old_enunciado_sha256": "732b45efc9576fd2a8448040095a2054e74222baa667ecc65d53eaacdc08255e",
+    "old_gabarito": "A"
+  },
+  {
+    "numero": 14,
+    "old_enunciado_sha256": "dbf90e54ed8b2d42dabb28672b3f3c558fd89b3aa88f33fc7970052bb774896b",
+    "old_gabarito": "B"
+  },
+  {
+    "numero": 15,
+    "old_enunciado_sha256": "61b1961c3b99ac709523391c9acbdc83fa535f72047f0bb38dbc4b7aa7e1005b",
+    "old_gabarito": "A"
+  },
+  {
+    "numero": 16,
+    "old_enunciado_sha256": "eec0a77b7258031c89e5dc55336a9470bff11f79c541647cf01d07d66335fea2",
+    "old_gabarito": "D"
+  },
+  {
+    "numero": 17,
+    "old_enunciado_sha256": "be85ddd48d5df5c25ba1ff011430ca6d3a2c391a3283994063b58fa9d084029c",
+    "old_gabarito": "A"
+  },
+  {
+    "numero": 18,
+    "old_enunciado_sha256": "7b1030edd659eda93832af2701d4f566c0f4fc3489456c442d8c726a604f0224",
+    "old_gabarito": "C"
+  },
+  {
+    "numero": 19,
+    "old_enunciado_sha256": "90e189d601df8c743265996702e6bd6dee81d1fdfa5ec637b94afca4a2dd39b9",
+    "old_gabarito": "D"
+  },
+  {
+    "numero": 20,
+    "old_enunciado_sha256": "955f1a70be9f714ac75bc2ecdaa0b539e55e03f7ceffb24417aa0046bd3c14f9",
+    "old_gabarito": "D"
+  },
+  {
+    "numero": 21,
+    "old_enunciado_sha256": "eb7530f739fa5712831466bd14c6e05d16b79a2b3e0279f3f4c72749e179a042",
+    "old_gabarito": "C"
+  },
+  {
+    "numero": 22,
+    "old_enunciado_sha256": "a970a142a455edb9bf725b53e1e4cf43d42715148e6b3e01cc60a135209768af",
+    "old_gabarito": "D"
+  },
+  {
+    "numero": 23,
+    "old_enunciado_sha256": "3d88dc8c0c655bd69922cd1b6565dff1a33a42258aa64202b5758dd2cf179c24",
+    "old_gabarito": "D"
+  },
+  {
+    "numero": 24,
+    "old_enunciado_sha256": "318336b66ecd9baefc18ecdd3040de94268a49a264c27569611f613a1e5ed7af",
+    "old_gabarito": "B"
+  },
+  {
+    "numero": 25,
+    "old_enunciado_sha256": "5fbc3acdb014c6cf8c4f9a37544cb85701f31fd3bc3fd0e0a548667f364ca187",
+    "old_gabarito": "A"
+  },
+  {
+    "numero": 26,
+    "old_enunciado_sha256": "5c44477c0dcdbc6c40501c1103199933b752f42a4097d15d518b41fc414bd1b7",
+    "old_gabarito": "C"
+  },
+  {
+    "numero": 27,
+    "old_enunciado_sha256": "c3c3740ed17cc7f514729cfe08747cf7ad3ce7c223ae34ac90237238bd9f271d",
+    "old_gabarito": "D"
+  },
+  {
+    "numero": 28,
+    "old_enunciado_sha256": "7b74e144e114d2e09641d44d38bf7fdb192e2628aa65b57eb9b20fafe6232750",
+    "old_gabarito": "C"
+  },
+  {
+    "numero": 29,
+    "old_enunciado_sha256": "08df088d59e6770cb5a21c02bf296aa3327af7f1ffb44c428a70b1afbe5389ee",
+    "old_gabarito": "C"
+  },
+  {
+    "numero": 30,
+    "old_enunciado_sha256": "94e7b5d9375fe2798a04f8c5eef2728cba51dfb04203bb7f869d267cd4187cd5",
+    "old_gabarito": "D"
+  },
+  {
+    "numero": 31,
+    "old_enunciado_sha256": "33fcaab2cbafc40253befa4470abc15f7c80afdff254f1a53e42560600e9943a",
+    "old_gabarito": "B"
+  },
+  {
+    "numero": 32,
+    "old_enunciado_sha256": "13128331cf75cb3f86fd7abcb1e70d505e513fe7102ca2b3a512f8640168d2ea",
+    "old_gabarito": "B"
+  },
+  {
+    "numero": 33,
+    "old_enunciado_sha256": "0e524d403455224af2527930cdd62eaca1fd7169906ff74f4df36090a636e42e",
+    "old_gabarito": "A"
+  },
+  {
+    "numero": 34,
+    "old_enunciado_sha256": "10194e9fcee9ee7dab032aafa61267e18c87ce53aa6d072bded4f1921cb424da",
+    "old_gabarito": "C"
+  },
+  {
+    "numero": 35,
+    "old_enunciado_sha256": "e7306cd9738d211b70a1bb09e22e01b2a0fb3036569d96243e3f74ed0d8a050b",
+    "old_gabarito": "B"
+  },
+  {
+    "numero": 36,
+    "old_enunciado_sha256": "15d60a1ff8a0ea2f3959dc528f6148c6c1a3e393cffac5331ee191f6c87dd413",
+    "old_gabarito": "D"
+  },
+  {
+    "numero": 37,
+    "old_enunciado_sha256": "15ce4fd63c20a536323d2911d284dbdf96347d67e1d48ef26a9267f9de5bd41c",
+    "old_gabarito": "C"
+  },
+  {
+    "numero": 38,
+    "old_enunciado_sha256": "f4c46e5caebc24edb333134cc7dfcaddb9f6fae434db590d873b3c5ca6c18b73",
+    "old_gabarito": "D"
+  },
+  {
+    "numero": 39,
+    "old_enunciado_sha256": "4937e54cb15412dd260f2f1e22de992307e5f539f00d3cc6063e1408953d5b8e",
+    "old_gabarito": "D"
+  },
+  {
+    "numero": 40,
+    "old_enunciado_sha256": "d822d12e90b76f650c0ebc0ed086f89bc76575091c8f13ad6a825c85ba9a5223",
+    "old_gabarito": "C"
+  },
+  {
+    "numero": 41,
+    "old_enunciado_sha256": "cd07ff3968288005a76c6003710ebc3661e82acbd0d3fb94fbd6bf9fbd44c196",
+    "old_gabarito": "D"
+  },
+  {
+    "numero": 42,
+    "old_enunciado_sha256": "361bafab9339aa886aa8326a2c5d5b4f03833162f5864cf5191b676d9f33efa4",
+    "old_gabarito": "B"
+  },
+  {
+    "numero": 43,
+    "old_enunciado_sha256": "91348a1c46a2dac37917e648cc33f25d6ccd7cbe62d449117dde09e1c2366f2b",
+    "old_gabarito": "A"
+  },
+  {
+    "numero": 44,
+    "old_enunciado_sha256": "0ef9bab914154bd50c3c8c3a66d4de899a53e80beb715e6256b4bc94fe0d89cc",
+    "old_gabarito": "C"
+  },
+  {
+    "numero": 45,
+    "old_enunciado_sha256": "6b96a589958cf15bca7761d852e4ec5703867c4f123c65097a38e92f2b628f8b",
+    "old_gabarito": "D"
+  },
+  {
+    "numero": 46,
+    "old_enunciado_sha256": "824f5ff86198a5959114bc0d6852d44bc34beb68cf35c42be2ef15775be6cad3",
+    "old_gabarito": "B"
+  },
+  {
+    "numero": 47,
+    "old_enunciado_sha256": "7057d580997bf79eb735ddc3515fc2dded92c35aa0b3d1c881d7a7762d52120b",
+    "old_gabarito": "B"
+  },
+  {
+    "numero": 48,
+    "old_enunciado_sha256": "dc2c6313b0d3bf2d3941136b7966d9796e3f79eb92705e9d699504aa1c7a9209",
+    "old_gabarito": "A"
+  },
+  {
+    "numero": 49,
+    "old_enunciado_sha256": "46e72fe98e1f1b1fe48d14a910235059986491ba4bb8a74710926ad9d68a7d37",
+    "old_gabarito": "A"
+  },
+  {
+    "numero": 50,
+    "old_enunciado_sha256": "ef78c21fc518453db938e726df494b252f40c3ca51344a379f47b3af8448d813",
+    "old_gabarito": "C"
+  },
+  {
+    "numero": 51,
+    "old_enunciado_sha256": "9d5ed4eb2e68fa6d11983937b7cecbaae6ec9c1edb636acbaea52b4b73620798",
+    "old_gabarito": "A"
+  },
+  {
+    "numero": 52,
+    "old_enunciado_sha256": "65f11005df3407dda817c26b1fc6106151c3bdee01e144b478e110c459dcf848",
+    "old_gabarito": "A"
+  },
+  {
+    "numero": 53,
+    "old_enunciado_sha256": "f2bd548fc0160de1377765fc7e2bb8aca9cfcde9ac91205bff361f52c20d0887",
+    "old_gabarito": "D"
+  },
+  {
+    "numero": 54,
+    "old_enunciado_sha256": "df1d836eb0c7ed153fa358acf1efa1dcb49af7f6342ec57ffe745c4b8436e0c3",
+    "old_gabarito": "C"
+  },
+  {
+    "numero": 55,
+    "old_enunciado_sha256": "abeb28e7838e3e12cd0b7f2273ea35b63a177f678d2ceb510314901ef5c47a87",
+    "old_gabarito": "B"
+  },
+  {
+    "numero": 56,
+    "old_enunciado_sha256": "7d4915336069487df4c4acb22ad030b5113a4f54819370e886ae88b9a3deb89f",
+    "old_gabarito": "C"
+  },
+  {
+    "numero": 57,
+    "old_enunciado_sha256": "db4dfbed81d3e33dee4bb71975eb8f12708a4cf8dbf9e6968a45ee904edac52d",
+    "old_gabarito": "B"
+  },
+  {
+    "numero": 58,
+    "old_enunciado_sha256": "f45f8d5a31913f1c5e62e4598b4b5047c62460245fcba50d86abf28b34aa9fa3",
+    "old_gabarito": "B"
+  },
+  {
+    "numero": 59,
+    "old_enunciado_sha256": "21b477ce092cb4cb1caae2fc9896f8ca6f2cf5f83ce726cf4d508c998d59eea8",
+    "old_gabarito": "A"
+  },
+  {
+    "numero": 60,
+    "old_enunciado_sha256": "5dd13acce7f6d9de7e8c6b69d3c323f27fa17a8f7fc385e8f399e2a6a2d72575",
+    "old_gabarito": "B"
+  },
+  {
+    "numero": 61,
+    "old_enunciado_sha256": "b14b07bf12c90d67e6373772fc520ace032e663966a111e74695aca8460cea8b",
+    "old_gabarito": "C"
+  },
+  {
+    "numero": 62,
+    "old_enunciado_sha256": "0568e9050259f07d872ccab5b8fb3ddf02dc62effd699d6903d7ec4687c2f77b",
+    "old_gabarito": "A"
+  },
+  {
+    "numero": 63,
+    "old_enunciado_sha256": "72b644ab06b2f317e62da438371eff6559fab808336c60fccc2903eb41bfcd4c",
+    "old_gabarito": "C"
+  },
+  {
+    "numero": 64,
+    "old_enunciado_sha256": "6970a8e15ab36777c25dfed6889e5e4019d8b60c2b1097336a32b0ffa7e62aac",
+    "old_gabarito": "A"
+  },
+  {
+    "numero": 65,
+    "old_enunciado_sha256": "e082b381efc0cc682dfb49cef5831ff0502b20e47fbe91c87240d446229f1597",
+    "old_gabarito": "B"
+  },
+  {
+    "numero": 66,
+    "old_enunciado_sha256": "f374ea7a0068bc52cca2bac8a66c85d23afa3e10ac299b4312ebe8a744080422",
+    "old_gabarito": "B"
+  },
+  {
+    "numero": 67,
+    "old_enunciado_sha256": "96c716adb944b3e3e08140383f52b13f47c05fc7410a377e9233d3d667c5915a",
+    "old_gabarito": "D"
+  },
+  {
+    "numero": 68,
+    "old_enunciado_sha256": "943a5e0f71bff24fa08918cc6aacf8fce509431ada25ce399cd73a6a0900c5bb",
+    "old_gabarito": "C"
+  },
+  {
+    "numero": 69,
+    "old_enunciado_sha256": "1bba3f10d3bfcb8488dded58313d5629f3ca78ec12e5bc670baf5a0462ae6957",
+    "old_gabarito": "B"
+  },
+  {
+    "numero": 70,
+    "old_enunciado_sha256": "26c89119671eb111f99d6bba692b1d61cf1541fed1e6c319270d62297695c7f9",
+    "old_gabarito": "B"
+  },
+  {
+    "numero": 71,
+    "old_enunciado_sha256": "cdcd3c072f8a67555c8b5c0709e23ade0d5fce5afe9bcaad82edafa73c81a283",
+    "old_gabarito": "A"
+  },
+  {
+    "numero": 72,
+    "old_enunciado_sha256": "c237b1005cd4c597e2975908b1dff09317ca84577e9030c9d72d07443df9080d",
+    "old_gabarito": "A"
+  }
+]

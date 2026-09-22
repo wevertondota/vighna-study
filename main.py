@@ -254,6 +254,7 @@ from banco import (
     marcar_item_sessao_apresentado,
     obter_itens_sessao_questoes,
     registrar_tentativa_questao,
+    reagendar_questao_pulada_no_fim_sessao,
     encerrar_sessao_questoes,
     obter_resumo_sessao_questoes,
     listar_historico_tentativas_questoes,
@@ -13875,7 +13876,7 @@ class JanelaResumoResolucaoQuestoes(QDialog):
 
         if self.fluxo_algoritmo:
             valores = [
-                ("Questões", int(resumo.get("processadas") or 0)),
+                ("Questões", int(resumo.get("objetivo") or resumo.get("processadas") or 0)),
                 ("Acertos", int(resumo.get("acertos") or 0)),
                 ("Erros", int(resumo.get("erros") or 0)),
                 ("Aproveitamento", desempenho),
@@ -15348,6 +15349,10 @@ class JanelaResolverQuestoes(QDialog):
         )
         self.indice = 0
         self.registros = []
+        # A primeira vez que uma questão é pulada ela retorna ao fim da
+        # própria bateria. Se for pulada novamente, passa a equivaler a erro
+        # para a inteligência e para a cobertura da revisão.
+        self.pulos_por_questao = {}
         self.questao_atual = None
         self.item_sessao_atual_id = None
         self.inicio_questao = None
@@ -15937,6 +15942,10 @@ class JanelaResolverQuestoes(QDialog):
         self.botao_pular.clicked.connect(
             self.pular
         )
+        self.botao_pular.setToolTip(
+            "Primeiro pulo: a questão volta ao final da bateria. "
+            "Se for pulada novamente, será tratada como erro pela inteligência."
+        )
 
         self.botao_confirmar = QPushButton(
             "Confirmar resposta"
@@ -16307,14 +16316,44 @@ class JanelaResolverQuestoes(QDialog):
         self.resposta_confirmada = False
         self.inicio_questao = datetime.now()
 
+        # O total pode crescer quando uma questão pulada é reagendada para
+        # o fim. A barra acompanha a fila real exibida, sem alterar o objetivo
+        # acadêmico original da sessão salvo no banco.
+        self.sessao_progresso.setMaximum(
+            max(1, len(self.fila))
+        )
+        retorno_pulo = bool(
+            resumo_item.get("retorno_pulo")
+            or self.pulos_por_questao.get(
+                int(self.questao_atual["id"]),
+                0
+            ) >= 1
+        )
         self.sessao_progresso_texto.setText(
             (
                 f"Questão {self.indice + 1} "
                 f"de {len(self.fila)}"
+                + (" • retorno de questão pulada" if retorno_pulo else "")
             )
         )
         self.sessao_progresso.setValue(
             self.indice
+        )
+        self.botao_pular.setText(
+            "Pular novamente"
+            if retorno_pulo
+            else "Pular questão"
+        )
+        self.botao_pular.setToolTip(
+            (
+                "Segundo pulo: esta questão será registrada como erro para "
+                "a inteligência e passará a contar como coberta."
+                if retorno_pulo
+                else (
+                    "Primeiro pulo: a questão volta ao final da bateria. "
+                    "Se for pulada novamente, será tratada como erro pela inteligência."
+                )
+            )
         )
 
         estado_historico = (
@@ -16930,20 +16969,31 @@ class JanelaResolverQuestoes(QDialog):
         if self.resposta_confirmada:
             return
 
+        questao_id = int(self.questao_atual["id"])
+        pulos_anteriores = int(
+            self.pulos_por_questao.get(questao_id, 0)
+        )
+        segundo_pulo = pulos_anteriores >= 1
+
+        # No segundo pulo a omissão passa a valer como erro efetivo. Assim a
+        # questão entra na evidência da inteligência, conta para a cobertura
+        # da revisão e volta a ser priorizada como uma resposta incorreta.
+        tratar_como_erro = bool(
+            segundo_pulo
+            and not self.sem_impacto_inteligencia
+        )
+
         if not self.sem_impacto_inteligencia:
             try:
-                registrar_tentativa_questao(
+                resultado_pulo = registrar_tentativa_questao(
                     self.sessao_id,
-                    self.questao_atual[
-                        "id"
-                    ],
-                    self.configuracao[
-                        "concurso_id"
-                    ],
+                    questao_id,
+                    self.configuracao["concurso_id"],
                     alternativa_marcada=None,
                     marcada_duvida=self.duvida.isChecked(),
                     tempo_segundos=self.tempo_atual_segundos(),
                     item_sessao_id=self.item_sessao_atual_id,
+                    tratar_pulo_como_erro=tratar_como_erro,
                 )
             except Exception as erro:
                 QMessageBox.critical(
@@ -16955,56 +17005,83 @@ class JanelaResolverQuestoes(QDialog):
                     )
                 )
                 return
+        else:
+            resultado_pulo = {
+                "pulo_convertido_erro": False,
+            }
+
+        self.pulos_por_questao[questao_id] = pulos_anteriores + 1
 
         gabarito_pulada = next(
             (
-                alternativa[
-                    "letra"
-                ]
-                for alternativa in self.questao_atual[
-                    "alternativas"
-                ]
-                if alternativa.get(
-                    "correta"
-                )
+                alternativa["letra"]
+                for alternativa in self.questao_atual["alternativas"]
+                if alternativa.get("correta")
             ),
             None
         )
 
+        status_registro = (
+            "Errada"
+            if tratar_como_erro
+            else "Pulada"
+        )
+
         self.registros.append({
-            "questao_id": self.questao_atual[
-                "id"
-            ],
-            "disciplina": self.questao_atual[
-                "disciplina"
-            ],
-            "topico": self.questao_atual[
-                "topico"
-            ],
-            "topico_id": self.questao_atual.get(
-                "topico_id"
-            ),
-            "dificuldade": self.questao_atual.get(
-                "dificuldade"
-            ) or "Não informada",
-            "status": "Pulada",
+            "questao_id": questao_id,
+            "disciplina": self.questao_atual["disciplina"],
+            "topico": self.questao_atual["topico"],
+            "topico_id": self.questao_atual.get("topico_id"),
+            "dificuldade": self.questao_atual.get("dificuldade") or "Não informada",
+            "status": status_registro,
             "duvida": self.duvida.isChecked(),
-            "inedita": self.questao_atual[
-                "inedita"
-            ],
+            "inedita": self.questao_atual["inedita"],
             "marcada": None,
             "gabarito": gabarito_pulada,
+            "pulo": True,
+            "pulo_convertido_erro": tratar_como_erro,
         })
+
+        # Primeiro pulo: devolve a mesma questão ao final da bateria. Criamos
+        # também um novo item de telemetria no banco para que a segunda
+        # apresentação fique corretamente ligada à sessão.
+        if not segundo_pulo:
+            item_retorno = dict(self.fila[self.indice])
+            item_retorno["retorno_pulo"] = True
+            item_retorno["motivo_inteligente"] = (
+                "Questão pulada anteriormente: segunda oportunidade nesta bateria."
+            )
+
+            pode_reagendar = True
+            if not self.sem_impacto_inteligencia:
+                try:
+                    reagendar_questao_pulada_no_fim_sessao(
+                        self.sessao_id,
+                        questao_id,
+                    )
+                except Exception as erro:
+                    pode_reagendar = False
+                    QMessageBox.warning(
+                        self,
+                        "Questão pulada",
+                        (
+                            "A questão foi registrada como pulada, mas não foi "
+                            "possível colocá-la novamente no fim da bateria.\n\n"
+                            f"{erro}"
+                        )
+                    )
+
+            if pode_reagendar:
+                self.fila.append(item_retorno)
+                self.sessao_progresso.setMaximum(
+                    max(1, len(self.fila))
+                )
 
         self.atualizar_metricas()
         self.indice += 1
-        self.sessao_progresso.setValue(
-            self.indice
-        )
+        self.sessao_progresso.setValue(self.indice)
 
-        if self.indice >= len(
-            self.fila
-        ):
+        if self.indice >= len(self.fila):
             self.finalizar(
                 True,
                 "Objetivo concluído"
@@ -57890,7 +57967,7 @@ class SistemaEstudos(QMainWindow):
         self.tabela_topicos.setObjectName("disciplineTopicsTable")
 
         self.tabela_topicos.setColumnCount(
-            8
+            9
         )
 
         self.tabela_topicos.setHorizontalHeaderLabels([
@@ -57899,6 +57976,7 @@ class SistemaEstudos(QMainWindow):
             "Rev.",
             "Última",
             "Próxima",
+            "Cobertura",
             "% atual",
             "Nível",
             "Estado"
@@ -57931,7 +58009,7 @@ class SistemaEstudos(QMainWindow):
         cabecalho_topicos = self.tabela_topicos.horizontalHeader()
         cabecalho_topicos.setStretchLastSection(False)
         cabecalho_topicos.setSectionResizeMode(0, QHeaderView.Stretch)
-        for coluna_fixa in range(1, 8):
+        for coluna_fixa in range(1, 9):
             cabecalho_topicos.setSectionResizeMode(
                 coluna_fixa,
                 QHeaderView.Fixed
@@ -57942,11 +58020,12 @@ class SistemaEstudos(QMainWindow):
         larguras_topicos = {
             1: 74,   # Atualizar
             2: 54,   # Rev.
-            3: 94,   # Última
-            4: 94,   # Próxima
-            5: 74,   # % atual
-            6: 122,  # Nível
-            7: 84,   # Estado
+            3: 88,   # Última
+            4: 88,   # Próxima
+            5: 86,   # Cobertura
+            6: 70,   # % atual
+            7: 116,  # Nível
+            8: 80,   # Estado
         }
         for coluna, largura in larguras_topicos.items():
             self.tabela_topicos.setColumnWidth(coluna, largura)
@@ -58397,7 +58476,7 @@ class SistemaEstudos(QMainWindow):
                 item_parte.setFont(fonte_parte)
                 item_parte.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
                 self.tabela_topicos.setItem(linha_parte, 0, item_parte)
-                self.tabela_topicos.setSpan(linha_parte, 0, 1, 8)
+                self.tabela_topicos.setSpan(linha_parte, 0, 1, 9)
                 self.tabela_topicos.setRowHeight(linha_parte, 25)
                 parte_penal_atual = parte_penal
 
@@ -58411,6 +58490,19 @@ class SistemaEstudos(QMainWindow):
             percentual = dado[5]
             importancia = dado[6]
             pausado = bool(dado[7])
+
+            try:
+                cobertura_revisao_linha = obter_estado_cobertura_revisao(
+                    topico_id
+                )
+            except Exception:
+                cobertura_revisao_linha = {
+                    "ativa": False,
+                    "total": 0,
+                    "cobertas": 0,
+                    "restantes": 0,
+                    "percentual": None,
+                }
 
             # Tópico: a tabela usa uma representação em linha única para
             # aproveitar a largura disponível, mas o nome original fica
@@ -58595,6 +58687,53 @@ class SistemaEstudos(QMainWindow):
                 item_proxima
             )
 
+            # Cobertura da revisão vencida/atual. Enquanto houver questões
+            # pendentes, a data exibida em "Próxima" é apenas a referência da
+            # rodada; a nova data só nasce quando a cobertura chega a 100%.
+            cobertura_ativa = bool(
+                cobertura_revisao_linha.get("ativa")
+                and int(cobertura_revisao_linha.get("total") or 0) > 0
+            )
+            if cobertura_ativa:
+                cobertura_texto = (
+                    f"{int(cobertura_revisao_linha.get('cobertas') or 0)}/"
+                    f"{int(cobertura_revisao_linha.get('total') or 0)}"
+                )
+            else:
+                cobertura_texto = "—"
+
+            item_cobertura = QTableWidgetItem(cobertura_texto)
+            item_cobertura.setTextAlignment(Qt.AlignCenter)
+            if cobertura_ativa:
+                restantes_revisao = int(
+                    cobertura_revisao_linha.get("restantes") or 0
+                )
+                if restantes_revisao > 0:
+                    item_cobertura.setToolTip(
+                        "Revisão em andamento. "
+                        f"Restam {restantes_revisao} questão(ões). "
+                        "A próxima data só será recalculada após a cobertura integral."
+                    )
+                    aplicar_destaque_tabela(
+                        item_cobertura,
+                        "atencao",
+                        True
+                    )
+                    item_proxima.setToolTip(
+                        "Esta é a data de referência da revisão em andamento. "
+                        "A nova data será calculada somente após concluir a cobertura."
+                    )
+                else:
+                    item_cobertura.setToolTip(
+                        "Cobertura integral atingida."
+                    )
+
+            self.tabela_topicos.setItem(
+                linha,
+                5,
+                item_cobertura
+            )
+
             # Percentual atual
             item_percentual = QTableWidgetItem(
                 formatar_percentual(
@@ -58606,7 +58745,7 @@ class SistemaEstudos(QMainWindow):
             )
             self.tabela_topicos.setItem(
                 linha,
-                5,
+                6,
                 item_percentual
             )
 
@@ -58632,7 +58771,7 @@ class SistemaEstudos(QMainWindow):
 
             self.tabela_topicos.setCellWidget(
                 linha,
-                6,
+                7,
                 seletor
             )
 
@@ -58647,7 +58786,7 @@ class SistemaEstudos(QMainWindow):
             )
             self.tabela_topicos.setItem(
                 linha,
-                7,
+                8,
                 item_estado
             )
 
@@ -58665,7 +58804,7 @@ class SistemaEstudos(QMainWindow):
                 # A linha inteira usa o mesmo sinal visual de conteúdo inativo.
                 # Os dados continuam legíveis, mas deixam de competir visualmente
                 # com os tópicos que participam das rotinas do Vighna.
-                for coluna_inativa in (0, 2, 3, 4, 5, 7):
+                for coluna_inativa in (0, 2, 3, 4, 5, 6, 8):
                     item_inativo = self.tabela_topicos.item(
                         linha,
                         coluna_inativa
@@ -58792,7 +58931,7 @@ class SistemaEstudos(QMainWindow):
         )
         self.tabela_topicos.setItem(linha, 0, item_capitulo)
 
-        for coluna in (1, 2, 3, 4, 5):
+        for coluna in (1, 2, 3, 4, 5, 6):
             item_vazio = QTableWidgetItem("—")
             item_vazio.setTextAlignment(Qt.AlignCenter)
             self.tabela_topicos.setItem(linha, coluna, item_vazio)
@@ -58811,7 +58950,7 @@ class SistemaEstudos(QMainWindow):
             "Dificuldade do capítulo: clique em uma estrela para alterar."
         )
         seletor.setEnabled(not pausado)
-        self.tabela_topicos.setCellWidget(linha, 6, seletor)
+        self.tabela_topicos.setCellWidget(linha, 7, seletor)
 
         item_estado = QTableWidgetItem(
             "Desligado" if pausado else "Ativo"
@@ -58822,7 +58961,7 @@ class SistemaEstudos(QMainWindow):
             if pausado
             else "Capítulo ativo neste perfil."
         )
-        self.tabela_topicos.setItem(linha, 7, item_estado)
+        self.tabela_topicos.setItem(linha, 8, item_estado)
 
         if not pausado:
             aplicar_destaque_tabela(
@@ -58832,7 +58971,7 @@ class SistemaEstudos(QMainWindow):
             )
 
         if pausado:
-            for coluna in (0, 1, 2, 3, 4, 5, 7):
+            for coluna in (0, 1, 2, 3, 4, 5, 6, 8):
                 aplicar_destaque_tabela(
                     self.tabela_topicos.item(linha, coluna),
                     "inativo",
@@ -59186,6 +59325,30 @@ class SistemaEstudos(QMainWindow):
                         informacoes.append(
                             f"{formatar_percentual(dado_topico[5])} atual"
                         )
+                try:
+                    cobertura_selecionada = obter_estado_cobertura_revisao(
+                        int(conteudo_id)
+                    )
+                except Exception:
+                    cobertura_selecionada = {"ativa": False}
+
+                if (
+                    cobertura_selecionada.get("ativa")
+                    and int(cobertura_selecionada.get("total") or 0) > 0
+                    and int(cobertura_selecionada.get("restantes") or 0) > 0
+                ):
+                    informacoes.append(
+                        "Revisão em andamento: "
+                        f"{int(cobertura_selecionada.get('cobertas') or 0)}/"
+                        f"{int(cobertura_selecionada.get('total') or 0)}"
+                    )
+                    informacoes.append(
+                        f"restam {int(cobertura_selecionada.get('restantes') or 0)}"
+                    )
+                    informacoes.append(
+                        "próxima data após concluir a cobertura"
+                    )
+
                 self.rotulo_topico_selecionado.setText(nome_conteudo or "Tópico")
                 self.subtitulo_topico_selecionado.setText(" • ".join(informacoes))
 
