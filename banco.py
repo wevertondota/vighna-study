@@ -898,6 +898,7 @@ def criar_banco():
                 ano INTEGER,
                 fonte TEXT,
                 dificuldade TEXT,
+                tipo_questao TEXT NOT NULL DEFAULT 'MULTIPLA_ESCOLHA',
                 ativa INTEGER NOT NULL DEFAULT 1,
                 criado_em TEXT NOT NULL DEFAULT (
                     datetime('now', 'localtime')
@@ -928,6 +929,23 @@ def criar_banco():
                 ADD COLUMN capitulo_id INTEGER
                 """
             )
+
+        if "tipo_questao" not in colunas_questoes:
+            conexao.execute(
+                """
+                ALTER TABLE questoes
+                ADD COLUMN tipo_questao TEXT NOT NULL DEFAULT 'MULTIPLA_ESCOLHA'
+                """
+            )
+
+        # Compatibilidade: qualquer registro legado permanece múltipla escolha.
+        conexao.execute(
+            """
+            UPDATE questoes
+            SET tipo_questao = 'MULTIPLA_ESCOLHA'
+            WHERE TRIM(COALESCE(tipo_questao, '')) = ''
+            """
+        )
 
         if "excluida" not in colunas_questoes:
             conexao.execute(
@@ -5828,9 +5846,34 @@ def duplicar_prompt_ia(
     )
 
 
+TIPOS_QUESTAO_VALIDOS = {
+    "MULTIPLA_ESCOLHA",
+    "CERTO_ERRADO",
+}
+
+
+def normalizar_tipo_questao(tipo_questao):
+    valor = str(tipo_questao or "MULTIPLA_ESCOLHA").strip().upper()
+    valor = valor.replace("-", "_").replace("/", "_").replace(" ", "_")
+    aliases = {
+        "MULTIPLA": "MULTIPLA_ESCOLHA",
+        "MULTIPLA_ESCOLHA": "MULTIPLA_ESCOLHA",
+        "CERTO_ERRADO": "CERTO_ERRADO",
+        "CERTO_OU_ERRADO": "CERTO_ERRADO",
+        "CESPE": "CERTO_ERRADO",
+        "CEBRASPE": "CERTO_ERRADO",
+    }
+    valor = aliases.get(valor, valor)
+    if valor not in TIPOS_QUESTAO_VALIDOS:
+        raise ValueError("Tipo de questão inválido.")
+    return valor
+
+
 def _normalizar_alternativas_questao(
-    alternativas
+    alternativas,
+    tipo_questao="MULTIPLA_ESCOLHA"
 ):
+    tipo_questao = normalizar_tipo_questao(tipo_questao)
     resultado = []
 
     for ordem, alternativa in enumerate(
@@ -5882,6 +5925,15 @@ def _normalizar_alternativas_questao(
         raise ValueError(
             "A questão precisa ter exatamente uma alternativa correta."
         )
+
+    if tipo_questao == "CERTO_ERRADO":
+        letras = [item["letra"] for item in resultado]
+        if letras != ["C", "E"]:
+            raise ValueError(
+                "Questões Certo/Errado devem usar exatamente as opções C e E."
+            )
+        resultado[0]["texto"] = "Certo"
+        resultado[1]["texto"] = "Errado"
 
     return resultado
 
@@ -6260,7 +6312,8 @@ def criar_questao(
     fonte="",
     dificuldade="Não informada",
     ativa=True,
-    capitulo_id=None
+    capitulo_id=None,
+    tipo_questao="MULTIPLA_ESCOLHA"
 ):
     enunciado = str(
         enunciado
@@ -6271,9 +6324,11 @@ def criar_questao(
             "O enunciado da questão não pode ficar vazio."
         )
 
+    tipo_questao = normalizar_tipo_questao(tipo_questao)
     alternativas = (
         _normalizar_alternativas_questao(
-            alternativas
+            alternativas,
+            tipo_questao=tipo_questao
         )
     )
 
@@ -6306,9 +6361,10 @@ def criar_questao(
                 ano,
                 fonte,
                 dificuldade,
+                tipo_questao,
                 ativa
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 topico_id,
@@ -6331,6 +6387,7 @@ def criar_questao(
                     dificuldade
                     or "Não informada"
                 ).strip(),
+                tipo_questao,
                 1 if ativa else 0,
             )
         )
@@ -6390,12 +6447,16 @@ def criar_questoes_lote(
                     "Há uma questão sem enunciado no lote."
                 )
 
+            tipo_questao = normalizar_tipo_questao(
+                registro.get("tipo_questao", "MULTIPLA_ESCOLHA")
+            )
             alternativas = (
                 _normalizar_alternativas_questao(
                     registro.get(
                         "alternativas",
                         []
-                    )
+                    ),
+                    tipo_questao=tipo_questao
                 )
             )
 
@@ -6431,9 +6492,10 @@ def criar_questoes_lote(
                     ano,
                     fonte,
                     dificuldade,
+                    tipo_questao,
                     ativa
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
                 """,
                 (
                     topico_id,
@@ -6468,6 +6530,7 @@ def criar_questoes_lote(
                         )
                         or "Não informada"
                     ).strip(),
+                    tipo_questao,
                 )
             )
 
@@ -6531,6 +6594,7 @@ def obter_questao(
                 q.ano,
                 q.fonte,
                 q.dificuldade,
+                COALESCE(q.tipo_questao, 'MULTIPLA_ESCOLHA'),
                 q.ativa,
                 COALESCE(q.excluida, 0),
                 q.criado_em,
@@ -6591,18 +6655,19 @@ def obter_questao(
             linha[12]
             or "Não informada"
         ),
+        "tipo_questao": linha[13] or "MULTIPLA_ESCOLHA",
         "ativa": bool(
-            linha[13]
-        ),
-        "excluida": bool(
             linha[14]
         ),
-        "criado_em": linha[15],
-        "atualizado_em": linha[16],
-        "analise_pendente": bool(
-            linha[17]
+        "excluida": bool(
+            linha[15]
         ),
-        "analise_solicitada_em": linha[18],
+        "criado_em": linha[16],
+        "atualizado_em": linha[17],
+        "analise_pendente": bool(
+            linha[18]
+        ),
+        "analise_solicitada_em": linha[19],
         "alternativas": [
             {
                 "letra": alternativa[0],
@@ -6665,7 +6730,8 @@ def atualizar_questao(
     fonte="",
     dificuldade="Não informada",
     ativa=True,
-    capitulo_id=None
+    capitulo_id=None,
+    tipo_questao="MULTIPLA_ESCOLHA"
 ):
     enunciado = str(
         enunciado
@@ -6676,9 +6742,11 @@ def atualizar_questao(
             "O enunciado da questão não pode ficar vazio."
         )
 
+    tipo_questao = normalizar_tipo_questao(tipo_questao)
     alternativas = (
         _normalizar_alternativas_questao(
-            alternativas
+            alternativas,
+            tipo_questao=tipo_questao
         )
     )
 
@@ -6711,6 +6779,7 @@ def atualizar_questao(
                 ano = ?,
                 fonte = ?,
                 dificuldade = ?,
+                tipo_questao = ?,
                 ativa = ?,
                 atualizado_em = datetime(
                     'now',
@@ -6739,6 +6808,7 @@ def atualizar_questao(
                     dificuldade
                     or "Não informada"
                 ).strip(),
+                tipo_questao,
                 1 if ativa else 0,
                 int(
                     questao_id
@@ -7230,7 +7300,8 @@ def listar_questoes(
                 COALESCE(q.analise_pendente, 0) AS analise_pendente,
                 q.analise_solicitada_em,
                 q.capitulo_id,
-                c.nome AS capitulo
+                c.nome AS capitulo,
+                COALESCE(q.tipo_questao, 'MULTIPLA_ESCOLHA') AS tipo_questao
             FROM questoes q
             JOIN topicos t
                 ON t.id = q.topico_id
@@ -7298,6 +7369,7 @@ def listar_questoes(
             "analise_solicitada_em": linha[16],
             "capitulo_id": linha[17],
             "capitulo": linha[18] or "",
+            "tipo_questao": linha[19] or "MULTIPLA_ESCOLHA",
         }
         for linha in linhas
     ]
@@ -8961,7 +9033,8 @@ def obter_perfil_selecao_inteligente_questoes(
     concurso_id=None,
     disciplina_id=None,
     topico_id=None,
-    capitulos_ids=None
+    capitulos_ids=None,
+    tipo_questao=None
 ):
     """
     Analisa todas as questões visíveis no recorte atual e classifica
@@ -9014,6 +9087,11 @@ def obter_perfil_selecao_inteligente_questoes(
             )
         )
 
+    if tipo_questao:
+        tipo_questao = normalizar_tipo_questao(tipo_questao)
+        filtros.append("COALESCE(q.tipo_questao, 'MULTIPLA_ESCOLHA') = ?")
+        parametros.append(tipo_questao)
+
     if capitulos_ids is not None:
         capitulos_ids = [
             int(capitulo_id)
@@ -9042,7 +9120,8 @@ def obter_perfil_selecao_inteligente_questoes(
                 q.enunciado,
                 q.banca,
                 q.ano,
-                q.dificuldade
+                q.dificuldade,
+                COALESCE(q.tipo_questao, 'MULTIPLA_ESCOLHA') AS tipo_questao
             FROM questoes q
             JOIN topicos t
                 ON t.id = q.topico_id
@@ -9307,6 +9386,7 @@ def obter_perfil_selecao_inteligente_questoes(
                 linha[8]
                 or "Não informada"
             ),
+            "tipo_questao": linha[9] or "MULTIPLA_ESCOLHA",
             "tentativas_anteriores": total,
             "inedita": (
                 total == 0
@@ -10372,7 +10452,8 @@ def obter_prioridades_sessao_adaptativa(
     concurso_id=None,
     disciplina_id=None,
     topicos_ids=None,
-    capitulos_ids=None
+    capitulos_ids=None,
+    tipo_questao=None
 ):
     """
     Ranking ativo da Fila Inteligente V3 com comparação candidata em sombra.
@@ -10425,6 +10506,33 @@ def obter_prioridades_sessao_adaptativa(
         questoes_por_topico_capitulo = {
             int(topico_id): int(total or 0)
             for topico_id, total in linhas_capitulos
+        }
+
+    questoes_por_topico_tipo = None
+    if tipo_questao:
+        tipo_questao = normalizar_tipo_questao(tipo_questao)
+        filtros_tipo = [
+            "q.ativa = 1",
+            "COALESCE(q.tipo_questao, 'MULTIPLA_ESCOLHA') = ?",
+        ]
+        parametros_tipo = [tipo_questao]
+        if capitulos_ids_set is not None:
+            marcadores = ",".join("?" for _ in capitulos_ids_set)
+            filtros_tipo.append(f"q.capitulo_id IN ({marcadores})")
+            parametros_tipo.extend(sorted(capitulos_ids_set))
+        with conectar() as conexao:
+            linhas_tipo = conexao.execute(
+                f"""
+                SELECT q.topico_id, COUNT(*)
+                FROM questoes q
+                WHERE {' AND '.join(filtros_tipo)}
+                GROUP BY q.topico_id
+                """,
+                tuple(parametros_tipo),
+            ).fetchall()
+        questoes_por_topico_tipo = {
+            int(topico_id): int(total or 0)
+            for topico_id, total in linhas_tipo
         }
 
     with conectar() as conexao:
@@ -10497,7 +10605,11 @@ def obter_prioridades_sessao_adaptativa(
         if dominio is None:
             continue
 
-        if questoes_por_topico_capitulo is not None:
+        if questoes_por_topico_tipo is not None:
+            quantidade_questoes = int(
+                questoes_por_topico_tipo.get(topico_id, 0)
+            )
+        elif questoes_por_topico_capitulo is not None:
             quantidade_questoes = int(
                 questoes_por_topico_capitulo.get(topico_id, 0)
             )
@@ -11193,7 +11305,8 @@ def planejar_sessao_adaptativa_global(
     quantidade=30,
     disciplina_id=None,
     topicos_ids=None,
-    capitulos_ids=None
+    capitulos_ids=None,
+    tipo_questao=None
 ):
     """
     Distribui o objetivo da sessão entre os tópicos mais estratégicos.
@@ -11216,7 +11329,8 @@ def planejar_sessao_adaptativa_global(
         concurso_id,
         disciplina_id=disciplina_id,
         topicos_ids=topicos_ids,
-        capitulos_ids=capitulos_ids
+        capitulos_ids=capitulos_ids,
+        tipo_questao=tipo_questao
     )
 
     total_disponivel = sum(
@@ -11624,13 +11738,15 @@ def selecionar_questoes_adaptativas_v2(
     topico_id,
     quantidade,
     indice_topico=None,
-    capitulos_ids=None
+    capitulos_ids=None,
+    tipo_questao=None
 ):
     """Seleciona as questões de um tópico com composição dinâmica V2."""
     perfil = obter_perfil_selecao_inteligente_questoes(
         concurso_id,
         topico_id=topico_id,
-        capitulos_ids=capitulos_ids
+        capitulos_ids=capitulos_ids,
+        tipo_questao=tipo_questao
     )
 
     quantidade = max(1, int(quantidade or 1))
@@ -11724,7 +11840,8 @@ def selecionar_sessao_adaptativa_global(
     quantidade=30,
     disciplina_id=None,
     topicos_ids=None,
-    capitulos_ids=None
+    capitulos_ids=None,
+    tipo_questao=None
 ):
     """
     Constrói a fila final da Seleção Adaptativa V2.
@@ -11738,7 +11855,8 @@ def selecionar_sessao_adaptativa_global(
         quantidade=quantidade,
         disciplina_id=disciplina_id,
         topicos_ids=topicos_ids,
-        capitulos_ids=capitulos_ids
+        capitulos_ids=capitulos_ids,
+        tipo_questao=tipo_questao
     )
 
     if concurso_id is None:
@@ -11754,7 +11872,8 @@ def selecionar_sessao_adaptativa_global(
             topico_id=alocacao["topico_id"],
             quantidade=alocacao["quantidade"],
             indice_topico=alocacao,
-            capitulos_ids=capitulos_ids
+            capitulos_ids=capitulos_ids,
+            tipo_questao=tipo_questao
         )
 
         fila_topico = []
@@ -11821,7 +11940,8 @@ def selecionar_sessao_adaptativa_global(
     }
 
 def obter_disponibilidade_simulado_disciplinas(
-    concurso_id=None
+    concurso_id=None,
+    tipo_questao=None
 ):
     if concurso_id is None:
         concurso_id = (
@@ -11830,6 +11950,11 @@ def obter_disponibilidade_simulado_disciplinas(
 
     concurso_id = int(
         concurso_id
+    )
+    tipo_questao = (
+        normalizar_tipo_questao(tipo_questao)
+        if tipo_questao
+        else None
     )
 
     with conectar() as conexao:
@@ -11892,6 +12017,10 @@ def obter_disponibilidade_simulado_disciplinas(
                 AND COALESCE(tc.pausado, 0) = 0
             LEFT JOIN questoes q
                 ON q.topico_id = t.id
+                AND (
+                    ? IS NULL
+                    OR COALESCE(q.tipo_questao, 'MULTIPLA_ESCOLHA') = ?
+                )
             GROUP BY
                 d.id,
                 d.nome
@@ -11903,6 +12032,8 @@ def obter_disponibilidade_simulado_disciplinas(
                 concurso_id,
                 concurso_id,
                 concurso_id,
+                tipo_questao,
+                tipo_questao,
             )
         ).fetchall()
 
@@ -11967,7 +12098,8 @@ def obter_disponibilidade_simulado_disciplinas(
 
 def planejar_simulado_vighna(
     concurso_id=None,
-    quantidade=50
+    quantidade=50,
+    tipo_questao=None
 ):
     """
     Simulado Vighna:
@@ -11990,7 +12122,8 @@ def planejar_simulado_vighna(
 
     disciplinas = (
         obter_disponibilidade_simulado_disciplinas(
-            concurso_id
+            concurso_id,
+            tipo_questao=tipo_questao
         )
     )
 
@@ -12204,7 +12337,8 @@ def planejar_simulado_vighna(
 
 def planejar_simulado_personalizado(
     concurso_id,
-    quantidades_por_disciplina
+    quantidades_por_disciplina,
+    tipo_questao=None
 ):
     concurso_id = int(
         concurso_id
@@ -12216,7 +12350,8 @@ def planejar_simulado_personalizado(
         ]: item
         for item in (
             obter_disponibilidade_simulado_disciplinas(
-                concurso_id
+                concurso_id,
+                tipo_questao=tipo_questao
             )
         )
     }
@@ -12307,7 +12442,8 @@ def _selecionar_questoes_simulado_disciplina(
     concurso_id,
     disciplina_id,
     quantidade,
-    preferir_ineditas=True
+    preferir_ineditas=True,
+    tipo_questao=None
 ):
     """
     Seleção para prova, sem usar desempenho.
@@ -12341,7 +12477,8 @@ def _selecionar_questoes_simulado_disciplina(
         concurso_id,
         disciplina_id=disciplina_id,
         somente_ineditas=False,
-        aleatorio=True
+        aleatorio=True,
+        tipo_questao=tipo_questao
     )
 
     if not todas:
@@ -12499,7 +12636,8 @@ def _selecionar_questoes_simulado_disciplina(
 def selecionar_questoes_simulado(
     concurso_id,
     plano,
-    preferir_ineditas=True
+    preferir_ineditas=True,
+    tipo_questao=None
 ):
     concurso_id = int(
         concurso_id
@@ -12532,7 +12670,8 @@ def selecionar_questoes_simulado(
                 ],
                 preferir_ineditas=(
                     preferir_ineditas
-                )
+                ),
+                tipo_questao=tipo_questao
             )
         )
 
@@ -12592,11 +12731,13 @@ def selecionar_questoes_simulado(
 def montar_simulado_vighna(
     concurso_id,
     quantidade,
-    preferir_ineditas=True
+    preferir_ineditas=True,
+    tipo_questao=None
 ):
     plano = planejar_simulado_vighna(
         concurso_id,
-        quantidade
+        quantidade,
+        tipo_questao=tipo_questao
     )
 
     selecao = selecionar_questoes_simulado(
@@ -12604,7 +12745,8 @@ def montar_simulado_vighna(
         plano,
         preferir_ineditas=(
             preferir_ineditas
-        )
+        ),
+        tipo_questao=tipo_questao
     )
 
     return {
@@ -12616,11 +12758,13 @@ def montar_simulado_vighna(
 def montar_simulado_personalizado(
     concurso_id,
     quantidades_por_disciplina,
-    preferir_ineditas=True
+    preferir_ineditas=True,
+    tipo_questao=None
 ):
     plano = planejar_simulado_personalizado(
         concurso_id,
-        quantidades_por_disciplina
+        quantidades_por_disciplina,
+        tipo_questao=tipo_questao
     )
 
     selecao = selecionar_questoes_simulado(
@@ -12628,7 +12772,8 @@ def montar_simulado_personalizado(
         plano,
         preferir_ineditas=(
             preferir_ineditas
-        )
+        ),
+        tipo_questao=tipo_questao
     )
 
     return {
@@ -12729,7 +12874,10 @@ def _alocar_quantidades_simulado_por_peso(
     return resultado, solicitado, sum(item["quantidade"] for item in resultado), total_disponivel
 
 
-def obter_disponibilidade_simulado_estrategico_disciplinas(concurso_id=None):
+def obter_disponibilidade_simulado_estrategico_disciplinas(
+    concurso_id=None,
+    tipo_questao=None
+):
     """
     Acrescenta uma pressão estratégica moderada à estrutura do perfil.
 
@@ -12740,8 +12888,14 @@ def obter_disponibilidade_simulado_estrategico_disciplinas(concurso_id=None):
         concurso_id = obter_concurso_ativo()[0]
     concurso_id = int(concurso_id)
 
-    disciplinas = obter_disponibilidade_simulado_disciplinas(concurso_id)
-    prioridades = obter_prioridades_sessao_adaptativa(concurso_id)
+    disciplinas = obter_disponibilidade_simulado_disciplinas(
+        concurso_id,
+        tipo_questao=tipo_questao
+    )
+    prioridades = obter_prioridades_sessao_adaptativa(
+        concurso_id,
+        tipo_questao=tipo_questao
+    )
 
     por_disciplina = {}
     for item in prioridades:
@@ -12780,7 +12934,8 @@ def obter_disponibilidade_simulado_estrategico_disciplinas(concurso_id=None):
 def planejar_simulado_inteligente(
     concurso_id=None,
     quantidade=50,
-    estrategia="equilibrado"
+    estrategia="equilibrado",
+    tipo_questao=None
 ):
     """Planejamento dos modos Equilibrado e Estratégico do Simulado V2."""
     if concurso_id is None:
@@ -12792,7 +12947,11 @@ def planejar_simulado_inteligente(
         estrategia = "equilibrado"
 
     if estrategia == "equilibrado":
-        plano = planejar_simulado_vighna(concurso_id, quantidade)
+        plano = planejar_simulado_vighna(
+            concurso_id,
+            quantidade,
+            tipo_questao=tipo_questao
+        )
         plano = dict(plano)
         plano["tipo"] = "Equilibrado"
         plano["estrategia"] = "equilibrado"
@@ -12802,7 +12961,10 @@ def planejar_simulado_inteligente(
         )
         return plano
 
-    disciplinas = obter_disponibilidade_simulado_estrategico_disciplinas(concurso_id)
+    disciplinas = obter_disponibilidade_simulado_estrategico_disciplinas(
+        concurso_id,
+        tipo_questao=tipo_questao
+    )
     alocacoes, solicitado, quantidade_final, total_disponivel = (
         _alocar_quantidades_simulado_por_peso(
             disciplinas,
@@ -12830,7 +12992,8 @@ def _selecionar_questoes_simulado_disciplina_estrategico(
     concurso_id,
     disciplina_id,
     quantidade,
-    preferir_ineditas=True
+    preferir_ineditas=True,
+    tipo_questao=None
 ):
     """Seleção tópico a tópico com viés moderado para fragilidades."""
     concurso_id = int(concurso_id)
@@ -12844,6 +13007,7 @@ def _selecionar_questoes_simulado_disciplina_estrategico(
         disciplina_id=disciplina_id,
         somente_ineditas=False,
         aleatorio=True,
+        tipo_questao=tipo_questao,
     )
     if not todas:
         return []
@@ -12851,6 +13015,7 @@ def _selecionar_questoes_simulado_disciplina_estrategico(
     prioridades = obter_prioridades_sessao_adaptativa(
         concurso_id,
         disciplina_id=disciplina_id,
+        tipo_questao=tipo_questao,
     )
     score_topico = {
         int(item["topico_id"]): float(item.get("score_adaptativo", 50.0) or 50.0)
@@ -12920,13 +13085,15 @@ def montar_simulado_inteligente(
     concurso_id,
     quantidade,
     estrategia="equilibrado",
-    preferir_ineditas=True
+    preferir_ineditas=True,
+    tipo_questao=None
 ):
     estrategia = str(estrategia or "equilibrado").strip().lower()
     plano = planejar_simulado_inteligente(
         concurso_id,
         quantidade,
         estrategia=estrategia,
+        tipo_questao=tipo_questao,
     )
 
     if estrategia == "estrategico":
@@ -12939,6 +13106,7 @@ def montar_simulado_inteligente(
                 disciplina_id,
                 alocacao["quantidade"],
                 preferir_ineditas=preferir_ineditas,
+                tipo_questao=tipo_questao,
             )
             for item in fila:
                 item["sessao_simulado"] = True
@@ -12974,6 +13142,7 @@ def montar_simulado_inteligente(
         concurso_id,
         plano,
         preferir_ineditas=preferir_ineditas,
+        tipo_questao=tipo_questao,
     )
     return {
         **selecao,
@@ -13446,13 +13615,15 @@ def selecionar_questoes_inteligentes(
     concurso_id=None,
     disciplina_id=None,
     topico_id=None,
-    quantidade=20
+    quantidade=20,
+    tipo_questao=None
 ):
     perfil = (
         obter_perfil_selecao_inteligente_questoes(
             concurso_id,
             disciplina_id=disciplina_id,
-            topico_id=topico_id
+            topico_id=topico_id,
+            tipo_questao=tipo_questao
         )
     )
 
@@ -13654,7 +13825,8 @@ def selecionar_questoes_por_modo(
     disciplina_id=None,
     topico_id=None,
     quantidade=20,
-    modo="Sessão inteligente"
+    modo="Sessão inteligente",
+    tipo_questao=None
 ):
     modo = str(
         modo
@@ -13665,7 +13837,8 @@ def selecionar_questoes_por_modo(
         obter_perfil_selecao_inteligente_questoes(
             concurso_id,
             disciplina_id=disciplina_id,
-            topico_id=topico_id
+            topico_id=topico_id,
+            tipo_questao=tipo_questao
         )
     )
 
@@ -13681,7 +13854,8 @@ def selecionar_questoes_por_modo(
             concurso_id,
             disciplina_id=disciplina_id,
             topico_id=topico_id,
-            quantidade=quantidade
+            quantidade=quantidade,
+            tipo_questao=tipo_questao
         )
 
     candidatos = list(
@@ -13816,13 +13990,15 @@ def contar_questoes_disponiveis_por_modo(
     concurso_id=None,
     disciplina_id=None,
     topico_id=None,
-    modo="Sessão inteligente"
+    modo="Sessão inteligente",
+    tipo_questao=None
 ):
     perfil = (
         obter_perfil_selecao_inteligente_questoes(
             concurso_id,
             disciplina_id=disciplina_id,
-            topico_id=topico_id
+            topico_id=topico_id,
+            tipo_questao=tipo_questao
         )
     )
 
@@ -14006,7 +14182,8 @@ def listar_questoes_resolucao(
     topico_id=None,
     somente_ineditas=False,
     limite=None,
-    aleatorio=False
+    aleatorio=False,
+    tipo_questao=None
 ):
     """
     Lista questões aptas para uma sessão de resolução.
@@ -14054,6 +14231,11 @@ def listar_questoes_resolucao(
                 topico_id
             )
         )
+
+    if tipo_questao:
+        tipo_questao = normalizar_tipo_questao(tipo_questao)
+        filtros.append("COALESCE(q.tipo_questao, 'MULTIPLA_ESCOLHA') = ?")
+        parametros.append(tipo_questao)
 
     if somente_ineditas:
         filtros.append(
@@ -14118,7 +14300,8 @@ def listar_questoes_resolucao(
                         tq.questao_id = q.id
                         AND tq.concurso_id = ?
                         AND tq.correta IS NOT NULL
-                ) AS tentativas_anteriores
+                ) AS tentativas_anteriores,
+                COALESCE(q.tipo_questao, 'MULTIPLA_ESCOLHA') AS tipo_questao
             FROM questoes q
             JOIN topicos t
                 ON t.id = q.topico_id
@@ -14163,6 +14346,7 @@ def listar_questoes_resolucao(
             "tentativas_anteriores": int(
                 linha[11] or 0
             ),
+            "tipo_questao": linha[12] or "MULTIPLA_ESCOLHA",
             "inedita": (
                 int(
                     linha[11] or 0

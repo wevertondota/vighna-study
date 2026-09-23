@@ -2609,6 +2609,7 @@ TÍTULO: Título I: Dos crimes contra a pessoa
 CAPÍTULO: Capítulo I: Dos crimes contra a vida
 FONTE: Simulado próprio — setembro/2026
 QUANTIDADE: 2
+FORMATO: MULTIPLA-ESCOLHA
 ALTERNATIVAS: A-E
 
 QUESTÃO 1
@@ -2640,6 +2641,21 @@ REGRAS DO PROTOCOLO
 6. Use os nomes cadastrados no perfil ativo; maiúsculas, acentos e os
    separadores ":", "-" e "–" são aceitos como equivalentes.
 7. GABARITO deve apontar para uma alternativa existente em cada questão.
+8. Para itens CESPE/Cebraspe, use FORMATO: CERTO-ERRADO e não crie
+   alternativas artificiais. Use apenas GABARITO: CERTO ou GABARITO: ERRADO.
+
+MODELO CERTO/ERRADO
+VIGHNA PDF — VPQ 1.1
+DISCIPLINA: Direito Constitucional
+TÍTULO: Direitos e Garantias Fundamentais
+FONTE: Simulado próprio
+QUANTIDADE: 1
+FORMATO: CERTO-ERRADO
+
+QUESTÃO 1
+Julgue o item conforme o conteúdo estudado.
+GABARITO: CERTO
+EXPLICAÇÃO: Comentário da questão.
 """
 
 
@@ -6318,16 +6334,14 @@ class JanelaImportarPDFQuestoes(QDialog):
             None
         )
 
+        tipo_questao = _questao_tipo(questao)
         for alternativa in questao[
             "alternativas"
         ]:
+            letra = alternativa["letra"]
             combo.addItem(
-                alternativa[
-                    "letra"
-                ],
-                alternativa[
-                    "letra"
-                ]
+                _rotulo_resposta_questao(letra, tipo_questao),
+                letra
             )
 
         if questao.get(
@@ -6439,8 +6453,11 @@ class JanelaImportarPDFQuestoes(QDialog):
                     + "\n\n"
                     + "\n".join(
                         (
-                            f"{alt['letra']}) "
-                            f"{alt['texto']}"
+                            (
+                                _rotulo_resposta_questao(alt['letra'], _questao_tipo(questao))
+                                if _questao_tipo(questao) == "CERTO_ERRADO"
+                                else f"{alt['letra']}) {alt['texto']}"
+                            )
                         )
                         for alt in questao[
                             "alternativas"
@@ -7072,6 +7089,10 @@ class JanelaImportarPDFQuestoes(QDialog):
                     self.pdf_dificuldade
                     .currentText()
                 ),
+                "tipo_questao": questao.get(
+                    "tipo_questao",
+                    "MULTIPLA_ESCOLHA"
+                ),
             })
 
         if problemas:
@@ -7386,6 +7407,26 @@ class JanelaEdicaoLoteQuestoes(QDialog):
         self.accept()
 
 
+def _questao_tipo(dados):
+    tipo = str((dados or {}).get("tipo_questao") or "").strip().upper()
+    if tipo == "CERTO_ERRADO":
+        return "CERTO_ERRADO"
+    alternativas = (dados or {}).get("alternativas") or []
+    letras = [str(item.get("letra") or "").strip().upper() for item in alternativas]
+    if letras == ["C", "E"] and len(alternativas) == 2:
+        textos = [str(item.get("texto") or "").strip().lower() for item in alternativas]
+        if textos == ["certo", "errado"]:
+            return "CERTO_ERRADO"
+    return "MULTIPLA_ESCOLHA"
+
+
+def _rotulo_resposta_questao(letra, tipo_questao):
+    letra = str(letra or "").strip().upper()
+    if tipo_questao == "CERTO_ERRADO":
+        return {"C": "CERTO", "E": "ERRADO"}.get(letra, letra or "—")
+    return letra or "—"
+
+
 class JanelaQuestaoEditor(QDialog):
 
     def __init__(
@@ -7449,8 +7490,8 @@ class JanelaQuestaoEditor(QDialog):
 
         subtitulo = QLabel(
             (
-                "Classifique a questão por título ou capítulo do perfil ativo. "
-                "As alternativas A–E são flexíveis: use de 2 a 5."
+                "Classifique a questão e escolha o formato. Múltipla escolha usa "
+                "2 a 5 alternativas; Certo/Errado usa os botões próprios do formato."
             )
         )
         subtitulo.setObjectName(
@@ -7582,6 +7623,19 @@ class JanelaQuestaoEditor(QDialog):
             34
         )
 
+        self.questao_tipo = QComboBox()
+        self.questao_tipo.addItem(
+            "Múltipla escolha",
+            "MULTIPLA_ESCOLHA"
+        )
+        self.questao_tipo.addItem(
+            "Certo / Errado",
+            "CERTO_ERRADO"
+        )
+        self.questao_tipo.setMinimumHeight(
+            34
+        )
+
         grade_classificacao.addWidget(
             QLabel(
                 "Disciplina"
@@ -7656,6 +7710,21 @@ class JanelaQuestaoEditor(QDialog):
             2
         )
 
+        grade_classificacao.addWidget(
+            QLabel(
+                "Formato"
+            ),
+            4,
+            0
+        )
+        grade_classificacao.addWidget(
+            self.questao_tipo,
+            5,
+            0,
+            1,
+            3
+        )
+
         for coluna in range(
             3
         ):
@@ -7715,6 +7784,7 @@ class JanelaQuestaoEditor(QDialog):
 
         # Alternativas.
         alternativas_card = QFrame()
+        self.alternativas_card = alternativas_card
         alternativas_card.setObjectName(
             "questionEditorCard"
         )
@@ -7829,6 +7899,44 @@ class JanelaQuestaoEditor(QDialog):
 
         conteudo_layout.addWidget(
             alternativas_card
+        )
+
+        self.certo_errado_card = QFrame()
+        self.certo_errado_card.setObjectName(
+            "questionEditorCard"
+        )
+        ce_layout = QVBoxLayout(
+            self.certo_errado_card
+        )
+        ce_layout.setContentsMargins(
+            13, 11, 13, 11
+        )
+        ce_layout.setSpacing(
+            8
+        )
+        ce_titulo = QLabel(
+            "Gabarito — Certo / Errado"
+        )
+        ce_titulo.setObjectName(
+            "questionEditorSectionTitle"
+        )
+        ce_ajuda = QLabel(
+            "O item será exibido sem alternativas A/B: apenas CERTO e ERRADO."
+        )
+        ce_ajuda.setObjectName(
+            "pageSubtitle"
+        )
+        ce_ajuda.setWordWrap(True)
+        self.questao_gabarito_ce = QComboBox()
+        self.questao_gabarito_ce.addItem("CERTO", "C")
+        self.questao_gabarito_ce.addItem("ERRADO", "E")
+        self.questao_gabarito_ce.setMinimumHeight(34)
+        ce_layout.addWidget(ce_titulo)
+        ce_layout.addWidget(ce_ajuda)
+        ce_layout.addWidget(self.questao_gabarito_ce)
+        self.certo_errado_card.hide()
+        conteudo_layout.addWidget(
+            self.certo_errado_card
         )
 
         # Explicação e fonte.
@@ -7951,8 +8059,12 @@ class JanelaQuestaoEditor(QDialog):
         self.questao_topico.currentIndexChanged.connect(
             self.carregar_capitulos
         )
+        self.questao_tipo.currentIndexChanged.connect(
+            self.atualizar_tipo_questao_editor
+        )
 
         self.carregar_disciplinas()
+        self.atualizar_tipo_questao_editor()
 
         if self.questao_id is not None:
             self.carregar_questao_existente()
@@ -8040,6 +8152,12 @@ class JanelaQuestaoEditor(QDialog):
 
         self.questao_capitulo.blockSignals(False)
 
+    def atualizar_tipo_questao_editor(self):
+        tipo = self.questao_tipo.currentData() or "MULTIPLA_ESCOLHA"
+        multipla = tipo == "MULTIPLA_ESCOLHA"
+        self.alternativas_card.setVisible(multipla)
+        self.certo_errado_card.setVisible(not multipla)
+
     def carregar_questao_existente(self):
         dados = obter_questao(
             self.questao_id
@@ -8123,6 +8241,12 @@ class JanelaQuestaoEditor(QDialog):
                 indice_capitulo
             )
 
+        tipo_questao = _questao_tipo(dados)
+        indice_tipo = self.questao_tipo.findData(tipo_questao)
+        if indice_tipo >= 0:
+            self.questao_tipo.setCurrentIndex(indice_tipo)
+        self.atualizar_tipo_questao_editor()
+
         self.questao_enunciado.setPlainText(
             dados[
                 "enunciado"
@@ -8184,16 +8308,20 @@ class JanelaQuestaoEditor(QDialog):
             if alternativa[
                 "correta"
             ]:
-                indice_gabarito = (
-                    self.questao_gabarito.findText(
-                        letra
+                if tipo_questao == "CERTO_ERRADO":
+                    indice_gabarito = self.questao_gabarito_ce.findData(letra)
+                    if indice_gabarito >= 0:
+                        self.questao_gabarito_ce.setCurrentIndex(indice_gabarito)
+                else:
+                    indice_gabarito = (
+                        self.questao_gabarito.findText(
+                            letra
+                        )
                     )
-                )
-
-                if indice_gabarito >= 0:
-                    self.questao_gabarito.setCurrentIndex(
-                        indice_gabarito
-                    )
+                    if indice_gabarito >= 0:
+                        self.questao_gabarito.setCurrentIndex(
+                            indice_gabarito
+                        )
 
     def salvar_questao(self):
         topico_id = (
@@ -8225,59 +8353,48 @@ class JanelaQuestaoEditor(QDialog):
             )
             return
 
-        gabarito = (
-            self.questao_gabarito.currentText()
+        tipo_questao = (
+            self.questao_tipo.currentData()
+            or "MULTIPLA_ESCOLHA"
         )
-
         alternativas = []
 
-        for letra in "ABCDE":
-            texto = (
-                self.alternativas_campos[
-                    letra
-                ]
-                .text()
-                .strip()
-            )
+        if tipo_questao == "CERTO_ERRADO":
+            gabarito = self.questao_gabarito_ce.currentData()
+            alternativas = [
+                {"letra": "C", "texto": "Certo", "correta": gabarito == "C"},
+                {"letra": "E", "texto": "Errado", "correta": gabarito == "E"},
+            ]
+        else:
+            gabarito = self.questao_gabarito.currentText()
+            for letra in "ABCDE":
+                texto = self.alternativas_campos[letra].text().strip()
+                if not texto:
+                    continue
+                alternativas.append({
+                    "letra": letra,
+                    "texto": texto,
+                    "correta": letra == gabarito,
+                })
 
-            if not texto:
-                continue
-
-            alternativas.append({
-                "letra": letra,
-                "texto": texto,
-                "correta": (
-                    letra == gabarito
-                ),
-            })
-
-        if len(
-            alternativas
-        ) < 2:
-            QMessageBox.warning(
-                self,
-                "Questão",
-                (
+            if len(alternativas) < 2:
+                QMessageBox.warning(
+                    self,
+                    "Questão",
                     "Informe pelo menos duas alternativas."
                 )
-            )
-            return
+                return
 
-        if not any(
-            item[
-                "letra"
-            ] == gabarito
-            for item in alternativas
-        ):
-            QMessageBox.warning(
-                self,
-                "Questão",
-                (
-                    f"O gabarito {gabarito} não possui texto. "
-                    "Preencha essa alternativa ou escolha outro gabarito."
+            if not any(item["letra"] == gabarito for item in alternativas):
+                QMessageBox.warning(
+                    self,
+                    "Questão",
+                    (
+                        f"O gabarito {gabarito} não possui texto. "
+                        "Preencha essa alternativa ou escolha outro gabarito."
+                    )
                 )
-            )
-            return
+                return
 
         topico_id_duplicidade = topico_id
         if topico_id_duplicidade is None and capitulo_id is not None:
@@ -8356,7 +8473,8 @@ class JanelaQuestaoEditor(QDialog):
                     self.questao_dificuldade
                     .currentText(),
                     True,
-                    capitulo_id=capitulo_id
+                    capitulo_id=capitulo_id,
+                    tipo_questao=tipo_questao
                 )
             else:
                 atualizar_questao(
@@ -8377,7 +8495,8 @@ class JanelaQuestaoEditor(QDialog):
                     self.questao_dificuldade
                     .currentText(),
                     self.questao_ativa_atual,
-                    capitulo_id=capitulo_id
+                    capitulo_id=capitulo_id,
+                    tipo_questao=tipo_questao
                 )
 
         except Exception as erro:
@@ -8514,6 +8633,9 @@ class JanelaVisualizarQuestao(QDialog):
                 "dificuldade"
             ]
         )
+        tipo_questao = _questao_tipo(dados)
+        if tipo_questao == "CERTO_ERRADO":
+            metadata.append("Certo / Errado")
 
         meta = QLabel(
             " • ".join(
@@ -8712,7 +8834,12 @@ class JanelaVisualizarQuestao(QDialog):
             )
 
             letra = QLabel(
-                f"{alternativa['letra']})"
+                _rotulo_resposta_questao(
+                    alternativa["letra"],
+                    tipo_questao,
+                )
+                if tipo_questao == "CERTO_ERRADO"
+                else f"{alternativa['letra']})"
             )
             letra.setObjectName(
                 "questionAlternativeLetter"
@@ -8731,6 +8858,9 @@ class JanelaVisualizarQuestao(QDialog):
             )
             texto.setTextInteractionFlags(
                 Qt.TextSelectableByMouse
+            )
+            texto.setVisible(
+                tipo_questao != "CERTO_ERRADO"
             )
 
             linha.addWidget(
@@ -10350,6 +10480,38 @@ class JanelaConfigurarSimulado(QDialog):
             )
         )
 
+        self.formato = QComboBox()
+        self.formato.setMinimumHeight(34)
+        self.formato.addItem(
+            "Todos os formatos",
+            None
+        )
+        self.formato.addItem(
+            "Múltipla escolha",
+            "MULTIPLA_ESCOLHA"
+        )
+        self.formato.addItem(
+            "Certo / Errado",
+            "CERTO_ERRADO"
+        )
+        self.formato.setToolTip(
+            "Limita o simulado ao formato escolhido sem alterar a disciplina ou o tópico."
+        )
+
+        self.regra_pontuacao = QComboBox()
+        self.regra_pontuacao.setMinimumHeight(34)
+        self.regra_pontuacao.addItem(
+            "Normal (+1 acerto / 0 erro)",
+            "NORMAL"
+        )
+        self.regra_pontuacao.addItem(
+            "Cebraspe (+1 acerto / -1 erro)",
+            "CEBRASPE"
+        )
+        self.regra_pontuacao.setToolTip(
+            "A pontuação do simulado é independente do Domínio e da inteligência acadêmica."
+        )
+
         config_layout.addWidget(
             QLabel(
                 "Tipo de simulado"
@@ -10380,6 +10542,28 @@ class JanelaConfigurarSimulado(QDialog):
             1,
             2
         )
+        config_layout.addWidget(
+            QLabel("Formato das questões"),
+            2,
+            0
+        )
+        config_layout.addWidget(
+            QLabel("Pontuação"),
+            2,
+            1
+        )
+        config_layout.addWidget(
+            self.formato,
+            3,
+            0
+        )
+        config_layout.addWidget(
+            self.regra_pontuacao,
+            3,
+            1,
+            1,
+            2
+        )
 
         config_layout.setColumnStretch(
             0,
@@ -10403,7 +10587,8 @@ class JanelaConfigurarSimulado(QDialog):
                 "Durante a prova o Vighna não mostra acerto, gabarito ou explicação. "
                 "A correção aparece somente após a entrega. O resultado alimenta "
                 "Histórico, Caderno de Erros, Domínio e Efetividade, sem alterar "
-                "automaticamente a agenda de revisões questão por questão."
+                "automaticamente a agenda de revisões questão por questão. A regra "
+                "de pontuação escolhida afeta apenas a nota do simulado, não o Domínio."
             )
         )
         nota.setObjectName(
@@ -10624,6 +10809,7 @@ class JanelaConfigurarSimulado(QDialog):
                 "check": check,
                 "spin": spin,
                 "dados": item,
+                "linha": linha,
             }
 
             check.stateChanged.connect(
@@ -10857,10 +11043,71 @@ class JanelaConfigurarSimulado(QDialog):
         self.quantidade_vighna.valueChanged.connect(
             self.atualizar_preview_vighna
         )
+        self.formato.currentIndexChanged.connect(
+            self.atualizar_formato_simulado
+        )
 
+        self.atualizar_formato_simulado()
         self.atualizar_tipo()
         self.atualizar_preview_vighna()
         self.atualizar_resumo_personalizado()
+
+    def tipo_questao_selecionado(self):
+        return self.formato.currentData()
+
+    def atualizar_formato_simulado(self):
+        tipo_questao = self.tipo_questao_selecionado()
+        self.disponibilidade = obter_disponibilidade_simulado_disciplinas(
+            self.concurso[0],
+            tipo_questao=tipo_questao
+        )
+        por_disciplina = {
+            int(item["disciplina_id"]): item
+            for item in self.disponibilidade
+        }
+
+        for disciplina_id, linha in self.linhas_personalizadas.items():
+            dados = por_disciplina.get(int(disciplina_id))
+            disponiveis = int(dados.get("disponiveis", 0) or 0) if dados else 0
+            ineditas = int(dados.get("ineditas", 0) or 0) if dados else 0
+            numero_linha = int(linha.get("linha", 0))
+
+            item_disponiveis = self.tabela_personalizado.item(numero_linha, 2)
+            if item_disponiveis is not None:
+                item_disponiveis.setText(str(disponiveis))
+            item_ineditas = self.tabela_personalizado.item(numero_linha, 3)
+            if item_ineditas is not None:
+                item_ineditas.setText(str(ineditas))
+
+            check = linha["check"]
+            spin = linha["spin"]
+            linha["dados"] = dados or {
+                "disciplina_id": disciplina_id,
+                "disponiveis": 0,
+                "ineditas": 0,
+            }
+            check.setEnabled(disponiveis > 0)
+            if disponiveis <= 0:
+                check.setChecked(False)
+                spin.setValue(0)
+                spin.setEnabled(False)
+            spin.setRange(0, disponiveis)
+            if spin.value() > disponiveis:
+                spin.setValue(disponiveis)
+            spin.setEnabled(check.isChecked() and disponiveis > 0)
+
+        total_disponivel = sum(
+            int(item.get("disponiveis", 0) or 0)
+            for item in self.disponibilidade
+        )
+        self.quantidade_vighna.setRange(1, max(1, total_disponivel))
+        if total_disponivel > 0:
+            self.quantidade_vighna.setValue(
+                min(self.quantidade_vighna.value(), total_disponivel)
+            )
+
+        self.atualizar_resumo_personalizado()
+        self.atualizar_preview_vighna()
 
     def alterar_inclusao_materia(
         self,
@@ -10983,6 +11230,7 @@ class JanelaConfigurarSimulado(QDialog):
             self.concurso[0],
             self.quantidade_vighna.value(),
             estrategia=estrategia,
+            tipo_questao=self.tipo_questao_selecionado(),
         )
         alocacoes = plano["alocacoes"]
         self.tabela_vighna.setRowCount(len(alocacoes))
@@ -11048,6 +11296,8 @@ class JanelaConfigurarSimulado(QDialog):
         preferir = self.preferir_ineditas.isChecked()
         tempo = self.tempo.value()
         indice_tipo = self.tipo.currentIndex()
+        regra_pontuacao = self.regra_pontuacao.currentData() or "NORMAL"
+        tipo_questao = self.tipo_questao_selecionado()
 
         if indice_tipo == 0:
             quantidades = self.quantidades_personalizadas()
@@ -11062,6 +11312,7 @@ class JanelaConfigurarSimulado(QDialog):
                 self.concurso[0],
                 quantidades,
                 preferir_ineditas=preferir,
+                tipo_questao=tipo_questao,
             )
             tipo = "Prova real"
             modo = "Simulado • Prova real"
@@ -11075,6 +11326,7 @@ class JanelaConfigurarSimulado(QDialog):
                 self.quantidade_vighna.value(),
                 estrategia=estrategia_simulado,
                 preferir_ineditas=preferir,
+                tipo_questao=tipo_questao,
             )
             if estrategia_simulado == "estrategico":
                 tipo = "Estratégico"
@@ -11126,6 +11378,12 @@ class JanelaConfigurarSimulado(QDialog):
             "integrar_revisoes": False,
             "tempo_limite_minutos": tempo,
             "preferir_ineditas": preferir,
+            "tipo_questao": tipo_questao,
+            "formato_nome": self.formato.currentText(),
+            "regra_pontuacao": regra_pontuacao,
+            "pontos_acerto": 1,
+            "pontos_erro": -1 if regra_pontuacao == "CEBRASPE" else 0,
+            "pontos_branco": 0,
             "plano_simulado": plano,
             "dominio_antes_simulado": dominio_antes,
         }
@@ -12311,17 +12569,26 @@ class JanelaConfigurarSessaoAdaptativa(QDialog):
         self.quantidade.setMinimumHeight(36)
         self.quantidade.setSuffix(" questões")
 
+        self.formato = QComboBox()
+        self.formato.setMinimumHeight(36)
+        self.formato.addItem("Todos", None)
+        self.formato.addItem("Múltipla escolha", "MULTIPLA_ESCOLHA")
+        self.formato.addItem("Certo / Errado", "CERTO_ERRADO")
+        self.formato.setToolTip("Limita o treino a um formato de questão ou permite misturar ambos.")
+
         self.rotulo_escopo = QLabel("Escopo")
         self.rotulo_disciplina = QLabel("Disciplina")
         self.rotulo_topico = QLabel("Título / tópico")
         self.rotulo_capitulo = QLabel("Capítulo")
         self.rotulo_quantidade = QLabel("Quantidade")
+        self.rotulo_formato = QLabel("Formato")
 
         rotulos = (
             self.rotulo_escopo,
             self.rotulo_disciplina,
             self.rotulo_topico,
             self.rotulo_capitulo,
+            self.rotulo_formato,
             self.rotulo_quantidade,
         )
         for rotulo in rotulos:
@@ -12332,6 +12599,7 @@ class JanelaConfigurarSessaoAdaptativa(QDialog):
             (self.rotulo_disciplina, self.disciplina),
             (self.rotulo_topico, self.topico),
             (self.rotulo_capitulo, self.capitulo),
+            (self.rotulo_formato, self.formato),
             (self.rotulo_quantidade, self.quantidade),
         )):
             config_layout.addWidget(rotulo, 0, coluna)
@@ -12341,7 +12609,8 @@ class JanelaConfigurarSessaoAdaptativa(QDialog):
         config_layout.setColumnStretch(1, 2)
         config_layout.setColumnStretch(2, 4)
         config_layout.setColumnStretch(3, 4)
-        config_layout.setColumnStretch(4, 1)
+        config_layout.setColumnStretch(4, 2)
+        config_layout.setColumnStretch(5, 1)
         layout.addWidget(config_card)
 
         # ----------------------------------------------------
@@ -12741,6 +13010,7 @@ class JanelaConfigurarSessaoAdaptativa(QDialog):
                 disciplina_id=disciplina_id,
                 topicos_ids=topicos_ids,
                 capitulos_ids=capitulos_ids,
+                tipo_questao=self.formato.currentData(),
             )
         except Exception as erro:
             self.limpar_preview("Não foi possível calcular o plano.")
@@ -12770,6 +13040,7 @@ class JanelaConfigurarSessaoAdaptativa(QDialog):
             disciplina_id=disciplina_id,
             topicos_ids=topicos_ids,
             capitulos_ids=capitulos_ids,
+            tipo_questao=self.formato.currentData(),
         )
 
         self.preview_tabela.setRowCount(len(plano["alocacoes"]))
@@ -12846,6 +13117,7 @@ class JanelaConfigurarSessaoAdaptativa(QDialog):
             disciplina_id=disciplina_id,
             topicos_ids=topicos_ids,
             capitulos_ids=capitulos_ids,
+            tipo_questao=self.formato.currentData(),
         )
         fila = selecao["fila"]
         if not fila:
@@ -12873,6 +13145,8 @@ class JanelaConfigurarSessaoAdaptativa(QDialog):
             "topico_id": None,
             "topico_nome": "Múltiplos tópicos",
             "modo": "Treino adaptativo",
+            "tipo_questao": self.formato.currentData(),
+            "formato_nome": self.formato.currentText(),
             "origem_sessao": "treino_adaptativo",
             "quantidade": len(fila),
             "fila": fila,
@@ -12885,6 +13159,7 @@ class JanelaConfigurarSessaoAdaptativa(QDialog):
                 "disciplina_id": disciplina_id,
                 "topicos_ids": list(topicos_ids) if topicos_ids is not None else None,
                 "capitulos_ids": list(capitulos_ids) if capitulos_ids is not None else None,
+                "tipo_questao": self.formato.currentData(),
                 "plano": plano,
                 "composicao_topicos": selecao["composicao_topicos"],
                 "resumo_motivos": selecao["resumo_motivos"],
@@ -13018,6 +13293,12 @@ class JanelaConfigurarResolucaoQuestoes(QDialog):
             "Aleatórias"
         ])
 
+        self.formato = QComboBox()
+        self.formato.setMinimumHeight(34)
+        self.formato.addItem("Todos os formatos", None)
+        self.formato.addItem("Múltipla escolha", "MULTIPLA_ESCOLHA")
+        self.formato.addItem("Certo / Errado", "CERTO_ERRADO")
+
         self.quantidade = QSpinBox()
         self.quantidade.setRange(
             1,
@@ -13068,15 +13349,29 @@ class JanelaConfigurarResolucaoQuestoes(QDialog):
         )
         form.addWidget(
             QLabel(
-                "Quantidade"
+                "Formato"
             ),
             2,
             1
         )
         form.addWidget(
-            self.quantidade,
+            self.formato,
             3,
             1
+        )
+        form.addWidget(
+            QLabel(
+                "Quantidade"
+            ),
+            4,
+            0
+        )
+        form.addWidget(
+            self.quantidade,
+            5,
+            0,
+            1,
+            2
         )
 
         form.setColumnStretch(
@@ -13161,6 +13456,9 @@ class JanelaConfigurarResolucaoQuestoes(QDialog):
         self.modo.currentTextChanged.connect(
             self.atualizar_disponibilidade
         )
+        self.formato.currentIndexChanged.connect(
+            self.atualizar_disponibilidade
+        )
 
         self.carregar_topicos()
         self.atualizar_disponibilidade()
@@ -13207,7 +13505,8 @@ class JanelaConfigurarResolucaoQuestoes(QDialog):
                 self.concurso[0],
                 disciplina_id=self.disciplina.currentData(),
                 topico_id=self.topico.currentData(),
-                modo=modo
+                modo=modo,
+                tipo_questao=self.formato.currentData()
             )
         )
 
@@ -13215,7 +13514,8 @@ class JanelaConfigurarResolucaoQuestoes(QDialog):
             obter_perfil_selecao_inteligente_questoes(
                 self.concurso[0],
                 disciplina_id=self.disciplina.currentData(),
-                topico_id=self.topico.currentData()
+                topico_id=self.topico.currentData(),
+                tipo_questao=self.formato.currentData()
             )
         )
 
@@ -13397,7 +13697,8 @@ class JanelaConfigurarResolucaoQuestoes(QDialog):
             disciplina_id=self.disciplina.currentData(),
             topico_id=self.topico.currentData(),
             quantidade=quantidade,
-            modo=modo
+            modo=modo,
+            tipo_questao=self.formato.currentData()
         )
 
         fila = selecao[
@@ -13421,6 +13722,8 @@ class JanelaConfigurarResolucaoQuestoes(QDialog):
             "topico_id": self.topico.currentData(),
             "topico_nome": self.topico.currentText(),
             "modo": modo,
+            "tipo_questao": self.formato.currentData(),
+            "formato_nome": self.formato.currentText(),
             "origem_sessao": "manual",
             "quantidade": len(
                 fila
@@ -13576,6 +13879,7 @@ class JanelaRevisaoBateria(QDialog):
             str(questao.get("enunciado") or ""),
             "",
         ]
+        tipo_questao = _questao_tipo(questao)
         for alternativa in questao.get("alternativas", []):
             letra = str(alternativa.get("letra") or "").strip().upper()
             texto_alt = str(alternativa.get("texto") or "")
@@ -13585,13 +13889,16 @@ class JanelaRevisaoBateria(QDialog):
             if letra == marcada:
                 marcadores.append("MARCADA POR VOCÊ" if letra != gabarito else "SUA RESPOSTA")
             sufixo = f"  [{' • '.join(marcadores)}]" if marcadores else ""
-            linhas.append(f"{letra}) {texto_alt}{sufixo}")
+            if tipo_questao == "CERTO_ERRADO":
+                linhas.append(f"{_rotulo_resposta_questao(letra, tipo_questao)}{sufixo}")
+            else:
+                linhas.append(f"{letra}) {texto_alt}{sufixo}")
 
         linhas.extend([
             "",
             f"Resultado na bateria: {questao.get('status_bateria', 'Não respondida')}",
-            f"Resposta marcada: {marcada}",
-            f"Gabarito: {gabarito}",
+            f"Resposta marcada: {_rotulo_resposta_questao(marcada, tipo_questao)}",
+            f"Gabarito: {_rotulo_resposta_questao(gabarito, tipo_questao)}",
         ])
         explicacao = str(questao.get("explicacao") or "").strip()
         linhas.extend([
@@ -13827,6 +14134,26 @@ class JanelaResumoResolucaoQuestoes(QDialog):
             else "—"
         )
 
+        pontuacao_simulado = None
+        regra_pontuacao_simulado = str(
+            simulado.get("regra_pontuacao") or "NORMAL"
+        ).upper()
+        if simulado:
+            valor_acerto = float(simulado.get("pontos_acerto", 1) or 0)
+            valor_erro = float(
+                simulado.get(
+                    "pontos_erro",
+                    -1 if regra_pontuacao_simulado == "CEBRASPE" else 0
+                )
+            )
+            valor_branco = float(simulado.get("pontos_branco", 0) or 0)
+            pontuacao_simulado = sum(
+                valor_acerto if registro.get("status") == "Correta"
+                else valor_erro if registro.get("status") == "Errada"
+                else valor_branco
+                for registro in registros
+            )
+
         ineditas_respondidas = sum(
             1
             for registro in registros
@@ -13920,6 +14247,13 @@ class JanelaResumoResolucaoQuestoes(QDialog):
                     ]
                 ),
             ]
+            if simulado and pontuacao_simulado is not None:
+                pontuacao_texto = (
+                    str(int(pontuacao_simulado))
+                    if float(pontuacao_simulado).is_integer()
+                    else f"{pontuacao_simulado:.1f}"
+                )
+                valores.append(("Pontuação", pontuacao_texto))
 
         for indice, (
             rotulo,
@@ -13965,6 +14299,61 @@ class JanelaResumoResolucaoQuestoes(QDialog):
         layout.addWidget(
             detalhe
         )
+
+        desempenho_por_formato = {}
+        for registro in registros:
+            tipo = str(registro.get("tipo_questao") or "MULTIPLA_ESCOLHA")
+            dados_formato = desempenho_por_formato.setdefault(
+                tipo,
+                {"respondidas": 0, "acertos": 0, "erros": 0}
+            )
+            if registro.get("status") in ("Correta", "Errada"):
+                dados_formato["respondidas"] += 1
+                if registro.get("status") == "Correta":
+                    dados_formato["acertos"] += 1
+                else:
+                    dados_formato["erros"] += 1
+
+        if desempenho_por_formato and (
+            "CERTO_ERRADO" in desempenho_por_formato
+            or len(desempenho_por_formato) > 1
+        ):
+            partes_formato = []
+            for tipo, rotulo in (
+                ("MULTIPLA_ESCOLHA", "Múltipla escolha"),
+                ("CERTO_ERRADO", "Certo / Errado"),
+            ):
+                dados_formato = desempenho_por_formato.get(tipo)
+                if not dados_formato or not dados_formato["respondidas"]:
+                    continue
+                taxa = 100.0 * dados_formato["acertos"] / dados_formato["respondidas"]
+                partes_formato.append(
+                    f"{rotulo}: {taxa:.1f}% "
+                    f"({dados_formato['acertos']}/{dados_formato['respondidas']})"
+                )
+            if partes_formato:
+                desempenho_formato_label = QLabel(
+                    "Desempenho por formato • " + "   •   ".join(partes_formato)
+                )
+                desempenho_formato_label.setObjectName(
+                    "questionSessionSummaryDetail"
+                )
+                desempenho_formato_label.setWordWrap(True)
+                layout.addWidget(desempenho_formato_label)
+
+        if simulado and pontuacao_simulado is not None:
+            regra_texto = (
+                "Cebraspe: +1 acerto, -1 erro, 0 em branco"
+                if regra_pontuacao_simulado == "CEBRASPE"
+                else "Normal: +1 acerto, 0 erro, 0 em branco"
+            )
+            regra_label = QLabel(
+                f"Regra de pontuação do simulado • {regra_texto}. "
+                "Esta nota não altera a inteligência acadêmica."
+            )
+            regra_label.setObjectName("questionSessionSummaryDetail")
+            regra_label.setWordWrap(True)
+            layout.addWidget(regra_label)
 
         if self.fluxo_algoritmo:
             integracao_alvo = None
@@ -16424,6 +16813,10 @@ class JanelaResolverQuestoes(QDialog):
                 ]
             )
 
+        tipo_questao = _questao_tipo(dados)
+        if tipo_questao == "CERTO_ERRADO":
+            metadata.append("Certo / Errado")
+
         self.questao_meta.setText(
             " • ".join(
                 metadata
@@ -16511,12 +16904,18 @@ class JanelaResolverQuestoes(QDialog):
             eliminar.setToolTip(
                 f"Eliminar alternativa {letra}"
             )
+            eliminar.setVisible(
+                tipo_questao != "CERTO_ERRADO"
+            )
             eliminar.setAccessibleName(
                 eliminar.toolTip()
             )
 
             radio = QRadioButton(
-                letra
+                _rotulo_resposta_questao(
+                    letra,
+                    tipo_questao
+                )
             )
             radio.setObjectName(
                 "questionSolverRadio"
@@ -16526,7 +16925,7 @@ class JanelaResolverQuestoes(QDialog):
                 letra
             )
             radio.setFixedWidth(
-                36
+                100 if tipo_questao == "CERTO_ERRADO" else 36
             )
 
             texto = QLabel(
@@ -16802,6 +17201,7 @@ class JanelaResolverQuestoes(QDialog):
             "dificuldade": self.questao_atual.get(
                 "dificuldade"
             ) or "Não informada",
+            "tipo_questao": _questao_tipo(self.questao_atual),
             "status": status,
             "duvida": self.duvida.isChecked(),
             "inedita": self.questao_atual[
@@ -16919,7 +17319,7 @@ class JanelaResolverQuestoes(QDialog):
             self.feedback_titulo.setText(
                 (
                     f"✕ Resposta incorreta "
-                    f"• Gabarito: {gabarito}"
+                    f"• Gabarito: {_rotulo_resposta_questao(gabarito, _questao_tipo(self.questao_atual))}"
                 )
             )
 
@@ -17033,6 +17433,7 @@ class JanelaResolverQuestoes(QDialog):
             "topico": self.questao_atual["topico"],
             "topico_id": self.questao_atual.get("topico_id"),
             "dificuldade": self.questao_atual.get("dificuldade") or "Não informada",
+            "tipo_questao": _questao_tipo(self.questao_atual),
             "status": status_registro,
             "duvida": self.duvida.isChecked(),
             "inedita": self.questao_atual["inedita"],
@@ -39375,6 +39776,13 @@ class SistemaEstudos(QMainWindow):
             "Difícil",
         ])
 
+        self.questoes_filtro_formato = QComboBox()
+        self.questoes_filtro_formato.setMinimumWidth(135)
+        self.questoes_filtro_formato.setFixedHeight(34)
+        self.questoes_filtro_formato.addItem("Todos formatos", None)
+        self.questoes_filtro_formato.addItem("Múltipla escolha", "MULTIPLA_ESCOLHA")
+        self.questoes_filtro_formato.addItem("Certo / Errado", "CERTO_ERRADO")
+
         self.questoes_mostrar_arquivadas = QCheckBox("Incluir arquivadas")
         self.questoes_mostrar_arquivadas.setToolTip(
             "Exibe questões arquivadas junto com as ativas."
@@ -39396,6 +39804,7 @@ class SistemaEstudos(QMainWindow):
         filtros_layout.addWidget(self.questoes_filtro_topico)
         filtros_layout.addWidget(self.questoes_filtro_capitulo)
         filtros_layout.addWidget(self.questoes_filtro_dificuldade)
+        filtros_layout.addWidget(self.questoes_filtro_formato)
         area_trabalho_layout.addWidget(
             filtros
         )
@@ -39557,6 +39966,7 @@ class SistemaEstudos(QMainWindow):
             self.filtrar_questoes
         )
         self.questoes_filtro_dificuldade.currentTextChanged.connect(self.filtrar_questoes)
+        self.questoes_filtro_formato.currentIndexChanged.connect(self.filtrar_questoes)
         self.questoes_mostrar_arquivadas.stateChanged.connect(self.carregar_questoes)
         self.tabela_questoes.itemSelectionChanged.connect(self.atualizar_acoes_questao)
         self.tabela_questoes.itemChanged.connect(self.atualizar_acoes_questao)
@@ -40584,6 +40994,11 @@ class SistemaEstudos(QMainWindow):
             self.questoes_filtro_dificuldade
             .currentText()
         )
+        formato = (
+            self.questoes_filtro_formato.currentData()
+            if hasattr(self, "questoes_filtro_formato")
+            else None
+        )
         somente_para_analise = (
             hasattr(
                 self,
@@ -40654,6 +41069,12 @@ class SistemaEstudos(QMainWindow):
             ):
                 continue
 
+            if (
+                formato
+                and item.get("tipo_questao", "MULTIPLA_ESCOLHA") != formato
+            ):
+                continue
+
             if busca:
                 alvo = self.normalizar_texto_questoes(
                     (
@@ -40664,7 +41085,8 @@ class SistemaEstudos(QMainWindow):
                         f"{item['enunciado']} "
                         f"{item['banca']} "
                         f"{item['fonte']} "
-                        f"{item['dificuldade']}"
+                        f"{item['dificuldade']} "
+                        f"{item.get('tipo_questao', 'MULTIPLA_ESCOLHA')}"
                     )
                 )
 

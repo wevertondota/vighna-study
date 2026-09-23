@@ -1601,39 +1601,6 @@ def analisar_vpq_1_0(
     }
 
 
-def _detectar_certo_errado_estruturado(texto):
-    """Reconhece TXT/PDF Certo-Errado mesmo sem o selo formal VPQ.
-
-    O gerador de questões pode produzir arquivos Cebraspe com cabeçalho próprio
-    (por exemplo, ``CEBRASPE — CERTO OU ERRADO DIFÍCIL``), mas mantendo os
-    metadados ``FORMATO`` e os gabaritos individuais. Esses arquivos devem ser
-    importáveis sem exigir alternativas artificiais A-E.
-    """
-    texto = str(texto or "")
-    metadados = extrair_metadados_vpq_1_0(texto)
-    formato = _normalizar_formato_vpq(metadados.get("formato"))
-
-    inicio = normalizar_texto_pdf(texto[:3000])
-    cabecalho_cebraspe = (
-        ("cebraspe" in inicio or "cespe" in inicio)
-        and "certo" in inicio
-        and "errado" in inicio
-    )
-
-    if formato != "CERTO_ERRADO" and not cabecalho_cebraspe:
-        return False
-
-    candidatos = [
-        item
-        for item in _candidatos_questao(limpar_texto_pdf(texto))
-        if item.get("explicita")
-    ]
-    if not candidatos:
-        return False
-
-    return bool(PADRAO_GABARITO_CERTO_ERRADO.search(texto))
-
-
 def analisar_texto_questoes_pdf(
     texto,
     faixas_paginas=None
@@ -1645,26 +1612,6 @@ def analisar_texto_questoes_pdf(
             texto,
             faixas_paginas
         )
-
-    # Cebraspe/CESPE estruturado pode vir em TXT com cabeçalho próprio, sem
-    # a primeira linha formal "VIGHNA PDF — VPQ 1.1". Se houver formato
-    # Certo/Errado, questões numeradas e gabaritos C/E, usa o parser nativo.
-    if _detectar_certo_errado_estruturado(texto):
-        analise = _analisar_texto_questoes_vpq_certo_errado(
-            texto,
-            faixas_paginas
-        )
-        return {
-            **analise,
-            "protocolo": "Certo/Errado estruturado",
-            "vpq_detectado": False,
-            "vpq_metadados": extrair_metadados_vpq_1_0(texto),
-            "vpq_erros": [],
-            "vpq_avisos": [],
-            "vpq_bloqueia_importacao": False,
-            "vpq_status": "generico_certo_errado",
-            "vpq_status_rotulo": "Certo/Errado estruturado",
-        }
 
     analise = (
         _analisar_texto_questoes_pdf_generico(
