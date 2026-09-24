@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import gc
 import tempfile
 import unittest
 from contextlib import closing
@@ -51,6 +52,7 @@ class CicloEstudoTests(unittest.TestCase):
 
     def tearDown(self):
         banco.CAMINHO_BANCO = self.original
+        gc.collect()
         self.temp.cleanup()
 
     def _resolver_bateria(self, quantidade=10, origem="algoritmo_v5", dia=None):

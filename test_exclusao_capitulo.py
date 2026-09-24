@@ -1,3 +1,4 @@
+import gc
 import tempfile
 import unittest
 from pathlib import Path
@@ -14,6 +15,7 @@ class ExclusaoCapituloTests(unittest.TestCase):
 
     def tearDown(self):
         banco.CAMINHO_BANCO = self._caminho_original
+        gc.collect()
         self._tmp.cleanup()
 
     def _criar_estrutura_generica(self):

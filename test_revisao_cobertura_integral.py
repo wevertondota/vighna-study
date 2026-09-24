@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import gc
 import tempfile
 import unittest
 from contextlib import closing
@@ -54,6 +55,7 @@ class RevisaoCoberturaIntegralTests(unittest.TestCase):
 
     def tearDown(self):
         banco.CAMINHO_BANCO = self.original
+        gc.collect()
         self.temp.cleanup()
 
     def _resolver(self, ids, erros=None, modo="Revisão inteligente"):

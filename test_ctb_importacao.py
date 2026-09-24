@@ -1,3 +1,4 @@
+import gc
 import tempfile
 import unittest
 from pathlib import Path
@@ -15,6 +16,7 @@ class CTBNomenclatureTests(unittest.TestCase):
 
     def tearDown(self):
         banco.CAMINHO_BANCO = self.original_path
+        gc.collect()
         self.tempdir.cleanup()
 
     def test_new_database_uses_official_ctb_name_and_sigla_alias(self):

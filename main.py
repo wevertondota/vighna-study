@@ -260,6 +260,9 @@ from banco import (
     listar_historico_tentativas_questoes,
     listar_caderno_erros_questoes,
     obter_estatisticas_historico_questoes,
+    listar_banco_erros_pendentes,
+    contar_banco_erros_pendentes,
+    processar_resposta_banco_erros,
     obter_metricas_globais_nucleo,
     obter_metricas_periodo_nucleo,
     obter_snapshot_progresso_edital,
@@ -14004,10 +14007,15 @@ class JanelaResumoResolucaoQuestoes(QDialog):
         )
 
         reforco_sem_impacto = (resumo.get("origem") == "reforco_pos_bateria")
+        banco_erros_sem_impacto = (resumo.get("origem") == "banco_erros")
+        if banco_erros_sem_impacto:
+            self.setWindowTitle("Banco de Erros — resumo operacional")
 
         titulo = QLabel(
             (
-                "Resumo do reforço imediato"
+                "Banco de Erros"
+                if banco_erros_sem_impacto
+                else "Resumo do reforço imediato"
                 if reforco_sem_impacto
                 else (
                     "Resultado do simulado"
@@ -14041,6 +14049,10 @@ class JanelaResumoResolucaoQuestoes(QDialog):
             ).strip()
             partes_resumo = [parte for parte in (disciplina_resumo, topico_resumo) if parte]
             descricao_texto = "\n".join(partes_resumo) or str(resumo.get("modo") or "Sessão recomendada")
+        elif banco_erros_sem_impacto:
+            descricao_texto = (
+                f"{resumo['concurso']} • {motivo} • treino sem impacto na inteligência"
+            )
         else:
             descricao_texto = f"{resumo['concurso']} • {resumo['modo']} • {motivo}"
 
@@ -14210,6 +14222,12 @@ class JanelaResumoResolucaoQuestoes(QDialog):
                 ("Tempo total", _formatar_duracao_resumo()),
                 ("Tempo médio", tempo_medio_texto),
             ]
+        elif banco_erros_sem_impacto:
+            valores = [
+                ("Praticadas", int(resumo.get("praticadas") or 0)),
+                ("Removidas da fila", int(resumo.get("removidas_fila") or 0)),
+                ("Ainda pendentes", int(resumo.get("ainda_pendentes") or 0)),
+            ]
         else:
             valores = [
                 (
@@ -14276,7 +14294,9 @@ class JanelaResumoResolucaoQuestoes(QDialog):
 
         detalhe = QLabel(
             (
-                "Reforço isolado: nenhuma resposta desta rodada foi gravada no histórico ou usada pela inteligência do Vighna."
+                "Treino sem impacto na inteligência. Nenhuma resposta desta rodada foi gravada como tentativa acadêmica."
+                if banco_erros_sem_impacto
+                else "Reforço isolado: nenhuma resposta desta rodada foi gravada no histórico ou usada pela inteligência do Vighna."
                 if reforco_sem_impacto
                 else (
                     (
@@ -15566,7 +15586,10 @@ class JanelaResumoResolucaoQuestoes(QDialog):
                 31
             )
 
-        tabela.setVisible(not self.fluxo_algoritmo)
+        tabela.setVisible(
+            not self.fluxo_algoritmo
+            and not banco_erros_sem_impacto
+        )
         layout.addWidget(
             tabela,
             1
@@ -15579,7 +15602,9 @@ class JanelaResumoResolucaoQuestoes(QDialog):
             fechar.button(
                 QDialogButtonBox.Close
             ).setText(
-                "Voltar ao resumo da bateria"
+                "Voltar ao Banco de Erros"
+                if banco_erros_sem_impacto
+                else "Voltar ao resumo da bateria"
                 if reforco_sem_impacto
                 else "Voltar ao banco de questões"
             )
@@ -15702,6 +15727,248 @@ def _contexto_sessao_unificada(configuracao):
     return {chave: configuracao.get(chave) for chave in chaves if chave in configuracao}
 
 
+class JanelaBancoErros(QDialog):
+    """Seletor da fila operacional de erros do perfil ativo."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.janela_principal = parent
+        self.concurso = obter_concurso_ativo()
+        self.itens = []
+        self.itens_filtrados = []
+
+        self.setWindowTitle("Banco de Erros")
+        self.resize(900, 650)
+        self.setMinimumSize(760, 560)
+
+        raiz = QVBoxLayout(self)
+        raiz.setContentsMargins(18, 16, 18, 16)
+        raiz.setSpacing(10)
+
+        cabecalho = QHBoxLayout()
+        titulos = QVBoxLayout()
+        titulos.setSpacing(2)
+        titulo = QLabel("BANCO DE ERROS")
+        titulo.setObjectName("pageTitle")
+        subtitulo = QLabel(
+            "Treino livre — não altera Domínio, revisões ou recomendações"
+        )
+        subtitulo.setObjectName("pageSubtitle")
+        subtitulo.setWordWrap(True)
+        titulos.addWidget(titulo)
+        titulos.addWidget(subtitulo)
+        perfil = QLabel(f"Perfil: {self.concurso[1]}")
+        perfil.setObjectName("profileBadge")
+        cabecalho.addLayout(titulos, 1)
+        cabecalho.addWidget(perfil, 0, Qt.AlignVCenter)
+        raiz.addLayout(cabecalho)
+
+        self.contador = QLabel("0 questões pendentes")
+        self.contador.setObjectName("filterCount")
+        raiz.addWidget(self.contador)
+
+        filtros_card = QFrame()
+        filtros_card.setObjectName("questionHistoryFilterCard")
+        filtros = QGridLayout(filtros_card)
+        filtros.setContentsMargins(12, 10, 12, 10)
+        filtros.setHorizontalSpacing(8)
+        filtros.setVerticalSpacing(5)
+
+        self.filtro_disciplina = QComboBox()
+        self.filtro_titulo = QComboBox()
+        self.filtro_capitulo = QComboBox()
+        self.filtro_formato = QComboBox()
+        self.filtro_quantidade = QComboBox()
+        self.filtro_formato.addItem("Todos", None)
+        self.filtro_formato.addItem("Múltipla escolha", "MULTIPLA_ESCOLHA")
+        self.filtro_formato.addItem("Certo / Errado", "CERTO_ERRADO")
+        for texto, valor in (("10", 10), ("20", 20), ("30", 30), ("50", 50), ("Todas", None)):
+            self.filtro_quantidade.addItem(texto, valor)
+
+        campos = (
+            ("Disciplina", self.filtro_disciplina),
+            ("Título / tópico", self.filtro_titulo),
+            ("Capítulo", self.filtro_capitulo),
+            ("Formato da questão", self.filtro_formato),
+            ("Quantidade", self.filtro_quantidade),
+        )
+        for indice, (rotulo_texto, campo) in enumerate(campos):
+            rotulo = QLabel(rotulo_texto)
+            rotulo.setObjectName("miniStatLabel")
+            campo.setMinimumHeight(34)
+            filtros.addWidget(rotulo, 0, indice)
+            filtros.addWidget(campo, 1, indice)
+            filtros.setColumnStretch(indice, 1)
+        raiz.addWidget(filtros_card)
+
+        distribuicao_card = QFrame()
+        distribuicao_card.setObjectName("questionSessionSummaryCard")
+        distribuicao_layout = QVBoxLayout(distribuicao_card)
+        distribuicao_layout.setContentsMargins(12, 9, 12, 9)
+        distribuicao_layout.setSpacing(4)
+        distribuicao_titulo = QLabel("Pendências por disciplina")
+        distribuicao_titulo.setObjectName("miniStatLabel")
+        self.distribuicao = QLabel("—")
+        self.distribuicao.setObjectName("questionSessionSummaryDetail")
+        self.distribuicao.setWordWrap(True)
+        distribuicao_layout.addWidget(distribuicao_titulo)
+        distribuicao_layout.addWidget(self.distribuicao)
+        raiz.addWidget(distribuicao_card)
+
+        explicacao = QLabel(
+            "Acertou: sai da fila. Errou ou não respondeu: permanece pendente. "
+            "As respostas desta tela não entram no histórico acadêmico."
+        )
+        explicacao.setObjectName("questionReviewIntegrationText")
+        explicacao.setWordWrap(True)
+        raiz.addWidget(explicacao)
+        raiz.addStretch(1)
+
+        botoes = QHBoxLayout()
+        fechar = QPushButton("Fechar")
+        fechar.setObjectName("subtleButton")
+        fechar.setMinimumHeight(40)
+        fechar.clicked.connect(self.reject)
+        self.botao_praticar = QPushButton("↻  PRATICAR ERROS")
+        self.botao_praticar.setObjectName("primaryButton")
+        self.botao_praticar.setMinimumHeight(42)
+        self.botao_praticar.setMinimumWidth(220)
+        self.botao_praticar.clicked.connect(self.praticar)
+        botoes.addStretch(1)
+        botoes.addWidget(fechar)
+        botoes.addWidget(self.botao_praticar)
+        raiz.addLayout(botoes)
+
+        self.filtro_disciplina.currentIndexChanged.connect(
+            self.atualizar_titulos
+        )
+        self.filtro_titulo.currentIndexChanged.connect(
+            self.atualizar_capitulos
+        )
+        self.filtro_capitulo.currentIndexChanged.connect(self.aplicar_filtros)
+        self.filtro_formato.currentIndexChanged.connect(self.aplicar_filtros)
+        self.filtro_quantidade.currentIndexChanged.connect(self.aplicar_filtros)
+
+        self.carregar_dados()
+
+    def carregar_dados(self):
+        self.itens = listar_banco_erros_pendentes(self.concurso[0])
+        self.filtro_disciplina.blockSignals(True)
+        self.filtro_disciplina.clear()
+        self.filtro_disciplina.addItem("Todas as disciplinas", None)
+        disciplinas = sorted(
+            {(item["disciplina_id"], item["disciplina"]) for item in self.itens},
+            key=lambda item: item[1].lower(),
+        )
+        for disciplina_id, nome in disciplinas:
+            self.filtro_disciplina.addItem(nome, disciplina_id)
+        self.filtro_disciplina.blockSignals(False)
+        self.atualizar_titulos()
+
+    def atualizar_titulos(self):
+        disciplina_id = self.filtro_disciplina.currentData()
+        candidatos = [
+            item for item in self.itens
+            if disciplina_id is None or item["disciplina_id"] == disciplina_id
+        ]
+        self.filtro_titulo.blockSignals(True)
+        self.filtro_titulo.clear()
+        self.filtro_titulo.addItem("Todos os títulos / tópicos", None)
+        titulos = sorted(
+            {(item["topico_id"], item["titulo"]) for item in candidatos},
+            key=lambda item: item[1].lower(),
+        )
+        for topico_id, nome in titulos:
+            self.filtro_titulo.addItem(nome, topico_id)
+        self.filtro_titulo.blockSignals(False)
+        self.atualizar_capitulos()
+
+    def atualizar_capitulos(self):
+        disciplina_id = self.filtro_disciplina.currentData()
+        topico_id = self.filtro_titulo.currentData()
+        candidatos = [
+            item for item in self.itens
+            if (disciplina_id is None or item["disciplina_id"] == disciplina_id)
+            and (topico_id is None or item["topico_id"] == topico_id)
+        ]
+        self.filtro_capitulo.blockSignals(True)
+        self.filtro_capitulo.clear()
+        self.filtro_capitulo.addItem("Todos os capítulos", None)
+        capitulos = sorted(
+            {
+                (item["capitulo_id"], item["capitulo"])
+                for item in candidatos
+                if item.get("capitulo_id") is not None and item.get("capitulo")
+            },
+            key=lambda item: item[1].lower(),
+        )
+        for capitulo_id, nome in capitulos:
+            self.filtro_capitulo.addItem(nome, capitulo_id)
+        self.filtro_capitulo.setEnabled(bool(capitulos))
+        self.filtro_capitulo.blockSignals(False)
+        self.aplicar_filtros()
+
+    def aplicar_filtros(self):
+        disciplina_id = self.filtro_disciplina.currentData()
+        topico_id = self.filtro_titulo.currentData()
+        capitulo_id = self.filtro_capitulo.currentData()
+        formato = self.filtro_formato.currentData()
+        self.itens_filtrados = [
+            item for item in self.itens
+            if (disciplina_id is None or item["disciplina_id"] == disciplina_id)
+            and (topico_id is None or item["topico_id"] == topico_id)
+            and (capitulo_id is None or item.get("capitulo_id") == capitulo_id)
+            and (formato is None or item.get("tipo_questao") == formato)
+        ]
+        total = len(self.itens_filtrados)
+        self.contador.setText(
+            "1 questão pendente" if total == 1 else f"{total} questões pendentes"
+        )
+        por_disciplina = {}
+        for item in self.itens_filtrados:
+            nome = item["disciplina"]
+            por_disciplina[nome] = por_disciplina.get(nome, 0) + 1
+        linhas = [
+            f"{nome}   {quantidade}"
+            for nome, quantidade in sorted(
+                por_disciplina.items(), key=lambda item: (-item[1], item[0].lower())
+            )
+        ]
+        self.distribuicao.setText("\n".join(linhas) if linhas else "Nenhuma pendência compatível")
+        self.botao_praticar.setEnabled(total > 0)
+
+    def praticar(self):
+        if not self.itens_filtrados:
+            return
+        limite = self.filtro_quantidade.currentData()
+        fila = list(self.itens_filtrados)
+        if limite is not None:
+            fila = fila[:int(limite)]
+        configuracao = {
+            "concurso_id": self.concurso[0],
+            "concurso_nome": self.concurso[1],
+            "modo": "Banco de Erros",
+            "origem_sessao": "banco_erros",
+            "quantidade": len(fila),
+            "fila": fila,
+            "sem_impacto_inteligencia": True,
+            "modo_banco_erros": True,
+            "modo_simulado": False,
+            "feedback_imediato": True,
+            "integrar_revisoes": False,
+            "tempo_limite_minutos": 0,
+            "estrategia_adaptativa": None,
+        }
+        janela = JanelaResolverQuestoes(configuracao, self)
+        janela.exec_nao_modal()
+        self.carregar_dados()
+        if (
+            self.janela_principal is not None
+            and hasattr(self.janela_principal, "atualizar_dashboard")
+        ):
+            self.janela_principal.atualizar_dashboard()
+
+
 
 class JanelaResolverQuestoes(QDialog):
     def __init__(
@@ -15731,6 +15998,13 @@ class JanelaResolverQuestoes(QDialog):
         self.sem_impacto_inteligencia = bool(
             configuracao.get("sem_impacto_inteligencia", False)
         )
+        self.modo_banco_erros = bool(
+            configuracao.get("modo_banco_erros", False)
+        )
+        if self.modo_banco_erros:
+            # O próprio contexto impõe isolamento, mesmo que um chamador
+            # futuro esqueça de enviar a flag genérica de reforço livre.
+            self.sem_impacto_inteligencia = True
         self.fila = list(
             configuracao[
                 "fila"
@@ -15738,6 +16012,8 @@ class JanelaResolverQuestoes(QDialog):
         )
         self.indice = 0
         self.registros = []
+        self.quantidade_planejada_inicial = len(self.fila)
+        self.banco_erros_removidas = set()
         # A primeira vez que uma questão é pulada ela retorna ao fim da
         # própria bateria. Se for pulada novamente, passa a equivaler a erro
         # para a inteligência e para a cobertura da revisão.
@@ -15790,7 +16066,9 @@ class JanelaResolverQuestoes(QDialog):
 
         self.setWindowTitle(
             (
-                "Reforço imediato — sem impacto no histórico"
+                "Banco de Erros — treino sem impacto"
+                if self.modo_banco_erros
+                else "Reforço imediato — sem impacto no histórico"
                 if self.sem_impacto_inteligencia
                 else (
                     "Simulado"
@@ -15880,7 +16158,9 @@ class JanelaResolverQuestoes(QDialog):
 
         titulo = QLabel(
             (
-                "Reforço imediato"
+                "BANCO DE ERROS"
+                if self.modo_banco_erros
+                else "Reforço imediato"
                 if self.sem_impacto_inteligencia
                 else (
                     "Simulado"
@@ -15895,7 +16175,9 @@ class JanelaResolverQuestoes(QDialog):
 
         self.sessao_contexto = QLabel(
             (
-                "Reforço pós-bateria • estas respostas não alteram histórico, revisões, Domínio ou recomendações"
+                "BANCO DE ERROS • MODO SEM IMPACTO NA INTELIGÊNCIA"
+                if self.modo_banco_erros
+                else "Reforço pós-bateria • estas respostas não alteram histórico, revisões, Domínio ou recomendações"
                 if self.sem_impacto_inteligencia
                 else (
                     f"{configuracao['concurso_nome']} • "
@@ -16295,11 +16577,19 @@ class JanelaResolverQuestoes(QDialog):
             Qt.TextSelectableByMouse
         )
 
+        self.feedback_fila = QLabel("")
+        self.feedback_fila.setObjectName("questionSessionSummaryDetail")
+        self.feedback_fila.setWordWrap(True)
+        self.feedback_fila.setVisible(False)
+
         feedback_layout.addWidget(
             self.feedback_titulo
         )
         feedback_layout.addWidget(
             self.feedback_explicacao
+        )
+        feedback_layout.addWidget(
+            self.feedback_fila
         )
 
         conteudo_layout.addWidget(
@@ -16332,8 +16622,12 @@ class JanelaResolverQuestoes(QDialog):
             self.pular
         )
         self.botao_pular.setToolTip(
-            "Primeiro pulo: a questão volta ao final da bateria. "
-            "Se for pulada novamente, será tratada como erro pela inteligência."
+            (
+                "Pular mantém a questão pendente no Banco de Erros."
+                if self.modo_banco_erros
+                else "Primeiro pulo: a questão volta ao final da bateria. "
+                "Se for pulada novamente, será tratada como erro pela inteligência."
+            )
         )
 
         self.botao_confirmar = QPushButton(
@@ -16685,7 +16979,16 @@ class JanelaResolverQuestoes(QDialog):
             ]
         )
 
-        if dados is None:
+        if (
+            dados is None
+            or (
+                self.modo_banco_erros
+                and (
+                    not dados.get("ativa", False)
+                    or dados.get("excluida", False)
+                )
+            )
+        ):
             self.indice += 1
             self.carregar_atual()
             return
@@ -16735,18 +17038,24 @@ class JanelaResolverQuestoes(QDialog):
         )
         self.botao_pular.setToolTip(
             (
-                "Segundo pulo: esta questão será registrada como erro para "
-                "a inteligência e passará a contar como coberta."
-                if retorno_pulo
+                "Pular mantém a questão pendente no Banco de Erros."
+                if self.modo_banco_erros
                 else (
-                    "Primeiro pulo: a questão volta ao final da bateria. "
-                    "Se for pulada novamente, será tratada como erro pela inteligência."
+                    "Segundo pulo: esta questão será registrada como erro para "
+                    "a inteligência e passará a contar como coberta."
+                    if retorno_pulo
+                    else (
+                        "Primeiro pulo: a questão volta ao final da bateria. "
+                        "Se for pulada novamente, será tratada como erro pela inteligência."
+                    )
                 )
             )
         )
 
         estado_historico = (
-            "Reforço sem impacto"
+            "Banco de Erros • treino livre"
+            if self.modo_banco_erros
+            else "Reforço sem impacto"
             if self.sem_impacto_inteligencia
             else (
                 "Inédita"
@@ -17016,6 +17325,7 @@ class JanelaResolverQuestoes(QDialog):
         self.feedback.setVisible(
             False
         )
+        self.feedback_fila.setVisible(False)
         self.botao_pular.setEnabled(
             True
         )
@@ -17142,6 +17452,25 @@ class JanelaResolverQuestoes(QDialog):
                 "gabarito": gabarito_local,
                 "alternativa_marcada": marcada,
             }
+            if self.modo_banco_erros:
+                try:
+                    resultado_fila = processar_resposta_banco_erros(
+                        self.configuracao["concurso_id"],
+                        self.questao_atual["id"],
+                        resultado["correta"],
+                    )
+                except Exception as erro:
+                    QMessageBox.critical(
+                        self,
+                        "Banco de Erros",
+                        "Não foi possível atualizar a pendência.\n\n" + str(erro),
+                    )
+                    return
+                resultado["resultado_banco_erros"] = resultado_fila
+                if resultado_fila.get("removida"):
+                    self.banco_erros_removidas.add(
+                        int(self.questao_atual["id"])
+                    )
         else:
             try:
                 resultado = registrar_tentativa_questao(
@@ -17209,6 +17538,9 @@ class JanelaResolverQuestoes(QDialog):
             ],
             "marcada": marcada,
             "gabarito": gabarito,
+            "removida_banco_erros": bool(
+                resultado.get("resultado_banco_erros", {}).get("removida")
+            ),
         })
 
         for botao in self.botao_eliminar_por_letra.values():
@@ -17337,6 +17669,14 @@ class JanelaResolverQuestoes(QDialog):
             self.feedback_explicacao.setText(
                 "Esta questão não possui explicação cadastrada."
             )
+
+        if self.modo_banco_erros:
+            self.feedback_fila.setText(
+                "Questão removida do Banco de Erros"
+                if correta
+                else "Questão permanece no Banco de Erros"
+            )
+            self.feedback_fila.setVisible(True)
 
         self.feedback.style().unpolish(
             self.feedback
@@ -17526,8 +17866,15 @@ class JanelaResolverQuestoes(QDialog):
                 if self.modo_simulado
                 else (
                     (
-                        "Deseja encerrar o reforço imediato agora?\n\n"
-                        "As respostas desta rodada não são gravadas no histórico do Vighna."
+                        (
+                            "Deseja encerrar o Banco de Erros agora?\n\n"
+                            "Questões não respondidas ou erradas permanecerão pendentes."
+                        )
+                        if self.modo_banco_erros
+                        else (
+                            "Deseja encerrar o reforço imediato agora?\n\n"
+                            "As respostas desta rodada não são gravadas no histórico do Vighna."
+                        )
                     )
                     if self.sem_impacto_inteligencia
                     else (
@@ -17589,14 +17936,22 @@ class JanelaResolverQuestoes(QDialog):
                 "concurso_id": self.configuracao.get("concurso_id"),
                 "concurso": self.configuracao.get("concurso_nome", "VighnaStudy"),
                 "modo": self.configuracao.get("modo", "Reforço imediato"),
-                "objetivo": len(self.fila),
+                "objetivo": self.quantidade_planejada_inicial,
                 "concluida": bool(concluida),
-                "origem": "reforco_pos_bateria",
+                "origem": (
+                    "banco_erros"
+                    if self.modo_banco_erros
+                    else "reforco_pos_bateria"
+                ),
                 "versao_motor": "sem_registro",
-                "planejadas": len(self.fila),
+                "planejadas": self.quantidade_planejada_inicial,
                 "apresentadas": min(len(self.fila), len(self.registros)),
                 "nao_respondidas": 0,
-                "nao_alcancadas": max(0, len(self.fila) - len(self.registros)),
+                "nao_alcancadas": max(
+                    0,
+                    self.quantidade_planejada_inicial
+                    - len({item.get("questao_id") for item in self.registros}),
+                ),
                 "processadas": len(self.registros),
                 "respondidas": respondidas,
                 "acertos": acertos,
@@ -17604,6 +17959,13 @@ class JanelaResolverQuestoes(QDialog):
                 "puladas": puladas,
                 "duvidas": duvidas,
                 "desempenho": desempenho,
+                "praticadas": respondidas,
+                "removidas_fila": len(self.banco_erros_removidas),
+                "ainda_pendentes": max(
+                    0,
+                    self.quantidade_planejada_inicial
+                    - len(self.banco_erros_removidas),
+                ),
             }
             self.resumo_final = resumo
             JanelaResumoResolucaoQuestoes(
@@ -17733,9 +18095,17 @@ class JanelaResolverQuestoes(QDialog):
                 if self.modo_simulado
                 else (
                     (
-                        "Fechar esta janela encerrará o reforço imediato.\n\n"
-                        "As respostas desta rodada não são gravadas no histórico. "
-                        "Deseja continuar?"
+                        (
+                            "Fechar esta janela encerrará o Banco de Erros.\n\n"
+                            "Questões não respondidas ou erradas permanecerão pendentes. "
+                            "Deseja continuar?"
+                        )
+                        if self.modo_banco_erros
+                        else (
+                            "Fechar esta janela encerrará o reforço imediato.\n\n"
+                            "As respostas desta rodada não são gravadas no histórico. "
+                            "Deseja continuar?"
+                        )
                     )
                     if self.sem_impacto_inteligencia
                     else (
@@ -17755,9 +18125,15 @@ class JanelaResolverQuestoes(QDialog):
             return
 
         if self.sem_impacto_inteligencia:
-            self.finalizada = True
             event.ignore()
-            self.reject()
+            if self.modo_banco_erros:
+                self.finalizar(
+                    False,
+                    "Encerrado ao fechar"
+                )
+            else:
+                self.finalizada = True
+                self.reject()
             return
 
         if self.modo_simulado:
@@ -18865,6 +19241,16 @@ class JanelaHistoricoQuestoes(QDialog):
             self.revisar_meus_erros
         )
 
+        praticar_pendentes = QPushButton(
+            "↺ Praticar pendentes"
+        )
+        praticar_pendentes.setObjectName(
+            "subtleButton"
+        )
+        praticar_pendentes.clicked.connect(
+            self.abrir_banco_erros
+        )
+
         ver = QPushButton(
             "Ver questão"
         )
@@ -18899,6 +19285,9 @@ class JanelaHistoricoQuestoes(QDialog):
             self.erros_contagem
         )
         barra.addStretch()
+        barra.addWidget(
+            praticar_pendentes
+        )
         barra.addWidget(
             revisar
         )
@@ -20296,6 +20685,10 @@ class JanelaHistoricoQuestoes(QDialog):
             fila,
             "Revisar erros"
         )
+
+    def abrir_banco_erros(self):
+        JanelaBancoErros(self).exec()
+        self.atualizar_dados()
 
 
 class JanelaExplicacaoRecomendacao(QDialog):
@@ -31772,6 +32165,15 @@ class SistemaEstudos(QMainWindow):
                 "prioridade": 89,
             },
             {
+                "id": "banco_erros",
+                "categoria": "ESTUDO",
+                "titulo": "Banco de Erros",
+                "descricao": "Praticar pendências sem impacto na inteligência",
+                "termos": "banco erros pendentes recuperar treino livre",
+                "atalho": "",
+                "prioridade": 90,
+            },
+            {
                 "id": "central_questoes",
                 "categoria": "NAVEGAÇÃO",
                 "titulo": "Central de Questões",
@@ -31897,6 +32299,8 @@ class SistemaEstudos(QMainWindow):
             self.abrir_treino_adaptativo()
         elif comando_id == "simulado":
             self.abrir_simulado()
+        elif comando_id == "banco_erros":
+            self.abrir_banco_erros()
         elif comando_id == "central_questoes":
             self.abrir_questoes()
         elif comando_id == "estatisticas":
@@ -35336,7 +35740,7 @@ class SistemaEstudos(QMainWindow):
         )
 
         self.estudar_agora_subtitulo = QLabel(
-            "Escolha como deseja praticar: revisar, treinar de forma adaptativa ou simular uma prova."
+            "Escolha como deseja praticar: revisar, treinar, simular ou recuperar pendências."
         )
         self.estudar_agora_subtitulo.setObjectName(
             "dashboardActionSectionSubtitle"
@@ -35396,10 +35800,12 @@ class SistemaEstudos(QMainWindow):
         dashboard_estudar_conteudo_layout.addLayout(nucleo_metricas)
 
         # ----------------------------------------------------
-        # Três modos principais — mesma hierarquia visual
+        # Quatro modos principais — mesma hierarquia visual
         # ----------------------------------------------------
-        modos_layout = QHBoxLayout()
+        modos_layout = QGridLayout()
         modos_layout.setSpacing(8)
+        modos_layout.setColumnStretch(0, 1)
+        modos_layout.setColumnStretch(1, 1)
 
         # Revisão Inteligente
         revisao_card = QFrame()
@@ -35570,9 +35976,56 @@ class SistemaEstudos(QMainWindow):
         simulado_layout.addStretch(1)
         simulado_layout.addWidget(self.botao_simulado)
 
-        modos_layout.addWidget(revisao_card, 1)
-        modos_layout.addWidget(adaptativo_card, 1)
-        modos_layout.addWidget(simulado_card, 1)
+        # Banco de Erros
+        banco_erros_card = QFrame()
+        banco_erros_card.setObjectName("strategyCompactCard")
+        banco_erros_card.setProperty("actionRole", "recovery")
+        banco_erros_card.setMinimumHeight(198)
+        banco_erros_card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        banco_erros_layout = QVBoxLayout(banco_erros_card)
+        banco_erros_layout.setContentsMargins(13, 12, 13, 12)
+        banco_erros_layout.setSpacing(6)
+
+        banco_erros_topo = QHBoxLayout()
+        banco_erros_topo.setSpacing(8)
+        banco_erros_icone = QLabel("↺")
+        banco_erros_icone.setObjectName("strategyCardIcon")
+        banco_erros_icone.setAlignment(Qt.AlignCenter)
+        banco_erros_icone.setFixedSize(34, 34)
+        banco_erros_titulos = QVBoxLayout()
+        banco_erros_titulos.setSpacing(1)
+        banco_erros_titulo = QLabel("Banco de Erros")
+        banco_erros_titulo.setObjectName("strategyCardTitle")
+        self.banco_erros_resumo = QLabel("— pendentes")
+        self.banco_erros_resumo.setObjectName("studyReviewCount")
+        banco_erros_titulos.addWidget(banco_erros_titulo)
+        banco_erros_titulos.addWidget(self.banco_erros_resumo)
+        banco_erros_topo.addWidget(banco_erros_icone)
+        banco_erros_topo.addLayout(banco_erros_titulos, 1)
+
+        banco_erros_descricao = QLabel(
+            "Pratique pendências livremente: acertou, sai; errou, permanece."
+        )
+        banco_erros_descricao.setObjectName("strategyCardDescription")
+        banco_erros_descricao.setWordWrap(True)
+        banco_erros_aviso = QLabel("Sem impacto na inteligência")
+        banco_erros_aviso.setObjectName("studyAdaptiveCriteria")
+        self.botao_banco_erros = QPushButton("Praticar")
+        self.botao_banco_erros.setObjectName("subtleButton")
+        self.botao_banco_erros.setMinimumHeight(38)
+        self.botao_banco_erros.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.botao_banco_erros.clicked.connect(self.abrir_banco_erros)
+
+        banco_erros_layout.addLayout(banco_erros_topo)
+        banco_erros_layout.addWidget(banco_erros_descricao)
+        banco_erros_layout.addWidget(banco_erros_aviso)
+        banco_erros_layout.addStretch(1)
+        banco_erros_layout.addWidget(self.botao_banco_erros)
+
+        modos_layout.addWidget(revisao_card, 0, 0)
+        modos_layout.addWidget(adaptativo_card, 0, 1)
+        modos_layout.addWidget(simulado_card, 1, 0)
+        modos_layout.addWidget(banco_erros_card, 1, 1)
         dashboard_estudar_conteudo_layout.addLayout(modos_layout)
 
         # ----------------------------------------------------
@@ -37991,6 +38444,17 @@ class SistemaEstudos(QMainWindow):
         except Exception:
             pass
 
+        try:
+            pendentes_banco_erros = contar_banco_erros_pendentes(concurso_id)
+        except Exception:
+            pendentes_banco_erros = 0
+        if hasattr(self, "banco_erros_resumo"):
+            self.banco_erros_resumo.setText(
+                "1 pendente"
+                if pendentes_banco_erros == 1
+                else f"{pendentes_banco_erros} pendentes"
+            )
+
         resumo = obter_dashboard(
             hoje,
             concurso_id,
@@ -38382,7 +38846,7 @@ class SistemaEstudos(QMainWindow):
         self.botao_estudar_agora.setVisible(False)
         if hasattr(self, "estudar_agora_subtitulo"):
             self.estudar_agora_subtitulo.setText(
-                "Escolha como deseja praticar: revisar, treinar de forma adaptativa ou simular uma prova."
+                "Escolha como deseja praticar: revisar, treinar, simular ou recuperar pendências."
             )
 
         # Resumo visual de "Estudar agora".
@@ -41701,6 +42165,10 @@ class SistemaEstudos(QMainWindow):
         janela.exec()
 
         self.carregar_questoes()
+        self.atualizar_dashboard()
+
+    def abrir_banco_erros(self):
+        JanelaBancoErros(self).exec()
         self.atualizar_dashboard()
 
     def resolver_questoes(self):

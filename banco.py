@@ -418,7 +418,10 @@ def comparar_metricas_nucleo_topico(topico_id, concurso_id=None):
 
 
 def criar_banco():
-    with conectar() as conexao:
+    # O context manager nativo do sqlite confirma ou reverte a transação, mas
+    # não fecha a conexão. O fechamento explícito evita bloquear bancos
+    # temporários no Windows após a migração.
+    with closing(conectar()) as conexao, conexao:
         # Ajustes seguros para uso local: WAL reduz bloqueios entre leituras e
         # escritas curtas; NORMAL evita sincronizações excessivas sem abrir mão
         # da durabilidade esperada do SQLite em desktop.
@@ -1199,6 +1202,42 @@ def criar_banco():
             )
         """)
 
+        # Banco de Erros: fila operacional mínima e isolada do histórico
+        # acadêmico. A pendência identifica apenas que uma questão precisa ser
+        # praticada novamente por um perfil; respostas desse modo não recebem
+        # tabela própria e não entram em ``tentativas_questoes``.
+        conexao.execute("""
+            CREATE TABLE IF NOT EXISTS banco_erros_pendentes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                concurso_id INTEGER NOT NULL,
+                questao_id INTEGER NOT NULL,
+                data_entrada TEXT NOT NULL DEFAULT (
+                    datetime('now', 'localtime')
+                ),
+                tentativa_origem_id INTEGER,
+                UNIQUE (concurso_id, questao_id),
+                FOREIGN KEY (concurso_id)
+                    REFERENCES concursos(id)
+                    ON DELETE CASCADE,
+                FOREIGN KEY (questao_id)
+                    REFERENCES questoes(id)
+                    ON DELETE CASCADE,
+                FOREIGN KEY (tentativa_origem_id)
+                    REFERENCES tentativas_questoes(id)
+                    ON DELETE SET NULL
+            )
+        """)
+
+        conexao.execute("""
+            CREATE INDEX IF NOT EXISTS idx_banco_erros_concurso_entrada
+            ON banco_erros_pendentes(concurso_id, data_entrada, id)
+        """)
+
+        conexao.execute("""
+            CREATE INDEX IF NOT EXISTS idx_banco_erros_questao
+            ON banco_erros_pendentes(questao_id)
+        """)
+
         colunas_tentativas = {
             linha[1]
             for linha in conexao.execute(
@@ -1873,6 +1912,10 @@ def criar_banco():
             conexao.execute("PRAGMA optimize")
         except sqlite3.DatabaseError:
             pass
+
+    # O backfill usa a classificação canônica do Caderno de Erros e, por isso,
+    # roda somente depois de a migração estrutural acima ter sido confirmada.
+    executar_backfill_banco_erros_pendentes()
 
 
 def listar_concursos():
@@ -16379,7 +16422,10 @@ def registrar_tentativa_questao(
         else None
     )
 
-    with conectar() as conexao:
+    # Mantém o commit/rollback transacional do sqlite e fecha o handle ao sair.
+    # Isso é especialmente importante nos testes com bancos temporários no
+    # Windows, onde um handle vivo impede a remoção do arquivo.
+    with closing(conectar()) as conexao, conexao:
         sessao = conexao.execute(
             """
             SELECT concurso_id, encerrado_em
@@ -16609,6 +16655,17 @@ def registrar_tentativa_questao(
                 item_sessao_id,
             ),
         )
+
+        # Toda resposta acadêmica incorreta válida entra na fila temporária.
+        # Modos sem impacto não chamam este registrador e, portanto, nunca
+        # criam pendências nem qualquer evidência acadêmica adicional.
+        if resultado == 0:
+            _inserir_pendencia_banco_erros(
+                conexao,
+                concurso_id,
+                questao_id,
+                tentativa_origem_id=cursor.lastrowid,
+            )
 
         if item_sessao_id is not None:
             conexao.execute(
@@ -17841,7 +17898,9 @@ def listar_caderno_erros_questoes(
         concurso_id
     )
 
-    with conectar() as conexao:
+    # Esta rotina também é usada durante a migração inicial. Fechar a conexão
+    # explicitamente evita manter bancos temporários bloqueados no Windows.
+    with closing(conectar()) as conexao:
         referencias = conexao.execute(
             """
             SELECT DISTINCT
@@ -18176,6 +18235,328 @@ def listar_caderno_erros_questoes(
     )
 
     return resultado
+
+
+def _inserir_pendencia_banco_erros(
+    conexao,
+    concurso_id,
+    questao_id,
+    tentativa_origem_id=None,
+    data_entrada=None,
+):
+    """Insere uma pendência sem duplicar a questão dentro do perfil."""
+    parametros = (
+        int(concurso_id),
+        int(questao_id),
+        (
+            int(tentativa_origem_id)
+            if tentativa_origem_id not in (None, "")
+            else None
+        ),
+    )
+    if data_entrada:
+        cursor = conexao.execute(
+            """
+            INSERT OR IGNORE INTO banco_erros_pendentes (
+                concurso_id, questao_id, tentativa_origem_id, data_entrada
+            ) VALUES (?, ?, ?, ?)
+            """,
+            (*parametros, str(data_entrada)),
+        )
+    else:
+        cursor = conexao.execute(
+            """
+            INSERT OR IGNORE INTO banco_erros_pendentes (
+                concurso_id, questao_id, tentativa_origem_id
+            ) VALUES (?, ?, ?)
+            """,
+            parametros,
+        )
+    return bool(cursor.rowcount)
+
+
+def adicionar_pendencia_banco_erros(
+    concurso_id,
+    questao_id,
+    tentativa_origem_id=None,
+    data_entrada=None,
+):
+    """Registra a consequência operacional de um erro acadêmico real."""
+    with closing(conectar()) as conexao:
+        inserida = _inserir_pendencia_banco_erros(
+            conexao,
+            concurso_id,
+            questao_id,
+            tentativa_origem_id,
+            data_entrada,
+        )
+        conexao.commit()
+        return inserida
+
+
+def remover_pendencia_banco_erros(concurso_id, questao_id):
+    """Remove apenas a pendência auxiliar, preservando todo o histórico."""
+    with closing(conectar()) as conexao:
+        cursor = conexao.execute(
+            """
+            DELETE FROM banco_erros_pendentes
+            WHERE concurso_id = ? AND questao_id = ?
+            """,
+            (int(concurso_id), int(questao_id)),
+        )
+        conexao.commit()
+        return bool(cursor.rowcount)
+
+
+def processar_resposta_banco_erros(concurso_id, questao_id, correta):
+    """Atualiza exclusivamente a fila temporária do Banco de Erros.
+
+    Esta função deliberadamente não cria sessão, tentativa, revisão, evento de
+    gamificação ou qualquer outro registro acadêmico.
+    """
+    concurso_id = int(concurso_id)
+    questao_id = int(questao_id)
+    correta = bool(correta)
+
+    with closing(conectar()) as conexao:
+        if correta:
+            cursor = conexao.execute(
+                """
+                DELETE FROM banco_erros_pendentes
+                WHERE concurso_id = ? AND questao_id = ?
+                """,
+                (concurso_id, questao_id),
+            )
+            conexao.commit()
+            return {
+                "correta": True,
+                "removida": bool(cursor.rowcount),
+                "pendente": False,
+            }
+
+        _inserir_pendencia_banco_erros(
+            conexao,
+            concurso_id,
+            questao_id,
+        )
+        conexao.commit()
+        return {
+            "correta": False,
+            "removida": False,
+            "pendente": True,
+        }
+
+
+def listar_banco_erros_pendentes(
+    concurso_id=None,
+    disciplina_id=None,
+    topico_id=None,
+    capitulo_id=None,
+    tipo_questao=None,
+    incluir_indisponiveis=False,
+):
+    """Lista a fila do perfil, sem misturá-la às fontes acadêmicas.
+
+    Por padrão só retorna questões que podem ser resolvidas agora: ativas,
+    fora da Lixeira e pertencentes ao conteúdo habilitado no perfil.
+    Pendências indisponíveis continuam armazenadas e reaparecem se a questão
+    ou o conteúdo forem reativados.
+    """
+    if concurso_id is None:
+        concurso_id = obter_concurso_ativo()[0]
+    concurso_id = int(concurso_id)
+
+    filtros = ["be.concurso_id = ?"]
+    parametros = [concurso_id]
+    if not incluir_indisponiveis:
+        filtros.extend([
+            "q.ativa = 1",
+            "COALESCE(q.excluida, 0) = 0",
+            "dc.incluido = 1",
+            "COALESCE(dc.pausado, 0) = 0",
+            "tc.incluido = 1",
+            "COALESCE(tc.pausado, 0) = 0",
+            "(q.capitulo_id IS NULL OR COALESCE(cc.pausado, 0) = 0)",
+        ])
+    if disciplina_id not in (None, ""):
+        filtros.append("d.id = ?")
+        parametros.append(int(disciplina_id))
+    if topico_id not in (None, ""):
+        filtros.append("t.id = ?")
+        parametros.append(int(topico_id))
+    if capitulo_id not in (None, ""):
+        filtros.append("q.capitulo_id = ?")
+        parametros.append(int(capitulo_id))
+    if tipo_questao not in (None, "", "TODOS"):
+        filtros.append("COALESCE(q.tipo_questao, 'MULTIPLA_ESCOLHA') = ?")
+        parametros.append(normalizar_tipo_questao(tipo_questao))
+
+    with closing(conectar()) as conexao:
+        linhas = conexao.execute(
+            f"""
+            SELECT
+                be.id,
+                q.id,
+                q.topico_id,
+                q.capitulo_id,
+                d.id,
+                d.nome,
+                t.nome,
+                COALESCE(c.nome, ''),
+                q.enunciado,
+                COALESCE(q.banca, ''),
+                q.ano,
+                COALESCE(q.fonte, ''),
+                COALESCE(q.dificuldade, 'Não informada'),
+                COALESCE(q.tipo_questao, 'MULTIPLA_ESCOLHA'),
+                q.ativa,
+                COALESCE(q.excluida, 0),
+                be.data_entrada,
+                be.tentativa_origem_id,
+                (
+                    SELECT COUNT(*)
+                    FROM tentativas_questoes tq
+                    WHERE tq.concurso_id = be.concurso_id
+                      AND COALESCE(tq.questao_id_snapshot, tq.questao_id) = q.id
+                      AND tq.correta IS NOT NULL
+                )
+            FROM banco_erros_pendentes be
+            JOIN questoes q ON q.id = be.questao_id
+            JOIN topicos t ON t.id = q.topico_id
+            JOIN disciplinas d ON d.id = t.disciplina_id
+            LEFT JOIN capitulos_topico c ON c.id = q.capitulo_id
+            LEFT JOIN disciplina_concurso_inclusao dc
+                ON dc.disciplina_id = d.id
+               AND dc.concurso_id = be.concurso_id
+            LEFT JOIN topico_concurso_importancia tc
+                ON tc.topico_id = t.id
+               AND tc.concurso_id = be.concurso_id
+            LEFT JOIN capitulo_concurso_config cc
+                ON cc.capitulo_id = q.capitulo_id
+               AND cc.concurso_id = be.concurso_id
+            WHERE {' AND '.join(filtros)}
+            ORDER BY
+                be.data_entrada ASC,
+                d.nome COLLATE NOCASE,
+                t.nome COLLATE NOCASE,
+                q.id
+            """,
+            tuple(parametros),
+        ).fetchall()
+
+    return [
+        {
+            "pendencia_id": int(linha[0]),
+            "id": int(linha[1]),
+            "questao_id": int(linha[1]),
+            "topico_id": int(linha[2]),
+            "capitulo_id": linha[3],
+            "disciplina_id": int(linha[4]),
+            "disciplina": linha[5],
+            "titulo": linha[6],
+            "topico": linha[6],
+            "capitulo": linha[7] or "",
+            "enunciado": linha[8],
+            "banca": linha[9] or "",
+            "ano": linha[10],
+            "fonte": linha[11] or "",
+            "dificuldade": linha[12] or "Não informada",
+            "tipo_questao": linha[13] or "MULTIPLA_ESCOLHA",
+            "ativa": bool(linha[14]) and not bool(linha[15]),
+            "data_entrada": linha[16],
+            "tentativa_origem_id": linha[17],
+            "tentativas_anteriores": int(linha[18] or 0),
+            "inedita": False,
+        }
+        for linha in linhas
+    ]
+
+
+def contar_banco_erros_pendentes(concurso_id=None, incluir_indisponiveis=False):
+    return len(
+        listar_banco_erros_pendentes(
+            concurso_id,
+            incluir_indisponiveis=incluir_indisponiveis,
+        )
+    )
+
+
+def executar_backfill_banco_erros_pendentes():
+    """Migração idempotente baseada no Caderno de Erros canônico."""
+    nome_migracao = "banco_erros_pendentes_backfill_v1"
+    try:
+        with closing(conectar()) as conexao:
+            executada = conexao.execute(
+                "SELECT 1 FROM migracoes WHERE nome = ?",
+                (nome_migracao,),
+            ).fetchone()
+            if executada is not None:
+                return 0
+            concursos = [
+                int(linha[0])
+                for linha in conexao.execute("SELECT id FROM concursos ORDER BY id")
+            ]
+
+        candidatos = []
+        for concurso_id in concursos:
+            for item in listar_caderno_erros_questoes(concurso_id):
+                if item.get("status") not in {
+                    "Erro isolado",
+                    "Recorrente",
+                    "Crítica",
+                }:
+                    continue
+                candidatos.append((concurso_id, int(item["questao_id"])))
+
+        inseridas = 0
+        with closing(conectar()) as conexao:
+            for concurso_id, questao_id in candidatos:
+                questao_existe = conexao.execute(
+                    "SELECT 1 FROM questoes WHERE id = ?",
+                    (questao_id,),
+                ).fetchone()
+                if questao_existe is None:
+                    # O Caderno preserva snapshots de questões removidas, mas
+                    # a fila operacional só pode apontar para questão existente.
+                    continue
+                origem = conexao.execute(
+                    """
+                    SELECT id, respondida_em
+                    FROM tentativas_questoes
+                    WHERE concurso_id = ?
+                      AND COALESCE(questao_id_snapshot, questao_id) = ?
+                      AND correta = 0
+                    ORDER BY respondida_em DESC, id DESC
+                    LIMIT 1
+                    """,
+                    (concurso_id, questao_id),
+                ).fetchone()
+                if origem is None:
+                    continue
+                inseridas += int(
+                    _inserir_pendencia_banco_erros(
+                        conexao,
+                        concurso_id,
+                        questao_id,
+                        tentativa_origem_id=origem[0],
+                        data_entrada=origem[1],
+                    )
+                )
+
+            conexao.execute(
+                """
+                INSERT OR IGNORE INTO migracoes (nome, executada_em)
+                VALUES (?, datetime('now', 'localtime'))
+                """,
+                (nome_migracao,),
+            )
+            conexao.commit()
+        return inseridas
+    except Exception:
+        # Uma base antiga atípica não deve impedir a abertura. Sem o marco, o
+        # backfill será tentado novamente depois de a causa ser corrigida.
+        LOGGER.exception("Falha no backfill inicial do Banco de Erros")
+        return 0
 
 
 def obter_estatisticas_historico_questoes(

@@ -1,3 +1,4 @@
+import gc
 import tempfile
 import unittest
 from pathlib import Path
@@ -14,6 +15,7 @@ class CapitulosGenericosTests(unittest.TestCase):
 
     def tearDown(self):
         banco.CAMINHO_BANCO = self.original_path
+        gc.collect()
         self.tempdir.cleanup()
 
     def test_disciplina_generica_pode_ter_capitulos_manuais(self):
