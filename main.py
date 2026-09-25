@@ -17004,6 +17004,11 @@ class JanelaResolverQuestoes(QDialog):
             widget = item.widget()
 
             if widget is not None:
+                # O frame removido ainda permanece vivo até o próximo ciclo
+                # do event loop por causa de deleteLater(). Escondê-lo antes
+                # evita que filhos antigos (principalmente o botão ✂) sejam
+                # repintados isoladamente durante a troca de questão.
+                widget.hide()
                 widget.deleteLater()
 
         self.grupo_alternativas = QButtonGroup(
@@ -17275,138 +17280,151 @@ class JanelaResolverQuestoes(QDialog):
             ]
         )
 
-        self.limpar_alternativas()
+        # A lista de alternativas é reconstruída como uma atualização atômica.
+        # Sem isso, o Windows pode receber um repaint entre a remoção dos
+        # widgets antigos e a inserção dos novos, produzindo um pequeno
+        # "flash" do QToolButton de eliminação no meio da janela.
+        self.alternativas_container.setUpdatesEnabled(False)
+        try:
+            self.limpar_alternativas()
 
-        for alternativa in dados[
-            "alternativas"
-        ]:
-            letra = alternativa[
-                "letra"
-            ]
-
-            frame = QFrame()
-            frame.setObjectName(
-                "questionSolverAlternative"
-            )
-            frame.setProperty(
-                "answerState",
-                "normal"
-            )
-
-            linha = QHBoxLayout(
-                frame
-            )
-            linha.setContentsMargins(
-                11,
-                9,
-                11,
-                9
-            )
-            linha.setSpacing(
-                8
-            )
-
-            eliminar = QToolButton()
-            eliminar.setObjectName(
-                "questionSolverEliminateButton"
-            )
-            eliminar.setText(
-                "✂"
-            )
-            eliminar.setCheckable(
-                True
-            )
-            eliminar.setAutoRaise(
-                True
-            )
-            eliminar.setFixedSize(
-                24,
-                24
-            )
-            eliminar.setToolTip(
-                f"Eliminar alternativa {letra}"
-            )
-            eliminar.setVisible(
-                tipo_questao != "CERTO_ERRADO"
-            )
-            eliminar.setAccessibleName(
-                eliminar.toolTip()
-            )
-
-            radio = QRadioButton(
-                _rotulo_resposta_questao(
-                    letra,
-                    tipo_questao
-                )
-            )
-            radio.setObjectName(
-                "questionSolverRadio"
-            )
-            radio.setProperty(
-                "letra",
-                letra
-            )
-            radio.setFixedWidth(
-                100 if tipo_questao == "CERTO_ERRADO" else 36
-            )
-
-            texto = QLabel(
-                alternativa[
-                    "texto"
+            for alternativa in dados[
+                "alternativas"
+            ]:
+                letra = alternativa[
+                    "letra"
                 ]
-            )
-            texto.setObjectName(
-                "questionSolverAlternativeText"
-            )
-            texto.setWordWrap(
-                True
-            )
-            texto.setTextInteractionFlags(
-                Qt.TextSelectableByMouse
-            )
 
-            linha.addWidget(
-                eliminar,
-                0,
-                Qt.AlignTop
-            )
-            linha.addWidget(
-                radio,
-                0,
-                Qt.AlignTop
-            )
-            linha.addWidget(
-                texto,
-                1
-            )
+                # Pais explícitos impedem que qualquer controle da alternativa
+                # exista, ainda que por um instante, como janela top-level.
+                frame = QFrame(self.alternativas_container)
+                frame.setObjectName(
+                    "questionSolverAlternative"
+                )
+                frame.setProperty(
+                    "answerState",
+                    "normal"
+                )
 
-            self.grupo_alternativas.addButton(
-                radio
-            )
-            self.radio_por_letra[
-                letra
-            ] = radio
-            self.frame_por_letra[
-                letra
-            ] = frame
-            self.texto_por_letra[
-                letra
-            ] = texto
-            self.botao_eliminar_por_letra[
-                letra
-            ] = eliminar
+                linha = QHBoxLayout(
+                    frame
+                )
+                linha.setContentsMargins(
+                    11,
+                    9,
+                    11,
+                    9
+                )
+                linha.setSpacing(
+                    8
+                )
 
-            eliminar.toggled.connect(
-                lambda eliminada, alternativa_letra=letra:
-                    self.alternar_eliminacao_alternativa(
-                        alternativa_letra,
-                        eliminada
-                    )
-            )
+                eliminar = QToolButton(frame)
+                eliminar.setObjectName(
+                    "questionSolverEliminateButton"
+                )
+                eliminar.setText(
+                    "✂"
+                )
+                eliminar.setCheckable(
+                    True
+                )
+                eliminar.setAutoRaise(
+                    True
+                )
+                eliminar.setFixedSize(
+                    24,
+                    24
+                )
+                eliminar.setToolTip(
+                    f"Eliminar alternativa {letra}"
+                )
+                eliminar.setVisible(
+                    tipo_questao != "CERTO_ERRADO"
+                )
+                eliminar.setAccessibleName(
+                    eliminar.toolTip()
+                )
 
-            self.alternativas_layout.addWidget(
-                frame
-            )
+                radio = QRadioButton(
+                    _rotulo_resposta_questao(
+                        letra,
+                        tipo_questao
+                    ),
+                    frame
+                )
+                radio.setObjectName(
+                    "questionSolverRadio"
+                )
+                radio.setProperty(
+                    "letra",
+                    letra
+                )
+                radio.setFixedWidth(
+                    100 if tipo_questao == "CERTO_ERRADO" else 36
+                )
+
+                texto = QLabel(
+                    alternativa[
+                        "texto"
+                    ],
+                    frame
+                )
+                texto.setObjectName(
+                    "questionSolverAlternativeText"
+                )
+                texto.setWordWrap(
+                    True
+                )
+                texto.setTextInteractionFlags(
+                    Qt.TextSelectableByMouse
+                )
+
+                linha.addWidget(
+                    eliminar,
+                    0,
+                    Qt.AlignTop
+                )
+                linha.addWidget(
+                    radio,
+                    0,
+                    Qt.AlignTop
+                )
+                linha.addWidget(
+                    texto,
+                    1
+                )
+
+                self.grupo_alternativas.addButton(
+                    radio
+                )
+                self.radio_por_letra[
+                    letra
+                ] = radio
+                self.frame_por_letra[
+                    letra
+                ] = frame
+                self.texto_por_letra[
+                    letra
+                ] = texto
+                self.botao_eliminar_por_letra[
+                    letra
+                ] = eliminar
+
+                eliminar.toggled.connect(
+                    lambda eliminada, alternativa_letra=letra:
+                        self.alternar_eliminacao_alternativa(
+                            alternativa_letra,
+                            eliminada
+                        )
+                )
+
+                self.alternativas_layout.addWidget(
+                    frame
+                )
+        finally:
+            self.alternativas_container.setUpdatesEnabled(True)
+            self.alternativas_container.update()
 
         self.duvida.setChecked(
             False

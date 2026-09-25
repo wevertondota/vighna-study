@@ -9533,7 +9533,8 @@ QPushButton#sectionEditButton:hover {
     QPushButton#chimpCellButton,
     QPushButton#memoryCardButton,
     QPushButton#sequenceCellButton,
-    QPushButton#puzzleTileButton {
+    QPushButton#puzzleTileButton,
+    QPushButton#rotationOptionButton {
         min-height: 46px;
         background-color: #f7fafc;
         color: #243449;
@@ -9541,6 +9542,18 @@ QPushButton#sectionEditButton:hover {
         border-radius: 9px;
         font-size: 12pt;
         font-weight: 900;
+    }
+
+    QScrollArea#rotationScrollArea,
+    QWidget#rotationScrollContent,
+    QWidget#rotationOptionsContainer {
+        background: transparent;
+        border: none;
+    }
+
+    QPushButton#rotationOptionButton {
+        min-height: 112px;
+        padding: 0px;
     }
 
     QPushButton#chimpCellButton[cellState="number"] {
@@ -9593,6 +9606,16 @@ QPushButton#sectionEditButton:hover {
         background-color: #edf1f5;
         border-color: #e0e6ed;
         color: transparent;
+    }
+
+    QPushButton#rotationOptionButton[answerState="correct"] {
+        background-color: #e4f6f0;
+        border-color: #60b89e;
+    }
+
+    QPushButton#rotationOptionButton[answerState="wrong"] {
+        background-color: #fff0f1;
+        border-color: #d88b96;
     }
 
 
@@ -16083,13 +16106,26 @@ def stylesheet_escuro():
     QPushButton#chimpCellButton,
     QPushButton#memoryCardButton,
     QPushButton#sequenceCellButton,
-    QPushButton#puzzleTileButton {
+    QPushButton#puzzleTileButton,
+    QPushButton#rotationOptionButton {
         background-color: #1b2939;
         color: #dfe8f2;
         border: 1px solid #3a4e64;
         border-radius: 9px;
         font-size: 12pt;
         font-weight: 900;
+    }
+
+    QScrollArea#rotationScrollArea,
+    QWidget#rotationScrollContent,
+    QWidget#rotationOptionsContainer {
+        background: transparent;
+        border: none;
+    }
+
+    QPushButton#rotationOptionButton {
+        min-height: 112px;
+        padding: 0px;
     }
 
     QPushButton#chimpCellButton[cellState="number"] {
@@ -16142,6 +16178,16 @@ def stylesheet_escuro():
         background-color: #121c29;
         border-color: #26384b;
         color: transparent;
+    }
+
+    QPushButton#rotationOptionButton[answerState="correct"] {
+        background-color: #183a34;
+        border-color: #477f73;
+    }
+
+    QPushButton#rotationOptionButton[answerState="wrong"] {
+        background-color: #45232b;
+        border-color: #a45f6e;
     }
 
 
@@ -19487,13 +19533,26 @@ def stylesheet_futurista():
     QPushButton#chimpCellButton,
     QPushButton#memoryCardButton,
     QPushButton#sequenceCellButton,
-    QPushButton#puzzleTileButton {
+    QPushButton#puzzleTileButton,
+    QPushButton#rotationOptionButton {
         background-color: #14283b;
         color: #e5f5ff;
         border: 1px solid #386681;
         border-radius: 10px;
         font-size: 12pt;
         font-weight: 900;
+    }
+
+    QScrollArea#rotationScrollArea,
+    QWidget#rotationScrollContent,
+    QWidget#rotationOptionsContainer {
+        background: transparent;
+        border: none;
+    }
+
+    QPushButton#rotationOptionButton {
+        min-height: 112px;
+        padding: 0px;
     }
 
     QPushButton#chimpCellButton[cellState="number"],
@@ -19520,6 +19579,16 @@ def stylesheet_futurista():
         background-color: #0d1825;
         border-color: #203d52;
         color: transparent;
+    }
+
+    QPushButton#rotationOptionButton[answerState="correct"] {
+        background-color: #17413d;
+        border-color: #53baa7;
+    }
+
+    QPushButton#rotationOptionButton[answerState="wrong"] {
+        background-color: #48212f;
+        border-color: #c25978;
     }
 
 

@@ -1,7 +1,9 @@
 import random
+import time
 from datetime import datetime
 
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, QRectF
+from PySide6.QtGui import QPainter, QPalette
 from PySide6.QtWidgets import (
     QDialog,
     QWidget,
@@ -15,6 +17,7 @@ from PySide6.QtWidgets import (
     QSpinBox,
     QSizePolicy,
     QMessageBox,
+    QScrollArea,
 )
 
 from banco import registrar_resultado_jogo, obter_recordes_jogos
@@ -36,6 +39,227 @@ def _repolir(widget):
         widget.update()
     except Exception:
         pass
+
+
+def _normalizar_forma(forma):
+    """Remove linhas/colunas vazias para comparar formas sem depender de translação."""
+    linhas = [list(map(int, linha)) for linha in (forma or ())]
+    if not linhas:
+        return tuple()
+
+    while linhas and not any(linhas[0]):
+        linhas.pop(0)
+    while linhas and not any(linhas[-1]):
+        linhas.pop()
+    if not linhas:
+        return tuple()
+
+    colunas_ativas = [
+        coluna
+        for coluna in range(len(linhas[0]))
+        if any(linha[coluna] for linha in linhas)
+    ]
+    if not colunas_ativas:
+        return tuple()
+    inicio, fim = min(colunas_ativas), max(colunas_ativas) + 1
+    return tuple(tuple(linha[inicio:fim]) for linha in linhas)
+
+
+def _rotacionar_forma_90(forma):
+    forma = _normalizar_forma(forma)
+    if not forma:
+        return forma
+    return _normalizar_forma(tuple(zip(*forma[::-1])))
+
+
+def _espelhar_forma_horizontal(forma):
+    """Espelha esquerda <-> direita."""
+    forma = _normalizar_forma(forma)
+    return _normalizar_forma(tuple(tuple(reversed(linha)) for linha in forma))
+
+
+def _espelhar_forma_vertical(forma):
+    """Espelha cima <-> baixo."""
+    forma = _normalizar_forma(forma)
+    return _normalizar_forma(tuple(reversed(forma)))
+
+
+def _aplicar_operacao_forma(forma, operacao):
+    if operacao == "rot90":
+        return _rotacionar_forma_90(forma)
+    if operacao == "rot180":
+        return _rotacionar_forma_90(_rotacionar_forma_90(forma))
+    if operacao == "rot270":
+        return _rotacionar_forma_90(
+            _rotacionar_forma_90(_rotacionar_forma_90(forma))
+        )
+    if operacao == "mirror_h":
+        return _espelhar_forma_horizontal(forma)
+    if operacao == "mirror_v":
+        return _espelhar_forma_vertical(forma)
+    return _normalizar_forma(forma)
+
+
+def _aplicar_sequencia_forma(forma, operacoes):
+    resultado = _normalizar_forma(forma)
+    for operacao in operacoes:
+        resultado = _aplicar_operacao_forma(resultado, operacao)
+    return resultado
+
+
+def _variantes_dihedrais(forma):
+    """Retorna as orientações distintas obtidas por rotações e espelhamentos."""
+    forma = _normalizar_forma(forma)
+    variantes = set()
+    atual = forma
+    for _ in range(4):
+        variantes.add(_normalizar_forma(atual))
+        variantes.add(_espelhar_forma_horizontal(atual))
+        atual = _rotacionar_forma_90(atual)
+    return list(variantes)
+
+
+def _gerar_forma_assimetrica(tamanho=4):
+    """Gera uma pequena forma conectada com ao menos 8 orientações distintas."""
+    tamanho = max(4, min(5, int(tamanho or 4)))
+    minimo = 6 if tamanho == 4 else 7
+    maximo = 8 if tamanho == 4 else 10
+
+    for _ in range(250):
+        alvo = random.randint(minimo, maximo)
+        centro = tamanho // 2
+        celulas = {(centro, centro)}
+        tentativas = 0
+        while len(celulas) < alvo and tentativas < 400:
+            tentativas += 1
+            linha, coluna = random.choice(tuple(celulas))
+            dl, dc = random.choice(((-1, 0), (1, 0), (0, -1), (0, 1)))
+            nl, nc = linha + dl, coluna + dc
+            if 0 <= nl < tamanho and 0 <= nc < tamanho:
+                celulas.add((nl, nc))
+
+        matriz = tuple(
+            tuple(1 if (linha, coluna) in celulas else 0 for coluna in range(tamanho))
+            for linha in range(tamanho)
+        )
+        matriz = _normalizar_forma(matriz)
+        if len(_variantes_dihedrais(matriz)) == 8:
+            return matriz
+
+    # Fallback determinístico e assimétrico.
+    return (
+        (1, 0, 0, 0),
+        (1, 1, 1, 0),
+        (0, 0, 1, 1),
+        (0, 0, 1, 0),
+    )
+
+
+_ROTACAO_ROTULOS = {
+    "rot90": "rotação de 90° no sentido horário",
+    "rot180": "rotação de 180°",
+    "rot270": "rotação de 270° no sentido horário",
+    "mirror_h": "espelhamento esquerda ↔ direita",
+    "mirror_v": "espelhamento cima ↔ baixo",
+}
+
+
+def _sequencias_rotacao_por_nivel(nivel):
+    nivel = max(1, min(5, int(nivel or 1)))
+    simples = [
+        ("rot90",),
+        ("rot180",),
+        ("rot270",),
+        ("mirror_h",),
+        ("mirror_v",),
+    ]
+    duplas = [
+        ("rot90", "mirror_h"),
+        ("rot90", "mirror_v"),
+        ("rot180", "mirror_h"),
+        ("rot180", "mirror_v"),
+        ("rot270", "mirror_h"),
+        ("rot270", "mirror_v"),
+        ("mirror_h", "rot90"),
+        ("mirror_v", "rot90"),
+    ]
+    triplas = [
+        ("rot90", "mirror_h", "rot90"),
+        ("mirror_h", "rot90", "mirror_v"),
+        ("rot270", "mirror_v", "rot90"),
+        ("mirror_v", "rot180", "mirror_h"),
+        ("rot90", "mirror_v", "rot180"),
+        ("mirror_h", "rot270", "mirror_v"),
+    ]
+
+    if nivel == 1:
+        return simples
+    if nivel == 2:
+        return simples + duplas
+    if nivel == 3:
+        return duplas
+    return duplas + triplas
+
+
+class _FormaMatrizWidget(QWidget):
+    """Desenha formas como matrizes, sem imagens externas."""
+
+    def __init__(self, forma=None, parent=None):
+        super().__init__(parent)
+        self.forma = _normalizar_forma(forma)
+        self.setMinimumSize(84, 64)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+
+    def set_forma(self, forma):
+        self.forma = _normalizar_forma(forma)
+        self.update()
+
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        if not self.forma:
+            return
+
+        linhas = len(self.forma)
+        colunas = len(self.forma[0]) if linhas else 0
+        if not linhas or not colunas:
+            return
+
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+        cor = self.palette().color(QPalette.Highlight)
+        if not self.isEnabled():
+            cor.setAlpha(155)
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(cor)
+
+        # A margem acompanha o tamanho real do canvas. Não há lado mínimo
+        # artificial: assim a forma sempre cabe inteira, mesmo quando o
+        # layout é comprimido verticalmente.
+        menor_dimensao = max(1.0, float(min(self.width(), self.height())))
+        margem = min(10.0, max(4.0, menor_dimensao * 0.08))
+        largura = max(1.0, self.width() - (margem * 2))
+        altura = max(1.0, self.height() - (margem * 2))
+        lado = min(largura / colunas, altura / linhas)
+        if lado <= 0.0:
+            painter.end()
+            return
+        total_largura = lado * colunas
+        total_altura = lado * linhas
+        x0 = (self.width() - total_largura) / 2.0
+        y0 = (self.height() - total_altura) / 2.0
+        folga = min(max(1.0, lado * 0.10), lado * 0.24)
+
+        for linha, valores in enumerate(self.forma):
+            for coluna, preenchido in enumerate(valores):
+                if not preenchido:
+                    continue
+                x = x0 + (coluna * lado) + (folga / 2.0)
+                y = y0 + (linha * lado) + (folga / 2.0)
+                tamanho = max(2.0, lado - folga)
+                painter.drawRoundedRect(QRectF(x, y, tamanho, tamanho), 2.5, 2.5)
+
+        painter.end()
 
 
 class _BaseJogo(QWidget):
@@ -543,6 +767,353 @@ class JogoSequenciaVisual(_BaseJogo):
         )
 
 
+class JogoRotacaoVisual(_BaseJogo):
+    jogo_id = "rotacao_visual"
+
+    def __init__(self, ao_registrar=None, parent=None):
+        super().__init__(ao_registrar, parent)
+
+        self.nivel = 1
+        self.pontuacao = 0
+        self.acertos = 0
+        self.sequencia_acertos = 0
+        self.ativo = False
+        self.bloqueado = True
+        self.inicio = None
+        self.fim_questao = None
+        self.token_rodada = 0
+        self.forma_original = tuple()
+        self.resposta_correta = tuple()
+        self.operacoes = tuple()
+        self.formas_opcoes = [tuple()] * 6
+
+        self.timer_questao = QTimer(self)
+        self.timer_questao.setInterval(100)
+        self.timer_questao.timeout.connect(self.atualizar_tempo_questao)
+
+        raiz = QVBoxLayout(self)
+        raiz.setContentsMargins(0, 0, 0, 0)
+        raiz.setSpacing(0)
+
+        # O conteúdo do minijogo fica dentro de uma área rolável. Em janelas
+        # altas, tudo aparece de uma vez; em alturas menores, os cartões
+        # preservam seu tamanho e a aba ganha rolagem vertical em vez de
+        # comprimir ou recortar a segunda linha de alternativas.
+        self.scroll_area = QScrollArea(self)
+        self.scroll_area.setObjectName("rotationScrollArea")
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.scroll_area.setFrameShape(QFrame.NoFrame)
+        self.scroll_area.viewport().setAutoFillBackground(False)
+
+        conteudo_scroll = QWidget()
+        conteudo_scroll.setObjectName("rotationScrollContent")
+        conteudo_scroll.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        layout = QVBoxLayout(conteudo_scroll)
+        layout.setContentsMargins(18, 14, 18, 16)
+        layout.setSpacing(8)
+
+        self.scroll_area.setWidget(conteudo_scroll)
+        raiz.addWidget(self.scroll_area, 1)
+
+        titulo = QLabel("Rotação & Espelho")
+        titulo.setObjectName("gameTitle")
+        layout.addWidget(titulo)
+
+        dica = QLabel(
+            "Transforme mentalmente a forma e escolha o resultado correto. "
+            "As alternativas são outras rotações/espelhamentos da mesma figura."
+        )
+        dica.setObjectName("gameHint")
+        dica.setWordWrap(True)
+        layout.addWidget(dica)
+
+        barra = QHBoxLayout()
+        barra.setSpacing(12)
+        self.nivel_label = QLabel("Nível: 1")
+        self.nivel_label.setObjectName("gameMetric")
+        self.pontos_label = QLabel("Pontos: 0")
+        self.pontos_label.setObjectName("gameMetric")
+        self.sequencia_label = QLabel("Sequência: 0")
+        self.sequencia_label.setObjectName("gameMetric")
+        self.tempo_label = QLabel("Tempo: --")
+        self.tempo_label.setObjectName("gameMetric")
+        self.status = QLabel("Clique em Iniciar desafio.")
+        self.status.setObjectName("gameStatus")
+        self.status.setWordWrap(True)
+
+        barra.addWidget(self.nivel_label)
+        barra.addWidget(self.pontos_label)
+        barra.addWidget(self.sequencia_label)
+        barra.addWidget(self.tempo_label)
+        barra.addStretch()
+        barra.addWidget(self.status, 1)
+
+        self.iniciar_btn = QPushButton("Iniciar desafio")
+        self.iniciar_btn.setObjectName("gamePrimaryButton")
+        self.iniciar_btn.clicked.connect(self.iniciar_partida)
+        barra.addWidget(self.iniciar_btn)
+        layout.addLayout(barra)
+
+        painel = QFrame()
+        painel.setObjectName("gameBoardPanel")
+        painel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        painel_layout = QVBoxLayout(painel)
+        painel_layout.setContentsMargins(14, 10, 14, 12)
+        painel_layout.setSpacing(7)
+
+        topo = QHBoxLayout()
+        topo.setContentsMargins(0, 0, 0, 2)
+        topo.setSpacing(16)
+
+        # A forma original deixa de ocupar uma coluna estreita. O bloco recebe
+        # 1/3 da largura do cabeçalho e o próprio canvas centraliza a peça,
+        # aproximando-a do centro visual do painel sem roubar altura das opções.
+        original_bloco = QVBoxLayout()
+        original_bloco.setContentsMargins(0, 0, 0, 0)
+        original_bloco.setSpacing(4)
+        original_rotulo = QLabel("Forma original")
+        original_rotulo.setObjectName("pauseRecordTitle")
+        original_rotulo.setAlignment(Qt.AlignCenter)
+        self.preview_original = _FormaMatrizWidget(parent=painel)
+        self.preview_original.setMinimumSize(180, 96)
+        self.preview_original.setMaximumHeight(116)
+        self.preview_original.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        original_bloco.addWidget(original_rotulo)
+        original_bloco.addWidget(self.preview_original, 1)
+
+        self.pergunta = QLabel("A transformação aparecerá aqui.")
+        self.pergunta.setObjectName("gameStatus")
+        self.pergunta.setAlignment(Qt.AlignCenter)
+        self.pergunta.setWordWrap(True)
+        self.pergunta.setMinimumHeight(58)
+
+        topo.addLayout(original_bloco, 1)
+        topo.addWidget(self.pergunta, 2)
+        painel_layout.addLayout(topo)
+
+        # A grade recebe um contêiner próprio com altura mínima suficiente
+        # para duas linhas completas. Isso impede que o QTabWidget comprima a
+        # segunda linha quando a janela tem pouca altura.
+        altura_opcao = 112
+        espacamento_vertical = 10
+        margem_grade_superior = 4
+        margem_grade_inferior = 4
+
+        self.opcoes_container = QWidget(painel)
+        self.opcoes_container.setObjectName("rotationOptionsContainer")
+        self.opcoes_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.opcoes_container.setMinimumHeight(
+            (altura_opcao * 2)
+            + espacamento_vertical
+            + margem_grade_superior
+            + margem_grade_inferior
+        )
+
+        self.opcoes_layout = QGridLayout(self.opcoes_container)
+        self.opcoes_layout.setContentsMargins(0, margem_grade_superior, 0, margem_grade_inferior)
+        self.opcoes_layout.setHorizontalSpacing(10)
+        self.opcoes_layout.setVerticalSpacing(espacamento_vertical)
+        for coluna in range(3):
+            self.opcoes_layout.setColumnStretch(coluna, 1)
+        for linha in range(2):
+            self.opcoes_layout.setRowMinimumHeight(linha, altura_opcao)
+            self.opcoes_layout.setRowStretch(linha, 1)
+
+        self.opcoes = []
+        for indice in range(6):
+            botao = QPushButton("")
+            botao.setObjectName("rotationOptionButton")
+            botao.setMinimumSize(150, altura_opcao)
+            botao.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+            botao.setProperty("answerState", "idle")
+            conteudo = QVBoxLayout(botao)
+            conteudo.setContentsMargins(10, 8, 10, 8)
+            conteudo.setSpacing(0)
+            desenho = _FormaMatrizWidget(parent=botao)
+            desenho.setMinimumSize(110, 88)
+            desenho.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+            conteudo.addWidget(desenho, 1)
+            botao.clicked.connect(lambda _=False, idx=indice: self.responder(idx))
+            self.opcoes_layout.addWidget(botao, indice // 3, indice % 3)
+            self.opcoes.append((botao, desenho))
+
+        painel_layout.addWidget(self.opcoes_container, 0)
+        layout.addWidget(painel, 0)
+        layout.addStretch(1)
+
+        # O mínimo do conteúdo é maior que a área útil típica da aba em
+        # resoluções mais baixas. Assim o QScrollArea assume a rolagem e não
+        # permite que o QTabWidget esmague os cartões inferiores.
+        conteudo_scroll.setMinimumHeight(520)
+
+        self._limpar_opcoes()
+
+    def _limite_tempo(self):
+        return {1: 18.0, 2: 16.0, 3: 14.0, 4: 12.0, 5: 10.0}.get(self.nivel, 10.0)
+
+    def _tamanho_forma(self):
+        return 5 if self.nivel >= 4 else 4
+
+    def _limpar_opcoes(self):
+        for botao, desenho in self.opcoes:
+            botao.setEnabled(False)
+            botao.setProperty("answerState", "idle")
+            desenho.set_forma(tuple())
+            _repolir(botao)
+
+    def iniciar_partida(self):
+        self.token_rodada += 1
+        self.timer_questao.stop()
+        self.nivel = 1
+        self.pontuacao = 0
+        self.acertos = 0
+        self.sequencia_acertos = 0
+        self.ativo = True
+        self.bloqueado = False
+        self.inicio = datetime.now()
+        self.iniciar_btn.setText("Nova partida")
+        self.status.setText("Resolva antes do tempo acabar.")
+        self._atualizar_metricas()
+        self.preparar_desafio()
+
+    def _atualizar_metricas(self):
+        self.nivel_label.setText(f"Nível: {self.nivel}")
+        self.pontos_label.setText(f"Pontos: {self.pontuacao}")
+        self.sequencia_label.setText(f"Sequência: {self.sequencia_acertos}")
+
+    def _escolher_sequencia(self, forma):
+        candidatas = list(_sequencias_rotacao_por_nivel(self.nivel))
+        random.shuffle(candidatas)
+        for operacoes in candidatas:
+            resultado = _aplicar_sequencia_forma(forma, operacoes)
+            if resultado != forma:
+                return operacoes, resultado
+        operacoes = ("rot90",)
+        return operacoes, _aplicar_sequencia_forma(forma, operacoes)
+
+    def preparar_desafio(self):
+        if not self.ativo:
+            return
+
+        self.token_rodada += 1
+        self.bloqueado = False
+        self.forma_original = _gerar_forma_assimetrica(self._tamanho_forma())
+        self.operacoes, self.resposta_correta = self._escolher_sequencia(self.forma_original)
+
+        variantes = [
+            forma for forma in _variantes_dihedrais(self.forma_original)
+            if forma != self.resposta_correta
+        ]
+        random.shuffle(variantes)
+        alternativas = [self.resposta_correta] + variantes[:5]
+        random.shuffle(alternativas)
+
+        self.preview_original.set_forma(self.forma_original)
+        if len(self.operacoes) == 1:
+            texto = f"Qual forma resulta de {_ROTACAO_ROTULOS[self.operacoes[0]]}?"
+        else:
+            nomes = " → ".join(_ROTACAO_ROTULOS[op] for op in self.operacoes)
+            texto = f"Aplique nesta ordem: {nomes}. Qual é o resultado?"
+        self.pergunta.setText(texto)
+
+        for indice, (botao, desenho) in enumerate(self.opcoes):
+            forma = alternativas[indice]
+            desenho.set_forma(forma)
+            self.formas_opcoes[indice] = forma
+            botao.setProperty("answerState", "idle")
+            botao.setEnabled(True)
+            _repolir(botao)
+
+        limite = self._limite_tempo()
+        self.fim_questao = time.monotonic() + limite
+        self.tempo_label.setText(f"Tempo: {limite:.1f}s")
+        self.status.setText("Escolha a transformação correta.")
+        self.timer_questao.start()
+        self._atualizar_metricas()
+
+    def atualizar_tempo_questao(self):
+        if not self.ativo or self.bloqueado or self.fim_questao is None:
+            return
+        restante = max(0.0, self.fim_questao - time.monotonic())
+        self.tempo_label.setText(f"Tempo: {restante:.1f}s")
+        if restante <= 0.0:
+            self._encerrar_por_erro("Tempo esgotado.")
+
+    def responder(self, indice):
+        if not self.ativo or self.bloqueado:
+            return
+        if not (0 <= indice < len(self.opcoes)):
+            return
+
+        botao, _ = self.opcoes[indice]
+        forma_escolhida = self.formas_opcoes[indice]
+        if forma_escolhida == self.resposta_correta:
+            self._acertar(indice)
+        else:
+            botao.setProperty("answerState", "wrong")
+            _repolir(botao)
+            self._encerrar_por_erro("Transformação incorreta.")
+
+    def _marcar_resposta_correta(self):
+        for indice, (botao, _) in enumerate(self.opcoes):
+            if self.formas_opcoes[indice] == self.resposta_correta:
+                botao.setProperty("answerState", "correct")
+                _repolir(botao)
+                return
+
+    def _acertar(self, indice):
+        self.bloqueado = True
+        self.timer_questao.stop()
+        restante = max(0.0, (self.fim_questao or 0) - time.monotonic())
+        botao, _ = self.opcoes[indice]
+        botao.setProperty("answerState", "correct")
+        _repolir(botao)
+        ganho = 100 + (self.nivel * 25) + int(restante * 6)
+        self.pontuacao += ganho
+        self.acertos += 1
+        self.sequencia_acertos += 1
+        novo_nivel = min(5, 1 + (self.acertos // 3))
+        subiu = novo_nivel > self.nivel
+        self.nivel = novo_nivel
+        self._atualizar_metricas()
+        self.status.setText(
+            f"Correto. +{ganho} pontos" + (" • nível aumentado" if subiu else "") + "."
+        )
+
+        token = self.token_rodada
+        QTimer.singleShot(
+            620,
+            lambda: self.preparar_desafio()
+            if self.ativo and token == self.token_rodada
+            else None,
+        )
+
+    def _encerrar_por_erro(self, motivo):
+        if not self.ativo or self.bloqueado:
+            return
+        self.bloqueado = True
+        self.ativo = False
+        self.timer_questao.stop()
+        self._marcar_resposta_correta()
+
+        duracao = int((datetime.now() - self.inicio).total_seconds()) if self.inicio else 0
+        self.tempo_label.setText("Tempo: --")
+        self.status.setText(
+            f"{motivo} Resultado: {self.pontuacao} pontos • {self.acertos} acerto(s)."
+        )
+        self.registrar_resultado(
+            pontuacao=self.pontuacao,
+            nivel=self.nivel,
+            duracao=duracao,
+        )
+
+    def closeEvent(self, evento):
+        self.timer_questao.stop()
+        super().closeEvent(evento)
+
+
 class JogoQuebraCabeca(_BaseJogo):
     jogo_id = "quebra_cabeca"
 
@@ -794,6 +1365,7 @@ class JanelaPausaDesafios(QDialog):
             ("chimpanze", "Chimpanzé"),
             ("memoria", "Memória"),
             ("sequencia", "Sequência visual"),
+            ("rotacao_visual", "Rotação visual"),
             ("quebra_cabeca", "Quebra-cabeça"),
         ]
         for coluna, (chave, nome) in enumerate(nomes):
@@ -819,6 +1391,7 @@ class JanelaPausaDesafios(QDialog):
         self.tabs.addTab(JogoChimpanze(self.atualizar_recordes, self), "Chimpanzé")
         self.tabs.addTab(JogoMemoria(self.atualizar_recordes, self), "Memória")
         self.tabs.addTab(JogoSequenciaVisual(self.atualizar_recordes, self), "Sequência visual")
+        self.tabs.addTab(JogoRotacaoVisual(self.atualizar_recordes, self), "Rotação visual")
         self.tabs.addTab(JogoQuebraCabeca(self.atualizar_recordes, self), "Quebra-cabeça")
         layout.addWidget(self.tabs, 1)
 
@@ -900,6 +1473,18 @@ class JanelaPausaDesafios(QDialog):
             )
         else:
             self.recorde_labels["sequencia"].setText("Sem recorde")
+
+        rotacao = dados.get("rotacao_visual", {})
+        if rotacao.get("partidas"):
+            partes = []
+            if rotacao.get("melhor_nivel") is not None:
+                partes.append(f"Nível {rotacao['melhor_nivel']}")
+            if rotacao.get("melhor_pontuacao") is not None:
+                partes.append(f"{rotacao['melhor_pontuacao']} pts")
+            partes.append(f"{rotacao.get('partidas', 0)} partida(s)")
+            self.recorde_labels["rotacao_visual"].setText(" • ".join(partes))
+        else:
+            self.recorde_labels["rotacao_visual"].setText("Sem recorde")
 
         puzzle = dados.get("quebra_cabeca", {})
         if puzzle.get("partidas"):

@@ -16656,15 +16656,25 @@ def registrar_tentativa_questao(
             ),
         )
 
-        # Toda resposta acadêmica incorreta válida entra na fila temporária.
-        # Modos sem impacto não chamam este registrador e, portanto, nunca
-        # criam pendências nem qualquer evidência acadêmica adicional.
+        # O Banco de Erros representa uma pendência operacional atual.
+        # Portanto, qualquer erro acadêmico real cria/mantém a pendência,
+        # enquanto qualquer acerto acadêmico posterior resolve essa pendência.
+        # Pulos sem resultado não alteram a fila. Modos sem impacto não chamam
+        # este registrador e continuam isolados da inteligência acadêmica.
         if resultado == 0:
             _inserir_pendencia_banco_erros(
                 conexao,
                 concurso_id,
                 questao_id,
                 tentativa_origem_id=cursor.lastrowid,
+            )
+        elif resultado == 1:
+            conexao.execute(
+                """
+                DELETE FROM banco_erros_pendentes
+                WHERE concurso_id = ? AND questao_id = ?
+                """,
+                (concurso_id, questao_id),
             )
 
         if item_sessao_id is not None:
@@ -21302,6 +21312,7 @@ _JOGOS_VALIDOS = {
     "chimpanze",
     "memoria",
     "sequencia",
+    "rotacao_visual",
     "quebra_cabeca",
 }
 

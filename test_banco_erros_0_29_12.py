@@ -447,6 +447,112 @@ class TestBancoErros(unittest.TestCase):
                 [],
             )
 
+    def test_32_acerto_academico_posterior_remove_pendencia(self):
+        self._preparar_pendencia()
+        resultado = self._responder(
+            self.q_multipla,
+            correta=True,
+            origem="revisao_inteligente",
+        )
+        self.assertTrue(resultado["correta"])
+        self.assertEqual(banco.contar_banco_erros_pendentes(self.perfil), 0)
+
+    def test_33_acerto_academico_remove_so_pendencia_do_mesmo_perfil(self):
+        perfil_b = banco.adicionar_concurso("Perfil B para recuperação")
+        with banco.conectar() as conexao:
+            conexao.execute(
+                "INSERT INTO disciplina_concurso_inclusao VALUES (?, ?, 1, 0)",
+                (self.disciplina, perfil_b),
+            )
+            conexao.execute(
+                "INSERT INTO topico_concurso_importancia VALUES (?, ?, 3, 1, 0)",
+                (self.topico, perfil_b),
+            )
+        banco.adicionar_pendencia_banco_erros(self.perfil, self.q_multipla)
+        banco.adicionar_pendencia_banco_erros(perfil_b, self.q_multipla)
+
+        self._responder(
+            self.q_multipla,
+            correta=True,
+            perfil=self.perfil,
+            origem="revisao_inteligente",
+        )
+
+        self.assertEqual(banco.contar_banco_erros_pendentes(self.perfil), 0)
+        self.assertEqual(banco.contar_banco_erros_pendentes(perfil_b), 1)
+
+    def test_34_pulo_academico_nao_remove_pendencia(self):
+        self._preparar_pendencia()
+        sessao = banco.iniciar_sessao_questoes(
+            self.perfil,
+            "Sessão acadêmica com pulo",
+            1,
+            origem="revisao_inteligente",
+        )
+        banco.registrar_fila_sessao_questoes(sessao, [{"id": self.q_multipla}])
+        item = banco.marcar_item_sessao_apresentado(sessao, 1, self.q_multipla)
+        resultado = banco.registrar_tentativa_questao(
+            sessao,
+            self.q_multipla,
+            self.perfil,
+            alternativa_marcada=None,
+            item_sessao_id=item,
+        )
+        banco.encerrar_sessao_questoes(sessao, concluida=True)
+        self.assertTrue(resultado["pulada"])
+        self.assertEqual(banco.contar_banco_erros_pendentes(self.perfil), 1)
+
+    def test_35_novo_erro_academico_reinsere_apos_acerto_academico(self):
+        self._preparar_pendencia()
+        self._responder(
+            self.q_multipla,
+            correta=True,
+            origem="revisao_inteligente",
+        )
+        self.assertEqual(banco.contar_banco_erros_pendentes(self.perfil), 0)
+        self._responder(
+            self.q_multipla,
+            correta=False,
+            origem="treino_adaptativo",
+        )
+        self.assertEqual(banco.contar_banco_erros_pendentes(self.perfil), 1)
+
+    def test_36_acerto_academico_preserva_historico_de_tentativas(self):
+        self._preparar_pendencia()
+        antes = self._contar("tentativas_questoes")
+        self._responder(
+            self.q_multipla,
+            correta=True,
+            origem="revisao_inteligente",
+        )
+        self.assertEqual(self._contar("tentativas_questoes"), antes + 1)
+        with banco.conectar() as conexao:
+            resultados = [
+                linha[0]
+                for linha in conexao.execute(
+                    """
+                    SELECT correta
+                    FROM tentativas_questoes
+                    WHERE concurso_id = ?
+                      AND COALESCE(questao_id_snapshot, questao_id) = ?
+                    ORDER BY id
+                    """,
+                    (self.perfil, self.q_multipla),
+                ).fetchall()
+            ]
+        self.assertEqual(resultados, [0, 1])
+        self.assertEqual(banco.contar_banco_erros_pendentes(self.perfil), 0)
+
+    def test_37_regra_de_limpeza_academica_esta_no_registrador_canonico(self):
+        self.assertIn(
+            "DELETE FROM banco_erros_pendentes",
+            self.banco_source,
+        )
+        self.assertIn(
+            "elif resultado == 1:",
+            self.banco_source,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
