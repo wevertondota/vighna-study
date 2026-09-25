@@ -12,7 +12,9 @@ _dados_antes_atualizacao/
 
 # Dados gerados pelo aplicativo
 backups/
+backups_codigo/
 checkpoints/
+*.bak_*
 *.db-shm
 *.db-wal
 *.tmp-shm
