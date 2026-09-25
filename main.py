@@ -10316,6 +10316,7 @@ class JanelaConfigurarSimulado(QDialog):
         super().__init__(
             parent
         )
+        self.setWindowModality(Qt.WindowModal)
 
         # Janela operacional ampla: permite maximizar/restaurar
         # pelo botão nativo do Windows e por duplo clique na barra.
@@ -12477,6 +12478,7 @@ class JanelaCentralEfetividade(QDialog):
 class JanelaConfigurarSessaoAdaptativa(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setWindowModality(Qt.WindowModal)
 
         self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
         self.configuracao = None
@@ -13179,6 +13181,7 @@ class JanelaConfigurarResolucaoQuestoes(QDialog):
         super().__init__(
             parent
         )
+        self.setWindowModality(Qt.WindowModal)
 
         self.configuracao = None
         self.concurso = obter_concurso_ativo()
@@ -13751,6 +13754,7 @@ class JanelaRevisaoBateria(QDialog):
 
     def __init__(self, fila, registros, parent=None):
         super().__init__(parent)
+        self.setWindowModality(Qt.WindowModal)
         self.fila = list(fila or [])
         self.registros = list(registros or [])
         self.questoes = []
@@ -13930,6 +13934,7 @@ class JanelaResumoResolucaoQuestoes(QDialog):
         super().__init__(
             parent
         )
+        self.setWindowModality(Qt.WindowModal)
 
         # Janela operacional ampla: permite maximizar/restaurar
         # pelo botão nativo do Windows e por duplo clique na barra.
@@ -16254,6 +16259,57 @@ class JanelaResolverQuestoes(QDialog):
             cabecalho
         )
 
+        # Faixa compacta e contextual. Ela consulta a sessão mantida pela
+        # janela principal; não possui cronômetro nem estado de foco próprios.
+        self.foco_painel = QFrame()
+        self.foco_painel.setObjectName("questionSessionMiniStat")
+        foco_layout = QHBoxLayout(self.foco_painel)
+        foco_layout.setContentsMargins(10, 5, 8, 5)
+        foco_layout.setSpacing(7)
+
+        self.foco_estado = QLabel("")
+        self.foco_estado.setObjectName("questionSessionMiniLabel")
+        self.foco_estado.setAccessibleName("Estado do Modo Foco")
+
+        self.foco_pausar = QPushButton("Pausar")
+        self.foco_pausar.setObjectName("subtleButton")
+        self.foco_pausar.setFixedHeight(30)
+        self.foco_pausar.setToolTip("Pausar ou retomar a sessão de foco atual (F8)")
+        self.foco_pausar.clicked.connect(self.alternar_foco_resolvedor)
+
+        self.foco_abrir = QPushButton("Abrir foco")
+        self.foco_abrir.setObjectName("subtleButton")
+        self.foco_abrir.setFixedHeight(30)
+        self.foco_abrir.setToolTip(
+            "Mostrar, restaurar e trazer a janela do Modo Foco para frente (Ctrl+Shift+F)"
+        )
+        self.foco_abrir.clicked.connect(self.abrir_foco_resolvedor)
+
+        foco_layout.addWidget(self.foco_estado)
+        foco_layout.addStretch()
+        foco_layout.addWidget(self.foco_pausar)
+        foco_layout.addWidget(self.foco_abrir)
+        self.foco_painel.hide()
+        layout.addWidget(self.foco_painel)
+
+        self.atalho_pausa_foco = QShortcut(QKeySequence("F8"), self)
+        self.atalho_pausa_foco.setContext(Qt.WindowShortcut)
+        self.atalho_pausa_foco.activated.connect(self.alternar_foco_resolvedor)
+
+        self.atalho_abrir_foco = QShortcut(QKeySequence("Ctrl+Shift+F"), self)
+        self.atalho_abrir_foco.setContext(Qt.WindowShortcut)
+        self.atalho_abrir_foco.activated.connect(self.abrir_foco_resolvedor)
+
+        self._timer_interface_foco = QTimer(self)
+        self._timer_interface_foco.setInterval(1000)
+        self._timer_interface_foco.timeout.connect(self.atualizar_painel_foco)
+        self._timer_interface_foco.start()
+
+        controlador_foco = self._localizar_controlador_foco()
+        sinal_estado_foco = getattr(controlador_foco, "estado_foco_alterado", None)
+        if sinal_estado_foco is not None:
+            sinal_estado_foco.connect(self.atualizar_painel_foco)
+
         self.sessao_progresso = QProgressBar()
         self.sessao_progresso.setObjectName(
             "questionSessionProgress"
@@ -16691,6 +16747,63 @@ class JanelaResolverQuestoes(QDialog):
                 self.timer_simulado.start()
 
         self.carregar_atual()
+        self.atualizar_painel_foco()
+
+    def _localizar_controlador_foco(self):
+        atual = self.parentWidget()
+        while atual is not None:
+            if callable(getattr(atual, "abrir_ou_trazer_modo_foco", None)):
+                return atual
+            atual = atual.parentWidget()
+
+        app = QApplication.instance()
+        if app is not None:
+            for janela in app.topLevelWidgets():
+                if callable(getattr(janela, "abrir_ou_trazer_modo_foco", None)):
+                    return janela
+        return None
+
+    def _janela_foco_ativa(self):
+        controlador = self._localizar_controlador_foco()
+        if controlador is None:
+            return None
+        return controlador.obter_janela_modo_foco(apenas_ativa=True)
+
+    def atualizar_painel_foco(self):
+        janela = self._janela_foco_ativa()
+        if janela is None:
+            self.foco_painel.hide()
+            return
+
+        try:
+            pausada = bool(janela.pausada)
+            decorrido = janela.tempo_decorrido()
+        except RuntimeError:
+            self.foco_painel.hide()
+            return
+
+        estado = "FOCO PAUSADO" if pausada else "FOCO ATIVO"
+        self.foco_estado.setText(
+            f"{estado}  •  {formatar_tempo_foco_resumido(decorrido)}"
+        )
+        self.foco_pausar.setText("Retomar" if pausada else "Pausar")
+        self.foco_painel.show()
+
+    def alternar_foco_resolvedor(self):
+        controlador = self._localizar_controlador_foco()
+        if controlador is None:
+            return
+        controlador.alternar_pausa_modo_foco()
+        self.atualizar_painel_foco()
+
+    def abrir_foco_resolvedor(self):
+        controlador = self._localizar_controlador_foco()
+        if controlador is None:
+            return
+        # Só restaura a sessão existente; o painel nunca inicia outra.
+        if controlador.obter_janela_modo_foco(apenas_ativa=True) is not None:
+            controlador.abrir_ou_trazer_modo_foco()
+        self.atualizar_painel_foco()
 
     def exec_nao_modal(self):
         """Exibe a sessão sem bloquear as demais janelas do aplicativo."""
@@ -23167,6 +23280,7 @@ class JanelaEstudoTopico(QDialog):
 
     def __init__(self, topico_id, nome_topico, parent=None):
         super().__init__(parent)
+        self.setWindowModality(Qt.WindowModal)
         self.topico_id = int(topico_id)
         self.nome_topico = str(nome_topico or "Tópico")
         self.concurso = obter_concurso_ativo()
@@ -23584,6 +23698,7 @@ class JanelaTopico(QDialog):
             Qt.WindowMaximizeButtonHint,
             True
         )
+        self.setWindowModality(Qt.NonModal)
 
         self.topico_id = int(topico_id)
         self.nome_topico = nome_topico
@@ -24411,6 +24526,32 @@ class JanelaTopico(QDialog):
             self.excluir_revisao_btn.setToolTip(
                 "Excluir a revisão manual selecionada."
             )
+
+    def exec(self):
+        """Mantém a API dos chamadores sem tornar a página do tópico modal."""
+        ciclo = QEventLoop()
+        encerrada = False
+
+        def encerrar_ciclo(*_args):
+            nonlocal encerrada
+            encerrada = True
+            if ciclo.isRunning():
+                ciclo.quit()
+
+        self.finished.connect(encerrar_ciclo)
+        self.setWindowModality(Qt.NonModal)
+        self.show()
+        self.raise_()
+        self.activateWindow()
+
+        if not encerrada:
+            ciclo.exec()
+
+        try:
+            self.finished.disconnect(encerrar_ciclo)
+        except (RuntimeError, TypeError):
+            pass
+        return self.result()
 
     def estudar_topico(self):
         janela_config = JanelaEstudoTopico(
@@ -31431,6 +31572,7 @@ class DashboardDonutWidget(QWidget):
 
 class SistemaEstudos(QMainWindow):
     dados_alterados = Signal(str)
+    estado_foco_alterado = Signal()
 
     def __init__(self):
         super().__init__()
@@ -32049,6 +32191,8 @@ class SistemaEstudos(QMainWindow):
         atalhos = [
             ("Ctrl+K", self.abrir_busca_global),
             ("Ctrl+F", self.abrir_modo_foco),
+            ("Ctrl+Shift+F", self.abrir_ou_trazer_modo_foco),
+            ("F8", self.alternar_pausa_modo_foco),
             ("Ctrl+Q", self.abrir_questoes),
             ("Ctrl+Shift+C", self.atalho_checkpoint),
             ("Ctrl+H", self.voltar_inicio),
@@ -40525,9 +40669,7 @@ class SistemaEstudos(QMainWindow):
         if janela_existente is not None:
             try:
                 if bool(getattr(janela_existente, "sessao_ativa", False)):
-                    janela_existente.showNormal()
-                    janela_existente.raise_()
-                    janela_existente.activateWindow()
+                    self.abrir_ou_trazer_modo_foco()
                     return
             except RuntimeError:
                 self._janela_modo_foco = None
@@ -40550,35 +40692,57 @@ class SistemaEstudos(QMainWindow):
         except RuntimeError:
             self._janela_modo_foco = None
 
-    def abrir_modo_foco(self, preparacao=None):
-        from foco import JanelaModoFoco
-        # Modo Foco é uma janela de apoio, não um diálogo modal.
-        # Mantemos uma referência para o cronômetro continuar ativo enquanto
-        # o usuário navega normalmente pelo restante do VighnaStudy.
+    def obter_janela_modo_foco(self, apenas_ativa=False):
         janela = getattr(self, "_janela_modo_foco", None)
-        if janela is not None:
-            try:
-                if preparacao:
-                    janela.preparar_sessao(**preparacao)
-                janela.showNormal()
-                janela.raise_()
-                janela.activateWindow()
-                return
-            except RuntimeError:
-                self._janela_modo_foco = None
+        if janela is None:
+            return None
+        try:
+            if apenas_ativa and not bool(janela.sessao_ativa):
+                return None
+            janela.isVisible()
+            return janela
+        except RuntimeError:
+            self._janela_modo_foco = None
+            return None
 
-        janela = JanelaModoFoco(self)
+    def abrir_ou_trazer_modo_foco(self, preparacao=None):
+        from foco import JanelaModoFoco, trazer_janela_foco_para_frente
+
+        # Esta é a única fábrica da janela. A referência central impede uma
+        # segunda instância e o helper cuida de ocultação/minimização/ativação.
+        janela = self.obter_janela_modo_foco()
+        if janela is not None:
+            if preparacao:
+                janela.preparar_sessao(**preparacao)
+            trazer_janela_foco_para_frente(janela)
+            return janela
+
+        # Sem parent Qt: janela top-level independente, inclusive na barra de
+        # tarefas do Windows. Os sinais mantêm o vínculo funcional com o app.
+        janela = JanelaModoFoco()
         self._janela_modo_foco = janela
         janela.resumo_alterado.connect(lambda: self.notificar_dados_alterados("foco"))
+        janela.estado_alterado.connect(self.estado_foco_alterado.emit)
         janela.acao_pos_foco.connect(self.tratar_acao_pos_foco)
         janela.solicitar_questoes.connect(self.iniciar_questoes_contextuais_foco)
         janela.sessao_finalizada.connect(self.tratar_sessao_finalizada_jornada)
         janela.destroyed.connect(self._modo_foco_destruido)
         if preparacao:
             janela.preparar_sessao(**preparacao)
-        janela.show()
-        janela.raise_()
-        janela.activateWindow()
+        trazer_janela_foco_para_frente(janela)
+        self.estado_foco_alterado.emit()
+        return janela
+
+    def abrir_modo_foco(self, preparacao=None):
+        """Alias compatível para o ponto canônico de abertura/restauração."""
+        return self.abrir_ou_trazer_modo_foco(preparacao)
+
+    def alternar_pausa_modo_foco(self):
+        janela = self.obter_janela_modo_foco(apenas_ativa=True)
+        if janela is None:
+            return False
+        janela.alternar_pausa()
+        return True
 
     def iniciar_questoes_contextuais_foco(self, contexto):
         contexto = dict(contexto or {})
@@ -40617,9 +40781,7 @@ class SistemaEstudos(QMainWindow):
         if resultado and janela_foco is not None:
             try:
                 janela_foco.registrar_resultado_questoes(resultado)
-                janela_foco.showNormal()
-                janela_foco.raise_()
-                janela_foco.activateWindow()
+                self.abrir_ou_trazer_modo_foco()
             except RuntimeError:
                 self._janela_modo_foco = None
 
@@ -40629,6 +40791,7 @@ class SistemaEstudos(QMainWindow):
 
     def _modo_foco_destruido(self, *args):
         self._janela_modo_foco = None
+        self.estado_foco_alterado.emit()
         self.notificar_dados_alterados("foco")
 
     def tratar_acao_pos_foco(self, acao, dados):
@@ -60786,6 +60949,19 @@ class SistemaEstudos(QMainWindow):
             )
 
     def closeEvent(self, evento):
+        # Como o Foco é top-level, seu ciclo precisa ser encerrado antes da
+        # principal. Se o usuário cancelar a confirmação do Foco, o fechamento
+        # do aplicativo também é cancelado e nenhum timer fica órfão.
+        janela_foco = self.obter_janela_modo_foco()
+        if janela_foco is not None:
+            try:
+                janela_foco.close()
+                if janela_foco.isVisible():
+                    evento.ignore()
+                    return
+            except RuntimeError:
+                self._janela_modo_foco = None
+
         try:
             fazer_backup(
                 "fechamento"

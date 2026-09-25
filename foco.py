@@ -2,6 +2,7 @@ import time
 from datetime import datetime
 
 from PySide6.QtCore import Qt, QTimer, Signal
+from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QDialog,
     QVBoxLayout,
@@ -55,6 +56,23 @@ def _tempo_pos_foco(segundos):
     return _tempo_curto(segundos)
 
 
+FOCO_MIN_MINUTOS = 1
+FOCO_MAX_MINUTOS = 24 * 60
+
+
+def _normalizar_duracao_foco_minutos(minutos):
+    try:
+        minutos = int(minutos)
+    except (TypeError, ValueError):
+        minutos = 50
+    return max(FOCO_MIN_MINUTOS, min(FOCO_MAX_MINUTOS, minutos))
+
+
+def _decompor_duracao_foco(minutos):
+    total = _normalizar_duracao_foco_minutos(minutos)
+    return divmod(total, 60)
+
+
 def _relogio(segundos):
     segundos = max(0, int(round(segundos or 0)))
     horas, resto = divmod(segundos, 3600)
@@ -62,6 +80,19 @@ def _relogio(segundos):
     if horas:
         return f"{horas:02d}:{minutos:02d}:{segundos:02d}"
     return f"{minutos:02d}:{segundos:02d}"
+
+
+def trazer_janela_foco_para_frente(janela):
+    """Mostra, restaura e ativa a mesma janela de Foco, se ela existir."""
+    if janela is None:
+        return None
+    if janela.isMinimized():
+        janela.showNormal()
+    elif not janela.isVisible():
+        janela.show()
+    janela.raise_()
+    janela.activateWindow()
+    return janela
 
 
 class JanelaPosFoco(QDialog):
@@ -277,19 +308,30 @@ class JanelaPosFoco(QDialog):
 
 class JanelaModoFoco(QDialog):
     resumo_alterado = Signal()
+    estado_alterado = Signal()
     acao_pos_foco = Signal(str, object)
     solicitar_questoes = Signal(object)
     sessao_finalizada = Signal(object)
 
     def __init__(self, parent=None):
-        super().__init__(parent)
+        # O argumento é mantido por compatibilidade com integrações antigas,
+        # mas não é usado como parent Qt. O cronômetro precisa ser uma janela
+        # top-level real, independente da principal, do tópico e do resolvedor.
+        super().__init__(None)
+        self.controlador = parent
         self.setWindowTitle("Modo Foco — VighnaStudy")
         # O Foco precisa funcionar também em telas de 768 px de altura e
         # com escala do Windows acima de 100%. O tamanho inicial é calculado
         # a partir da área útil do monitor (descontando barra de tarefas).
         self.setMinimumSize(760, 500)
         self._ajustar_tamanho_ao_monitor()
-        self.setWindowFlags(self.windowFlags() | Qt.WindowMinMaxButtonsHint)
+        self.setWindowFlags(
+            Qt.Window
+            | Qt.WindowTitleHint
+            | Qt.WindowSystemMenuHint
+            | Qt.WindowMinMaxButtonsHint
+            | Qt.WindowCloseButtonHint
+        )
         # Janela deliberadamente não modal: o cronômetro deve continuar
         # ativo enquanto o usuário navega por Questões, Revisões, Simulados
         # e pelo restante do VighnaStudy.
@@ -316,6 +358,16 @@ class JanelaModoFoco(QDialog):
         self.timer = QTimer(self)
         self.timer.setInterval(250)
         self.timer.timeout.connect(self.atualizar_timer)
+
+        self.atalho_pausa = QShortcut(QKeySequence("F8"), self)
+        self.atalho_pausa.setContext(Qt.WindowShortcut)
+        self.atalho_pausa.activated.connect(self.alternar_pausa)
+
+        self.atalho_trazer = QShortcut(QKeySequence("Ctrl+Shift+F"), self)
+        self.atalho_trazer.setContext(Qt.WindowShortcut)
+        self.atalho_trazer.activated.connect(
+            lambda: trazer_janela_foco_para_frente(self)
+        )
 
         self.montar_interface()
         self.carregar_disciplinas()
@@ -430,12 +482,29 @@ class JanelaModoFoco(QDialog):
         personalizado = QLabel("Personalizado")
         personalizado.setMinimumWidth(86)
         presets.addWidget(personalizado)
+
+        # A duração personalizada usa horas + minutos para manter a leitura
+        # natural mesmo em sessões longas. Internamente tudo continua sendo
+        # convertido para minutos/segundos, preservando o restante do fluxo.
+        self.horas = QSpinBox()
+        self.horas.setRange(0, 24)
+        self.horas.setValue(0)
+        self.horas.setSuffix(" h")
+        self.horas.setFixedSize(82, 34)
+        self.horas.setToolTip("Horas da sessão de foco (máximo total: 24 horas)")
+        presets.addWidget(self.horas)
+
         self.minutos = QSpinBox()
-        self.minutos.setRange(5, 240)
+        self.minutos.setRange(1, 59)
         self.minutos.setValue(50)
         self.minutos.setSuffix(" min")
-        self.minutos.setFixedSize(108, 34)
+        self.minutos.setFixedSize(94, 34)
+        self.minutos.setToolTip("Minutos adicionais da sessão de foco")
         presets.addWidget(self.minutos)
+
+        self.horas.valueChanged.connect(self._ajustar_campos_duracao)
+        self._ajustar_campos_duracao(self.horas.value())
+
         presets.addStretch(1)
         config.addLayout(presets)
 
@@ -614,8 +683,47 @@ class JanelaModoFoco(QDialog):
         layout.addLayout(box, 0, coluna)
         return valor
 
+    def _ajustar_campos_duracao(self, horas=None):
+        if horas is None:
+            horas = int(self.horas.value())
+        else:
+            horas = int(horas)
+
+        if horas >= 24:
+            # 24h é o teto absoluto: não pode haver minutos adicionais.
+            self.minutos.blockSignals(True)
+            self.minutos.setRange(0, 0)
+            self.minutos.setValue(0)
+            self.minutos.blockSignals(False)
+            self.minutos.setEnabled(False)
+        elif horas <= 0:
+            # Evita uma duração nula, mantendo o mínimo operacional em 1 min.
+            self.minutos.setEnabled(True)
+            valor_atual = max(1, int(self.minutos.value()))
+            self.minutos.blockSignals(True)
+            self.minutos.setRange(1, 59)
+            self.minutos.setValue(valor_atual)
+            self.minutos.blockSignals(False)
+        else:
+            self.minutos.setEnabled(True)
+            valor_atual = max(0, min(59, int(self.minutos.value())))
+            self.minutos.blockSignals(True)
+            self.minutos.setRange(0, 59)
+            self.minutos.setValue(valor_atual)
+            self.minutos.blockSignals(False)
+
+    def _duracao_personalizada_minutos(self):
+        total = int(self.horas.value()) * 60 + int(self.minutos.value())
+        return _normalizar_duracao_foco_minutos(total)
+
     def definir_minutos(self, minutos):
-        self.minutos.setValue(int(minutos))
+        horas, minutos_restantes = _decompor_duracao_foco(minutos)
+        self.horas.blockSignals(True)
+        self.horas.setValue(int(horas))
+        self.horas.blockSignals(False)
+        self._ajustar_campos_duracao(horas)
+        if horas < 24:
+            self.minutos.setValue(int(minutos_restantes))
 
     def atualizar_campos_opcionais(self, marcado=None):
         if marcado is None:
@@ -657,9 +765,7 @@ class JanelaModoFoco(QDialog):
 
         if minutos is not None:
             try:
-                self.minutos.setValue(
-                    max(5, min(240, int(minutos)))
-                )
+                self.definir_minutos(minutos)
             except Exception:
                 pass
 
@@ -829,7 +935,7 @@ class JanelaModoFoco(QDialog):
     def iniciar(self):
         if self.sessao_ativa:
             return
-        minutos = max(5, int(self.minutos.value()))
+        minutos = self._duracao_personalizada_minutos()
         self.duracao_planejada = minutos * 60
         self.inicio_datetime = datetime.now()
         self.inicio_segmento = time.monotonic()
@@ -860,6 +966,7 @@ class JanelaModoFoco(QDialog):
         self.active_panel.show()
         self.timer.start()
         self.atualizar_timer()
+        self.estado_alterado.emit()
 
         if (
             self.abrir_questoes_ao_iniciar
@@ -985,6 +1092,7 @@ class JanelaModoFoco(QDialog):
             self.pausar_btn.setText("Retomar")
             self.status.setText("Sessão pausada — este tempo não será contado")
         self.atualizar_timer()
+        self.estado_alterado.emit()
 
     def atualizar_timer(self):
         if not self.sessao_ativa:
@@ -1000,6 +1108,7 @@ class JanelaModoFoco(QDialog):
             self.inicio_segmento = None
             self.pausada = True
             self.timer.stop()
+            self.estado_alterado.emit()
             QTimer.singleShot(0, self.tratar_fim_planejado)
 
     def tratar_fim_planejado(self):
@@ -1030,6 +1139,7 @@ class JanelaModoFoco(QDialog):
             self.pausar_btn.setText("Pausar")
             self.timer.start()
             self.atualizar_timer()
+            self.estado_alterado.emit()
             return
 
         if clicado is b_pausa:
@@ -1066,6 +1176,7 @@ class JanelaModoFoco(QDialog):
             self.pausada = False
             self.pausar_btn.setText("Pausar")
             self.status.setText("Foco em andamento")
+            self.estado_alterado.emit()
             return
         self.finalizar(concluida=(clicado is concluida_btn))
 
@@ -1187,6 +1298,7 @@ class JanelaModoFoco(QDialog):
         self.atualizar_resumo()
         self.carregar_historico()
         self.resumo_alterado.emit()
+        self.estado_alterado.emit()
         if contexto_pos_foco:
             self.sessao_finalizada.emit(dict(contexto_pos_foco))
 
