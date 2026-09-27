@@ -31822,6 +31822,69 @@ class JanelaRedistribuicao(QDialog):
         self.accept()
 
 
+class DashboardPlanningArcWidget(QWidget):
+    """Indicador em arco para a meta diária do card Planejamento."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._atual = 0
+        self._meta = 0
+        self.setMinimumSize(196, 90)
+        self.setMaximumHeight(100)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+    def setProgress(self, atual, meta):
+        try:
+            self._atual = max(0, int(atual or 0))
+        except Exception:
+            self._atual = 0
+
+        try:
+            self._meta = max(0, int(meta or 0))
+        except Exception:
+            self._meta = 0
+
+        self.update()
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+
+        largura = max(96, self.width() - 52)
+        altura = min(self.height() - 24, 68)
+        x = (self.width() - largura) / 2
+        y = 8
+        rect = QRectF(x, y, largura, altura * 2)
+
+        trilha = QPen(QColor(207, 243, 225, 82), 8)
+        trilha.setCapStyle(Qt.RoundCap)
+        painter.setPen(trilha)
+        painter.drawArc(rect, 180 * 16, -180 * 16)
+
+        if self._meta > 0:
+            proporcao = max(0.0, min(1.0, self._atual / float(self._meta)))
+        else:
+            proporcao = 0.0
+
+        if proporcao > 0:
+            valor = QPen(QColor('#B9FFE3'), 8)
+            valor.setCapStyle(Qt.RoundCap)
+            painter.setPen(valor)
+            painter.drawArc(rect, 180 * 16, int(-180 * 16 * proporcao))
+
+        fonte = QFont('Segoe UI')
+        fonte.setPointSize(16)
+        fonte.setBold(True)
+        painter.setFont(fonte)
+        painter.setPen(QColor('#F4FFFA'))
+        texto = f"{self._atual} / {self._meta}" if self._meta > 0 else f"{self._atual}"
+        painter.drawText(
+            QRectF(0, 18, self.width(), 56),
+            Qt.AlignHCenter | Qt.AlignVCenter,
+            texto,
+        )
+
+
 class DashboardDonutWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -34263,24 +34326,24 @@ class SistemaEstudos(QMainWindow):
         # execução do dia: meta, pendências, carga restante e ritmo semanal.
         self.dashboard_resumo_ia = QFrame()
         self.dashboard_resumo_ia.setObjectName("dashboardInsightSummary")
-        self.dashboard_resumo_ia.setMinimumHeight(174)
+        self.dashboard_resumo_ia.setMinimumHeight(160)
         self.dashboard_resumo_ia.setSizePolicy(
             QSizePolicy.Expanding,
             QSizePolicy.Expanding,
         )
         resumo_ia_layout = QVBoxLayout(self.dashboard_resumo_ia)
-        resumo_ia_layout.setContentsMargins(14, 6, 14, 8)
-        resumo_ia_layout.setSpacing(5)
+        resumo_ia_layout.setContentsMargins(12, 5, 12, 6)
+        resumo_ia_layout.setSpacing(4)
         resumo_ia_layout.setAlignment(Qt.AlignTop)
 
         resumo_ia_header = QHBoxLayout()
-        resumo_ia_header.setSpacing(8)
+        resumo_ia_header.setSpacing(6)
         resumo_ia_icone = QLabel("◈")
         resumo_ia_icone.setObjectName("dashboardInsightSummaryIcon")
         resumo_ia_icone.setAlignment(Qt.AlignCenter)
-        resumo_ia_icone.setFixedSize(34, 34)
+        resumo_ia_icone.setFixedSize(30, 30)
         resumo_ia_titulos = QVBoxLayout()
-        resumo_ia_titulos.setSpacing(1)
+        resumo_ia_titulos.setSpacing(0)
         resumo_ia_titulo = QLabel("Planejamento de hoje")
         resumo_ia_titulo.setObjectName("dashboardInsightSummaryTitle")
         self.dashboard_resumo_data = QLabel("Hoje")
@@ -34301,22 +34364,30 @@ class SistemaEstudos(QMainWindow):
         resumo_ia_layout.addLayout(resumo_ia_header)
 
         # Meta diária — protagonista visual do Planejamento.
-        # O número principal fica aberto no card, sem um mini-card concorrente.
+        # A referência agora usa um arco semicircular com o valor central.
         meta_dia_layout = QVBoxLayout()
-        meta_dia_layout.setContentsMargins(4, 1, 4, 5)
-        meta_dia_layout.setSpacing(1)
+        meta_dia_layout.setContentsMargins(2, 0, 2, 2)
+        meta_dia_layout.setSpacing(0)
 
         meta_dia_titulo = QLabel("META DE QUESTÕES")
         meta_dia_titulo.setObjectName("dashboardPlanningHeroTitle")
         meta_dia_titulo.setAlignment(Qt.AlignCenter)
         meta_dia_layout.addWidget(meta_dia_titulo)
 
+        self.dashboard_planejamento_meta_gauge = DashboardPlanningArcWidget()
+        meta_dia_layout.addWidget(
+            self.dashboard_planejamento_meta_gauge,
+            0,
+            Qt.AlignHCenter,
+        )
+
+        # Campos mantidos para reaproveitar a lógica existente de atualização,
+        # mas ocultados da composição final em favor do gauge da referência.
         self.dashboard_planejamento_resumo_meta_diaria = QLabel("—")
         self.dashboard_planejamento_resumo_meta_diaria.setObjectName(
             "dashboardPlanningHeroValue"
         )
-        self.dashboard_planejamento_resumo_meta_diaria.setAlignment(Qt.AlignCenter)
-        meta_dia_layout.addWidget(self.dashboard_planejamento_resumo_meta_diaria)
+        self.dashboard_planejamento_resumo_meta_diaria.setVisible(False)
 
         self.dashboard_planejamento_resumo_meta_diaria_detalhe = QLabel(
             "Questões resolvidas hoje"
@@ -34324,12 +34395,7 @@ class SistemaEstudos(QMainWindow):
         self.dashboard_planejamento_resumo_meta_diaria_detalhe.setObjectName(
             "dashboardPlanningHeroDetail"
         )
-        self.dashboard_planejamento_resumo_meta_diaria_detalhe.setAlignment(
-            Qt.AlignCenter
-        )
-        meta_dia_layout.addWidget(
-            self.dashboard_planejamento_resumo_meta_diaria_detalhe
-        )
+        self.dashboard_planejamento_resumo_meta_diaria_detalhe.setVisible(False)
 
         self.dashboard_resumo_meta_barra = QProgressBar()
         self.dashboard_resumo_meta_barra.setObjectName(
@@ -34339,18 +34405,18 @@ class SistemaEstudos(QMainWindow):
         self.dashboard_resumo_meta_barra.setValue(0)
         self.dashboard_resumo_meta_barra.setTextVisible(False)
         self.dashboard_resumo_meta_barra.setFixedHeight(8)
-        meta_dia_layout.addWidget(self.dashboard_resumo_meta_barra)
+        self.dashboard_resumo_meta_barra.setVisible(False)
         resumo_ia_layout.addLayout(meta_dia_layout)
 
         # Operação do dia em um único bloco: menos bordas e leitura mais direta.
         operacao_box = QFrame()
         operacao_box.setObjectName("dashboardPlanningOperational")
         operacao_linha = QHBoxLayout(operacao_box)
-        operacao_linha.setContentsMargins(11, 6, 11, 6)
-        operacao_linha.setSpacing(14)
+        operacao_linha.setContentsMargins(10, 3, 10, 3)
+        operacao_linha.setSpacing(10)
 
         revisoes_layout = QVBoxLayout()
-        revisoes_layout.setSpacing(1)
+        revisoes_layout.setSpacing(0)
         revisoes_titulo = QLabel("REVISÕES PENDENTES")
         revisoes_titulo.setObjectName("dashboardInsightSummaryRowTitle")
         self.dashboard_planejamento_resumo_pendencias = QLabel("—")
@@ -34377,7 +34443,7 @@ class SistemaEstudos(QMainWindow):
         operacao_linha.addWidget(divisor_operacional)
 
         carga_resumo_layout = QVBoxLayout()
-        carga_resumo_layout.setSpacing(1)
+        carga_resumo_layout.setSpacing(0)
         carga_titulo = QLabel("PARA CONCLUIR O DIA")
         carga_titulo.setObjectName("dashboardInsightSummaryRowTitle")
         self.dashboard_planejamento_carga_valor = QLabel("—")
@@ -34397,7 +34463,7 @@ class SistemaEstudos(QMainWindow):
         # Semana em uma única faixa, sem três mini-cards concorrentes.
         semana_linha = QHBoxLayout()
         semana_linha.setContentsMargins(0, 0, 0, 0)
-        semana_linha.setSpacing(7)
+        semana_linha.setSpacing(5)
         semana_titulo = QLabel("SEMANA")
         semana_titulo.setObjectName("dashboardInsightSummaryRowTitle")
         semana_linha.addWidget(semana_titulo)
@@ -34425,6 +34491,7 @@ class SistemaEstudos(QMainWindow):
         self.dashboard_planejamento_resumo_botao.setObjectName(
             "planningSummaryButton"
         )
+        self.dashboard_planejamento_resumo_botao.setFixedHeight(34)
         self.dashboard_planejamento_resumo_botao.setCursor(
             Qt.PointingHandCursor
         )
@@ -38763,6 +38830,11 @@ class SistemaEstudos(QMainWindow):
                 self.dashboard_resumo_meta_barra.setValue(
                     min(100, max(0, int(percentual_meta)))
                 )
+                if hasattr(self, "dashboard_planejamento_meta_gauge"):
+                    self.dashboard_planejamento_meta_gauge.setProgress(
+                        questoes_hoje,
+                        meta,
+                    )
             else:
                 self.dashboard_planejamento_resumo_meta_diaria.setText(
                     f"{questoes_hoje} hoje"
@@ -38771,6 +38843,11 @@ class SistemaEstudos(QMainWindow):
                     "Meta diária desativada"
                 )
                 self.dashboard_resumo_meta_barra.setValue(0)
+                if hasattr(self, "dashboard_planejamento_meta_gauge"):
+                    self.dashboard_planejamento_meta_gauge.setProgress(
+                        questoes_hoje,
+                        0,
+                    )
 
         if hasattr(self, "dashboard_planejamento_carga_valor"):
             if meta > 0:

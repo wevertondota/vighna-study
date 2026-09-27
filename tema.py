@@ -2794,30 +2794,30 @@ QWidget#dashboardRoot QPushButton#subtleButton:hover {
 
 QWidget#dashboardRoot QFrame#dashboardInsightSummary {
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-        stop:0 #202832, stop:0.58 #212A36, stop:1 #1D2430);
-    border: 1px solid #465263;
+        stop:0 #202733, stop:0.52 #222A36, stop:1 #1D2430);
+    border: 1px solid #475364;
     border-radius: 15px;
 }
 QWidget#dashboardRoot QLabel#dashboardInsightSummaryIcon {
-    color: #E0E7EF;
+    color: #E5ECF3;
     background-color: #39414D;
-    border: 1px solid #657081;
+    border: 1px solid #697587;
     border-radius: 10px;
     font-size: 14px;
     font-weight: 900;
 }
 QWidget#dashboardRoot QLabel#dashboardInsightSummaryTitle {
     color: #F3F7FB;
-    font-size: 10.5pt;
+    font-size: 10.7pt;
     font-weight: 850;
 }
 QWidget#dashboardRoot QLabel#dashboardInsightSummaryDate {
-    color: #B1BBC8;
-    font-size: 8.3pt;
+    color: #B8C1CD;
+    font-size: 8.5pt;
 }
 QWidget#dashboardRoot QLabel#dashboardPlanningHeroTitle {
-    color: #D4DBE5;
-    font-size: 8.3pt;
+    color: #D7DEE7;
+    font-size: 8.8pt;
     font-weight: 850;
     letter-spacing: 0.6px;
 }
@@ -2827,7 +2827,7 @@ QWidget#dashboardRoot QLabel#dashboardPlanningHeroValue {
     font-weight: 900;
 }
 QWidget#dashboardRoot QLabel#dashboardPlanningHeroDetail {
-    color: #C0C8D3;
+    color: #C3CBD5;
     font-size: 8.4pt;
     font-weight: 600;
 }
@@ -2838,36 +2838,36 @@ QWidget#dashboardRoot QProgressBar#dashboardInsightSummaryProgress {
 }
 QWidget#dashboardRoot QProgressBar#dashboardInsightSummaryProgress::chunk {
     background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #484DF2, stop:1 #6267FF);
+        stop:0 #B9FFE3, stop:1 #D5FFF0);
     border-radius: 4px;
 }
 QWidget#dashboardRoot QFrame#dashboardPlanningOperational {
-    background-color: #202732;
-    border: 1px solid #475263;
-    border-radius: 9px;
+    background-color: transparent;
+    border: none;
+    border-radius: 0px;
 }
 QWidget#dashboardRoot QLabel#dashboardInsightSummaryRowTitle {
     color: #EFF4F9;
-    font-size: 8.5pt;
+    font-size: 8.6pt;
     font-weight: 800;
 }
 QWidget#dashboardRoot QLabel#dashboardPlanningOperationalValue {
     color: #F9FBFC;
-    font-size: 12.5pt;
+    font-size: 12.7pt;
     font-weight: 900;
 }
 QWidget#dashboardRoot QLabel#dashboardInsightSummaryRowDetail {
-    color: #BCC5CF;
-    font-size: 8pt;
+    color: #C0C8D2;
+    font-size: 8.2pt;
 }
 QWidget#dashboardRoot QFrame#dashboardPlanningDivider {
-    color: #596473;
-    background-color: #596473;
+    color: rgba(191, 201, 214, 0.28);
+    background-color: rgba(191, 201, 214, 0.28);
     border: none;
     max-width: 1px;
 }
 QWidget#dashboardRoot QLabel#dashboardPlanningWeekLabel {
-    color: #C4CCD6;
+    color: #C8D0DA;
     font-size: 7.8pt;
     font-weight: 700;
 }
@@ -2875,7 +2875,7 @@ QWidget#dashboardRoot QLabel#weeklyGoalStatus {
     background-color: #3E4654;
     color: #E7EDF3;
     border: 1px solid #616C7A;
-    border-radius: 7px;
+    border-radius: 9px;
     padding: 3px 9px;
     font-size: 7.7pt;
     font-weight: 800;
@@ -2899,9 +2899,9 @@ QWidget#dashboardRoot QPushButton#planningSummaryButton {
     background-color: #202833;
     color: #E0E7EF;
     border: 1px solid #596474;
-    border-radius: 9px;
+    border-radius: 11px;
     font-weight: 800;
-    padding: 6px 12px;
+    padding: 7px 12px;
 }
 QWidget#dashboardRoot QPushButton#planningSummaryButton:hover {
     background-color: #293341;
