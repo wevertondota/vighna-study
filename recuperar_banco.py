@@ -51,6 +51,35 @@ def validar_db(caminho: Path) -> tuple[bool, str]:
                 pass
 
 
+def candidato_banco_sem_wal(alvo: Path) -> tuple[Path | None, str]:
+    """Valida uma copia isolada apenas do arquivo .db, sem WAL/SHM.
+
+    Isso recupera o caso comum em que o arquivo principal permanece integro,
+    mas um WAL/SHM antigo ou incompatível ficou ao lado dele após uma
+    substituicao manual do estudos.db. A copia isolada nunca altera o alvo.
+    """
+    alvo = Path(alvo)
+    if not alvo.is_file():
+        return None, "arquivo inexistente"
+    try:
+        td = tempfile.TemporaryDirectory(prefix="vighna_db_sem_wal_")
+        isolado = Path(td.name) / "estudos_sem_wal.db"
+        shutil.copy2(alvo, isolado)
+        ok, msg = validar_db(isolado)
+        if not ok:
+            td.cleanup()
+            return None, msg
+        # Mantem o TemporaryDirectory vivo anexado ao Path por meio de uma
+        # referencia global simples; o chamador limpa ao final.
+        _TEMP_ISOLADOS.append(td)
+        return isolado, "OK"
+    except Exception as erro:
+        return None, str(erro)
+
+
+_TEMP_ISOLADOS: list[tempfile.TemporaryDirectory] = []
+
+
 def bancos_ativos() -> list[Path]:
     candidatos = [BASE / "estudos.db", BASE / "dist" / "SistemaEstudos" / "estudos.db"]
     return [p for p in candidatos if p.exists()]
@@ -158,6 +187,18 @@ def main() -> int:
         return 0
 
     validos: list[tuple[float, str, Path, Path | None]] = []
+
+    # Primeiro tenta preservar o estado mais recente possível. Em casos de
+    # WAL/SHM residual incompatível, o arquivo estudos.db isolado pode estar
+    # perfeitamente íntegro. Ele tem prioridade sobre backups mais antigos.
+    for alvo in corrompidos:
+        isolado, msg = candidato_banco_sem_wal(alvo)
+        if isolado is not None:
+            try:
+                ts = alvo.stat().st_mtime + 0.001
+            except OSError:
+                ts = datetime.now().timestamp()
+            validos.append((ts, "banco atual sem WAL/SHM", alvo, isolado))
 
     # Um banco ativo íntegro também pode recuperar o outro alvo.
     for p, ok, _ in status_ativos:

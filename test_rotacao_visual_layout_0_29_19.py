@@ -52,8 +52,8 @@ class RotacaoVisualLayoutScrollSourceTests(unittest.TestCase):
 
     def test_versao_avancada_sem_migracao(self):
         versao = (ROOT / "versao.py").read_text(encoding="utf-8")
-        self.assertIn('VIGHNA_VERSION = "0.29.19"', versao)
-        self.assertIn('VIGHNA_BUILD = "pausa-rotacao-visual-scroll-v3"', versao)
+        self.assertIn('VIGHNA_VERSION = "0.29.20"', versao)
+        self.assertIn('VIGHNA_BUILD = "penal-ancora-memoria-titulos-iv-viii"', versao)
         self.assertIn("VIGHNA_SCHEMA = 22", versao)
 
 

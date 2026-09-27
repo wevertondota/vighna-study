@@ -759,10 +759,20 @@ def inspecionar_checkpoint(caminho) -> dict:
 
 
 def _restaurar_snapshot_banco(origem: Path, destino: Path) -> None:
-    origem_uri = origem.resolve().as_uri() + "?mode=ro"
-    origem_con = sqlite3.connect(origem_uri, uri=True, timeout=10)
+    """Restaura um snapshot SQLite por substituição atômica.
+
+    Nunca grava sobre um banco já aberto e remove WAL/SHM residuais antes da
+    troca final. Esta rotina deve ser usada somente com o Vighna fechado.
+    """
+    origem = Path(origem).resolve()
+    destino = Path(destino).resolve()
     destino.parent.mkdir(parents=True, exist_ok=True)
-    destino_con = sqlite3.connect(destino, timeout=10)
+    temp = destino.with_name(destino.name + ".restore_tmp")
+    temp.unlink(missing_ok=True)
+
+    origem_uri = origem.as_uri() + "?mode=ro"
+    origem_con = sqlite3.connect(origem_uri, uri=True, timeout=10)
+    destino_con = sqlite3.connect(temp, timeout=10)
     try:
         origem_con.backup(destino_con)
         destino_con.commit()
@@ -773,6 +783,10 @@ def _restaurar_snapshot_banco(origem: Path, destino: Path) -> None:
         destino_con.close()
         origem_con.close()
 
+    for sufixo in ("-wal", "-shm"):
+        Path(str(destino) + sufixo).unlink(missing_ok=True)
+    os.replace(temp, destino)
+
 
 def restaurar_checkpoint(caminho, restaurar_banco: bool = False) -> dict:
     """Restaura os arquivos de um checkpoint nativo após validação integral.
@@ -781,6 +795,14 @@ def restaurar_checkpoint(caminho, restaurar_banco: bool = False) -> dict:
     banco só é restaurado quando solicitado explicitamente e quando existe no
     checkpoint. Arquivos extras da instalação atual nunca são apagados.
     """
+    if restaurar_banco:
+        raise ValueError(
+            "Por segurança, o estudos.db não pode mais ser restaurado enquanto "
+            "o VighnaStudy está em execução. Feche o programa e use "
+            "recuperar_banco.bat para restaurar o banco com WAL/SHM tratados "
+            "e validação de integridade."
+        )
+
     diagnostico = inspecionar_checkpoint(caminho)
     pasta = localizar_pasta_projeto()
     _validar_fontes(pasta)

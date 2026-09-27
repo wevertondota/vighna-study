@@ -1043,6 +1043,71 @@ def criar_banco():
                 )
 
         # ------------------------------------------------------
+        # CICLOS PERSISTENTES DE QUESTÕES
+        # ------------------------------------------------------
+        # Um ciclo congela o conjunto de questões que o usuário pretende
+        # percorrer uma vez. Respostas efetivas marcam cada item como coberto;
+        # pulos simples permanecem pendentes. O histórico acadêmico continua
+        # exclusivamente em tentativas_questoes.
+        conexao.execute("""
+            CREATE TABLE IF NOT EXISTS ciclos_questoes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                concurso_id INTEGER NOT NULL,
+                topico_id INTEGER NOT NULL,
+                origem TEXT NOT NULL DEFAULT 'topico_estudo',
+                status TEXT NOT NULL DEFAULT 'ativo',
+                filtros_json TEXT,
+                motivo_encerramento TEXT,
+                criado_em TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+                encerrado_em TEXT,
+                FOREIGN KEY (concurso_id)
+                    REFERENCES concursos(id)
+                    ON DELETE CASCADE,
+                FOREIGN KEY (topico_id)
+                    REFERENCES topicos(id)
+                    ON DELETE CASCADE
+            )
+        """)
+
+        conexao.execute("""
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_ciclos_questoes_ativo
+            ON ciclos_questoes(concurso_id, topico_id)
+            WHERE status = 'ativo'
+        """)
+
+        conexao.execute("""
+            CREATE INDEX IF NOT EXISTS idx_ciclos_questoes_topico
+            ON ciclos_questoes(concurso_id, topico_id, criado_em DESC)
+        """)
+
+        conexao.execute("""
+            CREATE TABLE IF NOT EXISTS ciclo_questoes_itens (
+                ciclo_id INTEGER NOT NULL,
+                ordem INTEGER NOT NULL,
+                questao_id INTEGER NOT NULL,
+                estado TEXT NOT NULL DEFAULT 'pendente',
+                respondida_em TEXT,
+                tentativa_id INTEGER,
+                PRIMARY KEY (ciclo_id, questao_id),
+                UNIQUE (ciclo_id, ordem),
+                FOREIGN KEY (ciclo_id)
+                    REFERENCES ciclos_questoes(id)
+                    ON DELETE CASCADE,
+                FOREIGN KEY (questao_id)
+                    REFERENCES questoes(id)
+                    ON DELETE CASCADE,
+                FOREIGN KEY (tentativa_id)
+                    REFERENCES tentativas_questoes(id)
+                    ON DELETE SET NULL
+            )
+        """)
+
+        conexao.execute("""
+            CREATE INDEX IF NOT EXISTS idx_ciclo_questoes_itens_estado
+            ON ciclo_questoes_itens(ciclo_id, estado, ordem)
+        """)
+
+        # ------------------------------------------------------
         # EFETIVIDADE E CALIBRAÇÃO DAS SESSÕES
         # ------------------------------------------------------
 
@@ -14217,6 +14282,304 @@ def listar_topicos_equivalentes_com_questoes(
             == chave_origem
         )
     ]
+
+
+
+def _normalizar_ids_ciclo_questoes(questoes_ids):
+    """Normaliza IDs preservando a ordem e removendo duplicidades."""
+    resultado = []
+    vistos = set()
+    for valor in questoes_ids or []:
+        try:
+            questao_id = int(valor)
+        except (TypeError, ValueError):
+            continue
+        if questao_id <= 0 or questao_id in vistos:
+            continue
+        vistos.add(questao_id)
+        resultado.append(questao_id)
+    return resultado
+
+
+def criar_ciclo_questoes(
+    concurso_id,
+    topico_id,
+    questoes_ids,
+    origem="topico_estudo",
+    filtros=None,
+):
+    """Cria uma rodada persistente com um snapshot explícito de questões.
+
+    O ciclo não substitui o histórico. Ele apenas controla quais itens daquele
+    conjunto ainda precisam ser respondidos uma vez. Há no máximo um ciclo
+    ativo por perfil+tópico.
+    """
+    concurso_id = int(concurso_id)
+    topico_id = int(topico_id)
+    ids = _normalizar_ids_ciclo_questoes(questoes_ids)
+    if not ids:
+        raise ValueError("O ciclo precisa conter ao menos uma questão.")
+
+    with conectar() as conexao:
+        existente = conexao.execute(
+            """
+            SELECT id
+            FROM ciclos_questoes
+            WHERE concurso_id = ? AND topico_id = ? AND status = 'ativo'
+            ORDER BY id DESC
+            LIMIT 1
+            """,
+            (concurso_id, topico_id),
+        ).fetchone()
+        if existente is not None:
+            raise ValueError(
+                "Já existe um ciclo de questões em andamento para este tópico."
+            )
+
+        placeholders = ",".join("?" for _ in ids)
+        validas = conexao.execute(
+            f"""
+            SELECT id
+            FROM questoes
+            WHERE topico_id = ?
+              AND ativa = 1
+              AND COALESCE(excluida, 0) = 0
+              AND id IN ({placeholders})
+            """,
+            (topico_id, *ids),
+        ).fetchall()
+        conjunto_validas = {int(linha[0]) for linha in validas}
+        ids_validos = [qid for qid in ids if qid in conjunto_validas]
+        if not ids_validos:
+            raise ValueError(
+                "Nenhuma das questões selecionadas está ativa neste tópico."
+            )
+        if len(ids_validos) != len(ids):
+            raise ValueError(
+                "O conjunto do ciclo contém questão inativa ou pertencente a outro tópico."
+            )
+
+        cursor = conexao.execute(
+            """
+            INSERT INTO ciclos_questoes (
+                concurso_id,
+                topico_id,
+                origem,
+                status,
+                filtros_json
+            )
+            VALUES (?, ?, ?, 'ativo', ?)
+            """,
+            (
+                concurso_id,
+                topico_id,
+                str(origem or "topico_estudo"),
+                json.dumps(filtros or {}, ensure_ascii=False, default=str),
+            ),
+        )
+        ciclo_id = int(cursor.lastrowid)
+        conexao.executemany(
+            """
+            INSERT INTO ciclo_questoes_itens (
+                ciclo_id,
+                ordem,
+                questao_id,
+                estado
+            )
+            VALUES (?, ?, ?, 'pendente')
+            """,
+            [
+                (ciclo_id, ordem, questao_id)
+                for ordem, questao_id in enumerate(ids_validos, start=1)
+            ],
+        )
+
+    return obter_estado_ciclo_questoes(ciclo_id)
+
+
+def obter_estado_ciclo_questoes(ciclo_id):
+    """Retorna progresso e IDs pendentes de um ciclo persistente."""
+    ciclo_id = int(ciclo_id)
+    with conectar() as conexao:
+        ciclo = conexao.execute(
+            """
+            SELECT
+                id, concurso_id, topico_id, origem, status,
+                filtros_json, motivo_encerramento, criado_em, encerrado_em
+            FROM ciclos_questoes
+            WHERE id = ?
+            """,
+            (ciclo_id,),
+        ).fetchone()
+        if ciclo is None:
+            return None
+
+        linhas = conexao.execute(
+            """
+            SELECT
+                ci.questao_id,
+                ci.ordem,
+                ci.estado,
+                ci.respondida_em,
+                ci.tentativa_id,
+                CASE
+                    WHEN q.id IS NOT NULL
+                     AND q.ativa = 1
+                     AND COALESCE(q.excluida, 0) = 0
+                    THEN 1 ELSE 0
+                END AS disponivel
+            FROM ciclo_questoes_itens ci
+            LEFT JOIN questoes q ON q.id = ci.questao_id
+            WHERE ci.ciclo_id = ?
+            ORDER BY ci.ordem
+            """,
+            (ciclo_id,),
+        ).fetchall()
+
+    ids_respondidas = [
+        int(linha[0]) for linha in linhas if str(linha[2]) == "respondida"
+    ]
+    ids_pendentes = [
+        int(linha[0])
+        for linha in linhas
+        if str(linha[2]) == "pendente" and bool(linha[5])
+    ]
+    ids_indisponiveis = [
+        int(linha[0])
+        for linha in linhas
+        if str(linha[2]) == "pendente" and not bool(linha[5])
+    ]
+    total = len(linhas)
+    respondidas = len(ids_respondidas)
+    pendentes = len(ids_pendentes)
+    percentual = (100.0 * respondidas / total) if total else 100.0
+
+    filtros = {}
+    try:
+        filtros = json.loads(ciclo[5] or "{}")
+        if not isinstance(filtros, dict):
+            filtros = {}
+    except Exception:
+        filtros = {}
+
+    return {
+        "id": int(ciclo[0]),
+        "concurso_id": int(ciclo[1]),
+        "topico_id": int(ciclo[2]),
+        "origem": ciclo[3] or "topico_estudo",
+        "status": ciclo[4] or "ativo",
+        "filtros": filtros,
+        "motivo_encerramento": ciclo[6],
+        "criado_em": ciclo[7],
+        "encerrado_em": ciclo[8],
+        "total": total,
+        "respondidas": respondidas,
+        "pendentes": pendentes,
+        "indisponiveis": len(ids_indisponiveis),
+        "percentual": percentual,
+        "ids_respondidas": ids_respondidas,
+        "ids_pendentes": ids_pendentes,
+        "ids_indisponiveis": ids_indisponiveis,
+        "concluido": str(ciclo[4]) == "concluido",
+    }
+
+
+def obter_ciclo_questoes_ativo(concurso_id, topico_id):
+    concurso_id = int(concurso_id)
+    topico_id = int(topico_id)
+    with conectar() as conexao:
+        linha = conexao.execute(
+            """
+            SELECT id
+            FROM ciclos_questoes
+            WHERE concurso_id = ? AND topico_id = ? AND status = 'ativo'
+            ORDER BY id DESC
+            LIMIT 1
+            """,
+            (concurso_id, topico_id),
+        ).fetchone()
+    if linha is None:
+        return None
+    return obter_estado_ciclo_questoes(int(linha[0]))
+
+
+def marcar_questao_ciclo_respondida(ciclo_id, questao_id, tentativa_id=None):
+    """Marca uma questão como coberta no ciclo após resposta efetiva.
+
+    Pulos simples não chamam esta função. O segundo pulo convertido em erro é
+    resposta efetiva e, portanto, fecha o item do ciclo.
+    """
+    ciclo_id = int(ciclo_id)
+    questao_id = int(questao_id)
+    tentativa_id = int(tentativa_id) if tentativa_id is not None else None
+
+    with conectar() as conexao:
+        ciclo = conexao.execute(
+            "SELECT status FROM ciclos_questoes WHERE id = ?",
+            (ciclo_id,),
+        ).fetchone()
+        if ciclo is None:
+            raise ValueError("Ciclo de questões não encontrado.")
+        if str(ciclo[0]) != "ativo":
+            return obter_estado_ciclo_questoes(ciclo_id)
+
+        conexao.execute(
+            """
+            UPDATE ciclo_questoes_itens
+            SET
+                estado = 'respondida',
+                respondida_em = COALESCE(respondida_em, datetime('now', 'localtime')),
+                tentativa_id = COALESCE(?, tentativa_id)
+            WHERE ciclo_id = ? AND questao_id = ? AND estado = 'pendente'
+            """,
+            (tentativa_id, ciclo_id, questao_id),
+        )
+
+        pendentes_disponiveis = conexao.execute(
+            """
+            SELECT COUNT(*)
+            FROM ciclo_questoes_itens ci
+            JOIN questoes q ON q.id = ci.questao_id
+            WHERE ci.ciclo_id = ?
+              AND ci.estado = 'pendente'
+              AND q.ativa = 1
+              AND COALESCE(q.excluida, 0) = 0
+            """,
+            (ciclo_id,),
+        ).fetchone()[0]
+
+        if int(pendentes_disponiveis or 0) == 0:
+            conexao.execute(
+                """
+                UPDATE ciclos_questoes
+                SET
+                    status = 'concluido',
+                    motivo_encerramento = 'cobertura_completa',
+                    encerrado_em = datetime('now', 'localtime')
+                WHERE id = ? AND status = 'ativo'
+                """,
+                (ciclo_id,),
+            )
+
+    return obter_estado_ciclo_questoes(ciclo_id)
+
+
+def encerrar_ciclo_questoes(ciclo_id, motivo="encerrado_manual"):
+    """Encerra sem apagar o ciclo ou seus itens, preservando a auditoria."""
+    ciclo_id = int(ciclo_id)
+    with conectar() as conexao:
+        conexao.execute(
+            """
+            UPDATE ciclos_questoes
+            SET
+                status = 'cancelado',
+                motivo_encerramento = ?,
+                encerrado_em = datetime('now', 'localtime')
+            WHERE id = ? AND status = 'ativo'
+            """,
+            (str(motivo or "encerrado_manual"), ciclo_id),
+        )
+    return obter_estado_ciclo_questoes(ciclo_id)
 
 
 def listar_questoes_resolucao(

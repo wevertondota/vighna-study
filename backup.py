@@ -35,7 +35,14 @@ def limpar_backups_antigos():
             pass
 
 
-def verificar_integridade_banco(caminho=ARQUIVO_BANCO):
+def verificar_integridade_banco(caminho=ARQUIVO_BANCO, completo=False):
+    """Valida o SQLite sem transformar a abertura do app em auditoria completa.
+
+    Na inicialização normal usamos ``quick_check(1)``: ele detecta corrupção
+    estrutural/malformação do arquivo com custo muito menor. A verificação
+    completa continua disponível para recuperação, backup e diagnóstico
+    explícito por meio de ``completo=True``.
+    """
     caminho = Path(caminho)
 
     if not caminho.exists():
@@ -50,8 +57,9 @@ def verificar_integridade_banco(caminho=ARQUIVO_BANCO):
             uri=True,
             timeout=5
         )
+        pragma = "integrity_check" if completo else "quick_check(1)"
         resultado = conexao.execute(
-            "PRAGMA integrity_check"
+            f"PRAGMA {pragma}"
         ).fetchone()
 
         if (
@@ -59,7 +67,7 @@ def verificar_integridade_banco(caminho=ARQUIVO_BANCO):
             or str(resultado[0]).strip().lower() != "ok"
         ):
             return False, (
-                "O banco não passou no PRAGMA integrity_check: "
+                f"O banco não passou no PRAGMA {pragma}: "
                 + str(resultado[0] if resultado else "sem resultado")
             )
 

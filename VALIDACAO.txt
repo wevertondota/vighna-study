@@ -1,0 +1,10 @@
+VALIDAÇÃO DO PATCH
+Base testada: checkpoint inicial de 25/09/2026 13:13:50
+Questões nos cinco tópicos antes: 274
+Questões visíveis depois: 0
+Questões preservadas na Lixeira: 274
+Total físico de questões preservado: 274
+controle_topico inalterado: SIM
+quick_check: ok
+foreign_key_check: 0 problema(s)
+Teste de restauração: OK (274 questões reativadas)

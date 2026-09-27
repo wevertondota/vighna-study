@@ -125,6 +125,43 @@ QWidget#dashboardRoot QProgressBar#dashboardInsightSummaryProgress::chunk {
     background-color: #2F73C9;
     border-radius: 3px;
 }
+
+QWidget#dashboardRoot QLabel#dashboardPlanningHeroTitle {
+    color: #4E6A86;
+    font-size: 8.5pt;
+    font-weight: 800;
+}
+QWidget#dashboardRoot QLabel#dashboardPlanningHeroValue {
+    color: #0F3989;
+    font-size: 24pt;
+    font-weight: 900;
+}
+QWidget#dashboardRoot QLabel#dashboardPlanningHeroDetail {
+    color: #66788C;
+    font-size: 8.5pt;
+    font-weight: 600;
+}
+QWidget#dashboardRoot QFrame#dashboardPlanningOperational {
+    background-color: #FAFCFE;
+    border: 1px solid #E3EAF2;
+    border-radius: 8px;
+}
+QWidget#dashboardRoot QLabel#dashboardPlanningOperationalValue {
+    color: #183A6B;
+    font-size: 12pt;
+    font-weight: 900;
+}
+QWidget#dashboardRoot QFrame#dashboardPlanningDivider {
+    color: #DCE4ED;
+    background-color: #DCE4ED;
+    border: none;
+    max-width: 1px;
+}
+QWidget#dashboardRoot QLabel#dashboardPlanningWeekLabel {
+    color: #6F8092;
+    font-size: 8pt;
+    font-weight: 700;
+}
 """
 
 ESTILO_INTELIGENCIA_RESUMO_ESCURO = r"""
@@ -163,6 +200,43 @@ QWidget#dashboardRoot QProgressBar#dashboardInsightSummaryProgress::chunk {
     background-color: #4C7FD1;
     border-radius: 3px;
 }
+
+QWidget#dashboardRoot QLabel#dashboardPlanningHeroTitle {
+    color: #9FB1C3;
+    font-size: 8.5pt;
+    font-weight: 800;
+}
+QWidget#dashboardRoot QLabel#dashboardPlanningHeroValue {
+    color: #F1F6FB;
+    font-size: 24pt;
+    font-weight: 900;
+}
+QWidget#dashboardRoot QLabel#dashboardPlanningHeroDetail {
+    color: #9FB1C3;
+    font-size: 8.5pt;
+    font-weight: 600;
+}
+QWidget#dashboardRoot QFrame#dashboardPlanningOperational {
+    background-color: #1B2C3E;
+    border: 1px solid #3A536B;
+    border-radius: 8px;
+}
+QWidget#dashboardRoot QLabel#dashboardPlanningOperationalValue {
+    color: #F1F6FB;
+    font-size: 12pt;
+    font-weight: 900;
+}
+QWidget#dashboardRoot QFrame#dashboardPlanningDivider {
+    color: #3A536B;
+    background-color: #3A536B;
+    border: none;
+    max-width: 1px;
+}
+QWidget#dashboardRoot QLabel#dashboardPlanningWeekLabel {
+    color: #9FB1C3;
+    font-size: 8pt;
+    font-weight: 700;
+}
 """
 
 ESTILO_INTELIGENCIA_RESUMO_FUTURISTA = r"""
@@ -200,6 +274,43 @@ QWidget#dashboardRoot QProgressBar#dashboardInsightSummaryProgress {
 QWidget#dashboardRoot QProgressBar#dashboardInsightSummaryProgress::chunk {
     background-color: #5ED8FF;
     border-radius: 3px;
+}
+
+QWidget#dashboardRoot QLabel#dashboardPlanningHeroTitle {
+    color: #9BCBDD;
+    font-size: 8.5pt;
+    font-weight: 800;
+}
+QWidget#dashboardRoot QLabel#dashboardPlanningHeroValue {
+    color: #F2FCFF;
+    font-size: 24pt;
+    font-weight: 900;
+}
+QWidget#dashboardRoot QLabel#dashboardPlanningHeroDetail {
+    color: #9BCBDD;
+    font-size: 8.5pt;
+    font-weight: 600;
+}
+QWidget#dashboardRoot QFrame#dashboardPlanningOperational {
+    background-color: #123149;
+    border: 1px solid #447DA1;
+    border-radius: 8px;
+}
+QWidget#dashboardRoot QLabel#dashboardPlanningOperationalValue {
+    color: #F2FCFF;
+    font-size: 12pt;
+    font-weight: 900;
+}
+QWidget#dashboardRoot QFrame#dashboardPlanningDivider {
+    color: #447DA1;
+    background-color: #447DA1;
+    border: none;
+    max-width: 1px;
+}
+QWidget#dashboardRoot QLabel#dashboardPlanningWeekLabel {
+    color: #9BCBDD;
+    font-size: 8pt;
+    font-weight: 700;
 }
 """
 
@@ -2006,90 +2117,46 @@ QWidget#dashboardRoot QFrame#dashboardQuickAccess[embedded="true"] QPushButton#p
 """
 
 ESTILO_FOCO_DASHBOARD_FUTURISTA = r"""
-QWidget#dashboardRoot QFrame#dashboardFocusPanel,
-QWidget#dashboardRoot QFrame#dashboardFocusPanel QLabel,
-QWidget#dashboardRoot QFrame#dashboardFocusPanel QPushButton {
-    font-family: "Segoe UI Variable Text", "Segoe UI";
-}
-QWidget#dashboardRoot QFrame#dashboardFocusPanel {
-    background-color: #0d2030;
-    border: 1px solid #315e7a;
-    border-radius: 16px;
-}
-QWidget#dashboardRoot QFrame#dashboardFocusPanel QPushButton#dashboardSectionToggle {
-    color: #e3f7ff;
-    font-size: 10pt;
-    font-weight: 800;
-    padding: 1px 0px;
-}
-QWidget#dashboardRoot QLabel#focusDashboardIcon {
-    color: #a8e5ff;
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-        stop:0 #113149, stop:1 #10283c);
-    border: 1px solid #3c789a;
-    border-radius: 10px;
-    font-size: 17pt;
-    font-weight: 700;
-}
-QWidget#dashboardRoot QLabel#focusDashboardSubtitle {
-    color: #86abc2;
-    font-size: 8.55pt;
-    font-weight: 500;
-}
-QWidget#dashboardRoot QFrame#dashboardFocusPanel QLabel#dashboardTodayDate {
-    color: #a8d4e7;
-    background-color: #102b40;
-    border: 1px solid #326781;
-    border-radius: 8px;
-    padding: 4px 9px;
-    font-size: 7.9pt;
-    font-weight: 700;
-}
-QWidget#dashboardRoot QLabel#focusDashboardMetricText {
-    color: #89c8e4;
-    font-size: 8.35pt;
-    font-weight: 700;
-}
-QWidget#dashboardRoot QLabel#focusDashboardMetricText[metricKind="time"] { color: #a5dcf1; }
-QWidget#dashboardRoot QLabel#focusDashboardMetricText[metricKind="sessions"] { color: #86bed5; }
-QWidget#dashboardRoot QLabel#focusDashboardMetricText[metricKind="goal"] { color: #7097ab; font-weight: 600; }
+QWidget#dashboardRoot QLabel#focusDashboardMetricText[metricKind="time"] { color: #CBD5E1; }
+QWidget#dashboardRoot QLabel#focusDashboardMetricText[metricKind="sessions"] { color: #AEB7C4; }
+QWidget#dashboardRoot QLabel#focusDashboardMetricText[metricKind="goal"] { color: #8E97A6; font-weight: 600; }
 QWidget#dashboardRoot QFrame#focusDashboardMainCard {
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-        stop:0 #211925, stop:0.7 #261c28, stop:1 #2a1d2a);
-    border: 1px solid #815064;
+        stop:0 #232A36, stop:0.6 #242B37, stop:1 #202733);
+    border: 1px solid #4B5667;
     border-radius: 12px;
 }
 QWidget#dashboardRoot QFrame#focusQuickCard {
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-        stop:0 #0d2435, stop:0.7 #102838, stop:1 #102d3c);
-    border: 1px solid #39778d;
+        stop:0 #202833, stop:0.7 #212935, stop:1 #1E2531);
+    border: 1px solid #465163;
     border-radius: 12px;
 }
 QWidget#dashboardRoot QLabel#focusDashboardCardIcon {
-    color: #ff9fb0;
-    background-color: #38212c;
-    border: 1px solid #92536a;
+    color: #F6A9B5;
+    background-color: #3B2A33;
+    border: 1px solid #8E6271;
     border-radius: 11px;
     font-size: 17pt;
     font-weight: 800;
 }
 QWidget#dashboardRoot QLabel#focusQuickIcon {
-    color: #99e8ea;
-    background-color: #10383e;
-    border: 1px solid #4a8d92;
+    color: #D8FFF4;
+    background-color: #2A4247;
+    border: 1px solid #68998F;
     border-radius: 11px;
     font-size: 18pt;
     font-weight: 800;
 }
 QWidget#dashboardRoot QLabel#focusDashboardCardTitle {
-    color: #eaf8ff;
+    color: #F4F7FB;
     font-size: 11.2pt;
     font-weight: 800;
 }
 QWidget#dashboardRoot QLabel#focusDashboardBadge {
-    color: #ffc0ca;
-    background-color: rgba(62, 30, 42, 220);
-    border: 1px solid #875065;
+    color: #FFC5CF;
+    background-color: rgba(84, 50, 59, 228);
+    border: 1px solid #976874;
     border-radius: 7px;
     padding: 3px 7px;
     font-size: 6.9pt;
@@ -2099,37 +2166,37 @@ QWidget#dashboardRoot QLabel#focusDashboardBadge {
 QWidget#dashboardRoot QLabel#focusDashboardDescription,
 QWidget#dashboardRoot QLabel#focusDashboardDetail,
 QWidget#dashboardRoot QLabel#focusQuickHint {
-    color: #91b4c8;
+    color: #C2CAD4;
     font-size: 8.45pt;
     font-weight: 500;
 }
 QWidget#dashboardRoot QLabel#focusDashboardDetail,
 QWidget#dashboardRoot QLabel#focusQuickHint {
-    color: #80a8bd;
+    color: #BAC4CF;
     font-size: 8.15pt;
 }
 QWidget#dashboardRoot QLabel#focusDashboardCaption {
-    color: #c197a2;
+    color: #D2AAB3;
     font-size: 8.25pt;
     font-weight: 600;
     padding-bottom: 3px;
 }
 QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#dashboardTodayFocusValue {
-    color: #ff9caf;
+    color: #F6AAB5;
     font-size: 22pt;
     font-weight: 850;
 }
 QWidget#dashboardRoot QLabel#focusQuickEyebrow {
-    color: #86bdd4;
+    color: #C0CAD5;
     font-size: 7.45pt;
     font-weight: 800;
     letter-spacing: 0.55px;
 }
 QWidget#dashboardRoot QFrame#focusDashboardMainCard QPushButton#dashboardFocusPrimaryButton {
     background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #b93449, stop:1 #dc5368);
-    color: #ffffff;
-    border: 1px solid #eb7182;
+        stop:0 #4447E8, stop:1 #3B40D4);
+    color: #FFFFFF;
+    border: 1px solid #7C83FF;
     border-radius: 10px;
     font-size: 9.15pt;
     font-weight: 800;
@@ -2137,34 +2204,38 @@ QWidget#dashboardRoot QFrame#focusDashboardMainCard QPushButton#dashboardFocusPr
 }
 QWidget#dashboardRoot QFrame#focusDashboardMainCard QPushButton#dashboardFocusPrimaryButton:hover {
     background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #cb4055, stop:1 #ef6679);
-    border-color: #ff9aaa;
+        stop:0 #5254F3, stop:1 #484DE0);
+    border-color: #AAB1FF;
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QPushButton#dashboardFocusPrimaryButton:pressed {
+    background-color: #363BB8;
+    border-color: #6C73F4;
 }
 QWidget#dashboardRoot QPushButton#focusQuickPresetButton {
-    background-color: #0e2a3b;
-    color: #acd9e9;
-    border: 1px solid #386a81;
+    background-color: #232C37;
+    color: #D4DCE6;
+    border: 1px solid #566173;
     border-radius: 9px;
     font-size: 8.65pt;
     font-weight: 700;
     padding: 6px 10px;
 }
 QWidget#dashboardRoot QPushButton#focusQuickPresetButton:hover {
-    background-color: #123842;
-    border-color: #4d969b;
-    color: #d9fbfc;
+    background-color: #2A3442;
+    border-color: #728096;
+    color: #F2F5F9;
 }
 QWidget#dashboardRoot QPushButton#focusQuickPresetButton:checked {
-    background-color: #12464b;
-    color: #d3fcfd;
-    border: 1px solid #64b6bb;
+    background-color: #2F3A4A;
+    color: #FFFFFF;
+    border: 1px solid #8D9AB0;
     font-weight: 800;
 }
 QWidget#dashboardRoot QPushButton#focusQuickStartButton {
     background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #247985, stop:1 #35a0a8);
-    color: #ffffff;
-    border: 1px solid #63bec8;
+        stop:0 #4447E8, stop:1 #3B40D4);
+    color: #FFFFFF;
+    border: 1px solid #7C83FF;
     border-radius: 10px;
     font-size: 9.15pt;
     font-weight: 800;
@@ -2172,25 +2243,25 @@ QWidget#dashboardRoot QPushButton#focusQuickStartButton {
 }
 QWidget#dashboardRoot QPushButton#focusQuickStartButton:hover {
     background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #2d8995, stop:1 #45b0b8);
-    border-color: #91dbe0;
+        stop:0 #5254F3, stop:1 #484DE0);
+    border-color: #AAB1FF;
 }
 QWidget#dashboardRoot QFrame#dashboardQuickAccess[embedded="true"] {
-    background-color: #102638;
-    border: 1px solid #315d79;
+    background-color: #212935;
+    border: 1px solid #475365;
     border-radius: 10px;
 }
 QWidget#dashboardRoot QFrame#dashboardQuickAccess[embedded="true"] QPushButton#dashboardSectionToggle {
-    color: #91bed2;
+    color: #CDD6E0;
     font-size: 8.55pt;
     font-weight: 800;
     padding: 4px 3px;
 }
 QWidget#dashboardRoot QFrame#dashboardQuickAccess[embedded="true"] QPushButton#toolbarButton,
 QWidget#dashboardRoot QFrame#dashboardQuickAccess[embedded="true"] QPushButton#pauseNavButton {
-    background-color: #0f2a3d;
-    color: #afd5e3;
-    border: 1px solid #386987;
+    background-color: #222B36;
+    color: #D5DDE7;
+    border: 1px solid #556072;
     border-radius: 9px;
     font-size: 8.6pt;
     font-weight: 700;
@@ -2198,12 +2269,11 @@ QWidget#dashboardRoot QFrame#dashboardQuickAccess[embedded="true"] QPushButton#p
 }
 QWidget#dashboardRoot QFrame#dashboardQuickAccess[embedded="true"] QPushButton#toolbarButton:hover,
 QWidget#dashboardRoot QFrame#dashboardQuickAccess[embedded="true"] QPushButton#pauseNavButton:hover {
-    background-color: #14374d;
-    border-color: #55a0c5;
-    color: #e6f8ff;
+    background-color: #2B3542;
+    border-color: #758297;
+    color: #FFFFFF;
 }
 """
-
 
 ESTILO_ALGORITMO_DASHBOARD_CLARO = r"""
 QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] {
@@ -2369,56 +2439,56 @@ ESTILO_ALGORITMO_DASHBOARD_FUTURISTA = r"""
 QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] {
     background: qlineargradient(
         x1:0, y1:0, x2:1, y2:1,
-        stop:0 #0b2033, stop:0.55 #08192b, stop:1 #071422
+        stop:0 #202733, stop:0.55 #222A36, stop:1 #1D2430
     );
-    border: 1px solid #2c658b;
+    border: 1px solid #475363;
     border-radius: 14px;
 }
 QWidget#dashboardRoot QLabel#algorithmDashboardIcon {
     background: qlineargradient(
         x1:0, y1:0, x2:1, y2:1,
-        stop:0 #123e62, stop:1 #2d285f
+        stop:0 #3B4554, stop:1 #2E3643
     );
-    color: #bcefff;
-    border: 1px solid #56dbff;
+    color: #E5ECF3;
+    border: 1px solid #626E80;
     border-radius: 14px;
     font-size: 20px;
     font-weight: 900;
 }
 QWidget#dashboardRoot QLabel#algorithmDashboardTitle {
-    color: #d9f7ff;
+    color: #F3F7FB;
     font-size: 10.2pt;
     font-weight: 900;
 }
 QWidget#dashboardRoot QLabel#algorithmDashboardSubtitle {
-    color: #8db2ca;
+    color: #B5BFCA;
     font-size: 8.8pt;
 }
 QWidget#dashboardRoot QLabel#algorithmDashboardReady {
-    color: #8ee2ff;
+    color: #C3CCD8;
     font-size: 8.4pt;
     font-weight: 900;
     letter-spacing: 0.9px;
 }
 QWidget#dashboardRoot QPushButton#algorithmDashboardHelp {
-    background-color: #0d2638;
-    color: #a9dced;
-    border: 1px solid #376a87;
+    background-color: #262E3A;
+    color: #CFD7E1;
+    border: 1px solid #596577;
     border-radius: 9px;
     font-size: 9pt;
     font-weight: 800;
 }
 QWidget#dashboardRoot QPushButton#algorithmDashboardHelp:hover {
-    background-color: #123149;
-    border-color: #55a0c5;
+    background-color: #303948;
+    border-color: #7B8698;
 }
 QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] QPushButton#dashboardTodayPrimaryButton {
     min-width: 320px;
     min-height: 40px;
     background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #255cb1, stop:0.5 #3777d6, stop:1 #4d91f2);
-    color: #ffffff;
-    border: 1px solid #8bc0ff;
+        stop:0 #4447E8, stop:0.5 #4347E1, stop:1 #3C42D2);
+    color: #FFFFFF;
+    border: 1px solid #7C83FF;
     border-radius: 10px;
     font-family: "Segoe UI Semibold";
     font-size: 10.4pt;
@@ -2428,16 +2498,16 @@ QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] QPushButton
 }
 QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] QPushButton#dashboardTodayPrimaryButton:hover {
     background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #2f6bc5, stop:0.5 #4388e6, stop:1 #5da4ff);
-    border-color: #d2e9ff;
+        stop:0 #5355F2, stop:0.5 #4F54EB, stop:1 #464DDE);
+    border-color: #B1B7FF;
 }
 QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] QPushButton#dashboardTodayPrimaryButton:pressed {
-    background-color: #214e94;
-    border-color: #79b4f5;
+    background-color: #363BB8;
+    border-color: #6C73F4;
 }
 QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] QPushButton#dashboardTodayButton {
     background: transparent;
-    color: #91cce6;
+    color: #C9D2DE;
     border: none;
     border-radius: 0px;
     font-size: 8.8pt;
@@ -2447,11 +2517,9 @@ QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] QPushButton
 }
 QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] QPushButton#dashboardTodayButton:hover {
     background: transparent;
-    color: #e6f8ff;
+    color: #F3F7FB;
 }
 """
-
-
 
 ESTILO_BUSCA_GLOBAL_CLARO = r"""
 QWidget#dashboardRoot QPushButton#globalSearchTrigger {
@@ -2606,11 +2674,389 @@ QDialog#globalSearchDialog QHeaderView::section {
 }
 """
 
+
+# ============================================================
+# Dashboard — Futurista Neo
+# Camada final de refinamento visual do Dashboard futurista.
+# Não altera o módulo Foco: os seletores abaixo evitam deliberadamente
+# dashboardFocusPanel/focusDashboardMainCard/dashboardFocusPrimaryButton.
+# ============================================================
+ESTILO_DASHBOARD_NEO_FUTURISTA = r"""
+/* Base — paleta escura neutra com acentos azul-violeta e verde. */
+QWidget#dashboardPage,
+QScrollArea#dashboardScroll,
+QWidget#dashboardRoot {
+    background-color: #0B111D;
+}
+
+QWidget#dashboardRoot QLabel#pageTitle {
+    color: #F5F7FB;
+    font-size: 20px;
+    font-weight: 900;
+}
+QWidget#dashboardRoot QLabel#pageSubtitle {
+    color: #B4BECA;
+    font-size: 9pt;
+}
+
+QWidget#dashboardRoot QFrame#dashboardTopBar {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #0D1420, stop:0.52 #0F1622, stop:1 #0C1320);
+    border: 1px solid #1E2634;
+    border-radius: 16px;
+}
+QWidget#dashboardRoot QFrame#topProfileBar {
+    background-color: #111925;
+    border: 1px solid #313948;
+    border-radius: 11px;
+}
+QWidget#dashboardRoot QLabel#topProfileLabel {
+    color: #BDC6D1;
+    font-size: 8.2pt;
+    font-weight: 800;
+    letter-spacing: 0.7px;
+}
+QWidget#dashboardRoot QComboBox#topProfileCombo {
+    background-color: #202935;
+    color: #F2F5F9;
+    border: 1px solid #4A5362;
+    border-radius: 9px;
+    padding: 4px 10px;
+}
+QWidget#dashboardRoot QComboBox#topProfileCombo:hover,
+QWidget#dashboardRoot QComboBox#topProfileCombo:focus {
+    background-color: #293341;
+    border-color: #6D7888;
+}
+
+QWidget#dashboardRoot QPushButton#globalSearchTrigger {
+    background-color: #212A35;
+    color: #C2CAD4;
+    border: 1px solid #48515F;
+    border-radius: 11px;
+    font-size: 8.8pt;
+    font-weight: 700;
+    text-align: left;
+    padding: 6px 12px;
+}
+QWidget#dashboardRoot QPushButton#globalSearchTrigger:hover {
+    background-color: #293342;
+    color: #F3F7FB;
+    border-color: #636E7D;
+}
+
+QWidget#dashboardRoot QPushButton#questionsNavButton {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #212A35, stop:1 #1F2732);
+    color: #F7FAFC;
+    border: 1px solid #666F7C;
+    border-radius: 10px;
+    font-weight: 850;
+    padding: 6px 15px;
+}
+QWidget#dashboardRoot QPushButton#questionsNavButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #283241, stop:1 #252E3B);
+    border-color: #8892A0;
+}
+QWidget#dashboardRoot QPushButton#questionsNavButton:pressed {
+    background-color: #1A212C;
+    border-color: #596371;
+}
+
+QWidget#dashboardRoot QPushButton#topAccentButton {
+    background-color: #232C38;
+    border: 1px solid #5E6876;
+    border-radius: 11px;
+    padding: 0px;
+}
+QWidget#dashboardRoot QPushButton#topAccentButton:hover {
+    background-color: #2B3542;
+    border-color: #7B8695;
+}
+QWidget#dashboardRoot QPushButton#topAccentButton:pressed {
+    background-color: #1C2430;
+}
+
+QWidget#dashboardRoot QPushButton#subtleButton {
+    background-color: #232B36;
+    color: #D1D9E2;
+    border: 1px solid #5A6472;
+    border-radius: 9px;
+    font-weight: 700;
+    padding: 5px 12px;
+}
+QWidget#dashboardRoot QPushButton#subtleButton:hover {
+    background-color: #2C3643;
+    color: #FFFFFF;
+    border-color: #7A8594;
+}
+
+QWidget#dashboardRoot QFrame#dashboardInsightSummary {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #202832, stop:0.58 #212A36, stop:1 #1D2430);
+    border: 1px solid #465263;
+    border-radius: 15px;
+}
+QWidget#dashboardRoot QLabel#dashboardInsightSummaryIcon {
+    color: #E0E7EF;
+    background-color: #39414D;
+    border: 1px solid #657081;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 900;
+}
+QWidget#dashboardRoot QLabel#dashboardInsightSummaryTitle {
+    color: #F3F7FB;
+    font-size: 10.5pt;
+    font-weight: 850;
+}
+QWidget#dashboardRoot QLabel#dashboardInsightSummaryDate {
+    color: #B1BBC8;
+    font-size: 8.3pt;
+}
+QWidget#dashboardRoot QLabel#dashboardPlanningHeroTitle {
+    color: #D4DBE5;
+    font-size: 8.3pt;
+    font-weight: 850;
+    letter-spacing: 0.6px;
+}
+QWidget#dashboardRoot QLabel#dashboardPlanningHeroValue {
+    color: #F8FAFC;
+    font-size: 25pt;
+    font-weight: 900;
+}
+QWidget#dashboardRoot QLabel#dashboardPlanningHeroDetail {
+    color: #C0C8D3;
+    font-size: 8.4pt;
+    font-weight: 600;
+}
+QWidget#dashboardRoot QProgressBar#dashboardInsightSummaryProgress {
+    background-color: #3B424F;
+    border: none;
+    border-radius: 4px;
+}
+QWidget#dashboardRoot QProgressBar#dashboardInsightSummaryProgress::chunk {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #484DF2, stop:1 #6267FF);
+    border-radius: 4px;
+}
+QWidget#dashboardRoot QFrame#dashboardPlanningOperational {
+    background-color: #202732;
+    border: 1px solid #475263;
+    border-radius: 9px;
+}
+QWidget#dashboardRoot QLabel#dashboardInsightSummaryRowTitle {
+    color: #EFF4F9;
+    font-size: 8.5pt;
+    font-weight: 800;
+}
+QWidget#dashboardRoot QLabel#dashboardPlanningOperationalValue {
+    color: #F9FBFC;
+    font-size: 12.5pt;
+    font-weight: 900;
+}
+QWidget#dashboardRoot QLabel#dashboardInsightSummaryRowDetail {
+    color: #BCC5CF;
+    font-size: 8pt;
+}
+QWidget#dashboardRoot QFrame#dashboardPlanningDivider {
+    color: #596473;
+    background-color: #596473;
+    border: none;
+    max-width: 1px;
+}
+QWidget#dashboardRoot QLabel#dashboardPlanningWeekLabel {
+    color: #C4CCD6;
+    font-size: 7.8pt;
+    font-weight: 700;
+}
+QWidget#dashboardRoot QLabel#weeklyGoalStatus {
+    background-color: #3E4654;
+    color: #E7EDF3;
+    border: 1px solid #616C7A;
+    border-radius: 7px;
+    padding: 3px 9px;
+    font-size: 7.7pt;
+    font-weight: 800;
+}
+QWidget#dashboardRoot QLabel#weeklyGoalStatus[weekState="concluida"] {
+    background-color: #305345;
+    color: #D2FFE7;
+    border-color: #58A07A;
+}
+QWidget#dashboardRoot QLabel#weeklyGoalStatus[weekState="atencao"] {
+    background-color: #5A402D;
+    color: #FFE2C0;
+    border-color: #D39A64;
+}
+QWidget#dashboardRoot QLabel#weeklyGoalStatus[weekState="andamento"] {
+    background-color: #46506A;
+    color: #E6EBFF;
+    border-color: #707AA0;
+}
+QWidget#dashboardRoot QPushButton#planningSummaryButton {
+    background-color: #202833;
+    color: #E0E7EF;
+    border: 1px solid #596474;
+    border-radius: 9px;
+    font-weight: 800;
+    padding: 6px 12px;
+}
+QWidget#dashboardRoot QPushButton#planningSummaryButton:hover {
+    background-color: #293341;
+    color: #FFFFFF;
+    border-color: #7B8698;
+}
+
+QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"],
+QWidget#dashboardRoot QFrame#dashboardTodayAction[heroCentral="true"] {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #202733, stop:0.52 #222A36, stop:1 #1D2430);
+    border: 1px solid #475364;
+    border-radius: 15px;
+}
+QWidget#dashboardRoot QLabel#algorithmDashboardIcon {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #404957, stop:1 #2F3744);
+    color: #E5ECF3;
+    border: 1px solid #697587;
+    border-radius: 13px;
+}
+QWidget#dashboardRoot QLabel#algorithmDashboardTitle {
+    color: #F3F7FB;
+    font-size: 10.4pt;
+    font-weight: 900;
+}
+QWidget#dashboardRoot QLabel#algorithmDashboardSubtitle {
+    color: #B4BEC9;
+    font-size: 8.7pt;
+}
+QWidget#dashboardRoot QPushButton#algorithmDashboardHelp {
+    background-color: #252E3A;
+    color: #D1D9E2;
+    border: 1px solid #5E6A7C;
+    border-radius: 9px;
+}
+QWidget#dashboardRoot QPushButton#algorithmDashboardHelp:hover {
+    background-color: #2F3947;
+    color: #FFFFFF;
+    border-color: #7E899A;
+}
+QWidget#dashboardRoot QFrame#algorithmRecommendationBody {
+    background-color: #202833;
+    border: 1px solid #465263;
+    border-radius: 11px;
+}
+QWidget#dashboardRoot QLabel#algorithmDashboardReady {
+    color: #C4CDD8;
+    font-size: 8.4pt;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] QPushButton#dashboardTodayPrimaryButton,
+QWidget#dashboardRoot QFrame#dashboardTodayAction[heroCentral="true"] QPushButton#dashboardTodayPrimaryButton {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #4447E8, stop:0.52 #4347E1, stop:1 #3C42D2);
+    color: #FFFFFF;
+    border: 1px solid #7C83FF;
+    border-radius: 11px;
+    font-size: 10.5pt;
+    font-weight: 900;
+}
+QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] QPushButton#dashboardTodayPrimaryButton:hover,
+QWidget#dashboardRoot QFrame#dashboardTodayAction[heroCentral="true"] QPushButton#dashboardTodayPrimaryButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #5355F2, stop:0.52 #4F54EB, stop:1 #464DDE);
+    border-color: #B1B7FF;
+}
+QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] QPushButton#dashboardTodayButton,
+QWidget#dashboardRoot QFrame#dashboardTodayAction[heroCentral="true"] QPushButton#dashboardTodayButton {
+    background: transparent;
+    color: #CBD3DE;
+    border: none;
+    text-decoration: underline;
+    font-weight: 750;
+}
+QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] QPushButton#dashboardTodayButton:hover,
+QWidget#dashboardRoot QFrame#dashboardTodayAction[heroCentral="true"] QPushButton#dashboardTodayButton:hover {
+    color: #F4F7FB;
+}
+
+QWidget#dashboardRoot QFrame#focusQuickCard[cardRole="progress"] {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #14A779, stop:0.55 #13835F, stop:1 #16534D);
+    border: 1px solid #39C39A;
+    border-radius: 15px;
+}
+QWidget#dashboardRoot QFrame#focusQuickCard[cardRole="progress"] QLabel#focusQuickIcon {
+    background-color: rgba(255, 255, 255, 0.12);
+    color: #E8FFF8;
+    border: 1px solid rgba(232, 255, 248, 0.35);
+    border-radius: 10px;
+}
+QWidget#dashboardRoot QFrame#focusQuickCard[cardRole="progress"] QLabel#focusDashboardCardTitle {
+    color: #F6FFFC;
+    font-weight: 850;
+}
+QWidget#dashboardRoot QFrame#focusQuickCard[cardRole="progress"] QLabel#focusDashboardDescription,
+QWidget#dashboardRoot QFrame#focusQuickCard[cardRole="progress"] QLabel#focusDashboardDetail,
+QWidget#dashboardRoot QFrame#focusQuickCard[cardRole="progress"] QLabel#focusQuickHint {
+    color: #D7FFF3;
+}
+QWidget#dashboardRoot QFrame#focusQuickCard[cardRole="progress"] QLabel#dashboardProgressBadge {
+    background-color: rgba(255, 255, 255, 0.14);
+    color: #F7FFFC;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 20px;
+    font-size: 10pt;
+    font-weight: 900;
+}
+QWidget#dashboardRoot QFrame#focusQuickCard[cardRole="progress"] QProgressBar#dashboardTodayProgress {
+    background-color: rgba(12, 43, 37, 0.45);
+    border: none;
+    border-radius: 4px;
+}
+QWidget#dashboardRoot QFrame#focusQuickCard[cardRole="progress"] QProgressBar#dashboardTodayProgress::chunk {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #B7FFE6, stop:1 #F0FFF9);
+    border-radius: 4px;
+}
+QWidget#dashboardRoot QFrame#focusQuickCard[cardRole="progress"] QPushButton#subtleButton {
+    background-color: #202833;
+    color: #F1F7FB;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 9px;
+}
+QWidget#dashboardRoot QFrame#focusQuickCard[cardRole="progress"] QPushButton#subtleButton:hover {
+    background-color: #293341;
+    color: #FFFFFF;
+    border-color: rgba(255, 255, 255, 0.32);
+}
+
+QWidget#dashboardRoot QFrame#dashboardOverviewCard,
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel,
+QWidget#dashboardRoot QFrame#planningPanel,
+QWidget#dashboardRoot QFrame#studyNowPanel,
+QWidget#dashboardRoot QFrame#priorityQueuePanel,
+QWidget#dashboardRoot QFrame#dashboardCenterBar {
+    background-color: #202833;
+    border: 1px solid #445061;
+    border-radius: 14px;
+}
+QWidget#dashboardRoot QFrame#dashboardQuickAccess {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #1F2733, stop:0.5 #212A36, stop:1 #1E2531);
+    border: 1px solid #475364;
+    border-radius: 13px;
+}
+"""
+
 ESTILO_BUSCA_GLOBAL_FUTURISTA = r"""
 QWidget#dashboardRoot QPushButton#globalSearchTrigger {
-    background-color: #0c2234;
-    color: #9bcbe0;
-    border: 1px solid #326b89;
+    background-color: #212A35;
+    color: #C2CAD4;
+    border: 1px solid #48515F;
     border-radius: 10px;
     font-size: 8.8pt;
     font-weight: 700;
@@ -2618,28 +3064,28 @@ QWidget#dashboardRoot QPushButton#globalSearchTrigger {
     padding: 6px 11px;
 }
 QWidget#dashboardRoot QPushButton#globalSearchTrigger:hover {
-    background-color: #103149;
-    color: #ddf8ff;
-    border-color: #55b1d5;
+    background-color: #293342;
+    color: #F3F7FB;
+    border-color: #636E7D;
 }
 QDialog#globalSearchDialog {
-    background-color: #071522;
+    background-color: #0F1520;
 }
 QDialog#globalSearchDialog QLabel#globalSearchTitle {
-    color: #dcf7ff;
+    color: #F3F7FB;
     font-size: 16pt;
     font-weight: 900;
 }
 QDialog#globalSearchDialog QLabel#globalSearchSubtitle,
 QDialog#globalSearchDialog QLabel#globalSearchStatus,
 QDialog#globalSearchDialog QLabel#globalSearchHint {
-    color: #7da7bd;
+    color: #AEB7C4;
     font-size: 8.7pt;
 }
 QDialog#globalSearchDialog QLabel#globalSearchShortcut {
-    background-color: #0d283c;
-    color: #9bdcf3;
-    border: 1px solid #326b89;
+    background-color: #232C38;
+    color: #D3DBE5;
+    border: 1px solid #5D6774;
     border-radius: 7px;
     padding: 4px 8px;
     font-size: 8pt;
@@ -2647,35 +3093,35 @@ QDialog#globalSearchDialog QLabel#globalSearchShortcut {
 }
 QDialog#globalSearchDialog QLineEdit#globalSearchInput {
     min-height: 38px;
-    background-color: #0a1d2d;
-    color: #e5f9ff;
-    border: 1px solid #327293;
+    background-color: #202833;
+    color: #F3F7FB;
+    border: 1px solid #4C5563;
     border-radius: 10px;
     padding: 0 12px;
     font-size: 10pt;
-    selection-background-color: #1f698c;
+    selection-background-color: #555AF0;
 }
 QDialog#globalSearchDialog QLineEdit#globalSearchInput:focus {
-    border: 1px solid #5ed8ff;
+    border: 1px solid #8086FF;
 }
 QDialog#globalSearchDialog QTableWidget#globalSearchResults {
-    background-color: #0a1b2a;
-    color: #cfeef8;
-    border: 1px solid #295d79;
+    background-color: #1D2430;
+    color: #DDE5EE;
+    border: 1px solid #465162;
     border-radius: 10px;
     gridline-color: transparent;
-    selection-background-color: #123f5b;
-    selection-color: #effcff;
+    selection-background-color: #343C8A;
+    selection-color: #F8FAFC;
 }
 QDialog#globalSearchDialog QTableWidget#globalSearchResults::item {
-    border-bottom: 1px solid #123047;
+    border-bottom: 1px solid #2E3644;
     padding: 6px 8px;
 }
 QDialog#globalSearchDialog QHeaderView::section {
-    background-color: #0d2233;
-    color: #78a9bf;
+    background-color: #232C38;
+    color: #C2CAD4;
     border: none;
-    border-bottom: 1px solid #285774;
+    border-bottom: 1px solid #465162;
     padding: 7px 8px;
     font-size: 8pt;
     font-weight: 800;
@@ -2683,6 +3129,7 @@ QDialog#globalSearchDialog QHeaderView::section {
 """
 
 # ============================================================
+# Dashboard — paleta harmônica do topo (tema claro)# ============================================================
 # Dashboard — paleta harmônica do topo (tema claro)
 # Alinha Foco, Algoritmo e Estudo por questões à linguagem
 # cromática dos cards da seção "Visão geral": superfícies neutras,
@@ -19868,7 +20315,7 @@ def stylesheet_futurista():
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_FUTURISTA + ESTILO_DASHBOARD_MODERNO_FUTURISTA + ESTILO_FOCO_DASHBOARD_FUTURISTA + ESTILO_ALGORITMO_DASHBOARD_FUTURISTA + ESTILO_BUSCA_GLOBAL_FUTURISTA + ESTILO_INTELIGENCIA_RESUMO_FUTURISTA + ESTILO_TOPICOS_DISCIPLINA_FUTURISTA
+""" + ESTILO_JORNADA_FUTURISTA + ESTILO_DASHBOARD_MODERNO_FUTURISTA + ESTILO_FOCO_DASHBOARD_FUTURISTA + ESTILO_ALGORITMO_DASHBOARD_FUTURISTA + ESTILO_BUSCA_GLOBAL_FUTURISTA + ESTILO_INTELIGENCIA_RESUMO_FUTURISTA + ESTILO_TOPICOS_DISCIPLINA_FUTURISTA + ESTILO_DASHBOARD_NEO_FUTURISTA
 
 def aplicar_tema(
     app,

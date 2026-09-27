@@ -1,4 +1,26 @@
 import sys
+
+from startup_splash import (
+    ARG_SPLASH_WORKER,
+    ControladorSplashInicializacao,
+    executar_splash_worker_cli,
+)
+
+
+# O splash principal roda em processo independente. Ele é lançado antes das
+# importações pesadas para continuar animado mesmo quando a interface principal
+# está ocupada com o pré-carregamento síncrono.
+if ARG_SPLASH_WORKER in sys.argv:
+    raise SystemExit(executar_splash_worker_cli(sys.argv))
+
+_STARTUP_SPLASH_BOOTSTRAP = None
+if __name__ == "__main__":
+    try:
+        _STARTUP_SPLASH_BOOTSTRAP = ControladorSplashInicializacao()
+        _STARTUP_SPLASH_BOOTSTRAP.iniciar()
+    except Exception:
+        _STARTUP_SPLASH_BOOTSTRAP = None
+
 import base64
 import json
 import csv
@@ -249,6 +271,11 @@ from banco import (
     listar_grupos_questoes_duplicadas,
     atualizar_questoes_lote,
     listar_questoes_resolucao,
+    criar_ciclo_questoes,
+    obter_ciclo_questoes_ativo,
+    obter_estado_ciclo_questoes,
+    marcar_questao_ciclo_respondida,
+    encerrar_ciclo_questoes,
     iniciar_sessao_questoes,
     registrar_fila_sessao_questoes,
     marcar_item_sessao_apresentado,
@@ -15728,6 +15755,7 @@ def _contexto_sessao_unificada(configuracao):
         "estrategia_adaptativa", "modo_simulado", "tipo_simulado",
         "versao_simulado", "estrategia_simulado", "tempo_limite_minutos",
         "preferir_ineditas",
+        "ciclo_questoes_id", "ciclo_questoes_modo",
     )
     return {chave: configuracao.get(chave) for chave in chaves if chave in configuracao}
 
@@ -16000,6 +16028,13 @@ class JanelaResolverQuestoes(QDialog):
         )
 
         self.configuracao = configuracao
+        ciclo_id = configuracao.get("ciclo_questoes_id")
+        self.ciclo_questoes_id = (
+            int(ciclo_id)
+            if ciclo_id not in (None, "")
+            else None
+        )
+        self.estado_ciclo_questoes = None
         self.sem_impacto_inteligencia = bool(
             configuracao.get("sem_impacto_inteligencia", False)
         )
@@ -17139,10 +17174,27 @@ class JanelaResolverQuestoes(QDialog):
                 0
             ) >= 1
         )
+        ciclo_progresso_rotulo = ""
+        if self.ciclo_questoes_id is not None:
+            try:
+                estado_ciclo = obter_estado_ciclo_questoes(
+                    self.ciclo_questoes_id
+                )
+                self.estado_ciclo_questoes = estado_ciclo
+                if estado_ciclo:
+                    ciclo_progresso_rotulo = (
+                        f" • Ciclo {int(estado_ciclo.get('respondidas') or 0)}/"
+                        f"{int(estado_ciclo.get('total') or 0)}"
+                        f" • {int(estado_ciclo.get('pendentes') or 0)} pendentes"
+                    )
+            except Exception:
+                ciclo_progresso_rotulo = ""
+
         self.sessao_progresso_texto.setText(
             (
                 f"Questão {self.indice + 1} "
                 f"de {len(self.fila)}"
+                + ciclo_progresso_rotulo
                 + (" • retorno de questão pulada" if retorno_pulo else "")
             )
         )
@@ -17628,6 +17680,22 @@ class JanelaResolverQuestoes(QDialog):
                 )
                 return
 
+        if (
+            self.ciclo_questoes_id is not None
+            and not self.sem_impacto_inteligencia
+            and resultado.get("correta") is not None
+        ):
+            try:
+                self.estado_ciclo_questoes = marcar_questao_ciclo_respondida(
+                    self.ciclo_questoes_id,
+                    self.questao_atual["id"],
+                    tentativa_id=resultado.get("tentativa_id"),
+                )
+            except Exception:
+                # A tentativa acadêmica já foi salva. Uma falha de telemetria
+                # do ciclo não deve impedir a continuidade da sessão.
+                self.estado_ciclo_questoes = None
+
         self.resposta_confirmada = True
 
         correta = bool(
@@ -17880,6 +17948,20 @@ class JanelaResolverQuestoes(QDialog):
             resultado_pulo = {
                 "pulo_convertido_erro": False,
             }
+
+        if (
+            self.ciclo_questoes_id is not None
+            and not self.sem_impacto_inteligencia
+            and bool(resultado_pulo.get("pulo_convertido_erro"))
+        ):
+            try:
+                self.estado_ciclo_questoes = marcar_questao_ciclo_respondida(
+                    self.ciclo_questoes_id,
+                    questao_id,
+                    tentativa_id=resultado_pulo.get("tentativa_id"),
+                )
+            except Exception:
+                self.estado_ciclo_questoes = None
 
         self.pulos_por_questao[questao_id] = pulos_anteriores + 1
 
@@ -23328,6 +23410,14 @@ class JanelaEstudoTopico(QDialog):
             meta = mapa_basico.get(int(item["id"]), {})
             self.candidatos.append({**item, **meta})
 
+        try:
+            self.ciclo_atual = obter_ciclo_questoes_ativo(
+                self.concurso[0],
+                self.topico_id,
+            )
+        except Exception:
+            self.ciclo_atual = None
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 18, 20, 18)
         layout.setSpacing(12)
@@ -23378,6 +23468,43 @@ class JanelaEstudoTopico(QDialog):
         resumo.addWidget(card_resumo("Inéditas", ineditas), 1)
         resumo.addWidget(card_resumo("Com erro anterior", com_erro), 1)
         layout.addLayout(resumo)
+
+        ciclo_card = QFrame()
+        ciclo_card.setObjectName("dialogCard")
+        ciclo_layout = QVBoxLayout(ciclo_card)
+        ciclo_layout.setContentsMargins(16, 12, 16, 12)
+        ciclo_layout.setSpacing(7)
+
+        ciclo_topo = QHBoxLayout()
+        ciclo_titulos = QVBoxLayout()
+        ciclo_titulos.setSpacing(2)
+        ciclo_titulo = QLabel("Ciclo de questões")
+        ciclo_titulo.setObjectName("sectionTitle")
+        self.ciclo_status = QLabel("")
+        self.ciclo_status.setObjectName("mutedLabel")
+        self.ciclo_status.setWordWrap(True)
+        ciclo_titulos.addWidget(ciclo_titulo)
+        ciclo_titulos.addWidget(self.ciclo_status)
+        ciclo_topo.addLayout(ciclo_titulos, 1)
+
+        self.ciclo_modo = QComboBox()
+        self.ciclo_modo.setMinimumHeight(34)
+        self.ciclo_modo.setMinimumWidth(300)
+        ciclo_topo.addWidget(self.ciclo_modo, 0, Qt.AlignVCenter)
+
+        self.ciclo_encerrar = QPushButton("Encerrar ciclo")
+        self.ciclo_encerrar.setObjectName("subtleButton")
+        self.ciclo_encerrar.setMinimumHeight(34)
+        self.ciclo_encerrar.clicked.connect(self.encerrar_ciclo_atual)
+        ciclo_topo.addWidget(self.ciclo_encerrar, 0, Qt.AlignVCenter)
+        ciclo_layout.addLayout(ciclo_topo)
+
+        self.ciclo_progresso = QProgressBar()
+        self.ciclo_progresso.setRange(0, 100)
+        self.ciclo_progresso.setTextVisible(True)
+        self.ciclo_progresso.setMinimumHeight(16)
+        ciclo_layout.addWidget(self.ciclo_progresso)
+        layout.addWidget(ciclo_card)
 
         config_card = QFrame()
         config_card.setObjectName("dialogCard")
@@ -23517,10 +23644,149 @@ class JanelaEstudoTopico(QDialog):
         for widget in (self.montagem, self.estado, self.capitulo, self.dificuldade):
             widget.currentIndexChanged.connect(self.atualizar_lista)
         self.quantidade.valueChanged.connect(self.atualizar_resumo_inicio)
+        self.ciclo_modo.currentIndexChanged.connect(self.alterar_modo_ciclo)
 
+        self.recarregar_ciclo_ui()
+        self.atualizar_lista()
+
+    def recarregar_ciclo_ui(self, preferir=None):
+        try:
+            self.ciclo_atual = obter_ciclo_questoes_ativo(
+                self.concurso[0],
+                self.topico_id,
+            )
+        except Exception:
+            self.ciclo_atual = None
+
+        self.ciclo_modo.blockSignals(True)
+        self.ciclo_modo.clear()
+        if self.ciclo_atual and int(self.ciclo_atual.get("pendentes") or 0) > 0:
+            pendentes = int(self.ciclo_atual.get("pendentes") or 0)
+            self.ciclo_modo.addItem(
+                f"Continuar ciclo atual ({pendentes} pendentes)",
+                "continuar",
+            )
+            self.ciclo_modo.addItem("Bateria avulsa", "avulsa")
+            alvo = preferir if preferir in {"continuar", "avulsa"} else "continuar"
+        else:
+            self.ciclo_modo.addItem("Bateria avulsa", "avulsa")
+            self.ciclo_modo.addItem(
+                "Iniciar novo ciclo com o conjunto filtrado",
+                "novo",
+            )
+            alvo = preferir if preferir in {"avulsa", "novo"} else "avulsa"
+
+        indice = self.ciclo_modo.findData(alvo)
+        if indice >= 0:
+            self.ciclo_modo.setCurrentIndex(indice)
+        self.ciclo_modo.blockSignals(False)
+
+        if self.ciclo_atual and self.ciclo_atual.get("status") == "ativo":
+            total = int(self.ciclo_atual.get("total") or 0)
+            respondidas = int(self.ciclo_atual.get("respondidas") or 0)
+            pendentes = int(self.ciclo_atual.get("pendentes") or 0)
+            indisponiveis = int(self.ciclo_atual.get("indisponiveis") or 0)
+            detalhe_indisponiveis = (
+                f" • {indisponiveis} indisponível(is)"
+                if indisponiveis
+                else ""
+            )
+            self.ciclo_status.setText(
+                f"Ciclo em andamento: {respondidas}/{total} respondidas • "
+                f"{pendentes} pendentes{detalhe_indisponiveis}. "
+                "Questões novas importadas depois do início ficam para o próximo ciclo."
+            )
+            percentual = int(round(float(self.ciclo_atual.get("percentual") or 0.0)))
+            self.ciclo_progresso.setValue(max(0, min(100, percentual)))
+            self.ciclo_progresso.setFormat(f"{respondidas}/{total} • %p%")
+            self.ciclo_progresso.setVisible(True)
+            self.ciclo_encerrar.setVisible(True)
+        else:
+            self.ciclo_status.setText(
+                "Sem ciclo em andamento. Você pode iniciar uma rodada persistente "
+                "com o conjunto filtrado e continuar em outro dia apenas com as pendentes."
+            )
+            self.ciclo_progresso.setVisible(False)
+            self.ciclo_encerrar.setVisible(False)
+
+        self.atualizar_estado_filtros_ciclo()
+
+    def alterar_modo_ciclo(self):
+        self.ids_manuais.clear()
+        self.atualizar_estado_filtros_ciclo()
+        self.atualizar_lista()
+
+    def atualizar_estado_filtros_ciclo(self):
+        continuar = (
+            hasattr(self, "ciclo_modo")
+            and self.ciclo_modo.currentData() == "continuar"
+            and self.ciclo_atual is not None
+        )
+        self.estado.setEnabled(not continuar)
+        self.capitulo.setEnabled(not continuar and self.capitulo.count() > 1)
+        self.dificuldade.setEnabled(not continuar)
+        if continuar:
+            self.estado.setToolTip(
+                "No ciclo atual, o conjunto já está congelado; são exibidas apenas as pendentes."
+            )
+            self.capitulo.setToolTip(
+                "O capítulo foi congelado quando o ciclo foi criado."
+            )
+            self.dificuldade.setToolTip(
+                "A dificuldade foi congelada quando o ciclo foi criado."
+            )
+        else:
+            self.estado.setToolTip("")
+            self.capitulo.setToolTip("")
+            self.dificuldade.setToolTip("")
+
+    def encerrar_ciclo_atual(self):
+        if not self.ciclo_atual:
+            return
+        resposta = QMessageBox.question(
+            self,
+            "Encerrar ciclo",
+            (
+                "Encerrar o ciclo atual?\n\n"
+                "O histórico e as respostas já registradas serão preservados. "
+                "Depois você poderá iniciar um novo ciclo com outro conjunto de questões."
+            ),
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        if resposta != QMessageBox.Yes:
+            return
+        try:
+            encerrar_ciclo_questoes(
+                self.ciclo_atual["id"],
+                motivo="encerrado_manual_interface",
+            )
+        except Exception as erro:
+            QMessageBox.critical(
+                self,
+                "Encerrar ciclo",
+                "Não foi possível encerrar o ciclo.\n\n" + str(erro),
+            )
+            return
+        self.recarregar_ciclo_ui(preferir="avulsa")
         self.atualizar_lista()
 
     def candidatos_filtrados(self):
+        if (
+            hasattr(self, "ciclo_modo")
+            and self.ciclo_modo.currentData() == "continuar"
+            and self.ciclo_atual is not None
+        ):
+            pendentes = {
+                int(qid)
+                for qid in self.ciclo_atual.get("ids_pendentes", [])
+            }
+            return [
+                item
+                for item in self.candidatos
+                if int(item.get("id") or -1) in pendentes
+            ]
+
         estado = self.estado.currentData()
         capitulo_id = self.capitulo.currentData()
         dificuldade = self.dificuldade.currentData()
@@ -23578,9 +23844,17 @@ class JanelaEstudoTopico(QDialog):
 
         ineditas = sum(1 for item in candidatos if item.get("inedita"))
         erros = sum(1 for item in candidatos if item.get("teve_erro"))
-        self.resumo_filtro.setText(
-            f"{len(candidatos)} disponíveis • {ineditas} inéditas • {erros} com erro"
-        )
+        if (
+            hasattr(self, "ciclo_modo")
+            and self.ciclo_modo.currentData() == "continuar"
+        ):
+            self.resumo_filtro.setText(
+                f"{len(candidatos)} pendentes do ciclo • {ineditas} inéditas no histórico • {erros} com erro"
+            )
+        else:
+            self.resumo_filtro.setText(
+                f"{len(candidatos)} disponíveis • {ineditas} inéditas • {erros} com erro"
+            )
         self.atualizar_resumo_inicio()
 
     @staticmethod
@@ -23619,8 +23893,13 @@ class JanelaEstudoTopico(QDialog):
         quantidade = len(self.ids_manuais) if manual else min(self.quantidade.value(), len(candidatos))
         self.resumo_manual.setText(f"{len(self.ids_manuais)} selecionada(s)")
         self.iniciar.setEnabled(quantidade > 0)
+        prefixo = (
+            "▶  Continuar ciclo • "
+            if hasattr(self, "ciclo_modo") and self.ciclo_modo.currentData() == "continuar"
+            else "▶  Resolver "
+        )
         self.iniciar.setText(
-            f"▶  Resolver {quantidade} questão" + ("" if quantidade == 1 else "ões")
+            prefixo + f"{quantidade} questão" + ("" if quantidade == 1 else "ões")
         )
 
     def montar_fila(self):
@@ -23654,23 +23933,86 @@ class JanelaEstudoTopico(QDialog):
         return fila[:quantidade]
 
     def confirmar(self):
+        modo_ciclo = str(self.ciclo_modo.currentData() or "avulsa")
         fila = self.montar_fila()
         if not fila:
-            QMessageBox.information(
-                self,
-                "Estudar tópico",
-                "Nenhuma questão foi selecionada para esta bateria.",
+            titulo = "Continuar ciclo" if modo_ciclo == "continuar" else "Estudar tópico"
+            mensagem = (
+                "Não há questões pendentes disponíveis neste ciclo."
+                if modo_ciclo == "continuar"
+                else "Nenhuma questão foi selecionada para esta bateria."
             )
+            QMessageBox.information(self, titulo, mensagem)
             return
 
-        primeiro = fila[0]
         montagem = str(self.montagem.currentData() or "inteligente")
+        ciclo_id = None
+
+        if modo_ciclo == "continuar":
+            if not self.ciclo_atual:
+                QMessageBox.information(
+                    self,
+                    "Continuar ciclo",
+                    "O ciclo não está mais disponível. Reabra esta janela para atualizar o estado.",
+                )
+                return
+            ciclo_id = int(self.ciclo_atual["id"])
+
+        elif modo_ciclo == "novo":
+            candidatos_ciclo = self.candidatos_filtrados()
+            if montagem == "manual":
+                ids_ciclo = [
+                    int(item["id"])
+                    for item in candidatos_ciclo
+                    if int(item["id"]) in self.ids_manuais
+                ]
+            else:
+                ids_ciclo = [int(item["id"]) for item in candidatos_ciclo]
+
+            if not ids_ciclo:
+                QMessageBox.information(
+                    self,
+                    "Iniciar ciclo",
+                    "O conjunto filtrado não possui questões para formar um ciclo.",
+                )
+                return
+
+            try:
+                ciclo = criar_ciclo_questoes(
+                    self.concurso[0],
+                    self.topico_id,
+                    ids_ciclo,
+                    origem="topico_estudo",
+                    filtros={
+                        "montagem": montagem,
+                        "estado": self.estado.currentData(),
+                        "capitulo_id": self.capitulo.currentData(),
+                        "dificuldade": self.dificuldade.currentData(),
+                        "quantidade_primeira_bateria": len(fila),
+                    },
+                )
+                ciclo_id = int(ciclo["id"])
+                self.ciclo_atual = ciclo
+            except Exception as erro:
+                QMessageBox.critical(
+                    self,
+                    "Iniciar ciclo",
+                    "Não foi possível criar o ciclo de questões.\n\n" + str(erro),
+                )
+                return
+
+        primeiro = fila[0]
         rotulo_montagem = {
             "inteligente": "Prioridade Vighna",
             "aleatoria": "Aleatória",
             "ordem": "Ordem do banco",
             "manual": "Seleção manual",
         }.get(montagem, "Prioridade Vighna")
+        rotulo_ciclo = (
+            " • Ciclo"
+            if ciclo_id is not None
+            else ""
+        )
 
         self.configuracao = {
             "concurso_id": self.concurso[0],
@@ -23679,20 +24021,24 @@ class JanelaEstudoTopico(QDialog):
             "disciplina_nome": primeiro.get("disciplina"),
             "topico_id": self.topico_id,
             "topico_nome": self.nome_topico,
-            "modo": f"Estudo do tópico • {rotulo_montagem}",
+            "modo": f"Estudo do tópico{rotulo_ciclo} • {rotulo_montagem}",
             "origem_sessao": "topico_estudo",
             "quantidade": len(fila),
             "fila": fila,
             "feedback_imediato": True,
             "integrar_revisoes": True,
+            "ciclo_questoes_id": ciclo_id,
+            "ciclo_questoes_modo": modo_ciclo,
             "filtros_estudo_topico": {
                 "montagem": montagem,
                 "estado": self.estado.currentData(),
                 "capitulo_id": self.capitulo.currentData(),
                 "dificuldade": self.dificuldade.currentData(),
+                "ciclo": modo_ciclo,
             },
         }
         self.accept()
+
 
 
 class JanelaTopico(QDialog):
@@ -29020,11 +29366,16 @@ class JanelaConfiguracoes(QDialog):
         caixa.setDefaultButton(QMessageBox.Cancel)
 
         incluir_banco = QCheckBox(
-            "Também restaurar o estudos.db deste checkpoint"
+            "Banco de dados: restauração segura somente com o Vighna fechado"
         )
         incluir_banco.setChecked(False)
-        incluir_banco.setEnabled(bool(diagnostico.get("banco_incluido")))
-        if not diagnostico.get("banco_incluido"):
+        incluir_banco.setEnabled(False)
+        if diagnostico.get("banco_incluido"):
+            incluir_banco.setToolTip(
+                "Feche o VighnaStudy e execute recuperar_banco.bat para restaurar "
+                "um banco de checkpoint com tratamento seguro de WAL/SHM."
+            )
+        else:
             incluir_banco.setText("Este checkpoint não contém estudos.db")
         caixa.setCheckBox(incluir_banco)
 
@@ -31588,12 +31939,225 @@ class DashboardDonutWidget(QWidget):
         )
 
 
+class JanelaInicializacao(QDialog):
+    """Fallback local caso o splash em processo independente não possa abrir."""
+
+    def __init__(self):
+        super().__init__(None)
+        self.setWindowTitle("VighnaStudy")
+        self.setModal(False)
+        self.setWindowFlags(
+            Qt.FramelessWindowHint
+            | Qt.Dialog
+            | Qt.WindowStaysOnTopHint
+        )
+        self.setFixedSize(620, 318)
+        tela = QApplication.primaryScreen()
+        if tela is not None:
+            area = tela.availableGeometry()
+            self.move(
+                area.center().x() - self.width() // 2,
+                area.center().y() - self.height() // 2,
+            )
+
+        self._frame = 0
+        self._status_base = "Inicializando o VighnaStudy"
+
+        raiz = QVBoxLayout(self)
+        raiz.setContentsMargins(34, 20, 32, 18)
+        raiz.setSpacing(0)
+        raiz.addStretch(1)
+
+        conteudo_wrap = QHBoxLayout()
+        conteudo_wrap.setContentsMargins(0, 0, 0, 0)
+        conteudo_wrap.setSpacing(0)
+        conteudo_wrap.addStretch(1)
+
+        conteudo = QWidget()
+        conteudo.setObjectName("startupFallbackContent")
+        conteudo.setFixedWidth(470)
+        conteudo_layout = QVBoxLayout(conteudo)
+        conteudo_layout.setContentsMargins(0, 0, 0, 0)
+        conteudo_layout.setSpacing(0)
+
+        topo = QHBoxLayout()
+        topo.setContentsMargins(0, 0, 0, 0)
+        topo.setSpacing(14)
+
+        logo_box = QFrame()
+        logo_box.setObjectName("startupFallbackLogoBox")
+        logo_box.setFixedSize(54, 54)
+        logo_layout = QVBoxLayout(logo_box)
+        logo_layout.setContentsMargins(5, 5, 5, 5)
+        logo = QLabel()
+        logo.setAlignment(Qt.AlignCenter)
+        pixmap_logo = carregar_logo_vighnastudy()
+        if not pixmap_logo.isNull():
+            logo.setPixmap(
+                pixmap_logo.scaled(
+                    42,
+                    42,
+                    Qt.KeepAspectRatio,
+                    Qt.SmoothTransformation,
+                )
+            )
+        else:
+            logo.setText("V")
+            logo.setStyleSheet(
+                "font-size: 25px; font-weight: 800; color: #6DC1FF;"
+            )
+        logo_layout.addWidget(logo)
+        topo.addWidget(logo_box, 0, Qt.AlignVCenter)
+
+        textos = QVBoxLayout()
+        textos.setSpacing(1)
+        titulo = QLabel("VighnaStudy")
+        titulo.setObjectName("startupFallbackTitle")
+        subtitulo = QLabel("Preparando seu ambiente de estudo")
+        subtitulo.setObjectName("startupFallbackSubtitle")
+        textos.addWidget(titulo)
+        textos.addWidget(subtitulo)
+        topo.addLayout(textos, 1)
+        conteudo_layout.addLayout(topo)
+
+        conteudo_layout.addSpacing(20)
+
+        painel = QFrame()
+        painel.setObjectName("startupFallbackPanel")
+        painel_layout = QVBoxLayout(painel)
+        painel_layout.setContentsMargins(18, 14, 18, 14)
+        painel_layout.setSpacing(6)
+
+        linha_status = QHBoxLayout()
+        linha_status.setSpacing(12)
+        self.status = QLabel("Inicializando o VighnaStudy...")
+        self.status.setObjectName("startupFallbackStatus")
+        self.status.setWordWrap(False)
+        self.percentual = QLabel("2%")
+        self.percentual.setObjectName("startupFallbackPercent")
+        self.percentual.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.percentual.setFixedWidth(56)
+        linha_status.addWidget(self.status, 1)
+        linha_status.addWidget(self.percentual, 0)
+        painel_layout.addLayout(linha_status)
+
+        self.detalhe = QLabel(
+            "Preparando os componentes essenciais do aplicativo."
+        )
+        self.detalhe.setObjectName("startupFallbackDetail")
+        self.detalhe.setWordWrap(True)
+        painel_layout.addWidget(self.detalhe)
+        painel_layout.addSpacing(4)
+
+        self.progresso = QProgressBar()
+        self.progresso.setRange(0, 100)
+        self.progresso.setValue(2)
+        self.progresso.setTextVisible(False)
+        self.progresso.setFixedHeight(18)
+        painel_layout.addWidget(self.progresso)
+
+        conteudo_layout.addWidget(painel)
+
+        conteudo_layout.addSpacing(24)
+
+        rodape = QHBoxLayout()
+        rodape.setContentsMargins(0, 0, 0, 0)
+        rodape.setSpacing(0)
+        rodape.addStretch(1)
+        rodape_texto = QLabel("motor de inteligência Vighna")
+        rodape_texto.setObjectName("startupFallbackFooter")
+        rodape.addWidget(rodape_texto, 0, Qt.AlignCenter)
+        rodape.addStretch(1)
+        conteudo_layout.addLayout(rodape)
+
+        conteudo_wrap.addWidget(conteudo, 0, Qt.AlignHCenter)
+        conteudo_wrap.addStretch(1)
+        raiz.addLayout(conteudo_wrap)
+        raiz.addStretch(1)
+
+        self.setStyleSheet(
+            "QDialog {"
+            " background: #071522; border: 1px solid #214A64; border-radius: 17px;"
+            "}"
+            "QFrame#startupFallbackLogoBox {"
+            " background: #091927; border: 1px solid #1D4058; border-radius: 13px;"
+            "}"
+            "QLabel#startupFallbackTitle {"
+            " color: #F5F8FF; font-family: 'Segoe UI'; font-size: 23px; font-weight: 800;"
+            "}"
+            "QLabel#startupFallbackSubtitle {"
+            " color: #9FB9D0; font-family: 'Segoe UI'; font-size: 12px;"
+            "}"
+            "QFrame#startupFallbackPanel {"
+            " background: #081927; border: 1px solid #15364C; border-radius: 13px;"
+            "}"
+            "QLabel#startupFallbackStatus {"
+            " color: #EAF4FF; font-family: 'Segoe UI'; font-size: 13px; font-weight: 650;"
+            "}"
+            "QLabel#startupFallbackPercent {"
+            " color: #67B7FF; font-family: 'Segoe UI'; font-size: 13px; font-weight: 800;"
+            "}"
+            "QLabel#startupFallbackDetail {"
+            " color: #8FAAC0; font-family: 'Segoe UI'; font-size: 11px;"
+            "}"
+            "QLabel#startupFallbackFooter {"
+            " color: #4E718A; font-family: 'Segoe UI'; font-size: 9px; letter-spacing: 0.35px;"
+            "}"
+            "QProgressBar {"
+            " border: 1px solid #315B76; border-radius: 8px; background: #081A28;"
+            "}"
+            "QProgressBar::chunk {"
+            " border-radius: 7px; background: #3A8DF1;"
+            "}"
+        )
+
+        self._timer_animacao = QTimer(self)
+        self._timer_animacao.setInterval(320)
+        self._timer_animacao.timeout.connect(self._animar)
+        self._timer_animacao.start()
+
+    def _animar(self):
+        self._frame = (self._frame + 1) % 4
+        self.status.setText(
+            self._status_base + ("." * self._frame)
+        )
+
+    def atualizar(self, texto, percentual=None, detalhe=None):
+        self._status_base = str(texto).rstrip(". …")
+        self._frame = 3
+        self.status.setText(self._status_base + "...")
+        if detalhe is not None:
+            self.detalhe.setText(str(detalhe))
+        if percentual is not None:
+            valor = max(0, min(100, int(percentual)))
+            self.progresso.setValue(valor)
+            self.percentual.setText(f"{valor}%")
+        QApplication.processEvents(QEventLoop.AllEvents, 80)
+
+    def finalizar(self):
+        self.atualizar(
+            "Tudo pronto. Abrindo o VighnaStudy...",
+            100,
+            "Dashboard, Central, Estatísticas e Relatórios já estão preparados.",
+        )
+        QApplication.processEvents(QEventLoop.AllEvents, 120)
+
+
 class SistemaEstudos(QMainWindow):
     dados_alterados = Signal(str)
     estado_foco_alterado = Signal()
 
-    def __init__(self):
+    def __init__(self, pre_carregar_startup=False):
         super().__init__()
+
+        self._pre_carregar_startup = bool(pre_carregar_startup)
+        self._startup_precarregado = False
+        self._topicos_precarregados = {}
+        self._topicos_precarregados_data = None
+        self._resumo_dia_precarregado = False
+        self._resumo_dia_data_referencia = None
+        self._calendario_precarregado = False
+        self._calendario_data_referencia = None
 
         # Cache curto + barramento de atualização: evita recalcular o mesmo
         # conjunto analítico várias vezes durante uma única sequência de ações.
@@ -31633,7 +32197,7 @@ class SistemaEstudos(QMainWindow):
         # ferramenta separada, que preserva o arquivo danificado antes de restaurar.
         from backup import ARQUIVO_BANCO
         if ARQUIVO_BANCO.exists():
-            banco_ok, banco_msg = verificar_integridade_banco(ARQUIVO_BANCO)
+            banco_ok, banco_msg = verificar_integridade_banco(ARQUIVO_BANCO, completo=False)
             if not banco_ok:
                 QMessageBox.critical(
                     self,
@@ -31701,14 +32265,144 @@ class SistemaEstudos(QMainWindow):
         self.configurar_atalhos_globais()
         self.restaurar_estado_sessao()
 
-        # O Dashboard aparece antes das consultas analíticas. O refresh roda no
-        # event loop logo após o primeiro repaint, eliminando a espera com a
-        # janela ainda invisível.
-        self._agendar_atualizacao_dashboard(forcar=True)
+        if not self._pre_carregar_startup:
+            # Modo legado/rápido: mostra o Dashboard e atualiza no event loop.
+            self._agendar_atualizacao_dashboard(forcar=True)
+            self._agendar_backup_abertura()
 
-        # Backup de abertura continua existindo, mas não participa mais do
-        # caminho crítico do primeiro frame.
+    def _precarregar_topicos_disciplinas(self):
+        """Aquece a primeira abertura de cada disciplina do perfil ativo."""
+        cache = {}
+        for _disciplina_id, nome, _pausada in listar_disciplinas_gerenciamento():
+            try:
+                cache[str(nome)] = listar_topicos_gerenciamento(str(nome))
+            except Exception:
+                cache[str(nome)] = []
+        self._topicos_precarregados = cache
+        self._topicos_precarregados_data = QDate.currentDate().toString("yyyy-MM-dd")
+
+    def _precarregar_estatisticas_todas_abas(self, notificar=None):
+        self._garantir_tela_estatisticas()
+        if not hasattr(self, "abas_estatisticas"):
+            return
+
+        original = self.abas_estatisticas.currentIndex()
+        self._estado_estatisticas.marcar_sujas()
+        self.abas_estatisticas.blockSignals(True)
+        try:
+            total = max(1, self.abas_estatisticas.count())
+            for indice in range(total):
+                nome = self.abas_estatisticas.tabText(indice)
+                if callable(notificar):
+                    notificar(nome, indice, total)
+                self.abas_estatisticas.setCurrentIndex(indice)
+                self.atualizar_estatisticas(forcar=(indice == 0))
+                QApplication.processEvents(QEventLoop.AllEvents, 30)
+        finally:
+            if 0 <= original < self.abas_estatisticas.count():
+                self.abas_estatisticas.setCurrentIndex(original)
+            self.abas_estatisticas.blockSignals(False)
+
+    def _precarregar_relatorios_todas_abas(self, notificar=None):
+        self._garantir_tela_relatorios()
+        if not hasattr(self, "abas_relatorios"):
+            return
+
+        contexto = self._obter_contexto_relatorios()
+        if contexto is None:
+            return
+
+        concurso = contexto["concurso"]
+        self._estado_relatorios.trocar_contexto(
+            concurso[0], contexto["inicio"], contexto["fim"]
+        )
+        self._estado_relatorios.marcar_sujas()
+        self._limpar_cache_dados_relatorios()
+        self._atualizar_resumo_relatorios(contexto)
+
+        total = max(1, self.abas_relatorios.count())
+        for indice in range(total):
+            nome = self.abas_relatorios.tabText(indice)
+            if callable(notificar):
+                notificar(nome, indice, total)
+            self._atualizar_aba_relatorios(nome, contexto)
+            QApplication.processEvents(QEventLoop.AllEvents, 30)
+
+    def precarregar_inicializacao_completa(self, notificar=None):
+        """Prepara telas e dados pesados antes de exibir a janela principal.
+
+        O objetivo é trocar carregamentos da primeira navegação por uma única
+        fase explícita de inicialização. Dados alterados depois continuam sendo
+        invalidados e recalculados normalmente.
+        """
+        def etapa(texto, percentual, detalhe=None):
+            if callable(notificar):
+                notificar(texto, percentual, detalhe)
+            QApplication.processEvents(QEventLoop.AllEvents, 60)
+
+        etapa("Preparando o Dashboard...", 12, "Calculando metas, revisões, progresso e recomendação.")
+        self.atualizar_dashboard()
+
+        etapa("Preparando disciplinas...", 22, "Aquecendo tópicos e estrutura acadêmica do perfil ativo.")
+        self._garantir_tela_disciplina()
+        self._precarregar_topicos_disciplinas()
+
+        etapa("Preparando a Central de Questões...", 34, "Carregando catálogo, contadores e duplicidades.")
+        self._garantir_tela_questoes()
+        self.carregar_questoes()
+
+        etapa("Preparando o Resumo do dia...", 44, "Montando pendências e indicadores do dia.")
+        self._garantir_tela_resumo_dia()
+        self.atualizar_resumo_dia()
+        self._resumo_dia_precarregado = True
+        self._resumo_dia_data_referencia = QDate.currentDate().toString("yyyy-MM-dd")
+
+        etapa("Preparando o Calendário...", 52, "Carregando revisões e agenda do mês atual.")
+        self._garantir_tela_calendario()
+        self.atualizar_calendario()
+        self._calendario_precarregado = True
+        self._calendario_data_referencia = QDate.currentDate().toString("yyyy-MM-dd")
+
+        etapa("Preparando sessões de estudo...", 58, "Construindo a área de sessão para abrir sem atraso.")
+        self._garantir_tela_sessao_estudo()
+        if getattr(self, "sessao_ativa", False):
+            self.atualizar_sessao_estudo()
+
+        etapa("Preparando Estatísticas...", 62, "Carregando todas as abas analíticas.")
+        def progresso_estatistica(nome, indice, total):
+            faixa = 18
+            percentual = 62 + int(faixa * (indice + 1) / max(1, total))
+            etapa(
+                f"Estatísticas · {nome}",
+                percentual,
+                "Pré-calculando a análise para evitar espera na primeira abertura.",
+            )
+        self._precarregar_estatisticas_todas_abas(progresso_estatistica)
+
+        etapa("Preparando Relatórios...", 82, "Carregando o período padrão e todas as visões do relatório.")
+        def progresso_relatorio(nome, indice, total):
+            faixa = 14
+            percentual = 82 + int(faixa * (indice + 1) / max(1, total))
+            etapa(
+                f"Relatórios · {nome}",
+                percentual,
+                "Montando as tabelas do período padrão antes de entrar no Vighna.",
+            )
+        self._precarregar_relatorios_todas_abas(progresso_relatorio)
+
+        etapa("Finalizando a interface...", 98, "Consolidando caches e retornando ao Dashboard.")
+        self.telas.setCurrentWidget(self.tela_inicial)
+        self._dashboard_sujo = False
+        try:
+            concurso_id = int(obter_concurso_ativo()[0])
+            self._central_questoes_suja = False
+            self._central_questoes_concurso_id = concurso_id
+        except Exception:
+            pass
+        self._startup_precarregado = True
+        self._pre_carregar_startup = False
         self._agendar_backup_abertura()
+        etapa("Tudo pronto.", 100, "O Vighna foi carregado antes da entrada no Dashboard.")
 
     def _garantir_tela_secundaria(self, atributo, construtor):
         """Cria uma tela pesada somente no primeiro acesso."""
@@ -31774,7 +32468,7 @@ class SistemaEstudos(QMainWindow):
                 daemon=True,
             ).start()
 
-        QTimer.singleShot(700, iniciar)
+        QTimer.singleShot(15000, iniciar)
 
     def _marcar_dashboard_sujo(self):
         self._dashboard_sujo = True
@@ -31808,7 +32502,7 @@ class SistemaEstudos(QMainWindow):
                 return
             self.atualizar_dashboard()
 
-        QTimer.singleShot(15, executar)
+        QTimer.singleShot(120, executar)
 
     def _marcar_central_questoes_suja(self):
         self._central_questoes_suja = True
@@ -31969,6 +32663,11 @@ class SistemaEstudos(QMainWindow):
         """
         escopo = str(escopo or "all").lower()
         self._marcar_dashboard_sujo()
+        if escopo in {"all", "questoes", "topicos", "revisoes"}:
+            self._topicos_precarregados.clear()
+            self._topicos_precarregados_data = None
+            self._resumo_dia_precarregado = False
+            self._calendario_precarregado = False
         if escopo in {"all", "questoes", "topicos"}:
             self._marcar_central_questoes_suja()
         if escopo == "foco":
@@ -32434,6 +33133,8 @@ class SistemaEstudos(QMainWindow):
                 alvo = getattr(self, "dashboard_hoje_painel", None)
             elif chave == "estudar":
                 alvo = getattr(self, "dashboard_estudo_questoes_painel", None)
+            elif chave == "planejamento":
+                alvo = getattr(self, "dashboard_planejamento_painel", None)
 
         if alvo is not None and hasattr(self, "dashboard_scroll"):
             QTimer.singleShot(
@@ -33076,6 +33777,7 @@ class SistemaEstudos(QMainWindow):
         # ----------------------------------------------------
         progresso_card = QFrame()
         progresso_card.setObjectName("focusQuickCard")
+        progresso_card.setProperty("cardRole", "progress")
         progresso_card.setMinimumHeight(174)
         progresso_card.setSizePolicy(
             QSizePolicy.Expanding,
@@ -33098,7 +33800,7 @@ class SistemaEstudos(QMainWindow):
         progresso_layout.addLayout(progresso_topo)
 
         progresso_descricao = QLabel(
-            "XP por constância, revisão, recuperação, cobertura e consolidação."
+            "Nível, XP, conquistas e próximo marco."
         )
         progresso_descricao.setObjectName("focusDashboardDescription")
         progresso_descricao.setWordWrap(True)
@@ -33158,8 +33860,21 @@ class SistemaEstudos(QMainWindow):
         )
         progresso_layout.addWidget(botao_ver_conquistas)
 
+        # O Planejamento ocupa agora a metade direita da primeira linha.
+        # O conteúdo é construído alguns blocos abaixo, mas o container já
+        # reserva sua posição ao lado do Foco sem duplicar lógica.
+        self.dashboard_planejamento_top_container = QWidget()
+        self.dashboard_planejamento_top_container.setObjectName(
+            "dashboardPlanningTopContainer"
+        )
+        self.dashboard_planejamento_top_layout = QVBoxLayout(
+            self.dashboard_planejamento_top_container
+        )
+        self.dashboard_planejamento_top_layout.setContentsMargins(0, 0, 0, 0)
+        self.dashboard_planejamento_top_layout.setSpacing(0)
+
         foco_cards.addWidget(foco_hoje, 1)
-        foco_cards.addWidget(progresso_card, 1)
+        foco_cards.addWidget(self.dashboard_planejamento_top_container, 1)
         dashboard_hoje_conteudo_layout.addLayout(foco_cards)
 
         # ----------------------------------------------------
@@ -33424,8 +34139,12 @@ class SistemaEstudos(QMainWindow):
         self.dashboard_hoje_acao.setProperty("simpleHero", True)
 
         acao_layout = QVBoxLayout(self.dashboard_hoje_acao)
-        acao_layout.setContentsMargins(16, 10, 16, 10)
-        acao_layout.setSpacing(6)
+        acao_layout.setContentsMargins(16, 8, 16, 10)
+        acao_layout.setSpacing(5)
+        # O cabeçalho permanece no topo. O corpo da recomendação recebe
+        # stretches simétricos acima e abaixo, centralizando-o no espaço
+        # vertical restante quando o card de Planejamento define a altura
+        # da linha.
 
         algoritmo_header = QHBoxLayout()
         algoritmo_header.setSpacing(9)
@@ -33436,7 +34155,8 @@ class SistemaEstudos(QMainWindow):
         algoritmo_icone.setFixedSize(34, 34)
 
         algoritmo_titulos = QVBoxLayout()
-        algoritmo_titulos.setSpacing(2)
+        algoritmo_titulos.setSpacing(1)
+        algoritmo_titulos.setAlignment(Qt.AlignTop)
 
         algoritmo_titulo = QLabel("Recomendação do algoritmo")
         algoritmo_titulo.setObjectName("algorithmDashboardTitle")
@@ -33534,24 +34254,34 @@ class SistemaEstudos(QMainWindow):
         botoes_ia.addLayout(botao_principal_linha)
         botoes_ia.addWidget(self.dashboard_hoje_botao, 0, Qt.AlignCenter)
         inteligencia_conteudo_layout.addLayout(botoes_ia)
+        acao_layout.addStretch(1)
         acao_layout.addWidget(inteligencia_conteudo)
+        acao_layout.addStretch(1)
 
-        # Resumo compacto do dia — substitui informação tabular no Dashboard.
+        # Planejamento de hoje — painel operacional da primeira dobra.
+        # O card ganha o espaço antes ocupado por "Seu progresso" e resume
+        # execução do dia: meta, pendências, carga restante e ritmo semanal.
         self.dashboard_resumo_ia = QFrame()
         self.dashboard_resumo_ia.setObjectName("dashboardInsightSummary")
+        self.dashboard_resumo_ia.setMinimumHeight(174)
+        self.dashboard_resumo_ia.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Expanding,
+        )
         resumo_ia_layout = QVBoxLayout(self.dashboard_resumo_ia)
-        resumo_ia_layout.setContentsMargins(14, 8, 14, 8)
-        resumo_ia_layout.setSpacing(4)
+        resumo_ia_layout.setContentsMargins(14, 6, 14, 8)
+        resumo_ia_layout.setSpacing(5)
+        resumo_ia_layout.setAlignment(Qt.AlignTop)
 
         resumo_ia_header = QHBoxLayout()
         resumo_ia_header.setSpacing(8)
-        resumo_ia_icone = QLabel("▥")
+        resumo_ia_icone = QLabel("◈")
         resumo_ia_icone.setObjectName("dashboardInsightSummaryIcon")
         resumo_ia_icone.setAlignment(Qt.AlignCenter)
         resumo_ia_icone.setFixedSize(34, 34)
         resumo_ia_titulos = QVBoxLayout()
         resumo_ia_titulos.setSpacing(1)
-        resumo_ia_titulo = QLabel("Seu resumo de hoje")
+        resumo_ia_titulo = QLabel("Planejamento de hoje")
         resumo_ia_titulo.setObjectName("dashboardInsightSummaryTitle")
         self.dashboard_resumo_data = QLabel("Hoje")
         self.dashboard_resumo_data.setObjectName("dashboardInsightSummaryDate")
@@ -33559,59 +34289,162 @@ class SistemaEstudos(QMainWindow):
         resumo_ia_titulos.addWidget(self.dashboard_resumo_data)
         resumo_ia_header.addWidget(resumo_ia_icone, 0, Qt.AlignTop)
         resumo_ia_header.addLayout(resumo_ia_titulos, 1)
+
+        self.dashboard_planejamento_status_dia = QLabel("EM ANDAMENTO")
+        self.dashboard_planejamento_status_dia.setObjectName("weeklyGoalStatus")
+        self.dashboard_planejamento_status_dia.setProperty("weekState", "andamento")
+        resumo_ia_header.addWidget(
+            self.dashboard_planejamento_status_dia,
+            0,
+            Qt.AlignTop | Qt.AlignRight,
+        )
         resumo_ia_layout.addLayout(resumo_ia_header)
 
-        def criar_linha_resumo_ia(rotulo, detalhe, papel):
-            linha = QFrame()
-            linha.setObjectName("dashboardInsightSummaryRow")
-            linha.setProperty("summaryRole", papel)
-            linha_layout = QHBoxLayout(linha)
-            linha_layout.setContentsMargins(10, 4, 10, 4)
-            linha_layout.setSpacing(8)
-            textos = QVBoxLayout()
-            textos.setSpacing(0)
-            titulo = QLabel(rotulo)
-            titulo.setObjectName("dashboardInsightSummaryRowTitle")
-            subtitulo = QLabel(detalhe)
-            subtitulo.setObjectName("dashboardInsightSummaryRowDetail")
-            textos.addWidget(titulo)
-            textos.addWidget(subtitulo)
-            valor = QLabel("—")
-            valor.setObjectName("dashboardInsightSummaryRowValue")
-            valor.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            linha_layout.addLayout(textos, 1)
-            linha_layout.addWidget(valor, 0, Qt.AlignVCenter)
-            resumo_ia_layout.addWidget(linha)
-            return valor
+        # Meta diária — protagonista visual do Planejamento.
+        # O número principal fica aberto no card, sem um mini-card concorrente.
+        meta_dia_layout = QVBoxLayout()
+        meta_dia_layout.setContentsMargins(4, 1, 4, 5)
+        meta_dia_layout.setSpacing(1)
 
-        self.dashboard_resumo_hoje = criar_linha_resumo_ia(
-            "Hoje", "Tempo efetivo de foco", "today"
+        meta_dia_titulo = QLabel("META DE QUESTÕES")
+        meta_dia_titulo.setObjectName("dashboardPlanningHeroTitle")
+        meta_dia_titulo.setAlignment(Qt.AlignCenter)
+        meta_dia_layout.addWidget(meta_dia_titulo)
+
+        self.dashboard_planejamento_resumo_meta_diaria = QLabel("—")
+        self.dashboard_planejamento_resumo_meta_diaria.setObjectName(
+            "dashboardPlanningHeroValue"
         )
-        self.dashboard_resumo_pendencias = criar_linha_resumo_ia(
-            "Pendências", "Revisões que pedem atenção", "pending"
+        self.dashboard_planejamento_resumo_meta_diaria.setAlignment(Qt.AlignCenter)
+        meta_dia_layout.addWidget(self.dashboard_planejamento_resumo_meta_diaria)
+
+        self.dashboard_planejamento_resumo_meta_diaria_detalhe = QLabel(
+            "Questões resolvidas hoje"
         )
-        self.dashboard_resumo_sequencia = criar_linha_resumo_ia(
-            "Sequência", "Dias seguidos estudando", "streak"
+        self.dashboard_planejamento_resumo_meta_diaria_detalhe.setObjectName(
+            "dashboardPlanningHeroDetail"
         )
-        self.dashboard_resumo_meta = criar_linha_resumo_ia(
-            "Meta semanal", "Progresso do tempo de foco", "goal"
+        self.dashboard_planejamento_resumo_meta_diaria_detalhe.setAlignment(
+            Qt.AlignCenter
+        )
+        meta_dia_layout.addWidget(
+            self.dashboard_planejamento_resumo_meta_diaria_detalhe
         )
 
         self.dashboard_resumo_meta_barra = QProgressBar()
-        self.dashboard_resumo_meta_barra.setObjectName("dashboardInsightSummaryProgress")
+        self.dashboard_resumo_meta_barra.setObjectName(
+            "dashboardInsightSummaryProgress"
+        )
         self.dashboard_resumo_meta_barra.setRange(0, 100)
         self.dashboard_resumo_meta_barra.setValue(0)
         self.dashboard_resumo_meta_barra.setTextVisible(False)
-        self.dashboard_resumo_meta_barra.setFixedHeight(6)
-        resumo_ia_layout.addWidget(self.dashboard_resumo_meta_barra)
-        resumo_ia_layout.addStretch(1)
+        self.dashboard_resumo_meta_barra.setFixedHeight(8)
+        meta_dia_layout.addWidget(self.dashboard_resumo_meta_barra)
+        resumo_ia_layout.addLayout(meta_dia_layout)
+
+        # Operação do dia em um único bloco: menos bordas e leitura mais direta.
+        operacao_box = QFrame()
+        operacao_box.setObjectName("dashboardPlanningOperational")
+        operacao_linha = QHBoxLayout(operacao_box)
+        operacao_linha.setContentsMargins(11, 6, 11, 6)
+        operacao_linha.setSpacing(14)
+
+        revisoes_layout = QVBoxLayout()
+        revisoes_layout.setSpacing(1)
+        revisoes_titulo = QLabel("REVISÕES PENDENTES")
+        revisoes_titulo.setObjectName("dashboardInsightSummaryRowTitle")
+        self.dashboard_planejamento_resumo_pendencias = QLabel("—")
+        self.dashboard_planejamento_resumo_pendencias.setObjectName(
+            "dashboardPlanningOperationalValue"
+        )
+        self.dashboard_planejamento_resumo_pendencias_detalhe = QLabel(
+            "Fila de revisões que pede atenção"
+        )
+        self.dashboard_planejamento_resumo_pendencias_detalhe.setObjectName(
+            "dashboardInsightSummaryRowDetail"
+        )
+        revisoes_layout.addWidget(revisoes_titulo)
+        revisoes_layout.addWidget(self.dashboard_planejamento_resumo_pendencias)
+        revisoes_layout.addWidget(
+            self.dashboard_planejamento_resumo_pendencias_detalhe
+        )
+        operacao_linha.addLayout(revisoes_layout, 1)
+
+        divisor_operacional = QFrame()
+        divisor_operacional.setObjectName("dashboardPlanningDivider")
+        divisor_operacional.setFrameShape(QFrame.Shape.VLine)
+        divisor_operacional.setFrameShadow(QFrame.Shadow.Plain)
+        operacao_linha.addWidget(divisor_operacional)
+
+        carga_resumo_layout = QVBoxLayout()
+        carga_resumo_layout.setSpacing(1)
+        carga_titulo = QLabel("PARA CONCLUIR O DIA")
+        carga_titulo.setObjectName("dashboardInsightSummaryRowTitle")
+        self.dashboard_planejamento_carga_valor = QLabel("—")
+        self.dashboard_planejamento_carga_valor.setObjectName(
+            "dashboardPlanningOperationalValue"
+        )
+        self.dashboard_planejamento_carga_detalhe = QLabel("—")
+        self.dashboard_planejamento_carga_detalhe.setObjectName(
+            "dashboardInsightSummaryRowDetail"
+        )
+        carga_resumo_layout.addWidget(carga_titulo)
+        carga_resumo_layout.addWidget(self.dashboard_planejamento_carga_valor)
+        carga_resumo_layout.addWidget(self.dashboard_planejamento_carga_detalhe)
+        operacao_linha.addLayout(carga_resumo_layout, 1)
+        resumo_ia_layout.addWidget(operacao_box)
+
+        # Semana em uma única faixa, sem três mini-cards concorrentes.
+        semana_linha = QHBoxLayout()
+        semana_linha.setContentsMargins(0, 0, 0, 0)
+        semana_linha.setSpacing(7)
+        semana_titulo = QLabel("SEMANA")
+        semana_titulo.setObjectName("dashboardInsightSummaryRowTitle")
+        semana_linha.addWidget(semana_titulo)
+        semana_linha.addStretch(1)
+        self.dashboard_planejamento_semana_labels = {}
+
+        def adicionar_status_semana(chave, titulo):
+            titulo_label = QLabel(f"{titulo}:")
+            titulo_label.setObjectName("dashboardPlanningWeekLabel")
+            status_label = QLabel("—")
+            status_label.setObjectName("weeklyGoalStatus")
+            status_label.setProperty("weekState", "desativada")
+            semana_linha.addWidget(titulo_label)
+            semana_linha.addWidget(status_label)
+            self.dashboard_planejamento_semana_labels[chave] = status_label
+
+        adicionar_status_semana("questoes", "Questões")
+        adicionar_status_semana("revisoes", "Revisões")
+        adicionar_status_semana("dias", "Dias")
+        resumo_ia_layout.addLayout(semana_linha)
+
+        self.dashboard_planejamento_resumo_botao = QPushButton(
+            "VER PLANEJAMENTO COMPLETO  →"
+        )
+        self.dashboard_planejamento_resumo_botao.setObjectName(
+            "planningSummaryButton"
+        )
+        self.dashboard_planejamento_resumo_botao.setCursor(
+            Qt.PointingHandCursor
+        )
+        self.dashboard_planejamento_resumo_botao.setToolTip(
+            "Ir para o Planejamento completo no Dashboard."
+        )
+        self.dashboard_planejamento_resumo_botao.clicked.connect(
+            lambda: self.ir_para_secao_dashboard("planejamento")
+        )
+        resumo_ia_layout.addWidget(self.dashboard_planejamento_resumo_botao)
+
+        # Insere o novo Planejamento exatamente ao lado do Foco.
+        self.dashboard_planejamento_top_layout.addWidget(self.dashboard_resumo_ia)
 
         self.dashboard_hoje_acao.setProperty("heroCentral", True)
         inteligencia_linha = QHBoxLayout()
         inteligencia_linha.setContentsMargins(0, 0, 0, 0)
         inteligencia_linha.setSpacing(10)
         inteligencia_linha.addWidget(self.dashboard_hoje_acao, 3)
-        inteligencia_linha.addWidget(self.dashboard_resumo_ia, 1)
+        inteligencia_linha.addWidget(progresso_card, 1)
         layout.addLayout(inteligencia_linha)
 
         # Os acessos rápidos ficam depois da recomendação: primeiro o usuário
@@ -34999,6 +35832,7 @@ class SistemaEstudos(QMainWindow):
         planejamento.setObjectName(
             "planningPanel"
         )
+        self.dashboard_planejamento_painel = planejamento
 
         planejamento_layout = QVBoxLayout(
             planejamento
@@ -36418,7 +37252,7 @@ class SistemaEstudos(QMainWindow):
         )
         # A fila técnica continua sendo atualizada para compatibilidade, mas
         # deixa de ocupar o Dashboard. O resumo útil aparece na Recomendação
-        # da IA e no card "Seu resumo de hoje".
+        # do algoritmo e no card compacto de Planejamento.
         fila_painel.setVisible(False)
 
         # ====================================================
@@ -37681,6 +38515,31 @@ class SistemaEstudos(QMainWindow):
                 )
                 estado = "atencao"
 
+        # Situação individual de cada meta para o card compacto do topo.
+        dias_decorridos_compacto = max(
+            1,
+            inicio_semana.daysTo(hoje_qdate) + 1
+        )
+        proporcao_tempo_compacto = dias_decorridos_compacto / 7.0
+
+        def situacao_meta_compacta(atual, meta):
+            atual = int(atual or 0)
+            meta = int(meta or 0)
+            if meta <= 0:
+                return {"texto": "Não definida", "estado": "desativada"}
+            if atual >= meta:
+                return {"texto": "Concluída", "estado": "concluida"}
+            progresso = min(1.0, atual / meta)
+            if progresso + 0.08 >= proporcao_tempo_compacto:
+                return {"texto": "No ritmo", "estado": "andamento"}
+            return {"texto": "Atenção", "estado": "atencao"}
+
+        resumo_compacto_semana = {
+            "questoes": situacao_meta_compacta(questoes, meta_questoes),
+            "revisoes": situacao_meta_compacta(revisoes, meta_revisoes),
+            "dias": situacao_meta_compacta(dias_estudados, meta_dias),
+        }
+
         metas_semanais_ativas = bool(
             metas_ativas
         )
@@ -37706,19 +38565,75 @@ class SistemaEstudos(QMainWindow):
             self.meta_semanal_situacao
         )
 
+        return {
+            "geral": {"texto": texto_situacao, "estado": estado},
+            **resumo_compacto_semana,
+        }
+
     def atualizar_planejamento_dashboard(
         self,
         concurso_id,
-        hoje_qdate
+        hoje_qdate,
+        resumo_revisoes=None
     ):
         hoje_texto = hoje_qdate.toString(
             "yyyy-MM-dd"
         )
 
-        self.atualizar_meta_semanal_dashboard(
+        resumo_semana_compacto = self.atualizar_meta_semanal_dashboard(
             concurso_id,
             hoje_qdate
-        )
+        ) or {}
+
+        if hasattr(self, "dashboard_planejamento_resumo_semana"):
+            geral_semana = resumo_semana_compacto.get("geral", {})
+            self.dashboard_planejamento_resumo_semana.setText(
+                geral_semana.get("texto") or "—"
+            )
+            self.dashboard_planejamento_resumo_semana.setProperty(
+                "weekState", geral_semana.get("estado") or "desativada"
+            )
+            self.dashboard_planejamento_resumo_semana.style().unpolish(
+                self.dashboard_planejamento_resumo_semana
+            )
+            self.dashboard_planejamento_resumo_semana.style().polish(
+                self.dashboard_planejamento_resumo_semana
+            )
+
+        if hasattr(self, "dashboard_planejamento_semana_labels"):
+            for chave, label in self.dashboard_planejamento_semana_labels.items():
+                dados_status = resumo_semana_compacto.get(chave, {})
+                label.setText(dados_status.get("texto") or "—")
+                label.setProperty(
+                    "weekState", dados_status.get("estado") or "desativada"
+                )
+                label.style().unpolish(label)
+                label.style().polish(label)
+
+        resumo_revisoes = resumo_revisoes or {}
+        revisoes_hoje = int(resumo_revisoes.get("hoje", 0) or 0)
+        revisoes_atrasadas = int(resumo_revisoes.get("atrasadas", 0) or 0)
+        revisoes_pendentes = revisoes_hoje + revisoes_atrasadas
+
+        if hasattr(self, "dashboard_planejamento_resumo_pendencias"):
+            self.dashboard_planejamento_resumo_pendencias.setText(
+                str(revisoes_pendentes)
+            )
+            if revisoes_pendentes <= 0:
+                detalhe_pendencias = "Fila do dia em ordem"
+            else:
+                partes_pendencias = []
+                if revisoes_atrasadas:
+                    partes_pendencias.append(
+                        f"{revisoes_atrasadas} atrasada"
+                        + ("s" if revisoes_atrasadas != 1 else "")
+                    )
+                if revisoes_hoje:
+                    partes_pendencias.append(f"{revisoes_hoje} para hoje")
+                detalhe_pendencias = " • ".join(partes_pendencias)
+            self.dashboard_planejamento_resumo_pendencias_detalhe.setText(
+                detalhe_pendencias
+            )
 
         # ----------------------------------------------------
         # META DIÁRIA DE QUESTÕES
@@ -37825,6 +38740,87 @@ class SistemaEstudos(QMainWindow):
             self.meta_questoes_barra.setProperty(
                 "goalState",
                 "desativada"
+            )
+
+        if hasattr(self, "dashboard_planejamento_resumo_meta_diaria"):
+            if meta > 0:
+                self.dashboard_planejamento_resumo_meta_diaria.setText(
+                    f"{questoes_hoje} / {meta}"
+                )
+                if questoes_hoje >= meta:
+                    excedente = max(0, questoes_hoje - meta)
+                    detalhe_hero = "Meta concluída"
+                    if excedente > 0:
+                        detalhe_hero += f" • +{excedente} questões"
+                else:
+                    faltam_hero = max(0, meta - questoes_hoje)
+                    detalhe_hero = (
+                        f"{percentual_meta}% concluído • faltam {faltam_hero}"
+                    )
+                self.dashboard_planejamento_resumo_meta_diaria_detalhe.setText(
+                    detalhe_hero
+                )
+                self.dashboard_resumo_meta_barra.setValue(
+                    min(100, max(0, int(percentual_meta)))
+                )
+            else:
+                self.dashboard_planejamento_resumo_meta_diaria.setText(
+                    f"{questoes_hoje} hoje"
+                )
+                self.dashboard_planejamento_resumo_meta_diaria_detalhe.setText(
+                    "Meta diária desativada"
+                )
+                self.dashboard_resumo_meta_barra.setValue(0)
+
+        if hasattr(self, "dashboard_planejamento_carga_valor"):
+            if meta > 0:
+                faltam_questoes = max(0, meta - questoes_hoje)
+                self.dashboard_planejamento_carga_valor.setText(
+                    f"{faltam_questoes} "
+                    + ("questão" if faltam_questoes == 1 else "questões")
+                )
+            else:
+                self.dashboard_planejamento_carga_valor.setText(
+                    "Meta desativada"
+                )
+
+            if revisoes_pendentes > 0:
+                self.dashboard_planejamento_carga_detalhe.setText(
+                    f"+ {revisoes_pendentes} "
+                    + (
+                        "revisão pendente"
+                        if revisoes_pendentes == 1
+                        else "revisões pendentes"
+                    )
+                )
+            else:
+                self.dashboard_planejamento_carga_detalhe.setText(
+                    "Sem revisões pendentes"
+                )
+
+        if hasattr(self, "dashboard_planejamento_status_dia"):
+            if meta > 0 and questoes_hoje >= meta and revisoes_pendentes <= 0:
+                status_dia = "CONCLUÍDO"
+                estado_dia = "concluida"
+            elif revisoes_atrasadas > 0:
+                status_dia = "ATENÇÃO"
+                estado_dia = "atencao"
+            elif meta > 0 and questoes_hoje >= meta:
+                status_dia = "META CONCLUÍDA"
+                estado_dia = "concluida"
+            else:
+                status_dia = "EM ANDAMENTO"
+                estado_dia = "andamento"
+
+            self.dashboard_planejamento_status_dia.setText(status_dia)
+            self.dashboard_planejamento_status_dia.setProperty(
+                "weekState", estado_dia
+            )
+            self.dashboard_planejamento_status_dia.style().unpolish(
+                self.dashboard_planejamento_status_dia
+            )
+            self.dashboard_planejamento_status_dia.style().polish(
+                self.dashboard_planejamento_status_dia
             )
 
         for widget in (
@@ -38797,7 +39793,8 @@ class SistemaEstudos(QMainWindow):
 
         self.atualizar_planejamento_dashboard(
             concurso_id,
-            hoje_qdate
+            hoje_qdate,
+            resumo
         )
 
         progresso_snapshot_dashboard = self.atualizar_progresso_dashboard(
@@ -40420,7 +41417,10 @@ class SistemaEstudos(QMainWindow):
         )
         self.questoes_somente_duplicadas.stateChanged.connect(self.filtrar_questoes)
 
-        self.questoes_selecionar_todas = QCheckBox("Selecionar todas visíveis")
+        self.questoes_selecionar_todas = QCheckBox("Selecionar todo o resultado · 0")
+        self.questoes_selecionar_todas.setToolTip(
+            "Seleciona todas as questões que correspondem aos filtros atuais, não apenas as linhas que estão no trecho visível da tabela."
+        )
         self.questoes_selecionar_todas.stateChanged.connect(
             self.alternar_marcacao_questoes_central
         )
@@ -40556,6 +41556,23 @@ class SistemaEstudos(QMainWindow):
         header = self.tabela_questoes.horizontalHeader()
         header.setStretchLastSection(False)
 
+        # Checkbox de seleção global no cabeçalho da primeira coluna. A tabela
+        # carrega todo o resultado filtrado; portanto, este controle seleciona
+        # todas as questões retornadas pelos filtros atuais de uma só vez.
+        self.questoes_selecionar_todas_header = QCheckBox(header)
+        self.questoes_selecionar_todas_header.setObjectName(
+            "questionsHeaderSelectAll"
+        )
+        self.questoes_selecionar_todas_header.setTristate(True)
+        self.questoes_selecionar_todas_header.setToolTip(
+            "Selecionar todas as questões do resultado atual."
+        )
+        self.questoes_selecionar_todas_header.clicked.connect(
+            lambda marcado: self.alternar_marcacao_questoes_central(
+                Qt.Checked if marcado else Qt.Unchecked
+            )
+        )
+
         larguras = {
             0: 34,
             1: 46,
@@ -40572,6 +41589,20 @@ class SistemaEstudos(QMainWindow):
             header.setSectionResizeMode(coluna, QHeaderView.Fixed)
             self.tabela_questoes.setColumnWidth(coluna, largura)
         header.setSectionResizeMode(4, QHeaderView.Stretch)
+
+        header.sectionResized.connect(
+            lambda *_: self._reposicionar_checkbox_cabecalho_questoes()
+        )
+        try:
+            header.geometriesChanged.connect(
+                self._reposicionar_checkbox_cabecalho_questoes
+            )
+        except Exception:
+            pass
+        QTimer.singleShot(
+            0,
+            self._reposicionar_checkbox_cabecalho_questoes
+        )
 
         area_trabalho_layout.addWidget(
             self.tabela_questoes,
@@ -41612,6 +42643,69 @@ class SistemaEstudos(QMainWindow):
             False
         )
 
+    def _reposicionar_checkbox_cabecalho_questoes(self):
+        """Mantém o checkbox global centralizado na primeira coluna."""
+        if not hasattr(self, "questoes_selecionar_todas_header"):
+            return
+        if not hasattr(self, "tabela_questoes"):
+            return
+
+        header = self.tabela_questoes.horizontalHeader()
+        checkbox = self.questoes_selecionar_todas_header
+        tamanho = checkbox.sizeHint()
+        largura = max(18, tamanho.width())
+        altura = max(18, tamanho.height())
+        x = header.sectionViewportPosition(0) + max(
+            0,
+            (header.sectionSize(0) - largura) // 2
+        )
+        y = max(0, (header.height() - altura) // 2)
+        checkbox.setGeometry(x, y, largura, altura)
+        checkbox.raise_()
+
+    def _sincronizar_selecao_global_questoes(self):
+        """Sincroniza os controles 'selecionar tudo' com as caixas da grade."""
+        if not hasattr(self, "tabela_questoes"):
+            return
+
+        total = self.tabela_questoes.rowCount()
+        marcadas = 0
+        for linha in range(total):
+            item = self.tabela_questoes.item(linha, 0)
+            if item is not None and item.checkState() == Qt.Checked:
+                marcadas += 1
+
+        estado = Qt.Unchecked
+        if total > 0 and marcadas == total:
+            estado = Qt.Checked
+        elif marcadas > 0:
+            estado = Qt.PartiallyChecked
+
+        controle = getattr(self, "questoes_selecionar_todas", None)
+        if controle is not None:
+            controle.blockSignals(True)
+            controle.setChecked(estado == Qt.Checked)
+            controle.setText(f"Selecionar todo o resultado · {total}")
+            controle.setEnabled(total > 0)
+            controle.blockSignals(False)
+
+        cabecalho = getattr(
+            self,
+            "questoes_selecionar_todas_header",
+            None
+        )
+        if cabecalho is not None:
+            cabecalho.blockSignals(True)
+            cabecalho.setCheckState(estado)
+            cabecalho.setEnabled(total > 0)
+            cabecalho.setToolTip(
+                f"Selecionar todas as {total} questão(ões) do resultado atual."
+                if total > 0
+                else "Nenhuma questão no resultado atual."
+            )
+            cabecalho.blockSignals(False)
+            self._reposicionar_checkbox_cabecalho_questoes()
+
     def filtrar_questoes(self):
         if not hasattr(
             self,
@@ -41752,6 +42846,12 @@ class SistemaEstudos(QMainWindow):
             filtradas.append(
                 item
             )
+
+        self._questoes_ids_resultado_atual = [
+            int(item["id"])
+            for item in filtradas
+            if item.get("id") is not None
+        ]
 
         arquivadas_filtradas = sum(
             1
@@ -41962,7 +43062,17 @@ class SistemaEstudos(QMainWindow):
         if hasattr(self, "questoes_selecionar_todas"):
             self.questoes_selecionar_todas.blockSignals(True)
             self.questoes_selecionar_todas.setChecked(False)
+            self.questoes_selecionar_todas.setText(
+                f"Selecionar todo o resultado · {len(filtradas)}"
+            )
+            self.questoes_selecionar_todas.setEnabled(bool(filtradas))
             self.questoes_selecionar_todas.blockSignals(False)
+        if hasattr(self, "questoes_selecionar_todas_header"):
+            self.questoes_selecionar_todas_header.blockSignals(True)
+            self.questoes_selecionar_todas_header.setCheckState(Qt.Unchecked)
+            self.questoes_selecionar_todas_header.setEnabled(bool(filtradas))
+            self.questoes_selecionar_todas_header.blockSignals(False)
+            self._reposicionar_checkbox_cabecalho_questoes()
         self.atualizar_acoes_questao()
 
     def obter_ids_questoes_marcadas_central(self):
@@ -41989,13 +43099,21 @@ class SistemaEstudos(QMainWindow):
         return ids
 
     def alternar_marcacao_questoes_central(self, estado):
-        marcado = estado == Qt.Checked
+        try:
+            marcado = int(estado) == int(Qt.Checked)
+        except (TypeError, ValueError):
+            marcado = estado == Qt.Checked
+
+        self.tabela_questoes.setUpdatesEnabled(False)
         self.tabela_questoes.blockSignals(True)
         for linha in range(self.tabela_questoes.rowCount()):
             item = self.tabela_questoes.item(linha, 0)
             if item is not None:
                 item.setCheckState(Qt.Checked if marcado else Qt.Unchecked)
         self.tabela_questoes.blockSignals(False)
+        self.tabela_questoes.setUpdatesEnabled(True)
+        self.tabela_questoes.viewport().update()
+        self._sincronizar_selecao_global_questoes()
         self.atualizar_acoes_questao()
 
     def abrir_lixeira_questoes_central(self):
@@ -42060,6 +43178,8 @@ class SistemaEstudos(QMainWindow):
         if not hasattr(self, "questoes_estado"):
             return
 
+        self._sincronizar_selecao_global_questoes()
+
         ids = self.obter_ids_questoes_marcadas_central()
         if not ids:
             linha = self.tabela_questoes.currentRow()
@@ -42079,8 +43199,16 @@ class SistemaEstudos(QMainWindow):
             self.questoes_editar_lote.setEnabled(False)
             return
 
+        estados_por_id = {
+            int(item["id"]): bool(item.get("ativa", True))
+            for item in self.dados_questoes
+            if item.get("id") is not None
+        }
         estados = []
         for questao_id in ids:
+            if int(questao_id) in estados_por_id:
+                estados.append(estados_por_id[int(questao_id)])
+                continue
             integridade = obter_integridade_questao(questao_id)
             if integridade is not None:
                 estados.append(bool(integridade.get("ativa")))
@@ -42231,8 +43359,16 @@ class SistemaEstudos(QMainWindow):
         if not ids:
             return
 
+        estados_por_id = {
+            int(item["id"]): bool(item.get("ativa", True))
+            for item in self.dados_questoes
+            if item.get("id") is not None
+        }
         estados = []
         for questao_id in ids:
+            if int(questao_id) in estados_por_id:
+                estados.append((questao_id, estados_por_id[int(questao_id)]))
+                continue
             integridade = obter_integridade_questao(questao_id)
             if integridade is not None:
                 estados.append((questao_id, bool(integridade.get("ativa"))))
@@ -42415,6 +43551,7 @@ class SistemaEstudos(QMainWindow):
                 "• Para análise: reúne questões sinalizadas durante uma bateria para visualização e edição.\n"
                 "• Lixeira: recebe questões removidas e permite restaurar ou excluir permanentemente.\n"
                 "• Seleção múltipla: use as caixas ou Ctrl/Shift para mover e editar questões em lote.\n"
+                "• Selecionar resultado: marque a caixa no cabeçalho ou na barra de ações para selecionar todas as questões retornadas pelos filtros atuais.\n"
                 "• Duplicadas: identifica questões com enunciado, alternativas e gabarito iguais.\n\n"
                 "A prática de questões, os simulados, a efetividade e o histórico de estudo ficam fora desta Central para manter esta tela focada exclusivamente na organização do banco."
             ),
@@ -44111,7 +45248,14 @@ class SistemaEstudos(QMainWindow):
 
     def abrir_resumo_dia(self):
         self._garantir_tela_resumo_dia()
-        self.atualizar_resumo_dia()
+        hoje = QDate.currentDate().toString("yyyy-MM-dd")
+        if (
+            not self._resumo_dia_precarregado
+            or self._resumo_dia_data_referencia != hoje
+        ):
+            self.atualizar_resumo_dia()
+            self._resumo_dia_precarregado = True
+            self._resumo_dia_data_referencia = hoje
 
         self.telas.setCurrentWidget(
             self.tela_resumo_dia
@@ -45602,7 +46746,8 @@ class SistemaEstudos(QMainWindow):
             )
             return
 
-        self.atualizar_dashboard()
+        if self._dashboard_sujo:
+            self.atualizar_dashboard()
 
         fila_dashboard = getattr(
             self,
@@ -47032,7 +48177,14 @@ class SistemaEstudos(QMainWindow):
 
     def abrir_calendario(self):
         self._garantir_tela_calendario()
-        self.atualizar_calendario()
+        hoje = QDate.currentDate().toString("yyyy-MM-dd")
+        if (
+            not self._calendario_precarregado
+            or self._calendario_data_referencia != hoje
+        ):
+            self.atualizar_calendario()
+            self._calendario_precarregado = True
+            self._calendario_data_referencia = hoje
 
         self.telas.setCurrentWidget(
             self.tela_calendario
@@ -59267,9 +60419,23 @@ class SistemaEstudos(QMainWindow):
                 f"Perfil: {concurso[1]}"
             )
 
-        self.dados_topicos_atuais = listar_topicos_gerenciamento(
-            self.disciplina_atual
-        )
+        hoje_cache = QDate.currentDate().toString("yyyy-MM-dd")
+        if self._topicos_precarregados_data != hoje_cache:
+            self._topicos_precarregados.clear()
+            self._topicos_precarregados_data = None
+
+        if self.disciplina_atual in self._topicos_precarregados:
+            self.dados_topicos_atuais = list(
+                self._topicos_precarregados[self.disciplina_atual]
+            )
+        else:
+            self.dados_topicos_atuais = listar_topicos_gerenciamento(
+                self.disciplina_atual
+            )
+            self._topicos_precarregados[self.disciplina_atual] = list(
+                self.dados_topicos_atuais
+            )
+            self._topicos_precarregados_data = hoje_cache
 
         self.atualizar_resumo_disciplina()
         self.aplicar_filtros_topicos()
@@ -60420,6 +61586,24 @@ class SistemaEstudos(QMainWindow):
                         "próxima data após concluir a cobertura"
                     )
 
+                try:
+                    ciclo_selecionado = obter_ciclo_questoes_ativo(
+                        obter_concurso_ativo()[0],
+                        int(conteudo_id),
+                    )
+                except Exception:
+                    ciclo_selecionado = None
+
+                if ciclo_selecionado:
+                    informacoes.append(
+                        "Ciclo: "
+                        f"{int(ciclo_selecionado.get('respondidas') or 0)}/"
+                        f"{int(ciclo_selecionado.get('total') or 0)}"
+                    )
+                    informacoes.append(
+                        f"{int(ciclo_selecionado.get('pendentes') or 0)} pendentes"
+                    )
+
                 self.rotulo_topico_selecionado.setText(nome_conteudo or "Tópico")
                 self.subtitulo_topico_selecionado.setText(" • ".join(informacoes))
 
@@ -61001,8 +62185,46 @@ if not icone_aplicativo.isNull():
         )
     )
 
-janela = SistemaEstudos()
+splash = _STARTUP_SPLASH_BOOTSTRAP
+if splash is None or not getattr(splash, "esta_ativo", lambda: False)():
+    splash = JanelaInicializacao()
+    splash.show()
+    QApplication.processEvents(QEventLoop.AllEvents, 120)
 
+splash.atualizar(
+    "Inicializando o núcleo do Vighna...",
+    5,
+    "Validando banco, configurações e interface principal.",
+)
+janela = SistemaEstudos(pre_carregar_startup=True)
+
+preload_completo = True
+try:
+    janela.precarregar_inicializacao_completa(splash.atualizar)
+except Exception as erro:
+    preload_completo = False
+    # Não impedir a abertura por falha em um aquecimento opcional. O Vighna
+    # volta ao comportamento lazy já existente para o que não tiver carregado.
+    splash.atualizar(
+        "Concluindo com carregamento sob demanda...",
+        96,
+        f"Uma etapa de pré-carregamento não foi concluída: {erro}",
+    )
+    janela._pre_carregar_startup = False
+    janela._agendar_atualizacao_dashboard(forcar=True)
+    janela._agendar_backup_abertura()
+
+if preload_completo:
+    splash.finalizar()
+else:
+    splash.atualizar(
+        "Abrindo o VighnaStudy...",
+        100,
+        "O núcleo está disponível; a etapa que falhou será carregada quando necessária.",
+    )
 janela.show()
+janela.raise_()
+janela.activateWindow()
+splash.close()
 
 sys.exit(app.exec())

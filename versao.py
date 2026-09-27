@@ -1,5 +1,5 @@
 """Metadados centrais de versão do VighnaStudy."""
 
-VIGHNA_VERSION = "0.29.19"
-VIGHNA_BUILD = "pausa-rotacao-visual-scroll-v3"
-VIGHNA_SCHEMA = 22
+VIGHNA_VERSION = "0.29.35"
+VIGHNA_BUILD = "dashboard-futurista-palette-reference-v1"
+VIGHNA_SCHEMA = 23
