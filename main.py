@@ -16002,6 +16002,30 @@ class JanelaBancoErros(QDialog):
             self.janela_principal.atualizar_dashboard()
 
 
+def _notificar_dados_alterados_raiz(widget, escopo="all"):
+    """Propaga uma invalidação de dados até a janela principal do Vighna.
+
+    Diálogos operacionais podem estar aninhados (ex.: Tópico -> Resolver).
+    Este helper garante que caches de telas já pré-carregadas sejam invalidados
+    antes de o controle voltar ao chamador, evitando listas visualmente antigas.
+    """
+    atual = widget.parentWidget() if widget is not None else None
+    while atual is not None:
+        metodo = getattr(atual, "notificar_dados_alterados", None)
+        if callable(metodo):
+            metodo(escopo)
+            return True
+        atual = atual.parentWidget()
+
+    app = QApplication.instance()
+    if app is not None:
+        for janela in app.topLevelWidgets():
+            metodo = getattr(janela, "notificar_dados_alterados", None)
+            if callable(metodo):
+                metodo(escopo)
+                return True
+    return False
+
 
 class JanelaResolverQuestoes(QDialog):
     def __init__(
@@ -16067,6 +16091,7 @@ class JanelaResolverQuestoes(QDialog):
         self.resumo_final = None
         self.efetividade_final = None
         self.proxima_acao_final = None
+        self._dados_pos_sessao_notificados = False
         self.modo_simulado = bool(
             configuracao.get(
                 "modo_simulado",
@@ -16783,6 +16808,23 @@ class JanelaResolverQuestoes(QDialog):
 
         self.carregar_atual()
         self.atualizar_painel_foco()
+
+    def _notificar_dados_pos_sessao(self):
+        """Invalida caches após uma sessão que realmente gravou respostas."""
+        if self.sem_impacto_inteligencia or self._dados_pos_sessao_notificados:
+            return
+
+        resumo = self.resumo_final or {}
+        try:
+            respondidas = int(resumo.get("respondidas", 0) or 0)
+        except Exception:
+            respondidas = 0
+
+        if respondidas <= 0 and not self.resultados_integracao:
+            return
+
+        if _notificar_dados_alterados_raiz(self, "questoes"):
+            self._dados_pos_sessao_notificados = True
 
     def _localizar_controlador_foco(self):
         atual = self.parentWidget()
@@ -18282,6 +18324,10 @@ class JanelaResolverQuestoes(QDialog):
             janela_resumo.exec()
             self.proxima_acao_final = janela_resumo.proxima_acao
 
+        # A sessão pode ter alterado revisão, percentual, próxima data e
+        # estatísticas. Invalide os caches ANTES de devolver o controle para
+        # telas já pré-carregadas (como a lista da disciplina).
+        self._notificar_dados_pos_sessao()
         self.accept()
 
     def closeEvent(
@@ -18393,6 +18439,11 @@ class JanelaResolverQuestoes(QDialog):
                 self.sessao_id
             )
         )
+
+        # Mesmo em encerramento pela janela, as respostas preservadas podem
+        # alterar a revisão consolidada do tópico. Limpe os caches antes de
+        # retornar para a tela anterior.
+        self._notificar_dados_pos_sessao()
 
         # ``reject`` também emite ``finished`` e libera o ciclo local usado
         # pela abertura não modal. As respostas registradas já foram salvas.
@@ -25000,6 +25051,7 @@ class JanelaTopico(QDialog):
         )
 
         if janela.exec() == QDialog.Accepted:
+            _notificar_dados_alterados_raiz(self, "revisoes")
             self.carregar_historico()
 
     def editar_revisao(self):
@@ -25019,6 +25071,7 @@ class JanelaTopico(QDialog):
         )
 
         if janela.exec() == QDialog.Accepted:
+            _notificar_dados_alterados_raiz(self, "revisoes")
             self.carregar_historico()
 
     def excluir_revisao_selecionada(self):
@@ -25051,6 +25104,7 @@ class JanelaTopico(QDialog):
             revisao[0]
         )
 
+        _notificar_dados_alterados_raiz(self, "revisoes")
         self.carregar_historico()
 
     def alterar_proxima_revisao(self):
@@ -25120,6 +25174,7 @@ class JanelaTopico(QDialog):
                     "yyyy-MM-dd"
                 )
             )
+            _notificar_dados_alterados_raiz(self, "revisoes")
             self.carregar_historico()
 
     def mostrar_detalhes(self):
@@ -32686,10 +32741,43 @@ class SistemaEstudos(QMainWindow):
         ):
             self._agendar_atualizacao_estatisticas()
 
+    def _estatisticas_visivel_precisa_atualizacao(self, forcar=False):
+        """Teste barato para manter a troca entre abas puramente visual.
+
+        O pré-carregamento inicial deixa resumo e abas limpos. Enquanto a data,
+        o perfil e os dados não forem invalidados, trocar de aba não deve nem
+        agendar timer nem consultar o banco. A checagem de perfil é feita ao
+        entrar na tela de Estatísticas; aqui usamos somente estado em memória.
+        """
+        if forcar:
+            return True
+        if not hasattr(self, "_estado_estatisticas"):
+            return True
+        if not hasattr(self, "abas_estatisticas"):
+            return True
+
+        hoje = QDate.currentDate().toString("yyyy-MM-dd")
+        if self._estatisticas_data_referencia != hoje:
+            return True
+        if self._estado_estatisticas.concurso_id is None:
+            return True
+        if self._estado_estatisticas.resumo_sujo:
+            return True
+
+        aba = self._nome_aba_estatisticas_atual()
+        return self._estado_estatisticas.precisa_atualizar(aba)
+
     def _agendar_atualizacao_estatisticas(self, forcar=False):
-        """Agenda o refresh depois que o Qt tiver oportunidade de repintar."""
+        """Agenda refresh somente quando a aba visível realmente está suja."""
         if self._estatisticas_refresh_agendado:
             return
+
+        # Caminho quente da navegação: uma aba já pré-carregada e limpa apenas
+        # aparece. Não há timer, acesso ao SQLite, reconstrução de tabela ou
+        # atualização redundante de labels.
+        if not self._estatisticas_visivel_precisa_atualizacao(forcar=forcar):
+            return
+
         self._estatisticas_refresh_agendado = True
 
         def executar():
@@ -32698,10 +32786,14 @@ class SistemaEstudos(QMainWindow):
                 return
             if self.telas.currentWidget() is not self.tela_estatisticas:
                 return
+            # O estado pode ter sido limpo por outra atualização entre o clique
+            # e este callback. Evita trabalho obsoleto em navegação rápida.
+            if not self._estatisticas_visivel_precisa_atualizacao(forcar=forcar):
+                return
             self.atualizar_estatisticas(forcar=forcar)
 
-        # Um pequeno atraso garante uma janela para o repaint da navegação
-        # antes de qualquer consulta/ montagem de tabela mais pesada.
+        # O repaint acontece antes de qualquer cálculo necessário. Em estado
+        # limpo este timer nem chega a ser criado.
         QTimer.singleShot(15, executar)
 
     def _ao_mudar_aba_estatisticas(self, *args):
@@ -32710,6 +32802,7 @@ class SistemaEstudos(QMainWindow):
             hasattr(self, "tela_estatisticas")
             and hasattr(self, "telas")
             and self.telas.currentWidget() is self.tela_estatisticas
+            and self._estatisticas_visivel_precisa_atualizacao()
         ):
             self._agendar_atualizacao_estatisticas()
 
@@ -37933,15 +38026,12 @@ class SistemaEstudos(QMainWindow):
             self.carregar_botoes_disciplinas()
             self.atualizar_dashboard()
 
-            if (
-                hasattr(
-                    self,
-                    "tela_relatorios"
-                )
-                and self.telas.currentWidget()
-                == self.tela_relatorios
-            ):
-                self.invalidar_relatorios(atualizar_se_visivel=True)
+            # O perfil mudou: snapshots analíticos do perfil anterior não podem
+            # continuar marcados como limpos. Apenas invalidamos; telas ocultas
+            # serão atualizadas quando realmente precisarem aparecer.
+            self.invalidar_estatisticas("all", atualizar_se_visivel=True)
+            self.invalidar_relatorios(atualizar_se_visivel=True)
+            self._marcar_central_questoes_suja()
 
             if (
                 hasattr(
@@ -59421,18 +59511,24 @@ class SistemaEstudos(QMainWindow):
 
     def abrir_estatisticas(self, aba=None):
         self._garantir_tela_estatisticas()
-        # A navegação vem primeiro. O cálculo da aba é postergado para o próximo
-        # ciclo do event loop, permitindo que a tela responda visualmente ao clique.
+        # Selecionar a aba antes de exibir a tela evita um ciclo de pintura extra.
         if aba:
             self._selecionar_aba_estatisticas(aba)
 
+        # A única validação de perfil necessária na entrada fica aqui. Depois
+        # disso, alternar abas usa apenas o estado em memória e não toca no banco.
         try:
             concurso = obter_concurso_ativo()
+            concurso_id = int(concurso[0])
+            if self._estado_estatisticas.concurso_id != concurso_id:
+                self._estado_estatisticas.trocar_concurso(concurso_id)
+                self.cache_analitico.invalidar("estatisticas:")
             if hasattr(self, "perfil_estatisticas"):
                 self.perfil_estatisticas.setText(f"Perfil: {concurso[1]}")
         except Exception:
             pass
 
+        # Navegação primeiro; cálculo somente se o snapshot visível estiver sujo.
         self.telas.setCurrentWidget(self.tela_estatisticas)
         self._agendar_atualizacao_estatisticas()
 
@@ -59634,13 +59730,15 @@ class SistemaEstudos(QMainWindow):
     def atualizar_estatisticas(self, forcar=False):
         """Atualiza somente a aba de Estatísticas atualmente visível.
 
-        A versão anterior recalculava todas as abas antes de navegar para a
-        tela. Agora cada aba é carregada sob demanda e permanece limpa até que
-        um evento acadêmico relevante a invalide.
+        Abas limpas saem antes de qualquer consulta ao perfil/banco. Esse fast
+        path complementa o pré-carregamento do startup e elimina verificações
+        redundantes durante a navegação normal.
         """
         if self._estatisticas_refresh_em_andamento:
             return
         if not hasattr(self, "abas_estatisticas"):
+            return
+        if not self._estatisticas_visivel_precisa_atualizacao(forcar=forcar):
             return
 
         self._estatisticas_refresh_em_andamento = True
@@ -60414,8 +60512,8 @@ class SistemaEstudos(QMainWindow):
             return
         self.atualizar_estado_disciplina_atual()
         self.carregar_botoes_disciplinas()
-        self.carregar_topicos()
         self.notificar_dados_alterados("all")
+        self.carregar_topicos()
 
     def abrir_questoes_desativadas_disciplina_atual(self):
         if not self.disciplina_atual:
@@ -60427,8 +60525,8 @@ class SistemaEstudos(QMainWindow):
             somente_questoes=True,
         )
         janela.exec()
-        self.carregar_topicos()
         self.notificar_dados_alterados("questoes")
+        self.carregar_topicos()
 
     def abrir_disciplina(
         self,
@@ -61473,6 +61571,7 @@ class SistemaEstudos(QMainWindow):
         if topico_possui_capitulos(topico_id):
             self.topicos_expandidos.add(int(topico_id))
 
+        self.notificar_dados_alterados("topicos")
         self.carregar_topicos()
 
     def novo_topico(self):
@@ -61520,6 +61619,7 @@ class SistemaEstudos(QMainWindow):
                     )
                 )
 
+        self.notificar_dados_alterados("topicos")
         self.carregar_topicos()
 
     def obter_conteudo_selecionado(self):
@@ -61845,12 +61945,12 @@ class SistemaEstudos(QMainWindow):
             self.cache_analitico.invalidar()
         except Exception:
             pass
+        self.notificar_dados_alterados("all")
         self.carregar_topicos()
         try:
             self.recalcular_jornada_do_dia()
         except Exception:
             pass
-        self.notificar_dados_alterados("all")
 
     def definir_importancia_topico_selecionado(self):
         topico_id, nome_topico = (
@@ -61938,6 +62038,7 @@ class SistemaEstudos(QMainWindow):
             return
 
         if renomear_capitulo(conteudo_id, novo_nome):
+            self.notificar_dados_alterados("topicos")
             self.carregar_topicos()
         else:
             QMessageBox.information(
@@ -61983,6 +62084,7 @@ class SistemaEstudos(QMainWindow):
             topico_id,
             novo_nome
         ):
+            self.notificar_dados_alterados("topicos")
             self.carregar_topicos()
         else:
             QMessageBox.information(
@@ -62102,8 +62204,8 @@ class SistemaEstudos(QMainWindow):
             self.cache_analitico.invalidar()
         except Exception:
             pass
-        self.carregar_topicos()
         self.notificar_dados_alterados("all")
+        self.carregar_topicos()
 
     def atualizar_revisao_topico(
         self,
@@ -62117,6 +62219,7 @@ class SistemaEstudos(QMainWindow):
         )
 
         if janela.exec() == QDialog.Accepted:
+            self.notificar_dados_alterados("revisoes")
             self.carregar_topicos()
             self.atualizar_dashboard()
 
@@ -62145,13 +62248,15 @@ class SistemaEstudos(QMainWindow):
         if item is None:
             return
 
+        nome_topico = item.data(Qt.UserRole + 4) or item.text()
         janela = JanelaRevisao(
             item.data(Qt.UserRole),
-            item.text(),
+            str(nome_topico),
             self
         )
 
         if janela.exec() == QDialog.Accepted:
+            self.notificar_dados_alterados("revisoes")
             self.carregar_topicos()
 
     def abrir_topico(
@@ -62177,9 +62282,10 @@ class SistemaEstudos(QMainWindow):
         if item.data(Qt.UserRole + 2) == "capitulo":
             return
 
+        nome_topico = item.data(Qt.UserRole + 4) or item.text()
         janela = JanelaTopico(
             item.data(Qt.UserRole),
-            item.text(),
+            str(nome_topico),
             self
         )
 
