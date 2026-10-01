@@ -1,0 +1,287 @@
+﻿rodada;ordem;fase;tipo;nome;ms;depth
+1;1;construtor;global;obter_configuracao_bool;1.555;1
+1;2;construtor;global;obter_concurso_ativo;7.009;1
+1;3;construtor;global;obter_configuracao_bool;1.496;1
+1;4;construtor;global;obter_configuracao_bool;1.352;1
+1;5;construtor;global;obter_configuracao_bool;1.501;1
+1;6;construtor;global;obter_configuracao_bool;1.513;1
+1;7;construtor;global;obter_configuracao_bool;1.636;1
+1;8;construtor;global;obter_configuracao_bool;1.481;1
+1;9;construtor;global;obter_configuracao_bool;1.639;1
+1;10;construtor;global;obter_configuracao_bool;1.531;1
+1;11;construtor;method;SistemaEstudos.criar_tela_inicial;230.692;0
+1;12;Preparando o Dashboard...;global;obter_concurso_ativo;1.604;1
+1;13;Preparando o Dashboard...;global;obter_metricas_globais_nucleo;2993.064;1
+1;14;Preparando o Dashboard...;global;contar_banco_erros_pendentes;569.024;1
+1;15;Preparando o Dashboard...;global;obter_dashboard;2.332;1
+1;16;Preparando o Dashboard...;global;obter_resumo_foco;13.681;1
+1;17;Preparando o Dashboard...;global;obter_snapshot_regularidade;604.484;1
+1;18;Preparando o Dashboard...;method;SistemaEstudos.atualizar_regularidade_dashboard;0.055;1
+1;19;Preparando o Dashboard...;global;obter_configuracao_int;1.426;1
+1;20;Preparando o Dashboard...;global;obter_metricas_periodo_nucleo;310.918;2
+1;21;Preparando o Dashboard...;global;obter_configuracao_int;1.903;2
+1;22;Preparando o Dashboard...;global;obter_configuracao_int;7.239;2
+1;23;Preparando o Dashboard...;global;obter_configuracao_int;1.796;2
+1;24;Preparando o Dashboard...;global;obter_configuracao_int;1.47;2
+1;25;Preparando o Dashboard...;global;obter_metricas_periodo_nucleo;49.498;2
+1;26;Preparando o Dashboard...;global;obter_configuracao_bool;6.047;2
+1;27;Preparando o Dashboard...;global;obter_configuracao_int;1.603;2
+1;28;Preparando o Dashboard...;global;obter_configuracao_int;1.532;2
+1;29;Preparando o Dashboard...;global;obter_configuracao_int;1.361;2
+1;30;Preparando o Dashboard...;global;obter_configuracao_int;1.654;2
+1;31;Preparando o Dashboard...;global;obter_configuracao_int;1.509;2
+1;32;Preparando o Dashboard...;global;obter_configuracao_int;1.508;2
+1;33;Preparando o Dashboard...;global;obter_configuracao_int;1.391;2
+1;34;Preparando o Dashboard...;global;obter_configuracao_int;1.509;2
+1;35;Preparando o Dashboard...;global;obter_configuracao_int;1.429;2
+1;36;Preparando o Dashboard...;global;obter_configuracao_int;1.456;2
+1;37;Preparando o Dashboard...;global;obter_configuracao_int;1.565;2
+1;38;Preparando o Dashboard...;global;obter_configuracao_int;1.718;2
+1;39;Preparando o Dashboard...;global;obter_configuracao_int;1.541;2
+1;40;Preparando o Dashboard...;global;obter_configuracao_int;1.518;2
+1;41;Preparando o Dashboard...;global;obter_configuracao_int;1.42;2
+1;42;Preparando o Dashboard...;method;SistemaEstudos.atualizar_planejamento_dashboard;411.982;1
+1;43;Preparando o Dashboard...;global;obter_snapshot_progresso_edital;10332.864;2
+1;44;Preparando o Dashboard...;method;SistemaEstudos.atualizar_progresso_dashboard;10584.45;1
+1;45;Preparando o Dashboard...;method;SistemaEstudos.atualizar_gamificacao_dashboard;637.587;1
+1;46;Preparando o Dashboard...;global;listar_pendencias;13.063;1
+1;47;Preparando o Dashboard...;global;obter_configuracao_bool;1.293;1
+1;48;Preparando o Dashboard...;global;obter_prioridades_sessao_adaptativa;3847.502;1
+1;49;Preparando o Dashboard...;global;obter_configuracao_int;1.563;2
+1;50;Preparando o Dashboard...;global;obter_configuracao_int;1.311;2
+1;51;Preparando o Dashboard...;global;obter_configuracao_int;1.33;2
+1;52;Preparando o Dashboard...;global;obter_concurso_ativo;1.342;2
+1;53;Preparando o Dashboard...;global;obter_resumo_foco;1.536;2
+1;54;Preparando o Dashboard...;global;obter_configuracao_int;2.648;2
+1;55;Preparando o Dashboard...;global;obter_configuracao_int;1.533;2
+1;56;Preparando o Dashboard...;global;obter_prioridades_sessao_adaptativa;3855.114;2
+1;57;Preparando o Dashboard...;global;obter_configuracao_bool;1.78;2
+1;58;Preparando o Dashboard...;global;obter_configuracao_bool;1.483;2
+1;59;Preparando o Dashboard...;global;obter_configuracao_bool;1.416;2
+1;60;Preparando o Dashboard...;method;SistemaEstudos.atualizar_hoje_operacional_dashboard;3912.797;1
+1;61;Preparando o Dashboard...;global;obter_estado_cobertura_revisao;6.196;1
+1;62;Preparando o Dashboard...;global;obter_resumo_simulados_dashboard;1.559;1
+1;63;Preparando o Dashboard...;method;SistemaEstudos.atualizar_dashboard;23606.739;0
+1;64;Preparando a Central de Questões...;global;obter_concurso_ativo;1.636;0
+1;65;Preparando o Resumo do dia...;global;obter_concurso_ativo;2.068;0
+1;66;Preparando o Resumo do dia...;global;listar_pendencias;1.797;0
+1;67;Preparando o Resumo do dia...;global;obter_configuracao_int;1.509;0
+1;68;Preparando o Calendário...;global;obter_concurso_ativo;1.766;0
+1;69;Preparando o Calendário...;global;obter_dashboard;3154.1;0
+1;70;Preparando o Calendário...;global;obter_concurso_ativo;7.599;0
+1;71;Preparando Estatísticas...;method;SistemaEstudos.criar_aba_regularidade;30.788;2
+1;72;Preparando Estatísticas...;method;SistemaEstudos.criar_aba_conquistas;38.396;2
+1;73;Preparando Estatísticas...;method;SistemaEstudos.criar_aba_laboratorio_algoritmo;37.936;2
+1;74;Preparando Estatísticas...;method;SistemaEstudos.criar_aba_mapa_dominio;23.214;2
+1;75;Preparando Estatísticas...;method;SistemaEstudos.criar_tela_estatisticas;700.769;1
+1;76;Estatísticas · Histórico;global;obter_concurso_ativo;1.598;2
+1;77;Estatísticas · Histórico;global;obter_metricas_globais_nucleo;3155.491;3
+1;78;Estatísticas · Histórico;method;SistemaEstudos._atualizar_resumo_estatisticas;6350.88;2
+1;79;Estatísticas · Histórico;global;obter_concurso_ativo;1.5;3
+1;80;Estatísticas · Histórico;global;obter_evolucao_historica;22234.163;3
+1;81;Estatísticas · Histórico;method;SistemaEstudos.atualizar_minha_evolucao;22236.136;2
+1;82;Estatísticas · Histórico;method;SistemaEstudos.atualizar_estatisticas;28588.744;1
+1;83;Estatísticas · Regularidade;global;obter_concurso_ativo;1.615;2
+1;84;Estatísticas · Regularidade;method;SistemaEstudos._atualizar_resumo_estatisticas;0.008;2
+1;85;Estatísticas · Regularidade;global;obter_snapshot_regularidade;625.22;3
+1;86;Estatísticas · Regularidade;method;SistemaEstudos._atualizar_aba_regularidade;626.412;2
+1;87;Estatísticas · Regularidade;method;SistemaEstudos.atualizar_estatisticas;628.255;1
+1;88;Estatísticas · Conquistas;global;obter_concurso_ativo;1.525;2
+1;89;Estatísticas · Conquistas;method;SistemaEstudos._atualizar_resumo_estatisticas;0.003;2
+1;90;Estatísticas · Conquistas;global;obter_snapshot_progresso_edital;10167.455;3
+1;91;Estatísticas · Conquistas;global;obter_snapshot_regularidade;626.354;3
+1;92;Estatísticas · Conquistas;method;SistemaEstudos._atualizar_aba_conquistas;11511.246;2
+1;93;Estatísticas · Conquistas;method;SistemaEstudos.atualizar_estatisticas;11512.909;1
+1;94;Estatísticas · Algoritmo;global;obter_concurso_ativo;1.558;2
+1;95;Estatísticas · Algoritmo;method;SistemaEstudos._atualizar_resumo_estatisticas;0.002;2
+1;96;Estatísticas · Algoritmo;global;obter_concurso_ativo;1.346;3
+1;97;Estatísticas · Algoritmo;global;obter_resumo_foco;1.608;3
+1;98;Estatísticas · Algoritmo;global;obter_configuracao_int;1.401;3
+1;99;Estatísticas · Algoritmo;global;obter_configuracao_int;1.316;3
+1;100;Estatísticas · Algoritmo;global;obter_prioridades_sessao_adaptativa;4009.146;3
+1;101;Estatísticas · Algoritmo;global;obter_configuracao_bool;1.504;3
+1;102;Estatísticas · Algoritmo;global;obter_configuracao_bool;1.283;3
+1;103;Estatísticas · Algoritmo;global;montar_laboratorio;1.617;3
+1;104;Estatísticas · Algoritmo;method;SistemaEstudos.atualizar_laboratorio_algoritmo;4031.676;2
+1;105;Estatísticas · Algoritmo;method;SistemaEstudos.atualizar_estatisticas;4033.334;1
+1;106;Estatísticas · Disciplinas;global;obter_concurso_ativo;1.512;2
+1;107;Estatísticas · Disciplinas;method;SistemaEstudos._atualizar_resumo_estatisticas;0.002;2
+1;108;Estatísticas · Disciplinas;global;obter_metricas_globais_nucleo;3162.335;3
+1;109;Estatísticas · Disciplinas;method;SistemaEstudos._atualizar_aba_estatisticas_disciplinas;6379.284;2
+1;110;Estatísticas · Disciplinas;method;SistemaEstudos.atualizar_estatisticas;6380.899;1
+1;111;Estatísticas · Mapa de domínio;global;obter_concurso_ativo;1.481;2
+1;112;Estatísticas · Mapa de domínio;method;SistemaEstudos._atualizar_resumo_estatisticas;0.002;2
+1;113;Estatísticas · Mapa de domínio;global;obter_snapshot_progresso_edital;10061.819;3
+1;114;Estatísticas · Mapa de domínio;global;build_domain_map_snapshot;0.377;3
+1;115;Estatísticas · Mapa de domínio;method;SistemaEstudos.filtrar_mapa_dominio;515.977;3
+1;116;Estatísticas · Mapa de domínio;method;SistemaEstudos._atualizar_aba_mapa_dominio;10598.426;2
+1;117;Estatísticas · Mapa de domínio;method;SistemaEstudos.atualizar_estatisticas;10600.008;1
+1;118;Estatísticas · Pontos fracos;global;obter_concurso_ativo;1.525;2
+1;119;Estatísticas · Pontos fracos;method;SistemaEstudos._atualizar_resumo_estatisticas;0.002;2
+1;120;Estatísticas · Pontos fracos;method;SistemaEstudos._atualizar_aba_estatisticas_fracos;3756.55;2
+1;121;Estatísticas · Pontos fracos;method;SistemaEstudos.atualizar_estatisticas;3758.187;1
+1;122;Estatísticas · Revisões recentes;global;obter_concurso_ativo;1.534;2
+1;123;Estatísticas · Revisões recentes;method;SistemaEstudos._atualizar_resumo_estatisticas;0.002;2
+1;124;Estatísticas · Revisões recentes;method;SistemaEstudos._atualizar_aba_estatisticas_recentes;12.259;2
+1;125;Estatísticas · Revisões recentes;method;SistemaEstudos.atualizar_estatisticas;13.903;1
+1;126;Estatísticas · Tendências;global;obter_concurso_ativo;1.565;2
+1;127;Estatísticas · Tendências;method;SistemaEstudos._atualizar_resumo_estatisticas;0.002;2
+1;128;Estatísticas · Tendências;global;obter_concurso_ativo;1.372;3
+1;129;Estatísticas · Tendências;global;obter_analise_temporal;22058.272;3
+1;130;Estatísticas · Tendências;method;SistemaEstudos.atualizar_evolucao_temporal;22062.853;2
+1;131;Estatísticas · Tendências;method;SistemaEstudos.atualizar_estatisticas;22064.523;1
+1;132;Estatísticas · Progresso;global;obter_concurso_ativo;1.54;2
+1;133;Estatísticas · Progresso;method;SistemaEstudos._atualizar_resumo_estatisticas;0.005;2
+1;134;Estatísticas · Progresso;global;obter_concurso_ativo;2.426;3
+1;135;Estatísticas · Progresso;global;obter_snapshot_progresso_edital;10119.481;3
+1;136;Estatísticas · Progresso;method;SistemaEstudos.filtrar_progresso_edital;289.292;3
+1;137;Estatísticas · Progresso;global;obter_concurso_ativo;1.39;3
+1;138;Estatísticas · Progresso;global;obter_concurso_ativo;1.742;3
+1;139;Estatísticas · Progresso;method;SistemaEstudos.atualizar_progresso_edital;10725.306;2
+1;140;Estatísticas · Progresso;method;SistemaEstudos.atualizar_estatisticas;10727.016;1
+1;141;Estatísticas · Progresso;method;SistemaEstudos._precarregar_estatisticas_todas_abas;99244.094;0
+1;142;Preparando Relatórios...;global;obter_concurso_ativo;2.805;0
+1;143;Finalizando a interface...;global;obter_concurso_ativo;1.486;0
+2;1;construtor;global;obter_configuracao_bool;1.573;1
+2;2;construtor;global;obter_concurso_ativo;1.37;1
+2;3;construtor;global;obter_configuracao_bool;1.398;1
+2;4;construtor;global;obter_configuracao_bool;1.336;1
+2;5;construtor;global;obter_configuracao_bool;1.518;1
+2;6;construtor;global;obter_configuracao_bool;1.615;1
+2;7;construtor;global;obter_configuracao_bool;1.476;1
+2;8;construtor;global;obter_configuracao_bool;1.406;1
+2;9;construtor;global;obter_configuracao_bool;1.499;1
+2;10;construtor;global;obter_configuracao_bool;1.523;1
+2;11;construtor;method;SistemaEstudos.criar_tela_inicial;227.081;0
+2;12;Preparando o Dashboard...;global;obter_concurso_ativo;1.548;1
+2;13;Preparando o Dashboard...;global;obter_metricas_globais_nucleo;3123.304;1
+2;14;Preparando o Dashboard...;global;contar_banco_erros_pendentes;596.395;1
+2;15;Preparando o Dashboard...;global;obter_dashboard;3.326;1
+2;16;Preparando o Dashboard...;global;obter_resumo_foco;12.698;1
+2;17;Preparando o Dashboard...;global;obter_snapshot_regularidade;617.774;1
+2;18;Preparando o Dashboard...;method;SistemaEstudos.atualizar_regularidade_dashboard;0.053;1
+2;19;Preparando o Dashboard...;global;obter_configuracao_int;2.197;1
+2;20;Preparando o Dashboard...;global;obter_metricas_periodo_nucleo;326.319;2
+2;21;Preparando o Dashboard...;global;obter_configuracao_int;1.911;2
+2;22;Preparando o Dashboard...;global;obter_configuracao_int;11.59;2
+2;23;Preparando o Dashboard...;global;obter_configuracao_int;1.623;2
+2;24;Preparando o Dashboard...;global;obter_configuracao_int;1.467;2
+2;25;Preparando o Dashboard...;global;obter_metricas_periodo_nucleo;51.719;2
+2;26;Preparando o Dashboard...;global;obter_configuracao_bool;7.726;2
+2;27;Preparando o Dashboard...;global;obter_configuracao_int;1.453;2
+2;28;Preparando o Dashboard...;global;obter_configuracao_int;1.508;2
+2;29;Preparando o Dashboard...;global;obter_configuracao_int;2.082;2
+2;30;Preparando o Dashboard...;global;obter_configuracao_int;1.732;2
+2;31;Preparando o Dashboard...;global;obter_configuracao_int;1.463;2
+2;32;Preparando o Dashboard...;global;obter_configuracao_int;1.444;2
+2;33;Preparando o Dashboard...;global;obter_configuracao_int;1.414;2
+2;34;Preparando o Dashboard...;global;obter_configuracao_int;1.437;2
+2;35;Preparando o Dashboard...;global;obter_configuracao_int;1.384;2
+2;36;Preparando o Dashboard...;global;obter_configuracao_int;1.45;2
+2;37;Preparando o Dashboard...;global;obter_configuracao_int;1.44;2
+2;38;Preparando o Dashboard...;global;obter_configuracao_int;1.529;2
+2;39;Preparando o Dashboard...;global;obter_configuracao_int;2.55;2
+2;40;Preparando o Dashboard...;global;obter_configuracao_int;1.775;2
+2;41;Preparando o Dashboard...;global;obter_configuracao_int;1.586;2
+2;42;Preparando o Dashboard...;method;SistemaEstudos.atualizar_planejamento_dashboard;438.5;1
+2;43;Preparando o Dashboard...;global;obter_snapshot_progresso_edital;9939.742;2
+2;44;Preparando o Dashboard...;method;SistemaEstudos.atualizar_progresso_dashboard;10191.473;1
+2;45;Preparando o Dashboard...;method;SistemaEstudos.atualizar_gamificacao_dashboard;627.265;1
+2;46;Preparando o Dashboard...;global;listar_pendencias;7.485;1
+2;47;Preparando o Dashboard...;global;obter_configuracao_bool;1.322;1
+2;48;Preparando o Dashboard...;global;obter_prioridades_sessao_adaptativa;4058.003;1
+2;49;Preparando o Dashboard...;global;obter_configuracao_int;1.541;2
+2;50;Preparando o Dashboard...;global;obter_configuracao_int;1.421;2
+2;51;Preparando o Dashboard...;global;obter_configuracao_int;1.432;2
+2;52;Preparando o Dashboard...;global;obter_concurso_ativo;1.408;2
+2;53;Preparando o Dashboard...;global;obter_resumo_foco;1.686;2
+2;54;Preparando o Dashboard...;global;obter_configuracao_int;1.679;2
+2;55;Preparando o Dashboard...;global;obter_configuracao_int;1.665;2
+2;56;Preparando o Dashboard...;global;obter_prioridades_sessao_adaptativa;3928.351;2
+2;57;Preparando o Dashboard...;global;obter_configuracao_bool;1.637;2
+2;58;Preparando o Dashboard...;global;obter_configuracao_bool;1.304;2
+2;59;Preparando o Dashboard...;global;obter_configuracao_bool;2.397;2
+2;60;Preparando o Dashboard...;method;SistemaEstudos.atualizar_hoje_operacional_dashboard;3985.64;1
+2;61;Preparando o Dashboard...;global;obter_estado_cobertura_revisao;7.891;1
+2;62;Preparando o Dashboard...;global;obter_resumo_simulados_dashboard;1.751;1
+2;63;Preparando o Dashboard...;method;SistemaEstudos.atualizar_dashboard;23681.602;0
+2;64;Preparando a Central de Questões...;global;obter_concurso_ativo;1.645;0
+2;65;Preparando o Resumo do dia...;global;obter_concurso_ativo;1.523;0
+2;66;Preparando o Resumo do dia...;global;listar_pendencias;1.609;0
+2;67;Preparando o Resumo do dia...;global;obter_configuracao_int;1.345;0
+2;68;Preparando o Calendário...;global;obter_concurso_ativo;1.577;0
+2;69;Preparando o Calendário...;global;obter_dashboard;3111.44;0
+2;70;Preparando o Calendário...;global;obter_concurso_ativo;1.336;0
+2;71;Preparando Estatísticas...;method;SistemaEstudos.criar_aba_regularidade;31.142;2
+2;72;Preparando Estatísticas...;method;SistemaEstudos.criar_aba_conquistas;38.898;2
+2;73;Preparando Estatísticas...;method;SistemaEstudos.criar_aba_laboratorio_algoritmo;35.931;2
+2;74;Preparando Estatísticas...;method;SistemaEstudos.criar_aba_mapa_dominio;21.692;2
+2;75;Preparando Estatísticas...;method;SistemaEstudos.criar_tela_estatisticas;727.97;1
+2;76;Estatísticas · Histórico;global;obter_concurso_ativo;1.571;2
+2;77;Estatísticas · Histórico;global;obter_metricas_globais_nucleo;3135.816;3
+2;78;Estatísticas · Histórico;method;SistemaEstudos._atualizar_resumo_estatisticas;6311.019;2
+2;79;Estatísticas · Histórico;global;obter_concurso_ativo;1.482;3
+2;80;Estatísticas · Histórico;global;obter_evolucao_historica;22057.804;3
+2;81;Estatísticas · Histórico;method;SistemaEstudos.atualizar_minha_evolucao;22059.65;2
+2;82;Estatísticas · Histórico;method;SistemaEstudos.atualizar_estatisticas;28372.43;1
+2;83;Estatísticas · Regularidade;global;obter_concurso_ativo;1.493;2
+2;84;Estatísticas · Regularidade;method;SistemaEstudos._atualizar_resumo_estatisticas;0.002;2
+2;85;Estatísticas · Regularidade;global;obter_snapshot_regularidade;621.088;3
+2;86;Estatísticas · Regularidade;method;SistemaEstudos._atualizar_aba_regularidade;622.312;2
+2;87;Estatísticas · Regularidade;method;SistemaEstudos.atualizar_estatisticas;623.939;1
+2;88;Estatísticas · Conquistas;global;obter_concurso_ativo;2.001;2
+2;89;Estatísticas · Conquistas;method;SistemaEstudos._atualizar_resumo_estatisticas;0.011;2
+2;90;Estatísticas · Conquistas;global;obter_snapshot_progresso_edital;10330.854;3
+2;91;Estatísticas · Conquistas;global;obter_snapshot_regularidade;616.55;3
+2;92;Estatísticas · Conquistas;method;SistemaEstudos._atualizar_aba_conquistas;11615.168;2
+2;93;Estatísticas · Conquistas;method;SistemaEstudos.atualizar_estatisticas;11617.403;1
+2;94;Estatísticas · Algoritmo;global;obter_concurso_ativo;1.54;2
+2;95;Estatísticas · Algoritmo;method;SistemaEstudos._atualizar_resumo_estatisticas;0.002;2
+2;96;Estatísticas · Algoritmo;global;obter_concurso_ativo;1.388;3
+2;97;Estatísticas · Algoritmo;global;obter_resumo_foco;3.604;3
+2;98;Estatísticas · Algoritmo;global;obter_configuracao_int;1.655;3
+2;99;Estatísticas · Algoritmo;global;obter_configuracao_int;1.496;3
+2;100;Estatísticas · Algoritmo;global;obter_prioridades_sessao_adaptativa;3848.77;3
+2;101;Estatísticas · Algoritmo;global;obter_configuracao_bool;1.513;3
+2;102;Estatísticas · Algoritmo;global;obter_configuracao_bool;1.297;3
+2;103;Estatísticas · Algoritmo;global;montar_laboratorio;1.588;3
+2;104;Estatísticas · Algoritmo;method;SistemaEstudos.atualizar_laboratorio_algoritmo;3875.109;2
+2;105;Estatísticas · Algoritmo;method;SistemaEstudos.atualizar_estatisticas;3876.753;1
+2;106;Estatísticas · Disciplinas;global;obter_concurso_ativo;1.721;2
+2;107;Estatísticas · Disciplinas;method;SistemaEstudos._atualizar_resumo_estatisticas;0.003;2
+2;108;Estatísticas · Disciplinas;global;obter_metricas_globais_nucleo;3209.807;3
+2;109;Estatísticas · Disciplinas;method;SistemaEstudos._atualizar_aba_estatisticas_disciplinas;6401.119;2
+2;110;Estatísticas · Disciplinas;method;SistemaEstudos.atualizar_estatisticas;6403.002;1
+2;111;Estatísticas · Mapa de domínio;global;obter_concurso_ativo;2.054;2
+2;112;Estatísticas · Mapa de domínio;method;SistemaEstudos._atualizar_resumo_estatisticas;0.007;2
+2;113;Estatísticas · Mapa de domínio;global;obter_snapshot_progresso_edital;10413.815;3
+2;114;Estatísticas · Mapa de domínio;global;build_domain_map_snapshot;0.356;3
+2;115;Estatísticas · Mapa de domínio;method;SistemaEstudos.filtrar_mapa_dominio;521.383;3
+2;116;Estatísticas · Mapa de domínio;method;SistemaEstudos._atualizar_aba_mapa_dominio;10954.726;2
+2;117;Estatísticas · Mapa de domínio;method;SistemaEstudos.atualizar_estatisticas;10957.002;1
+2;118;Estatísticas · Pontos fracos;global;obter_concurso_ativo;1.493;2
+2;119;Estatísticas · Pontos fracos;method;SistemaEstudos._atualizar_resumo_estatisticas;0.002;2
+2;120;Estatísticas · Pontos fracos;method;SistemaEstudos._atualizar_aba_estatisticas_fracos;3745.283;2
+2;121;Estatísticas · Pontos fracos;method;SistemaEstudos.atualizar_estatisticas;3746.88;1
+2;122;Estatísticas · Revisões recentes;global;obter_concurso_ativo;1.502;2
+2;123;Estatísticas · Revisões recentes;method;SistemaEstudos._atualizar_resumo_estatisticas;0.002;2
+2;124;Estatísticas · Revisões recentes;method;SistemaEstudos._atualizar_aba_estatisticas_recentes;12.371;2
+2;125;Estatísticas · Revisões recentes;method;SistemaEstudos.atualizar_estatisticas;13.976;1
+2;126;Estatísticas · Tendências;global;obter_concurso_ativo;1.59;2
+2;127;Estatísticas · Tendências;method;SistemaEstudos._atualizar_resumo_estatisticas;0.002;2
+2;128;Estatísticas · Tendências;global;obter_concurso_ativo;1.447;3
+2;129;Estatísticas · Tendências;global;obter_analise_temporal;22066.339;3
+2;130;Estatísticas · Tendências;method;SistemaEstudos.atualizar_evolucao_temporal;22071.269;2
+2;131;Estatísticas · Tendências;method;SistemaEstudos.atualizar_estatisticas;22072.962;1
+2;132;Estatísticas · Progresso;global;obter_concurso_ativo;1.486;2
+2;133;Estatísticas · Progresso;method;SistemaEstudos._atualizar_resumo_estatisticas;0.002;2
+2;134;Estatísticas · Progresso;global;obter_concurso_ativo;1.308;3
+2;135;Estatísticas · Progresso;global;obter_snapshot_progresso_edital;10000.71;3
+2;136;Estatísticas · Progresso;method;SistemaEstudos.filtrar_progresso_edital;285.708;3
+2;137;Estatísticas · Progresso;global;obter_concurso_ativo;1.378;3
+2;138;Estatísticas · Progresso;global;obter_concurso_ativo;1.471;3
+2;139;Estatísticas · Progresso;method;SistemaEstudos.atualizar_progresso_edital;10604.166;2
+2;140;Estatísticas · Progresso;method;SistemaEstudos.atualizar_estatisticas;10605.75;1
+2;141;Estatísticas · Progresso;method;SistemaEstudos._precarregar_estatisticas_todas_abas;99260.77;0
+2;142;Preparando Relatórios...;global;obter_concurso_ativo;1.549;0
+2;143;Finalizando a interface...;global;obter_concurso_ativo;1.479;0

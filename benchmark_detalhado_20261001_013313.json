@@ -1,0 +1,1309 @@
+{
+  "gerado_em": "2026-10-01 01:37:44",
+  "python": "C:\\SistemaEstudos\\.venv\\Scripts\\python.exe",
+  "runs": 2,
+  "topo": [
+    {
+      "rodada": 1,
+      "imports_bootstrap_ms": 849.55,
+      "qapplication_ms": 18.183,
+      "construtor_ms": 522.178,
+      "preload_ms": 132515.119,
+      "dashboard_ms": 23609.544,
+      "disciplinas_ms": 59.544,
+      "central_ms": 1139.374,
+      "resumo_ms": 33.073,
+      "calendario_ms": 3192.675,
+      "sessao_ms": 19.143,
+      "estatisticas_ms": 99251.789,
+      "relatorios_ms": 5206.474,
+      "finalizacao_ms": 2.595,
+      "show_ms": 114.411,
+      "total_ate_paint_ms": 134024.906,
+      "wall_ms": 135466.84
+    },
+    {
+      "rodada": 2,
+      "imports_bootstrap_ms": 441.923,
+      "qapplication_ms": 19.741,
+      "construtor_ms": 568.227,
+      "preload_ms": 132527.997,
+      "dashboard_ms": 23684.034,
+      "disciplinas_ms": 57.562,
+      "central_ms": 1143.107,
+      "resumo_ms": 32.16,
+      "calendario_ms": 3142.054,
+      "sessao_ms": 21.807,
+      "estatisticas_ms": 99265.829,
+      "relatorios_ms": 5175.656,
+      "finalizacao_ms": 2.538,
+      "show_ms": 110.315,
+      "total_ate_paint_ms": 133673.841,
+      "wall_ms": 135184.848
+    }
+  ],
+  "resumo_eventos": [
+    {
+      "fase": "Estatísticas · Progresso",
+      "tipo": "method",
+      "nome": "SistemaEstudos._precarregar_estatisticas_todas_abas",
+      "mediana_ms_por_rodada": 99252.432,
+      "min_ms": 99244.094,
+      "max_ms": 99260.77,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Histórico",
+      "tipo": "method",
+      "nome": "SistemaEstudos.atualizar_estatisticas",
+      "mediana_ms_por_rodada": 28480.587,
+      "min_ms": 28372.43,
+      "max_ms": 28588.744,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando o Dashboard...",
+      "tipo": "method",
+      "nome": "SistemaEstudos.atualizar_dashboard",
+      "mediana_ms_por_rodada": 23644.171,
+      "min_ms": 23606.739,
+      "max_ms": 23681.602,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Histórico",
+      "tipo": "method",
+      "nome": "SistemaEstudos.atualizar_minha_evolucao",
+      "mediana_ms_por_rodada": 22147.893,
+      "min_ms": 22059.65,
+      "max_ms": 22236.136,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Histórico",
+      "tipo": "global",
+      "nome": "obter_evolucao_historica",
+      "mediana_ms_por_rodada": 22145.984,
+      "min_ms": 22057.804,
+      "max_ms": 22234.163,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Tendências",
+      "tipo": "method",
+      "nome": "SistemaEstudos.atualizar_estatisticas",
+      "mediana_ms_por_rodada": 22068.743,
+      "min_ms": 22064.523,
+      "max_ms": 22072.962,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Tendências",
+      "tipo": "method",
+      "nome": "SistemaEstudos.atualizar_evolucao_temporal",
+      "mediana_ms_por_rodada": 22067.061,
+      "min_ms": 22062.853,
+      "max_ms": 22071.269,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Tendências",
+      "tipo": "global",
+      "nome": "obter_analise_temporal",
+      "mediana_ms_por_rodada": 22062.306,
+      "min_ms": 22058.272,
+      "max_ms": 22066.339,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Conquistas",
+      "tipo": "method",
+      "nome": "SistemaEstudos.atualizar_estatisticas",
+      "mediana_ms_por_rodada": 11565.156,
+      "min_ms": 11512.909,
+      "max_ms": 11617.403,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Conquistas",
+      "tipo": "method",
+      "nome": "SistemaEstudos._atualizar_aba_conquistas",
+      "mediana_ms_por_rodada": 11563.207,
+      "min_ms": 11511.246,
+      "max_ms": 11615.168,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Mapa de domínio",
+      "tipo": "method",
+      "nome": "SistemaEstudos.atualizar_estatisticas",
+      "mediana_ms_por_rodada": 10778.505,
+      "min_ms": 10600.008,
+      "max_ms": 10957.002,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Mapa de domínio",
+      "tipo": "method",
+      "nome": "SistemaEstudos._atualizar_aba_mapa_dominio",
+      "mediana_ms_por_rodada": 10776.576,
+      "min_ms": 10598.426,
+      "max_ms": 10954.726,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Progresso",
+      "tipo": "method",
+      "nome": "SistemaEstudos.atualizar_estatisticas",
+      "mediana_ms_por_rodada": 10666.383,
+      "min_ms": 10605.75,
+      "max_ms": 10727.016,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Progresso",
+      "tipo": "method",
+      "nome": "SistemaEstudos.atualizar_progresso_edital",
+      "mediana_ms_por_rodada": 10664.736,
+      "min_ms": 10604.166,
+      "max_ms": 10725.306,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando o Dashboard...",
+      "tipo": "method",
+      "nome": "SistemaEstudos.atualizar_progresso_dashboard",
+      "mediana_ms_por_rodada": 10387.962,
+      "min_ms": 10191.473,
+      "max_ms": 10584.45,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Conquistas",
+      "tipo": "global",
+      "nome": "obter_snapshot_progresso_edital",
+      "mediana_ms_por_rodada": 10249.155,
+      "min_ms": 10167.455,
+      "max_ms": 10330.854,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Mapa de domínio",
+      "tipo": "global",
+      "nome": "obter_snapshot_progresso_edital",
+      "mediana_ms_por_rodada": 10237.817,
+      "min_ms": 10061.819,
+      "max_ms": 10413.815,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando o Dashboard...",
+      "tipo": "global",
+      "nome": "obter_snapshot_progresso_edital",
+      "mediana_ms_por_rodada": 10136.303,
+      "min_ms": 9939.742,
+      "max_ms": 10332.864,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Progresso",
+      "tipo": "global",
+      "nome": "obter_snapshot_progresso_edital",
+      "mediana_ms_por_rodada": 10060.095,
+      "min_ms": 10000.71,
+      "max_ms": 10119.481,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando o Dashboard...",
+      "tipo": "global",
+      "nome": "obter_prioridades_sessao_adaptativa",
+      "mediana_ms_por_rodada": 7844.485,
+      "min_ms": 7702.616,
+      "max_ms": 7986.354,
+      "chamadas_mediana": 2.0
+    },
+    {
+      "fase": "Estatísticas · Disciplinas",
+      "tipo": "method",
+      "nome": "SistemaEstudos.atualizar_estatisticas",
+      "mediana_ms_por_rodada": 6391.951,
+      "min_ms": 6380.899,
+      "max_ms": 6403.002,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Disciplinas",
+      "tipo": "method",
+      "nome": "SistemaEstudos._atualizar_aba_estatisticas_disciplinas",
+      "mediana_ms_por_rodada": 6390.201,
+      "min_ms": 6379.284,
+      "max_ms": 6401.119,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Histórico",
+      "tipo": "method",
+      "nome": "SistemaEstudos._atualizar_resumo_estatisticas",
+      "mediana_ms_por_rodada": 6330.95,
+      "min_ms": 6311.019,
+      "max_ms": 6350.88,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Algoritmo",
+      "tipo": "method",
+      "nome": "SistemaEstudos.atualizar_estatisticas",
+      "mediana_ms_por_rodada": 3955.043,
+      "min_ms": 3876.753,
+      "max_ms": 4033.334,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Algoritmo",
+      "tipo": "method",
+      "nome": "SistemaEstudos.atualizar_laboratorio_algoritmo",
+      "mediana_ms_por_rodada": 3953.392,
+      "min_ms": 3875.109,
+      "max_ms": 4031.676,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando o Dashboard...",
+      "tipo": "method",
+      "nome": "SistemaEstudos.atualizar_hoje_operacional_dashboard",
+      "mediana_ms_por_rodada": 3949.218,
+      "min_ms": 3912.797,
+      "max_ms": 3985.64,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Algoritmo",
+      "tipo": "global",
+      "nome": "obter_prioridades_sessao_adaptativa",
+      "mediana_ms_por_rodada": 3928.958,
+      "min_ms": 3848.77,
+      "max_ms": 4009.146,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Pontos fracos",
+      "tipo": "method",
+      "nome": "SistemaEstudos.atualizar_estatisticas",
+      "mediana_ms_por_rodada": 3752.534,
+      "min_ms": 3746.88,
+      "max_ms": 3758.187,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Pontos fracos",
+      "tipo": "method",
+      "nome": "SistemaEstudos._atualizar_aba_estatisticas_fracos",
+      "mediana_ms_por_rodada": 3750.917,
+      "min_ms": 3745.283,
+      "max_ms": 3756.55,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Disciplinas",
+      "tipo": "global",
+      "nome": "obter_metricas_globais_nucleo",
+      "mediana_ms_por_rodada": 3186.071,
+      "min_ms": 3162.335,
+      "max_ms": 3209.807,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Histórico",
+      "tipo": "global",
+      "nome": "obter_metricas_globais_nucleo",
+      "mediana_ms_por_rodada": 3145.653,
+      "min_ms": 3135.816,
+      "max_ms": 3155.491,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando o Calendário...",
+      "tipo": "global",
+      "nome": "obter_dashboard",
+      "mediana_ms_por_rodada": 3132.77,
+      "min_ms": 3111.44,
+      "max_ms": 3154.1,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando o Dashboard...",
+      "tipo": "global",
+      "nome": "obter_metricas_globais_nucleo",
+      "mediana_ms_por_rodada": 3058.184,
+      "min_ms": 2993.064,
+      "max_ms": 3123.304,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando Estatísticas...",
+      "tipo": "method",
+      "nome": "SistemaEstudos.criar_tela_estatisticas",
+      "mediana_ms_por_rodada": 714.37,
+      "min_ms": 700.769,
+      "max_ms": 727.97,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando o Dashboard...",
+      "tipo": "method",
+      "nome": "SistemaEstudos.atualizar_gamificacao_dashboard",
+      "mediana_ms_por_rodada": 632.426,
+      "min_ms": 627.265,
+      "max_ms": 637.587,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Regularidade",
+      "tipo": "method",
+      "nome": "SistemaEstudos.atualizar_estatisticas",
+      "mediana_ms_por_rodada": 626.097,
+      "min_ms": 623.939,
+      "max_ms": 628.255,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Regularidade",
+      "tipo": "method",
+      "nome": "SistemaEstudos._atualizar_aba_regularidade",
+      "mediana_ms_por_rodada": 624.362,
+      "min_ms": 622.312,
+      "max_ms": 626.412,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Regularidade",
+      "tipo": "global",
+      "nome": "obter_snapshot_regularidade",
+      "mediana_ms_por_rodada": 623.154,
+      "min_ms": 621.088,
+      "max_ms": 625.22,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Conquistas",
+      "tipo": "global",
+      "nome": "obter_snapshot_regularidade",
+      "mediana_ms_por_rodada": 621.452,
+      "min_ms": 616.55,
+      "max_ms": 626.354,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando o Dashboard...",
+      "tipo": "global",
+      "nome": "obter_snapshot_regularidade",
+      "mediana_ms_por_rodada": 611.129,
+      "min_ms": 604.484,
+      "max_ms": 617.774,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando o Dashboard...",
+      "tipo": "global",
+      "nome": "contar_banco_erros_pendentes",
+      "mediana_ms_por_rodada": 582.709,
+      "min_ms": 569.024,
+      "max_ms": 596.395,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Mapa de domínio",
+      "tipo": "method",
+      "nome": "SistemaEstudos.filtrar_mapa_dominio",
+      "mediana_ms_por_rodada": 518.68,
+      "min_ms": 515.977,
+      "max_ms": 521.383,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando o Dashboard...",
+      "tipo": "method",
+      "nome": "SistemaEstudos.atualizar_planejamento_dashboard",
+      "mediana_ms_por_rodada": 425.241,
+      "min_ms": 411.982,
+      "max_ms": 438.5,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando o Dashboard...",
+      "tipo": "global",
+      "nome": "obter_metricas_periodo_nucleo",
+      "mediana_ms_por_rodada": 369.227,
+      "min_ms": 360.416,
+      "max_ms": 378.038,
+      "chamadas_mediana": 2.0
+    },
+    {
+      "fase": "Estatísticas · Progresso",
+      "tipo": "method",
+      "nome": "SistemaEstudos.filtrar_progresso_edital",
+      "mediana_ms_por_rodada": 287.5,
+      "min_ms": 285.708,
+      "max_ms": 289.292,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "construtor",
+      "tipo": "method",
+      "nome": "SistemaEstudos.criar_tela_inicial",
+      "mediana_ms_por_rodada": 228.887,
+      "min_ms": 227.081,
+      "max_ms": 230.692,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando o Dashboard...",
+      "tipo": "global",
+      "nome": "obter_configuracao_int",
+      "mediana_ms_por_rodada": 47.853,
+      "min_ms": 44.933,
+      "max_ms": 50.773,
+      "chamadas_mediana": 25.0
+    },
+    {
+      "fase": "Preparando Estatísticas...",
+      "tipo": "method",
+      "nome": "SistemaEstudos.criar_aba_conquistas",
+      "mediana_ms_por_rodada": 38.647,
+      "min_ms": 38.396,
+      "max_ms": 38.898,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando Estatísticas...",
+      "tipo": "method",
+      "nome": "SistemaEstudos.criar_aba_laboratorio_algoritmo",
+      "mediana_ms_por_rodada": 36.933,
+      "min_ms": 35.931,
+      "max_ms": 37.936,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando Estatísticas...",
+      "tipo": "method",
+      "nome": "SistemaEstudos.criar_aba_regularidade",
+      "mediana_ms_por_rodada": 30.965,
+      "min_ms": 30.788,
+      "max_ms": 31.142,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando Estatísticas...",
+      "tipo": "method",
+      "nome": "SistemaEstudos.criar_aba_mapa_dominio",
+      "mediana_ms_por_rodada": 22.453,
+      "min_ms": 21.692,
+      "max_ms": 23.214,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando o Dashboard...",
+      "tipo": "global",
+      "nome": "obter_resumo_foco",
+      "mediana_ms_por_rodada": 14.8,
+      "min_ms": 14.384,
+      "max_ms": 15.217,
+      "chamadas_mediana": 2.0
+    },
+    {
+      "fase": "Estatísticas · Revisões recentes",
+      "tipo": "method",
+      "nome": "SistemaEstudos.atualizar_estatisticas",
+      "mediana_ms_por_rodada": 13.94,
+      "min_ms": 13.903,
+      "max_ms": 13.976,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "construtor",
+      "tipo": "global",
+      "nome": "obter_configuracao_bool",
+      "mediana_ms_por_rodada": 13.524,
+      "min_ms": 13.344,
+      "max_ms": 13.704,
+      "chamadas_mediana": 9.0
+    },
+    {
+      "fase": "Preparando o Dashboard...",
+      "tipo": "global",
+      "nome": "obter_configuracao_bool",
+      "mediana_ms_por_rodada": 13.203,
+      "min_ms": 12.019,
+      "max_ms": 14.386,
+      "chamadas_mediana": 5.0
+    },
+    {
+      "fase": "Estatísticas · Revisões recentes",
+      "tipo": "method",
+      "nome": "SistemaEstudos._atualizar_aba_estatisticas_recentes",
+      "mediana_ms_por_rodada": 12.315,
+      "min_ms": 12.259,
+      "max_ms": 12.371,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando o Dashboard...",
+      "tipo": "global",
+      "nome": "listar_pendencias",
+      "mediana_ms_por_rodada": 10.274,
+      "min_ms": 7.485,
+      "max_ms": 13.063,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando o Dashboard...",
+      "tipo": "global",
+      "nome": "obter_estado_cobertura_revisao",
+      "mediana_ms_por_rodada": 7.043,
+      "min_ms": 6.196,
+      "max_ms": 7.891,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Progresso",
+      "tipo": "global",
+      "nome": "obter_concurso_ativo",
+      "mediana_ms_por_rodada": 6.37,
+      "min_ms": 5.643,
+      "max_ms": 7.098,
+      "chamadas_mediana": 4.0
+    },
+    {
+      "fase": "Preparando o Calendário...",
+      "tipo": "global",
+      "nome": "obter_concurso_ativo",
+      "mediana_ms_por_rodada": 6.139,
+      "min_ms": 2.913,
+      "max_ms": 9.365,
+      "chamadas_mediana": 2.0
+    },
+    {
+      "fase": "construtor",
+      "tipo": "global",
+      "nome": "obter_concurso_ativo",
+      "mediana_ms_por_rodada": 4.19,
+      "min_ms": 1.37,
+      "max_ms": 7.009,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Histórico",
+      "tipo": "global",
+      "nome": "obter_concurso_ativo",
+      "mediana_ms_por_rodada": 3.075,
+      "min_ms": 3.053,
+      "max_ms": 3.098,
+      "chamadas_mediana": 2.0
+    },
+    {
+      "fase": "Estatísticas · Tendências",
+      "tipo": "global",
+      "nome": "obter_concurso_ativo",
+      "mediana_ms_por_rodada": 2.987,
+      "min_ms": 2.937,
+      "max_ms": 3.037,
+      "chamadas_mediana": 2.0
+    },
+    {
+      "fase": "Preparando o Dashboard...",
+      "tipo": "global",
+      "nome": "obter_concurso_ativo",
+      "mediana_ms_por_rodada": 2.951,
+      "min_ms": 2.946,
+      "max_ms": 2.956,
+      "chamadas_mediana": 2.0
+    },
+    {
+      "fase": "Estatísticas · Algoritmo",
+      "tipo": "global",
+      "nome": "obter_configuracao_int",
+      "mediana_ms_por_rodada": 2.934,
+      "min_ms": 2.717,
+      "max_ms": 3.151,
+      "chamadas_mediana": 2.0
+    },
+    {
+      "fase": "Estatísticas · Algoritmo",
+      "tipo": "global",
+      "nome": "obter_concurso_ativo",
+      "mediana_ms_por_rodada": 2.916,
+      "min_ms": 2.904,
+      "max_ms": 2.928,
+      "chamadas_mediana": 2.0
+    },
+    {
+      "fase": "Preparando o Dashboard...",
+      "tipo": "global",
+      "nome": "obter_dashboard",
+      "mediana_ms_por_rodada": 2.829,
+      "min_ms": 2.332,
+      "max_ms": 3.326,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Algoritmo",
+      "tipo": "global",
+      "nome": "obter_configuracao_bool",
+      "mediana_ms_por_rodada": 2.798,
+      "min_ms": 2.787,
+      "max_ms": 2.81,
+      "chamadas_mediana": 2.0
+    },
+    {
+      "fase": "Estatísticas · Algoritmo",
+      "tipo": "global",
+      "nome": "obter_resumo_foco",
+      "mediana_ms_por_rodada": 2.606,
+      "min_ms": 1.608,
+      "max_ms": 3.604,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando Relatórios...",
+      "tipo": "global",
+      "nome": "obter_concurso_ativo",
+      "mediana_ms_por_rodada": 2.177,
+      "min_ms": 1.549,
+      "max_ms": 2.805,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando o Resumo do dia...",
+      "tipo": "global",
+      "nome": "obter_concurso_ativo",
+      "mediana_ms_por_rodada": 1.796,
+      "min_ms": 1.523,
+      "max_ms": 2.068,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Mapa de domínio",
+      "tipo": "global",
+      "nome": "obter_concurso_ativo",
+      "mediana_ms_por_rodada": 1.768,
+      "min_ms": 1.481,
+      "max_ms": 2.054,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Conquistas",
+      "tipo": "global",
+      "nome": "obter_concurso_ativo",
+      "mediana_ms_por_rodada": 1.763,
+      "min_ms": 1.525,
+      "max_ms": 2.001,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando o Resumo do dia...",
+      "tipo": "global",
+      "nome": "listar_pendencias",
+      "mediana_ms_por_rodada": 1.703,
+      "min_ms": 1.609,
+      "max_ms": 1.797,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando o Dashboard...",
+      "tipo": "global",
+      "nome": "obter_resumo_simulados_dashboard",
+      "mediana_ms_por_rodada": 1.655,
+      "min_ms": 1.559,
+      "max_ms": 1.751,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando a Central de Questões...",
+      "tipo": "global",
+      "nome": "obter_concurso_ativo",
+      "mediana_ms_por_rodada": 1.64,
+      "min_ms": 1.636,
+      "max_ms": 1.645,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Disciplinas",
+      "tipo": "global",
+      "nome": "obter_concurso_ativo",
+      "mediana_ms_por_rodada": 1.617,
+      "min_ms": 1.512,
+      "max_ms": 1.721,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Algoritmo",
+      "tipo": "global",
+      "nome": "montar_laboratorio",
+      "mediana_ms_por_rodada": 1.603,
+      "min_ms": 1.588,
+      "max_ms": 1.617,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Regularidade",
+      "tipo": "global",
+      "nome": "obter_concurso_ativo",
+      "mediana_ms_por_rodada": 1.554,
+      "min_ms": 1.493,
+      "max_ms": 1.615,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Revisões recentes",
+      "tipo": "global",
+      "nome": "obter_concurso_ativo",
+      "mediana_ms_por_rodada": 1.518,
+      "min_ms": 1.502,
+      "max_ms": 1.534,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Pontos fracos",
+      "tipo": "global",
+      "nome": "obter_concurso_ativo",
+      "mediana_ms_por_rodada": 1.509,
+      "min_ms": 1.493,
+      "max_ms": 1.525,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Finalizando a interface...",
+      "tipo": "global",
+      "nome": "obter_concurso_ativo",
+      "mediana_ms_por_rodada": 1.482,
+      "min_ms": 1.479,
+      "max_ms": 1.486,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando o Resumo do dia...",
+      "tipo": "global",
+      "nome": "obter_configuracao_int",
+      "mediana_ms_por_rodada": 1.427,
+      "min_ms": 1.345,
+      "max_ms": 1.509,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Mapa de domínio",
+      "tipo": "global",
+      "nome": "build_domain_map_snapshot",
+      "mediana_ms_por_rodada": 0.366,
+      "min_ms": 0.356,
+      "max_ms": 0.377,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Preparando o Dashboard...",
+      "tipo": "method",
+      "nome": "SistemaEstudos.atualizar_regularidade_dashboard",
+      "mediana_ms_por_rodada": 0.054,
+      "min_ms": 0.053,
+      "max_ms": 0.055,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Conquistas",
+      "tipo": "method",
+      "nome": "SistemaEstudos._atualizar_resumo_estatisticas",
+      "mediana_ms_por_rodada": 0.007,
+      "min_ms": 0.003,
+      "max_ms": 0.011,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Regularidade",
+      "tipo": "method",
+      "nome": "SistemaEstudos._atualizar_resumo_estatisticas",
+      "mediana_ms_por_rodada": 0.005,
+      "min_ms": 0.002,
+      "max_ms": 0.008,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Mapa de domínio",
+      "tipo": "method",
+      "nome": "SistemaEstudos._atualizar_resumo_estatisticas",
+      "mediana_ms_por_rodada": 0.005,
+      "min_ms": 0.002,
+      "max_ms": 0.007,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Progresso",
+      "tipo": "method",
+      "nome": "SistemaEstudos._atualizar_resumo_estatisticas",
+      "mediana_ms_por_rodada": 0.004,
+      "min_ms": 0.002,
+      "max_ms": 0.005,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Disciplinas",
+      "tipo": "method",
+      "nome": "SistemaEstudos._atualizar_resumo_estatisticas",
+      "mediana_ms_por_rodada": 0.003,
+      "min_ms": 0.002,
+      "max_ms": 0.003,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Algoritmo",
+      "tipo": "method",
+      "nome": "SistemaEstudos._atualizar_resumo_estatisticas",
+      "mediana_ms_por_rodada": 0.002,
+      "min_ms": 0.002,
+      "max_ms": 0.002,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Pontos fracos",
+      "tipo": "method",
+      "nome": "SistemaEstudos._atualizar_resumo_estatisticas",
+      "mediana_ms_por_rodada": 0.002,
+      "min_ms": 0.002,
+      "max_ms": 0.002,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Revisões recentes",
+      "tipo": "method",
+      "nome": "SistemaEstudos._atualizar_resumo_estatisticas",
+      "mediana_ms_por_rodada": 0.002,
+      "min_ms": 0.002,
+      "max_ms": 0.002,
+      "chamadas_mediana": 1.0
+    },
+    {
+      "fase": "Estatísticas · Tendências",
+      "tipo": "method",
+      "nome": "SistemaEstudos._atualizar_resumo_estatisticas",
+      "mediana_ms_por_rodada": 0.002,
+      "min_ms": 0.002,
+      "max_ms": 0.002,
+      "chamadas_mediana": 1.0
+    }
+  ],
+  "estatisticas_diagnostico": [
+    {
+      "concurso_id": 40,
+      "abas_sujas": [],
+      "resumo_sujo": false,
+      "duracoes_ms": {
+        "Resumo": 6350.874799994926,
+        "aba:Histórico": 22236.147699994035,
+        "Regularidade": 626.4067000010982,
+        "aba:Regularidade": 626.4232000030461,
+        "Conquistas": 11511.227400005737,
+        "aba:Conquistas": 11511.28439999593,
+        "aba:Algoritmo": 4031.6855999990366,
+        "Disciplinas": 6379.27839999611,
+        "aba:Disciplinas": 6379.300000000512,
+        "Mapa de domínio": 10598.420700000133,
+        "aba:Mapa de domínio": 10598.434699997597,
+        "Pontos fracos": 3756.5440999969724,
+        "aba:Pontos fracos": 3756.5655000071274,
+        "Revisões recentes": 12.253599998075515,
+        "aba:Revisões recentes": 12.275600005523302,
+        "aba:Tendências": 22062.86469999759,
+        "aba:Progresso": 10725.323300001037
+      }
+    },
+    {
+      "concurso_id": 40,
+      "abas_sujas": [],
+      "resumo_sujo": false,
+      "duracoes_ms": {
+        "Resumo": 6311.007800002699,
+        "aba:Histórico": 22059.6596999967,
+        "Regularidade": 622.3079999981564,
+        "aba:Regularidade": 622.3228000017116,
+        "Conquistas": 11615.157699998235,
+        "aba:Conquistas": 11615.190199998324,
+        "aba:Algoritmo": 3875.1181999978144,
+        "Disciplinas": 6401.111600003787,
+        "aba:Disciplinas": 6401.137900000322,
+        "Mapa de domínio": 10954.710700003488,
+        "aba:Mapa de domínio": 10954.748399999517,
+        "Pontos fracos": 3745.278299997153,
+        "aba:Pontos fracos": 3745.298999994702,
+        "Revisões recentes": 12.36550000612624,
+        "aba:Revisões recentes": 12.386599999445025,
+        "aba:Tendências": 22071.2812999991,
+        "aba:Progresso": 10604.178399997181
+      }
+    }
+  ],
+  "tabelas": [
+    {
+      "rodada": 1,
+      "tabela": "tabela_alertas_conteudo",
+      "linhas": 21,
+      "colunas": 9,
+      "celulas": 189
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_calendario",
+      "linhas": 0,
+      "colunas": 6,
+      "celulas": 0
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_estat_disciplinas",
+      "linhas": 7,
+      "colunas": 7,
+      "celulas": 49
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_evolucao_disciplinas",
+      "linhas": 5,
+      "colunas": 6,
+      "celulas": 30
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_evolucao_topicos",
+      "linhas": 20,
+      "colunas": 7,
+      "celulas": 140
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_fracos",
+      "linhas": 19,
+      "colunas": 6,
+      "celulas": 114
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_gamificacao_conquistas",
+      "linhas": 24,
+      "colunas": 5,
+      "celulas": 120
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_gamificacao_eventos",
+      "linhas": 12,
+      "colunas": 4,
+      "celulas": 48
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_mapa_disciplinas",
+      "linhas": 7,
+      "colunas": 7,
+      "celulas": 49
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_mapa_dominio",
+      "linhas": 76,
+      "colunas": 7,
+      "celulas": 532
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_minha_evolucao",
+      "linhas": 0,
+      "colunas": 6,
+      "celulas": 0
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_minha_evolucao_topicos",
+      "linhas": 0,
+      "colunas": 6,
+      "celulas": 0
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_pendentes",
+      "linhas": 7,
+      "colunas": 9,
+      "celulas": 63
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_previsao_cenarios",
+      "linhas": 3,
+      "colunas": 6,
+      "celulas": 18
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_progresso_disciplinas",
+      "linhas": 7,
+      "colunas": 7,
+      "celulas": 49
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_progresso_topicos",
+      "linhas": 76,
+      "colunas": 8,
+      "celulas": 608
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_questoes",
+      "linhas": 4048,
+      "colunas": 11,
+      "celulas": 44528
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_recentes",
+      "linhas": 20,
+      "colunas": 6,
+      "celulas": 120
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_regularidade_semanas",
+      "linhas": 8,
+      "colunas": 10,
+      "celulas": 80
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_relatorio_diario",
+      "linhas": 9,
+      "colunas": 5,
+      "celulas": 45
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_relatorio_disciplinas",
+      "linhas": 5,
+      "colunas": 6,
+      "celulas": 30
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_relatorio_estrategico_disciplinas",
+      "linhas": 7,
+      "colunas": 6,
+      "celulas": 42
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_relatorio_topicos",
+      "linhas": 18,
+      "colunas": 8,
+      "celulas": 144
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_resumo_dia",
+      "linhas": 0,
+      "colunas": 6,
+      "celulas": 0
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_sessao",
+      "linhas": 0,
+      "colunas": 7,
+      "celulas": 0
+    },
+    {
+      "rodada": 1,
+      "tabela": "tabela_topicos",
+      "linhas": 0,
+      "colunas": 9,
+      "celulas": 0
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_alertas_conteudo",
+      "linhas": 21,
+      "colunas": 9,
+      "celulas": 189
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_calendario",
+      "linhas": 0,
+      "colunas": 6,
+      "celulas": 0
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_estat_disciplinas",
+      "linhas": 7,
+      "colunas": 7,
+      "celulas": 49
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_evolucao_disciplinas",
+      "linhas": 5,
+      "colunas": 6,
+      "celulas": 30
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_evolucao_topicos",
+      "linhas": 20,
+      "colunas": 7,
+      "celulas": 140
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_fracos",
+      "linhas": 19,
+      "colunas": 6,
+      "celulas": 114
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_gamificacao_conquistas",
+      "linhas": 24,
+      "colunas": 5,
+      "celulas": 120
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_gamificacao_eventos",
+      "linhas": 12,
+      "colunas": 4,
+      "celulas": 48
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_mapa_disciplinas",
+      "linhas": 7,
+      "colunas": 7,
+      "celulas": 49
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_mapa_dominio",
+      "linhas": 76,
+      "colunas": 7,
+      "celulas": 532
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_minha_evolucao",
+      "linhas": 0,
+      "colunas": 6,
+      "celulas": 0
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_minha_evolucao_topicos",
+      "linhas": 0,
+      "colunas": 6,
+      "celulas": 0
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_pendentes",
+      "linhas": 7,
+      "colunas": 9,
+      "celulas": 63
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_previsao_cenarios",
+      "linhas": 3,
+      "colunas": 6,
+      "celulas": 18
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_progresso_disciplinas",
+      "linhas": 7,
+      "colunas": 7,
+      "celulas": 49
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_progresso_topicos",
+      "linhas": 76,
+      "colunas": 8,
+      "celulas": 608
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_questoes",
+      "linhas": 4048,
+      "colunas": 11,
+      "celulas": 44528
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_recentes",
+      "linhas": 20,
+      "colunas": 6,
+      "celulas": 120
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_regularidade_semanas",
+      "linhas": 8,
+      "colunas": 10,
+      "celulas": 80
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_relatorio_diario",
+      "linhas": 9,
+      "colunas": 5,
+      "celulas": 45
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_relatorio_disciplinas",
+      "linhas": 5,
+      "colunas": 6,
+      "celulas": 30
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_relatorio_estrategico_disciplinas",
+      "linhas": 7,
+      "colunas": 6,
+      "celulas": 42
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_relatorio_topicos",
+      "linhas": 18,
+      "colunas": 8,
+      "celulas": 144
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_resumo_dia",
+      "linhas": 0,
+      "colunas": 6,
+      "celulas": 0
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_sessao",
+      "linhas": 0,
+      "colunas": 7,
+      "celulas": 0
+    },
+    {
+      "rodada": 2,
+      "tabela": "tabela_topicos",
+      "linhas": 0,
+      "colunas": 9,
+      "celulas": 0
+    }
+  ]
+}

@@ -597,6 +597,157 @@ class StatisticsService:
         ))
         return ScopeMetrics(scope=dict(scope), period_id=period.identifier, metrics=metrics)
 
+    @classmethod
+    def _event_in_period(cls, occurred_at: str, period: StatisticalPeriod) -> bool:
+        parsed = cls._parse_datetime(occurred_at)
+        if parsed is None or parsed >= period.end_exclusive:
+            return False
+        return period.start is None or parsed >= period.start
+
+    def get_hierarchy_metrics(
+        self,
+        concurso_id: int,
+        period: StatisticalPeriod | None = None,
+        topic_ids: Iterable[int] | None = None,
+        subject_ids: Iterable[int] | None = None,
+        *,
+        attempts: list[AttemptEvent] | None = None,
+        catalog: list[CatalogItem] | None = None,
+        active_topics: list[tuple[int, int]] | None = None,
+        reviews: list[ReviewEvent] | None = None,
+        total_session_count: int | None = None,
+    ) -> dict[str, Any]:
+        """Calcula tópico, disciplina e global reutilizando uma única leitura.
+
+        É o caminho quente usado por Progresso e pelas análises temporais.
+        Evita reler as mesmas tentativas, revisões e catálogo para cada nível
+        hierárquico.
+        """
+        concurso_id = int(concurso_id)
+        period = self._period(period)
+        if attempts is None:
+            attempts = self.repository.load_attempts(period, concurso_id)
+        if catalog is None:
+            catalog = self.repository.load_active_catalog(concurso_id)
+        if active_topics is None:
+            active_topics = self.repository.load_active_topics(concurso_id)
+        if reviews is None:
+            reviews = self.repository.load_reviews(period, concurso_id)
+
+        selected_topics = (
+            {int(item) for item in topic_ids}
+            if topic_ids is not None
+            else {int(item[0]) for item in active_topics}
+        )
+        selected_subjects = (
+            {int(item) for item in subject_ids}
+            if subject_ids is not None
+            else {int(item[1]) for item in active_topics}
+        )
+
+        attempts_by_topic: dict[int, list[AttemptEvent]] = defaultdict(list)
+        attempts_by_subject: dict[int, list[AttemptEvent]] = defaultdict(list)
+        catalog_by_topic: dict[int, list[CatalogItem]] = defaultdict(list)
+        catalog_by_subject: dict[int, list[CatalogItem]] = defaultdict(list)
+        topics_by_subject: dict[int, list[tuple[int, int]]] = defaultdict(list)
+        reviews_by_topic: dict[int, list[ReviewEvent]] = defaultdict(list)
+        reviews_by_subject: dict[int, list[ReviewEvent]] = defaultdict(list)
+
+        for item in attempts:
+            if item.topic_id is not None:
+                attempts_by_topic[int(item.topic_id)].append(item)
+            if item.subject_id is not None:
+                attempts_by_subject[int(item.subject_id)].append(item)
+        for item in catalog:
+            catalog_by_topic[int(item.topic_id)].append(item)
+            catalog_by_subject[int(item.subject_id)].append(item)
+        for item in active_topics:
+            topics_by_subject[int(item[1])].append(item)
+        for item in reviews:
+            reviews_by_topic[int(item.topic_id)].append(item)
+            reviews_by_subject[int(item.subject_id)].append(item)
+
+        topic_metrics = {
+            topic_id: self._compute(
+                {"type": "topic", "topic_id": topic_id, "concurso_id": concurso_id},
+                period,
+                attempts_by_topic[topic_id],
+                catalog_by_topic[topic_id],
+                [(topic_id, 0)],
+                reviews_by_topic[topic_id],
+            )
+            for topic_id in sorted(selected_topics)
+        }
+        subject_metrics = {
+            subject_id: self._compute(
+                {"type": "subject", "subject_id": subject_id, "concurso_id": concurso_id},
+                period,
+                attempts_by_subject[subject_id],
+                catalog_by_subject[subject_id],
+                topics_by_subject[subject_id],
+                reviews_by_subject[subject_id],
+            )
+            for subject_id in sorted(selected_subjects)
+        }
+        if total_session_count is None:
+            total_session_count = self.repository.count_question_sessions(period, concurso_id)
+        global_metrics = self._compute(
+            {"type": "profile", "concurso_id": concurso_id},
+            period,
+            list(attempts),
+            list(catalog),
+            list(active_topics),
+            list(reviews),
+            total_session_count=total_session_count,
+        )
+        return {
+            "topics": topic_metrics,
+            "subjects": subject_metrics,
+            "global": global_metrics,
+        }
+
+    def get_hierarchy_metrics_periods(
+        self,
+        concurso_id: int,
+        periods: dict[str, StatisticalPeriod],
+        topic_ids: Iterable[int] | None = None,
+        subject_ids: Iterable[int] | None = None,
+    ) -> dict[str, dict[str, Any]]:
+        """Calcula vários períodos partindo de uma única leitura all-time."""
+        concurso_id = int(concurso_id)
+        all_time = StatisticalPeriods.all_time()
+        attempts_all = self.repository.load_attempts(all_time, concurso_id)
+        catalog = self.repository.load_active_catalog(concurso_id)
+        active_topics = self.repository.load_active_topics(concurso_id)
+        reviews_all = self.repository.load_reviews(all_time, concurso_id)
+
+        result: dict[str, dict[str, Any]] = {}
+        for name, raw_period in periods.items():
+            period = self._period(raw_period)
+            if period.start is None and period.end_exclusive == all_time.end_exclusive:
+                attempts = attempts_all
+                reviews = reviews_all
+            else:
+                attempts = [
+                    item for item in attempts_all
+                    if self._event_in_period(item.occurred_at, period)
+                ]
+                reviews = [
+                    item for item in reviews_all
+                    if self._event_in_period(item.occurred_at, period)
+                ]
+            result[str(name)] = self.get_hierarchy_metrics(
+                concurso_id,
+                period,
+                topic_ids,
+                subject_ids,
+                attempts=attempts,
+                catalog=catalog,
+                active_topics=active_topics,
+                reviews=reviews,
+            )
+        return result
+
     def get_topic_metrics(
         self,
         topic_id: int,

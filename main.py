@@ -32414,7 +32414,7 @@ class SistemaEstudos(QMainWindow):
                 if callable(notificar):
                     notificar(nome, indice, total)
                 self.abas_estatisticas.setCurrentIndex(indice)
-                self.atualizar_estatisticas(forcar=(indice == 0))
+                self.atualizar_estatisticas(forcar=False)
                 QApplication.processEvents(QEventLoop.AllEvents, 30)
         finally:
             if 0 <= original < self.abas_estatisticas.count():
@@ -39725,7 +39725,11 @@ class SistemaEstudos(QMainWindow):
         # de aprendizagem, sem depender da abertura do Banco de Questões.
         metricas_nucleo = {}
         try:
-            nucleo = obter_metricas_globais_nucleo(concurso_id)
+            nucleo = self.cache_analitico.obter(
+                f"nucleo:global:{int(concurso_id)}:all",
+                lambda: obter_metricas_globais_nucleo(concurso_id),
+                ttl=30,
+            )
             metricas_nucleo = nucleo.get("metrics", {})
 
             def valor_nucleo(chave, padrao=None):
@@ -40059,9 +40063,14 @@ class SistemaEstudos(QMainWindow):
         # V3. Assim Dashboard, Revisão Inteligente, Treino Adaptativo e o Motor
         # de Recomendação deixam de manter critérios de prioridade paralelos.
         try:
+            prioridades_dashboard = self.cache_analitico.obter(
+                f"adaptativas:{int(concurso_id)}",
+                lambda: list(obter_prioridades_sessao_adaptativa(concurso_id) or []),
+                ttl=30,
+            )
             ranking_fila_v3 = {
                 int(item["topico_id"]): item
-                for item in obter_prioridades_sessao_adaptativa(concurso_id)
+                for item in prioridades_dashboard
                 if item.get("topico_id") not in (None, "")
             }
         except Exception:
@@ -59537,7 +59546,11 @@ class SistemaEstudos(QMainWindow):
 
         def carregar():
             disciplinas = obter_estatisticas_disciplinas(hoje)
-            metricas_globais = obter_metricas_globais_nucleo(concurso_id)
+            metricas_globais = self.cache_analitico.obter(
+                f"nucleo:global:{int(concurso_id)}:all",
+                lambda: obter_metricas_globais_nucleo(concurso_id),
+                ttl=30,
+            )
             return disciplinas, metricas_globais
 
         return self.cache_analitico.obter(chave, carregar, ttl=12)
@@ -62382,6 +62395,7 @@ splash.atualizar(
 janela = SistemaEstudos(pre_carregar_startup=True)
 
 preload_completo = True
+janela.cache_analitico.iniciar_fase_estavel()
 try:
     janela.precarregar_inicializacao_completa(splash.atualizar)
 except Exception as erro:
@@ -62396,6 +62410,8 @@ except Exception as erro:
     janela._pre_carregar_startup = False
     janela._agendar_atualizacao_dashboard(forcar=True)
     janela._agendar_backup_abertura()
+finally:
+    janela.cache_analitico.finalizar_fase_estavel()
 
 if preload_completo:
     splash.finalizar()

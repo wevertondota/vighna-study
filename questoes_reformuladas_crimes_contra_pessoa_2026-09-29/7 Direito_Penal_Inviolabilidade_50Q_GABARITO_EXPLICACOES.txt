@@ -1,0 +1,922 @@
+VIGHNA — QUESTÕES
+DISCIPLINA: Direito Penal
+TÍTULO: Crimes contra a pessoa
+CAPÍTULO: Inviolabilidade do domicílio, da correspondência e dos segredos
+FONTE: Texto-base fornecido pelo usuário
+QUANTIDADE: 50
+ALTERNATIVAS: A-E
+
+QUESTÃO 1
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de domicílio, a forma básica exige necessariamente emprego de violência contra pessoa ou coisa.
+B) Na violação de correspondência, a figura básica alcança qualquer correspondência alheia, ainda que esteja aberta.
+C) Na divulgação de segredo, exige-se divulgação sem justa causa de documento particular ou correspondência confidencial cuja revelação possa causar dano.
+D) Na violação de segredo profissional, basta que o segredo tenha chegado casualmente ao conhecimento do agente, sem relação com sua atividade.
+E) Na invasão de dispositivo informático, o equipamento precisa estar conectado à internet no momento da invasão.
+
+GABARITO: C
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — A violência não é requisito da forma básica; ela aparece como circunstância de agravamento.
+B) INCORRETA — A figura básica exige correspondência fechada dirigida a outrem.
+C) CORRETA — A divulgação deve ser sem justa causa e recair sobre documento particular ou correspondência confidencial apta a causar dano.
+D) INCORRETA — O segredo deve ser conhecido em razão de função, ministério, ofício ou profissão.
+E) INCORRETA — O dispositivo pode estar conectado ou não à rede de computadores.
+
+QUESTÃO 2
+Com base no texto-base, assinale a alternativa correta.
+
+A) Entrar ou permanecer clandestina ou astuciosamente em casa alheia pode configurar violação de domicílio.
+B) Apoderar-se de correspondência alheia somente é punível quando ela estiver fechada.
+C) A correspondência comercial só é protegida quando pertencente a estabelecimento exclusivamente comercial, não industrial.
+D) A divulgação de informação sigilosa da Administração exige que ela esteja armazenada em sistema informatizado.
+E) A invasão de dispositivo informático exige sempre destruição efetiva de dados para consumar-se.
+
+GABARITO: A
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) CORRETA — Entrar ou permanecer clandestina ou astuciosamente em casa alheia pode configurar a violação.
+B) INCORRETA — A sonegação ou destruição alcança correspondência alheia mesmo que não esteja fechada.
+C) INCORRETA — A figura alcança estabelecimento comercial ou industrial.
+D) INCORRETA — A informação sigilosa ou reservada pode estar ou não em sistema ou banco de dados.
+E) INCORRETA — A invasão não exige destruição efetiva; basta a conduta com uma das finalidades previstas.
+
+QUESTÃO 3
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de domicílio, a vontade contrária deve ser sempre expressa, pois oposição tácita não produz relevância penal.
+B) Na violação de comunicação, impedir conversação telefônica entre outras pessoas não integra as condutas equiparadas.
+C) Na divulgação de segredo, somente o proprietário do documento pode praticar a conduta típica.
+D) Na invasão de dispositivo, obter, adulterar ou destruir dados ou informações sem autorização pode integrar a figura básica.
+E) Na violação de segredo profissional, a pena básica é reclusão de três meses a um ano.
+
+GABARITO: D
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — A oposição de quem de direito pode ser expressa ou tácita.
+B) INCORRETA — Impedir as comunicações ou conversações protegidas integra as condutas equiparadas.
+C) INCORRETA — O agente pode ser destinatário ou detentor do conteúdo divulgado.
+D) CORRETA — Obter, adulterar ou destruir dados ou informações sem autorização pode integrar a figura básica.
+E) INCORRETA — A pena é detenção de três meses a um ano ou multa, não reclusão.
+
+QUESTÃO 4
+Com base no texto-base, assinale a alternativa correta.
+
+A) A violação de domicílio em lugar ermo recebe a mesma pena da forma básica.
+B) Devassar indevidamente correspondência fechada dirigida a outrem é punido com detenção de um a seis meses ou multa.
+C) Na correspondência comercial, revelar o conteúdo a estranho só é punível se houver prejuízo econômico comprovado.
+D) A divulgação de segredo profissional exige segredo conhecido exclusivamente em razão de profissão regulamentada.
+E) Na invasão de dispositivo, a autorização expressa do usuário é irrelevante e não afasta a figura básica.
+
+GABARITO: B
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Lugar ermo é circunstância que agrava a violação de domicílio.
+B) CORRETA — Devassar indevidamente correspondência fechada dirigida a outrem sujeita o agente a detenção de um a seis meses ou multa.
+C) INCORRETA — A correspondência comercial não exige prejuízo econômico comprovado para a figura descrita.
+D) INCORRETA — O segredo pode ser conhecido por função, ministério, ofício ou profissão, não apenas por profissão regulamentada.
+E) INCORRETA — A autorização expressa do usuário afasta o requisito de ausência de autorização.
+
+QUESTÃO 5
+Com base no texto-base, assinale a alternativa correta.
+
+A) A entrada diurna em casa alheia para diligência legal continua criminosa mesmo quando observadas as formalidades exigidas.
+B) Na violação de correspondência, dano a outrem reduz a pena em razão do menor desvalor da conduta.
+C) A correspondência comercial pode ser desviada por qualquer terceiro estranho ao estabelecimento.
+D) Na divulgação de informação sigilosa da Administração, a pena é apenas detenção, sem multa.
+E) Na invasão de dispositivo informático, prejuízo econômico decorrente da invasão aumenta a pena de um terço a dois terços.
+
+GABARITO: E
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Durante o dia, a entrada para prisão ou diligência não constitui crime quando observadas as formalidades legais.
+B) INCORRETA — O dano a outrem aumenta a pena de violação de correspondência em metade.
+C) INCORRETA — O sujeito ativo é sócio ou empregado que abusa dessa condição.
+D) INCORRETA — A pena é detenção de um a quatro anos e multa.
+E) CORRETA — Prejuízo econômico decorrente da invasão aumenta a pena de um terço a dois terços.
+
+QUESTÃO 6
+Com base no texto-base, assinale a alternativa correta.
+
+A) Durante a noite, a entrada em casa alheia para efetuar qualquer diligência é sempre lícita, desde que exista interesse público.
+B) Na comunicação telegráfica ou radioelétrica, somente a divulgação indevida é punível, não a transmissão a terceiro.
+C) Na violação de segredo profissional, o segredo deve ser conhecido em razão de função, ministério, ofício ou profissão.
+D) Na invasão de dispositivo, produzir programa destinado a permitir a invasão é fato atípico enquanto não houver invasão concreta.
+E) Na divulgação de segredo, a persecução é sempre incondicionada, independentemente de prejuízo à Administração.
+
+GABARITO: C
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — A entrada noturna não é genericamente liberada para qualquer diligência oficial.
+B) INCORRETA — A transmissão indevida a outrem também é expressamente abrangida.
+C) CORRETA — O segredo profissional deve ser conhecido em razão de função, ministério, ofício ou profissão.
+D) INCORRETA — Produzir programa destinado a permitir a invasão é punível mesmo sem invasão concreta posterior.
+E) INCORRETA — A regra é representação; havendo prejuízo à Administração, a ação torna-se incondicionada.
+
+QUESTÃO 7
+Com base no texto-base, assinale a alternativa correta.
+
+A) Não há violação de domicílio quando, a qualquer hora, a entrada ocorre porque crime está sendo praticado na casa ou está na iminência de sê-lo.
+B) Na violação de correspondência, instalar aparelho radioelétrico sem observar disposição legal depende de dano efetivo para ser punível.
+C) Na correspondência comercial, apenas o sócio pode praticar a conduta, ficando o empregado fora do tipo.
+D) Na invasão de dispositivo, o consentimento tácito do usuário é juridicamente irrelevante e nunca afasta a figura básica.
+E) Na violação de segredo profissional, a persecução penal independe de representação.
+
+GABARITO: A
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) CORRETA — A entrada é lícita a qualquer hora quando há crime em curso ou na iminência de ocorrer.
+B) INCORRETA — A instalação irregular de estação ou aparelho radioelétrico não exige dano efetivo.
+C) INCORRETA — O empregado também pode ser sujeito ativo da correspondência comercial.
+D) INCORRETA — A autorização tácita do usuário é relevante e afasta a ausência de autorização.
+E) INCORRETA — A violação de segredo profissional somente se procede mediante representação.
+
+QUESTÃO 8
+Com base no texto-base, assinale a alternativa correta.
+
+A) A expressão casa exclui todo aposento ocupado de habitação coletiva, ainda que reservado ao morador.
+B) No abuso de função relacionado à correspondência, apenas o serviço postal é abrangido, ficando o serviço telefônico excluído.
+C) Na divulgação de segredo, a existência de justa causa não interfere na tipicidade da divulgação.
+D) Na invasão de dispositivo, instalar vulnerabilidades com o objetivo de obter vantagem ilícita pode integrar a figura básica.
+E) Na correspondência comercial, a pena básica é reclusão de três meses a dois anos.
+
+GABARITO: D
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Aposento ocupado de habitação coletiva integra o conceito penal de casa.
+B) INCORRETA — O abuso de função pode ocorrer em serviço postal, telegráfico, radioelétrico ou telefônico.
+C) INCORRETA — A existência de justa causa afasta a figura de divulgação de segredo.
+D) CORRETA — Instalar vulnerabilidades para obter vantagem ilícita pode integrar a invasão de dispositivo.
+E) INCORRETA — A pena da correspondência comercial é detenção de três meses a dois anos.
+
+QUESTÃO 9
+Com base no texto-base, assinale a alternativa correta.
+
+A) Compartimento não aberto ao público onde alguém exerce profissão nunca é considerado casa para fins penais.
+B) Na violação de correspondência, impedir comunicação telegráfica, radioelétrica ou conversação telefônica referida na norma é conduta equiparada.
+C) A divulgação de informação reservada da Administração é punida com detenção de um a seis meses ou multa.
+D) Na invasão de dispositivo, o oferecimento de programa destinado à invasão só é punível quando realizado mediante pagamento.
+E) Na violação de segredo profissional, a revelação é típica mesmo quando não possui aptidão para causar dano.
+
+GABARITO: B
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Compartimento não aberto ao público onde alguém exerce profissão ou atividade integra o conceito de casa.
+B) CORRETA — Impedir comunicação ou conversação protegida é conduta equiparada à violação de correspondência.
+C) INCORRETA — A divulgação de informação sigilosa ou reservada da Administração é punida com detenção de um a quatro anos e multa.
+D) INCORRETA — Oferecer programa destinado à invasão é punível independentemente de pagamento.
+E) INCORRETA — A revelação deve ser capaz de produzir dano a outrem.
+
+QUESTÃO 10
+Com base no texto-base, assinale a alternativa correta.
+
+A) Hospedaria aberta ao público é sempre considerada casa em sua integralidade, sem qualquer ressalva para aposento ocupado.
+B) Na violação de correspondência, a sonegação só é punível quando abrange integralmente a correspondência.
+C) Na correspondência comercial, o abuso da condição de empregado não integra a figura típica.
+D) Na divulgação de segredo, prejuízo à Administração Pública mantém a necessidade de representação.
+E) Na invasão de dispositivo, obter conteúdo de comunicações eletrônicas privadas pode levar à reclusão de dois a cinco anos e multa.
+
+GABARITO: E
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Hospedaria aberta não integra integralmente o conceito de casa; há ressalva para aposento ocupado.
+B) INCORRETA — A sonegação pode ser total ou parcial.
+C) INCORRETA — O empregado pode praticar a correspondência comercial abusando dessa condição.
+D) INCORRETA — Havendo prejuízo para a Administração Pública, a ação penal é incondicionada.
+E) CORRETA — A obtenção de comunicações eletrônicas privadas pode levar à reclusão de dois a cinco anos e multa.
+
+QUESTÃO 11
+Com base no texto-base, assinale a alternativa correta.
+
+A) Taverna e casa de jogo são abrangidas pela expressão casa enquanto estiverem abertas ao público.
+B) Na violação de correspondência, a pena por abuso de função em serviço telefônico é de detenção de três meses a dois anos.
+C) Sócio ou empregado de estabelecimento comercial ou industrial pode praticar o crime ao desviar, sonegar, subtrair ou suprimir correspondência.
+D) Na divulgação de segredo profissional, o simples conhecimento do segredo já consuma o crime, ainda que nada seja revelado.
+E) Na invasão de dispositivo, o controle remoto não autorizado do equipamento invadido permanece sujeito apenas à pena básica.
+
+GABARITO: C
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Taverna e casa de jogo não se compreendem na expressão casa.
+B) INCORRETA — O abuso funcional em serviço telefônico é punido com detenção de um a três anos.
+C) CORRETA — Sócio ou empregado pode responder por desviar, sonegar, subtrair ou suprimir correspondência abusando dessa condição.
+D) INCORRETA — É necessária revelação do segredo; mero conhecimento não basta.
+E) INCORRETA — Controle remoto não autorizado obtido pela invasão integra a forma de resultado agravado.
+
+QUESTÃO 12
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de domicílio com emprego de violência, a pena é detenção de seis meses a dois anos, além da pena da violência.
+B) Na violação de correspondência, a existência de dano a outrem é requisito para que a própria figura básica se configure.
+C) Na divulgação de segredo, somente o proprietário do documento particular pode praticar a figura básica.
+D) Na invasão de dispositivo, obter segredo comercial pela invasão é irrelevante para a faixa de pena.
+E) Na correspondência comercial, a ação penal é sempre pública incondicionada, ainda que não exista representação.
+
+GABARITO: A
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) CORRETA — Com emprego de violência, aplica-se detenção de seis meses a dois anos, além da pena correspondente à violência.
+B) INCORRETA — O dano não é requisito da figura básica; quando existe, aumenta a pena.
+C) INCORRETA — O sujeito ativo pode ser destinatário ou detentor, não apenas proprietário.
+D) INCORRETA — A obtenção de segredo comercial pela invasão integra forma mais grave.
+E) INCORRETA — A correspondência comercial somente se procede mediante representação.
+
+QUESTÃO 13
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de domicílio, agir durante a noite exclui a possibilidade de forma qualificada quando não há violência.
+B) Na violação de comunicação, utilizar abusivamente conversa telefônica própria com terceiro é a hipótese expressamente prevista.
+C) Na divulgação de informação sigilosa da Administração, a ação penal depende sempre de representação, mesmo havendo prejuízo público.
+D) Na invasão de dispositivo, a obtenção de segredo comercial ou industrial pode enquadrar a forma de resultado especialmente agravado.
+E) Na violação de segredo profissional, justa causa para revelar o segredo não possui relevância jurídica.
+
+GABARITO: D
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — A prática durante a noite é circunstância qualificadora, mesmo sem violência.
+B) INCORRETA — A norma protege conversação telefônica entre outras pessoas, não conversa própria do agente.
+C) INCORRETA — Se houver prejuízo à Administração Pública, a ação penal é incondicionada.
+D) CORRETA — Obter segredo comercial ou industrial pela invasão pode enquadrar a forma de resultado agravado.
+E) INCORRETA — A justa causa afasta a violação de segredo profissional.
+
+QUESTÃO 14
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de domicílio, o emprego de arma só agrava a pena quando houver disparo.
+B) Quem se apossa indevidamente de correspondência alheia e a destrói pode receber a mesma pena da violação de correspondência.
+C) Na correspondência comercial, apenas correspondência fechada pode ser objeto das condutas previstas.
+D) Na invasão de dispositivo, transmitir a terceiro dados obtidos na forma agravada reduz a pena se não houver vantagem econômica.
+E) Na divulgação de segredo, documento público e documento particular são tratados indistintamente na figura básica.
+
+GABARITO: B
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — O emprego de arma é circunstância qualificadora sem exigência de disparo.
+B) CORRETA — Apossar-se indevidamente de correspondência alheia e destruí-la recebe a mesma pena da violação básica.
+C) INCORRETA — A correspondência comercial não se limita a correspondência fechada.
+D) INCORRETA — Transmitir a terceiro dados obtidos na forma agravada pode aumentar, e não reduzir, a pena.
+E) INCORRETA — A figura básica refere-se a documento particular ou correspondência confidencial.
+
+QUESTÃO 15
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de domicílio, a atuação de duas pessoas jamais interfere na pena se não houver arma.
+B) Na violação de correspondência, a instalação irregular de aparelho radioelétrico exige representação para o processo penal.
+C) Na correspondência comercial, a revelação de conteúdo a estranho exige que o estabelecimento seja apenas industrial.
+D) Na divulgação de informação sigilosa da Administração, apenas informações inseridas em banco de dados são protegidas.
+E) Na invasão agravada, divulgar, comercializar ou transmitir a terceiro, a qualquer título, os dados obtidos pode aumentar a pena de um a dois terços.
+
+GABARITO: E
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — O concurso de duas ou mais pessoas é circunstância qualificadora própria.
+B) INCORRETA — A instalação ou uso radioelétrico irregular está entre as exceções à exigência de representação.
+C) INCORRETA — A figura alcança estabelecimento comercial ou industrial.
+D) INCORRETA — A informação sigilosa ou reservada pode estar ou não em banco de dados.
+E) CORRETA — Divulgação, comercialização ou transmissão a terceiro dos dados obtidos pode aumentar a pena de um a dois terços.
+
+QUESTÃO 16
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de domicílio, permanecer contra a vontade de quem de direito só é punível quando a entrada inicial também foi clandestina.
+B) Na violação de correspondência, a ação penal é sempre condicionada à representação, inclusive no abuso de função postal.
+C) Na correspondência comercial, a pena prevista para a forma básica é detenção de três meses a dois anos.
+D) Na violação de segredo profissional, a revelação somente é típica quando produz dano efetivo a outrem.
+E) Na invasão de dispositivo, a causa de aumento por vítima especialmente protegida é fixa em dois terços.
+
+GABARITO: C
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — A permanência contra a vontade de quem de direito pode ser típica mesmo que a entrada inicial não tenha sido clandestina.
+B) INCORRETA — Há exceções à representação, inclusive no abuso funcional.
+C) CORRETA — A correspondência comercial é punida com detenção de três meses a dois anos.
+D) INCORRETA — Basta que a revelação possa produzir dano; dano efetivo não é indispensável.
+E) INCORRETA — O aumento para vítimas especialmente protegidas varia de um terço à metade.
+
+QUESTÃO 17
+Com base no texto-base, assinale a alternativa correta.
+
+A) Para fins de violação de domicílio, qualquer compartimento efetivamente habitado integra a expressão casa.
+B) Na violação de correspondência, dano a outrem transforma a pena em reclusão de um a três anos.
+C) Na divulgação de segredo, quem não é destinatário nem detentor do conteúdo pode praticar a figura básica nas mesmas condições.
+D) Na invasão de dispositivo, a venda de programa destinado à invasão não é punível se o vendedor não realizar pessoalmente a invasão.
+E) Na violação de segredo profissional, a ação penal é pública incondicionada.
+
+GABARITO: A
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) CORRETA — Qualquer compartimento efetivamente habitado integra o conceito de casa.
+B) INCORRETA — O dano a outrem aumenta a pena em metade; não converte a pena em reclusão de um a três anos.
+C) INCORRETA — A figura exige que o agente seja destinatário ou detentor.
+D) INCORRETA — Vender programa destinado à invasão é conduta punível por si.
+E) INCORRETA — A violação de segredo profissional depende de representação.
+
+QUESTÃO 18
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de domicílio, aposento ocupado em habitação coletiva nunca integra o conceito de casa.
+B) Na violação de correspondência, instalar estação ou aparelho radioelétrico irregular só é punível quando houver dano a outrem.
+C) Na divulgação de informação sigilosa da Administração, a pena é de detenção de três meses a um ano ou multa.
+D) Produzir, oferecer, distribuir, vender ou difundir dispositivo ou programa para permitir invasão recebe a mesma pena da invasão básica.
+E) Na correspondência comercial, somente o desvio total da correspondência pode configurar o crime.
+
+GABARITO: D
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Aposento ocupado de habitação coletiva integra o conceito de casa.
+B) INCORRETA — A instalação ou uso radioelétrico irregular não depende de dano a outrem.
+C) INCORRETA — A divulgação de informação sigilosa da Administração é punida com detenção de um a quatro anos e multa.
+D) CORRETA — Produzir, oferecer, distribuir, vender ou difundir dispositivo ou programa para permitir invasão recebe a pena da figura básica.
+E) INCORRETA — A correspondência comercial pode envolver desvio total ou parcial.
+
+QUESTÃO 19
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de domicílio, compartimento profissional aberto ao público é expressamente equiparado a casa em qualquer circunstância.
+B) Abuso de função em serviço postal, telegráfico, radioelétrico ou telefônico é punido com detenção de um a três anos.
+C) Na divulgação de segredo, a possibilidade de dano a outrem é dispensável na figura básica.
+D) Na invasão de dispositivo, prejuízo econômico faz a pena aumentar apenas em metade.
+E) Na violação de segredo profissional, o segredo deve ser necessariamente de natureza econômica.
+
+GABARITO: B
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — O compartimento profissional só integra casa quando não está aberto ao público.
+B) CORRETA — O abuso de função em serviço postal, telegráfico, radioelétrico ou telefônico é punido com detenção de um a três anos.
+C) INCORRETA — A divulgação deve ser apta a produzir dano a outrem.
+D) INCORRETA — O prejuízo econômico gera aumento de um terço a dois terços.
+E) INCORRETA — O segredo profissional não precisa ter conteúdo econômico.
+
+QUESTÃO 20
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de domicílio, hospedaria aberta é sempre protegida integralmente como casa, inclusive áreas comuns abertas ao público.
+B) Na violação de correspondência, a divulgação de comunicação radioelétrica dirigida a terceiro é permitida quando não houver lucro.
+C) Na correspondência comercial, subtrair correspondência exige que o agente seja estranho ao estabelecimento.
+D) Na divulgação de segredo profissional, a multa prevista varia de trezentos mil réis a dois contos de réis.
+E) Na invasão de dispositivo, o equipamento de uso alheio pode estar conectado ou não a uma rede de computadores.
+
+GABARITO: E
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Hospedaria aberta não é protegida integralmente como casa, ressalvado o aposento ocupado.
+B) INCORRETA — A divulgação indevida de comunicação radioelétrica dirigida a terceiro pode ser punível independentemente de lucro.
+C) INCORRETA — O sujeito ativo é sócio ou empregado que abusa dessa condição.
+D) INCORRETA — A multa do segredo profissional varia de um a dez contos de réis.
+E) CORRETA — O dispositivo de uso alheio pode estar conectado ou não à rede de computadores.
+
+QUESTÃO 21
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de domicílio, casa de jogo aberta ao público integra a expressão casa para todos os efeitos penais.
+B) Na violação de correspondência, a pena por abuso de função em serviço telegráfico é detenção de seis meses a dois anos.
+C) Na divulgação de segredo, o agente pode ser destinatário ou detentor do documento particular ou da correspondência confidencial.
+D) Na invasão de dispositivo, a autorização expressa do usuário é irrelevante quando o objetivo é obter dados.
+E) Na correspondência comercial, a representação da vítima é dispensável.
+
+GABARITO: C
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Casa de jogo não se compreende na expressão casa.
+B) INCORRETA — O abuso funcional em serviço telegráfico é punido com detenção de um a três anos.
+C) CORRETA — O agente da divulgação pode ser destinatário ou detentor do documento particular ou correspondência confidencial.
+D) INCORRETA — A autorização expressa afasta o requisito de invasão sem autorização.
+E) INCORRETA — A correspondência comercial depende de representação.
+
+QUESTÃO 22
+Com base no texto-base, assinale a alternativa correta.
+
+A) Informação sigilosa ou reservada da Administração pode estar ou não contida em sistema de informações ou banco de dados.
+B) Na violação de domicílio, a entrada diurna para diligência legal dispensa qualquer formalidade quando houver ordem de autoridade.
+C) Na violação de correspondência, a sonegação de correspondência alheia só é punível se ela estiver fechada.
+D) Na invasão de dispositivo, o aumento por prejuízo econômico varia de metade ao dobro.
+E) Na violação de segredo profissional, somente segredo conhecido em razão de profissão pode ser protegido.
+
+GABARITO: A
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) CORRETA — A informação sigilosa ou reservada pode estar ou não em sistema de informações ou banco de dados.
+B) INCORRETA — A diligência diurna exige observância das formalidades legais.
+C) INCORRETA — A sonegação alcança correspondência alheia ainda que não esteja fechada.
+D) INCORRETA — O aumento por prejuízo econômico é de um terço a dois terços.
+E) INCORRETA — O segredo pode ser conhecido em razão de função, ministério, ofício ou profissão.
+
+QUESTÃO 23
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na invasão de dispositivo, a pena básica é detenção de um a quatro anos e multa.
+B) Na violação de domicílio, a qualificadora por duas ou mais pessoas exige pelo menos três agentes.
+C) Na divulgação de segredo, a ação penal é incondicionada mesmo quando não existe prejuízo à Administração Pública.
+D) Na violação de segredo profissional, a revelação sem justa causa deve ser de segredo conhecido pela atividade e apto a causar dano.
+E) Na correspondência comercial, revelar conteúdo ao próprio destinatário configura necessariamente revelação a estranho.
+
+GABARITO: D
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — A pena básica da invasão é reclusão de um a quatro anos e multa.
+B) INCORRETA — A forma qualificada já pode ocorrer com duas pessoas.
+C) INCORRETA — Na divulgação de segredo particular ou confidencial, a regra é representação.
+D) CORRETA — A revelação deve ser sem justa causa, decorrer da atividade e ser apta a produzir dano.
+E) INCORRETA — Revelação a estranho não se confunde com revelar ao próprio destinatário.
+
+QUESTÃO 24
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de correspondência, impedir a comunicação referida na norma exige dano econômico para ser punível.
+B) Na invasão de dispositivo informático, a forma básica é punida com reclusão de um a quatro anos, cumulada com multa.
+C) Na violação de domicílio, o emprego de arma torna irrelevante a pena correspondente à violência eventualmente praticada.
+D) Na divulgação de informação sigilosa da Administração, a figura só existe quando a informação é classificada como secreta em sentido estrito.
+E) Na violação de segredo profissional, a representação é dispensada quando o segredo decorre de função pública.
+
+GABARITO: B
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Impedir a comunicação protegida é punível sem exigência de dano econômico.
+B) CORRETA — A invasão básica é punida com reclusão de um a quatro anos e multa.
+C) INCORRETA — Havendo violência, aplica-se também a pena correspondente a ela.
+D) INCORRETA — A norma abrange informação sigilosa ou reservada definida em lei, não apenas a classificada como secreta.
+E) INCORRETA — A violação de segredo profissional depende de representação.
+
+QUESTÃO 25
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de domicílio, entrar contra vontade tácita não configura o crime se não houver oposição verbal.
+B) Na violação de correspondência, a pena de abuso de função postal é reclusão de um a quatro anos.
+C) Na correspondência comercial, o desvio parcial da correspondência não é punível.
+D) Na divulgação de segredo, a existência de justa causa não afasta a tipicidade quando o conteúdo é confidencial.
+E) Na invasão, obter informação sigilosa definida em lei pode levar à reclusão de dois a cinco anos e multa.
+
+GABARITO: E
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — A vontade contrária pode ser tácita.
+B) INCORRETA — O abuso de função postal é punido com detenção de um a três anos.
+C) INCORRETA — Desvio parcial também pode configurar correspondência comercial.
+D) INCORRETA — A justa causa afasta a figura de divulgação de segredo.
+E) CORRETA — Obter informação sigilosa definida em lei pode levar à reclusão de dois a cinco anos e multa.
+
+QUESTÃO 26
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de domicílio, o lugar ermo só qualifica a conduta quando o fato ocorre durante a noite.
+B) Na violação de correspondência, instalar aparelho radioelétrico sem observar disposição legal exige representação para prosseguimento.
+C) Divulgar sem justa causa informação sigilosa definida em lei da Administração Pública é punido com detenção de um a quatro anos e multa.
+D) Na invasão de dispositivo, o prejuízo econômico substitui a pena básica por reclusão de dois a cinco anos.
+E) Na violação de segredo profissional, o segredo protegido deve possuir necessariamente conteúdo econômico.
+
+GABARITO: C
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Lugar ermo qualifica a conduta independentemente de ser noite.
+B) INCORRETA — A instalação ou uso radioelétrico irregular dispensa representação.
+C) CORRETA — Divulgar sem justa causa informação sigilosa definida em lei da Administração é punido com detenção de um a quatro anos e multa.
+D) INCORRETA — Prejuízo econômico aumenta a pena de um terço a dois terços; não substitui a pena básica pela faixa de dois a cinco anos.
+E) INCORRETA — O segredo profissional não precisa ter conteúdo econômico.
+
+QUESTÃO 27
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na invasão de dispositivo, a obtenção de controle remoto não autorizado do equipamento invadido pode enquadrar a forma de resultado agravado.
+B) Na violação de domicílio, qualquer habitação coletiva aberta ao público é sempre considerada casa em todas as suas áreas.
+C) Na violação de correspondência, o agente que utiliza abusivamente comunicação radioelétrica dirigida a terceiro pratica fato atípico.
+D) Na correspondência comercial, apenas sócio administrador pode praticar o delito.
+E) Na divulgação de segredo, a divulgação precisa causar dano efetivo, não bastando aptidão para produzi-lo.
+
+GABARITO: A
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) CORRETA — O controle remoto não autorizado do dispositivo invadido integra a forma de resultado agravado.
+B) INCORRETA — Habitação coletiva aberta não é considerada casa em todas as áreas; o aposento ocupado é ressalvado.
+C) INCORRETA — Utilizar abusivamente comunicação radioelétrica dirigida a terceiro é conduta expressamente prevista.
+D) INCORRETA — Sócio ou empregado pode praticar a correspondência comercial.
+E) INCORRETA — Basta que a divulgação possa produzir dano; dano efetivo não é indispensável.
+
+QUESTÃO 28
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na invasão de dispositivo, comercializar dados obtidos na forma agravada gera aumento fixo de metade.
+B) Na violação de domicílio, a entrada para prisão durante o dia é lícita mesmo sem observância das formalidades legais.
+C) Na divulgação de segredo profissional, segredo conhecido em razão de ministério está fora da proteção penal.
+D) Na correspondência comercial, sócio ou empregado que revela a estranho o conteúdo da correspondência pode praticar o crime.
+E) Na violação de correspondência, a comunicação telefônica entre outras pessoas não é protegida.
+
+GABARITO: D
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — A comercialização dos dados obtidos pode aumentar a pena de um a dois terços, não em metade fixa.
+B) INCORRETA — A prisão diurna exige observância das formalidades legais.
+C) INCORRETA — Segredo conhecido em razão de ministério está protegido.
+D) CORRETA — Sócio ou empregado que revela a estranho o conteúdo da correspondência pode praticar o crime.
+E) INCORRETA — A conversação telefônica entre outras pessoas é expressamente protegida.
+
+QUESTÃO 29
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na invasão de dispositivo, a causa de aumento por vítima especialmente protegida varia de dois terços ao dobro.
+B) Na divulgação de segredo particular ou confidencial, a persecução penal depende de representação.
+C) Na sonegação ou destruição de correspondência, a destruição parcial é atípica, pois somente a eliminação integral é abrangida.
+D) Na violação de segredo profissional, o conhecimento do segredo em razão de ofício não é abrangido.
+E) Na violação de correspondência, transmitir a outrem comunicação telegráfica dirigida a terceiro só é punível se houver vantagem patrimonial.
+
+GABARITO: B
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — O aumento por vítima especialmente protegida varia de um terço à metade.
+B) CORRETA — A divulgação de segredo particular ou confidencial somente se procede mediante representação.
+C) INCORRETA — A destruição pode ser total ou parcial.
+D) INCORRETA — Segredo conhecido em razão de ofício está protegido.
+E) INCORRETA — A transmissão indevida de comunicação telegráfica não exige vantagem patrimonial.
+
+QUESTÃO 30
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de correspondência, correspondência alheia aberta jamais pode ser objeto de sonegação ou destruição.
+B) Na violação de domicílio, emprego de violência exclui a forma qualificada se não houver arma.
+C) Na correspondência comercial, somente o sócio pode praticar a conduta, ficando o empregado fora da figura penal.
+D) Na divulgação de segredo, prejuízo à Administração Pública torna a ação penal condicionada a representação especial.
+E) Na invasão de dispositivo, crime praticado contra presidente do Supremo Tribunal Federal pode receber aumento de um terço à metade.
+
+GABARITO: E
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Correspondência alheia aberta pode ser objeto de sonegação ou destruição.
+B) INCORRETA — O emprego de violência é circunstância qualificadora, ainda que não haja arma.
+C) INCORRETA — O empregado também pode praticar a correspondência comercial.
+D) INCORRETA — Havendo prejuízo à Administração Pública, a ação penal é incondicionada.
+E) CORRETA — Crime contra o Presidente do Supremo Tribunal Federal pode receber aumento de um terço à metade.
+
+QUESTÃO 31
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na invasão de dispositivo, prefeitos ficam fora da proteção especial conferida a chefes do Poder Executivo.
+B) Na sonegação ou destruição de correspondência, a correspondência alheia precisa estar fechada para ser protegida.
+C) Na correspondência comercial, a persecução penal da conduta depende de representação da pessoa legitimada.
+D) Na violação de domicílio, a entrada para diligência legal durante o dia constitui sempre crime, ainda que observadas as formalidades.
+E) Na divulgação de segredo profissional, a revelação com justa causa permanece típica.
+
+GABARITO: C
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Prefeitos estão entre as vítimas especialmente protegidas.
+B) INCORRETA — A sonegação ou destruição pode recair sobre correspondência alheia não fechada.
+C) CORRETA — A correspondência comercial somente se procede mediante representação.
+D) INCORRETA — A entrada diurna para diligência pode ser lícita se observadas as formalidades legais.
+E) INCORRETA — A justa causa afasta a violação de segredo profissional.
+
+QUESTÃO 32
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na invasão de dispositivo, presidentes da Câmara dos Deputados e do Senado estão entre as vítimas com aumento especial.
+B) Estalagem aberta ao público integra integralmente a expressão casa, inclusive em suas áreas comuns.
+C) Na violação de correspondência, o dano a outrem reduz a pena pela metade.
+D) Na divulgação de informação sigilosa da Administração, prejuízo público mantém a ação penal condicionada.
+E) Na violação de segredo profissional, o segredo precisa ter sido confiado formalmente pelo titular ao agente.
+
+GABARITO: A
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) CORRETA — Presidentes da Câmara dos Deputados e do Senado estão entre as vítimas que atraem aumento especial.
+B) INCORRETA — Estalagem aberta não integra integralmente a expressão casa; ressalva-se o aposento ocupado.
+C) INCORRETA — O dano a outrem aumenta a pena em metade.
+D) INCORRETA — Havendo prejuízo à Administração Pública, a ação penal é incondicionada.
+E) INCORRETA — Não é necessário que o segredo tenha sido formalmente confiado; basta ciência em razão da atividade prevista.
+
+QUESTÃO 33
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na invasão de dispositivo, presidentes de assembleias legislativas estaduais não recebem proteção especial.
+B) Na violação de correspondência, a forma básica exige destruição da correspondência fechada.
+C) Na divulgação de segredo, documento particular sem possibilidade de dano está sempre abrangido.
+D) Na violação de domicílio, a forma básica é punida com detenção de um a três meses ou multa.
+E) Na correspondência comercial, apenas correspondência integralmente suprimida pode configurar o crime.
+
+GABARITO: D
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Presidente de Assembleia Legislativa está entre as vítimas especialmente protegidas.
+B) INCORRETA — A figura básica consiste em devassar conteúdo de correspondência fechada; não exige destruição.
+C) INCORRETA — A divulgação precisa ser apta a produzir dano.
+D) CORRETA — A forma básica da violação de domicílio prevê detenção de um a três meses ou multa.
+E) INCORRETA — A supressão pode ser total ou parcial.
+
+QUESTÃO 34
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na invasão de dispositivo, presidente de Câmara Municipal não está entre as autoridades especialmente protegidas.
+B) Na violação de correspondência, instalação ou uso irregular de estação ou aparelho radioelétrico dispensa representação.
+C) Na violação de domicílio, qualquer entrada noturna em casa alheia é lícita quando se pretende cumprir diligência administrativa.
+D) Na divulgação de segredo, a pena básica é reclusão de um a seis meses e multa.
+E) Na violação de segredo profissional, a revelação deve causar dano efetivo para configurar o crime.
+
+GABARITO: B
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Presidente de Câmara Municipal integra o rol de vítimas especialmente protegidas.
+B) CORRETA — Instalação ou uso radioelétrico irregular está entre as hipóteses que dispensam representação.
+C) INCORRETA — Diligência noturna não é genericamente autorizada.
+D) INCORRETA — A divulgação de segredo prevê detenção de um a seis meses ou multa, não reclusão cumulada.
+E) INCORRETA — Basta que a revelação possa produzir dano; dano efetivo não é indispensável.
+
+QUESTÃO 35
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na invasão de dispositivo, presidente da Câmara Legislativa do Distrito Federal fica fora das vítimas especialmente protegidas.
+B) Na violação de domicílio, o emprego de arma reduz a pena quando não há violência física.
+C) Na violação de correspondência, o dano causado a outrem substitui a pena básica por reclusão de um a três anos.
+D) Na divulgação de informação sigilosa da Administração, informação reservada definida em lei não é abrangida.
+E) Na violação de segredo profissional, a persecução penal da conduta depende de representação da pessoa legitimada.
+
+GABARITO: E
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Presidente da Câmara Legislativa do Distrito Federal integra o rol protegido.
+B) INCORRETA — O emprego de arma agrava a violação de domicílio.
+C) INCORRETA — O dano a outrem aumenta as penas em metade; não as substitui por reclusão.
+D) INCORRETA — Informação reservada definida em lei está abrangida.
+E) CORRETA — A violação de segredo profissional somente se procede mediante representação.
+
+QUESTÃO 36
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na invasão de dispositivo, dirigente máximo da administração indireta municipal não integra a proteção especial.
+B) Na violação de correspondência, a mesma pena da figura básica não alcança quem destrói correspondência alheia aberta.
+C) Na divulgação de segredo, a pena básica é detenção de um a seis meses ou multa entre trezentos mil réis e dois contos de réis.
+D) Na violação de domicílio, aposento ocupado de habitação coletiva é excluído do conceito de casa enquanto o prédio estiver aberto.
+E) Na correspondência comercial, o empregado só responde se tiver poderes de administração.
+
+GABARITO: C
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Dirigente máximo da administração indireta municipal está entre as vítimas especialmente protegidas.
+B) INCORRETA — A destruição pode alcançar correspondência alheia ainda que não esteja fechada.
+C) CORRETA — A pena é detenção de um a seis meses ou multa de trezentos mil réis a dois contos de réis.
+D) INCORRETA — Aposento ocupado de habitação coletiva integra o conceito de casa.
+E) INCORRETA — O empregado pode responder sem necessidade de poderes de administração.
+
+QUESTÃO 37
+Com base no texto-base, assinale a alternativa correta.
+
+A) Dirigente máximo da administração direta ou indireta federal, estadual, municipal ou distrital recebe proteção especial na invasão.
+B) Taverna aberta ao público integra a expressão casa para fins da violação de domicílio.
+C) Na violação de correspondência, transmitir comunicação radioelétrica dirigida a terceiro é sempre lícito quando não há publicidade.
+D) Na divulgação de segredo profissional, o segredo conhecido em razão de função está excluído da proteção.
+E) Na correspondência comercial, a pena básica é detenção de um a seis meses.
+
+GABARITO: A
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) CORRETA — Dirigentes máximos da administração direta ou indireta federal, estadual, municipal ou distrital recebem proteção especial.
+B) INCORRETA — Taverna não se compreende na expressão casa.
+C) INCORRETA — A transmissão indevida de comunicação radioelétrica dirigida a terceiro pode ser punível.
+D) INCORRETA — Segredo conhecido em razão de função está protegido.
+E) INCORRETA — A pena da correspondência comercial é detenção de três meses a dois anos.
+
+QUESTÃO 38
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na invasão de dispositivo informático, o equipamento precisa estar conectado à rede de computadores para que a figura básica se configure.
+B) Na violação de domicílio, a forma básica prevê cumulativamente detenção e multa.
+C) Na violação de correspondência, a conversação telefônica entre outras pessoas fica fora das comunicações protegidas.
+D) Na divulgação de informação sigilosa da Administração, havendo prejuízo ao poder público, a ação penal é incondicionada.
+E) Na violação de segredo profissional, o segredo revelado precisa possuir necessariamente conteúdo econômico.
+
+GABARITO: D
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — O dispositivo pode estar conectado ou não à rede.
+B) INCORRETA — A pena básica da violação de domicílio é detenção de um a três meses OU multa.
+C) INCORRETA — Conversação telefônica entre outras pessoas é protegida.
+D) CORRETA — Havendo prejuízo à Administração Pública, a ação penal é incondicionada.
+E) INCORRETA — O segredo profissional não precisa ter natureza econômica.
+
+QUESTÃO 39
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na invasão de dispositivo, crime contra empresa concessionária de serviço público depende necessariamente de representação.
+B) Entrar ou permanecer em casa alheia ou dependências contra vontade expressa ou tácita de quem de direito pode configurar violação de domicílio.
+C) Na violação de correspondência, a divulgação indevida de comunicação telefônica própria integra a figura equiparada.
+D) Na divulgação de segredo, a correspondência confidencial só é protegida se o agente a tiver obtido clandestinamente.
+E) Na correspondência comercial, revelar o conteúdo a estranho é irrelevante se não houver subtração física da correspondência.
+
+GABARITO: B
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Crime contra concessionária de serviço público dispensa representação.
+B) CORRETA — Entrar ou permanecer em casa alheia ou dependências contra vontade expressa ou tácita de quem de direito pode configurar o crime.
+C) INCORRETA — A norma protege conversação telefônica entre outras pessoas, não conversa própria do agente.
+D) INCORRETA — O agente pode ser destinatário ou detentor; obtenção clandestina não é requisito.
+E) INCORRETA — Revelar o conteúdo a estranho é conduta autônoma, sem exigir subtração física.
+
+QUESTÃO 40
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na divulgação de segredo, documento particular só é protegido quando o agente o obtém clandestinamente.
+B) Na violação de domicílio, o lugar ermo só agrava a conduta quando o fato também ocorre durante a noite.
+C) Na violação de correspondência, apenas comunicação telefônica própria do agente pode integrar a figura equiparada.
+D) Na divulgação de informação sigilosa da Administração, a pena é detenção de um a quatro anos ou multa.
+E) Fora das exceções de Administração Pública e concessionárias, a invasão de dispositivo depende de representação.
+
+GABARITO: E
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Obtenção clandestina não é requisito; importa que o agente seja destinatário ou detentor.
+B) INCORRETA — Lugar ermo qualifica a conduta independentemente de ocorrer à noite.
+C) INCORRETA — A norma protege conversação telefônica entre outras pessoas.
+D) INCORRETA — A pena é detenção de um a quatro anos E multa.
+E) CORRETA — Fora das exceções envolvendo Administração Pública e concessionárias, a invasão depende de representação.
+
+QUESTÃO 41
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de segredo profissional, a pena é detenção de três meses a um ano ou multa de um conto a dez contos de réis.
+B) Na violação de domicílio, a entrada diurna para prisão é lícita mesmo quando as formalidades legais são ignoradas.
+C) Na violação de correspondência, o dano causado a outrem faz a pena aumentar de um terço.
+D) Na divulgação de informação da Administração, qualquer informação pública recebe a proteção da figura sigilosa.
+E) Na invasão de dispositivo, a distribuição de programa destinado à invasão somente é punível se houver venda.
+
+GABARITO: A
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) CORRETA — A violação de segredo profissional prevê detenção de três meses a um ano ou multa de um a dez contos de réis.
+B) INCORRETA — A entrada diurna para prisão exige observância das formalidades legais.
+C) INCORRETA — O dano a outrem aumenta a pena em metade.
+D) INCORRETA — A figura administrativa exige informação sigilosa ou reservada definida em lei.
+E) INCORRETA — Distribuir programa destinado à invasão é punível independentemente de venda.
+
+QUESTÃO 42
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de domicílio, aposento ocupado de habitação coletiva fica sempre excluído do conceito de casa, mesmo sendo reservado ao morador.
+B) A violação de correspondência depende de representação, salvo instalação ou uso radioelétrico irregular e abuso de função postal, telegráfica, radioelétrica ou telefônica.
+C) Na correspondência comercial, somente o proprietário do estabelecimento pode praticar a conduta, ficando sócios e empregados fora do tipo.
+D) Na violação de segredo profissional, exige-se dano efetivo decorrente da revelação, não bastando que ela possa produzir dano.
+E) Na invasão de dispositivo, o prejuízo econômico faz a pena aumentar exclusivamente pela metade, sem intervalo de variação.
+
+GABARITO: B
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Aposento ocupado de habitação coletiva integra o conceito de casa.
+B) CORRETA — A regra é representação, com exceção da instalação ou uso radioelétrico irregular e do abuso funcional nos serviços indicados.
+C) INCORRETA — Sócio e empregado podem praticar a correspondência comercial.
+D) INCORRETA — Basta aptidão para produzir dano; dano efetivo não é necessário.
+E) INCORRETA — O prejuízo econômico aumenta a pena de um terço a dois terços.
+
+QUESTÃO 43
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de domicílio, a presença de apenas duas pessoas é insuficiente para a forma qualificada.
+B) Na violação de correspondência, a figura básica alcança correspondência alheia ainda que esteja aberta.
+C) Na correspondência comercial, a pena prevista para a forma básica é detenção de três meses a dois anos.
+D) Na divulgação de segredo, a existência de justa causa não afasta a figura quando o conteúdo é confidencial.
+E) Na invasão de dispositivo, a autorização tácita do usuário não interfere na tipicidade.
+
+GABARITO: C
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Duas pessoas já bastam para a circunstância qualificadora.
+B) INCORRETA — A figura básica exige correspondência fechada.
+C) CORRETA — A correspondência comercial é punida com detenção de três meses a dois anos.
+D) INCORRETA — A justa causa afasta a divulgação de segredo.
+E) INCORRETA — A autorização tácita do usuário é juridicamente relevante.
+
+QUESTÃO 44
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de domicílio, a casa de jogo aberta ao público integra o conceito penal de casa.
+B) Na violação de correspondência, o abuso de função postal exige representação para prosseguimento.
+C) Na divulgação de segredo profissional, segredo conhecido em razão de ministério não é protegido.
+D) Na invasão de dispositivo, Presidente da República, governadores e prefeitos estão entre as vítimas sujeitas ao aumento especial.
+E) Na correspondência comercial, apenas a supressão total da correspondência pode configurar o crime.
+
+GABARITO: D
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Casa de jogo não se compreende na expressão casa.
+B) INCORRETA — O abuso de função postal está entre as exceções à representação.
+C) INCORRETA — Segredo conhecido em razão de ministério está protegido.
+D) CORRETA — Presidente da República, governadores e prefeitos estão entre as vítimas com aumento especial.
+E) INCORRETA — A supressão da correspondência pode ser total ou parcial.
+
+QUESTÃO 45
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de domicílio, a entrada noturna para diligência oficial é sempre permitida, ainda que não haja crime em curso ou iminente.
+B) Na violação de correspondência, impedir conversação telefônica entre outras pessoas não integra as condutas equiparadas.
+C) Na divulgação de informação sigilosa da Administração, a informação precisa estar armazenada em sistema ou banco de dados.
+D) Na violação de segredo profissional, a revelação sem justa causa é irrelevante quando o segredo foi conhecido em razão de ofício.
+E) Na invasão de dispositivo, dispensa-se representação contra administração direta ou indireta de qualquer Poder da União, Estados, Distrito Federal ou Municípios.
+
+GABARITO: E
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Diligência noturna não é genericamente autorizada; a entrada noturna é permitida nas hipóteses específicas descritas.
+B) INCORRETA — Impedir conversação telefônica entre outras pessoas integra as condutas equiparadas.
+C) INCORRETA — A informação sigilosa ou reservada pode estar ou não em sistema ou banco de dados.
+D) INCORRETA — Segredo conhecido em razão de ofício está protegido contra revelação sem justa causa.
+E) CORRETA — Crimes de invasão contra administração direta ou indireta de qualquer Poder dos entes indicados dispensam representação.
+
+QUESTÃO 46
+Com base no texto-base, assinale a alternativa correta.
+
+A) Durante o dia, a entrada em casa alheia para prisão ou outra diligência é lícita quando observadas as formalidades legais.
+B) Na violação de segredo profissional, o segredo precisa decorrer exclusivamente de profissão regulamentada.
+C) Na invasão de dispositivo, prejuízo econômico decorrente da invasão gera aumento fixo de metade.
+D) Na correspondência comercial, apenas o proprietário do estabelecimento pode praticar a conduta, ficando sócio e empregado excluídos.
+E) Na divulgação de informação sigilosa da Administração, somente dados armazenados em banco informatizado podem ser protegidos.
+
+GABARITO: A
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) CORRETA — Durante o dia, prisão ou outra diligência em casa alheia é lícita quando observadas as formalidades legais.
+B) INCORRETA — O segredo pode decorrer de função, ministério, ofício ou profissão, sem exigência de profissão regulamentada.
+C) INCORRETA — Prejuízo econômico gera aumento de um terço a dois terços.
+D) INCORRETA — Sócio e empregado podem ser sujeitos ativos da correspondência comercial.
+E) INCORRETA — A informação pode estar ou não em sistema ou banco de dados.
+
+QUESTÃO 47
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de correspondência, impedir comunicação telegráfica ou radioelétrica não integra as condutas equiparadas.
+B) Hospedaria, estalagem ou outra habitação coletiva, enquanto aberta, não integra o conceito de casa, ressalvado o aposento ocupado.
+C) Na violação de segredo profissional, somente segredo conhecido em razão de função pública recebe proteção.
+D) Na invasão de dispositivo, a autorização tácita do usuário não afasta a figura básica quando o objetivo é obter dados.
+E) Na correspondência comercial, revelar o conteúdo a estranho depende de subtração física da correspondência.
+
+GABARITO: B
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Impedir comunicação telegráfica ou radioelétrica integra as condutas equiparadas.
+B) CORRETA — Hospedaria, estalagem ou outra habitação coletiva aberta não integra casa, ressalvado o aposento ocupado.
+C) INCORRETA — O segredo pode ser conhecido em razão de função, ministério, ofício ou profissão.
+D) INCORRETA — A autorização tácita afasta o requisito de ausência de autorização.
+E) INCORRETA — Revelação a estranho é conduta autônoma e não depende de subtração física.
+
+QUESTÃO 48
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de domicílio qualificada por arma, o simples emprego do objeto não basta sem efetiva utilização contra a vítima.
+B) Na divulgação de segredo, o destinatário de correspondência confidencial não pode ser sujeito ativo, ainda que divulgue o conteúdo.
+C) Sonegação ou destruição de correspondência, abuso ou impedimento de comunicações e uso radioelétrico irregular recebem a mesma pena da violação de correspondência.
+D) Na invasão de dispositivo, o controle remoto não autorizado obtido pela invasão permanece submetido somente à pena básica.
+E) Na violação de segredo profissional, a revelação só é típica quando produz dano efetivo, não bastando capacidade de causá-lo.
+
+GABARITO: C
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — O emprego de arma é suficiente para a circunstância qualificadora; não se exige uso efetivo contra a vítima.
+B) INCORRETA — O destinatário pode ser sujeito ativo da divulgação de segredo.
+C) CORRETA — As condutas equiparadas indicadas recebem a mesma pena da violação básica de correspondência.
+D) INCORRETA — Controle remoto não autorizado obtido pela invasão integra a forma agravada.
+E) INCORRETA — Basta que a revelação possa produzir dano; dano efetivo não é indispensável.
+
+QUESTÃO 49
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na invasão de dispositivo, a venda de programa destinado à invasão só é punível depois que terceiro efetivamente invade um equipamento.
+B) Na correspondência comercial, apenas o sócio do estabelecimento pode praticar a conduta, nunca o empregado.
+C) Na divulgação de informação sigilosa da Administração, informação reservada definida em lei fica fora da proteção penal.
+D) Taverna, casa de jogo e estabelecimentos do mesmo gênero não se compreendem na expressão casa.
+E) Na violação de correspondência, o dano causado a outrem aumenta a pena em dois terços.
+
+GABARITO: D
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — Vender programa destinado à invasão é punível independentemente de invasão posterior por terceiro.
+B) INCORRETA — O empregado também pode praticar a correspondência comercial.
+C) INCORRETA — Informação reservada definida em lei está protegida.
+D) CORRETA — Taverna, casa de jogo e estabelecimentos do mesmo gênero não se compreendem na expressão casa.
+E) INCORRETA — O dano a outrem aumenta a pena em metade, não em dois terços.
+
+QUESTÃO 50
+Com base no texto-base, assinale a alternativa correta.
+
+A) Na violação de domicílio, a entrada para diligência durante o dia dispensa observância das formalidades legais.
+B) Na correspondência comercial, a pena é reclusão de três meses a dois anos quando há revelação a estranho.
+C) Na violação de segredo profissional, a revelação só é típica quando causa dano efetivo, não bastando aptidão para produzi-lo.
+D) Na invasão de dispositivo, prefeito e governador ficam fora das vítimas especialmente protegidas.
+E) Na invasão contra concessionária de serviço público, a persecução independe de representação.
+
+GABARITO: E
+
+EXPLICAÇÃO DAS ALTERNATIVAS:
+A) INCORRETA — A diligência diurna exige observância das formalidades legais.
+B) INCORRETA — A pena da correspondência comercial é detenção de três meses a dois anos.
+C) INCORRETA — Basta que a revelação possa produzir dano; dano efetivo não é indispensável.
+D) INCORRETA — Prefeito e governador estão entre as vítimas especialmente protegidas.
+E) CORRETA — Crime de invasão contra concessionária de serviço público independe de representação.
+
+GABARITO GERAL
+1-C | 2-A | 3-D | 4-B | 5-E
+6-C | 7-A | 8-D | 9-B | 10-E
+11-C | 12-A | 13-D | 14-B | 15-E
+16-C | 17-A | 18-D | 19-B | 20-E
+21-C | 22-A | 23-D | 24-B | 25-E
+26-C | 27-A | 28-D | 29-B | 30-E
+31-C | 32-A | 33-D | 34-B | 35-E
+36-C | 37-A | 38-D | 39-B | 40-E
+41-A | 42-B | 43-C | 44-D | 45-E
+46-A | 47-B | 48-C | 49-D | 50-E
+
+DISTRIBUIÇÃO DOS GABARITOS
+A = 10 | B = 10 | C = 10 | D = 10 | E = 10

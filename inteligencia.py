@@ -21,6 +21,7 @@ class CacheAnalitico:
         self._dados: dict[str, tuple[float, Any]] = {}
         self.acertos = 0
         self.falhas = 0
+        self._fase_estavel = 0
 
     def obter(self, chave: str, carregador: Callable[[], Any], ttl: float | None = None):
         agora = time.monotonic()
@@ -28,7 +29,7 @@ class CacheAnalitico:
         registro = self._dados.get(str(chave))
         if registro is not None:
             criado, valor = registro
-            if agora - criado <= validade:
+            if self._fase_estavel > 0 or agora - criado <= validade:
                 self.acertos += 1
                 return valor
         self.falhas += 1
@@ -39,6 +40,17 @@ class CacheAnalitico:
     def definir(self, chave: str, valor: Any):
         self._dados[str(chave)] = (time.monotonic(), valor)
         return valor
+
+    def iniciar_fase_estavel(self):
+        """Suspende expiração por tempo durante uma operação atômica longa.
+
+        Invalidações explícitas continuam funcionando. É usado no startup,
+        quando nenhum dado acadêmico muda entre uma aba pré-carregada e outra.
+        """
+        self._fase_estavel += 1
+
+    def finalizar_fase_estavel(self):
+        self._fase_estavel = max(0, self._fase_estavel - 1)
 
     def invalidar(self, prefixo: str | None = None):
         if prefixo is None:

@@ -1,0 +1,4092 @@
+{
+  "data": "2026-09-30",
+  "topico_id": 22,
+  "questoes_ativas": 353,
+  "alternativas_ativas": 1765,
+  "alternativas_ajustadas": 581,
+  "questoes_ajustadas": 234,
+  "snapshots_pendentes_atualizados": 351,
+  "tentativas_preservadas": 131,
+  "ciclo_ativo": {
+    "id": 5,
+    "status": "ativo"
+  },
+  "ciclo_ativo_estado": {
+    "total": 353,
+    "respondidas": 131,
+    "pendentes": 222
+  },
+  "integrity_check": "ok",
+  "foreign_key_violations": 0,
+  "questoes_estrutura_invalida": [],
+  "estrategia": "UPDATE in-place de alternativas; IDs, gabaritos, ciclo, tentativas e itens respondidos preservados",
+  "mudancas": [
+    {
+      "questao_id": 5683,
+      "letra": "D",
+      "antes": "Induzir alguém a suicidar-se integra a forma básica do crime.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Induzir alguém a suicidar-se integra a forma básica do crime.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5684,
+      "letra": "C",
+      "antes": "Instigar alguém a suicidar-se integra a forma básica do crime.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Instigar alguém a suicidar-se integra a forma básica do crime.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5685,
+      "letra": "C",
+      "antes": "O estado puerperal é dispensável quando a morte ocorre durante o parto.",
+      "depois": "Infanticídio — O estado puerperal é dispensável quando a morte ocorre durante o parto.",
+      "escopo": "Infanticídio"
+    },
+    {
+      "questao_id": 5687,
+      "letra": "B",
+      "antes": "Relevante valor social não pode fundamentar, por si, a diminuição da pena.",
+      "depois": "Homicídio — Relevante valor social não pode fundamentar, por si, a diminuição da pena.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5688,
+      "letra": "A",
+      "antes": "Relevante valor moral só produz efeito quando acompanhado de relevante valor social.",
+      "depois": "Homicídio — Relevante valor moral só produz efeito quando acompanhado de relevante valor social.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5689,
+      "letra": "C",
+      "antes": "A forma básica é punida com pena de detenção.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A forma básica é punida com pena de detenção.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5689,
+      "letra": "E",
+      "antes": "A mera influência de violenta emoção basta para a hipótese de diminuição.",
+      "depois": "Homicídio — A mera influência de violenta emoção basta para a hipótese de diminuição.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5690,
+      "letra": "B",
+      "antes": "A pena mínima da forma básica é de um ano.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A pena mínima da forma básica é de um ano.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5690,
+      "letra": "D",
+      "antes": "A reação sob violenta emoção deve ocorrer logo em seguida à provocação.",
+      "depois": "Homicídio — A reação sob violenta emoção deve ocorrer logo em seguida à provocação.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5691,
+      "letra": "A",
+      "antes": "A pena máxima da forma básica é de três anos.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A pena máxima da forma básica é de três anos.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5691,
+      "letra": "C",
+      "antes": "A hipótese emocional admite provocação justa da vítima como fundamento suficiente.",
+      "depois": "Homicídio — A hipótese emocional admite provocação justa da vítima como fundamento suficiente.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5691,
+      "letra": "D",
+      "antes": "Deixar de procurar diminuir as consequências do ato é irrelevante para a pena.",
+      "depois": "Homicídio culposo — Deixar de procurar diminuir as consequências do ato é irrelevante para a pena.",
+      "escopo": "Homicídio culposo"
+    },
+    {
+      "questao_id": 5692,
+      "letra": "B",
+      "antes": "Presentes os requisitos, o juiz deve obrigatoriamente reduzir a pena.",
+      "depois": "Homicídio — Presentes os requisitos, o juiz deve obrigatoriamente reduzir a pena.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5693,
+      "letra": "A",
+      "antes": "O limite mínimo da redução é de um quinto da pena.",
+      "depois": "Homicídio — O limite mínimo da redução é de um quinto da pena.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5693,
+      "letra": "E",
+      "antes": "A figura praticada pela gestante é punida com pena de detenção.",
+      "depois": "Aborto provocado pela gestante — A figura praticada pela gestante é punida com pena de detenção.",
+      "escopo": "Aborto provocado pela gestante"
+    },
+    {
+      "questao_id": 5694,
+      "letra": "C",
+      "antes": "A forma resultante exige exclusivamente lesão corporal de natureza gravíssima.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A forma resultante exige exclusivamente lesão corporal de natureza gravíssima.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5694,
+      "letra": "D",
+      "antes": "A pena mínima da figura praticada pela gestante é de dois anos.",
+      "depois": "Aborto provocado pela gestante — A pena mínima da figura praticada pela gestante é de dois anos.",
+      "escopo": "Aborto provocado pela gestante"
+    },
+    {
+      "questao_id": 5694,
+      "letra": "E",
+      "antes": "A redução pode alcançar o limite máximo de um terço da pena.",
+      "depois": "Homicídio — A redução pode alcançar o limite máximo de um terço da pena.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5695,
+      "letra": "B",
+      "antes": "Lesão corporal de natureza gravíssima pode preencher o resultado exigido nessa forma.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Lesão corporal de natureza gravíssima pode preencher o resultado exigido nessa forma.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5695,
+      "letra": "C",
+      "antes": "A pena máxima da figura praticada pela gestante é de quatro anos.",
+      "depois": "Aborto provocado pela gestante — A pena máxima da figura praticada pela gestante é de quatro anos.",
+      "escopo": "Aborto provocado pela gestante"
+    },
+    {
+      "questao_id": 5696,
+      "letra": "A",
+      "antes": "A forma resultante de lesão grave ou gravíssima é punida com reclusão.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A forma resultante de lesão grave ou gravíssima é punida com reclusão.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5696,
+      "letra": "B",
+      "antes": "A ausência de consentimento só importa quando também existe violência física.",
+      "depois": "Aborto provocado por terceiro sem consentimento — A ausência de consentimento só importa quando também existe violência física.",
+      "escopo": "Aborto provocado por terceiro sem consentimento"
+    },
+    {
+      "questao_id": 5696,
+      "letra": "C",
+      "antes": "A promessa de recompensa só qualifica se a vantagem for efetivamente entregue.",
+      "depois": "Homicídio — A promessa de recompensa só qualifica se a vantagem for efetivamente entregue.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5696,
+      "letra": "D",
+      "antes": "A possibilidade de deixar de aplicar a pena é prevista igualmente para todo homicídio doloso.",
+      "depois": "Homicídio culposo — A possibilidade de deixar de aplicar a pena é prevista igualmente para todo homicídio doloso.",
+      "escopo": "Homicídio culposo"
+    },
+    {
+      "questao_id": 5697,
+      "letra": "C",
+      "antes": "Consequências leves para o próprio agente bastam para permitir a não aplicação da pena.",
+      "depois": "Homicídio culposo — Consequências leves para o próprio agente bastam para permitir a não aplicação da pena.",
+      "escopo": "Homicídio culposo"
+    },
+    {
+      "questao_id": 5697,
+      "letra": "E",
+      "antes": "A pena mínima da forma resultante de lesão grave ou gravíssima é de dois anos.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A pena mínima da forma resultante de lesão grave ou gravíssima é de dois anos.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5698,
+      "letra": "A",
+      "antes": "O motivo fútil só qualifica quando ligado a vantagem econômica.",
+      "depois": "Homicídio — O motivo fútil só qualifica quando ligado a vantagem econômica.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5698,
+      "letra": "B",
+      "antes": "A regra exige que a gravidade das consequências torne desnecessária a sanção penal.",
+      "depois": "Homicídio culposo — A regra exige que a gravidade das consequências torne desnecessária a sanção penal.",
+      "escopo": "Homicídio culposo"
+    },
+    {
+      "questao_id": 5698,
+      "letra": "C",
+      "antes": "A presença da mulher a quem se pretende atingir é irrelevante para a pena.",
+      "depois": "Vicaricídio — A presença da mulher a quem se pretende atingir é irrelevante para a pena.",
+      "escopo": "Vicaricídio"
+    },
+    {
+      "questao_id": 5698,
+      "letra": "D",
+      "antes": "A pena máxima da forma resultante de lesão grave ou gravíssima é de quatro anos.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A pena máxima da forma resultante de lesão grave ou gravíssima é de quatro anos.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5699,
+      "letra": "A",
+      "antes": "Nessa hipótese, o juiz é obrigado a deixar de aplicar a pena.",
+      "depois": "Homicídio culposo — Nessa hipótese, o juiz é obrigado a deixar de aplicar a pena.",
+      "escopo": "Homicídio culposo"
+    },
+    {
+      "questao_id": 5699,
+      "letra": "E",
+      "antes": "O veneno só qualifica quando também produz perigo comum.",
+      "depois": "Homicídio — O veneno só qualifica quando também produz perigo comum.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5700,
+      "letra": "C",
+      "antes": "O consentimento da gestante torna atípica a conduta do terceiro.",
+      "depois": "Aborto provocado por terceiro com consentimento — O consentimento da gestante torna atípica a conduta do terceiro.",
+      "escopo": "Aborto provocado por terceiro com consentimento"
+    },
+    {
+      "questao_id": 5700,
+      "letra": "D",
+      "antes": "O fogo só qualifica quando empregado juntamente com explosivo.",
+      "depois": "Homicídio — O fogo só qualifica quando empregado juntamente com explosivo.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5700,
+      "letra": "E",
+      "antes": "Crime praticado por milícia privada fica fora da causa de aumento prevista.",
+      "depois": "Homicídio — Crime praticado por milícia privada fica fora da causa de aumento prevista.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5701,
+      "letra": "A",
+      "antes": "A forma resultante de morte é punida com pena de detenção.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A forma resultante de morte é punida com pena de detenção.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5701,
+      "letra": "C",
+      "antes": "O explosivo só qualifica quando efetivamente causa perigo comum.",
+      "depois": "Homicídio — O explosivo só qualifica quando efetivamente causa perigo comum.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5701,
+      "letra": "D",
+      "antes": "A majorante da milícia privada independe de qualquer pretexto de serviço de segurança.",
+      "depois": "Homicídio — A majorante da milícia privada independe de qualquer pretexto de serviço de segurança.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5702,
+      "letra": "B",
+      "antes": "A asfixia só qualifica quando praticada juntamente com tortura.",
+      "depois": "Homicídio — A asfixia só qualifica quando praticada juntamente com tortura.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5702,
+      "letra": "C",
+      "antes": "Grupo de extermínio fica fora da causa de aumento prevista.",
+      "depois": "Homicídio — Grupo de extermínio fica fora da causa de aumento prevista.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5702,
+      "letra": "E",
+      "antes": "A pena mínima da forma resultante de morte é de um ano.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A pena mínima da forma resultante de morte é de um ano.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5703,
+      "letra": "B",
+      "antes": "O aumento por milícia privada ou grupo de extermínio começa obrigatoriamente em metade.",
+      "depois": "Homicídio — O aumento por milícia privada ou grupo de extermínio começa obrigatoriamente em metade.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5703,
+      "letra": "D",
+      "antes": "A pena máxima da forma resultante de morte é de quatro anos.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A pena máxima da forma resultante de morte é de quatro anos.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5704,
+      "letra": "A",
+      "antes": "O aumento por milícia privada ou grupo de extermínio pode alcançar metade da pena.",
+      "depois": "Homicídio — O aumento por milícia privada ou grupo de extermínio pode alcançar metade da pena.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5704,
+      "letra": "D",
+      "antes": "A idade só interfere na validade penal do consentimento quando a gestante tem menos de doze anos.",
+      "depois": "Aborto provocado por terceiro — A idade só interfere na validade penal do consentimento quando a gestante tem menos de doze anos.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5705,
+      "letra": "B",
+      "antes": "Motivo torpe produz apenas aumento variável até o dobro.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Motivo torpe produz apenas aumento variável até o dobro.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5705,
+      "letra": "C",
+      "antes": "Alienação mental da gestante não interfere na disciplina penal do consentimento.",
+      "depois": "Aborto provocado por terceiro — Alienação mental da gestante não interfere na disciplina penal do consentimento.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5706,
+      "letra": "A",
+      "antes": "Motivo fútil não repercute na pena do crime.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Motivo fútil não repercute na pena do crime.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5706,
+      "letra": "B",
+      "antes": "Debilidade mental da gestante não interfere na disciplina penal do consentimento.",
+      "depois": "Aborto provocado por terceiro — Debilidade mental da gestante não interfere na disciplina penal do consentimento.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5706,
+      "letra": "C",
+      "antes": "Perigo comum só repercute quando decorre especificamente de explosivo.",
+      "depois": "Homicídio — Perigo comum só repercute quando decorre especificamente de explosivo.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5707,
+      "letra": "A",
+      "antes": "Fraude no consentimento apenas gera aumento da modalidade consensual.",
+      "depois": "Aborto provocado por terceiro — Fraude no consentimento apenas gera aumento da modalidade consensual.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5707,
+      "letra": "B",
+      "antes": "A traição só qualifica quando existe vínculo familiar entre autor e vítima.",
+      "depois": "Homicídio — A traição só qualifica quando existe vínculo familiar entre autor e vítima.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5707,
+      "letra": "E",
+      "antes": "A condição de vítima menor pode determinar duplicação da pena.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A condição de vítima menor pode determinar duplicação da pena.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5708,
+      "letra": "A",
+      "antes": "A emboscada só qualifica quando elimina totalmente qualquer possibilidade de defesa.",
+      "depois": "Homicídio — A emboscada só qualifica quando elimina totalmente qualquer possibilidade de defesa.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5708,
+      "letra": "C",
+      "antes": "Pessoa sob guarda da mulher só pode ser vítima se também for parente.",
+      "depois": "Vicaricídio — Pessoa sob guarda da mulher só pode ser vítima se também for parente.",
+      "escopo": "Vicaricídio"
+    },
+    {
+      "questao_id": 5708,
+      "letra": "D",
+      "antes": "Capacidade de resistência diminuída por qualquer causa pode determinar duplicação da pena.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Capacidade de resistência diminuída por qualquer causa pode determinar duplicação da pena.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5708,
+      "letra": "E",
+      "antes": "Grave ameaça mantém a disciplina própria da modalidade consensual.",
+      "depois": "Aborto provocado por terceiro — Grave ameaça mantém a disciplina própria da modalidade consensual.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5709,
+      "letra": "A",
+      "antes": "Violência doméstica e familiar é irrelevante para caracterizar a razão exigida.",
+      "depois": "Feminicídio — Violência doméstica e familiar é irrelevante para caracterizar a razão exigida.",
+      "escopo": "Feminicídio"
+    },
+    {
+      "questao_id": 5709,
+      "letra": "C",
+      "antes": "Uso de rede de computadores determina obrigatoriamente pena em dobro.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Uso de rede de computadores determina obrigatoriamente pena em dobro.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5709,
+      "letra": "D",
+      "antes": "Violência empregada para obter consentimento mantém a modalidade consensual.",
+      "depois": "Aborto provocado por terceiro — Violência empregada para obter consentimento mantém a modalidade consensual.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5709,
+      "letra": "E",
+      "antes": "A dissimulação só qualifica quando acompanhada de violência física anterior.",
+      "depois": "Homicídio — A dissimulação só qualifica quando acompanhada de violência física anterior.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5710,
+      "letra": "B",
+      "antes": "Uso de rede social só repercute quando há transmissão em tempo real.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Uso de rede social só repercute quando há transmissão em tempo real.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5710,
+      "letra": "C",
+      "antes": "Nessas hipóteses de consentimento inválido, mantém-se a pena da modalidade consensual.",
+      "depois": "Aborto provocado por terceiro — Nessas hipóteses de consentimento inválido, mantém-se a pena da modalidade consensual.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5710,
+      "letra": "D",
+      "antes": "Outro recurso só qualifica quando torna absolutamente impossível a defesa.",
+      "depois": "Homicídio — Outro recurso só qualifica quando torna absolutamente impossível a defesa.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5710,
+      "letra": "E",
+      "antes": "Menosprezo à condição de mulher só importa quando associado a violência doméstica.",
+      "depois": "Feminicídio — Menosprezo à condição de mulher só importa quando associado a violência doméstica.",
+      "escopo": "Feminicídio"
+    },
+    {
+      "questao_id": 5711,
+      "letra": "A",
+      "antes": "Transmissão em tempo real fica fora da causa de aumento digital.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Transmissão em tempo real fica fora da causa de aumento digital.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5711,
+      "letra": "D",
+      "antes": "Discriminação à condição de mulher, isoladamente, nunca caracteriza a razão exigida.",
+      "depois": "Feminicídio — Discriminação à condição de mulher, isoladamente, nunca caracteriza a razão exigida.",
+      "escopo": "Feminicídio"
+    },
+    {
+      "questao_id": 5712,
+      "letra": "E",
+      "antes": "Na hipótese digital, a pena é sempre aplicada exatamente em dobro.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Na hipótese digital, a pena é sempre aplicada exatamente em dobro.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5713,
+      "letra": "A",
+      "antes": "A finalidade de assegurar impunidade só importa após julgamento do outro crime.",
+      "depois": "Homicídio — A finalidade de assegurar impunidade só importa após julgamento do outro crime.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5713,
+      "letra": "D",
+      "antes": "A condição de líder gera apenas aumento variável até o dobro.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A condição de líder gera apenas aumento variável até o dobro.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5714,
+      "letra": "C",
+      "antes": "A condição de coordenador não recebe tratamento específico.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A condição de coordenador não recebe tratamento específico.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5714,
+      "letra": "D",
+      "antes": "Lesão grave causada pelos meios empregados não repercute na forma qualificada.",
+      "depois": "Aborto provocado por terceiro — Lesão grave causada pelos meios empregados não repercute na forma qualificada.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5715,
+      "letra": "B",
+      "antes": "A condição de administrador só repercute quando ele criou o ambiente virtual.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A condição de administrador só repercute quando ele criou o ambiente virtual.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5715,
+      "letra": "C",
+      "antes": "Quando sobrevém lesão corporal grave nas condições previstas, a pena é duplicada.",
+      "depois": "Aborto provocado por terceiro — Quando sobrevém lesão corporal grave nas condições previstas, a pena é duplicada.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5716,
+      "letra": "A",
+      "antes": "Autor responsável pelo ambiente virtual indicado recebe pena em dobro.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Autor responsável pelo ambiente virtual indicado recebe pena em dobro.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5717,
+      "letra": "A",
+      "antes": "Morte causada pelos meios empregados também pode acionar a consequência mais severa.",
+      "depois": "Aborto provocado por terceiro — Morte causada pelos meios empregados também pode acionar a consequência mais severa.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5717,
+      "letra": "E",
+      "antes": "A condição especial do autor só se aplica a comunidades, nunca a grupos.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A condição especial do autor só se aplica a comunidades, nunca a grupos.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5718,
+      "letra": "B",
+      "antes": "Ser mãe de pessoa com deficiência não produz causa especial de aumento.",
+      "depois": "Feminicídio — Ser mãe de pessoa com deficiência não produz causa especial de aumento.",
+      "escopo": "Feminicídio"
+    },
+    {
+      "questao_id": 5718,
+      "letra": "D",
+      "antes": "A condição especial do autor só se aplica a grupos, nunca a comunidades.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A condição especial do autor só se aplica a grupos, nunca a comunidades.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5718,
+      "letra": "E",
+      "antes": "Quando sobrevém morte nas condições previstas, as penas aumentam apenas em um terço.",
+      "depois": "Aborto provocado por terceiro — Quando sobrevém morte nas condições previstas, as penas aumentam apenas em um terço.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5812,
+      "letra": "B",
+      "antes": "A presença da mulher a quem se pretende atingir é irrelevante para a pena.",
+      "depois": "Vicaricídio — A presença da mulher a quem se pretende atingir é irrelevante para a pena.",
+      "escopo": "Vicaricídio"
+    },
+    {
+      "questao_id": 5812,
+      "letra": "C",
+      "antes": "Rede virtual fica fora da hipótese relativa à posição do autor.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Rede virtual fica fora da hipótese relativa à posição do autor.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5813,
+      "letra": "B",
+      "antes": "Lesão apenas grave já basta para a mudança especial de enquadramento.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Lesão apenas grave já basta para a mudança especial de enquadramento.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5814,
+      "letra": "A",
+      "antes": "Resultado gravíssimo contra menor de quatorze anos mantém necessariamente a pena anterior.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Resultado gravíssimo contra menor de quatorze anos mantém necessariamente a pena anterior.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5814,
+      "letra": "B",
+      "antes": "A hipótese necessária basta para proteger apenas a saúde, sem risco à vida.",
+      "depois": "Aborto não punido — A hipótese necessária basta para proteger apenas a saúde, sem risco à vida.",
+      "escopo": "Aborto não punido"
+    },
+    {
+      "questao_id": 5814,
+      "letra": "D",
+      "antes": "Ser responsável por pessoa com deficiência não produz causa especial de aumento.",
+      "depois": "Feminicídio — Ser responsável por pessoa com deficiência não produz causa especial de aumento.",
+      "escopo": "Feminicídio"
+    },
+    {
+      "questao_id": 5815,
+      "letra": "A",
+      "antes": "A hipótese não punida pode ocorrer quando a gravidez resulta de estupro.",
+      "depois": "Aborto não punido — A hipótese não punida pode ocorrer quando a gravidez resulta de estupro.",
+      "escopo": "Aborto não punido"
+    },
+    {
+      "questao_id": 5815,
+      "letra": "B",
+      "antes": "Fato cometido em decorrência da função fica fora da qualificação funcional.",
+      "depois": "Homicídio — Fato cometido em decorrência da função fica fora da qualificação funcional.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5815,
+      "letra": "C",
+      "antes": "A responsabilidade por pessoa com deficiência só gera aumento quando ela é menor.",
+      "depois": "Feminicídio — A responsabilidade por pessoa com deficiência só gera aumento quando ela é menor.",
+      "escopo": "Feminicídio"
+    },
+    {
+      "questao_id": 5815,
+      "letra": "E",
+      "antes": "Enfermidade mental que retire o discernimento fica fora da hipótese especial.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Enfermidade mental que retire o discernimento fica fora da hipótese especial.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5816,
+      "letra": "A",
+      "antes": "O cônjuge do agente protegido fica sempre fora da proteção familiar prevista.",
+      "depois": "Homicídio — O cônjuge do agente protegido fica sempre fora da proteção familiar prevista.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5816,
+      "letra": "D",
+      "antes": "Deficiência mental que retire o discernimento fica fora da hipótese especial.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Deficiência mental que retire o discernimento fica fora da hipótese especial.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5816,
+      "letra": "E",
+      "antes": "Na gravidez resultante de estupro, o consentimento da gestante capaz é dispensável.",
+      "depois": "Aborto não punido — Na gravidez resultante de estupro, o consentimento da gestante capaz é dispensável.",
+      "escopo": "Aborto não punido"
+    },
+    {
+      "questao_id": 5817,
+      "letra": "C",
+      "antes": "A falta de discernimento da vítima é irrelevante para a hipótese especial.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A falta de discernimento da vítima é irrelevante para a hipótese especial.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5817,
+      "letra": "D",
+      "antes": "Sendo incapaz a gestante, somente ela própria pode prestar o consentimento exigido.",
+      "depois": "Aborto não punido — Sendo incapaz a gestante, somente ela própria pode prestar o consentimento exigido.",
+      "escopo": "Aborto não punido"
+    },
+    {
+      "questao_id": 5817,
+      "letra": "E",
+      "antes": "O companheiro do agente protegido pode ser alcançado pela proteção familiar prevista.",
+      "depois": "Homicídio — O companheiro do agente protegido pode ser alcançado pela proteção familiar prevista.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5818,
+      "letra": "B",
+      "antes": "Incapacidade de resistência só importa quando decorre de doença mental.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Incapacidade de resistência só importa quando decorre de doença mental.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5818,
+      "letra": "D",
+      "antes": "A proteção familiar ligada à segurança alcança parentes consanguíneos do agente protegido.",
+      "depois": "Homicídio — A proteção familiar ligada à segurança alcança parentes consanguíneos do agente protegido.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5819,
+      "letra": "C",
+      "antes": "A proteção familiar alcança parente consanguíneo até o quarto grau.",
+      "depois": "Homicídio — A proteção familiar alcança parente consanguíneo até o quarto grau.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5820,
+      "letra": "A",
+      "antes": "O estado puerperal é dispensável quando a morte ocorre durante o parto.",
+      "depois": "Infanticídio — O estado puerperal é dispensável quando a morte ocorre durante o parto.",
+      "escopo": "Infanticídio"
+    },
+    {
+      "questao_id": 5820,
+      "letra": "B",
+      "antes": "O familiar é protegido mesmo quando o fato não guarda relação com a condição funcional.",
+      "depois": "Homicídio — O familiar é protegido mesmo quando o fato não guarda relação com a condição funcional.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5820,
+      "letra": "C",
+      "antes": "A doença degenerativa deve acarretar condição limitante ou vulnerabilidade para essa hipótese.",
+      "depois": "Feminicídio — A doença degenerativa deve acarretar condição limitante ou vulnerabilidade para essa hipótese.",
+      "escopo": "Feminicídio"
+    },
+    {
+      "questao_id": 5820,
+      "letra": "E",
+      "antes": "Resultado morte contra menor de quatorze anos permanece sempre na pena anterior.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Resultado morte contra menor de quatorze anos permanece sempre na pena anterior.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5821,
+      "letra": "B",
+      "antes": "Vulnerabilidade física causada por doença degenerativa pode integrar a causa de aumento.",
+      "depois": "Feminicídio — Vulnerabilidade física causada por doença degenerativa pode integrar a causa de aumento.",
+      "escopo": "Feminicídio"
+    },
+    {
+      "questao_id": 5821,
+      "letra": "D",
+      "antes": "Resultado morte contra pessoa sem discernimento nunca altera o enquadramento.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Resultado morte contra pessoa sem discernimento nunca altera o enquadramento.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5822,
+      "letra": "A",
+      "antes": "Vulnerabilidade mental causada por doença degenerativa fica fora da causa de aumento.",
+      "depois": "Feminicídio — Vulnerabilidade mental causada por doença degenerativa fica fora da causa de aumento.",
+      "escopo": "Feminicídio"
+    },
+    {
+      "questao_id": 5822,
+      "letra": "C",
+      "antes": "A impossibilidade de resistência é irrelevante quando sobrevém o resultado morte.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A impossibilidade de resistência é irrelevante quando sobrevém o resultado morte.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5824,
+      "letra": "A",
+      "antes": "Induzir alguém a suicidar-se integra a forma básica do crime.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Induzir alguém a suicidar-se integra a forma básica do crime.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5824,
+      "letra": "D",
+      "antes": "A presença virtual de descendente da vítima é irrelevante para a pena.",
+      "depois": "Feminicídio — A presença virtual de descendente da vítima é irrelevante para a pena.",
+      "escopo": "Feminicídio"
+    },
+    {
+      "questao_id": 5825,
+      "letra": "C",
+      "antes": "A presença física de ascendente da vítima é irrelevante para a pena.",
+      "depois": "Feminicídio — A presença física de ascendente da vítima é irrelevante para a pena.",
+      "escopo": "Feminicídio"
+    },
+    {
+      "questao_id": 5826,
+      "letra": "A",
+      "antes": "A qualificação ligada ao sistema de Justiça exige fato ocorrido fora do exercício da função.",
+      "depois": "Homicídio — A qualificação ligada ao sistema de Justiça exige fato ocorrido fora do exercício da função.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5827,
+      "letra": "E",
+      "antes": "Fato cometido em decorrência da função fica fora da qualificação ligada ao sistema de Justiça.",
+      "depois": "Homicídio — Fato cometido em decorrência da função fica fora da qualificação ligada ao sistema de Justiça.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5828,
+      "letra": "C",
+      "antes": "A figura praticada pela gestante é punida com pena de reclusão.",
+      "depois": "Aborto provocado pela gestante — A figura praticada pela gestante é punida com pena de reclusão.",
+      "escopo": "Aborto provocado pela gestante"
+    },
+    {
+      "questao_id": 5828,
+      "letra": "D",
+      "antes": "O cônjuge de integrante protegido do sistema de Justiça fica fora da proteção familiar.",
+      "depois": "Homicídio — O cônjuge de integrante protegido do sistema de Justiça fica fora da proteção familiar.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5829,
+      "letra": "B",
+      "antes": "A pena mínima da figura praticada pela gestante é de dois anos.",
+      "depois": "Aborto provocado pela gestante — A pena mínima da figura praticada pela gestante é de dois anos.",
+      "escopo": "Aborto provocado pela gestante"
+    },
+    {
+      "questao_id": 5829,
+      "letra": "C",
+      "antes": "O companheiro de integrante protegido do sistema de Justiça fica fora da proteção familiar.",
+      "depois": "Homicídio — O companheiro de integrante protegido do sistema de Justiça fica fora da proteção familiar.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5830,
+      "letra": "A",
+      "antes": "A pena máxima da figura praticada pela gestante é de quatro anos.",
+      "depois": "Aborto provocado pela gestante — A pena máxima da figura praticada pela gestante é de quatro anos.",
+      "escopo": "Aborto provocado pela gestante"
+    },
+    {
+      "questao_id": 5830,
+      "letra": "B",
+      "antes": "A proteção familiar do sistema de Justiça exclui todos os parentes por afinidade.",
+      "depois": "Homicídio — A proteção familiar do sistema de Justiça exclui todos os parentes por afinidade.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5830,
+      "letra": "E",
+      "antes": "A forma básica é punida com pena de reclusão.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A forma básica é punida com pena de reclusão.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5831,
+      "letra": "A",
+      "antes": "A proteção familiar do sistema de Justiça alcança parente até o quarto grau.",
+      "depois": "Homicídio — A proteção familiar do sistema de Justiça alcança parente até o quarto grau.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5831,
+      "letra": "D",
+      "antes": "A pena mínima da forma básica é de um ano.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A pena mínima da forma básica é de um ano.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5831,
+      "letra": "E",
+      "antes": "A ausência de consentimento só importa quando também existe violência física.",
+      "depois": "Aborto provocado por terceiro sem consentimento — A ausência de consentimento só importa quando também existe violência física.",
+      "escopo": "Aborto provocado por terceiro sem consentimento"
+    },
+    {
+      "questao_id": 5832,
+      "letra": "C",
+      "antes": "A pena máxima da forma básica é de dois anos.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A pena máxima da forma básica é de dois anos.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5832,
+      "letra": "E",
+      "antes": "O familiar é protegido mesmo quando o fato não guarda relação com a condição funcional.",
+      "depois": "Homicídio — O familiar é protegido mesmo quando o fato não guarda relação com a condição funcional.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5833,
+      "letra": "A",
+      "antes": "A presença da mulher a quem se pretende atingir é irrelevante para a pena.",
+      "depois": "Vicaricídio — A presença da mulher a quem se pretende atingir é irrelevante para a pena.",
+      "escopo": "Vicaricídio"
+    },
+    {
+      "questao_id": 5833,
+      "letra": "D",
+      "antes": "Arma de fogo de uso restrito fica fora da hipótese qualificadora.",
+      "depois": "Homicídio — Arma de fogo de uso restrito fica fora da hipótese qualificadora.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5834,
+      "letra": "C",
+      "antes": "Arma de fogo de uso proibido fica fora da hipótese qualificadora.",
+      "depois": "Homicídio — Arma de fogo de uso proibido fica fora da hipótese qualificadora.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5835,
+      "letra": "A",
+      "antes": "O consentimento da gestante torna atípica a conduta do terceiro.",
+      "depois": "Aborto provocado por terceiro com consentimento — O consentimento da gestante torna atípica a conduta do terceiro.",
+      "escopo": "Aborto provocado por terceiro com consentimento"
+    },
+    {
+      "questao_id": 5835,
+      "letra": "B",
+      "antes": "A qualificadora etária só alcança vítima que já tenha quatorze anos completos.",
+      "depois": "Homicídio — A qualificadora etária só alcança vítima que já tenha quatorze anos completos.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5835,
+      "letra": "E",
+      "antes": "Lesão corporal de natureza grave pode preencher o resultado exigido nessa forma.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Lesão corporal de natureza grave pode preencher o resultado exigido nessa forma.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5836,
+      "letra": "A",
+      "antes": "A qualificação por instituição de ensino exige que a vítima seja aluno matriculado.",
+      "depois": "Homicídio — A qualificação por instituição de ensino exige que a vítima seja aluno matriculado.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5836,
+      "letra": "D",
+      "antes": "Lesão corporal de natureza gravíssima pode preencher o resultado exigido nessa forma.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Lesão corporal de natureza gravíssima pode preencher o resultado exigido nessa forma.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5837,
+      "letra": "C",
+      "antes": "A forma resultante de lesão grave ou gravíssima é punida com detenção.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A forma resultante de lesão grave ou gravíssima é punida com detenção.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5837,
+      "letra": "E",
+      "antes": "Deficiência da vítima é irrelevante para o aumento próprio dessa hipótese.",
+      "depois": "Homicídio — Deficiência da vítima é irrelevante para o aumento próprio dessa hipótese.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5838,
+      "letra": "B",
+      "antes": "A pena mínima da forma resultante de lesão grave ou gravíssima é de dois anos.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A pena mínima da forma resultante de lesão grave ou gravíssima é de dois anos.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5838,
+      "letra": "D",
+      "antes": "Doença que aumente a vulnerabilidade da vítima pode gerar aumento nessa hipótese.",
+      "depois": "Homicídio — Doença que aumente a vulnerabilidade da vítima pode gerar aumento nessa hipótese.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5839,
+      "letra": "A",
+      "antes": "A pena máxima da forma resultante de lesão grave ou gravíssima é de três anos.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A pena máxima da forma resultante de lesão grave ou gravíssima é de três anos.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5839,
+      "letra": "B",
+      "antes": "A idade só interfere na validade penal do consentimento quando a gestante tem menos de doze anos.",
+      "depois": "Aborto provocado por terceiro — A idade só interfere na validade penal do consentimento quando a gestante tem menos de doze anos.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5839,
+      "letra": "C",
+      "antes": "O aumento por vulnerabilidade começa obrigatoriamente em metade da pena.",
+      "depois": "Homicídio — O aumento por vulnerabilidade começa obrigatoriamente em metade da pena.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5840,
+      "letra": "A",
+      "antes": "Alienação mental da gestante não interfere na disciplina penal do consentimento.",
+      "depois": "Aborto provocado por terceiro — Alienação mental da gestante não interfere na disciplina penal do consentimento.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5840,
+      "letra": "B",
+      "antes": "O aumento por vulnerabilidade pode alcançar dois terços da pena.",
+      "depois": "Homicídio — O aumento por vulnerabilidade pode alcançar dois terços da pena.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5841,
+      "letra": "A",
+      "antes": "Ascendente da vítima fica fora da causa de aumento própria dessa hipótese.",
+      "depois": "Homicídio — Ascendente da vítima fica fora da causa de aumento própria dessa hipótese.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5841,
+      "letra": "E",
+      "antes": "A debilidade mental da gestante conduz à disciplina da modalidade sem consentimento.",
+      "depois": "Aborto provocado por terceiro — A debilidade mental da gestante conduz à disciplina da modalidade sem consentimento.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5842,
+      "letra": "C",
+      "antes": "A forma resultante de morte é punida com pena de reclusão.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A forma resultante de morte é punida com pena de reclusão.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5842,
+      "letra": "D",
+      "antes": "Fraude no consentimento apenas gera aumento da modalidade consensual.",
+      "depois": "Aborto provocado por terceiro — Fraude no consentimento apenas gera aumento da modalidade consensual.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5842,
+      "letra": "E",
+      "antes": "Padrasto da vítima fica fora da causa de aumento própria dessa hipótese.",
+      "depois": "Homicídio — Padrasto da vítima fica fora da causa de aumento própria dessa hipótese.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5843,
+      "letra": "A",
+      "antes": "Pessoa sob guarda da mulher só pode ser vítima se também for parente.",
+      "depois": "Vicaricídio — Pessoa sob guarda da mulher só pode ser vítima se também for parente.",
+      "escopo": "Vicaricídio"
+    },
+    {
+      "questao_id": 5843,
+      "letra": "B",
+      "antes": "A pena mínima da forma resultante de morte é de dois anos.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A pena mínima da forma resultante de morte é de dois anos.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5843,
+      "letra": "C",
+      "antes": "Grave ameaça mantém a disciplina própria da modalidade consensual.",
+      "depois": "Aborto provocado por terceiro — Grave ameaça mantém a disciplina própria da modalidade consensual.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5843,
+      "letra": "D",
+      "antes": "Madrasta da vítima fica fora da causa de aumento própria dessa hipótese.",
+      "depois": "Homicídio — Madrasta da vítima fica fora da causa de aumento própria dessa hipótese.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5844,
+      "letra": "A",
+      "antes": "A pena máxima da forma resultante de morte é de quatro anos.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A pena máxima da forma resultante de morte é de quatro anos.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5844,
+      "letra": "B",
+      "antes": "Violência empregada para obter consentimento mantém a modalidade consensual.",
+      "depois": "Aborto provocado por terceiro — Violência empregada para obter consentimento mantém a modalidade consensual.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5844,
+      "letra": "C",
+      "antes": "Tio da vítima fica fora da causa de aumento própria dessa hipótese.",
+      "depois": "Homicídio — Tio da vítima fica fora da causa de aumento própria dessa hipótese.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5845,
+      "letra": "A",
+      "antes": "Nessas hipóteses de consentimento inválido, mantém-se a pena da modalidade consensual.",
+      "depois": "Aborto provocado por terceiro — Nessas hipóteses de consentimento inválido, mantém-se a pena da modalidade consensual.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5845,
+      "letra": "B",
+      "antes": "Irmão da vítima pode gerar aumento de dois terços nessa hipótese.",
+      "depois": "Homicídio — Irmão da vítima pode gerar aumento de dois terços nessa hipótese.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5846,
+      "letra": "A",
+      "antes": "Cônjuge da vítima pode gerar aumento de dois terços nessa hipótese.",
+      "depois": "Homicídio — Cônjuge da vítima pode gerar aumento de dois terços nessa hipótese.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5846,
+      "letra": "D",
+      "antes": "Motivo torpe produz apenas aumento variável até o dobro.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Motivo torpe produz apenas aumento variável até o dobro.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5847,
+      "letra": "A",
+      "antes": "Inobservância de regra técnica de profissão pode aumentar a pena em um terço.",
+      "depois": "Homicídio culposo — Inobservância de regra técnica de profissão pode aumentar a pena em um terço.",
+      "escopo": "Homicídio culposo"
+    },
+    {
+      "questao_id": 5847,
+      "letra": "C",
+      "antes": "Motivo fútil não repercute na pena do crime.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Motivo fútil não repercute na pena do crime.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5847,
+      "letra": "E",
+      "antes": "Companheiro da vítima fica fora da causa de aumento própria dessa hipótese.",
+      "depois": "Homicídio — Companheiro da vítima fica fora da causa de aumento própria dessa hipótese.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5848,
+      "letra": "B",
+      "antes": "A duplicação por idade exige vítima menor de quatorze anos.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A duplicação por idade exige vítima menor de quatorze anos.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5848,
+      "letra": "D",
+      "antes": "Tutor da vítima pode gerar aumento de dois terços nessa hipótese.",
+      "depois": "Homicídio — Tutor da vítima pode gerar aumento de dois terços nessa hipótese.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5849,
+      "letra": "A",
+      "antes": "A duplicação exige incapacidade absoluta de resistência.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A duplicação exige incapacidade absoluta de resistência.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5849,
+      "letra": "B",
+      "antes": "Lesão grave causada pelos meios empregados não repercute na forma qualificada.",
+      "depois": "Aborto provocado por terceiro — Lesão grave causada pelos meios empregados não repercute na forma qualificada.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5849,
+      "letra": "C",
+      "antes": "Curador da vítima pode gerar aumento de dois terços nessa hipótese.",
+      "depois": "Homicídio — Curador da vítima pode gerar aumento de dois terços nessa hipótese.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5850,
+      "letra": "A",
+      "antes": "Quando sobrevém lesão corporal grave nas condições previstas, a pena é duplicada.",
+      "depois": "Aborto provocado por terceiro — Quando sobrevém lesão corporal grave nas condições previstas, a pena é duplicada.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5850,
+      "letra": "B",
+      "antes": "Preceptor da vítima pode gerar aumento de dois terços nessa hipótese.",
+      "depois": "Homicídio — Preceptor da vítima pode gerar aumento de dois terços nessa hipótese.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5850,
+      "letra": "E",
+      "antes": "Uso de rede de computadores determina obrigatoriamente pena em dobro.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Uso de rede de computadores determina obrigatoriamente pena em dobro.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5851,
+      "letra": "A",
+      "antes": "Empregador da vítima fica fora da causa de aumento própria dessa hipótese.",
+      "depois": "Homicídio — Empregador da vítima fica fora da causa de aumento própria dessa hipótese.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5851,
+      "letra": "D",
+      "antes": "Uso de rede social pode gerar aumento da pena até o dobro.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Uso de rede social pode gerar aumento da pena até o dobro.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5852,
+      "letra": "A",
+      "antes": "Deixar de procurar diminuir as consequências do ato é irrelevante para a pena.",
+      "depois": "Homicídio culposo — Deixar de procurar diminuir as consequências do ato é irrelevante para a pena.",
+      "escopo": "Homicídio culposo"
+    },
+    {
+      "questao_id": 5852,
+      "letra": "C",
+      "antes": "Transmissão em tempo real pode gerar aumento da pena até o dobro.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Transmissão em tempo real pode gerar aumento da pena até o dobro.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5852,
+      "letra": "D",
+      "antes": "Morte causada pelos meios empregados não repercute na forma qualificada.",
+      "depois": "Aborto provocado por terceiro — Morte causada pelos meios empregados não repercute na forma qualificada.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5852,
+      "letra": "E",
+      "antes": "A autoridade sobre a vítima só importa quando decorre de vínculo familiar enumerado.",
+      "depois": "Homicídio — A autoridade sobre a vítima só importa quando decorre de vínculo familiar enumerado.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5853,
+      "letra": "B",
+      "antes": "Na hipótese digital, a pena é sempre aplicada exatamente em dobro.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Na hipótese digital, a pena é sempre aplicada exatamente em dobro.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5853,
+      "letra": "C",
+      "antes": "Quando sobrevém morte nas condições previstas, as penas aplicáveis são duplicadas.",
+      "depois": "Aborto provocado por terceiro — Quando sobrevém morte nas condições previstas, as penas aplicáveis são duplicadas.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5853,
+      "letra": "D",
+      "antes": "A causa de aumento em educação básica exclui as instituições públicas.",
+      "depois": "Homicídio — A causa de aumento em educação básica exclui as instituições públicas.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5854,
+      "letra": "A",
+      "antes": "Autor que seja líder do ambiente virtual indicado recebe pena em dobro.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Autor que seja líder do ambiente virtual indicado recebe pena em dobro.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5854,
+      "letra": "C",
+      "antes": "A causa de aumento em educação básica exclui as instituições privadas.",
+      "depois": "Homicídio — A causa de aumento em educação básica exclui as instituições privadas.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5854,
+      "letra": "E",
+      "antes": "A presença da mulher a quem se pretende atingir é irrelevante para a pena.",
+      "depois": "Vicaricídio — A presença da mulher a quem se pretende atingir é irrelevante para a pena.",
+      "escopo": "Vicaricídio"
+    },
+    {
+      "questao_id": 5855,
+      "letra": "A",
+      "antes": "Basta risco à saúde da gestante, mesmo existindo outro meio de salvar sua vida.",
+      "depois": "Aborto não punido — Basta risco à saúde da gestante, mesmo existindo outro meio de salvar sua vida.",
+      "escopo": "Aborto não punido"
+    },
+    {
+      "questao_id": 5855,
+      "letra": "B",
+      "antes": "Na hipótese de educação básica, o aumento previsto é de dois terços.",
+      "depois": "Homicídio — Na hipótese de educação básica, o aumento previsto é de dois terços.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5855,
+      "letra": "E",
+      "antes": "A condição de coordenador não recebe tratamento específico.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A condição de coordenador não recebe tratamento específico.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5856,
+      "letra": "A",
+      "antes": "Deficiência da vítima é irrelevante para a majorante própria da instituição.",
+      "depois": "Homicídio — Deficiência da vítima é irrelevante para a majorante própria da instituição.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5856,
+      "letra": "D",
+      "antes": "Autor que seja administrador do ambiente virtual indicado recebe pena em dobro.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Autor que seja administrador do ambiente virtual indicado recebe pena em dobro.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5856,
+      "letra": "E",
+      "antes": "A hipótese necessária basta para proteger apenas a saúde, sem risco à vida.",
+      "depois": "Aborto não punido — A hipótese necessária basta para proteger apenas a saúde, sem risco à vida.",
+      "escopo": "Aborto não punido"
+    },
+    {
+      "questao_id": 5857,
+      "letra": "A",
+      "antes": "A possibilidade de deixar de aplicar a pena é prevista igualmente para todo homicídio doloso.",
+      "depois": "Homicídio culposo — A possibilidade de deixar de aplicar a pena é prevista igualmente para todo homicídio doloso.",
+      "escopo": "Homicídio culposo"
+    },
+    {
+      "questao_id": 5857,
+      "letra": "C",
+      "antes": "Responsável pelo ambiente virtual só recebe aumento se também for administrador.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Responsável pelo ambiente virtual só recebe aumento se também for administrador.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5857,
+      "letra": "D",
+      "antes": "A hipótese não punida independe de a gravidez resultar de estupro.",
+      "depois": "Aborto não punido — A hipótese não punida independe de a gravidez resultar de estupro.",
+      "escopo": "Aborto não punido"
+    },
+    {
+      "questao_id": 5857,
+      "letra": "E",
+      "antes": "Doença da vítima só importa quando produz incapacidade total.",
+      "depois": "Homicídio — Doença da vítima só importa quando produz incapacidade total.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5858,
+      "letra": "B",
+      "antes": "A condição especial do autor só se aplica a comunidades, nunca a grupos.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A condição especial do autor só se aplica a comunidades, nunca a grupos.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5858,
+      "letra": "C",
+      "antes": "Na gravidez resultante de estupro, o consentimento da gestante capaz é dispensável.",
+      "depois": "Aborto não punido — Na gravidez resultante de estupro, o consentimento da gestante capaz é dispensável.",
+      "escopo": "Aborto não punido"
+    },
+    {
+      "questao_id": 5858,
+      "letra": "D",
+      "antes": "Vulnerabilidade física causada por doença fica fora dessa hipótese.",
+      "depois": "Homicídio — Vulnerabilidade física causada por doença fica fora dessa hipótese.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5858,
+      "letra": "E",
+      "antes": "Consequências leves para o próprio agente bastam para permitir a não aplicação da pena.",
+      "depois": "Homicídio culposo — Consequências leves para o próprio agente bastam para permitir a não aplicação da pena.",
+      "escopo": "Homicídio culposo"
+    },
+    {
+      "questao_id": 5859,
+      "letra": "A",
+      "antes": "A condição especial do autor só se aplica a grupos, nunca a comunidades.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A condição especial do autor só se aplica a grupos, nunca a comunidades.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5859,
+      "letra": "B",
+      "antes": "Sendo incapaz a gestante, somente ela própria pode prestar o consentimento exigido.",
+      "depois": "Aborto não punido — Sendo incapaz a gestante, somente ela própria pode prestar o consentimento exigido.",
+      "escopo": "Aborto não punido"
+    },
+    {
+      "questao_id": 5859,
+      "letra": "C",
+      "antes": "Vulnerabilidade mental causada por doença fica fora dessa hipótese.",
+      "depois": "Homicídio — Vulnerabilidade mental causada por doença fica fora dessa hipótese.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5859,
+      "letra": "D",
+      "antes": "A regra exige que a gravidade das consequências torne desnecessária a sanção penal.",
+      "depois": "Homicídio culposo — A regra exige que a gravidade das consequências torne desnecessária a sanção penal.",
+      "escopo": "Homicídio culposo"
+    },
+    {
+      "questao_id": 5860,
+      "letra": "B",
+      "antes": "O aumento por vulnerabilidade começa obrigatoriamente em metade da pena.",
+      "depois": "Homicídio — O aumento por vulnerabilidade começa obrigatoriamente em metade da pena.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5860,
+      "letra": "C",
+      "antes": "Nessa hipótese, o juiz pode deixar de aplicar a pena.",
+      "depois": "Homicídio culposo — Nessa hipótese, o juiz pode deixar de aplicar a pena.",
+      "escopo": "Homicídio culposo"
+    },
+    {
+      "questao_id": 5860,
+      "letra": "E",
+      "antes": "Rede virtual fica fora da hipótese relativa à posição do autor.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Rede virtual fica fora da hipótese relativa à posição do autor.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5861,
+      "letra": "A",
+      "antes": "O aumento por vulnerabilidade pode alcançar dois terços da pena.",
+      "depois": "Homicídio — O aumento por vulnerabilidade pode alcançar dois terços da pena.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5861,
+      "letra": "B",
+      "antes": "Crime praticado por milícia privada fica fora da causa de aumento prevista.",
+      "depois": "Homicídio — Crime praticado por milícia privada fica fora da causa de aumento prevista.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5861,
+      "letra": "D",
+      "antes": "A mudança especial de enquadramento exige resultado de lesão corporal gravíssima.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A mudança especial de enquadramento exige resultado de lesão corporal gravíssima.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5862,
+      "letra": "A",
+      "antes": "A majorante da milícia privada independe de qualquer pretexto de serviço de segurança.",
+      "depois": "Homicídio — A majorante da milícia privada independe de qualquer pretexto de serviço de segurança.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5862,
+      "letra": "C",
+      "antes": "Resultado gravíssimo contra menor de quatorze anos pode alterar o enquadramento penal.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Resultado gravíssimo contra menor de quatorze anos pode alterar o enquadramento penal.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5862,
+      "letra": "D",
+      "antes": "O estado puerperal é dispensável quando a morte ocorre durante o parto.",
+      "depois": "Infanticídio — O estado puerperal é dispensável quando a morte ocorre durante o parto.",
+      "escopo": "Infanticídio"
+    },
+    {
+      "questao_id": 5862,
+      "letra": "E",
+      "antes": "Ascendente da vítima fica fora da majorante própria da instituição.",
+      "depois": "Homicídio — Ascendente da vítima fica fora da majorante própria da instituição.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5863,
+      "letra": "B",
+      "antes": "Enfermidade mental que retire o discernimento fica fora da hipótese especial.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Enfermidade mental que retire o discernimento fica fora da hipótese especial.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5863,
+      "letra": "D",
+      "antes": "Padrasto da vítima fica fora da majorante própria da instituição.",
+      "depois": "Homicídio — Padrasto da vítima fica fora da majorante própria da instituição.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5863,
+      "letra": "E",
+      "antes": "Grupo de extermínio fica fora da causa de aumento prevista.",
+      "depois": "Homicídio — Grupo de extermínio fica fora da causa de aumento prevista.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5864,
+      "letra": "A",
+      "antes": "Deficiência mental que retire o discernimento fica fora da hipótese especial.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Deficiência mental que retire o discernimento fica fora da hipótese especial.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5864,
+      "letra": "C",
+      "antes": "Madrasta da vítima fica fora da majorante própria da instituição.",
+      "depois": "Homicídio — Madrasta da vítima fica fora da majorante própria da instituição.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5864,
+      "letra": "D",
+      "antes": "O aumento por milícia privada ou grupo de extermínio começa obrigatoriamente em metade.",
+      "depois": "Homicídio — O aumento por milícia privada ou grupo de extermínio começa obrigatoriamente em metade.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5865,
+      "letra": "B",
+      "antes": "Tio da vítima fica fora da majorante própria da instituição.",
+      "depois": "Homicídio — Tio da vítima fica fora da majorante própria da instituição.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5865,
+      "letra": "C",
+      "antes": "O aumento por milícia privada ou grupo de extermínio pode alcançar dois terços.",
+      "depois": "Homicídio — O aumento por milícia privada ou grupo de extermínio pode alcançar dois terços.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5865,
+      "letra": "E",
+      "antes": "A falta de discernimento da vítima é irrelevante para a hipótese especial.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A falta de discernimento da vítima é irrelevante para a hipótese especial.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5866,
+      "letra": "A",
+      "antes": "Irmão da vítima fica fora da majorante própria da instituição.",
+      "depois": "Homicídio — Irmão da vítima fica fora da majorante própria da instituição.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5866,
+      "letra": "D",
+      "antes": "Incapacidade de resistência só importa quando decorre de doença mental.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Incapacidade de resistência só importa quando decorre de doença mental.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5867,
+      "letra": "E",
+      "antes": "Cônjuge da vítima fica fora da majorante própria da instituição.",
+      "depois": "Homicídio — Cônjuge da vítima fica fora da majorante própria da instituição.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5868,
+      "letra": "B",
+      "antes": "Resultado morte contra menor de quatorze anos permanece sempre na pena anterior.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Resultado morte contra menor de quatorze anos permanece sempre na pena anterior.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5868,
+      "letra": "D",
+      "antes": "Companheiro da vítima fica fora da majorante própria da instituição.",
+      "depois": "Homicídio — Companheiro da vítima fica fora da majorante própria da instituição.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5869,
+      "letra": "A",
+      "antes": "Resultado morte contra pessoa sem discernimento nunca altera o enquadramento.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Resultado morte contra pessoa sem discernimento nunca altera o enquadramento.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5869,
+      "letra": "C",
+      "antes": "Tutor da vítima fica fora da majorante própria da instituição.",
+      "depois": "Homicídio — Tutor da vítima fica fora da majorante própria da instituição.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5870,
+      "letra": "A",
+      "antes": "A figura praticada pela gestante é punida com pena de detenção.",
+      "depois": "Aborto provocado pela gestante — A figura praticada pela gestante é punida com pena de detenção.",
+      "escopo": "Aborto provocado pela gestante"
+    },
+    {
+      "questao_id": 5870,
+      "letra": "B",
+      "antes": "Curador da vítima fica fora da majorante própria da instituição.",
+      "depois": "Homicídio — Curador da vítima fica fora da majorante própria da instituição.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5870,
+      "letra": "C",
+      "antes": "Violência doméstica e familiar é irrelevante para caracterizar a razão exigida.",
+      "depois": "Feminicídio — Violência doméstica e familiar é irrelevante para caracterizar a razão exigida.",
+      "escopo": "Feminicídio"
+    },
+    {
+      "questao_id": 5870,
+      "letra": "E",
+      "antes": "A impossibilidade de resistência é irrelevante quando sobrevém o resultado morte.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A impossibilidade de resistência é irrelevante quando sobrevém o resultado morte.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5871,
+      "letra": "A",
+      "antes": "Preceptor da vítima fica fora da majorante própria da instituição.",
+      "depois": "Homicídio — Preceptor da vítima fica fora da majorante própria da instituição.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5871,
+      "letra": "B",
+      "antes": "Menosprezo à condição de mulher só importa quando associado a violência doméstica.",
+      "depois": "Feminicídio — Menosprezo à condição de mulher só importa quando associado a violência doméstica.",
+      "escopo": "Feminicídio"
+    },
+    {
+      "questao_id": 5871,
+      "letra": "E",
+      "antes": "A pena mínima da figura praticada pela gestante é de um ano.",
+      "depois": "Aborto provocado pela gestante — A pena mínima da figura praticada pela gestante é de um ano.",
+      "escopo": "Aborto provocado pela gestante"
+    },
+    {
+      "questao_id": 5872,
+      "letra": "A",
+      "antes": "Discriminação à condição de mulher, isoladamente, nunca caracteriza a razão exigida.",
+      "depois": "Feminicídio — Discriminação à condição de mulher, isoladamente, nunca caracteriza a razão exigida.",
+      "escopo": "Feminicídio"
+    },
+    {
+      "questao_id": 5872,
+      "letra": "C",
+      "antes": "Induzir alguém a suicidar-se integra a forma básica do crime.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Induzir alguém a suicidar-se integra a forma básica do crime.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5872,
+      "letra": "D",
+      "antes": "A pena máxima da figura praticada pela gestante é de quatro anos.",
+      "depois": "Aborto provocado pela gestante — A pena máxima da figura praticada pela gestante é de quatro anos.",
+      "escopo": "Aborto provocado pela gestante"
+    },
+    {
+      "questao_id": 5872,
+      "letra": "E",
+      "antes": "Empregador da vítima fica fora da majorante própria da instituição.",
+      "depois": "Homicídio — Empregador da vítima fica fora da majorante própria da instituição.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5873,
+      "letra": "B",
+      "antes": "Instigar alguém a suicidar-se integra a forma básica do crime.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Instigar alguém a suicidar-se integra a forma básica do crime.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5873,
+      "letra": "C",
+      "antes": "A ausência de consentimento só importa quando também existe violência física.",
+      "depois": "Aborto provocado por terceiro sem consentimento — A ausência de consentimento só importa quando também existe violência física.",
+      "escopo": "Aborto provocado por terceiro sem consentimento"
+    },
+    {
+      "questao_id": 5873,
+      "letra": "D",
+      "antes": "A autoridade sobre a vítima só importa quando decorre de parentesco enumerado.",
+      "depois": "Homicídio — A autoridade sobre a vítima só importa quando decorre de parentesco enumerado.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5874,
+      "letra": "C",
+      "antes": "Professor da instituição só gera aumento quando também é parente da vítima.",
+      "depois": "Homicídio — Professor da instituição só gera aumento quando também é parente da vítima.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5875,
+      "letra": "B",
+      "antes": "Funcionário da instituição só gera aumento quando exerce função pedagógica.",
+      "depois": "Homicídio — Funcionário da instituição só gera aumento quando exerce função pedagógica.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5875,
+      "letra": "D",
+      "antes": "A presença da mulher a quem se pretende atingir é irrelevante para a pena.",
+      "depois": "Vicaricídio — A presença da mulher a quem se pretende atingir é irrelevante para a pena.",
+      "escopo": "Vicaricídio"
+    },
+    {
+      "questao_id": 5876,
+      "letra": "A",
+      "antes": "A condição especial relativa ao autor gera aumento de metade.",
+      "depois": "Homicídio — A condição especial relativa ao autor gera aumento de metade.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5877,
+      "letra": "D",
+      "antes": "O consentimento da gestante torna atípica a conduta do terceiro.",
+      "depois": "Aborto provocado por terceiro com consentimento — O consentimento da gestante torna atípica a conduta do terceiro.",
+      "escopo": "Aborto provocado por terceiro com consentimento"
+    },
+    {
+      "questao_id": 5878,
+      "letra": "B",
+      "antes": "A forma básica é punida com pena de detenção.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A forma básica é punida com pena de detenção.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5878,
+      "letra": "D",
+      "antes": "Integrante de organização criminosa ultraviolenta pode integrar a forma especial.",
+      "depois": "Homicídio — Integrante de organização criminosa ultraviolenta pode integrar a forma especial.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5879,
+      "letra": "A",
+      "antes": "A pena mínima da forma básica é de um ano.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A pena mínima da forma básica é de um ano.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5879,
+      "letra": "C",
+      "antes": "Integrante de grupo paramilitar fica fora da forma especial.",
+      "depois": "Homicídio — Integrante de grupo paramilitar fica fora da forma especial.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5880,
+      "letra": "B",
+      "antes": "Integrante de milícia privada fica fora da forma especial.",
+      "depois": "Homicídio — Integrante de milícia privada fica fora da forma especial.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5880,
+      "letra": "E",
+      "antes": "A pena máxima da forma básica é de três anos.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A pena máxima da forma básica é de três anos.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5881,
+      "letra": "E",
+      "antes": "A idade só interfere na validade penal do consentimento quando a gestante tem menos de doze anos.",
+      "depois": "Aborto provocado por terceiro — A idade só interfere na validade penal do consentimento quando a gestante tem menos de doze anos.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5882,
+      "letra": "D",
+      "antes": "Alienação mental da gestante não interfere na disciplina penal do consentimento.",
+      "depois": "Aborto provocado por terceiro — Alienação mental da gestante não interfere na disciplina penal do consentimento.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5882,
+      "letra": "E",
+      "antes": "A finalidade de realizar as condutas legalmente referidas é irrelevante para a forma especial.",
+      "depois": "Homicídio — A finalidade de realizar as condutas legalmente referidas é irrelevante para a forma especial.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5883,
+      "letra": "B",
+      "antes": "Lesão corporal de natureza grave pode preencher o resultado exigido nessa forma.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Lesão corporal de natureza grave pode preencher o resultado exigido nessa forma.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5883,
+      "letra": "C",
+      "antes": "Debilidade mental da gestante não interfere na disciplina penal do consentimento.",
+      "depois": "Aborto provocado por terceiro — Debilidade mental da gestante não interfere na disciplina penal do consentimento.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5883,
+      "letra": "D",
+      "antes": "A forma especial é punida com pena de detenção.",
+      "depois": "Homicídio — A forma especial é punida com pena de detenção.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5883,
+      "letra": "E",
+      "antes": "A responsabilidade por pessoa com deficiência só gera aumento quando ela é menor.",
+      "depois": "Feminicídio — A responsabilidade por pessoa com deficiência só gera aumento quando ela é menor.",
+      "escopo": "Feminicídio"
+    },
+    {
+      "questao_id": 5884,
+      "letra": "A",
+      "antes": "Lesão corporal gravíssima fica fora da forma resultante prevista.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — Lesão corporal gravíssima fica fora da forma resultante prevista.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5884,
+      "letra": "B",
+      "antes": "Fraude no consentimento apenas gera aumento da modalidade consensual.",
+      "depois": "Aborto provocado por terceiro — Fraude no consentimento apenas gera aumento da modalidade consensual.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5884,
+      "letra": "C",
+      "antes": "A pena mínima da forma especial é de vinte anos.",
+      "depois": "Homicídio — A pena mínima da forma especial é de vinte anos.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5885,
+      "letra": "A",
+      "antes": "Grave ameaça mantém a disciplina própria da modalidade consensual.",
+      "depois": "Aborto provocado por terceiro — Grave ameaça mantém a disciplina própria da modalidade consensual.",
+      "escopo": "Aborto provocado por terceiro"
+    },
+    {
+      "questao_id": 5885,
+      "letra": "B",
+      "antes": "A pena máxima da forma especial é de trinta anos.",
+      "depois": "Homicídio — A pena máxima da forma especial é de trinta anos.",
+      "escopo": "Homicídio"
+    },
+    {
+      "questao_id": 5885,
+      "letra": "E",
+      "antes": "A forma resultante de lesão grave ou gravíssima é punida com detenção.",
+      "depois": "Induzimento/instigação/auxílio a suicídio ou automutilação — A forma resultante de lesão grave ou gravíssima é punida com detenção.",
+      "escopo": "Induzimento/instigação/auxílio a suicídio ou automutilação"
+    },
+    {
+      "questao_id": 5762,
+      "letra": "D",
+      "antes": "A condição de criança da vítima é irrelevante para as hipóteses de aumento comum.",
+      "depois": "Disposições comuns dos crimes contra a honra — A condição de criança da vítima é irrelevante para as hipóteses de aumento comum.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5763,
+      "letra": "A",
+      "antes": "A condição de adolescente da vítima fica fora das hipóteses de aumento comum.",
+      "depois": "Disposições comuns dos crimes contra a honra — A condição de adolescente da vítima fica fora das hipóteses de aumento comum.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5764,
+      "letra": "B",
+      "antes": "A recusa em prestar explicações impede qualquer responsabilização pela ofensa.",
+      "depois": "Pedido de explicações nos crimes contra a honra — A recusa em prestar explicações impede qualquer responsabilização pela ofensa.",
+      "escopo": "Pedido de explicações nos crimes contra a honra"
+    },
+    {
+      "questao_id": 5764,
+      "letra": "E",
+      "antes": "A hipótese etária alcança somente pessoa com exatamente sessenta anos.",
+      "depois": "Disposições comuns dos crimes contra a honra — A hipótese etária alcança somente pessoa com exatamente sessenta anos.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5765,
+      "letra": "A",
+      "antes": "Qualquer explicação apresentada impede responsabilização, mesmo quando seja insatisfatória.",
+      "depois": "Pedido de explicações nos crimes contra a honra — Qualquer explicação apresentada impede responsabilização, mesmo quando seja insatisfatória.",
+      "escopo": "Pedido de explicações nos crimes contra a honra"
+    },
+    {
+      "questao_id": 5766,
+      "letra": "E",
+      "antes": "A suficiência das explicações depende exclusivamente da avaliação do próprio ofensor.",
+      "depois": "Pedido de explicações nos crimes contra a honra — A suficiência das explicações depende exclusivamente da avaliação do próprio ofensor.",
+      "escopo": "Pedido de explicações nos crimes contra a honra"
+    },
+    {
+      "questao_id": 5767,
+      "letra": "B",
+      "antes": "O cometimento do crime mediante paga aciona regra especial de exasperação da pena.",
+      "depois": "Disposições comuns dos crimes contra a honra — O cometimento do crime mediante paga aciona regra especial de exasperação da pena.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5767,
+      "letra": "D",
+      "antes": "A recusa ou insuficiência das explicações produz apenas multa processual, sem responsabilidade pela ofensa.",
+      "depois": "Pedido de explicações nos crimes contra a honra — A recusa ou insuficiência das explicações produz apenas multa processual, sem responsabilidade pela ofensa.",
+      "escopo": "Pedido de explicações nos crimes contra a honra"
+    },
+    {
+      "questao_id": 5768,
+      "letra": "A",
+      "antes": "Quando o crime é cometido mediante paga, aplica-se somente aumento de um terço.",
+      "depois": "Disposições comuns dos crimes contra a honra — Quando o crime é cometido mediante paga, aplica-se somente aumento de um terço.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5768,
+      "letra": "D",
+      "antes": "Propalar imputação caluniosa jamais gera responsabilização se o agente não criou a acusação.",
+      "depois": "Calúnia — Propalar imputação caluniosa jamais gera responsabilização se o agente não criou a acusação.",
+      "escopo": "Calúnia"
+    },
+    {
+      "questao_id": 5769,
+      "letra": "C",
+      "antes": "Divulgar imputação caluniosa só é punível quando o divulgador foi o autor originário da acusação.",
+      "depois": "Calúnia — Divulgar imputação caluniosa só é punível quando o divulgador foi o autor originário da acusação.",
+      "escopo": "Calúnia"
+    },
+    {
+      "questao_id": 5769,
+      "letra": "D",
+      "antes": "O cometimento do crime mediante promessa de recompensa aciona regra especial de exasperação.",
+      "depois": "Disposições comuns dos crimes contra a honra — O cometimento do crime mediante promessa de recompensa aciona regra especial de exasperação.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5770,
+      "letra": "B",
+      "antes": "Quem propala ou divulga a imputação responde pela regra específica mesmo sem saber que ela é falsa.",
+      "depois": "Calúnia — Quem propala ou divulga a imputação responde pela regra específica mesmo sem saber que ela é falsa.",
+      "escopo": "Calúnia"
+    },
+    {
+      "questao_id": 5770,
+      "letra": "C",
+      "antes": "A provocação relevante pode partir de qualquer terceiro sem vínculo com o ofendido.",
+      "depois": "Injúria — A provocação relevante pode partir de qualquer terceiro sem vínculo com o ofendido.",
+      "escopo": "Injúria"
+    },
+    {
+      "questao_id": 5770,
+      "letra": "D",
+      "antes": "Quando o crime é cometido mediante promessa de recompensa, aplica-se somente aumento de metade.",
+      "depois": "Disposições comuns dos crimes contra a honra — Quando o crime é cometido mediante promessa de recompensa, aplica-se somente aumento de metade.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5917,
+      "letra": "A",
+      "antes": "A exclusão da ofensa em juízo exige que ela ocorra na discussão da causa.",
+      "depois": "Exclusão de injúria ou difamação — A exclusão da ofensa em juízo exige que ela ocorra na discussão da causa.",
+      "escopo": "Exclusão de injúria ou difamação"
+    },
+    {
+      "questao_id": 5917,
+      "letra": "B",
+      "antes": "Qualquer provocação lícita e socialmente adequada basta para a hipótese de dispensa de pena.",
+      "depois": "Injúria — Qualquer provocação lícita e socialmente adequada basta para a hipótese de dispensa de pena.",
+      "escopo": "Injúria"
+    },
+    {
+      "questao_id": 5917,
+      "letra": "C",
+      "antes": "A prática originária do crime em rede social não produz qualquer agravamento previsto no texto.",
+      "depois": "Disposições comuns dos crimes contra a honra — A prática originária do crime em rede social não produz qualquer agravamento previsto no texto.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5917,
+      "letra": "D",
+      "antes": "Quem propala ou divulga imputação sabidamente falsa recebe necessariamente pena inferior à do autor inicial.",
+      "depois": "Calúnia — Quem propala ou divulga imputação sabidamente falsa recebe necessariamente pena inferior à do autor inicial.",
+      "escopo": "Calúnia"
+    },
+    {
+      "questao_id": 5918,
+      "letra": "A",
+      "antes": "Provocação indireta e remota satisfaz igualmente a hipótese de dispensa de pena.",
+      "depois": "Injúria — Provocação indireta e remota satisfaz igualmente a hipótese de dispensa de pena.",
+      "escopo": "Injúria"
+    },
+    {
+      "questao_id": 5918,
+      "letra": "B",
+      "antes": "A exclusão da ofensa em juízo pode alcançar manifestação feita pela própria parte.",
+      "depois": "Exclusão de injúria ou difamação — A exclusão da ofensa em juízo pode alcançar manifestação feita pela própria parte.",
+      "escopo": "Exclusão de injúria ou difamação"
+    },
+    {
+      "questao_id": 5918,
+      "letra": "C",
+      "antes": "A divulgação posterior em rede social fica fora da regra especial de agravamento.",
+      "depois": "Disposições comuns dos crimes contra a honra — A divulgação posterior em rede social fica fora da regra especial de agravamento.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5919,
+      "letra": "A",
+      "antes": "A regra especial se restringe a uma única modalidade específica de rede social.",
+      "depois": "Disposições comuns dos crimes contra a honra — A regra especial se restringe a uma única modalidade específica de rede social.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5919,
+      "letra": "B",
+      "antes": "O procurador da parte fica fora da exclusão prevista para a discussão da causa.",
+      "depois": "Exclusão de injúria ou difamação — O procurador da parte fica fora da exclusão prevista para a discussão da causa.",
+      "escopo": "Exclusão de injúria ou difamação"
+    },
+    {
+      "questao_id": 5920,
+      "letra": "A",
+      "antes": "A retorsão apta à dispensa de pena pode ocorrer muito tempo depois da primeira ofensa.",
+      "depois": "Injúria — A retorsão apta à dispensa de pena pode ocorrer muito tempo depois da primeira ofensa.",
+      "escopo": "Injúria"
+    },
+    {
+      "questao_id": 5920,
+      "letra": "C",
+      "antes": "A natureza privada da ação do crime imputado nunca interfere na prova da verdade.",
+      "depois": "Calúnia — A natureza privada da ação do crime imputado nunca interfere na prova da verdade.",
+      "escopo": "Calúnia"
+    },
+    {
+      "questao_id": 5920,
+      "letra": "D",
+      "antes": "Opinião desfavorável pode receber a exclusão prevista quando inserida nas modalidades de crítica indicadas.",
+      "depois": "Exclusão de injúria ou difamação — Opinião desfavorável pode receber a exclusão prevista quando inserida nas modalidades de crítica indicadas.",
+      "escopo": "Exclusão de injúria ou difamação"
+    },
+    {
+      "questao_id": 5920,
+      "letra": "E",
+      "antes": "Nas hipóteses previstas de rede social, aplica-se apenas a pena em dobro.",
+      "depois": "Disposições comuns dos crimes contra a honra — Nas hipóteses previstas de rede social, aplica-se apenas a pena em dobro.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5921,
+      "letra": "B",
+      "antes": "Em crime de ação privada, a prova da verdade é admitida mesmo sem qualquer condenação do ofendido.",
+      "depois": "Calúnia — Em crime de ação privada, a prova da verdade é admitida mesmo sem qualquer condenação do ofendido.",
+      "escopo": "Calúnia"
+    },
+    {
+      "questao_id": 5921,
+      "letra": "C",
+      "antes": "Qualquer reação física constitui, por si só, a retorsão prevista para dispensa de pena.",
+      "depois": "Injúria — Qualquer reação física constitui, por si só, a retorsão prevista para dispensa de pena.",
+      "escopo": "Injúria"
+    },
+    {
+      "questao_id": 5921,
+      "letra": "D",
+      "antes": "A regra especial de duplicação por condição do sexo feminino pode incidir contra vítima de qualquer sexo.",
+      "depois": "Disposições comuns dos crimes contra a honra — A regra especial de duplicação por condição do sexo feminino pode incidir contra vítima de qualquer sexo.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5922,
+      "letra": "C",
+      "antes": "Todo crime contra mulher recebe a duplicação, independentemente das razões da ofensa.",
+      "depois": "Disposições comuns dos crimes contra a honra — Todo crime contra mulher recebe a duplicação, independentemente das razões da ofensa.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5922,
+      "letra": "D",
+      "antes": "Qualquer condenação provisória do ofendido basta para afastar a restrição ligada à ação privada.",
+      "depois": "Calúnia — Qualquer condenação provisória do ofendido basta para afastar a restrição ligada à ação privada.",
+      "escopo": "Calúnia"
+    },
+    {
+      "questao_id": 5923,
+      "letra": "C",
+      "antes": "No crime contra mulher por razões da condição do sexo feminino, aplica-se somente aumento de um terço.",
+      "depois": "Disposições comuns dos crimes contra a honra — No crime contra mulher por razões da condição do sexo feminino, aplica-se somente aumento de um terço.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5923,
+      "letra": "E",
+      "antes": "A imputação dirigida ao Presidente da República admite sempre prova da verdade.",
+      "depois": "Calúnia — A imputação dirigida ao Presidente da República admite sempre prova da verdade.",
+      "escopo": "Calúnia"
+    },
+    {
+      "questao_id": 5924,
+      "letra": "B",
+      "antes": "A crítica permanece não punível mesmo quando é inequívoca a intenção de injuriar.",
+      "depois": "Exclusão de injúria ou difamação — A crítica permanece não punível mesmo quando é inequívoca a intenção de injuriar.",
+      "escopo": "Exclusão de injúria ou difamação"
+    },
+    {
+      "questao_id": 5924,
+      "letra": "D",
+      "antes": "A imputação dirigida a chefe de governo estrangeiro admite sempre prova da verdade.",
+      "depois": "Calúnia — A imputação dirigida a chefe de governo estrangeiro admite sempre prova da verdade.",
+      "escopo": "Calúnia"
+    },
+    {
+      "questao_id": 5925,
+      "letra": "C",
+      "antes": "A absolvição irrecorrível só restringe a prova da verdade quando o crime imputado é de ação privada.",
+      "depois": "Calúnia — A absolvição irrecorrível só restringe a prova da verdade quando o crime imputado é de ação privada.",
+      "escopo": "Calúnia"
+    },
+    {
+      "questao_id": 5925,
+      "letra": "D",
+      "antes": "A exclusão da crítica não prevalece quando é inequívoca a intenção de difamar.",
+      "depois": "Exclusão de injúria ou difamação — A exclusão da crítica não prevalece quando é inequívoca a intenção de difamar.",
+      "escopo": "Exclusão de injúria ou difamação"
+    },
+    {
+      "questao_id": 5925,
+      "letra": "E",
+      "antes": "Nas hipóteses comuns indicadas, as penas aumentam-se obrigatoriamente pela metade.",
+      "depois": "Disposições comuns dos crimes contra a honra — Nas hipóteses comuns indicadas, as penas aumentam-se obrigatoriamente pela metade.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5926,
+      "letra": "B",
+      "antes": "A absolvição do ofendido pelo crime imputado nunca interfere na admissibilidade da prova da verdade.",
+      "depois": "Calúnia — A absolvição do ofendido pelo crime imputado nunca interfere na admissibilidade da prova da verdade.",
+      "escopo": "Calúnia"
+    },
+    {
+      "questao_id": 5926,
+      "letra": "C",
+      "antes": "A exclusão do conceito desfavorável é reservada apenas a particulares.",
+      "depois": "Exclusão de injúria ou difamação — A exclusão do conceito desfavorável é reservada apenas a particulares.",
+      "escopo": "Exclusão de injúria ou difamação"
+    },
+    {
+      "questao_id": 5926,
+      "letra": "D",
+      "antes": "Crime contra a honra do Presidente da República fica fora das hipóteses de aumento comum.",
+      "depois": "Disposições comuns dos crimes contra a honra — Crime contra a honra do Presidente da República fica fora das hipóteses de aumento comum.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5927,
+      "letra": "B",
+      "antes": "Uma absolvição ainda recorrível basta para impedir definitivamente a prova da verdade.",
+      "depois": "Calúnia — Uma absolvição ainda recorrível basta para impedir definitivamente a prova da verdade.",
+      "escopo": "Calúnia"
+    },
+    {
+      "questao_id": 5927,
+      "letra": "C",
+      "antes": "Crime contra a honra de chefe de governo estrangeiro fica fora das hipóteses de aumento comum.",
+      "depois": "Disposições comuns dos crimes contra a honra — Crime contra a honra de chefe de governo estrangeiro fica fora das hipóteses de aumento comum.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5927,
+      "letra": "D",
+      "antes": "Somente conceito elogioso emitido por funcionário público recebe a exclusão indicada.",
+      "depois": "Exclusão de injúria ou difamação — Somente conceito elogioso emitido por funcionário público recebe a exclusão indicada.",
+      "escopo": "Exclusão de injúria ou difamação"
+    },
+    {
+      "questao_id": 5927,
+      "letra": "E",
+      "antes": "Alusões nunca permitem pedido judicial de explicações.",
+      "depois": "Pedido de explicações nos crimes contra a honra — Alusões nunca permitem pedido judicial de explicações.",
+      "escopo": "Pedido de explicações nos crimes contra a honra"
+    },
+    {
+      "questao_id": 5928,
+      "letra": "C",
+      "antes": "Conceito emitido em apreciação fica fora da exclusão funcional prevista.",
+      "depois": "Exclusão de injúria ou difamação — Conceito emitido em apreciação fica fora da exclusão funcional prevista.",
+      "escopo": "Exclusão de injúria ou difamação"
+    },
+    {
+      "questao_id": 5929,
+      "letra": "A",
+      "antes": "Na hipótese envolvendo funcionário público, o aumento independe de qualquer relação da ofensa com suas funções.",
+      "depois": "Disposições comuns dos crimes contra a honra — Na hipótese envolvendo funcionário público, o aumento independe de qualquer relação da ofensa com suas funções.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5929,
+      "letra": "C",
+      "antes": "A exclusão funcional pode abranger conceito emitido em informação prestada pelo funcionário público.",
+      "depois": "Exclusão de injúria ou difamação — A exclusão funcional pode abranger conceito emitido em informação prestada pelo funcionário público.",
+      "escopo": "Exclusão de injúria ou difamação"
+    },
+    {
+      "questao_id": 5930,
+      "letra": "A",
+      "antes": "A exclusão funcional independe de qualquer vínculo da manifestação com o dever do ofício.",
+      "depois": "Exclusão de injúria ou difamação — A exclusão funcional independe de qualquer vínculo da manifestação com o dever do ofício.",
+      "escopo": "Exclusão de injúria ou difamação"
+    },
+    {
+      "questao_id": 5930,
+      "letra": "E",
+      "antes": "Crime contra a honra do Presidente do Senado Federal fica fora das hipóteses de aumento.",
+      "depois": "Disposições comuns dos crimes contra a honra — Crime contra a honra do Presidente do Senado Federal fica fora das hipóteses de aumento.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5931,
+      "letra": "A",
+      "antes": "A injúria fica fora das hipóteses de pedido judicial de explicações.",
+      "depois": "Pedido de explicações nos crimes contra a honra — A injúria fica fora das hipóteses de pedido judicial de explicações.",
+      "escopo": "Pedido de explicações nos crimes contra a honra"
+    },
+    {
+      "questao_id": 5931,
+      "letra": "C",
+      "antes": "A publicidade posterior da ofensa proferida em juízo permanece sempre abrangida pela exclusão.",
+      "depois": "Exclusão de injúria ou difamação — A publicidade posterior da ofensa proferida em juízo permanece sempre abrangida pela exclusão.",
+      "escopo": "Exclusão de injúria ou difamação"
+    },
+    {
+      "questao_id": 5931,
+      "letra": "D",
+      "antes": "Crime contra a honra do Presidente da Câmara dos Deputados fica fora das hipóteses de aumento.",
+      "depois": "Disposições comuns dos crimes contra a honra — Crime contra a honra do Presidente da Câmara dos Deputados fica fora das hipóteses de aumento.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5932,
+      "letra": "C",
+      "antes": "Crime contra a honra do Presidente do Supremo Tribunal Federal fica fora das hipóteses de aumento.",
+      "depois": "Disposições comuns dos crimes contra a honra — Crime contra a honra do Presidente do Supremo Tribunal Federal fica fora das hipóteses de aumento.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5933,
+      "letra": "B",
+      "antes": "A prática do crime na presença de várias pessoas integra hipótese de aumento comum.",
+      "depois": "Disposições comuns dos crimes contra a honra — A prática do crime na presença de várias pessoas integra hipótese de aumento comum.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5934,
+      "letra": "D",
+      "antes": "A recusa em prestar explicações impede qualquer responsabilização pela ofensa.",
+      "depois": "Pedido de explicações nos crimes contra a honra — A recusa em prestar explicações impede qualquer responsabilização pela ofensa.",
+      "escopo": "Pedido de explicações nos crimes contra a honra"
+    },
+    {
+      "questao_id": 5935,
+      "letra": "C",
+      "antes": "Propalar imputação caluniosa jamais gera responsabilização se o agente não criou a acusação.",
+      "depois": "Calúnia — Propalar imputação caluniosa jamais gera responsabilização se o agente não criou a acusação.",
+      "escopo": "Calúnia"
+    },
+    {
+      "questao_id": 5935,
+      "letra": "D",
+      "antes": "Quem não presta explicações satisfatórias pode responder pela ofensa nas condições previstas.",
+      "depois": "Pedido de explicações nos crimes contra a honra — Quem não presta explicações satisfatórias pode responder pela ofensa nas condições previstas.",
+      "escopo": "Pedido de explicações nos crimes contra a honra"
+    },
+    {
+      "questao_id": 5936,
+      "letra": "A",
+      "antes": "A suficiência das explicações depende exclusivamente da avaliação do próprio ofensor.",
+      "depois": "Pedido de explicações nos crimes contra a honra — A suficiência das explicações depende exclusivamente da avaliação do próprio ofensor.",
+      "escopo": "Pedido de explicações nos crimes contra a honra"
+    },
+    {
+      "questao_id": 5936,
+      "letra": "B",
+      "antes": "Divulgar imputação caluniosa só é punível quando o divulgador foi o autor originário da acusação.",
+      "depois": "Calúnia — Divulgar imputação caluniosa só é punível quando o divulgador foi o autor originário da acusação.",
+      "escopo": "Calúnia"
+    },
+    {
+      "questao_id": 5937,
+      "letra": "C",
+      "antes": "Quem propala ou divulga a imputação responde pela regra específica mesmo sem saber que ela é falsa.",
+      "depois": "Calúnia — Quem propala ou divulga a imputação responde pela regra específica mesmo sem saber que ela é falsa.",
+      "escopo": "Calúnia"
+    },
+    {
+      "questao_id": 5937,
+      "letra": "E",
+      "antes": "A recusa ou insuficiência das explicações produz apenas multa processual, sem responsabilidade pela ofensa.",
+      "depois": "Pedido de explicações nos crimes contra a honra — A recusa ou insuficiência das explicações produz apenas multa processual, sem responsabilidade pela ofensa.",
+      "escopo": "Pedido de explicações nos crimes contra a honra"
+    },
+    {
+      "questao_id": 5938,
+      "letra": "D",
+      "antes": "A condição de criança da vítima é irrelevante para as hipóteses de aumento comum.",
+      "depois": "Disposições comuns dos crimes contra a honra — A condição de criança da vítima é irrelevante para as hipóteses de aumento comum.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5938,
+      "letra": "E",
+      "antes": "Quem propala ou divulga imputação sabidamente falsa recebe necessariamente pena inferior à do autor inicial.",
+      "depois": "Calúnia — Quem propala ou divulga imputação sabidamente falsa recebe necessariamente pena inferior à do autor inicial.",
+      "escopo": "Calúnia"
+    },
+    {
+      "questao_id": 5939,
+      "letra": "A",
+      "antes": "A condição de adolescente da vítima fica fora das hipóteses de aumento comum.",
+      "depois": "Disposições comuns dos crimes contra a honra — A condição de adolescente da vítima fica fora das hipóteses de aumento comum.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5940,
+      "letra": "E",
+      "antes": "A hipótese etária alcança somente pessoa com exatamente sessenta anos.",
+      "depois": "Disposições comuns dos crimes contra a honra — A hipótese etária alcança somente pessoa com exatamente sessenta anos.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5941,
+      "letra": "B",
+      "antes": "A natureza privada da ação do crime imputado nunca interfere na prova da verdade.",
+      "depois": "Calúnia — A natureza privada da ação do crime imputado nunca interfere na prova da verdade.",
+      "escopo": "Calúnia"
+    },
+    {
+      "questao_id": 5942,
+      "letra": "D",
+      "antes": "Em crime de ação privada, a prova da verdade é admitida mesmo sem qualquer condenação do ofendido.",
+      "depois": "Calúnia — Em crime de ação privada, a prova da verdade é admitida mesmo sem qualquer condenação do ofendido.",
+      "escopo": "Calúnia"
+    },
+    {
+      "questao_id": 5943,
+      "letra": "B",
+      "antes": "A condenação relevante para afastar a restrição ligada à ação privada deve ser irrecorrível.",
+      "depois": "Calúnia — A condenação relevante para afastar a restrição ligada à ação privada deve ser irrecorrível.",
+      "escopo": "Calúnia"
+    },
+    {
+      "questao_id": 5943,
+      "letra": "C",
+      "antes": "Ofensa proferida fora de qualquer processo recebe a mesma exclusão prevista para a atuação em juízo.",
+      "depois": "Exclusão de injúria ou difamação — Ofensa proferida fora de qualquer processo recebe a mesma exclusão prevista para a atuação em juízo.",
+      "escopo": "Exclusão de injúria ou difamação"
+    },
+    {
+      "questao_id": 5944,
+      "letra": "A",
+      "antes": "Quando o crime é cometido mediante paga, aplica-se somente aumento de um terço.",
+      "depois": "Disposições comuns dos crimes contra a honra — Quando o crime é cometido mediante paga, aplica-se somente aumento de um terço.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5944,
+      "letra": "B",
+      "antes": "A exclusão da ofensa em juízo independe de qualquer relação com a discussão da causa.",
+      "depois": "Exclusão de injúria ou difamação — A exclusão da ofensa em juízo independe de qualquer relação com a discussão da causa.",
+      "escopo": "Exclusão de injúria ou difamação"
+    },
+    {
+      "questao_id": 5944,
+      "letra": "D",
+      "antes": "A imputação dirigida ao Presidente da República admite sempre prova da verdade.",
+      "depois": "Calúnia — A imputação dirigida ao Presidente da República admite sempre prova da verdade.",
+      "escopo": "Calúnia"
+    },
+    {
+      "questao_id": 5945,
+      "letra": "C",
+      "antes": "A imputação dirigida a chefe de governo estrangeiro admite sempre prova da verdade.",
+      "depois": "Calúnia — A imputação dirigida a chefe de governo estrangeiro admite sempre prova da verdade.",
+      "escopo": "Calúnia"
+    },
+    {
+      "questao_id": 5945,
+      "letra": "D",
+      "antes": "A exclusão da ofensa em juízo pode alcançar manifestação feita pela própria parte.",
+      "depois": "Exclusão de injúria ou difamação — A exclusão da ofensa em juízo pode alcançar manifestação feita pela própria parte.",
+      "escopo": "Exclusão de injúria ou difamação"
+    },
+    {
+      "questao_id": 5945,
+      "letra": "E",
+      "antes": "A promessa de recompensa só produz efeito depois que a vantagem é efetivamente entregue.",
+      "depois": "Disposições comuns dos crimes contra a honra — A promessa de recompensa só produz efeito depois que a vantagem é efetivamente entregue.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5946,
+      "letra": "B",
+      "antes": "O procurador da parte fica fora da exclusão prevista para a discussão da causa.",
+      "depois": "Exclusão de injúria ou difamação — O procurador da parte fica fora da exclusão prevista para a discussão da causa.",
+      "escopo": "Exclusão de injúria ou difamação"
+    },
+    {
+      "questao_id": 5946,
+      "letra": "D",
+      "antes": "Quando o crime é cometido mediante promessa de recompensa, aplica-se somente aumento de metade.",
+      "depois": "Disposições comuns dos crimes contra a honra — Quando o crime é cometido mediante promessa de recompensa, aplica-se somente aumento de metade.",
+      "escopo": "Disposições comuns dos crimes contra a honra"
+    },
+    {
+      "questao_id": 5946,
+      "letra": "E",
+      "antes": "A exceção ligada à absolvição irrecorrível refere-se a crime imputado de ação pública.",
+      "depois": "Calúnia — A exceção ligada à absolvição irrecorrível refere-se a crime imputado de ação pública.",
+      "escopo": "Calúnia"
+    },
+    {
+      "questao_id": 5771,
+      "letra": "A",
+      "antes": "A vítima menor de dezoito anos pode levar à pena de dois a cinco anos.",
+      "depois": "Sequestro ou cárcere privado — A vítima menor de dezoito anos pode levar à pena de dois a cinco anos.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5771,
+      "letra": "D",
+      "antes": "Preconceito de cor fica fora das causas de aumento.",
+      "depois": "Redução a condição análoga à de escravo — Preconceito de cor fica fora das causas de aumento.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5771,
+      "letra": "E",
+      "antes": "Somente o exercício efetivo, e não o pretexto de função pública, pode aumentar a pena.",
+      "depois": "Tráfico de pessoas — Somente o exercício efetivo, e não o pretexto de função pública, pode aumentar a pena.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5772,
+      "letra": "D",
+      "antes": "Preconceito de etnia não repercute na pena.",
+      "depois": "Redução a condição análoga à de escravo — Preconceito de etnia não repercute na pena.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5772,
+      "letra": "E",
+      "antes": "A condição de criança da vítima não repercute na pena do tráfico.",
+      "depois": "Tráfico de pessoas — A condição de criança da vítima não repercute na pena do tráfico.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5773,
+      "letra": "B",
+      "antes": "Maus-tratos só alteram a pena quando causam exclusivamente sofrimento físico.",
+      "depois": "Sequestro ou cárcere privado — Maus-tratos só alteram a pena quando causam exclusivamente sofrimento físico.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5773,
+      "letra": "D",
+      "antes": "Preconceito de religião fica fora das causas de aumento.",
+      "depois": "Redução a condição análoga à de escravo — Preconceito de religião fica fora das causas de aumento.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5773,
+      "letra": "E",
+      "antes": "A condição de adolescente da vítima fica fora das causas de aumento.",
+      "depois": "Tráfico de pessoas — A condição de adolescente da vítima fica fora das causas de aumento.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5774,
+      "letra": "A",
+      "antes": "A redução da capacidade de resistência só é relevante quando obtida mediante violência física.",
+      "depois": "Constrangimento ilegal — A redução da capacidade de resistência só é relevante quando obtida mediante violência física.",
+      "escopo": "Constrangimento ilegal"
+    },
+    {
+      "questao_id": 5774,
+      "letra": "C",
+      "antes": "A natureza da detenção é irrelevante quando produz grave sofrimento moral.",
+      "depois": "Sequestro ou cárcere privado — A natureza da detenção é irrelevante quando produz grave sofrimento moral.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5774,
+      "letra": "E",
+      "antes": "Preconceito de origem é irrelevante para a pena.",
+      "depois": "Redução a condição análoga à de escravo — Preconceito de origem é irrelevante para a pena.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5775,
+      "letra": "C",
+      "antes": "A figura descrita exige apenas inadimplemento contratual, sem redução da condição da pessoa.",
+      "depois": "Redução a condição análoga à de escravo — A figura descrita exige apenas inadimplemento contratual, sem redução da condição da pessoa.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5775,
+      "letra": "D",
+      "antes": "A deficiência da vítima fica fora das causas de aumento.",
+      "depois": "Tráfico de pessoas — A deficiência da vítima fica fora das causas de aumento.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5775,
+      "letra": "E",
+      "antes": "Grave sofrimento físico pode caracterizar a forma punida com dois a oito anos.",
+      "depois": "Sequestro ou cárcere privado — Grave sofrimento físico pode caracterizar a forma punida com dois a oito anos.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5776,
+      "letra": "A",
+      "antes": "A restrição de locomoção ligada à dívida pode ocorrer por qualquer meio.",
+      "depois": "Redução a condição análoga à de escravo — A restrição de locomoção ligada à dívida pode ocorrer por qualquer meio.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5776,
+      "letra": "E",
+      "antes": "Relação de parentesco fica fora das relações consideradas na majorante.",
+      "depois": "Tráfico de pessoas — Relação de parentesco fica fora das relações consideradas na majorante.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5777,
+      "letra": "C",
+      "antes": "Integrante de organização criminosa ultraviolenta fica fora da forma especial.",
+      "depois": "Sequestro ou cárcere privado ligado à criminalidade organizada — Integrante de organização criminosa ultraviolenta fica fora da forma especial.",
+      "escopo": "Sequestro ou cárcere privado ligado à criminalidade organizada"
+    },
+    {
+      "questao_id": 5777,
+      "letra": "E",
+      "antes": "Relação doméstica é irrelevante para a causa de aumento.",
+      "depois": "Tráfico de pessoas — Relação doméstica é irrelevante para a causa de aumento.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5778,
+      "letra": "B",
+      "antes": "Grupo paramilitar fica fora da forma especial prevista.",
+      "depois": "Sequestro ou cárcere privado ligado à criminalidade organizada — Grupo paramilitar fica fora da forma especial prevista.",
+      "escopo": "Sequestro ou cárcere privado ligado à criminalidade organizada"
+    },
+    {
+      "questao_id": 5778,
+      "letra": "D",
+      "antes": "A reclusão prevista começa em quatro anos.",
+      "depois": "Redução a condição análoga à de escravo — A reclusão prevista começa em quatro anos.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5778,
+      "letra": "E",
+      "antes": "Relação de coabitação fica fora das relações consideradas.",
+      "depois": "Tráfico de pessoas — Relação de coabitação fica fora das relações consideradas.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5779,
+      "letra": "A",
+      "antes": "A reunião de exatamente três pessoas já satisfaz a hipótese agravada prevista no texto.",
+      "depois": "Constrangimento ilegal — A reunião de exatamente três pessoas já satisfaz a hipótese agravada prevista no texto.",
+      "escopo": "Constrangimento ilegal"
+    },
+    {
+      "questao_id": 5779,
+      "letra": "B",
+      "antes": "Milícia privada fica fora da forma especial prevista.",
+      "depois": "Sequestro ou cárcere privado ligado à criminalidade organizada — Milícia privada fica fora da forma especial prevista.",
+      "escopo": "Sequestro ou cárcere privado ligado à criminalidade organizada"
+    },
+    {
+      "questao_id": 5779,
+      "letra": "C",
+      "antes": "A reclusão prevista pode chegar apenas a quatro anos.",
+      "depois": "Redução a condição análoga à de escravo — A reclusão prevista pode chegar apenas a quatro anos.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5779,
+      "letra": "E",
+      "antes": "Relação de hospitalidade não integra a causa de aumento.",
+      "depois": "Tráfico de pessoas — Relação de hospitalidade não integra a causa de aumento.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5780,
+      "letra": "D",
+      "antes": "Dependência econômica é irrelevante para a majorante do tráfico.",
+      "depois": "Tráfico de pessoas — Dependência econômica é irrelevante para a majorante do tráfico.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5780,
+      "letra": "E",
+      "antes": "A forma especial exige contexto de atuação ou a finalidade legalmente indicada.",
+      "depois": "Sequestro ou cárcere privado ligado à criminalidade organizada — A forma especial exige contexto de atuação ou a finalidade legalmente indicada.",
+      "escopo": "Sequestro ou cárcere privado ligado à criminalidade organizada"
+    },
+    {
+      "questao_id": 5781,
+      "letra": "B",
+      "antes": "Na hipótese agravada, o juiz escolhe entre detenção ou multa sem duplicação.",
+      "depois": "Constrangimento ilegal — Na hipótese agravada, o juiz escolhe entre detenção ou multa sem duplicação.",
+      "escopo": "Constrangimento ilegal"
+    },
+    {
+      "questao_id": 5781,
+      "letra": "D",
+      "antes": "A prática no contexto da atuação do grupo ou organização é irrelevante para a forma especial.",
+      "depois": "Sequestro ou cárcere privado ligado à criminalidade organizada — A prática no contexto da atuação do grupo ou organização é irrelevante para a forma especial.",
+      "escopo": "Sequestro ou cárcere privado ligado à criminalidade organizada"
+    },
+    {
+      "questao_id": 5782,
+      "letra": "C",
+      "antes": "A finalidade de realizar as condutas legalmente referidas fica fora da forma especial.",
+      "depois": "Sequestro ou cárcere privado ligado à criminalidade organizada — A finalidade de realizar as condutas legalmente referidas fica fora da forma especial.",
+      "escopo": "Sequestro ou cárcere privado ligado à criminalidade organizada"
+    },
+    {
+      "questao_id": 5782,
+      "letra": "D",
+      "antes": "Jornada exaustiva é irrelevante para a figura descrita.",
+      "depois": "Redução a condição análoga à de escravo — Jornada exaustiva é irrelevante para a figura descrita.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5783,
+      "letra": "D",
+      "antes": "Condições degradantes de trabalho não integram a figura descrita.",
+      "depois": "Redução a condição análoga à de escravo — Condições degradantes de trabalho não integram a figura descrita.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5783,
+      "letra": "E",
+      "antes": "Superioridade hierárquica ligada a emprego fica fora da majorante.",
+      "depois": "Tráfico de pessoas — Superioridade hierárquica ligada a emprego fica fora da majorante.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5784,
+      "letra": "A",
+      "antes": "A ausência de consentimento do representante legal impede sempre a exclusão médica, mesmo diante de iminente perigo de vida.",
+      "depois": "Constrangimento ilegal — A ausência de consentimento do representante legal impede sempre a exclusão médica, mesmo diante de iminente perigo de vida.",
+      "escopo": "Constrangimento ilegal"
+    },
+    {
+      "questao_id": 5784,
+      "letra": "B",
+      "antes": "A condição de adolescente da vítima fica fora das causas de aumento.",
+      "depois": "Perseguição — A condição de adolescente da vítima fica fora das causas de aumento.",
+      "escopo": "Perseguição"
+    },
+    {
+      "questao_id": 5784,
+      "letra": "C",
+      "antes": "A reclusão da forma básica começa em dois anos.",
+      "depois": "Sequestro ou cárcere privado — A reclusão da forma básica começa em dois anos.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5784,
+      "letra": "D",
+      "antes": "A superioridade hierárquica inerente ao exercício de cargo pode integrar a causa de aumento.",
+      "depois": "Tráfico de pessoas — A superioridade hierárquica inerente ao exercício de cargo pode integrar a causa de aumento.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5784,
+      "letra": "E",
+      "antes": "Restrição de locomoção por dívida é irrelevante quando a dívida envolve o empregador.",
+      "depois": "Redução a condição análoga à de escravo — Restrição de locomoção por dívida é irrelevante quando a dívida envolve o empregador.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5785,
+      "letra": "C",
+      "antes": "Somente dívida contraída com terceiro estranho ao trabalho pode integrar a figura.",
+      "depois": "Redução a condição análoga à de escravo — Somente dívida contraída com terceiro estranho ao trabalho pode integrar a figura.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5785,
+      "letra": "D",
+      "antes": "Superioridade hierárquica ligada a função fica fora da majorante.",
+      "depois": "Tráfico de pessoas — Superioridade hierárquica ligada a função fica fora da majorante.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5785,
+      "letra": "E",
+      "antes": "A reclusão da forma básica pode chegar a três anos.",
+      "depois": "Sequestro ou cárcere privado — A reclusão da forma básica pode chegar a três anos.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5786,
+      "letra": "A",
+      "antes": "Dívida contraída com preposto do empregador pode ser fundamento da restrição descrita.",
+      "depois": "Redução a condição análoga à de escravo — Dívida contraída com preposto do empregador pode ser fundamento da restrição descrita.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5786,
+      "letra": "D",
+      "antes": "A forma agravada indicada prevê apenas detenção.",
+      "depois": "Sequestro ou cárcere privado — A forma agravada indicada prevê apenas detenção.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5786,
+      "letra": "E",
+      "antes": "A retirada da vítima do território nacional é irrelevante para a pena do tráfico.",
+      "depois": "Tráfico de pessoas — A retirada da vítima do território nacional é irrelevante para a pena do tráfico.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5787,
+      "letra": "B",
+      "antes": "A reclusão da forma agravada começa em dois anos.",
+      "depois": "Sequestro ou cárcere privado — A reclusão da forma agravada começa em dois anos.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5787,
+      "letra": "C",
+      "antes": "A majorante por concurso exige participação de pelo menos quatro pessoas.",
+      "depois": "Perseguição — A majorante por concurso exige participação de pelo menos quatro pessoas.",
+      "escopo": "Perseguição"
+    },
+    {
+      "questao_id": 5787,
+      "letra": "E",
+      "antes": "A redução especial independe de o agente ser primário.",
+      "depois": "Tráfico de pessoas — A redução especial independe de o agente ser primário.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5788,
+      "letra": "C",
+      "antes": "A reclusão da forma agravada pode chegar a cinco anos.",
+      "depois": "Sequestro ou cárcere privado — A reclusão da forma agravada pode chegar a cinco anos.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5788,
+      "letra": "D",
+      "antes": "Cercear transporte é irrelevante quando objetiva reter o trabalhador no local.",
+      "depois": "Redução a condição análoga à de escravo — Cercear transporte é irrelevante quando objetiva reter o trabalhador no local.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5788,
+      "letra": "E",
+      "antes": "A redução especial pode ser aplicada mesmo ao integrante de organização criminosa.",
+      "depois": "Tráfico de pessoas — A redução especial pode ser aplicada mesmo ao integrante de organização criminosa.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5789,
+      "letra": "B",
+      "antes": "A forma com grave sofrimento físico ou moral prevê apenas detenção.",
+      "depois": "Sequestro ou cárcere privado — A forma com grave sofrimento físico ou moral prevê apenas detenção.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5789,
+      "letra": "C",
+      "antes": "O cerceamento de transporte gera a mesma pena independentemente da finalidade de retenção.",
+      "depois": "Redução a condição análoga à de escravo — O cerceamento de transporte gera a mesma pena independentemente da finalidade de retenção.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5789,
+      "letra": "E",
+      "antes": "Basta apenas um dos requisitos da redução especial, alternativamente.",
+      "depois": "Tráfico de pessoas — Basta apenas um dos requisitos da redução especial, alternativamente.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5790,
+      "letra": "A",
+      "antes": "Um único episódio basta para satisfazer o requisito de repetição.",
+      "depois": "Bullying — Um único episódio basta para satisfazer o requisito de repetição.",
+      "escopo": "Bullying"
+    },
+    {
+      "questao_id": 5790,
+      "letra": "C",
+      "antes": "A reclusão da forma com grave sofrimento começa em cinco anos.",
+      "depois": "Sequestro ou cárcere privado — A reclusão da forma com grave sofrimento começa em cinco anos.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5790,
+      "letra": "D",
+      "antes": "Vigilância ostensiva com finalidade de retenção fica fora das condutas equiparadas.",
+      "depois": "Redução a condição análoga à de escravo — Vigilância ostensiva com finalidade de retenção fica fora das condutas equiparadas.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5790,
+      "letra": "E",
+      "antes": "A redução especial da pena pode ser de um terço.",
+      "depois": "Tráfico de pessoas — A redução especial da pena pode ser de um terço.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5791,
+      "letra": "A",
+      "antes": "A redução especial da pena pode chegar a dois terços.",
+      "depois": "Tráfico de pessoas — A redução especial da pena pode chegar a dois terços.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5791,
+      "letra": "D",
+      "antes": "A reclusão da forma com grave sofrimento pode chegar apenas a cinco anos.",
+      "depois": "Sequestro ou cárcere privado — A reclusão da forma com grave sofrimento pode chegar apenas a cinco anos.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5791,
+      "letra": "E",
+      "antes": "A retenção de documentos pessoais é irrelevante para a figura equiparada.",
+      "depois": "Redução a condição análoga à de escravo — A retenção de documentos pessoais é irrelevante para a figura equiparada.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5947,
+      "letra": "B",
+      "antes": "A conduta que visa degradar as ações da mulher pode integrar o crime.",
+      "depois": "Violência psicológica contra a mulher — A conduta que visa degradar as ações da mulher pode integrar o crime.",
+      "escopo": "Violência psicológica contra a mulher"
+    },
+    {
+      "questao_id": 5947,
+      "letra": "C",
+      "antes": "A forma ligada à criminalidade organizada prevê apenas detenção.",
+      "depois": "Sequestro ou cárcere privado ligado à criminalidade organizada — A forma ligada à criminalidade organizada prevê apenas detenção.",
+      "escopo": "Sequestro ou cárcere privado ligado à criminalidade organizada"
+    },
+    {
+      "questao_id": 5947,
+      "letra": "D",
+      "antes": "A apropriação de objetos pessoais nunca integra as condutas equiparadas.",
+      "depois": "Redução a condição análoga à de escravo — A apropriação de objetos pessoais nunca integra as condutas equiparadas.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5947,
+      "letra": "E",
+      "antes": "Para o tráfico descrito, basta qualquer deslocamento de pessoa, sem meio de execução nem finalidade específica.",
+      "depois": "Tráfico de pessoas — Para o tráfico descrito, basta qualquer deslocamento de pessoa, sem meio de execução nem finalidade específica.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5948,
+      "letra": "A",
+      "antes": "O controle dos comportamentos da mulher não integra a figura descrita.",
+      "depois": "Violência psicológica contra a mulher — O controle dos comportamentos da mulher não integra a figura descrita.",
+      "escopo": "Violência psicológica contra a mulher"
+    },
+    {
+      "questao_id": 5948,
+      "letra": "B",
+      "antes": "A reclusão da forma ligada à criminalidade organizada começa em oito anos.",
+      "depois": "Sequestro ou cárcere privado ligado à criminalidade organizada — A reclusão da forma ligada à criminalidade organizada começa em oito anos.",
+      "escopo": "Sequestro ou cárcere privado ligado à criminalidade organizada"
+    },
+    {
+      "questao_id": 5948,
+      "letra": "D",
+      "antes": "As condutas equiparadas recebem apenas multa, sem reclusão.",
+      "depois": "Redução a condição análoga à de escravo — As condutas equiparadas recebem apenas multa, sem reclusão.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5949,
+      "letra": "B",
+      "antes": "O controle das crenças da mulher é irrelevante para a figura descrita.",
+      "depois": "Violência psicológica contra a mulher — O controle das crenças da mulher é irrelevante para a figura descrita.",
+      "escopo": "Violência psicológica contra a mulher"
+    },
+    {
+      "questao_id": 5949,
+      "letra": "C",
+      "antes": "A reclusão da forma ligada à criminalidade organizada pode chegar a doze anos.",
+      "depois": "Sequestro ou cárcere privado ligado à criminalidade organizada — A reclusão da forma ligada à criminalidade organizada pode chegar a doze anos.",
+      "escopo": "Sequestro ou cárcere privado ligado à criminalidade organizada"
+    },
+    {
+      "questao_id": 5949,
+      "letra": "E",
+      "antes": "A pena aumenta apenas de um terço nas hipóteses especiais previstas.",
+      "depois": "Redução a condição análoga à de escravo — A pena aumenta apenas de um terço nas hipóteses especiais previstas.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5950,
+      "letra": "B",
+      "antes": "O controle das decisões da mulher fica fora da figura descrita.",
+      "depois": "Violência psicológica contra a mulher — O controle das decisões da mulher fica fora da figura descrita.",
+      "escopo": "Violência psicológica contra a mulher"
+    },
+    {
+      "questao_id": 5950,
+      "letra": "E",
+      "antes": "A prática contra criança aumenta a pena de metade.",
+      "depois": "Redução a condição análoga à de escravo — A prática contra criança aumenta a pena de metade.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5951,
+      "letra": "A",
+      "antes": "A prática contra adolescente aumenta a pena de metade.",
+      "depois": "Redução a condição análoga à de escravo — A prática contra adolescente aumenta a pena de metade.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5951,
+      "letra": "B",
+      "antes": "Ações morais ficam fora das modalidades previstas.",
+      "depois": "Bullying — Ações morais ficam fora das modalidades previstas.",
+      "escopo": "Bullying"
+    },
+    {
+      "questao_id": 5952,
+      "letra": "D",
+      "antes": "Preconceito de raça é irrelevante para a causa de aumento.",
+      "depois": "Redução a condição análoga à de escravo — Preconceito de raça é irrelevante para a causa de aumento.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5953,
+      "letra": "B",
+      "antes": "A condição de ascendente da vítima é irrelevante para a forma agravada.",
+      "depois": "Sequestro ou cárcere privado — A condição de ascendente da vítima é irrelevante para a forma agravada.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5953,
+      "letra": "D",
+      "antes": "Preconceito de cor fica fora das causas de aumento.",
+      "depois": "Redução a condição análoga à de escravo — Preconceito de cor fica fora das causas de aumento.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5954,
+      "letra": "C",
+      "antes": "A condição de descendente da vítima fica fora da forma agravada.",
+      "depois": "Sequestro ou cárcere privado — A condição de descendente da vítima fica fora da forma agravada.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5954,
+      "letra": "D",
+      "antes": "Motivo de preconceito de etnia aumenta a pena de metade.",
+      "depois": "Redução a condição análoga à de escravo — Motivo de preconceito de etnia aumenta a pena de metade.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5955,
+      "letra": "C",
+      "antes": "A condição de cônjuge da vítima não altera a pena prevista.",
+      "depois": "Sequestro ou cárcere privado — A condição de cônjuge da vítima não altera a pena prevista.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5955,
+      "letra": "E",
+      "antes": "Motivo de preconceito de religião aumenta a pena de metade.",
+      "depois": "Redução a condição análoga à de escravo — Motivo de preconceito de religião aumenta a pena de metade.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5956,
+      "letra": "B",
+      "antes": "A chantagem fica fora dos meios descritos.",
+      "depois": "Violência psicológica contra a mulher — A chantagem fica fora dos meios descritos.",
+      "escopo": "Violência psicológica contra a mulher"
+    },
+    {
+      "questao_id": 5956,
+      "letra": "C",
+      "antes": "A condição de companheiro da vítima fica fora da forma agravada.",
+      "depois": "Sequestro ou cárcere privado — A condição de companheiro da vítima fica fora da forma agravada.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5956,
+      "letra": "D",
+      "antes": "Preconceito de origem é irrelevante para a pena.",
+      "depois": "Redução a condição análoga à de escravo — Preconceito de origem é irrelevante para a pena.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5956,
+      "letra": "E",
+      "antes": "Transferir pessoa fica fora das condutas descritas.",
+      "depois": "Tráfico de pessoas — Transferir pessoa fica fora das condutas descritas.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5957,
+      "letra": "C",
+      "antes": "A forma agravada alcança apenas vítima com exatamente sessenta anos.",
+      "depois": "Sequestro ou cárcere privado — A forma agravada alcança apenas vítima com exatamente sessenta anos.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5957,
+      "letra": "D",
+      "antes": "A figura descrita exige apenas inadimplemento contratual, sem redução da condição da pessoa.",
+      "depois": "Redução a condição análoga à de escravo — A figura descrita exige apenas inadimplemento contratual, sem redução da condição da pessoa.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5957,
+      "letra": "E",
+      "antes": "Comprar pessoa não integra as condutas descritas para o tráfico.",
+      "depois": "Tráfico de pessoas — Comprar pessoa não integra as condutas descritas para o tráfico.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5958,
+      "letra": "B",
+      "antes": "A limitação do direito de ir e vir só é relevante quando dura mais de quinze dias.",
+      "depois": "Violência psicológica contra a mulher — A limitação do direito de ir e vir só é relevante quando dura mais de quinze dias.",
+      "escopo": "Violência psicológica contra a mulher"
+    },
+    {
+      "questao_id": 5958,
+      "letra": "C",
+      "antes": "A restrição de locomoção ligada à dívida pode ocorrer por qualquer meio.",
+      "depois": "Redução a condição análoga à de escravo — A restrição de locomoção ligada à dívida pode ocorrer por qualquer meio.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5958,
+      "letra": "D",
+      "antes": "Internação em casa de saúde é irrelevante para a forma agravada.",
+      "depois": "Sequestro ou cárcere privado — Internação em casa de saúde é irrelevante para a forma agravada.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5958,
+      "letra": "E",
+      "antes": "Alojar pessoa fica fora das condutas descritas para o tráfico.",
+      "depois": "Tráfico de pessoas — Alojar pessoa fica fora das condutas descritas para o tráfico.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5959,
+      "letra": "A",
+      "antes": "Prejuízo à saúde psicológica só importa se resultar também em dano físico.",
+      "depois": "Violência psicológica contra a mulher — Prejuízo à saúde psicológica só importa se resultar também em dano físico.",
+      "escopo": "Violência psicológica contra a mulher"
+    },
+    {
+      "questao_id": 5959,
+      "letra": "B",
+      "antes": "Internação em hospital não integra a forma agravada.",
+      "depois": "Sequestro ou cárcere privado — Internação em hospital não integra a forma agravada.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5959,
+      "letra": "E",
+      "antes": "Acolher pessoa não integra as condutas descritas para o tráfico.",
+      "depois": "Tráfico de pessoas — Acolher pessoa não integra as condutas descritas para o tráfico.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5960,
+      "letra": "A",
+      "antes": "Aplicativos ficam fora dos meios digitais previstos.",
+      "depois": "Cyberbullying — Aplicativos ficam fora dos meios digitais previstos.",
+      "escopo": "Cyberbullying"
+    },
+    {
+      "questao_id": 5960,
+      "letra": "B",
+      "antes": "Privação da liberdade por exatamente quinze dias já satisfaz a hipótese temporal agravada.",
+      "depois": "Sequestro ou cárcere privado — Privação da liberdade por exatamente quinze dias já satisfaz a hipótese temporal agravada.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5960,
+      "letra": "C",
+      "antes": "A reclusão prevista começa em quatro anos.",
+      "depois": "Redução a condição análoga à de escravo — A reclusão prevista começa em quatro anos.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5960,
+      "letra": "E",
+      "antes": "Outro meio que prejudique a autodeterminação da mulher pode integrar o crime.",
+      "depois": "Violência psicológica contra a mulher — Outro meio que prejudique a autodeterminação da mulher pode integrar o crime.",
+      "escopo": "Violência psicológica contra a mulher"
+    },
+    {
+      "questao_id": 5961,
+      "letra": "B",
+      "antes": "Jogos on-line ficam fora dos meios digitais previstos.",
+      "depois": "Cyberbullying — Jogos on-line ficam fora dos meios digitais previstos.",
+      "escopo": "Cyberbullying"
+    },
+    {
+      "questao_id": 5961,
+      "letra": "C",
+      "antes": "O uso de inteligência artificial para alterar imagem ou som é irrelevante para a pena.",
+      "depois": "Violência psicológica contra a mulher — O uso de inteligência artificial para alterar imagem ou som é irrelevante para a pena.",
+      "escopo": "Violência psicológica contra a mulher"
+    },
+    {
+      "questao_id": 5961,
+      "letra": "D",
+      "antes": "A forma agravada por idade só alcança vítima menor de quatorze anos.",
+      "depois": "Sequestro ou cárcere privado — A forma agravada por idade só alcança vítima menor de quatorze anos.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5961,
+      "letra": "E",
+      "antes": "A reclusão prevista pode chegar apenas a quatro anos.",
+      "depois": "Redução a condição análoga à de escravo — A reclusão prevista pode chegar apenas a quatro anos.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5962,
+      "letra": "C",
+      "antes": "Somente inteligência artificial pode gerar o aumento tecnológico previsto.",
+      "depois": "Violência psicológica contra a mulher — Somente inteligência artificial pode gerar o aumento tecnológico previsto.",
+      "escopo": "Violência psicológica contra a mulher"
+    },
+    {
+      "questao_id": 5963,
+      "letra": "A",
+      "antes": "A transmissão em tempo real fica fora da modalidade virtual.",
+      "depois": "Cyberbullying — A transmissão em tempo real fica fora da modalidade virtual.",
+      "escopo": "Cyberbullying"
+    },
+    {
+      "questao_id": 5963,
+      "letra": "D",
+      "antes": "Maus-tratos só alteram a pena quando causam exclusivamente sofrimento físico.",
+      "depois": "Sequestro ou cárcere privado — Maus-tratos só alteram a pena quando causam exclusivamente sofrimento físico.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5964,
+      "letra": "A",
+      "antes": "Intervenção cirúrgica sem consentimento é sempre punível, mesmo diante de iminente perigo de vida.",
+      "depois": "Constrangimento ilegal — Intervenção cirúrgica sem consentimento é sempre punível, mesmo diante de iminente perigo de vida.",
+      "escopo": "Constrangimento ilegal"
+    },
+    {
+      "questao_id": 5964,
+      "letra": "B",
+      "antes": "A finalidade de realizar as condutas legalmente referidas é irrelevante para a forma específica.",
+      "depois": "Ameaça ligada à criminalidade organizada — A finalidade de realizar as condutas legalmente referidas é irrelevante para a forma específica.",
+      "escopo": "Ameaça ligada à criminalidade organizada"
+    },
+    {
+      "questao_id": 5964,
+      "letra": "C",
+      "antes": "A natureza da detenção é irrelevante quando produz grave sofrimento moral.",
+      "depois": "Sequestro ou cárcere privado — A natureza da detenção é irrelevante quando produz grave sofrimento moral.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5964,
+      "letra": "E",
+      "antes": "Jornada exaustiva é irrelevante para a figura descrita.",
+      "depois": "Redução a condição análoga à de escravo — Jornada exaustiva é irrelevante para a figura descrita.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5965,
+      "letra": "A",
+      "antes": "A exclusão médica exige sempre consentimento expresso do próprio paciente.",
+      "depois": "Constrangimento ilegal — A exclusão médica exige sempre consentimento expresso do próprio paciente.",
+      "escopo": "Constrangimento ilegal"
+    },
+    {
+      "questao_id": 5965,
+      "letra": "C",
+      "antes": "Somente sofrimento moral, e não físico, integra a forma mais severa.",
+      "depois": "Sequestro ou cárcere privado — Somente sofrimento moral, e não físico, integra a forma mais severa.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5965,
+      "letra": "E",
+      "antes": "Sujeitar alguém a condições degradantes de trabalho pode caracterizar o crime.",
+      "depois": "Redução a condição análoga à de escravo — Sujeitar alguém a condições degradantes de trabalho pode caracterizar o crime.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5966,
+      "letra": "A",
+      "antes": "Grave sofrimento moral pode caracterizar a forma punida com dois a oito anos.",
+      "depois": "Sequestro ou cárcere privado — Grave sofrimento moral pode caracterizar a forma punida com dois a oito anos.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5966,
+      "letra": "B",
+      "antes": "Qualquer conveniência médica basta para a exclusão, ainda que inexista iminente perigo de vida.",
+      "depois": "Constrangimento ilegal — Qualquer conveniência médica basta para a exclusão, ainda que inexista iminente perigo de vida.",
+      "escopo": "Constrangimento ilegal"
+    },
+    {
+      "questao_id": 5966,
+      "letra": "D",
+      "antes": "Restrição de locomoção por dívida é irrelevante quando a dívida envolve o empregador.",
+      "depois": "Redução a condição análoga à de escravo — Restrição de locomoção por dívida é irrelevante quando a dívida envolve o empregador.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5966,
+      "letra": "E",
+      "antes": "A remoção de tecidos não integra as finalidades típicas do tráfico.",
+      "depois": "Tráfico de pessoas — A remoção de tecidos não integra as finalidades típicas do tráfico.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5967,
+      "letra": "A",
+      "antes": "Na hipótese agravada, detenção e multa permanecem sempre alternativas entre si.",
+      "depois": "Constrangimento ilegal — Na hipótese agravada, detenção e multa permanecem sempre alternativas entre si.",
+      "escopo": "Constrangimento ilegal"
+    },
+    {
+      "questao_id": 5967,
+      "letra": "D",
+      "antes": "Integrante de organização criminosa ultraviolenta fica fora da forma especial.",
+      "depois": "Sequestro ou cárcere privado ligado à criminalidade organizada — Integrante de organização criminosa ultraviolenta fica fora da forma especial.",
+      "escopo": "Sequestro ou cárcere privado ligado à criminalidade organizada"
+    },
+    {
+      "questao_id": 5967,
+      "letra": "E",
+      "antes": "Somente dívida contraída com terceiro estranho ao trabalho pode integrar a figura.",
+      "depois": "Redução a condição análoga à de escravo — Somente dívida contraída com terceiro estranho ao trabalho pode integrar a figura.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5968,
+      "letra": "A",
+      "antes": "Na hipótese agravada, as penas recebem apenas aumento de um terço.",
+      "depois": "Constrangimento ilegal — Na hipótese agravada, as penas recebem apenas aumento de um terço.",
+      "escopo": "Constrangimento ilegal"
+    },
+    {
+      "questao_id": 5968,
+      "letra": "B",
+      "antes": "A forma específica admite somente palavra, escrito ou gesto, excluindo qualquer outro meio simbólico.",
+      "depois": "Ameaça ligada à criminalidade organizada — A forma específica admite somente palavra, escrito ou gesto, excluindo qualquer outro meio simbólico.",
+      "escopo": "Ameaça ligada à criminalidade organizada"
+    },
+    {
+      "questao_id": 5968,
+      "letra": "C",
+      "antes": "Dívida contraída com preposto do empregador pode ser fundamento da restrição descrita.",
+      "depois": "Redução a condição análoga à de escravo — Dívida contraída com preposto do empregador pode ser fundamento da restrição descrita.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5968,
+      "letra": "D",
+      "antes": "Grupo paramilitar fica fora da forma especial prevista.",
+      "depois": "Sequestro ou cárcere privado ligado à criminalidade organizada — Grupo paramilitar fica fora da forma especial prevista.",
+      "escopo": "Sequestro ou cárcere privado ligado à criminalidade organizada"
+    },
+    {
+      "questao_id": 5968,
+      "letra": "E",
+      "antes": "Trabalho em condição análoga à de escravo fica fora das finalidades típicas do tráfico.",
+      "depois": "Tráfico de pessoas — Trabalho em condição análoga à de escravo fica fora das finalidades típicas do tráfico.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5969,
+      "letra": "D",
+      "antes": "Integrante de milícia privada pode sujeitar o crime à pena especial prevista.",
+      "depois": "Sequestro ou cárcere privado ligado à criminalidade organizada — Integrante de milícia privada pode sujeitar o crime à pena especial prevista.",
+      "escopo": "Sequestro ou cárcere privado ligado à criminalidade organizada"
+    },
+    {
+      "questao_id": 5970,
+      "letra": "C",
+      "antes": "Cercear transporte é irrelevante quando objetiva reter o trabalhador no local.",
+      "depois": "Redução a condição análoga à de escravo — Cercear transporte é irrelevante quando objetiva reter o trabalhador no local.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5970,
+      "letra": "E",
+      "antes": "A forma especial exige contexto de atuação ou a finalidade legalmente indicada.",
+      "depois": "Sequestro ou cárcere privado ligado à criminalidade organizada — A forma especial exige contexto de atuação ou a finalidade legalmente indicada.",
+      "escopo": "Sequestro ou cárcere privado ligado à criminalidade organizada"
+    },
+    {
+      "questao_id": 5971,
+      "letra": "D",
+      "antes": "A prática no contexto da atuação do grupo ou organização é irrelevante para a forma especial.",
+      "depois": "Sequestro ou cárcere privado ligado à criminalidade organizada — A prática no contexto da atuação do grupo ou organização é irrelevante para a forma especial.",
+      "escopo": "Sequestro ou cárcere privado ligado à criminalidade organizada"
+    },
+    {
+      "questao_id": 5971,
+      "letra": "E",
+      "antes": "O cerceamento de transporte gera a mesma pena independentemente da finalidade de retenção.",
+      "depois": "Redução a condição análoga à de escravo — O cerceamento de transporte gera a mesma pena independentemente da finalidade de retenção.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5972,
+      "letra": "B",
+      "antes": "As causas de aumento do tráfico podem começar em um terço.",
+      "depois": "Tráfico de pessoas — As causas de aumento do tráfico podem começar em um terço.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5972,
+      "letra": "D",
+      "antes": "A finalidade de realizar as condutas legalmente referidas fica fora da forma especial.",
+      "depois": "Sequestro ou cárcere privado ligado à criminalidade organizada — A finalidade de realizar as condutas legalmente referidas fica fora da forma especial.",
+      "escopo": "Sequestro ou cárcere privado ligado à criminalidade organizada"
+    },
+    {
+      "questao_id": 5972,
+      "letra": "E",
+      "antes": "Vigilância ostensiva com finalidade de retenção fica fora das condutas equiparadas.",
+      "depois": "Redução a condição análoga à de escravo — Vigilância ostensiva com finalidade de retenção fica fora das condutas equiparadas.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5973,
+      "letra": "D",
+      "antes": "A retenção de documentos pessoais é irrelevante para a figura equiparada.",
+      "depois": "Redução a condição análoga à de escravo — A retenção de documentos pessoais é irrelevante para a figura equiparada.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5973,
+      "letra": "E",
+      "antes": "As causas de aumento do tráfico podem chegar a dois terços.",
+      "depois": "Tráfico de pessoas — As causas de aumento do tráfico podem chegar a dois terços.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5974,
+      "letra": "C",
+      "antes": "A apropriação de objetos pessoais nunca integra as condutas equiparadas.",
+      "depois": "Redução a condição análoga à de escravo — A apropriação de objetos pessoais nunca integra as condutas equiparadas.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5974,
+      "letra": "D",
+      "antes": "A reclusão da forma básica começa em um ano.",
+      "depois": "Sequestro ou cárcere privado — A reclusão da forma básica começa em um ano.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5974,
+      "letra": "E",
+      "antes": "Funcionário público no exercício de suas funções fica fora das causas de aumento.",
+      "depois": "Tráfico de pessoas — Funcionário público no exercício de suas funções fica fora das causas de aumento.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5975,
+      "letra": "B",
+      "antes": "A reclusão da forma básica pode chegar a cinco anos.",
+      "depois": "Sequestro ou cárcere privado — A reclusão da forma básica pode chegar a cinco anos.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5975,
+      "letra": "C",
+      "antes": "As condutas equiparadas recebem apenas multa, sem reclusão.",
+      "depois": "Redução a condição análoga à de escravo — As condutas equiparadas recebem apenas multa, sem reclusão.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5975,
+      "letra": "D",
+      "antes": "Somente o exercício efetivo, e não o pretexto de função pública, pode aumentar a pena.",
+      "depois": "Tráfico de pessoas — Somente o exercício efetivo, e não o pretexto de função pública, pode aumentar a pena.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5976,
+      "letra": "A",
+      "antes": "A pena aumenta de metade nas hipóteses especiais previstas.",
+      "depois": "Redução a condição análoga à de escravo — A pena aumenta de metade nas hipóteses especiais previstas.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5976,
+      "letra": "D",
+      "antes": "A forma agravada indicada prevê apenas detenção.",
+      "depois": "Sequestro ou cárcere privado — A forma agravada indicada prevê apenas detenção.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5976,
+      "letra": "E",
+      "antes": "A condição de criança da vítima não repercute na pena do tráfico.",
+      "depois": "Tráfico de pessoas — A condição de criança da vítima não repercute na pena do tráfico.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5977,
+      "letra": "B",
+      "antes": "A prática contra criança aumenta a pena de metade.",
+      "depois": "Redução a condição análoga à de escravo — A prática contra criança aumenta a pena de metade.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5977,
+      "letra": "D",
+      "antes": "A reclusão da forma agravada começa em um ano.",
+      "depois": "Sequestro ou cárcere privado — A reclusão da forma agravada começa em um ano.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5977,
+      "letra": "E",
+      "antes": "A condição de adolescente da vítima fica fora das causas de aumento.",
+      "depois": "Tráfico de pessoas — A condição de adolescente da vítima fica fora das causas de aumento.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5978,
+      "letra": "C",
+      "antes": "A reclusão da forma agravada pode chegar a cinco anos.",
+      "depois": "Sequestro ou cárcere privado — A reclusão da forma agravada pode chegar a cinco anos.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5978,
+      "letra": "D",
+      "antes": "A condição de adolescente da vítima fica fora da causa de aumento.",
+      "depois": "Redução a condição análoga à de escravo — A condição de adolescente da vítima fica fora da causa de aumento.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5978,
+      "letra": "E",
+      "antes": "A condição de pessoa idosa é irrelevante para a pena do tráfico.",
+      "depois": "Tráfico de pessoas — A condição de pessoa idosa é irrelevante para a pena do tráfico.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5979,
+      "letra": "B",
+      "antes": "A forma com grave sofrimento físico ou moral prevê apenas detenção.",
+      "depois": "Sequestro ou cárcere privado — A forma com grave sofrimento físico ou moral prevê apenas detenção.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5979,
+      "letra": "C",
+      "antes": "Preconceito de raça é irrelevante para a causa de aumento.",
+      "depois": "Redução a condição análoga à de escravo — Preconceito de raça é irrelevante para a causa de aumento.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5979,
+      "letra": "E",
+      "antes": "A deficiência da vítima fica fora das causas de aumento.",
+      "depois": "Tráfico de pessoas — A deficiência da vítima fica fora das causas de aumento.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5980,
+      "letra": "C",
+      "antes": "Preconceito de cor fica fora das causas de aumento.",
+      "depois": "Redução a condição análoga à de escravo — Preconceito de cor fica fora das causas de aumento.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5980,
+      "letra": "D",
+      "antes": "Relação de parentesco fica fora das relações consideradas na majorante.",
+      "depois": "Tráfico de pessoas — Relação de parentesco fica fora das relações consideradas na majorante.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5980,
+      "letra": "E",
+      "antes": "A reclusão da forma com grave sofrimento começa em dois anos.",
+      "depois": "Sequestro ou cárcere privado — A reclusão da forma com grave sofrimento começa em dois anos.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5981,
+      "letra": "A",
+      "antes": "A reclusão da forma com grave sofrimento pode chegar a oito anos.",
+      "depois": "Sequestro ou cárcere privado — A reclusão da forma com grave sofrimento pode chegar a oito anos.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5981,
+      "letra": "C",
+      "antes": "O prejuízo ao pleno desenvolvimento da mulher é irrelevante para a primeira hipótese descrita.",
+      "depois": "Violência psicológica contra a mulher — O prejuízo ao pleno desenvolvimento da mulher é irrelevante para a primeira hipótese descrita.",
+      "escopo": "Violência psicológica contra a mulher"
+    },
+    {
+      "questao_id": 5981,
+      "letra": "D",
+      "antes": "Preconceito de etnia não repercute na pena.",
+      "depois": "Redução a condição análoga à de escravo — Preconceito de etnia não repercute na pena.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5981,
+      "letra": "E",
+      "antes": "Relação doméstica é irrelevante para a causa de aumento.",
+      "depois": "Tráfico de pessoas — Relação doméstica é irrelevante para a causa de aumento.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5982,
+      "letra": "B",
+      "antes": "Motivo de preconceito de religião aumenta a pena de metade.",
+      "depois": "Redução a condição análoga à de escravo — Motivo de preconceito de religião aumenta a pena de metade.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5982,
+      "letra": "C",
+      "antes": "A perturbação do pleno desenvolvimento da mulher é irrelevante para a primeira hipótese descrita.",
+      "depois": "Violência psicológica contra a mulher — A perturbação do pleno desenvolvimento da mulher é irrelevante para a primeira hipótese descrita.",
+      "escopo": "Violência psicológica contra a mulher"
+    },
+    {
+      "questao_id": 5982,
+      "letra": "D",
+      "antes": "A forma ligada à criminalidade organizada prevê apenas detenção.",
+      "depois": "Sequestro ou cárcere privado ligado à criminalidade organizada — A forma ligada à criminalidade organizada prevê apenas detenção.",
+      "escopo": "Sequestro ou cárcere privado ligado à criminalidade organizada"
+    },
+    {
+      "questao_id": 5982,
+      "letra": "E",
+      "antes": "Relação de coabitação fica fora das relações consideradas.",
+      "depois": "Tráfico de pessoas — Relação de coabitação fica fora das relações consideradas.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5983,
+      "letra": "B",
+      "antes": "Na primeira hipótese ligada ao pleno desenvolvimento, basta prejudicá-lo ou perturbá-lo isoladamente.",
+      "depois": "Violência psicológica contra a mulher — Na primeira hipótese ligada ao pleno desenvolvimento, basta prejudicá-lo ou perturbá-lo isoladamente.",
+      "escopo": "Violência psicológica contra a mulher"
+    },
+    {
+      "questao_id": 5983,
+      "letra": "C",
+      "antes": "A reclusão da forma ligada à criminalidade organizada começa em doze anos.",
+      "depois": "Sequestro ou cárcere privado ligado à criminalidade organizada — A reclusão da forma ligada à criminalidade organizada começa em doze anos.",
+      "escopo": "Sequestro ou cárcere privado ligado à criminalidade organizada"
+    },
+    {
+      "questao_id": 5983,
+      "letra": "D",
+      "antes": "Preconceito de origem é irrelevante para a pena.",
+      "depois": "Redução a condição análoga à de escravo — Preconceito de origem é irrelevante para a pena.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5983,
+      "letra": "E",
+      "antes": "Relação de hospitalidade não integra a causa de aumento.",
+      "depois": "Tráfico de pessoas — Relação de hospitalidade não integra a causa de aumento.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5984,
+      "letra": "C",
+      "antes": "A reclusão da forma ligada à criminalidade organizada pode chegar a doze anos.",
+      "depois": "Sequestro ou cárcere privado ligado à criminalidade organizada — A reclusão da forma ligada à criminalidade organizada pode chegar a doze anos.",
+      "escopo": "Sequestro ou cárcere privado ligado à criminalidade organizada"
+    },
+    {
+      "questao_id": 5984,
+      "letra": "E",
+      "antes": "A figura descrita exige apenas inadimplemento contratual, sem redução da condição da pessoa.",
+      "depois": "Redução a condição análoga à de escravo — A figura descrita exige apenas inadimplemento contratual, sem redução da condição da pessoa.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5985,
+      "letra": "C",
+      "antes": "A restrição de locomoção ligada à dívida só é relevante quando realizada por vigilância armada.",
+      "depois": "Redução a condição análoga à de escravo — A restrição de locomoção ligada à dívida só é relevante quando realizada por vigilância armada.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5985,
+      "letra": "D",
+      "antes": "Relação de autoridade fica fora das relações consideradas.",
+      "depois": "Tráfico de pessoas — Relação de autoridade fica fora das relações consideradas.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5986,
+      "letra": "B",
+      "antes": "A redução da capacidade de resistência só é relevante quando obtida mediante violência física.",
+      "depois": "Constrangimento ilegal — A redução da capacidade de resistência só é relevante quando obtida mediante violência física.",
+      "escopo": "Constrangimento ilegal"
+    },
+    {
+      "questao_id": 5987,
+      "letra": "D",
+      "antes": "A reclusão prevista começa em quatro anos.",
+      "depois": "Redução a condição análoga à de escravo — A reclusão prevista começa em quatro anos.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5987,
+      "letra": "E",
+      "antes": "Superioridade hierárquica ligada a emprego fica fora da majorante.",
+      "depois": "Tráfico de pessoas — Superioridade hierárquica ligada a emprego fica fora da majorante.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5988,
+      "letra": "C",
+      "antes": "A superioridade hierárquica inerente ao exercício de cargo pode integrar a causa de aumento.",
+      "depois": "Tráfico de pessoas — A superioridade hierárquica inerente ao exercício de cargo pode integrar a causa de aumento.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5988,
+      "letra": "D",
+      "antes": "A condição de ascendente da vítima é irrelevante para a forma agravada.",
+      "depois": "Sequestro ou cárcere privado — A condição de ascendente da vítima é irrelevante para a forma agravada.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5988,
+      "letra": "E",
+      "antes": "A reclusão prevista pode chegar apenas a quatro anos.",
+      "depois": "Redução a condição análoga à de escravo — A reclusão prevista pode chegar apenas a quatro anos.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5989,
+      "letra": "B",
+      "antes": "A alteração tecnológica da imagem da vítima fica fora da causa de aumento.",
+      "depois": "Violência psicológica contra a mulher — A alteração tecnológica da imagem da vítima fica fora da causa de aumento.",
+      "escopo": "Violência psicológica contra a mulher"
+    },
+    {
+      "questao_id": 5989,
+      "letra": "C",
+      "antes": "A condição de descendente da vítima fica fora da forma agravada.",
+      "depois": "Sequestro ou cárcere privado — A condição de descendente da vítima fica fora da forma agravada.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5989,
+      "letra": "E",
+      "antes": "Superioridade hierárquica ligada a função fica fora da majorante.",
+      "depois": "Tráfico de pessoas — Superioridade hierárquica ligada a função fica fora da majorante.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5990,
+      "letra": "A",
+      "antes": "A alteração tecnológica do som da vítima fica fora da causa de aumento.",
+      "depois": "Violência psicológica contra a mulher — A alteração tecnológica do som da vítima fica fora da causa de aumento.",
+      "escopo": "Violência psicológica contra a mulher"
+    },
+    {
+      "questao_id": 5990,
+      "letra": "B",
+      "antes": "A condição de cônjuge da vítima não altera a pena prevista.",
+      "depois": "Sequestro ou cárcere privado — A condição de cônjuge da vítima não altera a pena prevista.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5990,
+      "letra": "D",
+      "antes": "A retirada da vítima do território nacional é irrelevante para a pena do tráfico.",
+      "depois": "Tráfico de pessoas — A retirada da vítima do território nacional é irrelevante para a pena do tráfico.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5991,
+      "letra": "A",
+      "antes": "O uso tecnológico previsto aumenta a pena de metade.",
+      "depois": "Violência psicológica contra a mulher — O uso tecnológico previsto aumenta a pena de metade.",
+      "escopo": "Violência psicológica contra a mulher"
+    },
+    {
+      "questao_id": 5991,
+      "letra": "B",
+      "antes": "A reunião de exatamente três pessoas já satisfaz a hipótese agravada prevista no texto.",
+      "depois": "Constrangimento ilegal — A reunião de exatamente três pessoas já satisfaz a hipótese agravada prevista no texto.",
+      "escopo": "Constrangimento ilegal"
+    },
+    {
+      "questao_id": 5991,
+      "letra": "C",
+      "antes": "A condição de companheiro da vítima fica fora da forma agravada.",
+      "depois": "Sequestro ou cárcere privado — A condição de companheiro da vítima fica fora da forma agravada.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5991,
+      "letra": "D",
+      "antes": "Jornada exaustiva é irrelevante para a figura descrita.",
+      "depois": "Redução a condição análoga à de escravo — Jornada exaustiva é irrelevante para a figura descrita.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5991,
+      "letra": "E",
+      "antes": "A redução especial independe de o agente ser primário.",
+      "depois": "Tráfico de pessoas — A redução especial independe de o agente ser primário.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5992,
+      "letra": "C",
+      "antes": "A forma agravada alcança apenas vítima com exatamente sessenta anos.",
+      "depois": "Sequestro ou cárcere privado — A forma agravada alcança apenas vítima com exatamente sessenta anos.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5992,
+      "letra": "D",
+      "antes": "Condições degradantes de trabalho não integram a figura descrita.",
+      "depois": "Redução a condição análoga à de escravo — Condições degradantes de trabalho não integram a figura descrita.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5992,
+      "letra": "E",
+      "antes": "A redução especial pode ser aplicada mesmo ao integrante de organização criminosa.",
+      "depois": "Tráfico de pessoas — A redução especial pode ser aplicada mesmo ao integrante de organização criminosa.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5993,
+      "letra": "A",
+      "antes": "Na hipótese agravada, o juiz escolhe entre detenção ou multa sem duplicação.",
+      "depois": "Constrangimento ilegal — Na hipótese agravada, o juiz escolhe entre detenção ou multa sem duplicação.",
+      "escopo": "Constrangimento ilegal"
+    },
+    {
+      "questao_id": 5993,
+      "letra": "C",
+      "antes": "A redução especial exige cumulativamente primariedade e ausência de integração em organização criminosa.",
+      "depois": "Tráfico de pessoas — A redução especial exige cumulativamente primariedade e ausência de integração em organização criminosa.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5993,
+      "letra": "D",
+      "antes": "Internação em casa de saúde é irrelevante para a forma agravada.",
+      "depois": "Sequestro ou cárcere privado — Internação em casa de saúde é irrelevante para a forma agravada.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5993,
+      "letra": "E",
+      "antes": "Restrição de locomoção por dívida é irrelevante quando a dívida envolve o empregador.",
+      "depois": "Redução a condição análoga à de escravo — Restrição de locomoção por dívida é irrelevante quando a dívida envolve o empregador.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5994,
+      "letra": "C",
+      "antes": "Internação em hospital não integra a forma agravada.",
+      "depois": "Sequestro ou cárcere privado — Internação em hospital não integra a forma agravada.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5994,
+      "letra": "D",
+      "antes": "A redução especial da pena pode ser de um terço.",
+      "depois": "Tráfico de pessoas — A redução especial da pena pode ser de um terço.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5994,
+      "letra": "E",
+      "antes": "Somente dívida contraída com terceiro estranho ao trabalho pode integrar a figura.",
+      "depois": "Redução a condição análoga à de escravo — Somente dívida contraída com terceiro estranho ao trabalho pode integrar a figura.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5995,
+      "letra": "C",
+      "antes": "Privação da liberdade por exatamente quinze dias já satisfaz a hipótese temporal agravada.",
+      "depois": "Sequestro ou cárcere privado — Privação da liberdade por exatamente quinze dias já satisfaz a hipótese temporal agravada.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5995,
+      "letra": "D",
+      "antes": "A redução especial da pena pode chegar apenas à metade.",
+      "depois": "Tráfico de pessoas — A redução especial da pena pode chegar apenas à metade.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5995,
+      "letra": "E",
+      "antes": "Dívida contraída com preposto do empregador pode ser fundamento da restrição descrita.",
+      "depois": "Redução a condição análoga à de escravo — Dívida contraída com preposto do empregador pode ser fundamento da restrição descrita.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5996,
+      "letra": "A",
+      "antes": "Na cláusula residual, o outro meio deve causar prejuízo à saúde psicológica e à autodeterminação.",
+      "depois": "Violência psicológica contra a mulher — Na cláusula residual, o outro meio deve causar prejuízo à saúde psicológica e à autodeterminação.",
+      "escopo": "Violência psicológica contra a mulher"
+    },
+    {
+      "questao_id": 5996,
+      "letra": "B",
+      "antes": "A ausência de consentimento do representante legal impede sempre a exclusão médica, mesmo diante de iminente perigo de vida.",
+      "depois": "Constrangimento ilegal — A ausência de consentimento do representante legal impede sempre a exclusão médica, mesmo diante de iminente perigo de vida.",
+      "escopo": "Constrangimento ilegal"
+    },
+    {
+      "questao_id": 5996,
+      "letra": "C",
+      "antes": "A forma agravada por idade só alcança vítima menor de quatorze anos.",
+      "depois": "Sequestro ou cárcere privado — A forma agravada por idade só alcança vítima menor de quatorze anos.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5996,
+      "letra": "E",
+      "antes": "Para o tráfico descrito, basta qualquer deslocamento de pessoa, sem meio de execução nem finalidade específica.",
+      "depois": "Tráfico de pessoas — Para o tráfico descrito, basta qualquer deslocamento de pessoa, sem meio de execução nem finalidade específica.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 5997,
+      "letra": "D",
+      "antes": "Cercear transporte é irrelevante quando objetiva reter o trabalhador no local.",
+      "depois": "Redução a condição análoga à de escravo — Cercear transporte é irrelevante quando objetiva reter o trabalhador no local.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5998,
+      "letra": "D",
+      "antes": "Maus-tratos só alteram a pena quando causam exclusivamente sofrimento físico.",
+      "depois": "Sequestro ou cárcere privado — Maus-tratos só alteram a pena quando causam exclusivamente sofrimento físico.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5998,
+      "letra": "E",
+      "antes": "O cerceamento de transporte gera a mesma pena independentemente da finalidade de retenção.",
+      "depois": "Redução a condição análoga à de escravo — O cerceamento de transporte gera a mesma pena independentemente da finalidade de retenção.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5999,
+      "letra": "C",
+      "antes": "A natureza da detenção é irrelevante quando produz grave sofrimento moral.",
+      "depois": "Sequestro ou cárcere privado — A natureza da detenção é irrelevante quando produz grave sofrimento moral.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 5999,
+      "letra": "E",
+      "antes": "Vigilância ostensiva com finalidade de retenção fica fora das condutas equiparadas.",
+      "depois": "Redução a condição análoga à de escravo — Vigilância ostensiva com finalidade de retenção fica fora das condutas equiparadas.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 6000,
+      "letra": "C",
+      "antes": "Somente sofrimento moral, e não físico, integra a forma mais severa.",
+      "depois": "Sequestro ou cárcere privado — Somente sofrimento moral, e não físico, integra a forma mais severa.",
+      "escopo": "Sequestro ou cárcere privado"
+    },
+    {
+      "questao_id": 6000,
+      "letra": "D",
+      "antes": "A retenção de documentos pessoais é irrelevante para a figura equiparada.",
+      "depois": "Redução a condição análoga à de escravo — A retenção de documentos pessoais é irrelevante para a figura equiparada.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 6001,
+      "letra": "D",
+      "antes": "A apropriação de objetos pessoais nunca integra as condutas equiparadas.",
+      "depois": "Redução a condição análoga à de escravo — A apropriação de objetos pessoais nunca integra as condutas equiparadas.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 6002,
+      "letra": "A",
+      "antes": "Um único episódio basta para satisfazer o requisito de repetição.",
+      "depois": "Bullying — Um único episódio basta para satisfazer o requisito de repetição.",
+      "escopo": "Bullying"
+    },
+    {
+      "questao_id": 6002,
+      "letra": "B",
+      "antes": "Integrante de organização criminosa ultraviolenta pode sujeitar o crime à forma especial.",
+      "depois": "Sequestro ou cárcere privado ligado à criminalidade organizada — Integrante de organização criminosa ultraviolenta pode sujeitar o crime à forma especial.",
+      "escopo": "Sequestro ou cárcere privado ligado à criminalidade organizada"
+    },
+    {
+      "questao_id": 6002,
+      "letra": "D",
+      "antes": "As condutas equiparadas recebem apenas multa, sem reclusão.",
+      "depois": "Redução a condição análoga à de escravo — As condutas equiparadas recebem apenas multa, sem reclusão.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 6003,
+      "letra": "B",
+      "antes": "Grupo paramilitar fica fora da forma especial prevista.",
+      "depois": "Sequestro ou cárcere privado ligado à criminalidade organizada — Grupo paramilitar fica fora da forma especial prevista.",
+      "escopo": "Sequestro ou cárcere privado ligado à criminalidade organizada"
+    },
+    {
+      "questao_id": 6003,
+      "letra": "D",
+      "antes": "A pena aumenta apenas de um terço nas hipóteses especiais previstas.",
+      "depois": "Redução a condição análoga à de escravo — A pena aumenta apenas de um terço nas hipóteses especiais previstas.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 6004,
+      "letra": "C",
+      "antes": "Milícia privada fica fora da forma especial prevista.",
+      "depois": "Sequestro ou cárcere privado ligado à criminalidade organizada — Milícia privada fica fora da forma especial prevista.",
+      "escopo": "Sequestro ou cárcere privado ligado à criminalidade organizada"
+    },
+    {
+      "questao_id": 6004,
+      "letra": "D",
+      "antes": "A prática contra criança aumenta a pena de metade.",
+      "depois": "Redução a condição análoga à de escravo — A prática contra criança aumenta a pena de metade.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 6005,
+      "letra": "A",
+      "antes": "A humilhação só é relevante quando acompanhada de agressão física.",
+      "depois": "Bullying — A humilhação só é relevante quando acompanhada de agressão física.",
+      "escopo": "Bullying"
+    },
+    {
+      "questao_id": 6005,
+      "letra": "C",
+      "antes": "A forma especial independe de qualquer vínculo com o contexto de atuação ou finalidade prevista.",
+      "depois": "Sequestro ou cárcere privado ligado à criminalidade organizada — A forma especial independe de qualquer vínculo com o contexto de atuação ou finalidade prevista.",
+      "escopo": "Sequestro ou cárcere privado ligado à criminalidade organizada"
+    },
+    {
+      "questao_id": 6005,
+      "letra": "D",
+      "antes": "Transferir pessoa fica fora das condutas descritas.",
+      "depois": "Tráfico de pessoas — Transferir pessoa fica fora das condutas descritas.",
+      "escopo": "Tráfico de pessoas"
+    },
+    {
+      "questao_id": 6005,
+      "letra": "E",
+      "antes": "A prática contra adolescente aumenta a pena de metade.",
+      "depois": "Redução a condição análoga à de escravo — A prática contra adolescente aumenta a pena de metade.",
+      "escopo": "Redução a condição análoga à de escravo"
+    },
+    {
+      "questao_id": 5759,
+      "letra": "C",
+      "antes": "A pena básica de detenção tem como limite mínimo um mês.",
+      "depois": "Rixa — A pena básica de detenção tem como limite mínimo um mês.",
+      "escopo": "Rixa"
+    },
+    {
+      "questao_id": 5759,
+      "letra": "E",
+      "antes": "Na hipótese especial, a pena de detenção pode chegar a três anos.",
+      "depois": "Rixa — Na hipótese especial, a pena de detenção pode chegar a três anos.",
+      "escopo": "Rixa"
+    },
+    {
+      "questao_id": 5760,
+      "letra": "A",
+      "antes": "A pena básica de detenção pode alcançar três meses.",
+      "depois": "Rixa — A pena básica de detenção pode alcançar três meses.",
+      "escopo": "Rixa"
+    },
+    {
+      "questao_id": 5760,
+      "letra": "B",
+      "antes": "Na forma básica, a multa pode ser aplicada como alternativa à detenção.",
+      "depois": "Rixa — Na forma básica, a multa pode ser aplicada como alternativa à detenção.",
+      "escopo": "Rixa"
+    },
+    {
+      "questao_id": 5760,
+      "letra": "D",
+      "antes": "Na hipótese especial, a pena de detenção começa em três meses.",
+      "depois": "Rixa — Na hipótese especial, a pena de detenção começa em três meses.",
+      "escopo": "Rixa"
+    },
+    {
+      "questao_id": 5760,
+      "letra": "E",
+      "antes": "Na hipótese especial, a sanção prevista é de reclusão.",
+      "depois": "Rixa — Na hipótese especial, a sanção prevista é de reclusão.",
+      "escopo": "Rixa"
+    },
+    {
+      "questao_id": 5916,
+      "letra": "B",
+      "antes": "A atuação voltada a separar os contendores permanece punível sempre que houver contato físico.",
+      "depois": "Rixa — A atuação voltada a separar os contendores permanece punível sempre que houver contato físico.",
+      "escopo": "Rixa"
+    },
+    {
+      "questao_id": 5916,
+      "letra": "C",
+      "antes": "Na forma básica, a detenção e a multa devem ser aplicadas cumulativamente.",
+      "depois": "Rixa — Na forma básica, a detenção e a multa devem ser aplicadas cumulativamente.",
+      "escopo": "Rixa"
+    },
+    {
+      "questao_id": 5916,
+      "letra": "E",
+      "antes": "Na hipótese especial, a multa permanece prevista como alternativa à pena de detenção.",
+      "depois": "Rixa — Na hipótese especial, a multa permanece prevista como alternativa à pena de detenção.",
+      "escopo": "Rixa"
+    },
+    {
+      "questao_id": 5720,
+      "letra": "A",
+      "antes": "Ofender a integridade corporal ou a saúde de outrem configura a forma básica, punida com detenção de três meses a um ano.",
+      "depois": "Lesão corporal — Ofender a integridade corporal ou a saúde de outrem configura a forma básica, punida com detenção de três meses a um ano.",
+      "escopo": "manual"
+    },
+    {
+      "questao_id": 5748,
+      "letra": "D",
+      "antes": "A forma básica contra recém-nascido prevê detenção de seis meses a dois anos.",
+      "depois": "Exposição ou abandono de recém-nascido — A forma básica prevê detenção de seis meses a dois anos.",
+      "escopo": "manual"
+    },
+    {
+      "questao_id": 5901,
+      "letra": "B",
+      "antes": "A majorante do transporte irregular só alcança estabelecimentos industriais, e não os de qualquer natureza.",
+      "depois": "Perigo decorrente de transporte irregular para prestação de serviços — A majorante alcança estabelecimentos de qualquer natureza.",
+      "escopo": "manual"
+    },
+    {
+      "questao_id": 5910,
+      "letra": "B",
+      "antes": "A majorante do transporte irregular só alcança serviços destinados a estabelecimentos industriais.",
+      "depois": "Perigo decorrente de transporte irregular para prestação de serviços — A majorante não se limita a estabelecimentos industriais.",
+      "escopo": "manual"
+    }
+  ]
+}

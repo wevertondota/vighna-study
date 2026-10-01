@@ -1,0 +1,45 @@
+{
+  "active_questions": 353,
+  "active_alternatives": 1765,
+  "attempts": 131,
+  "cycle5": [
+    [
+      "pendente",
+      222
+    ],
+    [
+      "respondida",
+      131
+    ]
+  ],
+  "content_sha256": "05d2c17515d6db654fc6718aff177a79a8e3b077de77e6a7be6f87d4ed01ddbd",
+  "integrity": "ok",
+  "fk": [],
+  "diagnostic": {
+    "topico_id": 22,
+    "questoes_ativas": 353,
+    "alternativas_ativas": 1765,
+    "microtemas_ativos": 1094,
+    "mapeamentos_alternativas": 1765,
+    "lacunas_mapeamento": 0,
+    "versoes_questoes": 434,
+    "pendencias_mapeamento": 0,
+    "eventos_evidencia": 615,
+    "estados_microtema": 523
+  },
+  "migration": [
+    "microtemas_crimes_pessoa_v1",
+    "2026-10-01 02:57:14"
+  ],
+  "historical_versions": 81,
+  "current_versions": 353,
+  "attempts_with_evidence": 131,
+  "state_distribution": {
+    "atencao": 2,
+    "consolidado": 3,
+    "em_consolidacao": 107,
+    "evidencia_baixa": 384,
+    "fragil": 26,
+    "observacao": 1
+  }
+}

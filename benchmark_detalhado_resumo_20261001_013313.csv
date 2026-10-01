@@ -1,0 +1,95 @@
+﻿fase;tipo;nome;mediana_ms_por_rodada;min_ms;max_ms;chamadas_mediana
+Estatísticas · Progresso;method;SistemaEstudos._precarregar_estatisticas_todas_abas;99252.432;99244.094;99260.77;1.0
+Estatísticas · Histórico;method;SistemaEstudos.atualizar_estatisticas;28480.587;28372.43;28588.744;1.0
+Preparando o Dashboard...;method;SistemaEstudos.atualizar_dashboard;23644.171;23606.739;23681.602;1.0
+Estatísticas · Histórico;method;SistemaEstudos.atualizar_minha_evolucao;22147.893;22059.65;22236.136;1.0
+Estatísticas · Histórico;global;obter_evolucao_historica;22145.984;22057.804;22234.163;1.0
+Estatísticas · Tendências;method;SistemaEstudos.atualizar_estatisticas;22068.743;22064.523;22072.962;1.0
+Estatísticas · Tendências;method;SistemaEstudos.atualizar_evolucao_temporal;22067.061;22062.853;22071.269;1.0
+Estatísticas · Tendências;global;obter_analise_temporal;22062.306;22058.272;22066.339;1.0
+Estatísticas · Conquistas;method;SistemaEstudos.atualizar_estatisticas;11565.156;11512.909;11617.403;1.0
+Estatísticas · Conquistas;method;SistemaEstudos._atualizar_aba_conquistas;11563.207;11511.246;11615.168;1.0
+Estatísticas · Mapa de domínio;method;SistemaEstudos.atualizar_estatisticas;10778.505;10600.008;10957.002;1.0
+Estatísticas · Mapa de domínio;method;SistemaEstudos._atualizar_aba_mapa_dominio;10776.576;10598.426;10954.726;1.0
+Estatísticas · Progresso;method;SistemaEstudos.atualizar_estatisticas;10666.383;10605.75;10727.016;1.0
+Estatísticas · Progresso;method;SistemaEstudos.atualizar_progresso_edital;10664.736;10604.166;10725.306;1.0
+Preparando o Dashboard...;method;SistemaEstudos.atualizar_progresso_dashboard;10387.962;10191.473;10584.45;1.0
+Estatísticas · Conquistas;global;obter_snapshot_progresso_edital;10249.155;10167.455;10330.854;1.0
+Estatísticas · Mapa de domínio;global;obter_snapshot_progresso_edital;10237.817;10061.819;10413.815;1.0
+Preparando o Dashboard...;global;obter_snapshot_progresso_edital;10136.303;9939.742;10332.864;1.0
+Estatísticas · Progresso;global;obter_snapshot_progresso_edital;10060.095;10000.71;10119.481;1.0
+Preparando o Dashboard...;global;obter_prioridades_sessao_adaptativa;7844.485;7702.616;7986.354;2.0
+Estatísticas · Disciplinas;method;SistemaEstudos.atualizar_estatisticas;6391.951;6380.899;6403.002;1.0
+Estatísticas · Disciplinas;method;SistemaEstudos._atualizar_aba_estatisticas_disciplinas;6390.201;6379.284;6401.119;1.0
+Estatísticas · Histórico;method;SistemaEstudos._atualizar_resumo_estatisticas;6330.95;6311.019;6350.88;1.0
+Estatísticas · Algoritmo;method;SistemaEstudos.atualizar_estatisticas;3955.043;3876.753;4033.334;1.0
+Estatísticas · Algoritmo;method;SistemaEstudos.atualizar_laboratorio_algoritmo;3953.392;3875.109;4031.676;1.0
+Preparando o Dashboard...;method;SistemaEstudos.atualizar_hoje_operacional_dashboard;3949.218;3912.797;3985.64;1.0
+Estatísticas · Algoritmo;global;obter_prioridades_sessao_adaptativa;3928.958;3848.77;4009.146;1.0
+Estatísticas · Pontos fracos;method;SistemaEstudos.atualizar_estatisticas;3752.534;3746.88;3758.187;1.0
+Estatísticas · Pontos fracos;method;SistemaEstudos._atualizar_aba_estatisticas_fracos;3750.917;3745.283;3756.55;1.0
+Estatísticas · Disciplinas;global;obter_metricas_globais_nucleo;3186.071;3162.335;3209.807;1.0
+Estatísticas · Histórico;global;obter_metricas_globais_nucleo;3145.653;3135.816;3155.491;1.0
+Preparando o Calendário...;global;obter_dashboard;3132.77;3111.44;3154.1;1.0
+Preparando o Dashboard...;global;obter_metricas_globais_nucleo;3058.184;2993.064;3123.304;1.0
+Preparando Estatísticas...;method;SistemaEstudos.criar_tela_estatisticas;714.37;700.769;727.97;1.0
+Preparando o Dashboard...;method;SistemaEstudos.atualizar_gamificacao_dashboard;632.426;627.265;637.587;1.0
+Estatísticas · Regularidade;method;SistemaEstudos.atualizar_estatisticas;626.097;623.939;628.255;1.0
+Estatísticas · Regularidade;method;SistemaEstudos._atualizar_aba_regularidade;624.362;622.312;626.412;1.0
+Estatísticas · Regularidade;global;obter_snapshot_regularidade;623.154;621.088;625.22;1.0
+Estatísticas · Conquistas;global;obter_snapshot_regularidade;621.452;616.55;626.354;1.0
+Preparando o Dashboard...;global;obter_snapshot_regularidade;611.129;604.484;617.774;1.0
+Preparando o Dashboard...;global;contar_banco_erros_pendentes;582.709;569.024;596.395;1.0
+Estatísticas · Mapa de domínio;method;SistemaEstudos.filtrar_mapa_dominio;518.68;515.977;521.383;1.0
+Preparando o Dashboard...;method;SistemaEstudos.atualizar_planejamento_dashboard;425.241;411.982;438.5;1.0
+Preparando o Dashboard...;global;obter_metricas_periodo_nucleo;369.227;360.416;378.038;2.0
+Estatísticas · Progresso;method;SistemaEstudos.filtrar_progresso_edital;287.5;285.708;289.292;1.0
+construtor;method;SistemaEstudos.criar_tela_inicial;228.887;227.081;230.692;1.0
+Preparando o Dashboard...;global;obter_configuracao_int;47.853;44.933;50.773;25.0
+Preparando Estatísticas...;method;SistemaEstudos.criar_aba_conquistas;38.647;38.396;38.898;1.0
+Preparando Estatísticas...;method;SistemaEstudos.criar_aba_laboratorio_algoritmo;36.933;35.931;37.936;1.0
+Preparando Estatísticas...;method;SistemaEstudos.criar_aba_regularidade;30.965;30.788;31.142;1.0
+Preparando Estatísticas...;method;SistemaEstudos.criar_aba_mapa_dominio;22.453;21.692;23.214;1.0
+Preparando o Dashboard...;global;obter_resumo_foco;14.8;14.384;15.217;2.0
+Estatísticas · Revisões recentes;method;SistemaEstudos.atualizar_estatisticas;13.94;13.903;13.976;1.0
+construtor;global;obter_configuracao_bool;13.524;13.344;13.704;9.0
+Preparando o Dashboard...;global;obter_configuracao_bool;13.203;12.019;14.386;5.0
+Estatísticas · Revisões recentes;method;SistemaEstudos._atualizar_aba_estatisticas_recentes;12.315;12.259;12.371;1.0
+Preparando o Dashboard...;global;listar_pendencias;10.274;7.485;13.063;1.0
+Preparando o Dashboard...;global;obter_estado_cobertura_revisao;7.043;6.196;7.891;1.0
+Estatísticas · Progresso;global;obter_concurso_ativo;6.37;5.643;7.098;4.0
+Preparando o Calendário...;global;obter_concurso_ativo;6.139;2.913;9.365;2.0
+construtor;global;obter_concurso_ativo;4.19;1.37;7.009;1.0
+Estatísticas · Histórico;global;obter_concurso_ativo;3.075;3.053;3.098;2.0
+Estatísticas · Tendências;global;obter_concurso_ativo;2.987;2.937;3.037;2.0
+Preparando o Dashboard...;global;obter_concurso_ativo;2.951;2.946;2.956;2.0
+Estatísticas · Algoritmo;global;obter_configuracao_int;2.934;2.717;3.151;2.0
+Estatísticas · Algoritmo;global;obter_concurso_ativo;2.916;2.904;2.928;2.0
+Preparando o Dashboard...;global;obter_dashboard;2.829;2.332;3.326;1.0
+Estatísticas · Algoritmo;global;obter_configuracao_bool;2.798;2.787;2.81;2.0
+Estatísticas · Algoritmo;global;obter_resumo_foco;2.606;1.608;3.604;1.0
+Preparando Relatórios...;global;obter_concurso_ativo;2.177;1.549;2.805;1.0
+Preparando o Resumo do dia...;global;obter_concurso_ativo;1.796;1.523;2.068;1.0
+Estatísticas · Mapa de domínio;global;obter_concurso_ativo;1.768;1.481;2.054;1.0
+Estatísticas · Conquistas;global;obter_concurso_ativo;1.763;1.525;2.001;1.0
+Preparando o Resumo do dia...;global;listar_pendencias;1.703;1.609;1.797;1.0
+Preparando o Dashboard...;global;obter_resumo_simulados_dashboard;1.655;1.559;1.751;1.0
+Preparando a Central de Questões...;global;obter_concurso_ativo;1.64;1.636;1.645;1.0
+Estatísticas · Disciplinas;global;obter_concurso_ativo;1.617;1.512;1.721;1.0
+Estatísticas · Algoritmo;global;montar_laboratorio;1.603;1.588;1.617;1.0
+Estatísticas · Regularidade;global;obter_concurso_ativo;1.554;1.493;1.615;1.0
+Estatísticas · Revisões recentes;global;obter_concurso_ativo;1.518;1.502;1.534;1.0
+Estatísticas · Pontos fracos;global;obter_concurso_ativo;1.509;1.493;1.525;1.0
+Finalizando a interface...;global;obter_concurso_ativo;1.482;1.479;1.486;1.0
+Preparando o Resumo do dia...;global;obter_configuracao_int;1.427;1.345;1.509;1.0
+Estatísticas · Mapa de domínio;global;build_domain_map_snapshot;0.366;0.356;0.377;1.0
+Preparando o Dashboard...;method;SistemaEstudos.atualizar_regularidade_dashboard;0.054;0.053;0.055;1.0
+Estatísticas · Conquistas;method;SistemaEstudos._atualizar_resumo_estatisticas;0.007;0.003;0.011;1.0
+Estatísticas · Regularidade;method;SistemaEstudos._atualizar_resumo_estatisticas;0.005;0.002;0.008;1.0
+Estatísticas · Mapa de domínio;method;SistemaEstudos._atualizar_resumo_estatisticas;0.005;0.002;0.007;1.0
+Estatísticas · Progresso;method;SistemaEstudos._atualizar_resumo_estatisticas;0.004;0.002;0.005;1.0
+Estatísticas · Disciplinas;method;SistemaEstudos._atualizar_resumo_estatisticas;0.003;0.002;0.003;1.0
+Estatísticas · Algoritmo;method;SistemaEstudos._atualizar_resumo_estatisticas;0.002;0.002;0.002;1.0
+Estatísticas · Pontos fracos;method;SistemaEstudos._atualizar_resumo_estatisticas;0.002;0.002;0.002;1.0
+Estatísticas · Revisões recentes;method;SistemaEstudos._atualizar_resumo_estatisticas;0.002;0.002;0.002;1.0
+Estatísticas · Tendências;method;SistemaEstudos._atualizar_resumo_estatisticas;0.002;0.002;0.002;1.0

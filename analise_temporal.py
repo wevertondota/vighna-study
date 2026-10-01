@@ -422,29 +422,37 @@ def build_temporal_analytics_snapshot(
     service = service or StatisticsService(connection_factory)
     previous_period = period.previous_equivalent()
 
-    current_scope = service.get_global_metrics(concurso_id, period)
-    previous_scope = service.get_global_metrics(concurso_id, previous_period)
-    official_scope = service.get_global_metrics(concurso_id)
+    topic_names, subject_names = _catalog_names(connection_factory, concurso_id)
+    topic_ids = sorted(topic_names)
+    subject_ids = sorted(subject_names)
+
+    # Uma única leitura all-time alimenta período atual, anterior e fotografia
+    # oficial. Isso elimina leituras repetidas de tentativas/revisões e mantém
+    # exatamente as mesmas fórmulas de cada escopo.
+    hierarquia = service.get_hierarchy_metrics_periods(
+        concurso_id,
+        {
+            "current": period,
+            "previous": previous_period,
+            "official": StatisticalPeriods.all_time(),
+        },
+        topic_ids,
+        subject_ids,
+    )
+    current_scope = hierarquia["current"]["global"]
+    previous_scope = hierarquia["previous"]["global"]
+    official_scope = hierarquia["official"]["global"]
     current_summary = _summary(current_scope)
     previous_summary = _summary(previous_scope)
     comparisons = _period_comparisons(current_summary, previous_summary)
     sufficiency = comparison_sufficiency(current_summary, previous_summary)
 
-    topic_names, subject_names = _catalog_names(connection_factory, concurso_id)
-    topic_ids = sorted(topic_names)
-    subject_ids = sorted(subject_names)
-    current_topics = service.get_topic_metrics_batch(concurso_id, topic_ids, period)
-    previous_topics = service.get_topic_metrics_batch(
-        concurso_id, topic_ids, previous_period
-    )
-    current_subjects = service.get_subject_metrics_batch(
-        concurso_id, subject_ids, period
-    )
-    previous_subjects = service.get_subject_metrics_batch(
-        concurso_id, subject_ids, previous_period
-    )
-    official_topics = service.get_topic_metrics_batch(concurso_id, topic_ids)
-    official_subjects = service.get_subject_metrics_batch(concurso_id, subject_ids)
+    current_topics = hierarquia["current"]["topics"]
+    previous_topics = hierarquia["previous"]["topics"]
+    current_subjects = hierarquia["current"]["subjects"]
+    previous_subjects = hierarquia["previous"]["subjects"]
+    official_topics = hierarquia["official"]["topics"]
+    official_subjects = hierarquia["official"]["subjects"]
 
     subjects = [
         _scope_comparison(

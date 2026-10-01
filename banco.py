@@ -33,14 +33,30 @@ from analise_temporal import build_period, build_temporal_analytics_snapshot
 from progresso_edital import build_syllabus_progress_snapshot
 from regularidade import build_regularity_snapshot
 from gamificacao import build_gamification_snapshot, ensure_gamification_schema
+import microtemas as microtemas_engine
 from statistics_core import StatisticsService
 from statistics_core.models import METRIC_VERSION
 from statistics_core.periods import statistical_timezone
 from caminhos import CAMINHO_BANCO, PASTA_DADOS
+from cache_persistente import (
+    garantir_schema_cache_persistente,
+    obter_ou_calcular as obter_ou_calcular_cache_persistente,
+    invalidar_memoria as invalidar_cache_persistente_memoria,
+    suspender_revisoes_cache,
+)
 
 
 PASTA_APLICACAO = PASTA_DADOS
 LOGGER = logging.getLogger(__name__)
+
+
+def _chave_periodo_cache(periodo):
+    if periodo is None:
+        return "all"
+    inicio = getattr(periodo, "start", None)
+    fim = getattr(periodo, "end_exclusive", None)
+    ident = getattr(periodo, "identifier", None) or "period"
+    return f"{ident}:{inicio.isoformat() if inicio else '-'}:{fim.isoformat() if fim else '-'}"
 
 
 CTB_NOME_OFICIAL = "Código de Trânsito Brasileiro"
@@ -69,10 +85,18 @@ def obter_servico_estatistico():
 def obter_metricas_globais_nucleo(concurso_id=None, periodo=None):
     if concurso_id is None:
         concurso_id = obter_concurso_ativo()[0]
-    return obter_servico_estatistico().get_global_metrics(
-        int(concurso_id),
-        periodo,
-    ).to_dict()
+    concurso_id = int(concurso_id)
+    chave = f"nucleo:global:{concurso_id}:{_chave_periodo_cache(periodo)}"
+    return obter_ou_calcular_cache_persistente(
+        conectar,
+        chave,
+        lambda: obter_servico_estatistico().get_global_metrics(
+            concurso_id,
+            periodo,
+        ).to_dict(),
+        concurso_id=concurso_id,
+        dominios=("academico", "catalogo", "configuracao"),
+    )
 
 
 def obter_metricas_topico_nucleo(topico_id, concurso_id=None, periodo=None):
@@ -108,93 +132,111 @@ def obter_progresso_topicos_nucleo(concurso_id=None):
 
 
 def obter_snapshot_progresso_edital(concurso_id=None, capturar=True):
-    """Snapshot V2 compartilhado pelo Dashboard e pela aba Progresso."""
+    """Snapshot V2 compartilhado e persistido por revisão da base."""
     if concurso_id is None:
         concurso_id = obter_concurso_ativo()[0]
     concurso_id = int(concurso_id)
 
-    with conectar() as conexao:
-        linhas = conexao.execute(
-            """
-            SELECT
-                t.id,
-                d.id,
-                d.nome,
-                t.nome,
-                COALESCE(tc.importancia, 3),
-                c.proxima_revisao
-            FROM topicos t
-            JOIN disciplinas d ON d.id = t.disciplina_id
-            JOIN disciplina_concurso_inclusao dc
-                ON dc.disciplina_id = d.id
-                AND dc.concurso_id = ?
-                AND dc.incluido = 1
-                AND COALESCE(dc.pausado, 0) = 0
-            JOIN topico_concurso_importancia tc
-                ON tc.topico_id = t.id
-                AND tc.concurso_id = ?
-                AND tc.incluido = 1
-                AND COALESCE(tc.pausado, 0) = 0
-            LEFT JOIN controle_topico c ON c.topico_id = t.id
-            ORDER BY d.nome COLLATE NOCASE, t.nome COLLATE NOCASE
-            """,
-            (concurso_id, concurso_id),
-        ).fetchall()
+    def calcular():
+        with conectar() as conexao:
+            linhas = conexao.execute(
+                """
+                SELECT
+                    t.id,
+                    d.id,
+                    d.nome,
+                    t.nome,
+                    COALESCE(tc.importancia, 3),
+                    c.proxima_revisao
+                FROM topicos t
+                JOIN disciplinas d ON d.id = t.disciplina_id
+                JOIN disciplina_concurso_inclusao dc
+                    ON dc.disciplina_id = d.id
+                    AND dc.concurso_id = ?
+                    AND dc.incluido = 1
+                    AND COALESCE(dc.pausado, 0) = 0
+                JOIN topico_concurso_importancia tc
+                    ON tc.topico_id = t.id
+                    AND tc.concurso_id = ?
+                    AND tc.incluido = 1
+                    AND COALESCE(tc.pausado, 0) = 0
+                LEFT JOIN controle_topico c ON c.topico_id = t.id
+                ORDER BY d.nome COLLATE NOCASE, t.nome COLLATE NOCASE
+                """,
+                (concurso_id, concurso_id),
+            ).fetchall()
 
-    catalogo = [
-        {
-            "topico_id": int(linha[0]),
-            "disciplina_id": int(linha[1]),
-            "disciplina": linha[2],
-            "topico": linha[3],
-            "importancia": int(linha[4] or 3),
-            "proxima_revisao": linha[5],
-        }
-        for linha in linhas
-    ]
-    servico = obter_servico_estatistico()
-    metricas_topicos = servico.get_topic_metrics_batch(
-        concurso_id,
-        [int(linha[0]) for linha in linhas],
+        catalogo = [
+            {
+                "topico_id": int(linha[0]),
+                "disciplina_id": int(linha[1]),
+                "disciplina": linha[2],
+                "topico": linha[3],
+                "importancia": int(linha[4] or 3),
+                "proxima_revisao": linha[5],
+            }
+            for linha in linhas
+        ]
+        servico = obter_servico_estatistico()
+        disciplina_ids = sorted({int(linha[1]) for linha in linhas})
+        # get_hierarchy_metrics substitui get_topic_metrics_batch,
+        # get_subject_metrics_batch e get_global_metrics por uma única leitura compartilhada.
+        hierarquia = servico.get_hierarchy_metrics(
+            concurso_id,
+            topic_ids=[int(linha[0]) for linha in linhas],
+            subject_ids=disciplina_ids,
+        )
+        return build_syllabus_progress_snapshot(
+            concurso_id,
+            catalogo,
+            hierarquia["topics"],
+            hierarquia["subjects"],
+            hierarquia["global"],
+        ).to_dict()
+
+    snapshot = obter_ou_calcular_cache_persistente(
+        conectar,
+        f"progresso:v2:{concurso_id}",
+        calcular,
+        concurso_id=concurso_id,
+        dominios=("academico", "catalogo", "configuracao"),
     )
-    disciplina_ids = sorted({int(linha[1]) for linha in linhas})
-    metricas_disciplinas = servico.get_subject_metrics_batch(
-        concurso_id,
-        disciplina_ids,
-    )
-    metricas_globais = servico.get_global_metrics(concurso_id)
-    snapshot = build_syllabus_progress_snapshot(
-        concurso_id,
-        catalogo,
-        metricas_topicos,
-        metricas_disciplinas,
-        metricas_globais,
-    ).to_dict()
     if capturar:
         capturar_snapshot_progresso_diario(snapshot=snapshot)
     return snapshot
 
 
 def obter_snapshot_regularidade(data_referencia=None):
-    """Resumo global de hábito; não participa da fila inteligente."""
+    """Resumo global de hábito com cache persistente por dia/revisão."""
     if data_referencia is None:
-        referencia = None
+        referencia = datetime.now(statistical_timezone()).date()
     elif isinstance(data_referencia, datetime):
-        referencia = data_referencia
+        referencia = data_referencia.date()
     elif isinstance(data_referencia, date):
         referencia = data_referencia
     else:
         referencia = date.fromisoformat(str(data_referencia)[:10])
 
-    meta_dias = max(
-        0,
-        min(7, obter_configuracao_int("meta_dias_estudo_semanal", 0)),
-    )
-    return build_regularity_snapshot(
+    chave = f"regularidade:v2:{referencia.isoformat()}"
+
+    def calcular():
+        meta_dias = max(
+            0,
+            min(7, obter_configuracao_int("meta_dias_estudo_semanal", 0)),
+        )
+        return build_regularity_snapshot(
+            conectar,
+            as_of=referencia,
+            target_days_per_week=meta_dias,
+        ).to_dict()
+
+    return obter_ou_calcular_cache_persistente(
         conectar,
-        as_of=referencia,
-        target_days_per_week=meta_dias,
-    ).to_dict()
+        chave,
+        calcular,
+        concurso_id=0,
+        dominios=("academico", "configuracao", "foco"),
+    )
 
 
 def obter_snapshot_gamificacao(
@@ -241,9 +283,10 @@ def obter_analise_temporal(
     data_inicio=None,
     data_fim_inclusivo=None,
 ):
-    """Adaptador unico entre a UI e a camada temporal oficial."""
+    """Adaptador temporal com warm cache persistente e revisionado."""
     if concurso_id is None:
         concurso_id = obter_concurso_ativo()[0]
+    concurso_id = int(concurso_id)
     if data_inicio is not None or data_fim_inclusivo is not None:
         periodo = build_period(
             start=date.fromisoformat(str(data_inicio)[:10]),
@@ -251,12 +294,20 @@ def obter_analise_temporal(
         )
     else:
         periodo = build_period(days=int(dias or 30))
-    return build_temporal_analytics_snapshot(
+
+    chave = f"temporal:v2:{concurso_id}:{_chave_periodo_cache(periodo)}"
+    return obter_ou_calcular_cache_persistente(
         conectar,
-        int(concurso_id),
-        periodo,
-        obter_servico_estatistico(),
-    ).to_dict()
+        chave,
+        lambda: build_temporal_analytics_snapshot(
+            conectar,
+            concurso_id,
+            periodo,
+            obter_servico_estatistico(),
+        ).to_dict(),
+        concurso_id=concurso_id,
+        dominios=("academico", "catalogo", "configuracao", "foco"),
+    )
 
 
 def _campos_snapshot_progresso(snapshot):
@@ -422,6 +473,10 @@ def criar_banco():
     # não fecha a conexão. O fechamento explícito evita bloquear bancos
     # temporários no Windows após a migração.
     with closing(conectar()) as conexao, conexao:
+        # Se os gatilhos de cache já existem de uma abertura anterior, suspenda
+        # seus contadores durante as migrações idempotentes do startup.
+        suspender_revisoes_cache(conexao, True)
+
         # Ajustes seguros para uso local: WAL reduz bloqueios entre leituras e
         # escritas curtas; NORMAL evita sincronizações excessivas sem abrir mão
         # da durabilidade esperada do SQLite em desktop.
@@ -1972,6 +2027,57 @@ def criar_banco():
         # registro de aliases mantém imports e vínculos compatíveis após
         # renomeações futuras.
         _garantir_identidades_estruturais(conexao)
+
+        # ------------------------------------------------------
+        # MICROTEMAS V1 — conhecimento estável > questão mutável
+        # ------------------------------------------------------
+        microtemas_engine.garantir_schema(conexao)
+        migracao_microtemas = conexao.execute(
+            "SELECT 1 FROM migracoes WHERE nome = ?",
+            ("microtemas_crimes_pessoa_v1",),
+        ).fetchone()
+        if migracao_microtemas is None:
+            resultado_microtemas = microtemas_engine.aplicar_catalogo_crimes_pessoa(
+                conexao, Path(__file__).resolve().parent
+            )
+            if resultado_microtemas.get("aplicado"):
+                microtemas_engine.backfill_tentativas(conexao)
+                conexao.execute(
+                    "INSERT INTO migracoes (nome, executada_em) VALUES (?, datetime('now','localtime'))",
+                    ("microtemas_crimes_pessoa_v1",),
+                )
+
+        migracao_hesitacao = conexao.execute(
+            "SELECT 1 FROM migracoes WHERE nome = ?",
+            ("microtemas_hesitacao_v1",),
+        ).fetchone()
+        if migracao_hesitacao is None:
+            resultado_hesitacao = microtemas_engine.backfill_hesitacoes(conexao)
+            if resultado_hesitacao.get("aplicado"):
+                # A fórmula de fragilidade também passa a distinguir erro real
+                # de sinais fracos (dúvida/hesitação); recalcule o estado inteiro.
+                concursos_microtemas = [
+                    int(r[0]) for r in conexao.execute(
+                        """
+                        SELECT DISTINCT tq.concurso_id
+                        FROM tentativa_microtemas tm
+                        JOIN tentativas_questoes tq ON tq.id=tm.tentativa_id
+                        WHERE tq.concurso_id IS NOT NULL
+                        """
+                    ).fetchall()
+                ]
+                for concurso_microtema_id in concursos_microtemas:
+                    microtemas_engine.recalcular_estados(conexao, concurso_microtema_id)
+                conexao.execute(
+                    "INSERT INTO migracoes (nome, executada_em) VALUES (?, datetime('now','localtime'))",
+                    ("microtemas_hesitacao_v1",),
+                )
+
+        # Cache persistente derivado: triggers entram somente depois das
+        # migrações/backfills desta abertura, evitando invalidar snapshots por
+        # trabalho estrutural interno do próprio startup.
+        garantir_schema_cache_persistente(conexao)
+        suspender_revisoes_cache(conexao, False)
 
         try:
             conexao.execute("PRAGMA optimize")
@@ -6219,7 +6325,7 @@ def questao_existe(
 
     return False
 
-def listar_grupos_questoes_duplicadas(concurso_id=None):
+def listar_grupos_questoes_duplicadas(concurso_id=None, _cache_bypass=False):
     """Retorna grupos de questões realmente duplicadas no perfil ativo.
 
     A assinatura considera enunciado normalizado, alternativas e gabarito.
@@ -6227,6 +6333,18 @@ def listar_grupos_questoes_duplicadas(concurso_id=None):
     """
     if concurso_id is None:
         concurso_id = obter_concurso_ativo()[0]
+    concurso_id = int(concurso_id)
+
+    if not _cache_bypass:
+        return obter_ou_calcular_cache_persistente(
+            conectar,
+            f"duplicadas:v1:{concurso_id}",
+            lambda: listar_grupos_questoes_duplicadas(
+                concurso_id, _cache_bypass=True
+            ),
+            concurso_id=concurso_id,
+            dominios=("catalogo",),
+        )
 
     with conectar() as conexao:
         questoes = conexao.execute(
@@ -6533,6 +6651,12 @@ def criar_questao(
                 )
             )
 
+        microtemas_engine.registrar_questao_nova(
+            conexao,
+            int(questao_id),
+            motivo="criacao",
+        )
+
         return questao_id
 
 
@@ -6674,6 +6798,12 @@ def criar_questoes_lote(
                         ],
                     )
                 )
+
+            microtemas_engine.registrar_questao_nova(
+                conexao,
+                int(questao_id),
+                motivo="criacao_lote",
+            )
 
             ids.append(
                 questao_id
@@ -6870,6 +7000,10 @@ def atualizar_questao(
         )
 
     with conectar() as conexao:
+        estado_microtemas_anterior = microtemas_engine.capturar_estado_pre_edicao(
+            conexao,
+            int(questao_id),
+        )
         topico_id, capitulo_id = _resolver_classificacao_questao(
             topico_id,
             capitulo_id,
@@ -6969,6 +7103,13 @@ def atualizar_questao(
                     ],
                 )
             )
+
+        microtemas_engine.finalizar_edicao_questao(
+            conexao,
+            int(questao_id),
+            estado_microtemas_anterior,
+            motivo="edicao",
+        )
 
         return True
 
@@ -7213,6 +7354,13 @@ def restaurar_questao_da_lixeira(
 def excluir_questao_permanentemente(
     questao_id
 ):
+    # Questões com evidência acadêmica nunca são destruídas fisicamente.
+    # A lixeira funciona como soft delete e preserva versões, microtemas e
+    # tentativas históricas.
+    integridade = obter_integridade_questao(questao_id)
+    if integridade and integridade.get("possui_historico"):
+        return mover_questao_para_lixeira(questao_id)
+
     with conectar() as conexao:
         conexao.execute(
             """
@@ -7486,7 +7634,8 @@ def listar_questoes(
 
 
 def obter_resumo_integridade_historica_questoes(
-    concurso_id=None
+    concurso_id=None,
+    _cache_bypass=False,
 ):
     """
     Resume a cobertura dos snapshots históricos das tentativas.
@@ -7501,6 +7650,17 @@ def obter_resumo_integridade_historica_questoes(
         concurso_id = obter_concurso_ativo()[0]
 
     concurso_id = int(concurso_id)
+
+    if not _cache_bypass:
+        return obter_ou_calcular_cache_persistente(
+            conectar,
+            f"integridade_historica:v2:{concurso_id}",
+            lambda: obter_resumo_integridade_historica_questoes(
+                concurso_id, _cache_bypass=True
+            ),
+            concurso_id=concurso_id,
+            dominios=("academico", "catalogo"),
+        )
 
     with conectar() as conexao:
         linha = conexao.execute(
@@ -7536,20 +7696,17 @@ def obter_resumo_integridade_historica_questoes(
 
         arquivadas = conexao.execute(
             """
-            SELECT COUNT(DISTINCT q.id)
-            FROM questoes q
-            WHERE
-                q.ativa = 0
-                AND EXISTS (
-                    SELECT 1
-                    FROM tentativas_questoes tq
-                    WHERE
-                        tq.concurso_id = ?
-                        AND COALESCE(
-                            tq.questao_id_snapshot,
-                            tq.questao_id
-                        ) = q.id
-                )
+            WITH historico AS (
+                SELECT DISTINCT
+                    COALESCE(questao_id_snapshot, questao_id) AS questao_ref
+                FROM tentativas_questoes
+                WHERE concurso_id = ?
+                  AND COALESCE(questao_id_snapshot, questao_id) IS NOT NULL
+            )
+            SELECT COUNT(*)
+            FROM historico h
+            JOIN questoes q ON q.id = h.questao_ref
+            WHERE q.ativa = 0
             """,
             (concurso_id,)
         ).fetchone()[0]
@@ -7772,7 +7929,8 @@ def _limitar_score_dominio(
 
 
 def obter_indices_dominio_topicos(
-    concurso_id=None
+    concurso_id=None,
+    _cache_bypass=False,
 ):
     """
     Índice de Domínio V2.
@@ -7804,6 +7962,18 @@ def obter_indices_dominio_topicos(
     concurso_id = int(
         concurso_id
     )
+
+    if not _cache_bypass:
+        hoje_cache = date.today().isoformat()
+        return obter_ou_calcular_cache_persistente(
+            conectar,
+            f"dominio:v2:{concurso_id}:{hoje_cache}",
+            lambda: obter_indices_dominio_topicos(
+                concurso_id, _cache_bypass=True
+            ),
+            concurso_id=concurso_id,
+            dominios=("academico", "catalogo", "configuracao"),
+        )
 
     with conectar() as conexao:
         topicos_linhas = conexao.execute(
@@ -9103,6 +9273,46 @@ def obter_indice_dominio_topico(
             "evidencia": 10,
         },
     }
+
+
+def listar_microtemas_topico(topico_id, concurso_id=None):
+    """Lista a taxonomia de conhecimento e o estado atual de cada microtema."""
+    if concurso_id is None:
+        concurso_id = obter_concurso_ativo()[0]
+    with conectar() as conexao:
+        microtemas_engine.garantir_schema(conexao)
+        return microtemas_engine.listar_microtemas(
+            conexao,
+            int(topico_id),
+            int(concurso_id) if concurso_id is not None else None,
+        )
+
+
+def obter_refinamento_microtemas_topico(
+    topico_id,
+    concurso_id=None,
+    quantidade=10,
+    limiar_dominio=microtemas_engine.LIMIAR_REFINAMENTO_PADRAO,
+):
+    """Retorna candidatos de refinamento apenas após domínio confiável >= limiar."""
+    if concurso_id is None:
+        concurso_id = obter_concurso_ativo()[0]
+    indice = obter_indice_dominio_topico(int(topico_id), int(concurso_id))
+    with conectar() as conexao:
+        return microtemas_engine.selecionar_refinamento(
+            conexao,
+            int(concurso_id),
+            int(topico_id),
+            indice.get("score"),
+            quantidade=max(1, int(quantidade or 1)),
+            limiar_dominio=float(limiar_dominio),
+        )
+
+
+def obter_diagnostico_microtemas(topico_id=microtemas_engine.TOPICO_CRIMES_PESSOA_ID):
+    """Diagnóstico técnico do piloto de microtemas."""
+    with conectar() as conexao:
+        return microtemas_engine.diagnostico_piloto(conexao, int(topico_id))
 
 
 def obter_estatisticas_banco_questoes(
@@ -10561,7 +10771,8 @@ def obter_prioridades_sessao_adaptativa(
     disciplina_id=None,
     topicos_ids=None,
     capitulos_ids=None,
-    tipo_questao=None
+    tipo_questao=None,
+    _cache_bypass=False,
 ):
     """
     Ranking ativo da Fila Inteligente V3 com comparação candidata em sombra.
@@ -10588,6 +10799,34 @@ def obter_prioridades_sessao_adaptativa(
         capitulos_ids_set = {int(capitulo_id) for capitulo_id in capitulos_ids}
         if not capitulos_ids_set:
             return []
+
+    if not _cache_bypass:
+        chave_escopo = json.dumps(
+            {
+                "disciplina": disciplina_id,
+                "topicos": sorted(topicos_ids_set) if topicos_ids_set is not None else None,
+                "capitulos": sorted(capitulos_ids_set) if capitulos_ids_set is not None else None,
+                "tipo": normalizar_tipo_questao(tipo_questao) if tipo_questao else None,
+                "data": date.today().isoformat(),
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        return obter_ou_calcular_cache_persistente(
+            conectar,
+            f"adaptativas:v3:{concurso_id}:{chave_escopo}",
+            lambda: obter_prioridades_sessao_adaptativa(
+                concurso_id,
+                disciplina_id=disciplina_id,
+                topicos_ids=sorted(topicos_ids_set) if topicos_ids_set is not None else None,
+                capitulos_ids=sorted(capitulos_ids_set) if capitulos_ids_set is not None else None,
+                tipo_questao=tipo_questao,
+                _cache_bypass=True,
+            ),
+            concurso_id=concurso_id,
+            dominios=("academico", "catalogo", "configuracao"),
+        )
 
     indices = obter_indices_dominio_topicos(concurso_id)
     # O contrato novo roda lado a lado para auditoria. Nesta etapa nenhum
@@ -11865,6 +12104,19 @@ def selecionar_questoes_adaptativas_v2(
 
     pesos, estrategia = _pesos_categorias_adaptativas_v2(indice_topico)
 
+    # Quando o tópico já atingiu domínio alto, muda a função do motor: em vez
+    # de ampliar a cobertura, ele tenta localizar e testar fragilidades residuais
+    # por microtema. A fila normal continua como fallback e completa qualquer
+    # quantidade não atendida pelo refinamento.
+    with conectar() as conexao:
+        refinamento = microtemas_engine.selecionar_refinamento(
+            conexao,
+            int(concurso_id),
+            int(topico_id),
+            indice_topico.get("score"),
+            quantidade=quantidade,
+        )
+
     if quantidade <= 0:
         return {
             **perfil,
@@ -11886,6 +12138,31 @@ def selecionar_questoes_adaptativas_v2(
     selecionadas = []
     usados = set()
     contagem = {}
+
+    perfil_por_id = {int(item["id"]): item for item in perfil["questoes"]}
+    for alvo in refinamento.get("fila", []):
+        if len(selecionadas) >= quantidade:
+            break
+        base = perfil_por_id.get(int(alvo["id"]))
+        if base is None or int(base["id"]) in usados:
+            continue
+        usados.add(int(base["id"]))
+        selecionadas.append({
+            **base,
+            "categoria_inteligente": "refino_microtema",
+            "categoria_rotulo": "Refinamento de microtema",
+            "versao_selecao_adaptativa": "adaptativa_v2_microtemas",
+            "estrategia_questoes_v2": "Refinamento de pontos fracos",
+            "peso_categoria_adaptativo": 100.0,
+            "motivo_inteligente": alvo.get(
+                "motivo_inteligente",
+                "Refinamento de microtema frágil.",
+            ),
+            "score_inteligente": round(float(alvo.get("score_refino", 0.0)), 1),
+            "microtemas_alvo": list(alvo.get("microtemas_alvo") or []),
+            "refino_microtemas": True,
+        })
+        contagem["refino_microtema"] = contagem.get("refino_microtema", 0) + 1
     categorias_ordenadas = [
         "recorrente", "recuperacao", "erro", "inedita", "controle", "dominada"
     ]
@@ -11937,10 +12214,23 @@ def selecionar_questoes_adaptativas_v2(
         **perfil,
         "fila": selecionadas,
         "composicao": composicao,
-        "modo": "Treino adaptativo",
-        "versao_selecao": "adaptativa_v2",
-        "estrategia_v2": estrategia,
+        "modo": (
+            "Refinamento de pontos fracos"
+            if contagem.get("refino_microtema", 0) > 0
+            else "Treino adaptativo"
+        ),
+        "versao_selecao": (
+            "adaptativa_v2_microtemas"
+            if contagem.get("refino_microtema", 0) > 0
+            else "adaptativa_v2"
+        ),
+        "estrategia_v2": (
+            "Refinamento de pontos fracos"
+            if contagem.get("refino_microtema", 0) > 0
+            else estrategia
+        ),
         "pesos_categorias": pesos,
+        "refinamento_microtemas": refinamento,
     }
 
 def selecionar_sessao_adaptativa_global(
@@ -17057,6 +17347,18 @@ def registrar_tentativa_questao(
                 ),
             )
 
+        evidencia_microtemas = microtemas_engine.registrar_evidencia_tentativa(
+            conexao,
+            int(cursor.lastrowid),
+            questao_id,
+            concurso_id,
+            alternativa,
+            gabarito,
+            None if resultado is None else bool(resultado),
+            bool(marcada_duvida),
+            tempo_segundos=tempo_segundos,
+        )
+
         return {
             "tentativa_id": cursor.lastrowid,
             "item_sessao_id": item_sessao_id,
@@ -17069,6 +17371,7 @@ def registrar_tentativa_questao(
             ),
             "pulada": resultado is None,
             "pulo_convertido_erro": pulo_convertido_erro,
+            "microtemas": evidencia_microtemas,
         }
 
 
@@ -18254,359 +18557,204 @@ def listar_historico_tentativas_questoes(
 
 
 def listar_caderno_erros_questoes(
-    concurso_id=None
+    concurso_id=None,
+    _cache_bypass=False,
 ):
-    """
-    Consolida erros por ID original da questão.
-    Questões arquivadas permanecem no caderno, mas não podem ser
-    respondidas novamente até serem reativadas.
-    """
+    """Consolida erros por questão sem N+1 de consultas.
 
+    O histórico inteiro do perfil é lido uma vez e agrupado em memória.
+    Metadados atuais das questões com erro são buscados em uma segunda
+    consulta em lote. Questões removidas continuam usando o snapshot da
+    tentativa mais recente, preservando a semântica histórica anterior.
+    """
     if concurso_id is None:
-        concurso_id = (
-            obter_concurso_ativo()[0]
+        concurso_id = obter_concurso_ativo()[0]
+    concurso_id = int(concurso_id)
+
+    if not _cache_bypass:
+        return obter_ou_calcular_cache_persistente(
+            conectar,
+            f"caderno_erros:v2:{concurso_id}",
+            lambda: listar_caderno_erros_questoes(
+                concurso_id, _cache_bypass=True
+            ),
+            concurso_id=concurso_id,
+            dominios=("academico", "catalogo"),
         )
 
-    concurso_id = int(
-        concurso_id
-    )
-
-    # Esta rotina também é usada durante a migração inicial. Fechar a conexão
-    # explicitamente evita manter bancos temporários bloqueados no Windows.
     with closing(conectar()) as conexao:
-        referencias = conexao.execute(
+        linhas = conexao.execute(
             """
-            SELECT DISTINCT
-                COALESCE(
-                    questao_id_snapshot,
-                    questao_id
-                )
-            FROM tentativas_questoes
-            WHERE
-                concurso_id = ?
-                AND correta = 0
-                AND COALESCE(
-                    questao_id_snapshot,
-                    questao_id
-                ) IS NOT NULL
+            SELECT
+                COALESCE(tq.questao_id_snapshot, tq.questao_id) AS questao_ref,
+                tq.respondida_em,
+                tq.correta,
+                COALESCE(tq.marcada_duvida, 0),
+                tq.alternativa_marcada,
+                tq.topico_id_snapshot,
+                tq.disciplina_id_snapshot,
+                tq.disciplina_snapshot,
+                tq.topico_snapshot,
+                tq.enunciado_snapshot,
+                tq.banca_snapshot,
+                tq.ano_snapshot,
+                tq.dificuldade_snapshot,
+                tq.id
+            FROM tentativas_questoes tq
+            WHERE tq.concurso_id = ?
+              AND COALESCE(tq.questao_id_snapshot, tq.questao_id) IS NOT NULL
+            ORDER BY
+                questao_ref,
+                tq.respondida_em DESC,
+                tq.id DESC
             """,
-            (
-                concurso_id,
-            )
+            (concurso_id,),
         ).fetchall()
 
-        resultado = []
+        ids_com_erro = {
+            int(linha[0])
+            for linha in linhas
+            if linha[0] is not None and linha[2] is not None and int(linha[2]) == 0
+        }
+        if not ids_com_erro:
+            return []
 
-        for referencia_linha in referencias:
-            questao_id = int(
-                referencia_linha[0]
-            )
+        marcadores = ",".join("?" for _ in ids_com_erro)
+        atuais_linhas = conexao.execute(
+            f"""
+            SELECT
+                q.id,
+                q.topico_id,
+                d.id,
+                d.nome,
+                t.nome,
+                q.enunciado,
+                q.banca,
+                q.ano,
+                q.dificuldade,
+                q.ativa
+            FROM questoes q
+            JOIN topicos t ON t.id = q.topico_id
+            JOIN disciplinas d ON d.id = t.disciplina_id
+            WHERE q.id IN ({marcadores})
+            """,
+            tuple(sorted(ids_com_erro)),
+        ).fetchall()
 
-            atual = conexao.execute(
-                """
-                SELECT
-                    q.id,
-                    q.topico_id,
-                    d.id,
-                    d.nome,
-                    t.nome,
-                    q.enunciado,
-                    q.banca,
-                    q.ano,
-                    q.dificuldade,
-                    q.ativa
-                FROM questoes q
-                JOIN topicos t
-                    ON t.id = q.topico_id
-                JOIN disciplinas d
-                    ON d.id = t.disciplina_id
-                WHERE q.id = ?
-                """,
-                (
-                    questao_id,
-                )
-            ).fetchone()
+    atuais = {int(linha[0]): linha for linha in atuais_linhas}
+    por_questao = {questao_id: [] for questao_id in ids_com_erro}
+    for linha in linhas:
+        questao_id = int(linha[0])
+        if questao_id in por_questao:
+            por_questao[questao_id].append(linha)
 
-            if atual is not None:
-                dados_questao = {
-                    "questao_id": atual[0],
-                    "topico_id": atual[1],
-                    "disciplina_id": atual[2],
-                    "disciplina": atual[3],
-                    "topico": atual[4],
-                    "enunciado": atual[5],
-                    "banca": atual[6] or "",
-                    "ano": atual[7],
-                    "dificuldade": (
-                        atual[8]
-                        or "Não informada"
-                    ),
-                    "ativa": bool(
-                        atual[9]
-                    ),
-                }
+    resultado = []
+    for questao_id, tentativas in por_questao.items():
+        atual = atuais.get(questao_id)
+        if atual is not None:
+            dados_questao = {
+                "questao_id": int(atual[0]),
+                "topico_id": int(atual[1]),
+                "disciplina_id": int(atual[2]),
+                "disciplina": atual[3],
+                "topico": atual[4],
+                "enunciado": atual[5],
+                "banca": atual[6] or "",
+                "ano": atual[7],
+                "dificuldade": atual[8] or "Não informada",
+                "ativa": bool(atual[9]),
+            }
+        else:
+            snapshot = tentativas[0]
+            dados_questao = {
+                "questao_id": questao_id,
+                "topico_id": int(snapshot[5] or 0),
+                "disciplina_id": int(snapshot[6] or 0),
+                "disciplina": snapshot[7] or "—",
+                "topico": snapshot[8] or "—",
+                "enunciado": snapshot[9] or "[Conteúdo histórico indisponível]",
+                "banca": snapshot[10] or "",
+                "ano": snapshot[11],
+                "dificuldade": snapshot[12] or "Não informada",
+                "ativa": False,
+            }
+
+        efetivas = [item for item in tentativas if item[2] is not None]
+        total = len(efetivas)
+        acertos = sum(1 for item in efetivas if int(item[2]) == 1)
+        erros = sum(1 for item in efetivas if int(item[2]) == 0)
+        if erros <= 0:
+            continue
+        taxa = 100.0 * acertos / total if total > 0 else 0.0
+
+        erros_consecutivos = 0
+        for item in efetivas:
+            if int(item[2]) == 0:
+                erros_consecutivos += 1
             else:
-                snapshot = conexao.execute(
-                    """
-                    SELECT
-                        COALESCE(
-                            topico_id_snapshot,
-                            0
-                        ),
-                        COALESCE(
-                            disciplina_id_snapshot,
-                            0
-                        ),
-                        COALESCE(
-                            disciplina_snapshot,
-                            '—'
-                        ),
-                        COALESCE(
-                            topico_snapshot,
-                            '—'
-                        ),
-                        COALESCE(
-                            enunciado_snapshot,
-                            '[Conteúdo histórico indisponível]'
-                        ),
-                        COALESCE(
-                            banca_snapshot,
-                            ''
-                        ),
-                        ano_snapshot,
-                        COALESCE(
-                            dificuldade_snapshot,
-                            'Não informada'
-                        )
-                    FROM tentativas_questoes
-                    WHERE
-                        concurso_id = ?
-                        AND COALESCE(
-                            questao_id_snapshot,
-                            questao_id
-                        ) = ?
-                    ORDER BY
-                        respondida_em DESC,
-                        id DESC
-                    LIMIT 1
-                    """,
-                    (
-                        concurso_id,
-                        questao_id,
-                    )
-                ).fetchone()
+                break
 
-                if snapshot is None:
-                    continue
-
-                dados_questao = {
-                    "questao_id": questao_id,
-                    "topico_id": snapshot[0],
-                    "disciplina_id": snapshot[1],
-                    "disciplina": snapshot[2],
-                    "topico": snapshot[3],
-                    "enunciado": snapshot[4],
-                    "banca": snapshot[5] or "",
-                    "ano": snapshot[6],
-                    "dificuldade": (
-                        snapshot[7]
-                        or "Não informada"
-                    ),
-                    "ativa": False,
-                }
-
-            tentativas = conexao.execute(
-                """
-                SELECT
-                    respondida_em,
-                    correta,
-                    marcada_duvida,
-                    alternativa_marcada
-                FROM tentativas_questoes
-                WHERE
-                    concurso_id = ?
-                    AND COALESCE(
-                        questao_id_snapshot,
-                        questao_id
-                    ) = ?
-                ORDER BY
-                    respondida_em DESC,
-                    id DESC
-                """,
-                (
-                    concurso_id,
-                    questao_id,
-                )
-            ).fetchall()
-
-            efetivas = [
-                item
-                for item in tentativas
-                if item[1] is not None
-            ]
-
-            total = len(
-                efetivas
-            )
-            acertos = sum(
-                1
-                for item in efetivas
-                if int(
-                    item[1]
-                ) == 1
-            )
-            erros = sum(
-                1
-                for item in efetivas
-                if int(
-                    item[1]
-                ) == 0
-            )
-
-            if erros <= 0:
-                continue
-
-            taxa = (
-                100.0
-                * acertos
-                / total
-                if total > 0
-                else 0.0
-            )
-
-            erros_consecutivos = 0
-
-            for item in efetivas:
-                if int(
-                    item[1]
-                ) == 0:
-                    erros_consecutivos += 1
-                else:
-                    break
-
-            acertos_consecutivos = 0
-
-            for item in efetivas:
-                if int(
-                    item[1]
-                ) == 1:
-                    acertos_consecutivos += 1
-                else:
-                    break
-
-            duvida = any(
-                bool(
-                    item[2]
-                )
-                for item in tentativas
-            )
-
-            ultima_tentativa = (
-                tentativas[0][0]
-                if tentativas
-                else None
-            )
-
-            ultimo_resultado = (
-                (
-                    "Pulada"
-                    if tentativas[0][1] is None
-                    else (
-                        "Correta"
-                        if int(
-                            tentativas[0][1]
-                        ) == 1
-                        else "Errada"
-                    )
-                )
-                if tentativas
-                else "—"
-            )
-
-            if (
-                erros_consecutivos >= 3
-                or (
-                    erros >= 3
-                    and taxa < 50.0
-                )
-            ):
-                status = "Crítica"
-                ordem_status = 0
-
-            elif acertos_consecutivos >= 3:
-                status = "Recuperada"
-                ordem_status = 3
-
-            elif (
-                erros_consecutivos >= 2
-                or (
-                    erros >= 2
-                    and taxa < 70.0
-                )
-            ):
-                status = "Recorrente"
-                ordem_status = 1
-
+        acertos_consecutivos = 0
+        for item in efetivas:
+            if int(item[2]) == 1:
+                acertos_consecutivos += 1
             else:
-                status = "Erro isolado"
-                ordem_status = 2
+                break
 
-            resultado.append({
-                **dados_questao,
-                "tentativas": total,
-                "acertos": acertos,
-                "erros": erros,
-                "taxa_acerto": taxa,
-                "erros_consecutivos": (
-                    erros_consecutivos
-                ),
-                "acertos_consecutivos": (
-                    acertos_consecutivos
-                ),
-                "duvida": duvida,
-                "ultima_tentativa": (
-                    ultima_tentativa
-                ),
-                "ultimo_resultado": (
-                    ultimo_resultado
-                ),
-                "status": status,
-                "ordem_status": (
-                    ordem_status
-                ),
-                "inedita": False,
-                "tentativas_anteriores": total,
-            })
+        duvida = any(bool(item[3]) for item in tentativas)
+        ultima_tentativa = tentativas[0][1] if tentativas else None
+        ultimo_resultado = (
+            (
+                "Pulada"
+                if tentativas[0][2] is None
+                else ("Correta" if int(tentativas[0][2]) == 1 else "Errada")
+            )
+            if tentativas
+            else "—"
+        )
+
+        if erros_consecutivos >= 3 or (erros >= 3 and taxa < 50.0):
+            status = "Crítica"
+            ordem_status = 0
+        elif acertos_consecutivos >= 3:
+            status = "Recuperada"
+            ordem_status = 3
+        elif erros_consecutivos >= 2 or (erros >= 2 and taxa < 70.0):
+            status = "Recorrente"
+            ordem_status = 1
+        else:
+            status = "Erro isolado"
+            ordem_status = 2
+
+        resultado.append({
+            **dados_questao,
+            "tentativas": total,
+            "acertos": acertos,
+            "erros": erros,
+            "taxa_acerto": taxa,
+            "erros_consecutivos": erros_consecutivos,
+            "acertos_consecutivos": acertos_consecutivos,
+            "duvida": duvida,
+            "ultima_tentativa": ultima_tentativa,
+            "ultimo_resultado": ultimo_resultado,
+            "status": status,
+            "ordem_status": ordem_status,
+            "inedita": False,
+            "tentativas_anteriores": total,
+        })
 
     resultado.sort(
         key=lambda item: (
-            item[
-                "ordem_status"
-            ],
-            0 if item[
-                "ativa"
-            ] else 1,
-            -item[
-                "erros_consecutivos"
-            ],
-            item[
-                "taxa_acerto"
-            ],
-            -item[
-                "erros"
-            ],
-            item[
-                "disciplina"
-            ].lower(),
-            item[
-                "topico"
-            ].lower(),
-            item[
-                "questao_id"
-            ],
+            item["ordem_status"],
+            0 if item["ativa"] else 1,
+            -item["erros_consecutivos"],
+            item["taxa_acerto"],
+            -item["erros"],
+            item["disciplina"].lower(),
+            item["topico"].lower(),
+            item["questao_id"],
         )
     )
-
     return resultado
 
 
@@ -19997,18 +20145,24 @@ def definir_configuracao_bool(chave, valor):
 
 def obter_estatisticas_disciplinas(
     data_referencia,
-    concurso_id=None
+    concurso_id=None,
 ):
-    """
-    Estatísticas somente do conteúdo incluído no perfil ativo.
-    """
+    """Estatísticas das disciplinas reutilizando o snapshot curricular.
 
+    O Dashboard calcula o snapshot de progresso antes da tela de Estatísticas.
+    Reusar essa fotografia evita uma segunda varredura completa de tentativas e
+    revisões apenas para montar sete linhas da tabela de disciplinas.
+    """
     if concurso_id is None:
-        concurso_id = (
-            obter_concurso_ativo()[0]
-        )
-
+        concurso_id = obter_concurso_ativo()[0]
     concurso_id = int(concurso_id)
+
+    progresso = obter_snapshot_progresso_edital(concurso_id, capturar=False)
+    disciplinas_snapshot = {
+        int(item["disciplina_id"]): item
+        for item in (progresso.get("disciplinas") or [])
+    }
+
     with conectar() as conexao:
         linhas = conexao.execute(
             """
@@ -20037,21 +20191,16 @@ def obter_estatisticas_disciplinas(
             (data_referencia, data_referencia, concurso_id, concurso_id),
         ).fetchall()
 
-    servico = obter_servico_estatistico()
-    metricas = servico.get_subject_metrics_batch(
-        concurso_id,
-        [int(linha[0]) for linha in linhas],
-    )
     resultados = []
     for linha in linhas:
         disciplina_id = int(linha[0])
-        nucleo = metricas[disciplina_id]
+        nucleo = disciplinas_snapshot.get(disciplina_id, {})
         resultados.append((
             linha[1],
             int(linha[2] or 0),
-            int(nucleo.value("completed_review_count", 0) or 0),
-            nucleo.value("accuracy_rate"),
-            int(nucleo.value("answered_attempt_count", 0) or 0),
+            int(nucleo.get("revisoes") or 0),
+            nucleo.get("desempenho"),
+            int(nucleo.get("tentativas") or 0),
             int(linha[3] or 0),
             int(linha[4] or 0),
         ))
@@ -20063,64 +20212,33 @@ def listar_ranking_topicos(
     ordem="asc",
     concurso_id=None
 ):
-    """Ranking de pontos fracos por dominio oficial e evidencia comprovavel."""
+    """Ranking por domínio oficial reutilizando o snapshot de progresso.
+
+    Os mesmos valores de domínio/evidência/revisão já são produzidos para o
+    Dashboard e o Mapa de domínio; não há motivo para recalculá-los por tópico.
+    """
     if concurso_id is None:
-        concurso_id = (
-            obter_concurso_ativo()[0]
-        )
+        concurso_id = obter_concurso_ativo()[0]
+    concurso_id = int(concurso_id)
 
-    with conectar() as conexao:
-        linhas = conexao.execute(
-            """
-            SELECT
-                t.id,
-                d.nome,
-                t.nome,
-                c.proxima_revisao
-            FROM topicos t
-            JOIN disciplinas d
-                ON d.id = t.disciplina_id
-            JOIN disciplina_concurso_inclusao dc
-                ON dc.disciplina_id = d.id
-                AND dc.concurso_id = ?
-                AND dc.incluido = 1
-                AND COALESCE(dc.pausado, 0) = 0
-            JOIN topico_concurso_importancia tc
-                ON tc.topico_id = t.id
-                AND tc.concurso_id = ?
-                AND tc.incluido = 1
-                AND COALESCE(tc.pausado, 0) = 0
-            LEFT JOIN controle_topico c
-                ON c.topico_id = t.id
-            ORDER BY d.nome COLLATE NOCASE, t.nome COLLATE NOCASE
-            """,
-            (
-                concurso_id,
-                concurso_id
-            )
-        ).fetchall()
-
-    metricas = obter_servico_estatistico().get_topic_metrics_batch(
-        int(concurso_id),
-        [int(linha[0]) for linha in linhas],
-    )
+    progresso = obter_snapshot_progresso_edital(concurso_id, capturar=False)
     resultados = []
-    for topico_id, disciplina, topico, proxima_revisao in linhas:
-        nucleo = metricas[int(topico_id)]
-        dominio = nucleo.value("mastery_score")
-        evidencia = nucleo.value("evidence_level")
+    for item in (progresso.get("topicos") or []):
+        dominio = item.get("dominio_score")
+        evidencia = str(item.get("evidencia") or "insufficient")
         if dominio is None or evidencia == "insufficient":
             continue
         resultados.append((
-            int(topico_id),
-            disciplina,
-            topico,
-            int(nucleo.value("completed_review_count", 0) or 0),
+            int(item["topico_id"]),
+            str(item.get("disciplina") or ""),
+            str(item.get("topico") or ""),
+            int(item.get("revisoes") or 0),
             float(dominio),
-            proxima_revisao,
-            nucleo.value("last_review_at"),
-            str(evidencia or "insufficient"),
+            item.get("proxima"),
+            item.get("ultima"),
+            evidencia,
         ))
+
     reverse = str(ordem).lower() == "desc"
     resultados.sort(
         key=lambda item: (item[4], item[3], item[1].lower(), item[2].lower()),
@@ -20187,6 +20305,38 @@ def listar_revisoes_recentes(
 
 
 def obter_relatorio_estrategico(
+    data_inicio,
+    data_fim,
+    concurso_id=None
+):
+    """Relatório estratégico com warm cache por período e revisões."""
+    if concurso_id is None:
+        concurso_id = obter_concurso_ativo()[0]
+    concurso_id = int(concurso_id)
+    try:
+        inicio = date.fromisoformat(str(data_inicio)[:10])
+        fim = date.fromisoformat(str(data_fim)[:10])
+    except (TypeError, ValueError):
+        raise ValueError("Período inválido para o relatório estratégico.")
+    if inicio > fim:
+        inicio, fim = fim, inicio
+
+    chave = (
+        f"relatorio_estrategico:v2:{concurso_id}:"
+        f"{inicio.isoformat()}:{fim.isoformat()}"
+    )
+    return obter_ou_calcular_cache_persistente(
+        conectar,
+        chave,
+        lambda: _obter_relatorio_estrategico_calcular(
+            inicio.isoformat(), fim.isoformat(), concurso_id
+        ),
+        concurso_id=concurso_id,
+        dominios=("academico", "catalogo", "configuracao", "foco"),
+    )
+
+
+def _obter_relatorio_estrategico_calcular(
     data_inicio,
     data_fim,
     concurso_id=None

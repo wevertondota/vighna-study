@@ -277,6 +277,8 @@ def build_syllabus_progress_snapshot(
             "consolidacao_taxa": _rate(subject_consolidated, len(subject_topics)),
             "dominio": _value(metrics, "mastery_score"),
             "dominio_estado": _metric(metrics, "mastery_score").state,
+            "desempenho": _value(metrics, "accuracy_rate"),
+            "tentativas": int(_value(metrics, "answered_attempt_count", 0) or 0),
             "revisoes": int(_value(metrics, "completed_review_count", 0) or 0),
             "ultima_atividade": _value(metrics, "last_activity_at"),
         })
