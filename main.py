@@ -128,6 +128,8 @@ from estatisticas_lazy import EstadoEstatisticasLazy
 from relatorios_lazy import EstadoRelatoriosLazy
 from ciclo_estudo import integrar_sessao_questoes_com_revisoes as integrar_sessao_questoes_com_revisoes_core
 from versao import VIGHNA_BUILD, VIGHNA_VERSION
+from tarefas_pesadas import CoordenadorTarefas, IndicadorTarefa
+from aquecimento_dados import aquecer_dados_derivados
 from evolucao import obter_evolucao_historica
 from laboratorio import (
     carregar_configuracao_motor_v5, salvar_configuracao_motor_v5,
@@ -16823,7 +16825,7 @@ class JanelaResolverQuestoes(QDialog):
         if respondidas <= 0 and not self.resultados_integracao:
             return
 
-        if _notificar_dados_alterados_raiz(self, "questoes"):
+        if _notificar_dados_alterados_raiz(self, "tentativas"):
             self._dados_pos_sessao_notificados = True
 
     def _localizar_controlador_foco(self):
@@ -32310,6 +32312,29 @@ class SistemaEstudos(QMainWindow):
         self._timer_atualizacao.timeout.connect(self._processar_atualizacao_pendente)
         self.dados_alterados.connect(self._receber_alteracao_dados)
 
+        # Tarefas pesadas pós-alteração rodam fora da thread da interface.
+        # O debounce evita recomputar várias vezes em uma sequência curta e o
+        # warm cache persistente deixa Dashboard/Estatísticas/Relatórios prontos
+        # sem empurrar a espera para o primeiro clique.
+        self.coordenador_tarefas = CoordenadorTarefas(self)
+        self.indicador_tarefa = IndicadorTarefa(self)
+        self._tarefa_visual_ativa = None
+        self._recalculo_dados_ativo = False
+        self._recalculo_dados_reexecutar = False
+        self._escopos_recalculo_pendentes = set()
+        self._timer_recalculo_dados = QTimer(self)
+        self._timer_recalculo_dados.setSingleShot(True)
+        self._timer_recalculo_dados.setInterval(450)
+        self._timer_recalculo_dados.timeout.connect(self._iniciar_recalculo_dados)
+        self._fechamento_solicitado = False
+        self._fechamento_em_andamento = False
+        self._fechamento_autorizado = False
+
+        self.coordenador_tarefas.iniciada.connect(self._ao_tarefa_iniciada)
+        self.coordenador_tarefas.progresso.connect(self._ao_tarefa_progresso)
+        self.coordenador_tarefas.concluida.connect(self._ao_tarefa_concluida)
+        self.coordenador_tarefas.falhou.connect(self._ao_tarefa_falhou)
+
         # Proteção preventiva: um banco SQLite corrompido não deve continuar
         # recebendo escritas ou novos backups. A recuperação é feita por uma
         # ferramenta separada, que preserva o arquivo danificado antes de restaurar.
@@ -32406,7 +32431,10 @@ class SistemaEstudos(QMainWindow):
 
         original = self.abas_estatisticas.currentIndex()
         self._estado_estatisticas.marcar_sujas()
+        # O pré-aquecimento percorre internamente todas as abas, mas não deve
+        # piscar/trocar a aba visível caso Estatísticas já esteja aberta.
         self.abas_estatisticas.blockSignals(True)
+        self.abas_estatisticas.setUpdatesEnabled(False)
         try:
             total = max(1, self.abas_estatisticas.count())
             for indice in range(total):
@@ -32419,7 +32447,9 @@ class SistemaEstudos(QMainWindow):
         finally:
             if 0 <= original < self.abas_estatisticas.count():
                 self.abas_estatisticas.setCurrentIndex(original)
+            self.abas_estatisticas.setUpdatesEnabled(True)
             self.abas_estatisticas.blockSignals(False)
+            self.abas_estatisticas.update()
 
     def _precarregar_relatorios_todas_abas(self, notificar=None):
         self._garantir_tela_relatorios()
@@ -32601,6 +32631,18 @@ class SistemaEstudos(QMainWindow):
         if self._dashboard_refresh_agendado:
             return
 
+        if self._ha_recalculo_dados_pendente():
+            self._marcar_dashboard_sujo()
+            if (
+                hasattr(self, "tela_inicial")
+                and hasattr(self, "telas")
+                and self.telas.currentWidget() is self.tela_inicial
+            ):
+                self.indicador_tarefa.exigir_espera(
+                    "Atualizando os indicadores antes de exibir os novos valores."
+                )
+            return
+
         hoje = QDate.currentDate().toString("yyyy-MM-dd")
         if self._dashboard_data_referencia != hoje:
             self._dashboard_sujo = True
@@ -32620,7 +32662,7 @@ class SistemaEstudos(QMainWindow):
                 return
             self.atualizar_dashboard()
 
-        QTimer.singleShot(120, executar)
+        QTimer.singleShot(15, executar)
 
     def _marcar_central_questoes_suja(self):
         self._central_questoes_suja = True
@@ -32681,6 +32723,16 @@ class SistemaEstudos(QMainWindow):
     def _agendar_atualizacao_relatorios(self, forcar=False):
         """Atualiza Relatórios depois que a página já teve chance de repintar."""
         if self._relatorios_refresh_agendado:
+            return
+        if self._ha_recalculo_dados_pendente():
+            if (
+                hasattr(self, "tela_relatorios")
+                and hasattr(self, "telas")
+                and self.telas.currentWidget() is self.tela_relatorios
+            ):
+                self.indicador_tarefa.exigir_espera(
+                    "Consolidando os dados alterados antes de atualizar os Relatórios."
+                )
             return
         self._relatorios_refresh_agendado = True
 
@@ -32771,6 +32823,16 @@ class SistemaEstudos(QMainWindow):
         """Agenda refresh somente quando a aba visível realmente está suja."""
         if self._estatisticas_refresh_agendado:
             return
+        if self._ha_recalculo_dados_pendente():
+            if (
+                hasattr(self, "tela_estatisticas")
+                and hasattr(self, "telas")
+                and self.telas.currentWidget() is self.tela_estatisticas
+            ):
+                self.indicador_tarefa.exigir_espera(
+                    "Consolidando a nova resposta antes de atualizar as Estatísticas."
+                )
+            return
 
         # Caminho quente da navegação: uma aba já pré-carregada e limpa apenas
         # aparece. Não há timer, acesso ao SQLite, reconstrução de tabela ou
@@ -32819,7 +32881,13 @@ class SistemaEstudos(QMainWindow):
         """
         escopo = str(escopo or "all").lower()
         self._marcar_dashboard_sujo()
-        if escopo in {"all", "questoes", "topicos", "revisoes"}:
+
+        # Respostas, revisões e mudanças estruturais invalidam vários snapshots
+        # caros. O recálculo é aglutinado e executado fora da thread da UI.
+        if escopo in {"all", "questoes", "tentativas", "topicos", "revisoes"}:
+            self._agendar_recalculo_dados({escopo})
+
+        if escopo in {"all", "questoes", "tentativas", "topicos", "revisoes"}:
             self._topicos_precarregados.clear()
             self._topicos_precarregados_data = None
             self._resumo_dia_precarregado = False
@@ -32831,7 +32899,7 @@ class SistemaEstudos(QMainWindow):
             self.cache_analitico.invalidar("regularidade:")
             self.cache_analitico.invalidar("gamificacao:")
             self.cache_analitico.invalidar("inteligencia:calibracao_foco")
-        elif escopo in {"questoes", "revisoes"}:
+        elif escopo in {"questoes", "tentativas", "revisoes"}:
             self.cache_analitico.invalidar("adaptativas:")
             self.cache_analitico.invalidar("dashboard:")
             self.cache_analitico.invalidar("regularidade:")
@@ -32845,30 +32913,357 @@ class SistemaEstudos(QMainWindow):
         self.invalidar_relatorios(atualizar_se_visivel=True)
         self.dados_alterados.emit(escopo)
 
+    def _ha_recalculo_dados_pendente(self):
+        return bool(
+            self._recalculo_dados_ativo
+            or self._timer_recalculo_dados.isActive()
+            or self._escopos_recalculo_pendentes
+        )
+
+    def _agendar_recalculo_dados(self, escopos):
+        for escopo in (escopos or {"all"}):
+            self._escopos_recalculo_pendentes.add(str(escopo or "all"))
+        if self._recalculo_dados_ativo:
+            self._recalculo_dados_reexecutar = True
+            return
+        self._timer_recalculo_dados.start()
+
+    def _contexto_aquecimento_dados(self):
+        concurso_id = int(obter_concurso_ativo()[0])
+        hoje = QDate.currentDate().toString("yyyy-MM-dd")
+
+        tendencias_inicio = None
+        tendencias_fim = None
+        if hasattr(self, "data_inicio_evolucao") and hasattr(self, "data_fim_evolucao"):
+            try:
+                tendencias_inicio = self.data_inicio_evolucao.date().toString("yyyy-MM-dd")
+                tendencias_fim = self.data_fim_evolucao.date().toString("yyyy-MM-dd")
+            except Exception:
+                pass
+
+        relatorio_inicio = None
+        relatorio_fim = None
+        if hasattr(self, "data_inicio_relatorio") and hasattr(self, "data_fim_relatorio"):
+            try:
+                relatorio_inicio = self.data_inicio_relatorio.date().toString("yyyy-MM-dd")
+                relatorio_fim = self.data_fim_relatorio.date().toString("yyyy-MM-dd")
+            except Exception:
+                pass
+
+        return {
+            "concurso_id": concurso_id,
+            "hoje": hoje,
+            "tendencias_inicio": tendencias_inicio,
+            "tendencias_fim": tendencias_fim,
+            "relatorio_inicio": relatorio_inicio,
+            "relatorio_fim": relatorio_fim,
+        }
+
+    def _criar_trabalho_aquecimento(self, contexto):
+        contexto = dict(contexto or {})
+
+        def executar(reportar):
+            return aquecer_dados_derivados(
+                contexto["concurso_id"],
+                hoje=contexto.get("hoje"),
+                tendencias_inicio=contexto.get("tendencias_inicio"),
+                tendencias_fim=contexto.get("tendencias_fim"),
+                relatorio_inicio=contexto.get("relatorio_inicio"),
+                relatorio_fim=contexto.get("relatorio_fim"),
+                reportar=reportar,
+            )
+
+        return executar
+
+    def _iniciar_recalculo_dados(self):
+        if self._recalculo_dados_ativo:
+            self._recalculo_dados_reexecutar = True
+            return
+        if not self._escopos_recalculo_pendentes:
+            return
+
+        escopos = set(self._escopos_recalculo_pendentes)
+        self._escopos_recalculo_pendentes.clear()
+        try:
+            contexto = self._contexto_aquecimento_dados()
+        except Exception:
+            # Se o perfil não puder ser resolvido, preserve a atualização normal
+            # em primeiro plano em vez de deixar a interface eternamente suja.
+            self._agendar_atualizacao_dashboard(forcar=True)
+            return
+
+        self._recalculo_dados_ativo = True
+        self._recalculo_dados_reexecutar = False
+        detalhe_tarefa = (
+            "A resposta foi salva. Recalculando os dados derivados em segundo plano."
+            if escopos == {"tentativas"}
+            else "As alterações foram salvas. Atualizando os dados derivados em segundo plano."
+        )
+        aceito = self.coordenador_tarefas.executar(
+            "recalculo_dados",
+            "Atualizando seu progresso",
+            detalhe_tarefa,
+            self._criar_trabalho_aquecimento(contexto),
+            bloqueante=False,
+        )
+        if not aceito:
+            self._recalculo_dados_ativo = False
+            self._escopos_recalculo_pendentes.update(escopos)
+            self._recalculo_dados_reexecutar = True
+
+    def _preencher_cache_ui_aquecido(self, resultado):
+        if not isinstance(resultado, dict):
+            return
+        try:
+            concurso_id = int(resultado.get("concurso_id"))
+        except (TypeError, ValueError):
+            return
+        hoje = str(resultado.get("hoje") or QDate.currentDate().toString("yyyy-MM-dd"))
+
+        if resultado.get("progresso") is not None:
+            self.cache_analitico.definir(
+                f"progresso:v2:{concurso_id}", resultado["progresso"]
+            )
+        if resultado.get("metricas_globais") is not None:
+            self.cache_analitico.definir(
+                f"nucleo:global:{concurso_id}:all", resultado["metricas_globais"]
+            )
+        if resultado.get("regularidade") is not None:
+            self.cache_analitico.definir(
+                f"regularidade:{hoje}", resultado["regularidade"]
+            )
+        if resultado.get("gamificacao") is not None:
+            self.cache_analitico.definir(
+                f"gamificacao:v1:{concurso_id}:{hoje}", resultado["gamificacao"]
+            )
+        if resultado.get("adaptativas") is not None:
+            self.cache_analitico.definir(
+                f"adaptativas:{concurso_id}", resultado["adaptativas"]
+            )
+        if resultado.get("historico_30") is not None:
+            self.cache_analitico.definir(
+                f"estatisticas:historico:{concurso_id}:30", resultado["historico_30"]
+            )
+        if (
+            resultado.get("tendencias_periodo") is not None
+            and resultado.get("tendencias_inicio")
+            and resultado.get("tendencias_fim")
+        ):
+            self.cache_analitico.definir(
+                f"estatisticas:tendencias:{concurso_id}:"
+                f"{resultado['tendencias_inicio']}:{resultado['tendencias_fim']}",
+                resultado["tendencias_periodo"],
+            )
+        if (
+            resultado.get("estatisticas_disciplinas") is not None
+            and resultado.get("metricas_globais") is not None
+        ):
+            self.cache_analitico.definir(
+                f"estatisticas:resumo:{concurso_id}:{hoje}",
+                (resultado["estatisticas_disciplinas"], resultado["metricas_globais"]),
+            )
+
+    def _ao_tarefa_iniciada(self, chave, titulo, detalhe, bloqueante):
+        self._tarefa_visual_ativa = str(chave)
+        self.indicador_tarefa.iniciar(
+            titulo,
+            detalhe,
+            bloqueante=bool(bloqueante),
+            atraso_ms=0 if bloqueante else 280,
+        )
+
+    def _ao_tarefa_progresso(self, chave, titulo, detalhe, percentual):
+        if self._tarefa_visual_ativa != str(chave):
+            return
+        self.indicador_tarefa.atualizar(
+            titulo,
+            detalhe,
+            None if int(percentual) < 0 else int(percentual),
+        )
+
+    def _ao_tarefa_concluida(self, chave, resultado):
+        chave = str(chave)
+        if chave == "recalculo_dados":
+            self._finalizar_recalculo_dados(resultado)
+            return
+        if chave == "backup_manual":
+            self.indicador_tarefa.finalizar()
+            self._tarefa_visual_ativa = None
+            if self._fechamento_solicitado:
+                self._executar_tarefa_fechamento()
+                return
+            destino = None
+            if isinstance(resultado, dict):
+                destino = resultado.get("destino")
+            QMessageBox.information(
+                self,
+                "Backup concluído",
+                "Backup criado com sucesso" + (f" em:\n\n{destino}" if destino else "."),
+            )
+            return
+        if chave == "fechamento":
+            self.indicador_tarefa.finalizar()
+            self._tarefa_visual_ativa = None
+            self._fechamento_em_andamento = False
+            self._fechamento_autorizado = True
+            QTimer.singleShot(0, self.close)
+            return
+
+        self.indicador_tarefa.finalizar()
+        self._tarefa_visual_ativa = None
+
+    def _ao_tarefa_falhou(self, chave, erro):
+        chave = str(chave)
+        if chave == "recalculo_dados":
+            self._recalculo_dados_ativo = False
+            self._marcar_dashboard_sujo()
+            if self._fechamento_solicitado:
+                self._escopos_recalculo_pendentes.clear()
+                self.indicador_tarefa.exigir_espera(
+                    "A atualização encontrou uma falha; preparando o fechamento seguro."
+                )
+                self._executar_tarefa_fechamento()
+                return
+            if self._recalculo_dados_reexecutar or self._escopos_recalculo_pendentes:
+                self._recalculo_dados_reexecutar = False
+                self._timer_recalculo_dados.start(0)
+                return
+            self.indicador_tarefa.finalizar()
+            self._tarefa_visual_ativa = None
+            # O Vighna continua utilizável; a tela requisitada poderá recorrer
+            # ao caminho síncrono existente se uma análise for aberta depois.
+            return
+        if chave == "fechamento":
+            self.indicador_tarefa.finalizar()
+            self._tarefa_visual_ativa = None
+            self._fechamento_em_andamento = False
+            self._fechamento_autorizado = True
+            QTimer.singleShot(0, self.close)
+            return
+        if chave == "backup_manual":
+            self.indicador_tarefa.finalizar()
+            self._tarefa_visual_ativa = None
+            if self._fechamento_solicitado:
+                self._executar_tarefa_fechamento()
+                return
+            QMessageBox.critical(
+                self,
+                "Falha no backup",
+                "Não foi possível criar o backup.\n\n" + str(erro).splitlines()[-1],
+            )
+            return
+        self.indicador_tarefa.finalizar()
+        self._tarefa_visual_ativa = None
+
+    def _finalizar_recalculo_dados(self, resultado):
+        self._recalculo_dados_ativo = False
+
+        # Se outra resposta foi registrada durante o cálculo, não aplique o
+        # snapshot antigo à UI. A rodada seguinte parte das revisões mais novas.
+        if self._recalculo_dados_reexecutar or self._escopos_recalculo_pendentes:
+            self._recalculo_dados_reexecutar = False
+            if self._fechamento_solicitado:
+                self._escopos_recalculo_pendentes.clear()
+                self._executar_tarefa_fechamento()
+            else:
+                self._timer_recalculo_dados.start(0)
+            return
+
+        self._preencher_cache_ui_aquecido(resultado)
+
+        # Se o usuário pediu para fechar enquanto o worker concluía, não gaste
+        # tempo repintando telas que deixarão de ser usadas. O aquecimento já
+        # persistiu os snapshots; siga direto para a consolidação/backup final.
+        if self._fechamento_solicitado:
+            self.indicador_tarefa.exigir_espera(
+                "Atualização concluída; preparando a próxima sessão e o backup."
+            )
+            self._executar_tarefa_fechamento()
+            return
+
+        self.indicador_tarefa.atualizar(
+            "Aplicando atualização",
+            "Atualizando os componentes visíveis com os snapshots já calculados.",
+            100,
+        )
+
+        # Neste ponto o trabalho caro já está aquecido. Repreparamos também as
+        # telas já construídas para que o próximo clique continue instantâneo.
+        # As rotinas existentes processam eventos entre abas, mantendo a
+        # animação do indicador viva mesmo durante a atualização dos widgets.
+        try:
+            atual = self.telas.currentWidget() if hasattr(self, "telas") else None
+
+            if hasattr(self, "tela_estatisticas"):
+                self.indicador_tarefa.atualizar(
+                    "Preparando Estatísticas",
+                    "Atualizando todas as abas com os novos snapshots sem trocar a aba visível.",
+                    96,
+                )
+                self._precarregar_estatisticas_todas_abas()
+
+            if hasattr(self, "tela_relatorios"):
+                self.indicador_tarefa.atualizar(
+                    "Preparando Relatórios",
+                    "Atualizando as visões do período padrão sem esperar o próximo clique.",
+                    98,
+                )
+                self._precarregar_relatorios_todas_abas()
+
+            # A lista de tópicos também traz percentual e revisões; aqueça a
+            # estrutura em memória sem recriar a tela de disciplina.
+            try:
+                self._precarregar_topicos_disciplinas()
+            except Exception:
+                pass
+
+            if atual is self.tela_inicial:
+                self.atualizar_dashboard()
+            elif (
+                hasattr(self, "tela_estatisticas")
+                and atual is self.tela_estatisticas
+            ):
+                self.atualizar_estatisticas(forcar=False)
+            elif (
+                hasattr(self, "tela_relatorios")
+                and atual is self.tela_relatorios
+            ):
+                self.atualizar_relatorios(forcar=False)
+        finally:
+            self.indicador_tarefa.finalizar()
+            self._tarefa_visual_ativa = None
+
     def _processar_atualizacao_pendente(self):
         escopos = set(self._escopos_atualizacao)
         self._escopos_atualizacao.clear()
-
-        # Se o Dashboard não está visível, apenas preserve a invalidação.
-        # A atualização ocorrerá depois que a navegação já tiver acontecido.
-        if (
-            not hasattr(self, "tela_inicial")
-            or not hasattr(self, "telas")
-            or self.telas.currentWidget() is not self.tela_inicial
-        ):
-            self._marcar_dashboard_sujo()
-            return
+        fora_dashboard = bool(
+            hasattr(self, "tela_inicial")
+            and hasattr(self, "telas")
+            and self.telas.currentWidget() is not self.tela_inicial
+        )
 
         if escopos and escopos <= {"foco"}:
-            try:
-                self.atualizar_dashboard_foco_rapido()
-                self._dashboard_sujo = False
-                self._dashboard_data_referencia = QDate.currentDate().toString("yyyy-MM-dd")
-                return
-            except Exception:
+            if fora_dashboard:
                 self._marcar_dashboard_sujo()
+                return
+            if hasattr(self, "tela_inicial") and hasattr(self, "telas"):
+                try:
+                    self.atualizar_dashboard_foco_rapido()
+                    self._dashboard_sujo = False
+                    self._dashboard_data_referencia = QDate.currentDate().toString("yyyy-MM-dd")
+                    return
+                except Exception:
+                    self._marcar_dashboard_sujo()
+            return
 
-        self._agendar_atualizacao_dashboard(forcar=True)
+        # Fora do Dashboard não há refresh síncrono: apenas o aquecimento em
+        # worker é disparado. A tela atual permanece responsiva.
+        if escopos:
+            self._agendar_recalculo_dados(escopos)
+            # Fallback defensivo: se o worker não puder ser agendado por algum
+            # motivo, preserve o refresh deferido já existente do Dashboard.
+            if not fora_dashboard and not self._ha_recalculo_dados_pendente():
+                self._agendar_atualizacao_dashboard(forcar=True)
 
     def atualizar_regularidade_dashboard(self, snapshot=None):
         if not hasattr(self, "dashboard_regularidade_sequencia"):
@@ -62314,39 +62709,110 @@ class SistemaEstudos(QMainWindow):
 
 
     def backup_manual(self):
-        try:
-            destino = fazer_backup(
-                "manual"
+        if self.coordenador_tarefas.ha_tarefa("backup_manual"):
+            self.indicador_tarefa.exigir_espera(
+                "O backup solicitado ainda está em andamento."
             )
+            return
 
+        def executar(reportar):
+            reportar(
+                "Criando backup",
+                "Copiando o banco de forma consistente sem bloquear a interface.",
+                35,
+            )
+            destino = fazer_backup("manual")
             if destino is None:
-                QMessageBox.warning(
-                    self,
-                    "Backup",
-                    "O arquivo estudos.db ainda não existe."
-                )
-                return
-
-            QMessageBox.information(
-                self,
-                "Backup concluído",
-                (
-                    "Backup criado com sucesso em:\n\n"
-                    f"{destino}"
-                )
+                raise RuntimeError("O arquivo estudos.db ainda não existe.")
+            reportar(
+                "Finalizando backup",
+                "Validando o arquivo criado.",
+                100,
             )
+            return {"destino": str(destino)}
 
-        except Exception as erro:
-            QMessageBox.critical(
-                self,
-                "Falha no backup",
-                (
-                    "Não foi possível criar o backup.\n\n"
-                    f"{erro}"
-                )
+        self.coordenador_tarefas.executar(
+            "backup_manual",
+            "Criando backup",
+            "O Vighna continuará responsivo durante a cópia do banco.",
+            executar,
+            bloqueante=False,
+        )
+
+    def _executar_tarefa_fechamento(self):
+        if self._fechamento_em_andamento or self._fechamento_autorizado:
+            return
+
+        try:
+            contexto = self._contexto_aquecimento_dados()
+        except Exception:
+            contexto = None
+
+        def executar(reportar):
+            resultado = {"cache_preparado": False, "backup": None, "avisos": []}
+
+            if contexto is not None:
+                try:
+                    reportar(
+                        "Preparando a próxima sessão",
+                        "Consolidando os snapshots que poderão ser reutilizados na próxima abertura.",
+                        8,
+                    )
+                    aquecer_dados_derivados(
+                        contexto["concurso_id"],
+                        hoje=contexto.get("hoje"),
+                        tendencias_inicio=contexto.get("tendencias_inicio"),
+                        tendencias_fim=contexto.get("tendencias_fim"),
+                        relatorio_inicio=contexto.get("relatorio_inicio"),
+                        relatorio_fim=contexto.get("relatorio_fim"),
+                        reportar=reportar,
+                    )
+                    resultado["cache_preparado"] = True
+                except Exception as erro:
+                    # Cache é otimização, nunca requisito para encerrar com segurança.
+                    resultado["avisos"].append(f"cache: {erro}")
+
+            reportar(
+                "Salvando com segurança",
+                "Criando o backup de fechamento do estudos.db.",
+                96,
             )
+            try:
+                destino = fazer_backup("fechamento")
+                resultado["backup"] = None if destino is None else str(destino)
+            except Exception as erro:
+                # Mantém a política histórica: falha de backup não impede fechar.
+                resultado["avisos"].append(f"backup: {erro}")
+
+            reportar(
+                "Próxima sessão preparada",
+                "Cache e estado acadêmico foram consolidados.",
+                100,
+            )
+            return resultado
+
+        self._fechamento_em_andamento = True
+        self.indicador_tarefa.iniciar(
+            "Preparando a próxima sessão",
+            "Consolidando cache e backup antes de fechar o Vighna.",
+            bloqueante=True,
+            atraso_ms=0,
+        )
+        aceito = self.coordenador_tarefas.executar(
+            "fechamento",
+            "Preparando a próxima sessão",
+            "Consolidando cache e backup antes de fechar o Vighna.",
+            executar,
+            bloqueante=True,
+        )
+        if not aceito:
+            self._fechamento_em_andamento = False
 
     def closeEvent(self, evento):
+        if self._fechamento_autorizado:
+            evento.accept()
+            return
+
         # Como o Foco é top-level, seu ciclo precisa ser encerrado antes da
         # principal. Se o usuário cancelar a confirmação do Foco, o fechamento
         # do aplicativo também é cancelado e nenhum timer fica órfão.
@@ -62360,14 +62826,28 @@ class SistemaEstudos(QMainWindow):
             except RuntimeError:
                 self._janela_modo_foco = None
 
-        try:
-            fazer_backup(
-                "fechamento"
-            )
-        except Exception:
-            pass
+        evento.ignore()
+        self._fechamento_solicitado = True
 
-        evento.accept()
+        if self._fechamento_em_andamento:
+            self.indicador_tarefa.exigir_espera(
+                "Finalizando cache e backup antes de encerrar."
+            )
+            return
+
+        # Se havia apenas um recálculo agendado, o trabalho de fechamento já
+        # fará a consolidação completa e evita uma rodada redundante.
+        if self._timer_recalculo_dados.isActive() and not self._recalculo_dados_ativo:
+            self._timer_recalculo_dados.stop()
+            self._escopos_recalculo_pendentes.clear()
+
+        if self._recalculo_dados_ativo:
+            self.indicador_tarefa.exigir_espera(
+                "Concluindo a atualização em andamento; depois o Vighna salvará a próxima sessão."
+            )
+            return
+
+        self._executar_tarefa_fechamento()
 
 
 app = QApplication(sys.argv)

@@ -130,6 +130,8 @@ FONTES_NUCLEO_ATUAL = {
     "mapa_dominio.py",
     "regularidade.py",
     "microtemas.py",
+    "tarefas_pesadas.py",
+    "aquecimento_dados.py",
     "versao.py",
     "cache_persistente.py",
     "statistics_core/__init__.py",
