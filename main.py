@@ -32,7 +32,7 @@ from datetime import datetime
 from pathlib import Path
 
 
-from PySide6.QtCore import Qt, QDate, QPointF, QRectF, QTimer, Signal, QEventLoop, QSize
+from PySide6.QtCore import Qt, QDate, QPointF, QRectF, QTimer, Signal, QEventLoop, QSize, QEvent
 from PySide6.QtGui import QColor, QPainter, QPen, QFont, QPainterPath, QBrush, QPixmap, QIcon, QTextCharFormat, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
@@ -15717,7 +15717,7 @@ class JanelaResumoResolucaoQuestoes(QDialog):
             configuracao["concurso_nome"] = self.configuracao_original.get("concurso_nome", "VighnaStudy")
 
         janela = JanelaResolverQuestoes(configuracao, self)
-        janela.exec()
+        janela.exec_nao_modal()
 
 
 def _origem_sessao_unificada(configuracao):
@@ -16035,23 +16035,24 @@ class JanelaResolverQuestoes(QDialog):
         configuracao,
         parent=None
     ):
-        super().__init__(
-            parent
-        )
+        # ``parent`` continua sendo o controlador lógico da origem da sessão,
+        # mas não é usado como parent Qt. No Windows, um QDialog pertencente à
+        # janela principal vira uma janela "owned": pode desaparecer da barra
+        # de tarefas ao minimizar e fica acoplado à navegação do Dashboard.
+        # Como top-level real, a bateria pode permanecer aberta enquanto o
+        # usuário navega pelo Vighna e depois ser restaurada sem perder estado.
+        super().__init__(None)
+        self.controlador_origem = parent
 
-        # A resolução funciona como uma janela operacional independente. Ela
-        # pode ser minimizada enquanto o restante do Vighna permanece ativo.
-        self.setWindowFlag(
-            Qt.WindowMinimizeButtonHint,
-            True
+        self.setWindowFlags(
+            Qt.Window
+            | Qt.WindowTitleHint
+            | Qt.WindowSystemMenuHint
+            | Qt.WindowMinMaxButtonsHint
+            | Qt.WindowCloseButtonHint
         )
-        self.setWindowFlag(
-            Qt.WindowMaximizeButtonHint,
-            True
-        )
-        self.setWindowModality(
-            Qt.NonModal
-        )
+        self.setModal(False)
+        self.setWindowModality(Qt.NonModal)
 
         self.configuracao = configuracao
         ciclo_id = configuracao.get("ciclo_questoes_id")
@@ -16087,6 +16088,8 @@ class JanelaResolverQuestoes(QDialog):
         self.questao_atual = None
         self.item_sessao_atual_id = None
         self.inicio_questao = None
+        self._questao_pausa_iniciada = None
+        self._questao_tempo_pausado = 0.0
         self.resposta_confirmada = False
         self.finalizada = False
         self.resultados_integracao = []
@@ -16270,6 +16273,14 @@ class JanelaResolverQuestoes(QDialog):
             "questionSessionProgressText"
         )
 
+        self.botao_dashboard = QPushButton("Dashboard")
+        self.botao_dashboard.setObjectName("subtleButton")
+        self.botao_dashboard.setFixedHeight(34)
+        self.botao_dashboard.setToolTip(
+            "Minimizar a bateria e voltar ao Dashboard sem encerrar a sessão."
+        )
+        self.botao_dashboard.clicked.connect(self.ir_ao_dashboard)
+
         encerrar = QPushButton(
             (
                 "Entregar simulado"
@@ -16308,6 +16319,11 @@ class JanelaResolverQuestoes(QDialog):
         )
         cabecalho.addWidget(
             self.simulado_relogio,
+            0,
+            Qt.AlignVCenter
+        )
+        cabecalho.addWidget(
+            self.botao_dashboard,
             0,
             Qt.AlignVCenter
         )
@@ -16810,6 +16826,95 @@ class JanelaResolverQuestoes(QDialog):
 
         self.carregar_atual()
         self.atualizar_painel_foco()
+        self._registrar_no_controlador_principal()
+
+    def _localizar_janela_principal(self):
+        """Localiza a janela principal sem recriar vínculo Qt de propriedade."""
+        candidatos = []
+        origem = getattr(self, "controlador_origem", None)
+        if origem is not None:
+            candidatos.append(origem)
+            try:
+                principal_declarada = getattr(origem, "janela_principal", None)
+            except RuntimeError:
+                principal_declarada = None
+            if principal_declarada is not None:
+                candidatos.append(principal_declarada)
+
+        visitados = set()
+        for candidato in candidatos:
+            atual = candidato
+            while atual is not None and id(atual) not in visitados:
+                visitados.add(id(atual))
+                if (
+                    callable(getattr(atual, "voltar_inicio", None))
+                    and callable(getattr(atual, "abrir_ou_trazer_modo_foco", None))
+                ):
+                    return atual
+                try:
+                    atual = atual.parentWidget()
+                except (RuntimeError, AttributeError):
+                    atual = None
+
+        app = QApplication.instance()
+        if app is not None:
+            for janela in app.topLevelWidgets():
+                if (
+                    callable(getattr(janela, "voltar_inicio", None))
+                    and callable(getattr(janela, "abrir_ou_trazer_modo_foco", None))
+                ):
+                    return janela
+        return None
+
+    def _registrar_no_controlador_principal(self):
+        principal = self._localizar_janela_principal()
+        if principal is None:
+            return
+        registrar = getattr(principal, "registrar_janela_resolvedor_questoes", None)
+        if callable(registrar):
+            registrar(self)
+
+    def ir_ao_dashboard(self):
+        """Mantém a bateria viva, minimiza-a e devolve o foco ao Dashboard."""
+        if not self.modo_simulado:
+            self.pausar_cronometro_questao()
+        self.showMinimized()
+
+        principal = self._localizar_janela_principal()
+        if principal is None:
+            return
+        principal.voltar_inicio()
+        if principal.isMinimized():
+            principal.showNormal()
+        elif not principal.isVisible():
+            principal.show()
+        principal.raise_()
+        principal.activateWindow()
+
+    def pausar_cronometro_questao(self):
+        """Pausa só o tempo da questão; simulados cronometrados continuam correndo."""
+        if self.modo_simulado or self.inicio_questao is None:
+            return
+        if self._questao_pausa_iniciada is None:
+            self._questao_pausa_iniciada = datetime.now()
+
+    def retomar_cronometro_questao(self):
+        if self._questao_pausa_iniciada is None:
+            return
+        self._questao_tempo_pausado += max(
+            0.0,
+            (datetime.now() - self._questao_pausa_iniciada).total_seconds(),
+        )
+        self._questao_pausa_iniciada = None
+
+    def changeEvent(self, event):
+        super().changeEvent(event)
+        if event.type() != QEvent.WindowStateChange:
+            return
+        if self.isMinimized():
+            self.pausar_cronometro_questao()
+        else:
+            self.retomar_cronometro_questao()
 
     def _notificar_dados_pos_sessao(self):
         """Invalida caches após uma sessão que realmente gravou respostas."""
@@ -16829,11 +16934,9 @@ class JanelaResolverQuestoes(QDialog):
             self._dados_pos_sessao_notificados = True
 
     def _localizar_controlador_foco(self):
-        atual = self.parentWidget()
-        while atual is not None:
-            if callable(getattr(atual, "abrir_ou_trazer_modo_foco", None)):
-                return atual
-            atual = atual.parentWidget()
+        principal = self._localizar_janela_principal()
+        if principal is not None:
+            return principal
 
         app = QApplication.instance()
         if app is not None:
@@ -17204,6 +17307,8 @@ class JanelaResolverQuestoes(QDialog):
             )
         self.resposta_confirmada = False
         self.inicio_questao = datetime.now()
+        self._questao_pausa_iniciada = None
+        self._questao_tempo_pausado = 0.0
 
         # O total pode crescer quando uma questão pulada é reagendada para
         # o fim. A barra acompanha a fila real exibida, sem alterar o objetivo
@@ -17577,14 +17682,17 @@ class JanelaResolverQuestoes(QDialog):
         if self.inicio_questao is None:
             return None
 
+        agora = datetime.now()
+        pausado = float(self._questao_tempo_pausado or 0.0)
+        if self._questao_pausa_iniciada is not None:
+            pausado += max(
+                0.0,
+                (agora - self._questao_pausa_iniciada).total_seconds(),
+            )
+
         return max(
             0,
-            int(
-                (
-                    datetime.now()
-                    - self.inicio_questao
-                ).total_seconds()
-            )
+            int((agora - self.inicio_questao).total_seconds() - pausado),
         )
 
     def atualizar_metricas(self):
@@ -32329,6 +32437,10 @@ class SistemaEstudos(QMainWindow):
         self._fechamento_solicitado = False
         self._fechamento_em_andamento = False
         self._fechamento_autorizado = False
+        # Referência funcional da bateria de questões top-level mais recente.
+        # Não há parent Qt entre ela e a principal; esta referência serve só
+        # para restauração/atalhos e é limpa ao terminar a sessão.
+        self._janela_resolvedor_questoes = None
 
         self.coordenador_tarefas.iniciada.connect(self._ao_tarefa_iniciada)
         self.coordenador_tarefas.progresso.connect(self._ao_tarefa_progresso)
@@ -33461,6 +33573,7 @@ class SistemaEstudos(QMainWindow):
             ("Ctrl+F", self.abrir_modo_foco),
             ("Ctrl+Shift+F", self.abrir_ou_trazer_modo_foco),
             ("F8", self.alternar_pausa_modo_foco),
+            ("Ctrl+Shift+Q", self.abrir_ou_trazer_resolvedor_questoes),
             ("Ctrl+Q", self.abrir_questoes),
             ("Ctrl+Shift+C", self.atalho_checkpoint),
             ("Ctrl+H", self.voltar_inicio),
@@ -34009,6 +34122,22 @@ class SistemaEstudos(QMainWindow):
         )
         botao_questoes.clicked.connect(self.abrir_questoes)
         acoes_topo.addWidget(botao_questoes, 0, Qt.AlignVCenter)
+
+        self.botao_retomar_questoes_topo = QPushButton("Retomar bateria")
+        self.botao_retomar_questoes_topo.setObjectName("subtleButton")
+        self.botao_retomar_questoes_topo.setFixedHeight(36)
+        self.botao_retomar_questoes_topo.setToolTip(
+            "Restaurar a bateria de questões em andamento (Ctrl+Shift+Q)."
+        )
+        self.botao_retomar_questoes_topo.clicked.connect(
+            self.abrir_ou_trazer_resolvedor_questoes
+        )
+        self.botao_retomar_questoes_topo.setVisible(False)
+        acoes_topo.addWidget(
+            self.botao_retomar_questoes_topo,
+            0,
+            Qt.AlignVCenter,
+        )
 
         self.botao_configuracoes_topo = QPushButton("")
         self.botao_configuracoes_topo.setObjectName("topAccentButton")
@@ -42311,6 +42440,73 @@ class SistemaEstudos(QMainWindow):
                 janela.iniciar()
         except RuntimeError:
             self._janela_modo_foco = None
+
+    def registrar_janela_resolvedor_questoes(self, janela):
+        """Registra a bateria top-level para restauração pelo Dashboard."""
+        if janela is None:
+            return
+        self._janela_resolvedor_questoes = janela
+        try:
+            janela.finished.connect(
+                lambda _resultado=0, referencia=janela: self._resolvedor_questoes_finalizado(referencia)
+            )
+        except (RuntimeError, TypeError):
+            pass
+        self._atualizar_atalho_visual_resolvedor()
+
+    def _resolvedor_questoes_finalizado(self, janela):
+        if getattr(self, "_janela_resolvedor_questoes", None) is janela:
+            self._janela_resolvedor_questoes = None
+        botao = getattr(self, "botao_retomar_questoes_topo", None)
+        if botao is not None:
+            botao.setVisible(False)
+        # ``finished`` pode ser emitido durante o fechamento do QDialog. A
+        # varredura no próximo ciclo evita reencontrar a própria janela antes
+        # de o Windows/Qt atualizar sua visibilidade.
+        QTimer.singleShot(0, self._atualizar_atalho_visual_resolvedor)
+
+    def _atualizar_atalho_visual_resolvedor(self):
+        botao = getattr(self, "botao_retomar_questoes_topo", None)
+        if botao is None:
+            return
+        botao.setVisible(self.obter_janela_resolvedor_questoes() is not None)
+
+    def obter_janela_resolvedor_questoes(self):
+        janela = getattr(self, "_janela_resolvedor_questoes", None)
+        if janela is not None:
+            try:
+                janela.windowState()
+                return janela
+            except RuntimeError:
+                self._janela_resolvedor_questoes = None
+
+        # Recuperação defensiva: se a referência foi perdida, procura uma
+        # bateria top-level ainda viva na aplicação.
+        app = QApplication.instance()
+        if app is not None:
+            for candidata in app.topLevelWidgets():
+                if isinstance(candidata, JanelaResolverQuestoes):
+                    try:
+                        if candidata.isVisible() or candidata.isMinimized():
+                            self._janela_resolvedor_questoes = candidata
+                            return candidata
+                    except RuntimeError:
+                        continue
+        return None
+
+    def abrir_ou_trazer_resolvedor_questoes(self):
+        janela = self.obter_janela_resolvedor_questoes()
+        if janela is None:
+            self._atualizar_atalho_visual_resolvedor()
+            return None
+        if janela.isMinimized():
+            janela.showNormal()
+        elif not janela.isVisible():
+            janela.show()
+        janela.raise_()
+        janela.activateWindow()
+        self._atualizar_atalho_visual_resolvedor()
+        return janela
 
     def obter_janela_modo_foco(self, apenas_ativa=False):
         janela = getattr(self, "_janela_modo_foco", None)
@@ -62812,6 +63008,25 @@ class SistemaEstudos(QMainWindow):
         if self._fechamento_autorizado:
             evento.accept()
             return
+
+        # A bateria de questões agora é top-level. Feche-a antes da principal
+        # para preservar a confirmação e a consolidação acadêmica já existente.
+        # Se o usuário cancelar, o encerramento inteiro do aplicativo é abortado.
+        app = QApplication.instance()
+        if app is not None:
+            resolvedores = [
+                janela
+                for janela in app.topLevelWidgets()
+                if isinstance(janela, JanelaResolverQuestoes)
+            ]
+            for janela_resolvedor in resolvedores:
+                try:
+                    janela_resolvedor.close()
+                    if janela_resolvedor.isVisible():
+                        evento.ignore()
+                        return
+                except RuntimeError:
+                    pass
 
         # Como o Foco é top-level, seu ciclo precisa ser encerrado antes da
         # principal. Se o usuário cancelar a confirmação do Foco, o fechamento
