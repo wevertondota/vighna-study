@@ -128,6 +128,35 @@ if not "%QTA_VERSION%"=="%QTA_ESPERADO%" (
 
 if exist "%DIST_NOVA%" rmdir /S /Q "%DIST_NOVA%"
 
+REM -----------------------------------------------------------------
+REM COERENCIA DE BUILD
+REM
+REM Patches extraidos de ZIP podem carregar timestamps anteriores ao cache
+REM do PyInstaller. Nesse caso, um build incremental pode reutilizar bytecode
+REM antigo mesmo quando os arquivos .py da pasta ja foram substituidos.
+REM O fingerprint abaixo compara o CONTEUDO das fontes de producao. Se mudou,
+REM descartamos o workpath do projeto antes de empacotar.
+REM -----------------------------------------------------------------
+set "SOURCE_HASH="
+for /f "usebackq delims=" %%H in (`python hash_fontes_build.py 2^>nul`) do set "SOURCE_HASH=%%H"
+
+if not defined SOURCE_HASH (
+    echo ERRO: nao foi possivel calcular o fingerprint das fontes.
+    pause
+    exit /b 1
+)
+
+set "HASH_FILE=%BUILD_CACHE%\.vighna_source_hash"
+set "HASH_ANTERIOR="
+if exist "%HASH_FILE%" set /p HASH_ANTERIOR=<"%HASH_FILE%"
+
+if /I not "%SOURCE_HASH%"=="%HASH_ANTERIOR%" (
+    echo.
+    echo Fontes alteradas desde o ultimo build.
+    echo Invalidando cache do PyInstaller para garantir o codigo atual...
+    if exist "%BUILD_CACHE%" rmdir /S /Q "%BUILD_CACHE%"
+)
+
 if /I "%VIGHNA_CLEAN_BUILD%"=="1" (
     echo.
     echo Build LIMPO solicitado: descartando cache do PyInstaller...
@@ -165,6 +194,10 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
+
+REM Grava o fingerprint somente depois de um build concluido.
+if not exist "%BUILD_CACHE%" mkdir "%BUILD_CACHE%"
+>"%HASH_FILE%" echo %SOURCE_HASH%
 
 if not exist "%SAIDA_NOVA%\VighnaStudy.exe" (
     echo.
@@ -210,6 +243,9 @@ if errorlevel 1 (
 
 if exist "%DIST_NOVA%" rmdir /S /Q "%DIST_NOVA%"
 if exist "%TEMP_DADOS%" rmdir /S /Q "%TEMP_DADOS%"
+
+REM Registra exatamente qual fonte gerou a pasta executavel atual.
+python -c "from pathlib import Path; from versao import VIGHNA_VERSION,VIGHNA_BUILD; Path(r'%CD%\dist\SistemaEstudos\BUILD_INFO.txt').write_text(f'Versao: {VIGHNA_VERSION}\nBuild: {VIGHNA_BUILD}\nSource SHA-256: %SOURCE_HASH%\n', encoding='utf-8')"
 
 REM IMPORTANTE: BUILD_CACHE NAO E APAGADO.
 REM Ele acelera builds seguintes do PyInstaller.

@@ -14,7 +14,6 @@ from typing import Any, Callable
 from PySide6.QtCore import QObject, QRunnable, QThreadPool, QTimer, Qt, Signal
 from PySide6.QtWidgets import (
     QApplication,
-    QDialog,
     QFrame,
     QHBoxLayout,
     QLabel,
@@ -137,7 +136,7 @@ class CoordenadorTarefas(QObject):
         self.falhou.emit(str(chave), str(erro))
 
 
-class IndicadorTarefa(QDialog):
+class IndicadorTarefa(QFrame):
     """Indicador reutilizável para tarefas curtas/longas dentro do Vighna.
 
     - tarefas normais aparecem após pequeno atraso para evitar flicker;
@@ -147,14 +146,13 @@ class IndicadorTarefa(QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("VighnaStudy")
-        self.setWindowFlags(
-            Qt.FramelessWindowHint
-            | Qt.Dialog
-            | Qt.WindowStaysOnTopHint
-        )
-        self.setAttribute(Qt.WA_DeleteOnClose, False)
+        # O indicador é deliberadamente um widget-filho da janela principal,
+        # não uma janela nativa. Isso elimina de forma estrutural o flicker de
+        # captions/mini-janelas no Windows: não há HWND auxiliar para o sistema
+        # operacional criar, decorar ou animar durante tarefas rápidas.
+        self.setObjectName("taskIndicatorRoot")
         self.setFixedSize(520, 176)
+        self.hide()
 
         self._titulo_base = "Atualizando o Vighna"
         self._frame = 0
@@ -211,7 +209,7 @@ class IndicadorTarefa(QDialog):
         raiz.addWidget(painel)
 
         self.setStyleSheet(
-            "QDialog { background: #071522; border: 1px solid #214A64; border-radius: 16px; }"
+            "QFrame#taskIndicatorRoot { background: #071522; border: 1px solid #214A64; border-radius: 16px; }"
             "QLabel#taskIndicatorMark { background: #0A2233; border: 1px solid #286483; "
             "border-radius: 10px; color: #74C7FF; font-size: 19px; font-weight: 900; }"
             "QLabel#taskIndicatorTitle { color: #F5F8FF; font-size: 15px; font-weight: 800; }"
@@ -232,6 +230,11 @@ class IndicadorTarefa(QDialog):
         self._timer_exibir.setSingleShot(True)
         self._timer_exibir.timeout.connect(self._exibir_agora)
 
+        # Tarefas muito rápidas não devem criar uma janela transitória. O
+        # atraso anterior (280 ms) ainda permitia um flash em operações que
+        # terminavam logo depois de o indicador aparecer.
+        self._atraso_minimo_nao_bloqueante_ms = 850
+
     def _animar(self):
         if not self.isVisible():
             return
@@ -240,23 +243,24 @@ class IndicadorTarefa(QDialog):
 
     def _reposicionar(self):
         parent = self.parentWidget()
-        if parent is not None and parent.isVisible():
-            geom = parent.frameGeometry()
-            if self._bloqueante:
-                x = geom.center().x() - self.width() // 2
-                y = geom.center().y() - self.height() // 2
-            else:
-                x = geom.right() - self.width() - 24
-                y = geom.bottom() - self.height() - 42
-            self.move(max(0, x), max(0, y))
+        if parent is None:
             return
-        tela = QApplication.primaryScreen()
-        if tela is not None:
-            area = tela.availableGeometry()
-            self.move(
-                area.center().x() - self.width() // 2,
-                area.center().y() - self.height() // 2,
-            )
+
+        # Coordenadas de widget-filho são relativas ao conteúdo do parent.
+        # Nunca usamos frameGeometry()/coordenadas globais aqui, pois isso
+        # faria o indicador saltar para posições incorretas em múltiplos
+        # monitores ou quando a janela principal é movida.
+        area = parent.rect()
+        if self._bloqueante:
+            x = area.center().x() - self.width() // 2
+            y = area.center().y() - self.height() // 2
+        else:
+            x = area.right() - self.width() - 24
+            y = area.bottom() - self.height() - 42
+
+        x = max(12, min(x, max(12, area.width() - self.width() - 12)))
+        y = max(12, min(y, max(12, area.height() - self.height() - 12)))
+        self.move(x, y)
 
     def iniciar(
         self,
@@ -275,22 +279,39 @@ class IndicadorTarefa(QDialog):
         self.barra.setRange(0, 0)
         self._frame = 3
         self._pendente_exibicao = True
-        self.setWindowModality(
-            Qt.ApplicationModal if self._bloqueante else Qt.NonModal
-        )
         self._timer_exibir.stop()
         if self._bloqueante or int(atraso_ms) <= 0:
             self._exibir_agora()
         else:
-            self._timer_exibir.start(int(atraso_ms))
+            atraso = max(
+                self._atraso_minimo_nao_bloqueante_ms,
+                int(atraso_ms),
+            )
+            self._timer_exibir.start(atraso)
 
     def _exibir_agora(self):
         if not self._pendente_exibicao:
             return
+
+        # Um indicador de trabalho em segundo plano não agrega informação
+        # enquanto o usuário já está dentro de um diálogo modal. Exibi-lo
+        # atrás do diálogo era justamente o cenário em que o Windows podia
+        # mostrar por um frame uma pequena janela "Vighna...". Adiamos a
+        # exibição até o modal/popup desaparecer; se a tarefa terminar antes,
+        # finalizar() cancela o timer e nada chega a ser mostrado.
+        if not self._bloqueante:
+            modal = QApplication.activeModalWidget()
+            popup = QApplication.activePopupWidget()
+            if modal is not None or popup is not None:
+                self._timer_exibir.start(250)
+                return
+
         self._reposicionar()
         self.show()
+        # Como agora é um widget-filho, raise_() apenas o traz acima dos demais
+        # widgets da própria janela principal. Não existe ativação de janela,
+        # caption transitório nem item auxiliar na barra de tarefas.
         self.raise_()
-        self.activateWindow() if self._bloqueante else None
 
     def atualizar(self, titulo=None, detalhe=None, percentual=None):
         if titulo:
@@ -306,31 +327,31 @@ class IndicadorTarefa(QDialog):
             self.barra.setRange(0, 100)
             self.barra.setValue(valor)
             self.percentual.setText(f"{valor}%")
-        self._reposicionar()
+        if self.isVisible():
+            self._reposicionar()
 
     def exigir_espera(self, detalhe=None):
-        """Promove uma tarefa em curso para espera visual bloqueante."""
+        """Promove uma tarefa em curso para espera visual sem recriar a janela nativa."""
         if detalhe is not None:
             self.detalhe.setText(str(detalhe))
         self._bloqueante = True
         self._pendente_exibicao = True
         self._timer_exibir.stop()
         if self.isVisible():
-            self.hide()
-        self.setWindowModality(Qt.ApplicationModal)
-        self._exibir_agora()
+            self._reposicionar()
+            self.raise_()
+        else:
+            self._exibir_agora()
 
     def finalizar(self):
         self._pendente_exibicao = False
         self._timer_exibir.stop()
-        self.hide()
+        if self.isVisible():
+            self.hide()
         self._bloqueante = False
-        self.setWindowModality(Qt.NonModal)
 
     def closeEvent(self, event):
-        # O indicador é controlado pelo coordenador e não deve ser fechado pelo
-        # usuário durante uma tarefa bloqueante.
-        if self._bloqueante:
-            event.ignore()
-            return
-        event.accept()
+        # Não há janela nativa a fechar. Se algum código chamar close(),
+        # mantemos o componente reutilizável e apenas o ocultamos.
+        event.ignore()
+        self.hide()

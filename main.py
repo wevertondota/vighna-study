@@ -8880,39 +8880,61 @@ class JanelaVisualizarQuestao(QDialog):
                 28
             )
 
-            texto = QLabel(
-                alternativa[
-                    "texto"
-                ]
-            )
-            texto.setWordWrap(
-                True
-            )
-            texto.setTextInteractionFlags(
-                Qt.TextSelectableByMouse
-            )
-            texto.setVisible(
-                tipo_questao != "CERTO_ERRADO"
-            )
-
             linha.addWidget(
                 letra,
                 0,
                 Qt.AlignTop
             )
-            linha.addWidget(
-                texto,
-                1
-            )
+
+            # Em múltipla escolha, a alternativa textual já nasce com o card
+            # como parent. Evita um QLabel top-level transitório quando sua
+            # visibilidade é configurada antes de entrar no layout (origem do
+            # antigo "quadrado fantasma" em alguns diálogos do Windows).
+            if tipo_questao != "CERTO_ERRADO":
+                texto = QLabel(
+                    alternativa[
+                        "texto"
+                    ],
+                    card,
+                )
+                texto.setObjectName(
+                    "questionAlternativeText"
+                )
+                texto.setWordWrap(
+                    True
+                )
+                texto.setTextInteractionFlags(
+                    Qt.TextSelectableByMouse
+                )
+                texto.setSizePolicy(
+                    QSizePolicy.Expanding,
+                    QSizePolicy.Preferred
+                )
+                texto.setAlignment(
+                    Qt.AlignLeft | Qt.AlignTop
+                )
+                linha.addWidget(
+                    texto,
+                    1
+                )
+            else:
+                linha.addStretch(
+                    1
+                )
 
             if alternativa[
                 "correta"
             ]:
                 correto = QLabel(
-                    "Gabarito"
+                    "Gabarito",
+                    card,
                 )
                 correto.setObjectName(
                     "questionCorrectBadge"
+                )
+                correto.setSizePolicy(
+                    QSizePolicy.Fixed,
+                    QSizePolicy.Preferred
                 )
                 linha.addWidget(
                     correto,
@@ -16043,6 +16065,7 @@ class JanelaResolverQuestoes(QDialog):
         # usuário navega pelo Vighna e depois ser restaurada sem perder estado.
         super().__init__(None)
         self.controlador_origem = parent
+        self.setObjectName("questionSolverDialog")
 
         self.setWindowFlags(
             Qt.Window
@@ -16313,11 +16336,6 @@ class JanelaResolverQuestoes(QDialog):
         )
 
         cabecalho.addWidget(
-            self.sessao_progresso_texto,
-            0,
-            Qt.AlignVCenter
-        )
-        cabecalho.addWidget(
             self.simulado_relogio,
             0,
             Qt.AlignVCenter
@@ -16337,16 +16355,111 @@ class JanelaResolverQuestoes(QDialog):
             cabecalho
         )
 
-        # Faixa compacta e contextual. Ela consulta a sessão mantida pela
-        # janela principal; não possui cronômetro nem estado de foco próprios.
+        # Painel de sessão: concentra progresso, ciclo e métricas sem competir
+        # visualmente com o conteúdo pedagógico.
+        self.sessao_overview = QFrame()
+        self.sessao_overview.setObjectName("questionSessionOverviewCard")
+        overview_layout = QVBoxLayout(self.sessao_overview)
+        overview_layout.setContentsMargins(14, 10, 14, 10)
+        overview_layout.setSpacing(7)
+
+        overview_topo = QHBoxLayout()
+        overview_topo.setSpacing(10)
+
+        overview_eyebrow = QLabel("PROGRESSO DA SESSÃO")
+        overview_eyebrow.setObjectName("questionSessionEyebrow")
+        overview_topo.addWidget(overview_eyebrow)
+        overview_topo.addStretch()
+        overview_topo.addWidget(
+            self.sessao_progresso_texto,
+            0,
+            Qt.AlignVCenter
+        )
+
+        self.sessao_ciclo_texto = QLabel("")
+        self.sessao_ciclo_texto.setObjectName("questionSessionCycleText")
+        self.sessao_ciclo_texto.hide()
+        overview_topo.addWidget(
+            self.sessao_ciclo_texto,
+            0,
+            Qt.AlignVCenter
+        )
+        overview_layout.addLayout(overview_topo)
+
+        self.sessao_progresso = QProgressBar()
+        self.sessao_progresso.setObjectName(
+            "questionSessionProgress"
+        )
+        self.sessao_progresso.setRange(
+            0,
+            len(
+                self.fila
+            )
+        )
+        self.sessao_progresso.setValue(
+            0
+        )
+        self.sessao_progresso.setTextVisible(
+            False
+        )
+        self.sessao_progresso.setFixedHeight(
+            7
+        )
+        overview_layout.addWidget(self.sessao_progresso)
+
+        metricas = QHBoxLayout()
+        metricas.setSpacing(8)
+
+        def metrica(titulo_texto, papel="neutral"):
+            frame = QFrame()
+            frame.setObjectName("questionSessionMiniStat")
+            frame.setProperty("metricRole", papel)
+
+            frame_layout = QHBoxLayout(frame)
+            frame_layout.setContentsMargins(9, 5, 9, 5)
+            frame_layout.setSpacing(6)
+
+            rotulo = QLabel(titulo_texto)
+            rotulo.setObjectName("questionSessionMiniLabel")
+
+            valor = QLabel("0")
+            valor.setObjectName("questionSessionMiniValue")
+            valor.setProperty("metricRole", papel)
+
+            frame_layout.addWidget(rotulo)
+            frame_layout.addWidget(valor)
+            return frame, valor
+
+        frame, self.stat_respondidas = metrica("Respondidas")
+        metricas.addWidget(frame)
+
+        frame, self.stat_acertos = metrica("Acertos", "success")
+        metricas.addWidget(frame)
+
+        frame, self.stat_erros = metrica("Erros", "danger")
+        metricas.addWidget(frame)
+
+        frame, self.stat_puladas = metrica("Puladas", "warning")
+        metricas.addWidget(frame)
+        metricas.addStretch()
+
+        if self.modo_simulado:
+            self.stat_acertos.setText("—")
+            self.stat_erros.setText("—")
+
+        overview_layout.addLayout(metricas)
+        layout.addWidget(self.sessao_overview)
+
+        # Faixa contextual do Modo Foco: baixa altura e baixa saliência para
+        # não disputar atenção com a questão.
         self.foco_painel = QFrame()
-        self.foco_painel.setObjectName("questionSessionMiniStat")
+        self.foco_painel.setObjectName("questionSessionFocusBar")
         foco_layout = QHBoxLayout(self.foco_painel)
-        foco_layout.setContentsMargins(10, 5, 8, 5)
+        foco_layout.setContentsMargins(11, 5, 8, 5)
         foco_layout.setSpacing(7)
 
         self.foco_estado = QLabel("")
-        self.foco_estado.setObjectName("questionSessionMiniLabel")
+        self.foco_estado.setObjectName("questionSessionFocusState")
         self.foco_estado.setAccessibleName("Estado do Modo Foco")
 
         self.foco_pausar = QPushButton("Pausar")
@@ -16388,122 +16501,6 @@ class JanelaResolverQuestoes(QDialog):
         if sinal_estado_foco is not None:
             sinal_estado_foco.connect(self.atualizar_painel_foco)
 
-        self.sessao_progresso = QProgressBar()
-        self.sessao_progresso.setObjectName(
-            "questionSessionProgress"
-        )
-        self.sessao_progresso.setRange(
-            0,
-            len(
-                self.fila
-            )
-        )
-        self.sessao_progresso.setValue(
-            0
-        )
-        self.sessao_progresso.setTextVisible(
-            False
-        )
-        self.sessao_progresso.setFixedHeight(
-            7
-        )
-
-        layout.addWidget(
-            self.sessao_progresso
-        )
-
-        # Estatísticas correntes.
-        metricas = QHBoxLayout()
-        metricas.setSpacing(
-            8
-        )
-
-        def metrica(
-            titulo_texto
-        ):
-            frame = QFrame()
-            frame.setObjectName(
-                "questionSessionMiniStat"
-            )
-
-            frame_layout = QHBoxLayout(
-                frame
-            )
-            frame_layout.setContentsMargins(
-                9,
-                6,
-                9,
-                6
-            )
-            frame_layout.setSpacing(
-                5
-            )
-
-            rotulo = QLabel(
-                titulo_texto
-            )
-            rotulo.setObjectName(
-                "questionSessionMiniLabel"
-            )
-
-            valor = QLabel(
-                "0"
-            )
-            valor.setObjectName(
-                "questionSessionMiniValue"
-            )
-
-            frame_layout.addWidget(
-                rotulo
-            )
-            frame_layout.addWidget(
-                valor
-            )
-
-            return frame, valor
-
-        frame, self.stat_respondidas = metrica(
-            "Respondidas"
-        )
-        metricas.addWidget(
-            frame
-        )
-
-        frame, self.stat_acertos = metrica(
-            "Acertos"
-        )
-        metricas.addWidget(
-            frame
-        )
-
-        frame, self.stat_erros = metrica(
-            "Erros"
-        )
-        metricas.addWidget(
-            frame
-        )
-
-        frame, self.stat_puladas = metrica(
-            "Puladas"
-        )
-        metricas.addWidget(
-            frame
-        )
-
-        metricas.addStretch()
-
-        if self.modo_simulado:
-            self.stat_acertos.setText(
-                "—"
-            )
-            self.stat_erros.setText(
-                "—"
-            )
-
-        layout.addLayout(
-            metricas
-        )
-
         # Área da questão com scroll vertical e sem scroll horizontal.
         scroll = QScrollArea()
         scroll.setObjectName(
@@ -16537,19 +16534,20 @@ class JanelaResolverQuestoes(QDialog):
             9
         )
 
-        self.questao_meta = QLabel(
-            ""
-        )
-        self.questao_meta.setObjectName(
-            "questionSolverMeta"
-        )
-        self.questao_meta.setWordWrap(
-            True
-        )
+        contexto_questao = QVBoxLayout()
+        contexto_questao.setSpacing(2)
 
-        conteudo_layout.addWidget(
-            self.questao_meta
-        )
+        self.questao_disciplina = QLabel("")
+        self.questao_disciplina.setObjectName("questionSolverDiscipline")
+        self.questao_disciplina.setWordWrap(False)
+
+        self.questao_meta = QLabel("")
+        self.questao_meta.setObjectName("questionSolverMeta")
+        self.questao_meta.setWordWrap(True)
+
+        contexto_questao.addWidget(self.questao_disciplina)
+        contexto_questao.addWidget(self.questao_meta)
+        conteudo_layout.addLayout(contexto_questao)
 
         enunciado_card = QFrame()
         enunciado_card.setObjectName(
@@ -16560,11 +16558,16 @@ class JanelaResolverQuestoes(QDialog):
             enunciado_card
         )
         enunciado_layout.setContentsMargins(
-            15,
-            13,
-            15,
-            13
+            16,
+            12,
+            16,
+            14
         )
+        enunciado_layout.setSpacing(6)
+
+        self.questao_indice = QLabel("QUESTÃO 1")
+        self.questao_indice.setObjectName("questionSolverQuestionIndex")
+        enunciado_layout.addWidget(self.questao_indice)
 
         self.questao_enunciado = QLabel(
             ""
@@ -16665,10 +16668,6 @@ class JanelaResolverQuestoes(QDialog):
             Qt.AlignVCenter
         )
         acoes.addStretch()
-
-        conteudo_layout.addWidget(
-            painel_acoes
-        )
 
         self.feedback = QFrame()
         self.feedback.setObjectName(
@@ -16808,6 +16807,8 @@ class JanelaResolverQuestoes(QDialog):
         acoes.addWidget(
             self.botao_proxima
         )
+        painel_acoes.setMinimumHeight(58)
+        layout.addWidget(painel_acoes)
 
         if self.modo_simulado:
             self.atualizar_relogio_simulado()
@@ -17203,6 +17204,42 @@ class JanelaResolverQuestoes(QDialog):
         self.frame_por_letra = {}
         self.texto_por_letra = {}
         self.botao_eliminar_por_letra = {}
+        self._letra_por_widget_alternativa = {}
+
+    def selecionar_alternativa_por_letra(self, letra):
+        if self.resposta_confirmada:
+            return
+
+        radio = self.radio_por_letra.get(letra)
+        if radio is None or not radio.isEnabled():
+            return
+
+        # Se a alternativa havia sido eliminada pela tesoura, clicar no card
+        # restaura visualmente a opção antes de selecioná-la. Isso evita a
+        # combinação contraditória de "eliminada" e "marcada" ao mesmo tempo.
+        botao = self.botao_eliminar_por_letra.get(letra)
+        if botao is not None and botao.isChecked():
+            botao.setChecked(False)
+
+        radio.setChecked(True)
+        radio.setFocus()
+
+    def eventFilter(self, objeto, evento):
+        letra = getattr(self, "_letra_por_widget_alternativa", {}).get(objeto)
+        if letra is not None and not self.resposta_confirmada:
+            if evento.type() == QEvent.MouseButtonRelease and evento.button() == Qt.LeftButton:
+                # No texto, preserve seleção por arraste: só converte um clique
+                # simples em seleção da alternativa quando não há trecho marcado.
+                if isinstance(objeto, QLabel):
+                    try:
+                        if objeto.selectedText():
+                            return super().eventFilter(objeto, evento)
+                    except Exception:
+                        pass
+                self.selecionar_alternativa_por_letra(letra)
+                return True
+
+        return super().eventFilter(objeto, evento)
 
     def alternar_eliminacao_alternativa(
         self,
@@ -17215,10 +17252,18 @@ class JanelaResolverQuestoes(QDialog):
         botao = self.botao_eliminar_por_letra.get(
             letra
         )
+        frame = self.frame_por_letra.get(
+            letra
+        )
+        radio = self.radio_por_letra.get(
+            letra
+        )
 
         if (
             texto is None
             or botao is None
+            or frame is None
+            or radio is None
             or self.resposta_confirmada
         ):
             return
@@ -17227,16 +17272,20 @@ class JanelaResolverQuestoes(QDialog):
             eliminada
         )
 
-        texto.setProperty(
-            "eliminated",
-            eliminada
-        )
-        texto.style().unpolish(
-            texto
-        )
-        texto.style().polish(
-            texto
-        )
+        for widget in (frame, texto, radio):
+            widget.setProperty(
+                "eliminated",
+                eliminada
+            )
+            widget.style().unpolish(widget)
+            widget.style().polish(widget)
+
+        # Eliminar uma opção que estava marcada também remove a marcação.
+        if eliminada and radio.isChecked():
+            self.grupo_alternativas.setExclusive(False)
+            radio.setChecked(False)
+            self.grupo_alternativas.setExclusive(True)
+            self.atualizar_selecao_visual_alternativas()
 
         # A repolida aplica primeiro a cor do estado; o tachado precisa
         # ser definido depois para não ser sobrescrito pelo stylesheet.
@@ -17332,20 +17381,22 @@ class JanelaResolverQuestoes(QDialog):
                 self.estado_ciclo_questoes = estado_ciclo
                 if estado_ciclo:
                     ciclo_progresso_rotulo = (
-                        f" • Ciclo {int(estado_ciclo.get('respondidas') or 0)}/"
+                        f"Ciclo {int(estado_ciclo.get('respondidas') or 0)}/"
                         f"{int(estado_ciclo.get('total') or 0)}"
-                        f" • {int(estado_ciclo.get('pendentes') or 0)} pendentes"
+                        f"  •  {int(estado_ciclo.get('pendentes') or 0)} pendentes"
                     )
             except Exception:
                 ciclo_progresso_rotulo = ""
 
         self.sessao_progresso_texto.setText(
-            (
-                f"Questão {self.indice + 1} "
-                f"de {len(self.fila)}"
-                + ciclo_progresso_rotulo
-                + (" • retorno de questão pulada" if retorno_pulo else "")
-            )
+            f"Questão {self.indice + 1} de {len(self.fila)}"
+            + ("  •  retorno" if retorno_pulo else "")
+        )
+        self.sessao_ciclo_texto.setText(ciclo_progresso_rotulo)
+        self.sessao_ciclo_texto.setVisible(bool(ciclo_progresso_rotulo))
+        self.questao_indice.setText(
+            f"QUESTÃO {self.indice + 1}"
+            + ("  •  RETORNO" if retorno_pulo else "")
         )
         self.sessao_progresso.setValue(
             self.indice
@@ -17383,97 +17434,58 @@ class JanelaResolverQuestoes(QDialog):
             )
         )
 
-        metadata = [
-            (
-                f"{dados['disciplina']} › "
-                f"{dados['topico']}"
-            ),
-            estado_historico,
-        ]
-
-        categoria_smart = (
-            resumo_item.get(
-                "categoria_rotulo"
-            )
+        self.questao_disciplina.setText(
+            str(dados.get("disciplina") or "Disciplina").upper()
+        )
+        self.questao_meta.setText(
+            str(dados.get("topico") or "Tópico não informado")
         )
 
+        detalhes_metadata = [estado_historico]
+        categoria_smart = resumo_item.get("categoria_rotulo")
         if categoria_smart:
-            metadata.append(
-                categoria_smart
+            detalhes_metadata.append(str(categoria_smart))
+
+        if resumo_item.get("sessao_adaptativa"):
+            detalhes_metadata.append(
+                "Prioridade adaptativa "
+                f"{resumo_item.get('prioridade_topico', 0):.0f}"
             )
 
-        if resumo_item.get(
-            "sessao_adaptativa"
-        ):
-            metadata.append(
-                (
-                    "Prioridade adaptativa "
-                    f"{resumo_item.get('prioridade_topico', 0):.0f}"
-                )
-            )
-
-        if dados[
-            "banca"
-        ]:
-            metadata.append(
-                dados[
-                    "banca"
-                ]
-            )
-
-        if dados[
-            "ano"
-        ]:
-            metadata.append(
-                str(
-                    dados[
-                        "ano"
-                    ]
-                )
-            )
-
-        if dados[
-            "dificuldade"
-        ]:
-            metadata.append(
-                dados[
-                    "dificuldade"
-                ]
-            )
+        if dados.get("banca"):
+            detalhes_metadata.append(str(dados["banca"]))
+        if dados.get("ano"):
+            detalhes_metadata.append(str(dados["ano"]))
+        if dados.get("dificuldade"):
+            detalhes_metadata.append(str(dados["dificuldade"]))
 
         tipo_questao = _questao_tipo(dados)
         if tipo_questao == "CERTO_ERRADO":
-            metadata.append("Certo / Errado")
+            detalhes_metadata.append("Certo / Errado")
 
-        self.questao_meta.setText(
-            " • ".join(
-                metadata
-            )
-        )
+        # Remove repetições como "Inédita • Inédita" sem ocultar informação
+        # real: os detalhes continuam disponíveis no tooltip do contexto.
+        detalhes_unicos = []
+        chaves_metadata = set()
+        for detalhe in detalhes_metadata:
+            chave = str(detalhe).strip().casefold()
+            if chave and chave not in chaves_metadata:
+                chaves_metadata.add(chave)
+                detalhes_unicos.append(str(detalhe).strip())
 
-        motivo_smart = resumo_item.get(
-            "motivo_inteligente",
-            ""
-        )
-        motivo_adaptativo = resumo_item.get(
-            "motivo_adaptativo",
-            ""
-        )
-
-        tooltip_partes = [
+        motivo_smart = resumo_item.get("motivo_inteligente", "")
+        motivo_adaptativo = resumo_item.get("motivo_adaptativo", "")
+        tooltip_partes = []
+        if detalhes_unicos:
+            tooltip_partes.append(" • ".join(detalhes_unicos))
+        tooltip_partes.extend(
             texto
-            for texto in (
-                motivo_adaptativo,
-                motivo_smart,
-            )
+            for texto in (motivo_adaptativo, motivo_smart)
             if texto
-        ]
-
-        self.questao_meta.setToolTip(
-            "\n".join(
-                tooltip_partes
-            )
         )
+        tooltip_contexto = "\n".join(tooltip_partes)
+        self.questao_disciplina.setToolTip(tooltip_contexto)
+        self.questao_meta.setToolTip(tooltip_contexto)
 
         self.questao_enunciado.setText(
             dados[
@@ -17506,6 +17518,16 @@ class JanelaResolverQuestoes(QDialog):
                     "answerState",
                     "normal"
                 )
+                frame.setProperty(
+                    "selectionState",
+                    "normal"
+                )
+                frame.setProperty(
+                    "eliminated",
+                    False
+                )
+                frame.setAttribute(Qt.WA_Hover, True)
+                frame.setCursor(Qt.PointingHandCursor)
 
                 linha = QHBoxLayout(
                     frame
@@ -17561,6 +17583,10 @@ class JanelaResolverQuestoes(QDialog):
                     "letra",
                     letra
                 )
+                radio.setProperty(
+                    "eliminated",
+                    False
+                )
                 radio.setFixedWidth(
                     100 if tipo_questao == "CERTO_ERRADO" else 36
                 )
@@ -17573,6 +17599,10 @@ class JanelaResolverQuestoes(QDialog):
                 )
                 texto.setObjectName(
                     "questionSolverAlternativeText"
+                )
+                texto.setProperty(
+                    "eliminated",
+                    False
                 )
                 texto.setWordWrap(
                     True
@@ -17612,12 +17642,22 @@ class JanelaResolverQuestoes(QDialog):
                     letra
                 ] = eliminar
 
+                # O card inteiro é clicável. O botão da tesoura fica de fora
+                # deste mapa para continuar sendo uma ação independente.
+                self._letra_por_widget_alternativa[frame] = letra
+                self._letra_por_widget_alternativa[texto] = letra
+                frame.installEventFilter(self)
+                texto.installEventFilter(self)
+
                 eliminar.toggled.connect(
                     lambda eliminada, alternativa_letra=letra:
                         self.alternar_eliminacao_alternativa(
                             alternativa_letra,
                             eliminada
                         )
+                )
+                radio.toggled.connect(
+                    self.atualizar_selecao_visual_alternativas
                 )
 
                 self.alternativas_layout.addWidget(
@@ -17670,6 +17710,20 @@ class JanelaResolverQuestoes(QDialog):
         self.botao_proxima.setVisible(
             False
         )
+
+    def atualizar_selecao_visual_alternativas(self, *_args):
+        if self.resposta_confirmada:
+            return
+
+        for letra, frame in self.frame_por_letra.items():
+            radio = self.radio_por_letra.get(letra)
+            selecionada = bool(radio is not None and radio.isChecked())
+            frame.setProperty(
+                "selectionState",
+                "selected" if selecionada else "normal"
+            )
+            frame.style().unpolish(frame)
+            frame.style().polish(frame)
 
     def alternativa_selecionada(self):
         for letra, radio in self.radio_por_letra.items():
@@ -17951,6 +18005,10 @@ class JanelaResolverQuestoes(QDialog):
             frame = self.frame_por_letra[
                 letra
             ]
+            frame.setProperty(
+                "selectionState",
+                "normal"
+            )
 
             if letra == gabarito:
                 estado = "correta"
@@ -24213,8 +24271,9 @@ class JanelaTopico(QDialog):
             parent
         )
 
-        # Janela ampla de detalhes: usa os controles nativos do Windows
-        # para minimizar, maximizar e restaurar.
+        # A página do tópico funciona como uma janela operacional independente:
+        # ela pode permanecer aberta enquanto o usuário navega pelo restante do
+        # Vighna e usa os controles nativos do Windows para minimizar/maximizar.
         self.setWindowFlag(
             Qt.WindowMinimizeButtonHint,
             True
@@ -24224,6 +24283,7 @@ class JanelaTopico(QDialog):
             True
         )
         self.setWindowModality(Qt.NonModal)
+        self.setObjectName("topicDetailsDialog")
 
         self.topico_id = int(topico_id)
         self.nome_topico = nome_topico
@@ -24233,73 +24293,53 @@ class JanelaTopico(QDialog):
         self.setWindowTitle(
             f"Tópico — {nome_topico}"
         )
+        self.resize(1120, 720)
+        self.setMinimumSize(900, 620)
 
-        self.resize(
-            1060,
-            700
-        )
-
-        self.setMinimumSize(
-            880,
-            610
-        )
-
-        layout = QVBoxLayout(
-            self
-        )
-
-        layout.setContentsMargins(
-            22,
-            18,
-            22,
-            20
-        )
-
-        layout.setSpacing(
-            12
-        )
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(22, 18, 22, 20)
+        layout.setSpacing(12)
 
         # ====================================================
-        # HERO / CABEÇALHO
+        # HERO — contexto + ação + resumo executivo
         # ====================================================
-
         hero_card = QFrame()
-        hero_card.setObjectName("dialogCard")
+        hero_card.setObjectName("topicHeroCard")
         hero_layout = QVBoxLayout(hero_card)
         hero_layout.setContentsMargins(18, 16, 18, 16)
-        hero_layout.setSpacing(14)
+        hero_layout.setSpacing(12)
 
         hero_topo = QHBoxLayout()
-        hero_topo.setSpacing(16)
+        hero_topo.setSpacing(18)
 
         bloco_titulo = QVBoxLayout()
-        bloco_titulo.setSpacing(2)
+        bloco_titulo.setSpacing(3)
 
-        eyebrow = QLabel("TÓPICO")
-        eyebrow.setObjectName("metricLabel")
+        self.topico_breadcrumb = QLabel("Conteúdo de estudo")
+        self.topico_breadcrumb.setObjectName("topicBreadcrumb")
+        self.topico_breadcrumb.setWordWrap(True)
 
         titulo = QLabel(nome_topico)
-        titulo.setObjectName("pageTitle")
+        titulo.setObjectName("topicHeroTitle")
         titulo.setWordWrap(True)
 
         self.topico_contexto_label = QLabel(
-            "Histórico, evolução, domínio e próximas ações deste conteúdo."
+            "Importância, revisões e contexto deste conteúdo."
         )
-        self.topico_contexto_label.setObjectName("pageSubtitle")
+        self.topico_contexto_label.setObjectName("topicHeroSubtitle")
         self.topico_contexto_label.setWordWrap(True)
 
-        bloco_titulo.addWidget(eyebrow)
+        bloco_titulo.addWidget(self.topico_breadcrumb)
         bloco_titulo.addWidget(titulo)
         bloco_titulo.addWidget(self.topico_contexto_label)
-
         hero_topo.addLayout(bloco_titulo, 1)
 
         acoes_topo = QHBoxLayout()
-        acoes_topo.setSpacing(10)
+        acoes_topo.setSpacing(9)
 
         self.botao_estudar_topico = QPushButton("▶  Estudar")
-        self.botao_estudar_topico.setObjectName("primaryButton")
-        self.botao_estudar_topico.setFixedHeight(40)
+        self.botao_estudar_topico.setObjectName("topicStudyButton")
+        self.botao_estudar_topico.setFixedHeight(42)
         self.botao_estudar_topico.setMinimumWidth(128)
         self.botao_estudar_topico.setToolTip(
             "Montar uma sessão inteligente com questões deste tópico."
@@ -24307,8 +24347,8 @@ class JanelaTopico(QDialog):
         self.botao_estudar_topico.clicked.connect(self.estudar_topico)
 
         self.botao_ver_questoes_topico = QPushButton("Ver questões")
-        self.botao_ver_questoes_topico.setObjectName("subtleButton")
-        self.botao_ver_questoes_topico.setFixedHeight(40)
+        self.botao_ver_questoes_topico.setObjectName("topicQuestionsButton")
+        self.botao_ver_questoes_topico.setFixedHeight(42)
         self.botao_ver_questoes_topico.setMinimumWidth(132)
         self.botao_ver_questoes_topico.setToolTip(
             "Abrir o banco de questões já filtrado neste tópico."
@@ -24317,60 +24357,75 @@ class JanelaTopico(QDialog):
 
         acoes_topo.addWidget(self.botao_estudar_topico)
         acoes_topo.addWidget(self.botao_ver_questoes_topico)
-
         hero_topo.addLayout(acoes_topo, 0)
         hero_layout.addLayout(hero_topo)
 
-        # ====================================================
-        # RESUMO EM CARDS
-        # ====================================================
-
-        def criar_metrica(titulo_metrica):
+        # Três indicadores estratégicos. Os números operacionais restantes
+        # ficam em uma faixa compacta para não disputar atenção com o título.
+        def criar_metrica_principal(rotulo_texto, papel):
             card = QFrame()
-            card.setObjectName("metricCard")
+            card.setObjectName("topicMetricCard")
+            card.setProperty("metricRole", papel)
+            box = QVBoxLayout(card)
+            box.setContentsMargins(14, 10, 14, 10)
+            box.setSpacing(2)
 
-            card_layout = QVBoxLayout(card)
-            card_layout.setContentsMargins(14, 11, 14, 11)
-            card_layout.setSpacing(3)
-
-            rotulo = QLabel(titulo_metrica)
-            rotulo.setObjectName("metricLabel")
-
+            rotulo = QLabel(rotulo_texto)
+            rotulo.setObjectName("topicMetricLabel")
             valor = QLabel("—")
-            valor.setObjectName("metricValue")
+            valor.setObjectName("topicMetricValue")
             valor.setWordWrap(True)
 
-            card_layout.addWidget(rotulo)
-            card_layout.addWidget(valor)
-            card_layout.addStretch(1)
+            box.addWidget(rotulo)
+            box.addWidget(valor)
             return card, valor
 
-        grade_resumo = QGridLayout()
-        grade_resumo.setHorizontalSpacing(10)
-        grade_resumo.setVerticalSpacing(10)
+        metricas_principais = QHBoxLayout()
+        metricas_principais.setSpacing(9)
 
-        for coluna in range(5):
-            grade_resumo.setColumnStretch(coluna, 1)
+        card, self.valor_dominio_resumo = criar_metrica_principal(
+            "Domínio", "domain"
+        )
+        metricas_principais.addWidget(card, 1)
 
-        card, self.valor_dominio_resumo = criar_metrica("Domínio")
-        grade_resumo.addWidget(card, 0, 0)
+        card, self.valor_proxima_topico = criar_metrica_principal(
+            "Próxima revisão", "review"
+        )
+        metricas_principais.addWidget(card, 1)
 
-        card, self.valor_questoes_topico = criar_metrica("Questões")
-        grade_resumo.addWidget(card, 0, 1)
+        card, self.valor_ultima_pratica_topico = criar_metrica_principal(
+            "Última prática", "practice"
+        )
+        metricas_principais.addWidget(card, 1)
 
-        card, self.valor_erros_topico = criar_metrica("Erros em atenção")
-        grade_resumo.addWidget(card, 0, 2)
+        hero_layout.addLayout(metricas_principais)
 
-        card, self.valor_ultima_pratica_topico = criar_metrica("Última prática")
-        grade_resumo.addWidget(card, 0, 3)
+        faixa_operacional = QHBoxLayout()
+        faixa_operacional.setSpacing(8)
 
-        card, self.valor_proxima_topico = criar_metrica("Próxima revisão")
-        grade_resumo.addWidget(card, 0, 4)
+        def criar_metrica_compacta(rotulo_texto):
+            card = QFrame()
+            card.setObjectName("topicCompactMetric")
+            box = QHBoxLayout(card)
+            box.setContentsMargins(11, 6, 11, 6)
+            box.setSpacing(7)
+            rotulo = QLabel(rotulo_texto)
+            rotulo.setObjectName("topicCompactMetricLabel")
+            valor = QLabel("—")
+            valor.setObjectName("topicCompactMetricValue")
+            box.addWidget(rotulo)
+            box.addWidget(valor)
+            return card, valor
 
-        hero_layout.addLayout(grade_resumo)
+        card, self.valor_questoes_topico = criar_metrica_compacta("Questões")
+        faixa_operacional.addWidget(card)
+        card, self.valor_erros_topico = criar_metrica_compacta("Erros em atenção")
+        faixa_operacional.addWidget(card)
+        faixa_operacional.addStretch(1)
+        hero_layout.addLayout(faixa_operacional)
 
         self.aviso_legado = QLabel()
-        self.aviso_legado.setObjectName("infoNotice")
+        self.aviso_legado.setObjectName("topicLegacyNotice")
         self.aviso_legado.setWordWrap(True)
         self.aviso_legado.setVisible(False)
         hero_layout.addWidget(self.aviso_legado)
@@ -24378,56 +24433,50 @@ class JanelaTopico(QDialog):
         layout.addWidget(hero_card)
 
         # ====================================================
-        # ÍNDICE DE DOMÍNIO
+        # DOMÍNIO — leitura detalhada e hierarquizada
         # ====================================================
-
         self.dominio_card = QFrame()
-        self.dominio_card.setObjectName("topicDomainCard")
-
+        self.dominio_card.setObjectName("topicDomainCardModern")
         dominio_layout = QVBoxLayout(self.dominio_card)
-        dominio_layout.setContentsMargins(16, 14, 16, 14)
-        dominio_layout.setSpacing(8)
+        dominio_layout.setContentsMargins(17, 15, 17, 15)
+        dominio_layout.setSpacing(9)
 
         dominio_header = QHBoxLayout()
-        dominio_header.setSpacing(10)
+        dominio_header.setSpacing(12)
 
         dominio_titulos = QVBoxLayout()
-        dominio_titulos.setSpacing(0)
-
-        dominio_titulo = QLabel("Índice de Domínio do Tópico")
-        dominio_titulo.setObjectName("topicDomainTitle")
-
+        dominio_titulos.setSpacing(1)
+        dominio_titulo = QLabel("Domínio do tópico")
+        dominio_titulo.setObjectName("topicDomainTitleModern")
         dominio_subtitulo = QLabel(
-            "V2: desempenho recente, variedade, estabilidade, recência, erros/recuperação e robustez da evidência."
+            "Leitura V2 por desempenho, variedade, estabilidade, recência, recuperação de erros e robustez da evidência."
         )
-        dominio_subtitulo.setObjectName("topicDomainSubtitle")
+        dominio_subtitulo.setObjectName("topicDomainSubtitleModern")
         dominio_subtitulo.setWordWrap(True)
-
         dominio_titulos.addWidget(dominio_titulo)
         dominio_titulos.addWidget(dominio_subtitulo)
 
         placar_dominio = QHBoxLayout()
         placar_dominio.setSpacing(8)
-
         self.dominio_valor = QLabel("0 / 100")
-        self.dominio_valor.setObjectName("topicDomainScore")
-
+        self.dominio_valor.setObjectName("topicDomainScoreModern")
         self.dominio_nivel = QLabel("Sem evidência")
-        self.dominio_nivel.setObjectName("topicDomainLevel")
+        self.dominio_nivel.setObjectName("topicDomainLevelModern")
         self.dominio_nivel.setProperty("domainLevel", "sem")
-
         placar_dominio.addWidget(self.dominio_valor, 0, Qt.AlignVCenter)
         placar_dominio.addWidget(self.dominio_nivel, 0, Qt.AlignVCenter)
 
         dominio_header.addLayout(dominio_titulos, 1)
         dominio_header.addLayout(placar_dominio, 0)
+        dominio_layout.addLayout(dominio_header)
 
         self.dominio_barra = QProgressBar()
-        self.dominio_barra.setObjectName("topicDomainBar")
+        self.dominio_barra.setObjectName("topicDomainBarModern")
         self.dominio_barra.setRange(0, 100)
         self.dominio_barra.setValue(0)
         self.dominio_barra.setTextVisible(False)
         self.dominio_barra.setFixedHeight(8)
+        dominio_layout.addWidget(self.dominio_barra)
 
         componentes = QGridLayout()
         componentes.setHorizontalSpacing(8)
@@ -24435,19 +24484,15 @@ class JanelaTopico(QDialog):
 
         def criar_componente_dominio(titulo_componente):
             bloco = QFrame()
-            bloco.setObjectName("topicDomainComponent")
-
+            bloco.setObjectName("topicDomainComponentModern")
             bloco_layout = QVBoxLayout(bloco)
-            bloco_layout.setContentsMargins(10, 8, 10, 8)
+            bloco_layout.setContentsMargins(10, 7, 10, 7)
             bloco_layout.setSpacing(1)
-
             rotulo = QLabel(titulo_componente)
-            rotulo.setObjectName("topicDomainComponentLabel")
+            rotulo.setObjectName("topicDomainComponentLabelModern")
             rotulo.setWordWrap(True)
-
             valor = QLabel("—")
-            valor.setObjectName("topicDomainComponentValue")
-
+            valor.setObjectName("topicDomainComponentValueModern")
             bloco_layout.addWidget(rotulo)
             bloco_layout.addWidget(valor)
             return bloco, valor
@@ -24458,93 +24503,201 @@ class JanelaTopico(QDialog):
             ("Estabilidade · 15%", "dominio_estabilidade"),
             ("Recência · 10%", "dominio_recencia"),
             ("Erros / recuperação · 15%", "dominio_erros"),
-            ("Robustez da evidência · 10%", "dominio_evidencia_score"),
+            ("Evidência · 10%", "dominio_evidencia_score"),
         )
-
         for indice_componente, (titulo_componente, atributo) in enumerate(componentes_dominio):
             bloco, valor = criar_componente_dominio(titulo_componente)
             setattr(self, atributo, valor)
-            componentes.addWidget(bloco, indice_componente // 3, indice_componente % 3)
-
-        self.dominio_evidencia = QLabel("Evidência: sem respostas internas.")
-        self.dominio_evidencia.setObjectName("topicDomainEvidence")
-        self.dominio_evidencia.setWordWrap(True)
-
-        self.dominio_pontos_fortes = QLabel("")
-        self.dominio_pontos_fortes.setObjectName("topicDomainStrengths")
-        self.dominio_pontos_fortes.setWordWrap(True)
-
-        self.dominio_motivos = QLabel("")
-        self.dominio_motivos.setObjectName("topicDomainReasons")
-        self.dominio_motivos.setWordWrap(True)
-
-        dominio_layout.addLayout(dominio_header)
-        dominio_layout.addWidget(self.dominio_barra)
+            componentes.addWidget(
+                bloco,
+                indice_componente // 3,
+                indice_componente % 3,
+            )
         dominio_layout.addLayout(componentes)
+
+        insights = QHBoxLayout()
+        insights.setSpacing(8)
+
+        fortalezas_card = QFrame()
+        fortalezas_card.setObjectName("topicDomainInsight")
+        fortalezas_card.setProperty("insightRole", "strength")
+        fortalezas_layout = QVBoxLayout(fortalezas_card)
+        fortalezas_layout.setContentsMargins(11, 8, 11, 8)
+        fortalezas_layout.setSpacing(3)
+        fortalezas_titulo = QLabel("FORTALEZAS")
+        fortalezas_titulo.setObjectName("topicDomainInsightTitle")
+        self.dominio_pontos_fortes = QLabel("")
+        self.dominio_pontos_fortes.setObjectName("topicDomainInsightText")
+        self.dominio_pontos_fortes.setWordWrap(True)
+        fortalezas_layout.addWidget(fortalezas_titulo)
+        fortalezas_layout.addWidget(self.dominio_pontos_fortes)
+        insights.addWidget(fortalezas_card, 1)
+
+        atencao_card = QFrame()
+        atencao_card.setObjectName("topicDomainInsight")
+        atencao_card.setProperty("insightRole", "attention")
+        atencao_layout = QVBoxLayout(atencao_card)
+        atencao_layout.setContentsMargins(11, 8, 11, 8)
+        atencao_layout.setSpacing(3)
+        atencao_titulo = QLabel("PONTOS DE ATENÇÃO")
+        atencao_titulo.setObjectName("topicDomainInsightTitle")
+        self.dominio_motivos = QLabel("")
+        self.dominio_motivos.setObjectName("topicDomainInsightText")
+        self.dominio_motivos.setWordWrap(True)
+        atencao_layout.addWidget(atencao_titulo)
+        atencao_layout.addWidget(self.dominio_motivos)
+        insights.addWidget(atencao_card, 1)
+        dominio_layout.addLayout(insights)
+
+        evidencia_rotulo = QLabel("BASE DE EVIDÊNCIA")
+        evidencia_rotulo.setObjectName("topicDomainEvidenceLabel")
+        self.dominio_evidencia = QLabel("Sem respostas internas efetivas.")
+        self.dominio_evidencia.setObjectName("topicDomainEvidenceModern")
+        self.dominio_evidencia.setWordWrap(True)
+        dominio_layout.addWidget(evidencia_rotulo)
         dominio_layout.addWidget(self.dominio_evidencia)
-        dominio_layout.addWidget(self.dominio_pontos_fortes)
-        dominio_layout.addWidget(self.dominio_motivos)
 
         # ====================================================
-        # EVOLUÇÃO
+        # PRÓXIMO PASSO — ação prática ao lado do domínio
         # ====================================================
+        self.proximo_card = QFrame()
+        self.proximo_card.setObjectName("topicNextStepCard")
+        proximo_layout = QVBoxLayout(self.proximo_card)
+        proximo_layout.setContentsMargins(16, 15, 16, 15)
+        proximo_layout.setSpacing(8)
 
+        proximo_eyebrow = QLabel("PRÓXIMO PASSO")
+        proximo_eyebrow.setObjectName("topicNextEyebrow")
+        proximo_layout.addWidget(proximo_eyebrow)
+
+        self.proximo_status = QLabel("Aguardando agenda")
+        self.proximo_status.setObjectName("topicNextStatus")
+        self.proximo_status.setProperty("scheduleState", "none")
+        proximo_layout.addWidget(self.proximo_status, 0, Qt.AlignLeft)
+
+        self.proximo_data = QLabel("—")
+        self.proximo_data.setObjectName("topicNextDate")
+        proximo_layout.addWidget(self.proximo_data)
+
+        self.proximo_texto = QLabel(
+            "O Vighna usará a agenda, o domínio e os erros recentes para orientar a próxima ação."
+        )
+        self.proximo_texto.setObjectName("topicNextDescription")
+        self.proximo_texto.setWordWrap(True)
+        proximo_layout.addWidget(self.proximo_texto)
+
+        self.proximo_atencao = QLabel("")
+        self.proximo_atencao.setObjectName("topicNextMeta")
+        self.proximo_atencao.setWordWrap(True)
+        proximo_layout.addWidget(self.proximo_atencao)
+        proximo_layout.addStretch(1)
+
+        self.proximo_revisar_btn = QPushButton("Revisar agora")
+        self.proximo_revisar_btn.setObjectName("topicNextPrimaryButton")
+        self.proximo_revisar_btn.setMinimumHeight(40)
+        self.proximo_revisar_btn.clicked.connect(self.revisar_topico)
+        proximo_layout.addWidget(self.proximo_revisar_btn)
+
+        proximo_estudar = QPushButton("Estudar tópico")
+        proximo_estudar.setObjectName("topicNextSecondaryButton")
+        proximo_estudar.setMinimumHeight(37)
+        proximo_estudar.clicked.connect(self.estudar_topico)
+        proximo_layout.addWidget(proximo_estudar)
+
+        self.proximo_historico_btn = QPushButton("Ver histórico")
+        self.proximo_historico_btn.setObjectName("topicNextGhostButton")
+        self.proximo_historico_btn.setMinimumHeight(35)
+        proximo_layout.addWidget(self.proximo_historico_btn)
+
+        # ====================================================
+        # EVOLUÇÃO — gráfico quando existe evidência; estado vazio quando não
+        # ====================================================
         card_evolucao = QFrame()
-        card_evolucao.setObjectName("dialogCard")
-
+        card_evolucao.setObjectName("topicEvolutionCard")
         evolucao_layout = QVBoxLayout(card_evolucao)
         evolucao_layout.setContentsMargins(16, 14, 16, 14)
         evolucao_layout.setSpacing(8)
 
-        evolucao_titulo = QLabel("Evolução do desempenho")
-        evolucao_titulo.setObjectName("sectionTitle")
-
+        evolucao_titulo = QLabel("Evolução")
+        evolucao_titulo.setObjectName("topicSectionTitle")
         self.resumo_evolucao = QLabel()
-        self.resumo_evolucao.setObjectName("mutedLabel")
+        self.resumo_evolucao.setObjectName("topicEvolutionSummary")
         self.resumo_evolucao.setWordWrap(True)
 
         self.grafico_evolucao = GraficoEvolucao()
-        self.grafico_evolucao.setMinimumHeight(180)
+        self.grafico_evolucao.setMinimumHeight(190)
+
+        self.evolucao_vazia = QFrame()
+        self.evolucao_vazia.setObjectName("topicEvolutionEmpty")
+        vazio_layout = QVBoxLayout(self.evolucao_vazia)
+        vazio_layout.setContentsMargins(18, 18, 18, 18)
+        vazio_layout.setSpacing(5)
+        vazio_layout.setAlignment(Qt.AlignCenter)
+        vazio_icone = QLabel("◌")
+        vazio_icone.setObjectName("topicEvolutionEmptyIcon")
+        vazio_icone.setAlignment(Qt.AlignCenter)
+        vazio_titulo = QLabel("Histórico detalhado ainda insuficiente")
+        vazio_titulo.setObjectName("topicEvolutionEmptyTitle")
+        vazio_titulo.setAlignment(Qt.AlignCenter)
+        vazio_texto = QLabel(
+            "Quando houver revisões detalhadas registradas no Vighna, a evolução do desempenho aparecerá aqui."
+        )
+        vazio_texto.setObjectName("topicEvolutionEmptyText")
+        vazio_texto.setWordWrap(True)
+        vazio_texto.setAlignment(Qt.AlignCenter)
+        vazio_acoes = QHBoxLayout()
+        vazio_acoes.addStretch(1)
+        vazio_estudar = QPushButton("Estudar tópico")
+        vazio_estudar.setObjectName("topicNextSecondaryButton")
+        vazio_estudar.clicked.connect(self.estudar_topico)
+        vazio_revisao = QPushButton("Registrar revisão")
+        vazio_revisao.setObjectName("topicNextGhostButton")
+        vazio_revisao.clicked.connect(self.nova_revisao)
+        vazio_acoes.addWidget(vazio_estudar)
+        vazio_acoes.addWidget(vazio_revisao)
+        vazio_acoes.addStretch(1)
+        vazio_layout.addWidget(vazio_icone)
+        vazio_layout.addWidget(vazio_titulo)
+        vazio_layout.addWidget(vazio_texto)
+        vazio_layout.addLayout(vazio_acoes)
+        self.evolucao_vazia.hide()
 
         evolucao_layout.addWidget(evolucao_titulo)
         evolucao_layout.addWidget(self.resumo_evolucao)
         evolucao_layout.addWidget(self.grafico_evolucao)
+        evolucao_layout.addWidget(self.evolucao_vazia)
 
         # ====================================================
         # HISTÓRICO + DETALHES
         # ====================================================
-
         card_historico = QFrame()
-        card_historico.setObjectName("dialogCard")
-
+        card_historico.setObjectName("topicHistoryCard")
         historico_layout = QVBoxLayout(card_historico)
         historico_layout.setContentsMargins(16, 14, 16, 14)
         historico_layout.setSpacing(10)
 
         topo_historico = QHBoxLayout()
         topo_historico.setSpacing(8)
-
         titulo_historico = QLabel("Histórico de revisões")
-        titulo_historico.setObjectName("sectionTitle")
-
+        titulo_historico.setObjectName("topicSectionTitle")
         topo_historico.addWidget(titulo_historico)
         topo_historico.addStretch()
 
         registrar_manual = QPushButton("Registrar revisão manual")
-        registrar_manual.setObjectName("subtleButton")
+        registrar_manual.setObjectName("topicHistoryButton")
         registrar_manual.setToolTip("Registrar um estudo feito fora do VighnaStudy.")
         registrar_manual.clicked.connect(self.nova_revisao)
         topo_historico.addWidget(registrar_manual)
 
         alterar_data = QPushButton("Alterar próxima")
-        alterar_data.setObjectName("subtleButton")
+        alterar_data.setObjectName("topicHistoryButton")
         alterar_data.setToolTip("Alterar manualmente a data da próxima revisão.")
         alterar_data.clicked.connect(self.alterar_proxima_revisao)
         topo_historico.addWidget(alterar_data)
-
         historico_layout.addLayout(topo_historico)
 
         self.tabela = QTableWidget()
+        self.tabela.setObjectName("topicHistoryTable")
         self.tabela.setColumnCount(5)
         self.tabela.setHorizontalHeaderLabels([
             "Data",
@@ -24564,58 +24717,64 @@ class JanelaTopico(QDialog):
 
         linha_acoes = QHBoxLayout()
         linha_acoes.addStretch()
-
         self.editar_revisao_btn = QPushButton("Editar revisão")
-        self.editar_revisao_btn.setObjectName("subtleButton")
+        self.editar_revisao_btn.setObjectName("topicHistoryButton")
         self.editar_revisao_btn.clicked.connect(self.editar_revisao)
-
         self.excluir_revisao_btn = QPushButton("Excluir revisão")
         self.excluir_revisao_btn.setObjectName("dangerButton")
         self.excluir_revisao_btn.clicked.connect(self.excluir_revisao_selecionada)
-
         linha_acoes.addWidget(self.editar_revisao_btn)
         linha_acoes.addWidget(self.excluir_revisao_btn)
         historico_layout.addLayout(linha_acoes)
 
         card_detalhes = QFrame()
-        card_detalhes.setObjectName("dialogCard")
-
+        card_detalhes.setObjectName("topicHistoryDetailsCard")
         detalhes_layout = QVBoxLayout(card_detalhes)
         detalhes_layout.setContentsMargins(16, 14, 16, 14)
         detalhes_layout.setSpacing(8)
-
         subtitulo_detalhes = QLabel("Detalhes da revisão")
-        subtitulo_detalhes.setObjectName("sectionTitle")
-
+        subtitulo_detalhes.setObjectName("topicSectionTitle")
         explicacao_detalhes = QLabel(
-            "Selecione uma revisão no histórico para ver as anotações e observações desta sessão."
+            "Selecione uma revisão para ver as anotações e observações da sessão."
         )
-        explicacao_detalhes.setObjectName("mutedLabel")
+        explicacao_detalhes.setObjectName("topicHistoryHint")
         explicacao_detalhes.setWordWrap(True)
-
         self.detalhes = QTextEdit()
         self.detalhes.setObjectName("detailsReadOnly")
         self.detalhes.setReadOnly(True)
         self.detalhes.setPlaceholderText("Nenhuma revisão selecionada.")
         self.detalhes.setMinimumHeight(170)
-
         detalhes_layout.addWidget(subtitulo_detalhes)
         detalhes_layout.addWidget(explicacao_detalhes)
         detalhes_layout.addWidget(self.detalhes, 1)
 
+        # ====================================================
+        # ABAS
+        # ====================================================
         self.topico_tabs = QTabWidget()
-        self.topico_tabs.setObjectName("topicsTabWidget")
+        self.topico_tabs.setObjectName("topicDetailsTabs")
 
-        pagina_visao_geral = QWidget()
-        visao_layout = QVBoxLayout(pagina_visao_geral)
+        pagina_visao_geral = QScrollArea()
+        pagina_visao_geral.setObjectName("topicOverviewScroll")
+        pagina_visao_geral.setWidgetResizable(True)
+        pagina_visao_geral.setFrameShape(QFrame.NoFrame)
+        pagina_visao_geral.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        visao_conteudo = QWidget()
+        visao_conteudo.setObjectName("topicOverviewContent")
+        pagina_visao_geral.setWidget(visao_conteudo)
+        visao_layout = QVBoxLayout(visao_conteudo)
         visao_layout.setContentsMargins(0, 10, 0, 0)
         visao_layout.setSpacing(12)
-        visao_layout.addWidget(self.dominio_card)
-        visao_layout.addWidget(card_evolucao)
-        visao_layout.addStretch(1)
+
+        leitura_principal = QHBoxLayout()
+        leitura_principal.setSpacing(12)
+        leitura_principal.addWidget(self.dominio_card, 3)
+        leitura_principal.addWidget(self.proximo_card, 2)
+        visao_layout.addLayout(leitura_principal)
+        visao_layout.addWidget(card_evolucao, 1)
 
         pagina_historico = QWidget()
-        historico_pagina_layout = QVBoxLayout(pagina_historico)
+        historico_pagina_layout = QHBoxLayout(pagina_historico)
         historico_pagina_layout.setContentsMargins(0, 10, 0, 0)
         historico_pagina_layout.setSpacing(12)
         historico_pagina_layout.addWidget(card_historico, 3)
@@ -24623,13 +24782,13 @@ class JanelaTopico(QDialog):
 
         self.topico_tabs.addTab(pagina_visao_geral, "Visão geral")
         self.topico_tabs.addTab(pagina_historico, "Histórico")
+        self.proximo_historico_btn.clicked.connect(
+            lambda: self.topico_tabs.setCurrentIndex(1)
+        )
 
         layout.addWidget(self.topico_tabs, 1)
 
-        self.tabela.itemSelectionChanged.connect(
-            self.mostrar_detalhes
-        )
-
+        self.tabela.itemSelectionChanged.connect(self.mostrar_detalhes)
         self.carregar_historico()
 
     def carregar_historico(self):
@@ -24741,14 +24900,9 @@ class JanelaTopico(QDialog):
             []
         )
         self.dominio_pontos_fortes.setText(
-            (
-                "Fortalece a nota: "
-                + " • ".join(
-                    pontos_fortes
-                )
-                if pontos_fortes
-                else ""
-            )
+            " • ".join(pontos_fortes)
+            if pontos_fortes
+            else "Ainda sem sinal forte suficiente para destacar."
         )
 
         motivos_dominio = dominio.get(
@@ -24756,14 +24910,9 @@ class JanelaTopico(QDialog):
             []
         )
         self.dominio_motivos.setText(
-            (
-                "Limita a nota: "
-                + " • ".join(
-                    motivos_dominio
-                )
-                if motivos_dominio
-                else ""
-            )
+            " • ".join(motivos_dominio)
+            if motivos_dominio
+            else "Nenhum limitador relevante aberto no momento."
         )
 
         self.dados_revisoes = (
@@ -24893,20 +25042,73 @@ class JanelaTopico(QDialog):
             )
             or ""
         )
-        partes_contexto = []
+        breadcrumb = []
         if disciplina_nome:
-            partes_contexto.append(disciplina_nome)
-        partes_contexto.append(
-            f"Perfil {resumo['concurso_nome']}"
-        )
-        partes_contexto.append(
-            f"Importância {resumo['importancia']}/5"
-        )
-        partes_contexto.append(
-            f"{resumo['revisoes_totais']} revisão(ões)"
+            breadcrumb.append(disciplina_nome)
+        breadcrumb.append(f"Perfil {resumo['concurso_nome']}")
+        self.topico_breadcrumb.setText("  ›  ".join(breadcrumb))
+
+        revisoes_totais = int(resumo.get("revisoes_totais", 0) or 0)
+        revisoes_texto = (
+            "1 revisão registrada"
+            if revisoes_totais == 1
+            else f"{revisoes_totais} revisões registradas"
         )
         self.topico_contexto_label.setText(
-            " • ".join(partes_contexto)
+            f"Importância {resumo['importancia']}/5 • {revisoes_texto}"
+        )
+
+        # Painel de próximo passo: usa a agenda real do tópico e comunica o
+        # estado em linguagem direta, sem transformar todos os dados em cards.
+        proxima_raw = resumo.get("proxima_revisao")
+        proxima_qdate = QDate.fromString(
+            str(proxima_raw or "")[:10],
+            "yyyy-MM-dd",
+        )
+        hoje_qdate = QDate.currentDate()
+        estado_agenda = "none"
+        if proxima_qdate.isValid():
+            dias = hoje_qdate.daysTo(proxima_qdate)
+            self.proximo_data.setText(proxima_qdate.toString("dd/MM/yyyy"))
+            if dias < 0:
+                atraso = abs(dias)
+                self.proximo_status.setText(
+                    "REVISÃO EM ATRASO"
+                )
+                self.proximo_texto.setText(
+                    f"A revisão programada venceu há {atraso} dia(s). Priorize uma revisão curta ou uma bateria dirigida antes de avançar."
+                )
+                estado_agenda = "overdue"
+            elif dias == 0:
+                self.proximo_status.setText("REVISÃO HOJE")
+                self.proximo_texto.setText(
+                    "A revisão deste tópico está prevista para hoje. Uma rodada curta já atualiza a agenda e o domínio."
+                )
+                estado_agenda = "today"
+            elif dias == 1:
+                self.proximo_status.setText("REVISÃO AMANHÃ")
+                self.proximo_texto.setText(
+                    "A próxima revisão está próxima. Você pode antecipá-la agora ou manter a agenda planejada."
+                )
+                estado_agenda = "soon"
+            else:
+                self.proximo_status.setText(f"EM {dias} DIAS")
+                self.proximo_texto.setText(
+                    "A revisão está agendada. Continue estudando normalmente ou antecipe uma sessão se quiser reforçar este conteúdo."
+                )
+                estado_agenda = "future"
+        else:
+            self.proximo_status.setText("SEM REVISÃO AGENDADA")
+            self.proximo_data.setText("—")
+            self.proximo_texto.setText(
+                "Ainda não há uma próxima revisão registrada. Estude o tópico ou registre uma revisão para alimentar a agenda."
+            )
+
+        self.proximo_status.setProperty("scheduleState", estado_agenda)
+        self.proximo_status.style().unpolish(self.proximo_status)
+        self.proximo_status.style().polish(self.proximo_status)
+        self.proximo_atencao.setText(
+            f"{erros_em_atencao} erro(s) em atenção • {quantidade_questoes} questão(ões) ativa(s)"
         )
 
         iniciais = resumo[
@@ -24915,11 +25117,8 @@ class JanelaTopico(QDialog):
 
         if iniciais > 0:
             self.aviso_legado.setText(
-                f"{iniciais} revisão(ões) anteriores "
-                "foram trazidas do Excel. "
-                "Elas entram no total, mas não podem ser "
-                "editadas individualmente porque a planilha "
-                "não guardava os detalhes de cada sessão."
+                f"ℹ  {iniciais} revisão(ões) importada(s) do Excel contam no total, "
+                "mas não possuem detalhes individuais editáveis."
             )
             self.aviso_legado.setVisible(
                 True
@@ -24955,19 +25154,19 @@ class JanelaTopico(QDialog):
             rotulos_grafico
         )
 
+        sem_evolucao = len(cronologico) == 0
+        self.grafico_evolucao.setVisible(not sem_evolucao)
+        self.evolucao_vazia.setVisible(sem_evolucao)
+        self.resumo_evolucao.setVisible(not sem_evolucao)
+
         if len(cronologico) == 0:
-            self.resumo_evolucao.setText(
-                "Evolução detalhada: ainda sem dados "
-                "registrados no programa."
-            )
+            self.resumo_evolucao.clear()
 
         elif len(cronologico) == 1:
             atual = cronologico[0][4]
 
             self.resumo_evolucao.setText(
-                "Evolução detalhada: "
-                f"1 revisão registrada • "
-                f"resultado {formatar_percentual(atual)}."
+                f"1 revisão detalhada • resultado {formatar_percentual(atual)}"
             )
 
         else:
@@ -24990,12 +25189,10 @@ class JanelaTopico(QDialog):
             )
 
             self.resumo_evolucao.setText(
-                "Evolução detalhada: "
-                f"{formatar_percentual(primeiro)} → "
-                f"{formatar_percentual(ultimo)}    |    "
-                f"Variação: {sinal}{variacao:.1f} p.p.    |    "
-                f"Melhor: {formatar_percentual(melhor)}    |    "
-                f"Pior: {formatar_percentual(pior)}"
+                f"{formatar_percentual(primeiro)} → {formatar_percentual(ultimo)}  •  "
+                f"Variação {sinal}{variacao:.1f} p.p.  •  "
+                f"Melhor {formatar_percentual(melhor)}  •  "
+                f"Pior {formatar_percentual(pior)}"
             )
 
         self.detalhes.clear()
@@ -63065,7 +63262,87 @@ class SistemaEstudos(QMainWindow):
         self._executar_tarefa_fechamento()
 
 
-app = QApplication(sys.argv)
+class AplicacaoVighna(QApplication):
+    """Protege a interface contra widgets crus exibidos como janelas nativas.
+
+    Um QWidget/QFrame/QPushButton sem parent é tratado pelo Qt como top-level.
+    Se alguma rotina legada chama show()/setVisible(True) antes de o controle
+    ser anexado a um layout, o Windows chega a criar um pequeno caption
+    transitório (normalmente "python"/nome do executável) por um único frame.
+
+    Janelas legítimas do Vighna são QMainWindow/QDialog; popups internos do Qt
+    usam Qt.Popup/Qt.ToolTip e também ficam fora deste bloqueio.
+    """
+
+    def _top_level_acidental(self, receiver):
+        if not isinstance(receiver, QWidget):
+            return False
+        if isinstance(receiver, (QMainWindow, QDialog, QMenu)):
+            return False
+        try:
+            if bool(receiver.property("vighnaAllowTopLevel")):
+                return False
+            if receiver.parentWidget() is not None or not receiver.isWindow():
+                return False
+            return receiver.windowType() in (Qt.Window, Qt.Dialog)
+        except RuntimeError:
+            return False
+
+    def _registrar_top_level_bloqueado(self, receiver):
+        try:
+            caminho = Path.cwd() / "diagnostico_janelas_transitorias.log"
+            with caminho.open("a", encoding="utf-8") as arquivo:
+                arquivo.write(
+                    f"{datetime.now().isoformat(timespec='seconds')} | "
+                    f"classe={type(receiver).__name__} | "
+                    f"objectName={receiver.objectName()!r} | "
+                    f"windowTitle={receiver.windowTitle()!r}\\n"
+                )
+        except Exception:
+            pass
+
+    @staticmethod
+    def _normalizar_top_level_acidental(receiver):
+        """Finaliza o bloqueio sem esconder controles que já ganharam parent.
+
+        Alguns widgets legítimos são configurados como visíveis poucos
+        microssegundos antes de entrarem em um layout. Enquanto ainda não têm
+        parent, o Qt os trata como top-level. Se o bloqueio simplesmente chama
+        hide() no próximo ciclo, o controle termina oculto dentro do diálogo
+        final — foi exatamente o que ocorreu com os textos das alternativas da
+        Central de Questões.
+        """
+        try:
+            if receiver.parentWidget() is not None:
+                receiver.setAttribute(Qt.WA_DontShowOnScreen, False)
+                receiver.show()
+            else:
+                receiver.hide()
+        except RuntimeError:
+            pass
+
+    def notify(self, receiver, event):
+        if event is not None and event.type() == QEvent.Show:
+            if self._top_level_acidental(receiver):
+                # Bloqueia somente o mapeamento nativo daquele frame. No ciclo
+                # seguinte, se o widget já tiver sido anexado a um parent, ele
+                # é liberado e permanece visível. Se continuar top-level, é
+                # ocultado. Isso elimina o flicker sem destruir o estado visual
+                # de controles que estavam apenas em trânsito para um layout.
+                try:
+                    receiver.setAttribute(Qt.WA_DontShowOnScreen, True)
+                except RuntimeError:
+                    return True
+                self._registrar_top_level_bloqueado(receiver)
+                QTimer.singleShot(
+                    0,
+                    lambda alvo=receiver: self._normalizar_top_level_acidental(alvo),
+                )
+                return True
+        return super().notify(receiver, event)
+
+
+app = AplicacaoVighna(sys.argv)
 
 icone_aplicativo = carregar_logo_vighnastudy()
 

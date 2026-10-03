@@ -13,6 +13,8 @@ _dados_antes_atualizacao/
 # Dados gerados pelo aplicativo
 backups/
 backups_codigo/
+backup_codigo_pre_patch_*/
+backup_patch_*/
 checkpoints/
 *.bak_*
 *.db-shm
@@ -30,6 +32,12 @@ estudos.db
 estudos.db
 RECUPERACAO/*.db
 backups/*.db
+recuperacao_banco/*.db
+recuperacao_banco/*.db-shm
+recuperacao_banco/*.db-wal
+
+# Diagnostico local de widgets transitorios
+diagnostico_janelas_transitorias.log
 
 # Artefatos de compilacao
 /dist/

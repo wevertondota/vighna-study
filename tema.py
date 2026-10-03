@@ -3522,6 +3522,1055 @@ QWidget#dashboardRoot QFrame#topProfileBar {
 """ % PALETA_DASHBOARD_CLARO
 
 
+
+# ============================================================
+# Resolvedor de questões — modo concentração
+# Mantém a linguagem dos cards do Dashboard, mas reduz ornamentos no
+# conteúdo pedagógico. A variante futurista sobrescreve esta base ao final.
+# ============================================================
+ESTILO_RESOLVEDOR_CLARO = r"""
+QDialog#questionSolverDialog {
+    background-color: #F5F7FA;
+}
+QDialog#questionSolverDialog QLabel#pageTitle {
+    color: #172033;
+    font-size: 19px;
+    font-weight: 900;
+}
+QDialog#questionSolverDialog QLabel#pageSubtitle {
+    color: #718096;
+    font-size: 8.6pt;
+}
+QDialog#questionSolverDialog QFrame#questionSessionOverviewCard {
+    background-color: #FFFFFF;
+    border: 1px solid #DDE4EC;
+    border-radius: 14px;
+}
+QDialog#questionSolverDialog QLabel#questionSessionEyebrow {
+    color: #7B8797;
+    font-size: 7.6pt;
+    font-weight: 850;
+    letter-spacing: 0.8px;
+}
+QDialog#questionSolverDialog QLabel#questionSessionProgressText {
+    color: #202B3C;
+    font-size: 9pt;
+    font-weight: 850;
+}
+QDialog#questionSolverDialog QLabel#questionSessionCycleText {
+    color: #657286;
+    font-size: 8.5pt;
+    font-weight: 700;
+}
+QDialog#questionSolverDialog QProgressBar#questionSessionProgress {
+    background-color: #E8EDF3;
+    border: none;
+    border-radius: 4px;
+}
+QDialog#questionSolverDialog QProgressBar#questionSessionProgress::chunk {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #4F5FE8, stop:1 #6B86F2);
+    border-radius: 4px;
+}
+QDialog#questionSolverDialog QFrame#questionSessionMiniStat {
+    background-color: #F7F9FC;
+    border: 1px solid #E3E8EF;
+    border-radius: 9px;
+}
+QDialog#questionSolverDialog QLabel#questionSessionMiniLabel {
+    color: #7A8798;
+    font-size: 8pt;
+    font-weight: 700;
+}
+QDialog#questionSolverDialog QLabel#questionSessionMiniValue {
+    color: #1F2937;
+    font-size: 9.5pt;
+    font-weight: 900;
+}
+QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="success"] { color: #17815D; }
+QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="danger"] { color: #C44758; }
+QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="warning"] { color: #B16A18; }
+QDialog#questionSolverDialog QFrame#questionSessionFocusBar {
+    background-color: #F7F9FC;
+    border: 1px solid #E1E6ED;
+    border-radius: 10px;
+}
+QDialog#questionSolverDialog QLabel#questionSessionFocusState {
+    color: #536173;
+    font-size: 8.3pt;
+    font-weight: 800;
+}
+QDialog#questionSolverDialog QLabel#questionSolverDiscipline {
+    color: #5866C8;
+    font-size: 7.8pt;
+    font-weight: 900;
+    letter-spacing: 0.8px;
+}
+QDialog#questionSolverDialog QLabel#questionSolverMeta {
+    color: #5D697A;
+    font-size: 8.7pt;
+    font-weight: 700;
+}
+QDialog#questionSolverDialog QFrame#questionSolverStatementCard {
+    background-color: #FFFFFF;
+    border: 1px solid #DCE3EB;
+    border-radius: 12px;
+}
+QDialog#questionSolverDialog QLabel#questionSolverQuestionIndex {
+    color: #606BC9;
+    font-size: 7.8pt;
+    font-weight: 900;
+    letter-spacing: 0.8px;
+}
+QDialog#questionSolverDialog QLabel#questionSolverStatement {
+    color: #172033;
+    font-size: 10.8pt;
+}
+QDialog#questionSolverDialog QFrame#questionSolverAlternative {
+    background-color: #FFFFFF;
+    border: 1px solid #E0E6ED;
+    border-radius: 10px;
+}
+QDialog#questionSolverDialog QFrame#questionSolverAlternative[answerState="normal"]:hover {
+    background-color: #F9FAFC;
+    border-color: #BEC9D6;
+}
+QDialog#questionSolverDialog QFrame#questionSolverAlternative[selectionState="selected"][answerState="normal"] {
+    background-color: #F0F2FF;
+    border: 1px solid #7882E8;
+}
+QDialog#questionSolverDialog QFrame#questionSolverAlternative[answerState="correta"] {
+    background-color: #EEF9F4;
+    border-color: #64B992;
+}
+QDialog#questionSolverDialog QFrame#questionSolverAlternative[answerState="errada"] {
+    background-color: #FFF1F3;
+    border-color: #E18491;
+}
+QDialog#questionSolverDialog QRadioButton#questionSolverRadio::indicator {
+    width: 17px;
+    height: 17px;
+    border: 2px solid #8A96A6;
+    border-radius: 9px;
+    background-color: #FFFFFF;
+}
+QDialog#questionSolverDialog QRadioButton#questionSolverRadio::indicator:hover {
+    border-color: #6672D9;
+}
+QDialog#questionSolverDialog QRadioButton#questionSolverRadio::indicator:checked {
+    background-color: #5965D8;
+    border-color: #5965D8;
+}
+QDialog#questionSolverDialog QFrame#questionSessionActionPanel {
+    background-color: #FFFFFF;
+    border: 1px solid #DDE4EC;
+    border-radius: 13px;
+}
+QDialog#questionSolverDialog QPushButton#questionSessionSkipButton {
+    background-color: #F5F7FA;
+    color: #4F5D6E;
+    border: 1px solid #CCD5DF;
+    border-radius: 9px;
+    font-weight: 750;
+}
+QDialog#questionSolverDialog QPushButton#questionSessionSkipButton:hover {
+    background-color: #EDF1F5;
+    border-color: #AFBAC8;
+}
+QDialog#questionSolverDialog QPushButton#primaryButton {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #4B50DF, stop:1 #586DE3);
+    color: #FFFFFF;
+    border: 1px solid #7885F0;
+    border-radius: 9px;
+    font-weight: 850;
+}
+QDialog#questionSolverDialog QPushButton#primaryButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #595EE8, stop:1 #6579EC);
+    border-color: #98A2F7;
+}
+QDialog#questionSolverDialog QPushButton#questionSessionEndButton {
+    background-color: #FFF7F8;
+    color: #A54050;
+    border: 1px solid #E9BCC4;
+    border-radius: 9px;
+    font-weight: 750;
+}
+QDialog#questionSolverDialog QPushButton#questionSessionEndButton:hover {
+    background-color: #FFF0F2;
+    border-color: #DC929E;
+}
+"""
+
+ESTILO_RESOLVEDOR_ESCURO = r"""
+QDialog#questionSolverDialog {
+    background-color: #101722;
+}
+QDialog#questionSolverDialog QLabel#pageTitle {
+    color: #F3F6FA;
+    font-size: 19px;
+    font-weight: 900;
+}
+QDialog#questionSolverDialog QLabel#pageSubtitle {
+    color: #96A3B3;
+    font-size: 8.6pt;
+}
+QDialog#questionSolverDialog QFrame#questionSessionOverviewCard {
+    background-color: #182230;
+    border: 1px solid #344154;
+    border-radius: 14px;
+}
+QDialog#questionSolverDialog QLabel#questionSessionEyebrow {
+    color: #8392A5;
+    font-size: 7.6pt;
+    font-weight: 850;
+    letter-spacing: 0.8px;
+}
+QDialog#questionSolverDialog QLabel#questionSessionProgressText {
+    color: #EDF2F7;
+    font-size: 9pt;
+    font-weight: 850;
+}
+QDialog#questionSolverDialog QLabel#questionSessionCycleText {
+    color: #A1ADBB;
+    font-size: 8.5pt;
+    font-weight: 700;
+}
+QDialog#questionSolverDialog QProgressBar#questionSessionProgress {
+    background-color: #2C3745;
+    border: none;
+    border-radius: 4px;
+}
+QDialog#questionSolverDialog QProgressBar#questionSessionProgress::chunk {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #5964E8, stop:1 #6E8BEF);
+    border-radius: 4px;
+}
+QDialog#questionSolverDialog QFrame#questionSessionMiniStat {
+    background-color: #141D29;
+    border: 1px solid #2D3949;
+    border-radius: 9px;
+}
+QDialog#questionSolverDialog QLabel#questionSessionMiniLabel {
+    color: #8D9BAD;
+    font-size: 8pt;
+    font-weight: 700;
+}
+QDialog#questionSolverDialog QLabel#questionSessionMiniValue {
+    color: #F2F5F8;
+    font-size: 9.5pt;
+    font-weight: 900;
+}
+QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="success"] { color: #79D6AA; }
+QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="danger"] { color: #F08A98; }
+QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="warning"] { color: #E5B16B; }
+QDialog#questionSolverDialog QFrame#questionSessionFocusBar {
+    background-color: #151E2A;
+    border: 1px solid #303D4E;
+    border-radius: 10px;
+}
+QDialog#questionSolverDialog QLabel#questionSessionFocusState {
+    color: #A7B4C3;
+    font-size: 8.3pt;
+    font-weight: 800;
+}
+QDialog#questionSolverDialog QLabel#questionSolverDiscipline {
+    color: #96A0FF;
+    font-size: 7.8pt;
+    font-weight: 900;
+    letter-spacing: 0.8px;
+}
+QDialog#questionSolverDialog QLabel#questionSolverMeta {
+    color: #A8B4C2;
+    font-size: 8.7pt;
+    font-weight: 700;
+}
+QDialog#questionSolverDialog QFrame#questionSolverStatementCard {
+    background-color: #182230;
+    border: 1px solid #344154;
+    border-radius: 12px;
+}
+QDialog#questionSolverDialog QLabel#questionSolverQuestionIndex {
+    color: #9BA4FF;
+    font-size: 7.8pt;
+    font-weight: 900;
+    letter-spacing: 0.8px;
+}
+QDialog#questionSolverDialog QLabel#questionSolverStatement {
+    color: #F2F6FA;
+    font-size: 10.8pt;
+}
+QDialog#questionSolverDialog QFrame#questionSolverAlternative {
+    background-color: #151F2C;
+    border: 1px solid #2F3D4D;
+    border-radius: 10px;
+}
+QDialog#questionSolverDialog QFrame#questionSolverAlternative[answerState="normal"]:hover {
+    background-color: #192534;
+    border-color: #4A5A6E;
+}
+QDialog#questionSolverDialog QFrame#questionSolverAlternative[selectionState="selected"][answerState="normal"] {
+    background-color: #1D2440;
+    border: 1px solid #747FE9;
+}
+QDialog#questionSolverDialog QFrame#questionSolverAlternative[answerState="correta"] {
+    background-color: #173127;
+    border-color: #4EAD80;
+}
+QDialog#questionSolverDialog QFrame#questionSolverAlternative[answerState="errada"] {
+    background-color: #351D24;
+    border-color: #D76676;
+}
+QDialog#questionSolverDialog QRadioButton#questionSolverRadio::indicator {
+    width: 17px;
+    height: 17px;
+    border: 2px solid #687789;
+    border-radius: 9px;
+    background-color: #101722;
+}
+QDialog#questionSolverDialog QRadioButton#questionSolverRadio::indicator:hover {
+    border-color: #8791F2;
+}
+QDialog#questionSolverDialog QRadioButton#questionSolverRadio::indicator:checked {
+    background-color: #626DE0;
+    border-color: #A4ABFF;
+}
+QDialog#questionSolverDialog QFrame#questionSessionActionPanel {
+    background-color: #182230;
+    border: 1px solid #344154;
+    border-radius: 13px;
+}
+QDialog#questionSolverDialog QPushButton#questionSessionSkipButton {
+    background-color: #202B39;
+    color: #C8D1DC;
+    border: 1px solid #445265;
+    border-radius: 9px;
+    font-weight: 750;
+}
+QDialog#questionSolverDialog QPushButton#questionSessionSkipButton:hover {
+    background-color: #273444;
+    border-color: #607086;
+}
+QDialog#questionSolverDialog QPushButton#primaryButton {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #4B50DF, stop:1 #586DE3);
+    color: #FFFFFF;
+    border: 1px solid #7885F0;
+    border-radius: 9px;
+    font-weight: 850;
+}
+QDialog#questionSolverDialog QPushButton#primaryButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #595EE8, stop:1 #6579EC);
+    border-color: #A2AAFF;
+}
+QDialog#questionSolverDialog QPushButton#questionSessionEndButton {
+    background-color: #2B2027;
+    color: #FFB8C2;
+    border: 1px solid #724350;
+    border-radius: 9px;
+    font-weight: 750;
+}
+QDialog#questionSolverDialog QPushButton#questionSessionEndButton:hover {
+    background-color: #38262D;
+    border-color: #985766;
+}
+"""
+
+ESTILO_RESOLVEDOR_FUTURISTA = r"""
+/* Resolver — mesma família visual do Dashboard Neo, com menor ruído. */
+QDialog#questionSolverDialog {
+    background-color: #0B111D;
+}
+QDialog#questionSolverDialog QLabel#pageTitle {
+    color: #F5F7FB;
+    font-size: 20px;
+    font-weight: 900;
+}
+QDialog#questionSolverDialog QLabel#pageSubtitle {
+    color: #AAB5C2;
+    font-size: 8.6pt;
+}
+QDialog#questionSolverDialog QFrame#questionSessionOverviewCard {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #202733, stop:0.55 #222A36, stop:1 #1D2430);
+    border: 1px solid #475364;
+    border-radius: 15px;
+}
+QDialog#questionSolverDialog QLabel#questionSessionEyebrow {
+    color: #AAB4C0;
+    font-size: 7.5pt;
+    font-weight: 900;
+    letter-spacing: 0.9px;
+}
+QDialog#questionSolverDialog QLabel#questionSessionProgressText {
+    color: #F5F7FB;
+    font-size: 9.1pt;
+    font-weight: 900;
+}
+QDialog#questionSolverDialog QLabel#questionSessionCycleText {
+    color: #B8C1CD;
+    font-size: 8.4pt;
+    font-weight: 700;
+}
+QDialog#questionSolverDialog QProgressBar#questionSessionProgress {
+    background-color: #3B424F;
+    border: none;
+    border-radius: 4px;
+}
+QDialog#questionSolverDialog QProgressBar#questionSessionProgress::chunk {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #5358EA, stop:0.52 #5B64EE, stop:1 #718BF5);
+    border-radius: 4px;
+}
+QDialog#questionSolverDialog QFrame#questionSessionMiniStat {
+    background-color: #171F2B;
+    border: 1px solid #344050;
+    border-radius: 10px;
+}
+QDialog#questionSolverDialog QLabel#questionSessionMiniLabel {
+    color: #98A5B4;
+    font-size: 7.9pt;
+    font-weight: 700;
+}
+QDialog#questionSolverDialog QLabel#questionSessionMiniValue {
+    color: #F8FAFC;
+    font-size: 9.5pt;
+    font-weight: 900;
+}
+QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="success"] { color: #82DBB4; }
+QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="danger"] { color: #F28B99; }
+QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="warning"] { color: #E9B66E; }
+QDialog#questionSolverDialog QFrame#questionSessionFocusBar {
+    background-color: #151D28;
+    border: 1px solid #354151;
+    border-radius: 11px;
+}
+QDialog#questionSolverDialog QLabel#questionSessionFocusState {
+    color: #B1BCC9;
+    font-size: 8.2pt;
+    font-weight: 800;
+}
+QDialog#questionSolverDialog QFrame#questionSessionFocusBar QPushButton#subtleButton,
+QDialog#questionSolverDialog QPushButton#subtleButton {
+    background-color: #232B36;
+    color: #D1D9E2;
+    border: 1px solid #5A6472;
+    border-radius: 9px;
+    font-weight: 750;
+}
+QDialog#questionSolverDialog QFrame#questionSessionFocusBar QPushButton#subtleButton:hover,
+QDialog#questionSolverDialog QPushButton#subtleButton:hover {
+    background-color: #2C3643;
+    color: #FFFFFF;
+    border-color: #7A8594;
+}
+QDialog#questionSolverDialog QLabel#questionSolverDiscipline {
+    color: #969FFF;
+    font-size: 7.7pt;
+    font-weight: 900;
+    letter-spacing: 0.9px;
+}
+QDialog#questionSolverDialog QLabel#questionSolverMeta {
+    color: #B6C0CB;
+    font-size: 8.8pt;
+    font-weight: 700;
+}
+QDialog#questionSolverDialog QFrame#questionSolverStatementCard {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #171F2B, stop:1 #141C27);
+    border: 1px solid #3C4858;
+    border-radius: 13px;
+}
+QDialog#questionSolverDialog QLabel#questionSolverQuestionIndex {
+    color: #9BA4FF;
+    font-size: 7.7pt;
+    font-weight: 900;
+    letter-spacing: 0.9px;
+}
+QDialog#questionSolverDialog QLabel#questionSolverStatement {
+    color: #F2F6FA;
+    font-size: 10.9pt;
+}
+QDialog#questionSolverDialog QFrame#questionSolverAlternative {
+    background-color: #111A27;
+    border: 1px solid #2B3747;
+    border-radius: 11px;
+}
+QDialog#questionSolverDialog QFrame#questionSolverAlternative[answerState="normal"]:hover {
+    background-color: #162130;
+    border-color: #46566A;
+}
+QDialog#questionSolverDialog QFrame#questionSolverAlternative[selectionState="selected"][answerState="normal"] {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #1B213A, stop:1 #18243A);
+    border: 1px solid #757FFF;
+}
+QDialog#questionSolverDialog QFrame#questionSolverAlternative[answerState="correta"] {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #153127, stop:1 #12271F);
+    border-color: #4EBA86;
+}
+QDialog#questionSolverDialog QFrame#questionSolverAlternative[answerState="errada"] {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #351C24, stop:1 #2A171D);
+    border-color: #D96777;
+}
+QDialog#questionSolverDialog QRadioButton#questionSolverRadio {
+    color: #EAF0F6;
+    font-weight: 900;
+    spacing: 7px;
+}
+QDialog#questionSolverDialog QRadioButton#questionSolverRadio::indicator {
+    width: 17px;
+    height: 17px;
+    border: 2px solid #687789;
+    border-radius: 9px;
+    background-color: #0E1622;
+}
+QDialog#questionSolverDialog QRadioButton#questionSolverRadio::indicator:hover {
+    border-color: #8A94FA;
+}
+QDialog#questionSolverDialog QRadioButton#questionSolverRadio::indicator:checked {
+    background-color: #6269E8;
+    border-color: #ADB2FF;
+}
+QDialog#questionSolverDialog QLabel#questionSolverAlternativeText {
+    color: #DFE7EF;
+    font-size: 9.8pt;
+}
+QDialog#questionSolverDialog QToolButton#questionSolverEliminateButton {
+    color: #718094;
+    border: none;
+    background: transparent;
+}
+QDialog#questionSolverDialog QToolButton#questionSolverEliminateButton:hover {
+    background-color: #222C39;
+    color: #CAD4DF;
+    border-radius: 6px;
+}
+QDialog#questionSolverDialog QFrame#questionSessionActionPanel {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #171F2B, stop:1 #151D28);
+    border: 1px solid #3A4656;
+    border-radius: 13px;
+}
+QDialog#questionSolverDialog QCheckBox#questionSessionDoubt,
+QDialog#questionSolverDialog QCheckBox#questionSessionAnalysisFlag {
+    color: #B7C1CD;
+    background: transparent;
+    font-size: 8.6pt;
+}
+QDialog#questionSolverDialog QCheckBox#questionSessionDoubt:checked { color: #AEB5FF; }
+QDialog#questionSolverDialog QCheckBox#questionSessionAnalysisFlag:checked { color: #F0C47C; }
+QDialog#questionSolverDialog QPushButton#questionSessionSkipButton {
+    background-color: #202833;
+    color: #CED6E0;
+    border: 1px solid #505B69;
+    border-radius: 10px;
+    font-weight: 800;
+}
+QDialog#questionSolverDialog QPushButton#questionSessionSkipButton:hover {
+    background-color: #293341;
+    color: #FFFFFF;
+    border-color: #707C8B;
+}
+QDialog#questionSolverDialog QPushButton#primaryButton {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #4447E8, stop:0.52 #4347E1, stop:1 #3C42D2);
+    color: #FFFFFF;
+    border: 1px solid #7C83FF;
+    border-radius: 10px;
+    font-size: 9.2pt;
+    font-weight: 900;
+}
+QDialog#questionSolverDialog QPushButton#primaryButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #5355F2, stop:0.52 #4F54EB, stop:1 #464DDE);
+    border-color: #B1B7FF;
+}
+QDialog#questionSolverDialog QPushButton#questionSessionEndButton {
+    background-color: #2A2026;
+    color: #FFBAC4;
+    border: 1px solid #70434F;
+    border-radius: 10px;
+    font-weight: 800;
+}
+QDialog#questionSolverDialog QPushButton#questionSessionEndButton:hover {
+    background-color: #38262E;
+    border-color: #9A5968;
+    color: #FFD5DB;
+}
+QDialog#questionSolverDialog QFrame#questionSolverFeedback {
+    background-color: #171F2B;
+    border: 1px solid #3A4656;
+    border-radius: 11px;
+}
+"""
+
+
+ESTILO_TOPICO_DETALHES_CLARO = r"""
+QDialog#topicDetailsDialog {
+    background-color: #F5F7FA;
+}
+QDialog#topicDetailsDialog QFrame#topicHeroCard,
+QDialog#topicDetailsDialog QFrame#topicEvolutionCard,
+QDialog#topicDetailsDialog QFrame#topicHistoryCard,
+QDialog#topicDetailsDialog QFrame#topicHistoryDetailsCard {
+    background-color: #FFFFFF;
+    border: 1px solid #DCE4ED;
+    border-radius: 13px;
+}
+QDialog#topicDetailsDialog QLabel#topicBreadcrumb {
+    color: #5C7FA2;
+    font-size: 8.5pt;
+    font-weight: 700;
+}
+QDialog#topicDetailsDialog QLabel#topicHeroTitle {
+    color: #17263A;
+    font-size: 18pt;
+    font-weight: 900;
+}
+QDialog#topicDetailsDialog QLabel#topicHeroSubtitle {
+    color: #728094;
+    font-size: 9pt;
+}
+QDialog#topicDetailsDialog QPushButton#topicStudyButton {
+    background: qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #356FD0,stop:1 #4D7FE0);
+    color: #FFFFFF;
+    border: 1px solid #5D8DE2;
+    border-radius: 10px;
+    font-weight: 900;
+    padding: 7px 16px;
+}
+QDialog#topicDetailsDialog QPushButton#topicStudyButton:hover {
+    background: qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #2E63BC,stop:1 #416FD0);
+    border-color: #7EA6EA;
+}
+QDialog#topicDetailsDialog QPushButton#topicQuestionsButton,
+QDialog#topicDetailsDialog QPushButton#topicHistoryButton,
+QDialog#topicDetailsDialog QPushButton#topicNextSecondaryButton,
+QDialog#topicDetailsDialog QPushButton#topicNextGhostButton {
+    background-color: #FFFFFF;
+    color: #37658F;
+    border: 1px solid #C8D8E8;
+    border-radius: 9px;
+    font-weight: 700;
+    padding: 6px 12px;
+}
+QDialog#topicDetailsDialog QPushButton#topicQuestionsButton:hover,
+QDialog#topicDetailsDialog QPushButton#topicHistoryButton:hover,
+QDialog#topicDetailsDialog QPushButton#topicNextSecondaryButton:hover,
+QDialog#topicDetailsDialog QPushButton#topicNextGhostButton:hover {
+    background-color: #F1F7FD;
+    border-color: #90B6DA;
+    color: #245782;
+}
+QDialog#topicDetailsDialog QFrame#topicMetricCard {
+    background-color: #F8FAFD;
+    border: 1px solid #DCE5EF;
+    border-radius: 10px;
+}
+QDialog#topicDetailsDialog QFrame#topicMetricCard[metricRole="domain"] {
+    background-color: #F1F7FF;
+    border-color: #C7DAF2;
+}
+QDialog#topicDetailsDialog QLabel#topicMetricLabel,
+QDialog#topicDetailsDialog QLabel#topicCompactMetricLabel {
+    color: #748398;
+    font-size: 8.2pt;
+    font-weight: 700;
+}
+QDialog#topicDetailsDialog QLabel#topicMetricValue {
+    color: #17263A;
+    font-size: 13pt;
+    font-weight: 900;
+}
+QDialog#topicDetailsDialog QFrame#topicMetricCard[metricRole="domain"] QLabel#topicMetricValue {
+    color: #2D65B5;
+}
+QDialog#topicDetailsDialog QFrame#topicCompactMetric {
+    background-color: #F8FAFC;
+    border: 1px solid #E1E7EF;
+    border-radius: 8px;
+}
+QDialog#topicDetailsDialog QLabel#topicCompactMetricValue {
+    color: #334A62;
+    font-size: 8.7pt;
+    font-weight: 900;
+}
+QDialog#topicDetailsDialog QLabel#topicLegacyNotice {
+    color: #8A641B;
+    background-color: #FFF9EA;
+    border: 1px solid #EAD9AA;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 8.2pt;
+}
+QDialog#topicDetailsDialog QTabWidget#topicDetailsTabs::pane {
+    border: 0;
+    background: transparent;
+}
+QDialog#topicDetailsDialog QTabWidget#topicDetailsTabs QTabBar::tab {
+    background: transparent;
+    color: #708197;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    padding: 8px 15px;
+    font-weight: 700;
+}
+QDialog#topicDetailsDialog QTabWidget#topicDetailsTabs QTabBar::tab:selected {
+    color: #286AA3;
+    border-bottom-color: #3A8FD0;
+}
+QDialog#topicDetailsDialog QFrame#topicDomainCardModern {
+    background-color: #F8FBFF;
+    border: 1px solid #CFE0F2;
+    border-radius: 13px;
+}
+QDialog#topicDetailsDialog QLabel#topicDomainTitleModern,
+QDialog#topicDetailsDialog QLabel#topicSectionTitle {
+    color: #1B2B3E;
+    font-size: 10.5pt;
+    font-weight: 900;
+}
+QDialog#topicDetailsDialog QLabel#topicDomainSubtitleModern,
+QDialog#topicDetailsDialog QLabel#topicEvolutionSummary,
+QDialog#topicDetailsDialog QLabel#topicHistoryHint {
+    color: #728094;
+    font-size: 8.4pt;
+}
+QDialog#topicDetailsDialog QLabel#topicDomainScoreModern {
+    color: #2D65B5;
+    font-size: 18px;
+    font-weight: 900;
+}
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern {
+    background-color: #E8EEF5;
+    color: #52657A;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 8.2pt;
+    font-weight: 900;
+}
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="critico"],
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="fragil"] { background-color:#FDEAEA; color:#B43E45; }
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="desenvolvimento"],
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="consolidando"] { background-color:#FFF3D7; color:#956313; }
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="dominado"],
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="forte"] { background-color:#E6F6ED; color:#24714A; }
+QDialog#topicDetailsDialog QProgressBar#topicDomainBarModern {
+    background-color: #DFE8F2;
+    border: none;
+    border-radius: 4px;
+}
+QDialog#topicDetailsDialog QProgressBar#topicDomainBarModern::chunk {
+    background: qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #4D7FE0,stop:1 #55C8B3);
+    border-radius: 4px;
+}
+QDialog#topicDetailsDialog QFrame#topicDomainComponentModern {
+    background-color: #FFFFFF;
+    border: 1px solid #DFE7F0;
+    border-radius: 8px;
+}
+QDialog#topicDetailsDialog QLabel#topicDomainComponentLabelModern,
+QDialog#topicDetailsDialog QLabel#topicDomainEvidenceLabel {
+    color: #7A899B;
+    font-size: 7.7pt;
+    font-weight: 700;
+}
+QDialog#topicDetailsDialog QLabel#topicDomainComponentValueModern {
+    color: #203349;
+    font-size: 10.5pt;
+    font-weight: 900;
+}
+QDialog#topicDetailsDialog QFrame#topicDomainInsight {
+    background-color: #FFFFFF;
+    border: 1px solid #DDE6EF;
+    border-radius: 8px;
+}
+QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="strength"] { border-color:#BFDCCA; background-color:#F6FBF8; }
+QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="attention"] { border-color:#E7D7AE; background-color:#FFFBF1; }
+QDialog#topicDetailsDialog QLabel#topicDomainInsightTitle {
+    color: #738397;
+    font-size: 7.5pt;
+    font-weight: 900;
+}
+QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="strength"] QLabel#topicDomainInsightText { color:#367258; }
+QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="attention"] QLabel#topicDomainInsightText { color:#8D6B27; }
+QDialog#topicDetailsDialog QLabel#topicDomainInsightText,
+QDialog#topicDetailsDialog QLabel#topicDomainEvidenceModern {
+    font-size: 8.2pt;
+}
+QDialog#topicDetailsDialog QLabel#topicDomainEvidenceModern { color:#54677B; }
+QDialog#topicDetailsDialog QFrame#topicNextStepCard {
+    background-color: #F6F9FD;
+    border: 1px solid #D4E0EC;
+    border-radius: 13px;
+}
+QDialog#topicDetailsDialog QLabel#topicNextEyebrow {
+    color: #71839A;
+    font-size: 8pt;
+    font-weight: 900;
+}
+QDialog#topicDetailsDialog QLabel#topicNextStatus {
+    color: #4F657A;
+    background-color: #E8EEF5;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 7.8pt;
+    font-weight: 900;
+}
+QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="overdue"] { color:#B0444A; background-color:#FDEAEA; }
+QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="today"] { color:#986618; background-color:#FFF0D0; }
+QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="soon"] { color:#2F6FA6; background-color:#EAF4FE; }
+QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="future"] { color:#337A5B; background-color:#E8F6EE; }
+QDialog#topicDetailsDialog QLabel#topicNextDate { color:#1D3550; font-size:17px; font-weight:900; }
+QDialog#topicDetailsDialog QLabel#topicNextDescription,
+QDialog#topicDetailsDialog QLabel#topicNextMeta { color:#6D7C8E; font-size:8.4pt; }
+QDialog#topicDetailsDialog QPushButton#topicNextPrimaryButton {
+    background-color:#356FD0; color:#FFFFFF; border:1px solid #5A8DDD; border-radius:9px; font-weight:900; padding:7px 12px;
+}
+QDialog#topicDetailsDialog QPushButton#topicNextPrimaryButton:hover { background-color:#2D63BC; border-color:#79A5E7; }
+QDialog#topicDetailsDialog QFrame#topicEvolutionEmpty {
+    background-color:#F8FAFC;
+    border:1px dashed #CBD8E5;
+    border-radius:10px;
+}
+QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyIcon { color:#72A4CF; font-size:24px; }
+QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyTitle { color:#2C435A; font-size:10pt; font-weight:900; }
+QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyText { color:#788696; font-size:8.5pt; }
+QDialog#topicDetailsDialog QTableWidget#topicHistoryTable {
+    background-color:#FFFFFF;
+    alternate-background-color:#F8FAFC;
+    border:1px solid #DFE6EE;
+    border-radius:8px;
+}
+"""
+
+ESTILO_TOPICO_DETALHES_ESCURO = r"""
+QDialog#topicDetailsDialog { background-color:#111827; }
+QDialog#topicDetailsDialog QFrame#topicHeroCard,
+QDialog#topicDetailsDialog QFrame#topicEvolutionCard,
+QDialog#topicDetailsDialog QFrame#topicHistoryCard,
+QDialog#topicDetailsDialog QFrame#topicHistoryDetailsCard {
+    background-color:#182235; border:1px solid #334155; border-radius:13px;
+}
+QDialog#topicDetailsDialog QLabel#topicBreadcrumb { color:#88A4C0; font-size:8.5pt; font-weight:700; }
+QDialog#topicDetailsDialog QLabel#topicHeroTitle { color:#F4F8FC; font-size:18pt; font-weight:900; }
+QDialog#topicDetailsDialog QLabel#topicHeroSubtitle { color:#94A3B8; font-size:9pt; }
+QDialog#topicDetailsDialog QPushButton#topicStudyButton { background-color:#416AB7; color:#FFF; border:1px solid #527FD0; border-radius:10px; font-weight:900; padding:7px 16px; }
+QDialog#topicDetailsDialog QPushButton#topicStudyButton:hover { background-color:#355BA3; border-color:#6E98DF; }
+QDialog#topicDetailsDialog QPushButton#topicQuestionsButton,
+QDialog#topicDetailsDialog QPushButton#topicHistoryButton,
+QDialog#topicDetailsDialog QPushButton#topicNextSecondaryButton,
+QDialog#topicDetailsDialog QPushButton#topicNextGhostButton { background-color:#172536; color:#BCD7F0; border:1px solid #3A5877; border-radius:9px; font-weight:700; padding:6px 12px; }
+QDialog#topicDetailsDialog QPushButton#topicQuestionsButton:hover,
+QDialog#topicDetailsDialog QPushButton#topicHistoryButton:hover,
+QDialog#topicDetailsDialog QPushButton#topicNextSecondaryButton:hover,
+QDialog#topicDetailsDialog QPushButton#topicNextGhostButton:hover { background-color:#20374F; border-color:#527BA5; color:#E5F2FF; }
+QDialog#topicDetailsDialog QFrame#topicMetricCard { background-color:#172131; border:1px solid #33465A; border-radius:10px; }
+QDialog#topicDetailsDialog QFrame#topicMetricCard[metricRole="domain"] { background-color:#172536; border-color:#365574; }
+QDialog#topicDetailsDialog QLabel#topicMetricLabel,
+QDialog#topicDetailsDialog QLabel#topicCompactMetricLabel { color:#8CA4BB; font-size:8.2pt; font-weight:700; }
+QDialog#topicDetailsDialog QLabel#topicMetricValue { color:#E8F1FA; font-size:13pt; font-weight:900; }
+QDialog#topicDetailsDialog QFrame#topicMetricCard[metricRole="domain"] QLabel#topicMetricValue { color:#A9D3FF; }
+QDialog#topicDetailsDialog QFrame#topicCompactMetric { background-color:#151F2D; border:1px solid #33465A; border-radius:8px; }
+QDialog#topicDetailsDialog QLabel#topicCompactMetricValue { color:#C5D8EA; font-size:8.7pt; font-weight:900; }
+QDialog#topicDetailsDialog QLabel#topicLegacyNotice { color:#D9BC7B; background-color:#332A1B; border:1px solid #675637; border-radius:8px; padding:6px 10px; font-size:8.2pt; }
+QDialog#topicDetailsDialog QTabWidget#topicDetailsTabs::pane { border:0; background:transparent; }
+QDialog#topicDetailsDialog QTabWidget#topicDetailsTabs QTabBar::tab { background:transparent; color:#8296AB; border:0; border-bottom:2px solid transparent; padding:8px 15px; font-weight:700; }
+QDialog#topicDetailsDialog QTabWidget#topicDetailsTabs QTabBar::tab:selected { color:#BBD9F5; border-bottom-color:#5B94C7; }
+QDialog#topicDetailsDialog QFrame#topicDomainCardModern { background-color:#172033; border:1px solid #365574; border-radius:13px; }
+QDialog#topicDetailsDialog QLabel#topicDomainTitleModern,
+QDialog#topicDetailsDialog QLabel#topicSectionTitle { color:#EEF5FB; font-size:10.5pt; font-weight:900; }
+QDialog#topicDetailsDialog QLabel#topicDomainSubtitleModern,
+QDialog#topicDetailsDialog QLabel#topicEvolutionSummary,
+QDialog#topicDetailsDialog QLabel#topicHistoryHint { color:#8CA4BB; font-size:8.4pt; }
+QDialog#topicDetailsDialog QLabel#topicDomainScoreModern { color:#A9D3FF; font-size:18px; font-weight:900; }
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern { background-color:#334155; color:#CBD5E1; border-radius:8px; padding:4px 8px; font-size:8.2pt; font-weight:900; }
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="critico"],
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="fragil"] { background-color:#451C20; color:#F4A8AF; }
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="desenvolvimento"],
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="consolidando"] { background-color:#42351C; color:#F2CE7B; }
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="dominado"],
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="forte"] { background-color:#17372B; color:#8ED5AD; }
+QDialog#topicDetailsDialog QProgressBar#topicDomainBarModern { background-color:#2C3D50; border:none; border-radius:4px; }
+QDialog#topicDetailsDialog QProgressBar#topicDomainBarModern::chunk { background-color:#5596CF; border-radius:4px; }
+QDialog#topicDetailsDialog QFrame#topicDomainComponentModern { background-color:#182235; border:1px solid #33465A; border-radius:8px; }
+QDialog#topicDetailsDialog QLabel#topicDomainComponentLabelModern,
+QDialog#topicDetailsDialog QLabel#topicDomainEvidenceLabel { color:#849BB1; font-size:7.7pt; font-weight:700; }
+QDialog#topicDetailsDialog QLabel#topicDomainComponentValueModern { color:#E8F1F9; font-size:10.5pt; font-weight:900; }
+QDialog#topicDetailsDialog QFrame#topicDomainInsight { background-color:#172131; border:1px solid #33465A; border-radius:8px; }
+QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="strength"] { border-color:#365F4C; background-color:#172A24; }
+QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="attention"] { border-color:#665638; background-color:#30291D; }
+QDialog#topicDetailsDialog QLabel#topicDomainInsightTitle { color:#849BB1; font-size:7.5pt; font-weight:900; }
+QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="strength"] QLabel#topicDomainInsightText { color:#91D6AC; }
+QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="attention"] QLabel#topicDomainInsightText { color:#D9BC7B; }
+QDialog#topicDetailsDialog QLabel#topicDomainInsightText,
+QDialog#topicDetailsDialog QLabel#topicDomainEvidenceModern { font-size:8.2pt; }
+QDialog#topicDetailsDialog QLabel#topicDomainEvidenceModern { color:#9CB0C3; }
+QDialog#topicDetailsDialog QFrame#topicNextStepCard { background-color:#151F2D; border:1px solid #33465A; border-radius:13px; }
+QDialog#topicDetailsDialog QLabel#topicNextEyebrow { color:#8CA4BB; font-size:8pt; font-weight:900; }
+QDialog#topicDetailsDialog QLabel#topicNextStatus { color:#B7C5D4; background-color:#2B3949; border-radius:8px; padding:4px 8px; font-size:7.8pt; font-weight:900; }
+QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="overdue"] { color:#F4A8AF; background-color:#451C20; }
+QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="today"] { color:#F1CA75; background-color:#42351C; }
+QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="soon"] { color:#A9D3FF; background-color:#20374F; }
+QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="future"] { color:#91D6AC; background-color:#17372B; }
+QDialog#topicDetailsDialog QLabel#topicNextDate { color:#E0EDF8; font-size:17px; font-weight:900; }
+QDialog#topicDetailsDialog QLabel#topicNextDescription,
+QDialog#topicDetailsDialog QLabel#topicNextMeta { color:#8CA4BB; font-size:8.4pt; }
+QDialog#topicDetailsDialog QPushButton#topicNextPrimaryButton { background-color:#416AB7; color:#FFF; border:1px solid #527FD0; border-radius:9px; font-weight:900; padding:7px 12px; }
+QDialog#topicDetailsDialog QPushButton#topicNextPrimaryButton:hover { background-color:#355BA3; border-color:#6E98DF; }
+QDialog#topicDetailsDialog QFrame#topicEvolutionEmpty { background-color:#151F2D; border:1px dashed #3A4B5D; border-radius:10px; }
+QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyIcon { color:#6FA8D4; font-size:24px; }
+QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyTitle { color:#DDEAF5; font-size:10pt; font-weight:900; }
+QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyText { color:#879AAD; font-size:8.5pt; }
+QDialog#topicDetailsDialog QTableWidget#topicHistoryTable { background-color:#151F2D; alternate-background-color:#172536; border:1px solid #33465A; border-radius:8px; }
+"""
+
+ESTILO_TOPICO_DETALHES_FUTURISTA = r"""
+QDialog#topicDetailsDialog { background-color:#07111E; }
+QDialog#topicDetailsDialog QFrame#topicHeroCard,
+QDialog#topicDetailsDialog QFrame#topicEvolutionCard,
+QDialog#topicDetailsDialog QFrame#topicHistoryCard,
+QDialog#topicDetailsDialog QFrame#topicHistoryDetailsCard {
+    background-color:#0D1D2D; border:1px solid #2E5A77; border-radius:13px;
+}
+QDialog#topicDetailsDialog QLabel#topicBreadcrumb { color:#78A9C7; }
+QDialog#topicDetailsDialog QLabel#topicHeroTitle { color:#ECFAFF; }
+QDialog#topicDetailsDialog QLabel#topicHeroSubtitle { color:#82A8BE; }
+QDialog#topicDetailsDialog QPushButton#topicStudyButton,
+QDialog#topicDetailsDialog QPushButton#topicNextPrimaryButton {
+    background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #4447E8,stop:0.5 #4F54EB,stop:1 #5355F2);
+    color:#FFF; border:1px solid #8488FF;
+}
+QDialog#topicDetailsDialog QPushButton#topicStudyButton:hover,
+QDialog#topicDetailsDialog QPushButton#topicNextPrimaryButton:hover { border-color:#B8BBFF; }
+QDialog#topicDetailsDialog QPushButton#topicQuestionsButton,
+QDialog#topicDetailsDialog QPushButton#topicHistoryButton,
+QDialog#topicDetailsDialog QPushButton#topicNextSecondaryButton,
+QDialog#topicDetailsDialog QPushButton#topicNextGhostButton { background-color:#10263A; color:#BCE7FF; border-color:#376D90; }
+QDialog#topicDetailsDialog QPushButton#topicQuestionsButton:hover,
+QDialog#topicDetailsDialog QPushButton#topicHistoryButton:hover,
+QDialog#topicDetailsDialog QPushButton#topicNextSecondaryButton:hover,
+QDialog#topicDetailsDialog QPushButton#topicNextGhostButton:hover { background-color:#17344B; border-color:#57B9DF; color:#EEFBFF; }
+QDialog#topicDetailsDialog QFrame#topicMetricCard { background-color:#102236; border:1px solid #2F5872; }
+QDialog#topicDetailsDialog QFrame#topicMetricCard[metricRole="domain"] { background-color:#102A3F; border-color:#397AA3; }
+QDialog#topicDetailsDialog QLabel#topicMetricLabel,
+QDialog#topicDetailsDialog QLabel#topicCompactMetricLabel { color:#78A2BC; }
+QDialog#topicDetailsDialog QLabel#topicMetricValue { color:#E7F7FF; }
+QDialog#topicDetailsDialog QFrame#topicMetricCard[metricRole="domain"] QLabel#topicMetricValue { color:#A8DFFF; }
+QDialog#topicDetailsDialog QFrame#topicCompactMetric { background-color:#0C1D2D; border-color:#294C63; }
+QDialog#topicDetailsDialog QLabel#topicCompactMetricValue { color:#B9DAEC; }
+QDialog#topicDetailsDialog QLabel#topicLegacyNotice { color:#E1BB67; background-color:rgba(57,43,20,220); border-color:#755F34; }
+QDialog#topicDetailsDialog QTabWidget#topicDetailsTabs QTabBar::tab { color:#7396AC; }
+QDialog#topicDetailsDialog QTabWidget#topicDetailsTabs QTabBar::tab:selected { color:#C8F5FF; border-bottom-color:#55D4E6; }
+QDialog#topicDetailsDialog QFrame#topicDomainCardModern { background-color:#0E2234; border-color:#326783; }
+QDialog#topicDetailsDialog QLabel#topicDomainTitleModern,
+QDialog#topicDetailsDialog QLabel#topicSectionTitle { color:#E6F8FF; }
+QDialog#topicDetailsDialog QLabel#topicDomainSubtitleModern,
+QDialog#topicDetailsDialog QLabel#topicEvolutionSummary,
+QDialog#topicDetailsDialog QLabel#topicHistoryHint { color:#7FA6BD; }
+QDialog#topicDetailsDialog QLabel#topicDomainScoreModern { color:#A9E4FF; }
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern { background-color:#173047; color:#BBDDF0; }
+QDialog#topicDetailsDialog QProgressBar#topicDomainBarModern { background-color:#173046; }
+QDialog#topicDetailsDialog QProgressBar#topicDomainBarModern::chunk { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #4F6EF0,stop:0.55 #62BFE7,stop:1 #62DCC0); }
+QDialog#topicDetailsDialog QFrame#topicDomainComponentModern { background-color:rgba(10,30,46,225); border-color:#2D5269; }
+QDialog#topicDetailsDialog QLabel#topicDomainComponentLabelModern,
+QDialog#topicDetailsDialog QLabel#topicDomainEvidenceLabel { color:#759DB5; }
+QDialog#topicDetailsDialog QLabel#topicDomainComponentValueModern { color:#DDF5FF; }
+QDialog#topicDetailsDialog QFrame#topicDomainInsight { background-color:#0D2031; border-color:#2A4E65; }
+QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="strength"] { background-color:rgba(18,55,42,220); border-color:#36745A; }
+QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="attention"] { background-color:rgba(57,43,20,220); border-color:#755F34; }
+QDialog#topicDetailsDialog QLabel#topicDomainEvidenceModern { color:#8FB4C8; }
+QDialog#topicDetailsDialog QFrame#topicNextStepCard { background:qlineargradient(x1:0,y1:0,x2:1,y2:1,stop:0 #102A3D,stop:1 #0D2032); border-color:#356C8C; }
+QDialog#topicDetailsDialog QLabel#topicNextEyebrow { color:#7FAAC3; }
+QDialog#topicDetailsDialog QLabel#topicNextStatus { background-color:#173047; color:#A9D6EC; }
+QDialog#topicDetailsDialog QLabel#topicNextDate { color:#EAF9FF; }
+QDialog#topicDetailsDialog QLabel#topicNextDescription,
+QDialog#topicDetailsDialog QLabel#topicNextMeta { color:#82A9BE; }
+QDialog#topicDetailsDialog QFrame#topicEvolutionEmpty { background-color:#0B1C2B; border-color:#31556D; }
+QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyIcon { color:#5FC8E7; }
+QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyTitle { color:#DDF7FF; }
+QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyText { color:#789CB0; }
+QDialog#topicDetailsDialog QTableWidget#topicHistoryTable { background-color:#0B1B2A; alternate-background-color:#0E2234; border-color:#2C536B; }
+"""
+
+
+# ============================================================
+# Estado de eliminação do resolvedor — alta especificidade
+#
+# Estes seletores são deliberadamente tão específicos quanto a camada
+# ESTILO_RESOLVEDOR_* acima. As versões anteriores usavam seletores globais
+# menos específicos; por isso o tachado da fonte aparecia, mas o card podia
+# continuar com a mesma cor/borda normal no tema Futurista.
+# ============================================================
+ESTILO_RESOLVEDOR_ELIMINADAS_CLARO = r"""
+QDialog#questionSolverDialog QFrame#questionSolverAlternative[eliminated="true"][answerState="normal"] {
+    background-color: #E7ECF2;
+    border: 2px dashed #8796A8;
+}
+QDialog#questionSolverDialog QFrame#questionSolverAlternative[eliminated="true"][answerState="normal"]:hover {
+    background-color: #E3E9F0;
+    border-color: #728398;
+}
+QDialog#questionSolverDialog QLabel#questionSolverAlternativeText[eliminated="true"],
+QDialog#questionSolverDialog QRadioButton#questionSolverRadio[eliminated="true"] {
+    color: #718096;
+}
+QDialog#questionSolverDialog QToolButton#questionSolverEliminateButton:checked {
+    background-color: #D8E0E9;
+    color: #334155;
+    border: 1px solid #8493A6;
+    border-radius: 6px;
+}
+"""
+
+ESTILO_RESOLVEDOR_ELIMINADAS_ESCURO = r"""
+QDialog#questionSolverDialog QFrame#questionSolverAlternative[eliminated="true"][answerState="normal"] {
+    background-color: #0B121C;
+    border: 2px dashed #526276;
+}
+QDialog#questionSolverDialog QFrame#questionSolverAlternative[eliminated="true"][answerState="normal"]:hover {
+    background-color: #0E1723;
+    border-color: #66788E;
+}
+QDialog#questionSolverDialog QLabel#questionSolverAlternativeText[eliminated="true"],
+QDialog#questionSolverDialog QRadioButton#questionSolverRadio[eliminated="true"] {
+    color: #627488;
+}
+QDialog#questionSolverDialog QToolButton#questionSolverEliminateButton:checked {
+    background-color: #1D2A38;
+    color: #A1B2C3;
+    border: 1px solid #5A6D82;
+    border-radius: 6px;
+}
+"""
+
+ESTILO_RESOLVEDOR_ELIMINADAS_FUTURISTA = r"""
+QDialog#questionSolverDialog QFrame#questionSolverAlternative[eliminated="true"][answerState="normal"] {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #07101A, stop:0.55 #08121D, stop:1 #060D16);
+    border: 2px dashed #3E617A;
+}
+QDialog#questionSolverDialog QFrame#questionSolverAlternative[eliminated="true"][answerState="normal"]:hover {
+    background-color: #0A1622;
+    border-color: #507A97;
+}
+QDialog#questionSolverDialog QLabel#questionSolverAlternativeText[eliminated="true"],
+QDialog#questionSolverDialog QRadioButton#questionSolverRadio[eliminated="true"] {
+    color: #607A8E;
+}
+QDialog#questionSolverDialog QToolButton#questionSolverEliminateButton:checked {
+    background-color: #132C3F;
+    color: #B5D1E2;
+    border: 1px solid #507A97;
+    border-radius: 6px;
+}
+"""
+
 def stylesheet_claro():
     return r"""
     * {
@@ -3534,6 +4583,14 @@ def stylesheet_claro():
     QWidget {
         background-color: #f5f7fa;
         color: #1f2937;
+    }
+
+    /* Textos e controles de seleção não devem pintar o fundo genérico de
+       QWidget. Isso evita retângulos internos atrás de frases dentro de cards. */
+    QLabel,
+    QCheckBox,
+    QRadioButton {
+        background-color: transparent;
     }
 
     QScrollArea,
@@ -4936,8 +5993,20 @@ QPushButton#sectionEditButton:hover {
         font-size: 10pt;
     }
 
-    QLabel#questionSolverAlternativeText[eliminated="true"] {
-        color: #94a3b8;
+    QFrame#questionSolverAlternative[eliminated="true"][answerState="normal"] {
+        background-color: #eef2f6;
+        border: 1px dashed #94a3b8;
+    }
+
+    QLabel#questionSolverAlternativeText[eliminated="true"],
+    QRadioButton#questionSolverRadio[eliminated="true"] {
+        color: #64748b;
+    }
+
+    QToolButton#questionSolverEliminateButton:checked {
+        background-color: #e2e8f0;
+        color: #475569;
+        border: 1px solid #94a3b8;
     }
 
     QToolButton#questionSolverEliminateButton {
@@ -5556,6 +6625,12 @@ QPushButton#sectionEditButton:hover {
         color: #334155;
         font-size: 10pt;
         font-weight: 800;
+    }
+
+    QLabel#questionAlternativeText {
+        background: transparent;
+        color: #1f2937;
+        font-size: 10pt;
     }
 
     QLabel#questionViewerMeta,
@@ -10154,6 +11229,19 @@ QPushButton#sectionEditButton:hover {
     QPushButton#postFocusGhost { background: transparent; color: #53708c; border: 1px solid #d1dbe6; border-radius: 8px; font-weight: 700; padding: 6px 12px; }
     QPushButton#postFocusGhost:hover { background-color: #f4f7fb; color: #2c5279; }
     QPushButton#postFocusSecondary:disabled { color: #9aa9b8; background-color: #f4f6f8; border-color: #dce3ea; }
+    QFrame#focusHeroPanel { background-color: #eef6ff; border: 1px solid #cfe0f2; border-radius: 14px; }
+    QLabel#focusHeroEyebrow { color: #5e7b98; font-size: 8.3pt; font-weight: 800; letter-spacing: 0.4px; }
+    QLabel#focusHeroValue { color: #285f9e; font-size: 24px; font-weight: 900; }
+    QLabel#focusHeroStatus { color: #203247; font-size: 10pt; font-weight: 800; }
+    QLabel#focusHeroNote, QLabel#focusConfigHint, QLabel#focusHistoryHint, QLabel#focusFieldLabel { color: #64748b; }
+    QFrame#focusHeroMiniCard { background-color: #ffffff; border: 1px solid #d8e2ee; border-radius: 11px; }
+    QLabel#focusHeroMiniLabel { color: #6b7d90; font-size: 8.2pt; font-weight: 700; }
+    QLabel#focusHeroMiniValue { color: #244f83; font-size: 12pt; font-weight: 900; }
+    QLabel#postFocusDialogTitle { color: #203247; font-size: 16px; font-weight: 900; }
+    QLabel#postFocusDialogSubtitle { color: #64748b; }
+    QFrame#postFocusMiniCard { background-color: #ffffff; border: 1px solid #d9e2ec; border-radius: 10px; }
+    QLabel#postFocusMiniLabel { color: #6b7d90; font-size: 8.2pt; font-weight: 800; }
+    QLabel#postFocusMiniValue { color: #235fae; font-size: 11.5pt; font-weight: 900; }
     QProgressBar#focusProgressBar { min-height: 8px; max-height: 8px; background-color: #e4edf7; border: none; border-radius: 4px; }
     QProgressBar#focusProgressBar::chunk { background-color: #3b82d0; border-radius: 4px; }
 
@@ -10498,7 +11586,7 @@ QPushButton#sectionEditButton:hover {
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_CLARO + ESTILO_DASHBOARD_MODERNO_CLARO + ESTILO_FOCO_DASHBOARD_CLARO + ESTILO_ALGORITMO_DASHBOARD_CLARO + ESTILO_BUSCA_GLOBAL_CLARO + ESTILO_PALETA_HARMONICA_DASHBOARD_CLARO + ESTILO_DESIGN_SYSTEM_DASHBOARD_CLARO + ESTILO_INTELIGENCIA_RESUMO_CLARO + ESTILO_TOPICOS_DISCIPLINA_CLARO
+""" + ESTILO_JORNADA_CLARO + ESTILO_DASHBOARD_MODERNO_CLARO + ESTILO_FOCO_DASHBOARD_CLARO + ESTILO_ALGORITMO_DASHBOARD_CLARO + ESTILO_BUSCA_GLOBAL_CLARO + ESTILO_PALETA_HARMONICA_DASHBOARD_CLARO + ESTILO_DESIGN_SYSTEM_DASHBOARD_CLARO + ESTILO_INTELIGENCIA_RESUMO_CLARO + ESTILO_TOPICOS_DISCIPLINA_CLARO + ESTILO_RESOLVEDOR_CLARO + ESTILO_TOPICO_DETALHES_CLARO + ESTILO_RESOLVEDOR_ELIMINADAS_CLARO
 
 
 def stylesheet_escuro():
@@ -10513,6 +11601,14 @@ def stylesheet_escuro():
     QWidget {
         background-color: #111827;
         color: #e5e7eb;
+    }
+
+    /* Textos e controles de seleção permanecem transparentes sobre o card.
+       Evita o efeito de "quadrante" escuro atrás de cada linha de texto. */
+    QLabel,
+    QCheckBox,
+    QRadioButton {
+        background-color: transparent;
     }
 
     QScrollArea,
@@ -11920,8 +13016,20 @@ def stylesheet_escuro():
         font-size: 10pt;
     }
 
-    QLabel#questionSolverAlternativeText[eliminated="true"] {
-        color: #64748b;
+    QFrame#questionSolverAlternative[eliminated="true"][answerState="normal"] {
+        background-color: #0b1220;
+        border: 1px dashed #475569;
+    }
+
+    QLabel#questionSolverAlternativeText[eliminated="true"],
+    QRadioButton#questionSolverRadio[eliminated="true"] {
+        color: #52657a;
+    }
+
+    QToolButton#questionSolverEliminateButton:checked {
+        background-color: #1f2937;
+        color: #94a3b8;
+        border: 1px solid #475569;
     }
 
     QToolButton#questionSolverEliminateButton {
@@ -12540,6 +13648,12 @@ def stylesheet_escuro():
         color: #cbd5e1;
         font-size: 10pt;
         font-weight: 800;
+    }
+
+    QLabel#questionAlternativeText {
+        background: transparent;
+        color: #e5e7eb;
+        font-size: 10pt;
     }
 
     QLabel#questionViewerMeta,
@@ -16696,6 +17810,19 @@ def stylesheet_escuro():
     QPushButton#postFocusGhost { background: transparent; color: #8ca4bb; border: 1px solid #33465a; border-radius: 8px; font-weight: 700; padding: 6px 12px; }
     QPushButton#postFocusGhost:hover { background-color: #1b2a3b; color: #d2e6f8; }
     QPushButton#postFocusSecondary:disabled { color: #627488; background-color: #17202b; border-color: #2b3949; }
+    QFrame#focusHeroPanel { background-color: #15283c; border: 1px solid #3b6289; border-radius: 14px; }
+    QLabel#focusHeroEyebrow { color: #8ca4bb; font-size: 8.3pt; font-weight: 800; letter-spacing: 0.4px; }
+    QLabel#focusHeroValue { color: #a9d3ff; font-size: 24px; font-weight: 900; }
+    QLabel#focusHeroStatus { color: #e0edf8; font-size: 10pt; font-weight: 800; }
+    QLabel#focusHeroNote, QLabel#focusConfigHint, QLabel#focusHistoryHint, QLabel#focusFieldLabel { color: #8ca4bb; }
+    QFrame#focusHeroMiniCard { background-color: #172536; border: 1px solid #3a5877; border-radius: 11px; }
+    QLabel#focusHeroMiniLabel { color: #90a8bf; font-size: 8.2pt; font-weight: 700; }
+    QLabel#focusHeroMiniValue { color: #d6eaff; font-size: 12pt; font-weight: 900; }
+    QLabel#postFocusDialogTitle { color: #e0edf8; font-size: 16px; font-weight: 900; }
+    QLabel#postFocusDialogSubtitle { color: #8ca4bb; }
+    QFrame#postFocusMiniCard { background-color: #172536; border: 1px solid #365574; border-radius: 10px; }
+    QLabel#postFocusMiniLabel { color: #8ca4bb; font-size: 8.2pt; font-weight: 800; }
+    QLabel#postFocusMiniValue { color: #d6eaff; font-size: 11.5pt; font-weight: 900; }
     QProgressBar#focusProgressBar { min-height: 8px; max-height: 8px; background-color: #27384a; border: none; border-radius: 4px; }
     QProgressBar#focusProgressBar::chunk { background-color: #4f83c5; border-radius: 4px; }
 
@@ -16914,7 +18041,7 @@ def stylesheet_escuro():
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_ESCURO + ESTILO_DASHBOARD_MODERNO_ESCURO + ESTILO_FOCO_DASHBOARD_ESCURO + ESTILO_ALGORITMO_DASHBOARD_ESCURO + ESTILO_BUSCA_GLOBAL_ESCURO + ESTILO_INTELIGENCIA_RESUMO_ESCURO + ESTILO_TOPICOS_DISCIPLINA_ESCURO
+""" + ESTILO_JORNADA_ESCURO + ESTILO_DASHBOARD_MODERNO_ESCURO + ESTILO_FOCO_DASHBOARD_ESCURO + ESTILO_ALGORITMO_DASHBOARD_ESCURO + ESTILO_BUSCA_GLOBAL_ESCURO + ESTILO_INTELIGENCIA_RESUMO_ESCURO + ESTILO_TOPICOS_DISCIPLINA_ESCURO + ESTILO_RESOLVEDOR_ESCURO + ESTILO_TOPICO_DETALHES_ESCURO + ESTILO_RESOLVEDOR_ELIMINADAS_ESCURO
 
 
 
@@ -16940,6 +18067,16 @@ def stylesheet_futurista():
         color: #eaf7ff;
     }
 
+    /* Correção visual global do Futurista: QLabel/QCheckBox/QRadioButton
+       herdam QWidget, mas não devem repintar o fundo-base dentro dos cards.
+       Os componentes que realmente precisam de fundo (badges/avisos) mantêm
+       seus estilos específicos por objectName. */
+    QLabel,
+    QCheckBox,
+    QRadioButton {
+        background-color: transparent;
+    }
+
     QScrollArea,
     QScrollArea > QWidget > QWidget {
         background-color: transparent;
@@ -16953,6 +18090,11 @@ def stylesheet_futurista():
     QLabel#pageSubtitle,
     QLabel#mutedLabel {
         color: #87a6c2;
+    }
+
+    QLabel#questionAlternativeText {
+        background: transparent;
+        color: #EAF7FF;
     }
 
     /* Resolver questões — futurista
@@ -16994,8 +18136,24 @@ def stylesheet_futurista():
     QLabel#questionSolverAlternativeText {
         color: #e6f2fb;
     }
-    QLabel#questionSolverAlternativeText[eliminated="true"] {
-        color: #7f9ab0;
+    QFrame#questionSolverAlternative[eliminated="true"][answerState="normal"] {
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+            stop:0 #07111b,
+            stop:1 #050c14);
+        border: 1px dashed #31506a;
+    }
+    QFrame#questionSolverAlternative[eliminated="true"][answerState="normal"]:hover {
+        border-color: #3d6787;
+    }
+    QLabel#questionSolverAlternativeText[eliminated="true"],
+    QRadioButton#questionSolverRadio[eliminated="true"] {
+        color: #526f84;
+    }
+    QToolButton#questionSolverEliminateButton:checked {
+        background-color: #10283a;
+        color: #8eacc2;
+        border: 1px solid #3d6787;
+        border-radius: 6px;
     }
     QRadioButton#questionSolverRadio {
         color: #d9ecff;
@@ -20101,6 +21259,19 @@ def stylesheet_futurista():
     QPushButton#postFocusGhost { background: transparent; color: #82abc5; border: 1px solid #315d79; border-radius: 8px; font-weight: 700; padding: 6px 12px; }
     QPushButton#postFocusGhost:hover { background-color: #132b40; color: #d9f4ff; }
     QPushButton#postFocusSecondary:disabled { color: #55768b; background-color: #102231; border-color: #29495e; }
+    QFrame#focusHeroPanel { background-color: #10283c; border: 1px solid #3f7599; border-radius: 14px; }
+    QLabel#focusHeroEyebrow { color: #82abc5; font-size: 8.3pt; font-weight: 800; letter-spacing: 0.45px; }
+    QLabel#focusHeroValue { color: #bce7ff; font-size: 24px; font-weight: 900; }
+    QLabel#focusHeroStatus { color: #eaf8ff; font-size: 10pt; font-weight: 800; }
+    QLabel#focusHeroNote, QLabel#focusConfigHint, QLabel#focusHistoryHint, QLabel#focusFieldLabel { color: #82abc5; }
+    QFrame#focusHeroMiniCard { background-color: #132b40; border: 1px solid #3e7397; border-radius: 11px; }
+    QLabel#focusHeroMiniLabel { color: #82abc5; font-size: 8.2pt; font-weight: 700; }
+    QLabel#focusHeroMiniValue { color: #d9f4ff; font-size: 12pt; font-weight: 900; }
+    QLabel#postFocusDialogTitle { color: #eaf8ff; font-size: 16px; font-weight: 900; }
+    QLabel#postFocusDialogSubtitle { color: #82abc5; }
+    QFrame#postFocusMiniCard { background-color: #132b40; border: 1px solid #3e7397; border-radius: 10px; }
+    QLabel#postFocusMiniLabel { color: #82abc5; font-size: 8.2pt; font-weight: 800; }
+    QLabel#postFocusMiniValue { color: #d9f4ff; font-size: 11.5pt; font-weight: 900; }
     QProgressBar#focusProgressBar { min-height: 8px; max-height: 8px; background-color: #173046; border: 1px solid #2e5c78; border-radius: 4px; }
     QProgressBar#focusProgressBar::chunk { background-color: #55a7d5; border-radius: 4px; }
 
@@ -20315,7 +21486,7 @@ def stylesheet_futurista():
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_FUTURISTA + ESTILO_DASHBOARD_MODERNO_FUTURISTA + ESTILO_FOCO_DASHBOARD_FUTURISTA + ESTILO_ALGORITMO_DASHBOARD_FUTURISTA + ESTILO_BUSCA_GLOBAL_FUTURISTA + ESTILO_INTELIGENCIA_RESUMO_FUTURISTA + ESTILO_TOPICOS_DISCIPLINA_FUTURISTA + ESTILO_DASHBOARD_NEO_FUTURISTA
+""" + ESTILO_JORNADA_FUTURISTA + ESTILO_DASHBOARD_MODERNO_FUTURISTA + ESTILO_FOCO_DASHBOARD_FUTURISTA + ESTILO_ALGORITMO_DASHBOARD_FUTURISTA + ESTILO_BUSCA_GLOBAL_FUTURISTA + ESTILO_INTELIGENCIA_RESUMO_FUTURISTA + ESTILO_TOPICOS_DISCIPLINA_FUTURISTA + ESTILO_DASHBOARD_NEO_FUTURISTA + ESTILO_RESOLVEDOR_FUTURISTA + ESTILO_TOPICO_DETALHES_FUTURISTA + ESTILO_RESOLVEDOR_ELIMINADAS_FUTURISTA
 
 def aplicar_tema(
     app,

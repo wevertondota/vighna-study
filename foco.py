@@ -103,39 +103,81 @@ class JanelaPosFoco(QDialog):
         self.dados = dict(dados or {})
         self.acao_escolhida = "continuar"
         self.setWindowTitle("Sessão finalizada — VighnaStudy")
-        self.setMinimumWidth(560)
-        self.resize(620, 430)
+        self.setMinimumWidth(620)
+        self.resize(760, 540)
 
         raiz = QVBoxLayout(self)
-        raiz.setContentsMargins(22, 20, 22, 20)
+        raiz.setContentsMargins(24, 22, 24, 22)
         raiz.setSpacing(14)
+
+        titulo = QLabel("Sessão concluída")
+        titulo.setObjectName("postFocusDialogTitle")
+        raiz.addWidget(titulo)
+
+        subtitulo = QLabel("Seu tempo foi registrado com sucesso. Escolha o próximo passo para seguir no fluxo de estudo.")
+        subtitulo.setObjectName("postFocusDialogSubtitle")
+        subtitulo.setWordWrap(True)
+        raiz.addWidget(subtitulo)
 
         topo = QFrame()
         topo.setObjectName("postFocusHero")
-        topo_layout = QVBoxLayout(topo)
+        topo_layout = QHBoxLayout(topo)
         topo_layout.setContentsMargins(18, 16, 18, 16)
-        topo_layout.setSpacing(5)
+        topo_layout.setSpacing(14)
 
+        bloco_esquerdo = QVBoxLayout()
+        bloco_esquerdo.setSpacing(4)
         eyebrow = QLabel("SESSÃO REGISTRADA")
         eyebrow.setObjectName("postFocusEyebrow")
-        topo_layout.addWidget(eyebrow)
+        bloco_esquerdo.addWidget(eyebrow)
 
         tempo = QLabel(_tempo_pos_foco(self.dados.get("duracao_efetiva", 0)))
         tempo.setObjectName("postFocusTime")
-        topo_layout.addWidget(tempo)
+        bloco_esquerdo.addWidget(tempo)
 
         estado = "Concluída" if self.dados.get("concluida") else "Interrompida"
         atividade = str(self.dados.get("tipo_atividade") or "Estudo livre")
         linha = QLabel(f"{atividade} • {estado}")
         linha.setObjectName("postFocusStatus")
-        topo_layout.addWidget(linha)
+        bloco_esquerdo.addWidget(linha)
+        topo_layout.addLayout(bloco_esquerdo, 1)
+
+        bloco_direito = QGridLayout()
+        bloco_direito.setHorizontalSpacing(10)
+        bloco_direito.setVerticalSpacing(10)
+        planejado = int(self.dados.get("duracao_planejada") or 0)
+        efetivo = int(self.dados.get("duracao_efetiva") or 0)
+        diferenca = efetivo - planejado
+        cards = [
+            ("Planejado", _tempo_curto(planejado) if planejado > 0 else "Livre"),
+            ("Efetivo", _tempo_pos_foco(efetivo)),
+            ("Diferença", (
+                "Dentro do previsto" if planejado > 0 and abs(diferenca) < 60 else
+                f"+{_tempo_curto(diferenca)}" if planejado > 0 and diferenca > 0 else
+                f"-{_tempo_curto(abs(diferenca))}" if planejado > 0 else "Atualizado"
+            )),
+        ]
+        for idx, (rotulo_card, valor_card) in enumerate(cards):
+            card = QFrame()
+            card.setObjectName("postFocusMiniCard")
+            card_box = QVBoxLayout(card)
+            card_box.setContentsMargins(12, 10, 12, 10)
+            card_box.setSpacing(1)
+            rot = QLabel(rotulo_card)
+            rot.setObjectName("postFocusMiniLabel")
+            val = QLabel(str(valor_card))
+            val.setObjectName("postFocusMiniValue")
+            card_box.addWidget(rot)
+            card_box.addWidget(val)
+            bloco_direito.addWidget(card, 0, idx)
+        topo_layout.addLayout(bloco_direito)
         raiz.addWidget(topo)
 
         conteudo_card = QFrame()
         conteudo_card.setObjectName("postFocusContentCard")
         conteudo_layout = QVBoxLayout(conteudo_card)
         conteudo_layout.setContentsMargins(16, 14, 16, 14)
-        conteudo_layout.setSpacing(5)
+        conteudo_layout.setSpacing(6)
 
         disciplina = str(self.dados.get("disciplina") or "Livre / sem vínculo")
         topico = str(self.dados.get("topico") or "").strip()
@@ -144,21 +186,18 @@ class JanelaPosFoco(QDialog):
         rotulo = QLabel("CONTEÚDO TRABALHADO")
         rotulo.setObjectName("postFocusEyebrow")
         conteudo_layout.addWidget(rotulo)
-        titulo = QLabel(conteudo)
-        titulo.setObjectName("postFocusContentTitle")
-        titulo.setWordWrap(True)
-        conteudo_layout.addWidget(titulo)
+        titulo_conteudo = QLabel(conteudo)
+        titulo_conteudo.setObjectName("postFocusContentTitle")
+        titulo_conteudo.setWordWrap(True)
+        conteudo_layout.addWidget(titulo_conteudo)
 
-        planejado = int(self.dados.get("duracao_planejada") or 0)
-        efetivo = int(self.dados.get("duracao_efetiva") or 0)
-        diferenca = efetivo - planejado
         if planejado > 0:
             if abs(diferenca) < 60:
-                detalhe_tempo = f"Planejado: {_tempo_curto(planejado)} • tempo efetivo dentro do planejado"
+                detalhe_tempo = f"Meta planejada: {_tempo_curto(planejado)} • tempo efetivo dentro do previsto."
             elif diferenca > 0:
-                detalhe_tempo = f"Planejado: {_tempo_curto(planejado)} • +{_tempo_curto(diferenca)} além do previsto"
+                detalhe_tempo = f"Meta planejada: {_tempo_curto(planejado)} • {_tempo_curto(diferenca)} além do previsto."
             else:
-                detalhe_tempo = f"Planejado: {_tempo_curto(planejado)} • {_tempo_curto(abs(diferenca))} abaixo do previsto"
+                detalhe_tempo = f"Meta planejada: {_tempo_curto(planejado)} • {_tempo_curto(abs(diferenca))} abaixo do previsto."
         else:
             detalhe_tempo = "O Ritmo de estudo foi atualizado com o tempo efetivamente medido."
         detalhe = QLabel(detalhe_tempo)
@@ -182,13 +221,8 @@ class JanelaPosFoco(QDialog):
             respondidas = int(resultado_questoes.get("respondidas") or 0)
             acertos = int(resultado_questoes.get("acertos") or 0)
             desempenho = resultado_questoes.get("desempenho")
-            desempenho_txt = (
-                f"{float(desempenho):.0f}%"
-                if desempenho is not None else "—"
-            )
-            resultado_titulo = QLabel(
-                f"{acertos}/{respondidas} acertos • {desempenho_txt}"
-            )
+            desempenho_txt = f"{float(desempenho):.0f}%" if desempenho is not None else "—"
+            resultado_titulo = QLabel(f"{acertos}/{respondidas} acertos • {desempenho_txt}")
             resultado_titulo.setObjectName("postFocusResultValue")
             resultado_layout.addWidget(resultado_titulo)
 
@@ -220,83 +254,75 @@ class JanelaPosFoco(QDialog):
         pergunta.setObjectName("postFocusQuestion")
         raiz.addWidget(pergunta)
 
-        acoes_principais = QHBoxLayout()
-        acoes_principais.setSpacing(10)
+        em_jornada = str(self.dados.get("origem") or "") == "Jornada do Dia"
+        acao_principal = QPushButton("▶ Iniciar próxima" if em_jornada else "Continuar estudando")
+        acao_principal.setObjectName("postFocusContinue")
+        acao_principal.setMinimumHeight(44)
+        acao_principal.clicked.connect(
+            lambda: self._escolher("jornada_proxima" if em_jornada else "recomendar")
+        )
+        raiz.addWidget(acao_principal)
 
-        ja_respondeu = bool(
-            (self.dados.get("resultado_questoes") or {}).get("respondidas")
-        )
-        self.btn_questoes = QPushButton(
-            "Resolver mais questões" if ja_respondeu else "Resolver questões"
-        )
+        acoes_secundarias = QGridLayout()
+        acoes_secundarias.setHorizontalSpacing(10)
+        acoes_secundarias.setVerticalSpacing(10)
+
+        ja_respondeu = bool((self.dados.get("resultado_questoes") or {}).get("respondidas"))
+        self.btn_questoes = QPushButton("Resolver mais questões" if ja_respondeu else "Resolver questões")
         self.btn_questoes.setObjectName("postFocusPrimary")
-        self.btn_questoes.setMinimumHeight(42)
+        self.btn_questoes.setMinimumHeight(40)
         self.btn_questoes.clicked.connect(lambda: self._escolher("questoes"))
-        acoes_principais.addWidget(self.btn_questoes, 1)
+        if not self.dados.get("disciplina_id") and not self.dados.get("disciplina"):
+            self.btn_questoes.setText("Abrir Banco de Questões")
+        acoes_secundarias.addWidget(self.btn_questoes, 0, 0)
 
         self.btn_revisao = QPushButton("Registrar revisão")
         self.btn_revisao.setObjectName("postFocusSecondary")
-        self.btn_revisao.setMinimumHeight(42)
+        self.btn_revisao.setMinimumHeight(40)
         self.btn_revisao.clicked.connect(lambda: self._escolher("revisao"))
-        acoes_principais.addWidget(self.btn_revisao, 1)
-
-        raiz.addLayout(acoes_principais)
+        acoes_secundarias.addWidget(self.btn_revisao, 0, 1)
 
         if not self.dados.get("topico_id"):
             self.btn_revisao.setEnabled(False)
-            self.btn_revisao.setToolTip(
-                "Vincule a sessão a um tópico para registrar uma revisão diretamente daqui."
-            )
+            self.btn_revisao.setToolTip("Vincule a sessão a um tópico para registrar uma revisão diretamente daqui.")
 
-        # Questões podem ser abertas filtradas por disciplina e, quando houver,
-        # por tópico. Sem vínculo, o Banco de Questões ainda pode ser aberto,
-        # mas não há filtro contextual para aplicar.
-        if not self.dados.get("disciplina_id") and not self.dados.get("disciplina"):
-            self.btn_questoes.setText("Abrir Banco de Questões")
-
-        rodape = QHBoxLayout()
-        rodape.setSpacing(10)
-
-        em_jornada = str(self.dados.get("origem") or "") == "Jornada do Dia"
         if em_jornada:
-            proxima = QPushButton("▶ Iniciar próxima")
-            proxima.setObjectName("postFocusContinue")
-            proxima.clicked.connect(lambda: self._escolher("jornada_proxima"))
-            rodape.addWidget(proxima)
+            outro = QPushButton("Recalcular restante")
+            outro.setObjectName("postFocusGhost")
+            outro.setMinimumHeight(38)
+            outro.clicked.connect(lambda: self._escolher("jornada_recalcular"))
+            acoes_secundarias.addWidget(outro, 1, 0)
 
-            recalcular = QPushButton("Recalcular restante")
-            recalcular.setObjectName("postFocusGhost")
-            recalcular.clicked.connect(lambda: self._escolher("jornada_recalcular"))
-            rodape.addWidget(recalcular)
-
-            pausar_jornada = QPushButton("Pausar jornada")
-            pausar_jornada.setObjectName("postFocusGhost")
-            pausar_jornada.clicked.connect(lambda: self._escolher("jornada_pausar"))
-            rodape.addWidget(pausar_jornada)
+            apoio = QPushButton("Pausar jornada")
+            apoio.setObjectName("postFocusGhost")
+            apoio.setMinimumHeight(38)
+            apoio.clicked.connect(lambda: self._escolher("jornada_pausar"))
+            acoes_secundarias.addWidget(apoio, 1, 1)
         else:
-            recomendar = QPushButton("Continuar estudando")
-            recomendar.setObjectName("postFocusContinue")
-            recomendar.clicked.connect(lambda: self._escolher("recomendar"))
-            rodape.addWidget(recomendar)
+            outro = QPushButton("Preparar outra sessão")
+            outro.setObjectName("postFocusGhost")
+            outro.setMinimumHeight(38)
+            outro.clicked.connect(lambda: self._escolher("continuar"))
+            acoes_secundarias.addWidget(outro, 1, 0)
 
-            outra = QPushButton("Preparar outra sessão")
-            outra.setObjectName("postFocusGhost")
-            outra.clicked.connect(lambda: self._escolher("continuar"))
-            rodape.addWidget(outra)
+            apoio = QPushButton("Encerrar por hoje")
+            apoio.setObjectName("postFocusGhost")
+            apoio.setMinimumHeight(38)
+            apoio.clicked.connect(lambda: self._escolher("encerrar"))
+            acoes_secundarias.addWidget(apoio, 1, 1)
 
-        rodape.addStretch(1)
+        raiz.addLayout(acoes_secundarias)
 
-        encerrar = QPushButton("Encerrar por hoje")
-        encerrar.setObjectName("postFocusGhost")
-        encerrar.clicked.connect(
-            lambda: self._escolher("jornada_encerrar" if em_jornada else "encerrar")
-        )
-        rodape.addWidget(encerrar)
-        raiz.addLayout(rodape)
+        if em_jornada:
+            rodape = QHBoxLayout()
+            rodape.addStretch(1)
+            encerrar = QPushButton("Encerrar por hoje")
+            encerrar.setObjectName("postFocusGhost")
+            encerrar.clicked.connect(lambda: self._escolher("jornada_encerrar"))
+            rodape.addWidget(encerrar)
+            raiz.addLayout(rodape)
 
-        nota = QLabel(
-            "O tempo já foi registrado no Ritmo de estudo. Revisões e questões só serão alteradas se você escolher uma ação acima."
-        )
+        nota = QLabel("O tempo já foi registrado no Ritmo de estudo. Revisões e questões só serão alteradas se você escolher uma ação acima.")
         nota.setObjectName("postFocusNote")
         nota.setWordWrap(True)
         raiz.addWidget(nota)
@@ -407,10 +433,7 @@ class JanelaModoFoco(QDialog):
 
         self.scroll_content = QWidget()
         self.scroll_content.setObjectName("focusScrollContent")
-        self.scroll_content.setSizePolicy(
-            QSizePolicy.Expanding,
-            QSizePolicy.Preferred,
-        )
+        self.scroll_content.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         self.scroll_area.setWidget(self.scroll_content)
         raiz.addWidget(self.scroll_area)
 
@@ -419,17 +442,15 @@ class JanelaModoFoco(QDialog):
         layout.setSpacing(12)
 
         cabecalho = QHBoxLayout()
+        cabecalho.setSpacing(14)
         textos = QVBoxLayout()
+        textos.setSpacing(4)
         titulo = QLabel("Modo Foco")
         titulo.setObjectName("focusTitle")
-        subtitulo = QLabel(
-            "Cronometre o tempo realmente dedicado ao estudo. Pausas não entram na duração efetiva."
-        )
+        subtitulo = QLabel("Cronometre o tempo realmente dedicado ao estudo. Pausas não entram na duração efetiva.")
         subtitulo.setObjectName("focusSubtitle")
         subtitulo.setWordWrap(True)
-        dica = QLabel(
-            "Você pode deixar esta janela aberta: o cronômetro continua enquanto usa o restante do Vighna."
-        )
+        dica = QLabel("Você pode deixar esta janela aberta enquanto usa o restante do Vighna. O cronômetro continua ativo em segundo plano.")
         dica.setObjectName("focusWindowHint")
         dica.setWordWrap(True)
         textos.addWidget(titulo)
@@ -437,26 +458,58 @@ class JanelaModoFoco(QDialog):
         textos.addWidget(dica)
         cabecalho.addLayout(textos, 1)
 
-        pausa = QPushButton("Pausa & Desafios")
+        pausa = QPushButton("Pausas & Desafios")
         pausa.setObjectName("focusPauseButton")
+        pausa.setMinimumHeight(40)
         pausa.clicked.connect(self.abrir_pausa)
         cabecalho.addWidget(pausa, 0, Qt.AlignTop)
         layout.addLayout(cabecalho)
 
-        # Resumo real de tempo.
-        stats = QFrame()
-        stats.setObjectName("focusStatsPanel")
-        stats.setMinimumHeight(74)
-        stats_layout = QGridLayout(stats)
-        stats_layout.setContentsMargins(14, 10, 14, 10)
-        stats_layout.setHorizontalSpacing(24)
-        self.stat_hoje = self._criar_stat(stats_layout, 0, "Hoje")
-        self.stat_semana = self._criar_stat(stats_layout, 1, "Esta semana")
-        self.stat_sessoes = self._criar_stat(stats_layout, 2, "Sessões na semana")
-        self.stat_media = self._criar_stat(stats_layout, 3, "Média por sessão")
-        layout.addWidget(stats)
+        self.hero_panel = QFrame()
+        self.hero_panel.setObjectName("focusHeroPanel")
+        hero_layout = QHBoxLayout(self.hero_panel)
+        hero_layout.setContentsMargins(18, 16, 18, 16)
+        hero_layout.setSpacing(14)
 
-        # Configuração.
+        hero_esquerda = QVBoxLayout()
+        hero_esquerda.setSpacing(4)
+        hero_tag = QLabel("FOCO HOJE")
+        hero_tag.setObjectName("focusHeroEyebrow")
+        hero_esquerda.addWidget(hero_tag)
+
+        self.hero_hoje = QLabel("0 min")
+        self.hero_hoje.setObjectName("focusHeroValue")
+        hero_esquerda.addWidget(self.hero_hoje)
+
+        self.hero_estado = QLabel("Pronto para iniciar")
+        self.hero_estado.setObjectName("focusHeroStatus")
+        hero_esquerda.addWidget(self.hero_estado)
+
+        self.hero_nota = QLabel("Escolha uma duração e, se quiser, vincule a sessão a um conteúdo antes de começar.")
+        self.hero_nota.setObjectName("focusHeroNote")
+        self.hero_nota.setWordWrap(True)
+        hero_esquerda.addWidget(self.hero_nota)
+        hero_esquerda.addStretch(1)
+        hero_layout.addLayout(hero_esquerda, 2)
+
+        hero_direita = QGridLayout()
+        hero_direita.setHorizontalSpacing(10)
+        hero_direita.setVerticalSpacing(10)
+        card_semana, self.stat_semana = self._criar_mini_stat_card("Esta semana")
+        card_sessoes, self.stat_sessoes = self._criar_mini_stat_card("Sessões")
+        card_media, self.stat_media = self._criar_mini_stat_card("Média / sessão")
+        hero_direita.addWidget(card_semana, 0, 0)
+        hero_direita.addWidget(card_sessoes, 0, 1)
+        hero_direita.addWidget(card_media, 0, 2)
+        hero_layout.addLayout(hero_direita, 3)
+        layout.addWidget(self.hero_panel)
+
+        corpo = QHBoxLayout()
+        corpo.setSpacing(12)
+
+        coluna_esquerda = QVBoxLayout()
+        coluna_esquerda.setSpacing(12)
+
         self.config_panel = QFrame()
         self.config_panel.setObjectName("focusConfigPanel")
         self.config_panel.setMinimumHeight(205)
@@ -468,24 +521,28 @@ class JanelaModoFoco(QDialog):
         sec.setObjectName("focusSectionTitle")
         config.addWidget(sec)
 
+        config_hint = QLabel("Monte uma sessão curta ou longa com o menor número possível de cliques.")
+        config_hint.setObjectName("focusConfigHint")
+        config_hint.setWordWrap(True)
+        config.addWidget(config_hint)
+
         presets = QHBoxLayout()
         presets.setSpacing(10)
         duracao_label = QLabel("Duração")
-        duracao_label.setMinimumWidth(56)
+        duracao_label.setObjectName("focusFieldLabel")
+        duracao_label.setMinimumWidth(58)
         presets.addWidget(duracao_label)
         for minutos in (25, 50, 90):
             botao = QPushButton(f"{minutos} min")
             botao.setObjectName("focusPresetButton")
-            botao.setMinimumSize(72, 34)
+            botao.setMinimumSize(78, 34)
             botao.clicked.connect(lambda _=False, m=minutos: self.definir_minutos(m))
             presets.addWidget(botao)
         personalizado = QLabel("Personalizado")
-        personalizado.setMinimumWidth(86)
+        personalizado.setObjectName("focusFieldLabel")
+        personalizado.setMinimumWidth(88)
         presets.addWidget(personalizado)
 
-        # A duração personalizada usa horas + minutos para manter a leitura
-        # natural mesmo em sessões longas. Internamente tudo continua sendo
-        # convertido para minutos/segundos, preservando o restante do fluxo.
         self.horas = QSpinBox()
         self.horas.setRange(0, 24)
         self.horas.setValue(0)
@@ -528,15 +585,13 @@ class JanelaModoFoco(QDialog):
 
         topo_opcional = QHBoxLayout()
         topo_opcional.setSpacing(8)
-        self.usar_detalhes = QCheckBox("Quero especificar o que vou estudar (opcional)")
+        self.usar_detalhes = QCheckBox("Quero especificar o que vou estudar")
         self.usar_detalhes.toggled.connect(self.atualizar_campos_opcionais)
         topo_opcional.addWidget(self.usar_detalhes)
         topo_opcional.addStretch(1)
         opt_box_layout.addLayout(topo_opcional)
 
-        dica_opcional = QLabel(
-            "Você pode iniciar um foco livre normalmente. Ative esta opção apenas se quiser informar atividade, disciplina, tópico ou observação para esta sessão."
-        )
+        dica_opcional = QLabel("Você pode iniciar um foco livre normalmente. Ative esta opção apenas se quiser informar atividade, disciplina, tópico ou observação para esta sessão.")
         dica_opcional.setObjectName("focusWindowHint")
         dica_opcional.setWordWrap(True)
         opt_box_layout.addWidget(dica_opcional)
@@ -550,19 +605,25 @@ class JanelaModoFoco(QDialog):
         seletores.setHorizontalSpacing(12)
         seletores.setVerticalSpacing(8)
 
-        seletores.addWidget(QLabel("Atividade"), 0, 0)
+        atividade_label = QLabel("Atividade")
+        atividade_label.setObjectName("focusFieldLabel")
+        seletores.addWidget(atividade_label, 0, 0)
         self.atividade = QComboBox()
         self.atividade.setMinimumHeight(34)
         self.atividade.addItems(tipos_atividade_foco())
         seletores.addWidget(self.atividade, 1, 0)
 
-        seletores.addWidget(QLabel("Disciplina (opcional)"), 0, 1)
+        disciplina_label = QLabel("Disciplina (opcional)")
+        disciplina_label.setObjectName("focusFieldLabel")
+        seletores.addWidget(disciplina_label, 0, 1)
         self.disciplina = QComboBox()
         self.disciplina.setMinimumHeight(34)
         self.disciplina.currentIndexChanged.connect(self.carregar_topicos)
         seletores.addWidget(self.disciplina, 1, 1)
 
-        seletores.addWidget(QLabel("Tópico (opcional)"), 0, 2)
+        topico_label = QLabel("Tópico (opcional)")
+        topico_label.setObjectName("focusFieldLabel")
+        seletores.addWidget(topico_label, 0, 2)
         self.topico = QComboBox()
         self.topico.setMinimumHeight(34)
         seletores.addWidget(self.topico, 1, 2)
@@ -573,7 +634,9 @@ class JanelaModoFoco(QDialog):
         campos_layout.addLayout(seletores)
 
         obs_linha = QHBoxLayout()
-        obs_linha.addWidget(QLabel("Observação:"))
+        observacao_label = QLabel("Observação")
+        observacao_label.setObjectName("focusFieldLabel")
+        obs_linha.addWidget(observacao_label)
         self.observacao = QLineEdit()
         self.observacao.setMinimumHeight(34)
         self.observacao.setPlaceholderText("Opcional — ex.: teoria antes da bateria de questões")
@@ -590,9 +653,8 @@ class JanelaModoFoco(QDialog):
         self.aviso_bateria_automatica.hide()
         config.addWidget(self.aviso_bateria_automatica)
 
-        layout.addWidget(self.config_panel)
+        coluna_esquerda.addWidget(self.config_panel)
 
-        # Sessão ativa.
         self.active_panel = QFrame()
         self.active_panel.setObjectName("focusActivePanel")
         ativo = QVBoxLayout(self.active_panel)
@@ -620,9 +682,7 @@ class JanelaModoFoco(QDialog):
         self.status.setAlignment(Qt.AlignCenter)
         ativo.addWidget(self.status)
 
-        navegacao = QLabel(
-            "O foco continua contando enquanto você usa o Dashboard e as demais telas do Vighna."
-        )
+        navegacao = QLabel("O foco continua contando enquanto você usa o Dashboard e as demais telas do Vighna.")
         navegacao.setObjectName("focusWindowHint")
         navegacao.setAlignment(Qt.AlignCenter)
         navegacao.setWordWrap(True)
@@ -643,9 +703,13 @@ class JanelaModoFoco(QDialog):
         ativo.addLayout(acoes)
 
         self.active_panel.hide()
-        layout.addWidget(self.active_panel)
+        coluna_esquerda.addWidget(self.active_panel)
+        coluna_esquerda.addStretch(1)
+        corpo.addLayout(coluna_esquerda, 5)
 
-        # Histórico recente.
+        coluna_direita = QVBoxLayout()
+        coluna_direita.setSpacing(12)
+
         historico_panel = QFrame()
         historico_panel.setObjectName("focusRecentPanel")
         hist = QVBoxLayout(historico_panel)
@@ -655,10 +719,13 @@ class JanelaModoFoco(QDialog):
         hist_title.setObjectName("focusSectionTitle")
         hist.addWidget(hist_title)
 
+        hist_hint = QLabel("Acompanhe as últimas sessões concluídas ou interrompidas para manter uma leitura rápida do seu ritmo de estudo.")
+        hist_hint.setObjectName("focusHistoryHint")
+        hist_hint.setWordWrap(True)
+        hist.addWidget(hist_hint)
+
         self.tabela = QTableWidget(0, 5)
-        self.tabela.setHorizontalHeaderLabels(
-            ["Data", "Atividade", "Conteúdo", "Tempo real", "Estado"]
-        )
+        self.tabela.setHorizontalHeaderLabels(["Data", "Atividade", "Conteúdo", "Tempo real", "Estado"])
         self.tabela.verticalHeader().setVisible(False)
         self.tabela.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tabela.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -667,21 +734,27 @@ class JanelaModoFoco(QDialog):
         self.tabela.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
         self.tabela.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeToContents)
         self.tabela.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeToContents)
-        self.tabela.setMinimumHeight(165)
+        self.tabela.setMinimumHeight(240)
         self.tabela.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         hist.addWidget(self.tabela)
-        layout.addWidget(historico_panel, 1)
+        coluna_direita.addWidget(historico_panel, 1)
+        corpo.addLayout(coluna_direita, 4)
 
-    def _criar_stat(self, layout, coluna, titulo):
-        box = QVBoxLayout()
-        valor = QLabel("0")
-        valor.setObjectName("focusStatValue")
+        layout.addLayout(corpo, 1)
+
+    def _criar_mini_stat_card(self, titulo):
+        card = QFrame()
+        card.setObjectName("focusHeroMiniCard")
+        box = QVBoxLayout(card)
+        box.setContentsMargins(12, 10, 12, 10)
+        box.setSpacing(2)
         rotulo = QLabel(titulo)
-        rotulo.setObjectName("focusStatLabel")
-        box.addWidget(valor)
+        rotulo.setObjectName("focusHeroMiniLabel")
+        valor = QLabel("0")
+        valor.setObjectName("focusHeroMiniValue")
         box.addWidget(rotulo)
-        layout.addLayout(box, 0, coluna)
-        return valor
+        box.addWidget(valor)
+        return card, valor
 
     def _ajustar_campos_duracao(self, horas=None):
         if horas is None:
@@ -874,6 +947,15 @@ class JanelaModoFoco(QDialog):
         self.config_panel.show()
         self.config_panel.setEnabled(True)
         self.active_panel.hide()
+        self.hero_estado.setText("Sessão preparada")
+        if self.meta_questoes_preparada > 0:
+            self.hero_nota.setText(
+                f"Tudo pronto: ao iniciar, o Vighna poderá abrir {self.meta_questoes_preparada} questão(ões) automaticamente."
+            )
+        else:
+            self.hero_nota.setText(
+                "Os campos já foram preenchidos. Revise as informações e clique em Iniciar foco quando quiser começar."
+            )
         QTimer.singleShot(0, lambda: self.scroll_area.ensureWidgetVisible(
             self.config_panel, 24, 24
         ))
@@ -902,7 +984,8 @@ class JanelaModoFoco(QDialog):
 
     def atualizar_resumo(self):
         resumo = obter_resumo_foco()
-        self.stat_hoje.setText(_tempo_curto(resumo["hoje_segundos"]))
+        hoje_txt = _tempo_curto(resumo["hoje_segundos"])
+        self.hero_hoje.setText(hoje_txt)
         self.stat_semana.setText(_tempo_curto(resumo["semana_segundos"]))
         self.stat_sessoes.setText(str(resumo["semana_sessoes"]))
         self.stat_media.setText(_tempo_curto(resumo["media_sessao_semana"]))
@@ -957,6 +1040,8 @@ class JanelaModoFoco(QDialog):
             atividade_contexto = "Foco livre"
         self.contexto.setText(f"{atividade_contexto} • {conteudo}")
         self.status.setText("Foco em andamento")
+        self.hero_estado.setText("Sessão ativa")
+        self.hero_nota.setText("O cronômetro está rodando. Pausas ficam fora do tempo efetivo registrado.")
         self.pausar_btn.setText("Pausar")
         self.progresso.setRange(0, self.duracao_planejada)
         self.progresso.setValue(0)
@@ -1085,12 +1170,16 @@ class JanelaModoFoco(QDialog):
             self.inicio_segmento = time.monotonic()
             self.pausar_btn.setText("Pausar")
             self.status.setText("Foco em andamento")
+            self.hero_estado.setText("Sessão ativa")
+            self.hero_nota.setText("O cronômetro foi retomado e voltou a contar apenas o tempo efetivo de estudo.")
         else:
             self.acumulado = self.tempo_decorrido()
             self.inicio_segmento = None
             self.pausada = True
             self.pausar_btn.setText("Retomar")
             self.status.setText("Sessão pausada — este tempo não será contado")
+            self.hero_estado.setText("Sessão pausada")
+            self.hero_nota.setText("A pausa está ativa. O tempo permanece congelado até você retomar a sessão.")
         self.atualizar_timer()
         self.estado_alterado.emit()
 
@@ -1292,6 +1381,8 @@ class JanelaModoFoco(QDialog):
         self.config_panel.setEnabled(True)
         self.config_panel.show()
         self.status.setText("Pronto")
+        self.hero_estado.setText("Pronto para iniciar")
+        self.hero_nota.setText("Escolha uma duração e, se quiser, vincule a sessão a um conteúdo antes de começar.")
         QTimer.singleShot(0, lambda: self.scroll_area.ensureWidgetVisible(
             self.config_panel, 24, 24
         ))
