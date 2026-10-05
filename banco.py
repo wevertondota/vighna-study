@@ -6921,6 +6921,28 @@ def obter_questao(
     }
 
 
+def atualizar_explicacao_questao(questao_id, explicacao=""):
+    """Atualiza apenas a explicação de uma questão sem reconstruir o item."""
+    with conectar() as conexao:
+        cursor = conexao.execute(
+            """
+            UPDATE questoes
+            SET
+                explicacao = ?,
+                atualizado_em = datetime('now', 'localtime')
+            WHERE
+                id = ?
+                AND COALESCE(excluida, 0) = 0
+            """,
+            (
+                str(explicacao or "").strip(),
+                int(questao_id),
+            )
+        )
+
+        return cursor.rowcount > 0
+
+
 def definir_questao_analise_pendente(
     questao_id,
     marcada=True

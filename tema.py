@@ -4571,6 +4571,587 @@ QDialog#questionSolverDialog QToolButton#questionSolverEliminateButton:checked {
 }
 """
 
+# Foco de navegação por teclado. Fica por último na composição do tema para
+# continuar visível também quando a alternativa está selecionada ou eliminada.
+ESTILO_RESOLVEDOR_TECLADO_CLARO = r"""
+QDialog#questionSolverDialog QFrame#questionSolverAlternative[keyboardFocus="true"][answerState="normal"] {
+    border: 2px solid #5966D9;
+}
+"""
+
+ESTILO_RESOLVEDOR_TECLADO_ESCURO = r"""
+QDialog#questionSolverDialog QFrame#questionSolverAlternative[keyboardFocus="true"][answerState="normal"] {
+    border: 2px solid #8B95FF;
+}
+"""
+
+ESTILO_RESOLVEDOR_TECLADO_FUTURISTA = r"""
+QDialog#questionSolverDialog QFrame#questionSolverAlternative[keyboardFocus="true"][answerState="normal"] {
+    border: 2px solid #4BC9F2;
+}
+"""
+
+ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_CLARO = r"""
+QDialog#questionSolverDialog QLabel#questionSolverExplanationTitle {
+    color: #334155;
+    font-size: 8.5pt;
+    font-weight: 800;
+}
+QDialog#questionSolverDialog QToolButton#questionSolverExplanationEditButton {
+    background-color: #FFFFFF;
+    color: #475569;
+    border: 1px solid #CBD5E1;
+    border-radius: 7px;
+    font-size: 13pt;
+    font-weight: 800;
+}
+QDialog#questionSolverDialog QToolButton#questionSolverExplanationEditButton:hover {
+    background-color: #EEF2FF;
+    color: #4338CA;
+    border-color: #A5B4FC;
+}
+QDialog#questionSolverDialog QTextEdit#questionSolverExplanationEditor {
+    background-color: #FFFFFF;
+    color: #334155;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    padding: 7px;
+}
+QDialog#questionSolverDialog QPushButton#questionSolverExplanationSaveButton {
+    background-color: #4F46E5;
+    color: #FFFFFF;
+    border: 1px solid #4338CA;
+    border-radius: 8px;
+    font-weight: 800;
+    padding: 6px 14px;
+}
+QDialog#questionSolverDialog QPushButton#questionSolverExplanationCancelButton {
+    background-color: #FFFFFF;
+    color: #475569;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    font-weight: 700;
+    padding: 6px 14px;
+}
+"""
+
+ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_ESCURO = r"""
+QDialog#questionSolverDialog QLabel#questionSolverExplanationTitle {
+    color: #CBD5E1;
+    font-size: 8.5pt;
+    font-weight: 800;
+}
+QDialog#questionSolverDialog QToolButton#questionSolverExplanationEditButton {
+    background-color: #182235;
+    color: #CBD5E1;
+    border: 1px solid #475569;
+    border-radius: 7px;
+    font-size: 13pt;
+    font-weight: 800;
+}
+QDialog#questionSolverDialog QToolButton#questionSolverExplanationEditButton:hover {
+    background-color: #273449;
+    color: #FFFFFF;
+    border-color: #8B95FF;
+}
+QDialog#questionSolverDialog QTextEdit#questionSolverExplanationEditor {
+    background-color: #111827;
+    color: #E2E8F0;
+    border: 1px solid #475569;
+    border-radius: 8px;
+    padding: 7px;
+}
+QDialog#questionSolverDialog QPushButton#questionSolverExplanationSaveButton {
+    background-color: #6366F1;
+    color: #FFFFFF;
+    border: 1px solid #818CF8;
+    border-radius: 8px;
+    font-weight: 800;
+    padding: 6px 14px;
+}
+QDialog#questionSolverDialog QPushButton#questionSolverExplanationCancelButton {
+    background-color: #1F2937;
+    color: #CBD5E1;
+    border: 1px solid #475569;
+    border-radius: 8px;
+    font-weight: 700;
+    padding: 6px 14px;
+}
+"""
+
+ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_FUTURISTA = r"""
+QDialog#questionSolverDialog QLabel#questionSolverExplanationTitle {
+    color: #9FC4DD;
+    font-size: 8.5pt;
+    font-weight: 800;
+}
+QDialog#questionSolverDialog QToolButton#questionSolverExplanationEditButton {
+    background-color: #0D1D2D;
+    color: #B6D9E8;
+    border: 1px solid #355F82;
+    border-radius: 7px;
+    font-size: 13pt;
+    font-weight: 800;
+}
+QDialog#questionSolverDialog QToolButton#questionSolverExplanationEditButton:hover {
+    background-color: #15324A;
+    color: #F2FBFF;
+    border-color: #4BC9F2;
+}
+QDialog#questionSolverDialog QTextEdit#questionSolverExplanationEditor {
+    background-color: #0A1725;
+    color: #E7F5FF;
+    border: 1px solid #355F82;
+    border-radius: 8px;
+    padding: 7px;
+    selection-background-color: #285B8D;
+    selection-color: #FFFFFF;
+}
+QDialog#questionSolverDialog QPushButton#questionSolverExplanationSaveButton {
+    background-color: #19527A;
+    color: #F1FAFF;
+    border: 1px solid #4BC9F2;
+    border-radius: 8px;
+    font-weight: 800;
+    padding: 6px 14px;
+}
+QDialog#questionSolverDialog QPushButton#questionSolverExplanationCancelButton {
+    background-color: #0D1D2D;
+    color: #B6D9E8;
+    border: 1px solid #355F82;
+    border-radius: 8px;
+    font-weight: 700;
+    padding: 6px 14px;
+}
+"""
+
+
+ESTILO_CALENDARIO_PREVISAO_CLARO = r"""
+QPushButton#calendarViewToggle {
+    min-height: 30px;
+    padding: 4px 13px;
+    background-color: #ffffff;
+    color: #64748b;
+    border: 1px solid #d7e0ea;
+    border-radius: 8px;
+    font-weight: 700;
+}
+QPushButton#calendarViewToggle:hover {
+    background-color: #f8fafc;
+    color: #334155;
+    border-color: #cbd5e1;
+}
+QPushButton#calendarViewToggle:checked {
+    background-color: #e8f1ff;
+    color: #1d4ed8;
+    border-color: #93c5fd;
+}
+QLabel#calendarForecastHeaderHint,
+QLabel#calendarForecastSubtitle,
+QLabel#calendarForecastUpdated,
+QLabel#calendarForecastReason,
+QLabel#calendarForecastDayDate {
+    color: #64748b;
+    background: transparent;
+}
+QFrame#calendarForecastPanel {
+    background-color: #ffffff;
+    border: 1px solid #dbe3ed;
+    border-radius: 11px;
+}
+QLabel#calendarForecastTitle {
+    color: #111827;
+    font-size: 15px;
+    font-weight: 800;
+}
+QLabel#calendarForecastNotice {
+    color: #475569;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 7px 9px;
+}
+QScrollArea#calendarForecastScroll,
+QScrollArea#calendarForecastScroll > QWidget > QWidget,
+QWidget#calendarForecastBoard {
+    background-color: transparent;
+    border: none;
+}
+QFrame#calendarForecastDay {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+}
+QFrame#calendarForecastDay[dayState="today"] {
+    background-color: #f0f7ff;
+    border: 1px solid #93c5fd;
+}
+QFrame#calendarForecastDay[dayState="past"] {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+QLabel#calendarForecastDayName {
+    color: #0f172a;
+    font-weight: 800;
+    font-size: 10.5pt;
+}
+QLabel#calendarForecastDayDate {
+    font-size: 8.5pt;
+    font-weight: 600;
+}
+QLabel#calendarForecastDayCount {
+    background-color: #e2e8f0;
+    color: #475569;
+    border-radius: 7px;
+    padding: 2px 7px;
+    font-size: 8pt;
+    font-weight: 800;
+}
+QFrame#calendarForecastCard {
+    background-color: #ffffff;
+    border: 1px solid #dbe3ed;
+    border-left: 3px solid #64748b;
+    border-radius: 8px;
+}
+QFrame#calendarForecastCard[forecastKind="revisao"] {
+    border-left-color: #2563eb;
+}
+QFrame#calendarForecastCard[forecastKind="realizado"] {
+    border-left-color: #16a34a;
+}
+QFrame#calendarForecastCard[forecastKind="recomendacao"] {
+    border-left-color: #7c3aed;
+}
+QFrame#calendarForecastCard[forecastKind="simulado"] {
+    border-left-color: #d97706;
+}
+QLabel#calendarForecastDiscipline {
+    color: #475569;
+    font-size: 8pt;
+    font-weight: 800;
+}
+QLabel#calendarForecastCardTitle {
+    color: #111827;
+    font-size: 9.5pt;
+    font-weight: 700;
+}
+QLabel#calendarForecastKind,
+QLabel#calendarForecastLoad {
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 2px 5px;
+    font-size: 7.5pt;
+    font-weight: 700;
+}
+QLabel#calendarForecastReason {
+    font-size: 7.8pt;
+}
+QToolButton#calendarForecastOpen {
+    background-color: transparent;
+    color: #64748b;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-weight: 800;
+}
+QToolButton#calendarForecastOpen:hover {
+    background-color: #e8f1ff;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+}
+QLabel#calendarForecastDayEmpty,
+QLabel#calendarForecastEmpty {
+    color: #94a3b8;
+    background: transparent;
+    padding: 18px 7px;
+}
+"""
+
+ESTILO_CALENDARIO_PREVISAO_ESCURO = r"""
+QPushButton#calendarViewToggle {
+    min-height: 30px;
+    padding: 4px 13px;
+    background-color: #172033;
+    color: #94a3b8;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    font-weight: 700;
+}
+QPushButton#calendarViewToggle:hover {
+    background-color: #273449;
+    color: #e2e8f0;
+    border-color: #475569;
+}
+QPushButton#calendarViewToggle:checked {
+    background-color: #172554;
+    color: #93c5fd;
+    border-color: #1e40af;
+}
+QLabel#calendarForecastHeaderHint,
+QLabel#calendarForecastSubtitle,
+QLabel#calendarForecastUpdated,
+QLabel#calendarForecastReason,
+QLabel#calendarForecastDayDate {
+    color: #94a3b8;
+    background: transparent;
+}
+QFrame#calendarForecastPanel {
+    background-color: #182235;
+    border: 1px solid #334155;
+    border-radius: 11px;
+}
+QLabel#calendarForecastTitle {
+    color: #f8fafc;
+    font-size: 15px;
+    font-weight: 800;
+}
+QLabel#calendarForecastNotice {
+    color: #cbd5e1;
+    background-color: #172033;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 7px 9px;
+}
+QScrollArea#calendarForecastScroll,
+QScrollArea#calendarForecastScroll > QWidget > QWidget,
+QWidget#calendarForecastBoard {
+    background-color: transparent;
+    border: none;
+}
+QFrame#calendarForecastDay {
+    background-color: #172033;
+    border: 1px solid #334155;
+    border-radius: 10px;
+}
+QFrame#calendarForecastDay[dayState="today"] {
+    background-color: #172554;
+    border: 1px solid #1e40af;
+}
+QFrame#calendarForecastDay[dayState="past"] {
+    background-color: #151e2e;
+    border: 1px solid #2b394b;
+}
+QLabel#calendarForecastDayName {
+    color: #f8fafc;
+    font-weight: 800;
+    font-size: 10.5pt;
+}
+QLabel#calendarForecastDayDate {
+    font-size: 8.5pt;
+    font-weight: 600;
+}
+QLabel#calendarForecastDayCount {
+    background-color: #273449;
+    color: #cbd5e1;
+    border-radius: 7px;
+    padding: 2px 7px;
+    font-size: 8pt;
+    font-weight: 800;
+}
+QFrame#calendarForecastCard {
+    background-color: #1d293d;
+    border: 1px solid #334155;
+    border-left: 3px solid #64748b;
+    border-radius: 8px;
+}
+QFrame#calendarForecastCard[forecastKind="revisao"] {
+    border-left-color: #60a5fa;
+}
+QFrame#calendarForecastCard[forecastKind="realizado"] {
+    border-left-color: #4ade80;
+}
+QFrame#calendarForecastCard[forecastKind="recomendacao"] {
+    border-left-color: #a78bfa;
+}
+QFrame#calendarForecastCard[forecastKind="simulado"] {
+    border-left-color: #f59e0b;
+}
+QLabel#calendarForecastDiscipline {
+    color: #94a3b8;
+    font-size: 8pt;
+    font-weight: 800;
+}
+QLabel#calendarForecastCardTitle {
+    color: #f1f5f9;
+    font-size: 9.5pt;
+    font-weight: 700;
+}
+QLabel#calendarForecastKind,
+QLabel#calendarForecastLoad {
+    background-color: #273449;
+    color: #cbd5e1;
+    border: 1px solid #3b4a61;
+    border-radius: 6px;
+    padding: 2px 5px;
+    font-size: 7.5pt;
+    font-weight: 700;
+}
+QLabel#calendarForecastReason {
+    font-size: 7.8pt;
+}
+QToolButton#calendarForecastOpen {
+    background-color: transparent;
+    color: #94a3b8;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-weight: 800;
+}
+QToolButton#calendarForecastOpen:hover {
+    background-color: #273449;
+    color: #93c5fd;
+    border-color: #475569;
+}
+QLabel#calendarForecastDayEmpty,
+QLabel#calendarForecastEmpty {
+    color: #64748b;
+    background: transparent;
+    padding: 18px 7px;
+}
+"""
+
+ESTILO_CALENDARIO_PREVISAO_FUTURISTA = r"""
+QPushButton#calendarViewToggle {
+    min-height: 30px;
+    padding: 4px 13px;
+    background-color: #0D1D2D;
+    color: #84A9BD;
+    border: 1px solid #294B63;
+    border-radius: 8px;
+    font-weight: 700;
+}
+QPushButton#calendarViewToggle:hover {
+    background-color: #123049;
+    color: #D7F3FF;
+    border-color: #39789A;
+}
+QPushButton#calendarViewToggle:checked {
+    background-color: #143A55;
+    color: #BDF7FF;
+    border-color: #45BCE8;
+}
+QLabel#calendarForecastHeaderHint,
+QLabel#calendarForecastSubtitle,
+QLabel#calendarForecastUpdated,
+QLabel#calendarForecastReason,
+QLabel#calendarForecastDayDate {
+    color: #7FA2B5;
+    background: transparent;
+}
+QFrame#calendarForecastPanel {
+    background-color: #0B1A27;
+    border: 1px solid #294B63;
+    border-radius: 11px;
+}
+QLabel#calendarForecastTitle {
+    color: #E7F7FF;
+    font-size: 15px;
+    font-weight: 800;
+}
+QLabel#calendarForecastNotice {
+    color: #9FC4D6;
+    background-color: #0D1D2D;
+    border: 1px solid #294B63;
+    border-radius: 8px;
+    padding: 7px 9px;
+}
+QScrollArea#calendarForecastScroll,
+QScrollArea#calendarForecastScroll > QWidget > QWidget,
+QWidget#calendarForecastBoard {
+    background-color: transparent;
+    border: none;
+}
+QFrame#calendarForecastDay {
+    background-color: #0D1D2D;
+    border: 1px solid #294B63;
+    border-radius: 10px;
+}
+QFrame#calendarForecastDay[dayState="today"] {
+    background-color: #10304A;
+    border: 1px solid #3D9BC5;
+}
+QFrame#calendarForecastDay[dayState="past"] {
+    background-color: #0B1824;
+    border: 1px solid #223D50;
+}
+QLabel#calendarForecastDayName {
+    color: #E9F8FF;
+    font-weight: 800;
+    font-size: 10.5pt;
+}
+QLabel#calendarForecastDayDate {
+    font-size: 8.5pt;
+    font-weight: 600;
+}
+QLabel#calendarForecastDayCount {
+    background-color: #153149;
+    color: #A8D9EE;
+    border-radius: 7px;
+    padding: 2px 7px;
+    font-size: 8pt;
+    font-weight: 800;
+}
+QFrame#calendarForecastCard {
+    background-color: #102334;
+    border: 1px solid #294B63;
+    border-left: 3px solid #5F8296;
+    border-radius: 8px;
+}
+QFrame#calendarForecastCard[forecastKind="revisao"] {
+    border-left-color: #4BC9F2;
+}
+QFrame#calendarForecastCard[forecastKind="realizado"] {
+    border-left-color: #74F1C5;
+}
+QFrame#calendarForecastCard[forecastKind="recomendacao"] {
+    border-left-color: #8D7CFF;
+}
+QFrame#calendarForecastCard[forecastKind="simulado"] {
+    border-left-color: #E7B14B;
+}
+QLabel#calendarForecastDiscipline {
+    color: #82ABC0;
+    font-size: 8pt;
+    font-weight: 800;
+}
+QLabel#calendarForecastCardTitle {
+    color: #E7F5FF;
+    font-size: 9.5pt;
+    font-weight: 700;
+}
+QLabel#calendarForecastKind,
+QLabel#calendarForecastLoad {
+    background-color: #153149;
+    color: #A8D9EE;
+    border: 1px solid #315B75;
+    border-radius: 6px;
+    padding: 2px 5px;
+    font-size: 7.5pt;
+    font-weight: 700;
+}
+QLabel#calendarForecastReason {
+    font-size: 7.8pt;
+}
+QToolButton#calendarForecastOpen {
+    background-color: transparent;
+    color: #82ABC0;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-weight: 800;
+}
+QToolButton#calendarForecastOpen:hover {
+    background-color: #153149;
+    color: #BDF7FF;
+    border-color: #39789A;
+}
+QLabel#calendarForecastDayEmpty,
+QLabel#calendarForecastEmpty {
+    color: #638397;
+    background: transparent;
+    padding: 18px 7px;
+}
+"""
+
 def stylesheet_claro():
     return r"""
     * {
@@ -11586,7 +12167,7 @@ QPushButton#sectionEditButton:hover {
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_CLARO + ESTILO_DASHBOARD_MODERNO_CLARO + ESTILO_FOCO_DASHBOARD_CLARO + ESTILO_ALGORITMO_DASHBOARD_CLARO + ESTILO_BUSCA_GLOBAL_CLARO + ESTILO_PALETA_HARMONICA_DASHBOARD_CLARO + ESTILO_DESIGN_SYSTEM_DASHBOARD_CLARO + ESTILO_INTELIGENCIA_RESUMO_CLARO + ESTILO_TOPICOS_DISCIPLINA_CLARO + ESTILO_RESOLVEDOR_CLARO + ESTILO_TOPICO_DETALHES_CLARO + ESTILO_RESOLVEDOR_ELIMINADAS_CLARO
+""" + ESTILO_JORNADA_CLARO + ESTILO_DASHBOARD_MODERNO_CLARO + ESTILO_FOCO_DASHBOARD_CLARO + ESTILO_ALGORITMO_DASHBOARD_CLARO + ESTILO_BUSCA_GLOBAL_CLARO + ESTILO_PALETA_HARMONICA_DASHBOARD_CLARO + ESTILO_DESIGN_SYSTEM_DASHBOARD_CLARO + ESTILO_INTELIGENCIA_RESUMO_CLARO + ESTILO_TOPICOS_DISCIPLINA_CLARO + ESTILO_RESOLVEDOR_CLARO + ESTILO_TOPICO_DETALHES_CLARO + ESTILO_RESOLVEDOR_ELIMINADAS_CLARO + ESTILO_RESOLVEDOR_TECLADO_CLARO + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_CLARO + ESTILO_CALENDARIO_PREVISAO_CLARO
 
 
 def stylesheet_escuro():
@@ -18041,7 +18622,7 @@ def stylesheet_escuro():
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_ESCURO + ESTILO_DASHBOARD_MODERNO_ESCURO + ESTILO_FOCO_DASHBOARD_ESCURO + ESTILO_ALGORITMO_DASHBOARD_ESCURO + ESTILO_BUSCA_GLOBAL_ESCURO + ESTILO_INTELIGENCIA_RESUMO_ESCURO + ESTILO_TOPICOS_DISCIPLINA_ESCURO + ESTILO_RESOLVEDOR_ESCURO + ESTILO_TOPICO_DETALHES_ESCURO + ESTILO_RESOLVEDOR_ELIMINADAS_ESCURO
+""" + ESTILO_JORNADA_ESCURO + ESTILO_DASHBOARD_MODERNO_ESCURO + ESTILO_FOCO_DASHBOARD_ESCURO + ESTILO_ALGORITMO_DASHBOARD_ESCURO + ESTILO_BUSCA_GLOBAL_ESCURO + ESTILO_INTELIGENCIA_RESUMO_ESCURO + ESTILO_TOPICOS_DISCIPLINA_ESCURO + ESTILO_RESOLVEDOR_ESCURO + ESTILO_TOPICO_DETALHES_ESCURO + ESTILO_RESOLVEDOR_ELIMINADAS_ESCURO + ESTILO_RESOLVEDOR_TECLADO_ESCURO + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_ESCURO + ESTILO_CALENDARIO_PREVISAO_ESCURO
 
 
 
@@ -21486,7 +22067,7 @@ def stylesheet_futurista():
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_FUTURISTA + ESTILO_DASHBOARD_MODERNO_FUTURISTA + ESTILO_FOCO_DASHBOARD_FUTURISTA + ESTILO_ALGORITMO_DASHBOARD_FUTURISTA + ESTILO_BUSCA_GLOBAL_FUTURISTA + ESTILO_INTELIGENCIA_RESUMO_FUTURISTA + ESTILO_TOPICOS_DISCIPLINA_FUTURISTA + ESTILO_DASHBOARD_NEO_FUTURISTA + ESTILO_RESOLVEDOR_FUTURISTA + ESTILO_TOPICO_DETALHES_FUTURISTA + ESTILO_RESOLVEDOR_ELIMINADAS_FUTURISTA
+""" + ESTILO_JORNADA_FUTURISTA + ESTILO_DASHBOARD_MODERNO_FUTURISTA + ESTILO_FOCO_DASHBOARD_FUTURISTA + ESTILO_ALGORITMO_DASHBOARD_FUTURISTA + ESTILO_BUSCA_GLOBAL_FUTURISTA + ESTILO_INTELIGENCIA_RESUMO_FUTURISTA + ESTILO_TOPICOS_DISCIPLINA_FUTURISTA + ESTILO_DASHBOARD_NEO_FUTURISTA + ESTILO_RESOLVEDOR_FUTURISTA + ESTILO_TOPICO_DETALHES_FUTURISTA + ESTILO_RESOLVEDOR_ELIMINADAS_FUTURISTA + ESTILO_RESOLVEDOR_TECLADO_FUTURISTA + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_FUTURISTA + ESTILO_CALENDARIO_PREVISAO_FUTURISTA
 
 def aplicar_tema(
     app,

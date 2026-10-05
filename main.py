@@ -234,6 +234,7 @@ from banco import (
     criar_questoes_lote,
     obter_questao,
     definir_questao_analise_pendente,
+    atualizar_explicacao_questao,
     atualizar_questao,
     excluir_questao,
     obter_integridade_questao,
@@ -16114,6 +16115,12 @@ class JanelaResolverQuestoes(QDialog):
         self._questao_pausa_iniciada = None
         self._questao_tempo_pausado = 0.0
         self.resposta_confirmada = False
+        # Navegação por teclado usa um foco próprio, separado da alternativa
+        # efetivamente marcada. Assim, as setas apenas percorrem as opções;
+        # selecionar continua sendo uma ação explícita do usuário.
+        self._alternativa_foco_teclado = None
+        self._filtro_teclado_aplicacao_instalado = False
+        self._editando_explicacao = False
         self.finalizada = False
         self.resultados_integracao = []
         self.resumo_final = None
@@ -16697,6 +16704,44 @@ class JanelaResolverQuestoes(QDialog):
             "questionSolverFeedbackTitle"
         )
 
+        explicacao_cabecalho = QHBoxLayout()
+        explicacao_cabecalho.setContentsMargins(0, 2, 0, 0)
+        explicacao_cabecalho.setSpacing(6)
+
+        self.feedback_explicacao_rotulo = QLabel("Explicação")
+        self.feedback_explicacao_rotulo.setObjectName(
+            "questionSolverExplanationTitle"
+        )
+
+        self.feedback_explicacao_editar = QToolButton(self.feedback)
+        self.feedback_explicacao_editar.setObjectName(
+            "questionSolverExplanationEditButton"
+        )
+        self.feedback_explicacao_editar.setText("✎")
+        self.feedback_explicacao_editar.setFixedSize(28, 28)
+        self.feedback_explicacao_editar.setToolTip(
+            "Editar explicação desta questão"
+        )
+        self.feedback_explicacao_editar.setAccessibleName(
+            "Editar explicação"
+        )
+        self.feedback_explicacao_editar.setVisible(False)
+        self.feedback_explicacao_editar.clicked.connect(
+            self.iniciar_edicao_explicacao
+        )
+
+        explicacao_cabecalho.addWidget(
+            self.feedback_explicacao_rotulo,
+            0,
+            Qt.AlignVCenter
+        )
+        explicacao_cabecalho.addStretch()
+        explicacao_cabecalho.addWidget(
+            self.feedback_explicacao_editar,
+            0,
+            Qt.AlignVCenter
+        )
+
         self.feedback_explicacao = QLabel(
             ""
         )
@@ -16710,6 +16755,53 @@ class JanelaResolverQuestoes(QDialog):
             Qt.TextSelectableByMouse
         )
 
+        self.feedback_explicacao_editor = QTextEdit(self.feedback)
+        self.feedback_explicacao_editor.setObjectName(
+            "questionSolverExplanationEditor"
+        )
+        self.feedback_explicacao_editor.setAcceptRichText(False)
+        self.feedback_explicacao_editor.setTabChangesFocus(True)
+        self.feedback_explicacao_editor.setMinimumHeight(110)
+        self.feedback_explicacao_editor.setPlaceholderText(
+            "Corrija a explicação ou acrescente uma anotação."
+        )
+        self.feedback_explicacao_editor.setVisible(False)
+
+        self.feedback_explicacao_acoes = QWidget(self.feedback)
+        self.feedback_explicacao_acoes.setObjectName(
+            "questionSolverExplanationActions"
+        )
+        explicacao_acoes_layout = QHBoxLayout(
+            self.feedback_explicacao_acoes
+        )
+        explicacao_acoes_layout.setContentsMargins(0, 2, 0, 0)
+        explicacao_acoes_layout.setSpacing(7)
+        explicacao_acoes_layout.addStretch()
+
+        self.feedback_explicacao_cancelar = QPushButton("Cancelar")
+        self.feedback_explicacao_cancelar.setObjectName(
+            "questionSolverExplanationCancelButton"
+        )
+        self.feedback_explicacao_cancelar.clicked.connect(
+            self.cancelar_edicao_explicacao
+        )
+
+        self.feedback_explicacao_salvar = QPushButton("Salvar")
+        self.feedback_explicacao_salvar.setObjectName(
+            "questionSolverExplanationSaveButton"
+        )
+        self.feedback_explicacao_salvar.clicked.connect(
+            self.salvar_edicao_explicacao
+        )
+
+        explicacao_acoes_layout.addWidget(
+            self.feedback_explicacao_cancelar
+        )
+        explicacao_acoes_layout.addWidget(
+            self.feedback_explicacao_salvar
+        )
+        self.feedback_explicacao_acoes.setVisible(False)
+
         self.feedback_fila = QLabel("")
         self.feedback_fila.setObjectName("questionSessionSummaryDetail")
         self.feedback_fila.setWordWrap(True)
@@ -16718,8 +16810,17 @@ class JanelaResolverQuestoes(QDialog):
         feedback_layout.addWidget(
             self.feedback_titulo
         )
+        feedback_layout.addLayout(
+            explicacao_cabecalho
+        )
         feedback_layout.addWidget(
             self.feedback_explicacao
+        )
+        feedback_layout.addWidget(
+            self.feedback_explicacao_editor
+        )
+        feedback_layout.addWidget(
+            self.feedback_explicacao_acoes
         )
         feedback_layout.addWidget(
             self.feedback_fila
@@ -16828,6 +16929,14 @@ class JanelaResolverQuestoes(QDialog):
         self.carregar_atual()
         self.atualizar_painel_foco()
         self._registrar_no_controlador_principal()
+
+        # O filtro na aplicação recebe a tecla antes do controle focado
+        # (inclusive QRadioButton). Isso impede que as setas marquem opções
+        # automaticamente e preserva a semântica: navegar -> selecionar -> confirmar.
+        app = QApplication.instance()
+        if app is not None:
+            app.installEventFilter(self)
+            self._filtro_teclado_aplicacao_instalado = True
 
     def _localizar_janela_principal(self):
         """Localiza a janela principal sem recriar vínculo Qt de propriedade."""
@@ -17205,6 +17314,170 @@ class JanelaResolverQuestoes(QDialog):
         self.texto_por_letra = {}
         self.botao_eliminar_por_letra = {}
         self._letra_por_widget_alternativa = {}
+        self._alternativa_foco_teclado = None
+
+    def _letra_alternativa_do_widget(self, widget):
+        """Retorna a alternativa que contém ``widget``, quando houver."""
+        atual = widget
+        visitados = set()
+
+        while atual is not None and id(atual) not in visitados:
+            visitados.add(id(atual))
+            letra = getattr(self, "_letra_por_widget_alternativa", {}).get(atual)
+            if letra is not None:
+                return letra
+            if atual is self:
+                break
+            try:
+                atual = atual.parentWidget()
+            except (RuntimeError, AttributeError):
+                break
+
+        return None
+
+    def atualizar_texto_feedback_explicacao(self):
+        explicacao = str(
+            (self.questao_atual or {}).get("explicacao") or ""
+        ).strip()
+        self.feedback_explicacao.setText(
+            explicacao
+            if explicacao
+            else "Esta questão não possui explicação cadastrada."
+        )
+
+    def iniciar_edicao_explicacao(self):
+        if (
+            not self.resposta_confirmada
+            or not self.questao_atual
+            or not self.feedback.isVisible()
+        ):
+            return
+
+        self._editando_explicacao = True
+        self.feedback_explicacao_editor.setPlainText(
+            str(self.questao_atual.get("explicacao") or "")
+        )
+        self.feedback_explicacao.setVisible(False)
+        self.feedback_explicacao_editar.setVisible(False)
+        self.feedback_explicacao_editor.setVisible(True)
+        self.feedback_explicacao_acoes.setVisible(True)
+        self.botao_proxima.setEnabled(False)
+        self.feedback_explicacao_editor.setFocus(Qt.MouseFocusReason)
+
+    def finalizar_edicao_explicacao(self):
+        self._editando_explicacao = False
+        self.feedback_explicacao_editor.setVisible(False)
+        self.feedback_explicacao_acoes.setVisible(False)
+        self.feedback_explicacao.setVisible(True)
+        self.feedback_explicacao_editar.setVisible(
+            bool(self.resposta_confirmada and self.feedback.isVisible())
+        )
+        self.botao_proxima.setEnabled(True)
+        if self.botao_proxima.isVisible():
+            self.botao_proxima.setFocus(Qt.OtherFocusReason)
+
+    def cancelar_edicao_explicacao(self):
+        if not self._editando_explicacao:
+            return
+        self.atualizar_texto_feedback_explicacao()
+        self.finalizar_edicao_explicacao()
+
+    def salvar_edicao_explicacao(self):
+        if not self._editando_explicacao or not self.questao_atual:
+            return
+
+        nova_explicacao = self.feedback_explicacao_editor.toPlainText().strip()
+        try:
+            atualizada = atualizar_explicacao_questao(
+                self.questao_atual["id"],
+                nova_explicacao,
+            )
+        except Exception as erro:
+            QMessageBox.critical(
+                self,
+                "Editar explicação",
+                "Não foi possível salvar a explicação.\n\n" + str(erro),
+            )
+            return
+
+        if not atualizada:
+            QMessageBox.warning(
+                self,
+                "Editar explicação",
+                "A questão não está mais disponível para edição.",
+            )
+            return
+
+        self.questao_atual["explicacao"] = nova_explicacao
+        self.atualizar_texto_feedback_explicacao()
+        self.finalizar_edicao_explicacao()
+
+    def definir_foco_teclado_alternativa(self, letra, mover_foco_qt=True):
+        if self.resposta_confirmada or letra not in self.frame_por_letra:
+            return False
+
+        self._alternativa_foco_teclado = letra
+        for alternativa_letra, frame in self.frame_por_letra.items():
+            frame.setProperty(
+                "keyboardFocus",
+                alternativa_letra == letra
+            )
+            frame.style().unpolish(frame)
+            frame.style().polish(frame)
+
+        frame = self.frame_por_letra.get(letra)
+        if mover_foco_qt and frame is not None:
+            frame.setFocus(Qt.OtherFocusReason)
+
+        return True
+
+    def mover_foco_teclado_alternativa(self, passo):
+        if self.resposta_confirmada:
+            return False
+
+        letras = [
+            letra
+            for letra, frame in self.frame_por_letra.items()
+            if frame is not None and frame.isEnabled()
+        ]
+        if not letras:
+            return False
+
+        atual = self._alternativa_foco_teclado
+        if atual not in letras:
+            indice = 0 if passo >= 0 else len(letras) - 1
+        else:
+            indice = (letras.index(atual) + passo) % len(letras)
+
+        return self.definir_foco_teclado_alternativa(letras[indice])
+
+    def alternar_eliminacao_foco_teclado(self):
+        letra = self._alternativa_foco_teclado
+        if letra is None or self.resposta_confirmada:
+            return False
+
+        botao = self.botao_eliminar_por_letra.get(letra)
+        if botao is None or not botao.isEnabled():
+            return False
+
+        botao.setChecked(not botao.isChecked())
+        # O botão pode receber atualização visual sem roubar o foco de navegação.
+        self.definir_foco_teclado_alternativa(letra)
+        return True
+
+    def acionar_enter_foco_teclado(self):
+        letra = self._alternativa_foco_teclado
+        if letra is None or self.resposta_confirmada:
+            return False
+
+        # Primeiro Enter equivale ao clique esquerdo: seleciona a opção focada.
+        # Se ela já está selecionada, o Enter seguinte confirma a resposta.
+        if self.alternativa_selecionada() != letra:
+            self.selecionar_alternativa_por_letra(letra)
+            self.definir_foco_teclado_alternativa(letra)
+        else:
+            self.confirmar_resposta()
+        return True
 
     def selecionar_alternativa_por_letra(self, letra):
         if self.resposta_confirmada:
@@ -17225,6 +17498,73 @@ class JanelaResolverQuestoes(QDialog):
         radio.setFocus()
 
     def eventFilter(self, objeto, evento):
+        if (
+            evento.type() == QEvent.KeyPress
+            and self.isActiveWindow()
+        ):
+            tecla = evento.key()
+
+            # Enquanto a explicação está sendo editada, o QTextEdit e os
+            # botões Salvar/Cancelar recebem o teclado normalmente. Isso evita
+            # que Enter avance a bateria ou que as setas mudem de alternativa.
+            if self._editando_explicacao:
+                return super().eventFilter(objeto, evento)
+
+            # Um Enter mantido pressionado não pode atravessar várias etapas
+            # (selecionar -> confirmar -> avançar) por repetição automática.
+            if (
+                tecla in (Qt.Key_Return, Qt.Key_Enter)
+                and evento.isAutoRepeat()
+            ):
+                evento.accept()
+                return True
+
+            # Depois da confirmação, o Enter seguinte equivale ao botão
+            # "Próxima questão". Na última questão, ``proxima`` conclui a
+            # sessão normalmente. O evento é consumido aqui para impedir que
+            # o QPushButton focado execute a mesma ação uma segunda vez.
+            if (
+                self.resposta_confirmada
+                and tecla in (Qt.Key_Return, Qt.Key_Enter)
+            ):
+                self.proxima()
+                evento.accept()
+                return True
+
+            if self.resposta_confirmada:
+                return super().eventFilter(objeto, evento)
+
+            if tecla in (Qt.Key_Up, Qt.Key_Left):
+                if self.mover_foco_teclado_alternativa(-1):
+                    evento.accept()
+                    return True
+
+            if tecla in (Qt.Key_Down, Qt.Key_Right):
+                if self.mover_foco_teclado_alternativa(1):
+                    evento.accept()
+                    return True
+
+            # Espaço e Enter só assumem o comando quando o foco Qt está dentro
+            # de uma alternativa. Assim, Espaço continua funcionando normalmente
+            # em "Marcar como dúvida" e nos demais controles da sessão.
+            letra_widget = self._letra_alternativa_do_widget(objeto)
+            if letra_widget is not None:
+                if letra_widget != self._alternativa_foco_teclado:
+                    self.definir_foco_teclado_alternativa(
+                        letra_widget,
+                        mover_foco_qt=False
+                    )
+
+                if tecla == Qt.Key_Space:
+                    if self.alternar_eliminacao_foco_teclado():
+                        evento.accept()
+                        return True
+
+                if tecla in (Qt.Key_Return, Qt.Key_Enter):
+                    if self.acionar_enter_foco_teclado():
+                        evento.accept()
+                        return True
+
         letra = getattr(self, "_letra_por_widget_alternativa", {}).get(objeto)
         if letra is not None and not self.resposta_confirmada:
             if evento.type() == QEvent.MouseButtonRelease and evento.button() == Qt.LeftButton:
@@ -17237,6 +17577,7 @@ class JanelaResolverQuestoes(QDialog):
                     except Exception:
                         pass
                 self.selecionar_alternativa_por_letra(letra)
+                self.definir_foco_teclado_alternativa(letra)
                 return True
 
         return super().eventFilter(objeto, evento)
@@ -17355,6 +17696,11 @@ class JanelaResolverQuestoes(QDialog):
                 self.questao_atual["id"],
             )
         self.resposta_confirmada = False
+        self._editando_explicacao = False
+        self.feedback_explicacao_editor.setVisible(False)
+        self.feedback_explicacao_acoes.setVisible(False)
+        self.feedback_explicacao.setVisible(True)
+        self.feedback_explicacao_editar.setVisible(False)
         self.inicio_questao = datetime.now()
         self._questao_pausa_iniciada = None
         self._questao_tempo_pausado = 0.0
@@ -17526,6 +17872,11 @@ class JanelaResolverQuestoes(QDialog):
                     "eliminated",
                     False
                 )
+                frame.setProperty(
+                    "keyboardFocus",
+                    False
+                )
+                frame.setFocusPolicy(Qt.StrongFocus)
                 frame.setAttribute(Qt.WA_Hover, True)
                 frame.setCursor(Qt.PointingHandCursor)
 
@@ -17974,6 +18325,7 @@ class JanelaResolverQuestoes(QDialog):
             self.botao_proxima.setVisible(
                 True
             )
+            self.botao_proxima.setFocus(Qt.OtherFocusReason)
             self.feedback.setVisible(
                 False
             )
@@ -18043,6 +18395,7 @@ class JanelaResolverQuestoes(QDialog):
         self.botao_proxima.setVisible(
             True
         )
+        self.botao_proxima.setFocus(Qt.OtherFocusReason)
 
         if correta:
             self.feedback.setProperty(
@@ -18064,20 +18417,8 @@ class JanelaResolverQuestoes(QDialog):
                 )
             )
 
-        explicacao = (
-            self.questao_atual[
-                "explicacao"
-            ].strip()
-        )
-
-        if explicacao:
-            self.feedback_explicacao.setText(
-                explicacao
-            )
-        else:
-            self.feedback_explicacao.setText(
-                "Esta questão não possui explicação cadastrada."
-            )
+        self.atualizar_texto_feedback_explicacao()
+        self.feedback_explicacao_editar.setVisible(True)
 
         if self.modo_banco_erros:
             self.feedback_fila.setText(
@@ -18497,6 +18838,17 @@ class JanelaResolverQuestoes(QDialog):
         # telas já pré-carregadas (como a lista da disciplina).
         self._notificar_dados_pos_sessao()
         self.accept()
+
+    def done(self, resultado):
+        if self._filtro_teclado_aplicacao_instalado:
+            app = QApplication.instance()
+            if app is not None:
+                try:
+                    app.removeEventFilter(self)
+                except RuntimeError:
+                    pass
+            self._filtro_teclado_aplicacao_instalado = False
+        super().done(resultado)
 
     def closeEvent(
         self,
@@ -32583,6 +32935,8 @@ class SistemaEstudos(QMainWindow):
         self._resumo_dia_data_referencia = None
         self._calendario_precarregado = False
         self._calendario_data_referencia = None
+        self._previsao_semana_suja = True
+        self._previsao_semana_data_referencia = None
 
         # Cache curto + barramento de atualização: evita recalcular o mesmo
         # conjunto analítico várias vezes durante uma única sequência de ações.
@@ -33201,6 +33555,12 @@ class SistemaEstudos(QMainWindow):
             self._topicos_precarregados_data = None
             self._resumo_dia_precarregado = False
             self._calendario_precarregado = False
+
+        if escopo in {
+            "all", "questoes", "tentativas", "topicos", "revisoes",
+            "foco", "recomendacoes", "decisoes"
+        }:
+            self._previsao_semana_suja = True
         if escopo in {"all", "questoes", "topicos"}:
             self._marcar_central_questoes_suja()
         if escopo == "foco":
@@ -48674,14 +49034,14 @@ class SistemaEstudos(QMainWindow):
         )
 
         titulo = QLabel(
-            "Calendário de Revisões"
+            "Calendário de Estudos"
         )
         titulo.setObjectName(
             "pageTitle"
         )
 
         subtitulo = QLabel(
-            "Visualize as revisões agendadas e abra diretamente o tópico que deseja estudar."
+            "Acompanhe as revisões agendadas e a previsão dos próximos tópicos de estudo."
         )
         subtitulo.setObjectName(
             "pageSubtitle"
@@ -48721,6 +49081,57 @@ class SistemaEstudos(QMainWindow):
         layout.addLayout(
             cabecalho
         )
+
+        # ====================================================
+        # VISUALIZAÇÃO — MÊS / SEMANA PREVISTA
+        # ====================================================
+
+        barra_visualizacao = QHBoxLayout()
+        barra_visualizacao.setSpacing(6)
+
+        self.calendario_btn_mes = QPushButton("Mês")
+        self.calendario_btn_mes.setObjectName("calendarViewToggle")
+        self.calendario_btn_mes.setCheckable(True)
+        self.calendario_btn_mes.setChecked(True)
+        self.calendario_btn_mes.setMinimumWidth(86)
+
+        self.calendario_btn_semana = QPushButton("Semana prevista")
+        self.calendario_btn_semana.setObjectName("calendarViewToggle")
+        self.calendario_btn_semana.setCheckable(True)
+        self.calendario_btn_semana.setMinimumWidth(138)
+
+        self.calendario_grupo_visualizacao = QButtonGroup(self)
+        self.calendario_grupo_visualizacao.setExclusive(True)
+        self.calendario_grupo_visualizacao.addButton(self.calendario_btn_mes, 0)
+        self.calendario_grupo_visualizacao.addButton(self.calendario_btn_semana, 1)
+
+        self.calendario_btn_mes.clicked.connect(
+            lambda: self.alternar_visualizacao_calendario(0)
+        )
+        self.calendario_btn_semana.clicked.connect(
+            lambda: self.alternar_visualizacao_calendario(1)
+        )
+
+        barra_visualizacao.addWidget(self.calendario_btn_mes)
+        barra_visualizacao.addWidget(self.calendario_btn_semana)
+        barra_visualizacao.addStretch()
+
+        self.calendario_aviso_previsao = QLabel(
+            "A previsão se recalcula conforme você estuda."
+        )
+        self.calendario_aviso_previsao.setObjectName("calendarForecastHeaderHint")
+        self.calendario_aviso_previsao.setVisible(False)
+        barra_visualizacao.addWidget(self.calendario_aviso_previsao)
+
+        layout.addLayout(barra_visualizacao)
+
+        self.calendario_paginas = QStackedWidget()
+        self.calendario_paginas.setObjectName("calendarPages")
+
+        self.calendario_pagina_mes = QWidget()
+        mes_layout = QVBoxLayout(self.calendario_pagina_mes)
+        mes_layout.setContentsMargins(0, 0, 0, 0)
+        mes_layout.setSpacing(12)
 
         # ====================================================
         # INDICADORES
@@ -48830,7 +49241,7 @@ class SistemaEstudos(QMainWindow):
             3
         )
 
-        layout.addLayout(
+        mes_layout.addLayout(
             indicadores
         )
 
@@ -49129,15 +49540,430 @@ class SistemaEstudos(QMainWindow):
             1
         )
 
-        layout.addLayout(
+        mes_layout.addLayout(
             corpo,
             1
         )
 
+        self.calendario_pagina_semana = self._criar_pagina_previsao_calendario()
+        self.calendario_paginas.addWidget(self.calendario_pagina_mes)
+        self.calendario_paginas.addWidget(self.calendario_pagina_semana)
+        self.calendario_paginas.setCurrentIndex(0)
+        layout.addWidget(self.calendario_paginas, 1)
+
         self.datas_formatadas_calendario = set()
         self.dados_calendario_mes = []
+        self._previsao_semana_suja = True
 
         return tela
+
+    def _criar_pagina_previsao_calendario(self):
+        pagina = QWidget()
+        layout = QVBoxLayout(pagina)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(10)
+
+        painel = QFrame()
+        painel.setObjectName("calendarForecastPanel")
+        painel_layout = QVBoxLayout(painel)
+        painel_layout.setContentsMargins(14, 12, 14, 12)
+        painel_layout.setSpacing(9)
+
+        topo = QHBoxLayout()
+        topo.setSpacing(8)
+
+        textos = QVBoxLayout()
+        textos.setSpacing(1)
+        titulo = QLabel("Previsão semanal")
+        titulo.setObjectName("calendarForecastTitle")
+        subtitulo = QLabel(
+            "Segunda a domingo: dias anteriores mostram o realizado; hoje e os próximos dias mostram a projeção atual."
+        )
+        subtitulo.setObjectName("calendarForecastSubtitle")
+        subtitulo.setWordWrap(True)
+        textos.addWidget(titulo)
+        textos.addWidget(subtitulo)
+        topo.addLayout(textos, 1)
+
+        self.calendario_previsao_atualizado = QLabel("Ainda não calculada")
+        self.calendario_previsao_atualizado.setObjectName("calendarForecastUpdated")
+        topo.addWidget(self.calendario_previsao_atualizado, 0, Qt.AlignVCenter)
+
+        self.calendario_previsao_recalcular = QPushButton("↻ Recalcular previsão")
+        self.calendario_previsao_recalcular.setObjectName("subtleButton")
+        self.calendario_previsao_recalcular.clicked.connect(
+            lambda: self.atualizar_previsao_semana_calendario(forcar=True)
+        )
+        topo.addWidget(self.calendario_previsao_recalcular, 0, Qt.AlignVCenter)
+        painel_layout.addLayout(topo)
+
+        aviso = QLabel(
+            "É uma projeção, não uma agenda fixa. Se você responder questões, revisar, "
+            "alterar metas ou mudar prioridades, os próximos tópicos podem mudar."
+        )
+        aviso.setObjectName("calendarForecastNotice")
+        aviso.setWordWrap(True)
+        painel_layout.addWidget(aviso)
+
+        self.calendario_previsao_scroll = QScrollArea()
+        self.calendario_previsao_scroll.setObjectName("calendarForecastScroll")
+        self.calendario_previsao_scroll.setWidgetResizable(True)
+        self.calendario_previsao_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.calendario_previsao_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        painel_layout.addWidget(self.calendario_previsao_scroll, 1)
+
+        self.calendario_previsao_estado = QLabel(
+            "Abra esta visualização para calcular a projeção da semana."
+        )
+        self.calendario_previsao_estado.setObjectName("calendarForecastEmpty")
+        self.calendario_previsao_estado.setAlignment(Qt.AlignCenter)
+        self.calendario_previsao_estado.setWordWrap(True)
+        self.calendario_previsao_scroll.setWidget(self.calendario_previsao_estado)
+
+        layout.addWidget(painel, 1)
+        return pagina
+
+    def alternar_visualizacao_calendario(self, indice):
+        indice = 1 if int(indice) == 1 else 0
+        if not hasattr(self, "calendario_paginas"):
+            return
+
+        self.calendario_paginas.setCurrentIndex(indice)
+        self.calendario_btn_mes.setChecked(indice == 0)
+        self.calendario_btn_semana.setChecked(indice == 1)
+        self.calendario_aviso_previsao.setVisible(indice == 1)
+
+        if indice == 1:
+            self.atualizar_previsao_semana_calendario()
+
+    def _montar_itens_previsao_calendario(self, concurso_id):
+        hoje = QDate.currentDate()
+        segunda = hoje.addDays(1 - hoje.dayOfWeek())
+        domingo = segunda.addDays(6)
+        inicio_txt = hoje.toString("yyyy-MM-dd")
+        domingo_txt = domingo.toString("yyyy-MM-dd")
+
+        plano_ativo = obter_plano_acao_automatico(concurso_id) or {}
+        carga = str(plano_ativo.get("carga") or "moderada").lower()
+        if carga not in {"leve", "moderada", "intensa"}:
+            carga = "moderada"
+
+        # O motor projeta a partir de hoje. Quando a semana está perto do fim,
+        # ele pode produzir datas da semana seguinte; elas são filtradas abaixo.
+        horizonte = max(3, hoje.daysTo(domingo) + 1)
+        plano = gerar_plano_acao_automatico(
+            concurso_id=concurso_id,
+            data_inicio=inicio_txt,
+            carga=carga,
+            horizonte=horizonte,
+            variacao=0,
+        )
+
+        por_data = {
+            segunda.addDays(i).toString("yyyy-MM-dd"): []
+            for i in range(7)
+        }
+        vistos = set()
+
+        def adicionar(item):
+            data_txt = str(item.get("data") or "")[:10]
+            if data_txt not in por_data:
+                return
+            topico_id = item.get("topico_id")
+            if topico_id not in (None, ""):
+                # A visão é por tópico: evita duplicação quando revisão e
+                # recomendação convergem para o mesmo conteúdo no mesmo dia.
+                chave = (data_txt, int(topico_id))
+            else:
+                chave = (
+                    data_txt,
+                    None,
+                    str(item.get("tipo") or ""),
+                    str(item.get("titulo") or item.get("topico") or ""),
+                )
+            if chave in vistos:
+                return
+            vistos.add(chave)
+            por_data[data_txt].append(dict(item))
+
+        # Dias passados da semana mostram o que efetivamente foi registrado.
+        # O dia atual também recebe os tópicos já estudados antes da projeção.
+        for deslocamento in range(7):
+            data = segunda.addDays(deslocamento)
+            if data > hoje:
+                continue
+            data_txt = data.toString("yyyy-MM-dd")
+            realizados = obter_relatorio_topicos_periodo(
+                data_txt,
+                data_txt,
+                concurso_id,
+            )
+            for dado in realizados:
+                revisoes = int(dado[3] or 0)
+                questoes = int(dado[4] or 0)
+                percentual = dado[6]
+                adicionar({
+                    "data": data_txt,
+                    "tipo": "Estudado" if data < hoje else "Estudado hoje",
+                    "titulo": str(dado[2]),
+                    "disciplina": str(dado[1]),
+                    "topico": str(dado[2]),
+                    "topico_id": int(dado[0]),
+                    "questoes": questoes,
+                    "prioridade": 200.0,
+                    "fixa": True,
+                    "realizado": True,
+                    "detalhe": (
+                        f"Registrado neste dia: {revisoes} revisão(ões), "
+                        f"{questoes} questão(ões) e desempenho {formatar_percentual(percentual)}."
+                    ),
+                })
+
+        # Revisões são desagrupadas para mostrar os tópicos reais nas colunas.
+        for dado in listar_pendencias(inicio_txt, concurso_id):
+            adicionar({
+                "data": inicio_txt,
+                "tipo": "Revisão",
+                "titulo": str(dado[2]),
+                "disciplina": str(dado[1]),
+                "topico": str(dado[2]),
+                "topico_id": int(dado[0]),
+                "questoes": 0,
+                "prioridade": 130.0,
+                "fixa": True,
+                "detalhe": (
+                    "Revisão vencida ou prevista para hoje. "
+                    f"Domínio atual: {formatar_percentual(dado[5])}."
+                ),
+            })
+
+        if hoje < domingo:
+            futuras = listar_revisoes_agendadas_periodo(
+                hoje.addDays(1).toString("yyyy-MM-dd"),
+                domingo_txt,
+                concurso_id,
+            )
+            for dado in futuras:
+                adicionar({
+                    "data": str(dado[4]),
+                    "tipo": "Revisão",
+                    "titulo": str(dado[2]),
+                    "disciplina": str(dado[1]),
+                    "topico": str(dado[2]),
+                    "topico_id": int(dado[0]),
+                    "questoes": 0,
+                    "prioridade": 120.0,
+                    "fixa": True,
+                    "detalhe": (
+                        "Revisão já vinculada à agenda. "
+                        f"Domínio atual: {formatar_percentual(dado[5])}."
+                    ),
+                })
+
+        for item in list(plano.get("itens") or []):
+            if item.get("origem") == "agenda_revisoes" and item.get("topico_id") in (None, ""):
+                continue
+            adicionar(item)
+
+        for itens in por_data.values():
+            itens.sort(
+                key=lambda item: (
+                    0 if item.get("realizado") else (1 if item.get("fixa") else 2),
+                    -float(item.get("prioridade") or 0.0),
+                    str(item.get("disciplina") or ""),
+                    str(item.get("topico") or item.get("titulo") or ""),
+                )
+            )
+
+        return por_data, plano
+
+    def _criar_card_previsao_calendario(self, item):
+        card = QFrame()
+        card.setObjectName("calendarForecastCard")
+
+        tipo = str(item.get("tipo") or "Recomendação")
+        tipo_chave = "realizado" if item.get("realizado") else (
+            "revisao" if tipo.lower().startswith("revis") else (
+                "simulado" if "simulado" in tipo.lower() else "recomendacao"
+            )
+        )
+        card.setProperty("forecastKind", tipo_chave)
+
+        detalhe = str(item.get("detalhe") or item.get("acao") or "").strip()
+        if detalhe:
+            card.setToolTip("Por que isso está aqui?\n" + detalhe)
+
+        box = QVBoxLayout(card)
+        box.setContentsMargins(9, 8, 9, 8)
+        box.setSpacing(4)
+
+        cab = QHBoxLayout()
+        cab.setSpacing(5)
+        disciplina = QLabel(str(item.get("disciplina") or "Geral"))
+        disciplina.setObjectName("calendarForecastDiscipline")
+        disciplina.setWordWrap(True)
+        cab.addWidget(disciplina, 1)
+
+        if item.get("topico_id") not in (None, ""):
+            abrir = QToolButton()
+            abrir.setObjectName("calendarForecastOpen")
+            abrir.setText("↗")
+            abrir.setToolTip("Abrir tópico")
+            abrir.setFixedSize(24, 24)
+            abrir.clicked.connect(
+                lambda _=False,
+                tid=int(item.get("topico_id")),
+                nome=str(item.get("topico") or item.get("titulo") or "Tópico"):
+                self.abrir_topico_previsao_calendario(tid, nome)
+            )
+            cab.addWidget(abrir, 0, Qt.AlignTop)
+        box.addLayout(cab)
+
+        titulo = QLabel(str(item.get("topico") or item.get("titulo") or "Atividade"))
+        titulo.setObjectName("calendarForecastCardTitle")
+        titulo.setWordWrap(True)
+        box.addWidget(titulo)
+
+        rodape = QHBoxLayout()
+        rodape.setSpacing(5)
+        etiqueta = QLabel(tipo)
+        etiqueta.setObjectName("calendarForecastKind")
+        rodape.addWidget(etiqueta)
+
+        qtd = int(item.get("questoes") or 0)
+        if qtd > 0:
+            carga = QLabel(f"{qtd} q.")
+            carga.setObjectName("calendarForecastLoad")
+            rodape.addWidget(carga)
+        rodape.addStretch()
+        box.addLayout(rodape)
+
+        if detalhe:
+            motivo = QLabel(detalhe)
+            motivo.setObjectName("calendarForecastReason")
+            motivo.setWordWrap(True)
+            motivo.setMaximumHeight(40)
+            box.addWidget(motivo)
+
+        return card
+
+    def atualizar_previsao_semana_calendario(self, forcar=False):
+        if not hasattr(self, "calendario_previsao_scroll"):
+            return
+
+        hoje_txt = QDate.currentDate().toString("yyyy-MM-dd")
+        if (
+            not forcar
+            and not getattr(self, "_previsao_semana_suja", True)
+            and self._previsao_semana_data_referencia == hoje_txt
+        ):
+            return
+
+        self.calendario_previsao_recalcular.setEnabled(False)
+        self.calendario_previsao_recalcular.setText("Recalculando…")
+        QApplication.processEvents(QEventLoop.AllEvents, 40)
+
+        try:
+            concurso_id = int(obter_concurso_ativo()[0])
+            por_data, plano = self._montar_itens_previsao_calendario(concurso_id)
+
+            conteudo = QWidget()
+            conteudo.setObjectName("calendarForecastBoard")
+            colunas = QHBoxLayout(conteudo)
+            colunas.setContentsMargins(2, 2, 2, 2)
+            colunas.setSpacing(8)
+
+            nomes = {
+                1: "Segunda", 2: "Terça", 3: "Quarta", 4: "Quinta",
+                5: "Sexta", 6: "Sábado", 7: "Domingo",
+            }
+            hoje = QDate.currentDate()
+            segunda = hoje.addDays(1 - hoje.dayOfWeek())
+            total_itens = 0
+
+            for deslocamento in range(7):
+                data = segunda.addDays(deslocamento)
+                data_txt = data.toString("yyyy-MM-dd")
+                itens = list(por_data.get(data_txt) or [])
+                total_itens += len(itens)
+
+                coluna = QFrame()
+                coluna.setObjectName("calendarForecastDay")
+                if data < hoje:
+                    estado_dia = "past"
+                elif data == hoje:
+                    estado_dia = "today"
+                else:
+                    estado_dia = "future"
+                coluna.setProperty("dayState", estado_dia)
+                coluna.setMinimumWidth(168)
+                coluna.setMaximumWidth(235)
+
+                cbox = QVBoxLayout(coluna)
+                cbox.setContentsMargins(8, 9, 8, 9)
+                cbox.setSpacing(7)
+
+                nome_dia = nomes.get(data.dayOfWeek(), "")
+                dia = QLabel(f"{nome_dia} • Hoje" if data == hoje else nome_dia)
+                dia.setObjectName("calendarForecastDayName")
+                cbox.addWidget(dia)
+
+                linha_data = QHBoxLayout()
+                data_label = QLabel(data.toString("dd/MM"))
+                data_label.setObjectName("calendarForecastDayDate")
+                linha_data.addWidget(data_label)
+                linha_data.addStretch()
+                qtd_label = QLabel(str(len(itens)))
+                qtd_label.setObjectName("calendarForecastDayCount")
+                linha_data.addWidget(qtd_label)
+                cbox.addLayout(linha_data)
+
+                if itens:
+                    for item in itens:
+                        cbox.addWidget(self._criar_card_previsao_calendario(item))
+                else:
+                    vazio = QLabel(
+                        "Sem estudo registrado" if data < hoje else "Sem atividade prevista"
+                    )
+                    vazio.setObjectName("calendarForecastDayEmpty")
+                    vazio.setWordWrap(True)
+                    vazio.setAlignment(Qt.AlignCenter)
+                    cbox.addWidget(vazio)
+
+                cbox.addStretch(1)
+                colunas.addWidget(coluna, 1)
+
+            self.calendario_previsao_scroll.setWidget(conteudo)
+            agora = QDate.currentDate().toString("dd/MM") + " • " + datetime.now().strftime("%H:%M")
+            self.calendario_previsao_atualizado.setText(f"Atualizado {agora}")
+            self.calendario_previsao_atualizado.setToolTip(
+                "A projeção representa o cenário atual se nenhuma prioridade relevante mudar."
+            )
+            self.calendario_previsao_recalcular.setToolTip(
+                f"{total_itens} atividade(s) prevista(s) • carga {str(plano.get('carga') or 'moderada').capitalize()}"
+            )
+            self._previsao_semana_suja = False
+            self._previsao_semana_data_referencia = hoje_txt
+        except Exception as erro:
+            falha = QLabel(
+                "Não foi possível calcular a previsão semanal.\n\n" + str(erro)
+            )
+            falha.setObjectName("calendarForecastEmpty")
+            falha.setAlignment(Qt.AlignCenter)
+            falha.setWordWrap(True)
+            self.calendario_previsao_scroll.setWidget(falha)
+            self.calendario_previsao_atualizado.setText("Previsão indisponível")
+        finally:
+            self.calendario_previsao_recalcular.setEnabled(True)
+            self.calendario_previsao_recalcular.setText("↻ Recalcular previsão")
+
+    def abrir_topico_previsao_calendario(self, topico_id, nome_topico):
+        janela = JanelaTopico(int(topico_id), str(nome_topico), self)
+        janela.exec()
+        self._previsao_semana_suja = True
+        self.atualizar_calendario()
+        if self.calendario_paginas.currentIndex() == 1:
+            self.atualizar_previsao_semana_calendario(forcar=True)
 
     def abrir_calendario(self):
         self._garantir_tela_calendario()
@@ -49153,6 +49979,12 @@ class SistemaEstudos(QMainWindow):
         self.telas.setCurrentWidget(
             self.tela_calendario
         )
+
+        if (
+            self.calendario_paginas.currentIndex() == 1
+            and getattr(self, "_previsao_semana_suja", True)
+        ):
+            self.atualizar_previsao_semana_calendario()
 
     def ir_para_hoje_calendario(self):
         hoje = QDate.currentDate()
@@ -49241,6 +50073,12 @@ class SistemaEstudos(QMainWindow):
             mes
         )
         self.atualizar_calendario_dia()
+
+        if (
+            hasattr(self, "calendario_paginas")
+            and self.calendario_paginas.currentIndex() == 1
+        ):
+            self.atualizar_previsao_semana_calendario()
 
     def atualizar_calendario_mes(
         self,
