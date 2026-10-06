@@ -170,13 +170,13 @@ def _constant_source(name: str, next_name: str) -> str:
 
 
 class ResolverCoreDesignSystemTests(unittest.TestCase):
-    def test_contract_expands_only_by_approved_stage_3e_a1_budget(self) -> None:
+    def test_contract_includes_approved_stage_3e_a2_budget(self) -> None:
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 162)
-        self.assertEqual(len(ALL_TOKENS), 264)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 172)
+        self.assertEqual(len(ALL_TOKENS), 274)
         self.assertEqual(
             sum(token.path.startswith("answer.") for token in COMPONENT_TOKENS),
-            50,
+            60,
         )
 
     def test_answer_colors_reproduce_final_legacy_cascade(self) -> None:
@@ -266,18 +266,15 @@ class ResolverCoreDesignSystemTests(unittest.TestCase):
                 self.assertIn(marker, TEMA_SOURCE)
         self.assertIn("from ui.design import render_qss", TEMA_SOURCE)
 
-    def test_stage_3e_a2_controls_remain_deliberately_legacy(self) -> None:
+    def test_stage_3e_a2_editor_controls_now_use_public_tokens(self) -> None:
         editor = _constant_source(
             "ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_CLARO",
             "ESTILO_CALENDARIO_PREVISAO_CLARO",
         )
-        self.assertRegex(editor, r"questionSolverExplanationEditButton[\s\S]*#[0-9A-Fa-f]{6,8}")
-        self.assertRegex(editor, r"questionSolverExplanationSaveButton[\s\S]*#[0-9A-Fa-f]{6,8}")
-        self.assertRegex(editor, r"questionSolverExplanationCancelButton[\s\S]*#[0-9A-Fa-f]{6,8}")
-        self.assertRegex(
-            TEMA_SOURCE,
-            r"QDialog#questionSolverDialog QPushButton#primaryButton[\s\S]*?#[0-9A-Fa-f]{6,8}",
-        )
+        self.assertNotRegex(editor, r"#[0-9A-Fa-f]{6,8}")
+        self.assertIn("{{color:answer.edit_action_surface}}", editor)
+        self.assertIn("{{color:answer.save_action_surface}}", editor)
+        self.assertIn("{{color:answer.cancel_action_surface}}", editor)
 
     def test_qss_output_contains_no_unresolved_token_markers(self) -> None:
         for factory in THEMES.values():

@@ -3679,17 +3679,15 @@ QDialog#questionSolverDialog QPushButton#questionSessionSkipButton:hover {
     border-color: #AFBAC8;
 }
 QDialog#questionSolverDialog QPushButton#primaryButton {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #4B50DF, stop:1 #586DE3);
-    color: #FFFFFF;
-    border: 1px solid #7885F0;
+    background: {{gradient:gradient.action_primary}};
+    color: {{color:text.on_action}};
+    border: 1px solid {{color:answer.primary_action_border}};
     border-radius: 9px;
     font-weight: 850;
 }
 QDialog#questionSolverDialog QPushButton#primaryButton:hover {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #595EE8, stop:1 #6579EC);
-    border-color: #98A2F7;
+    background: {{gradient:gradient.action_primary_hover}};
+    border-color: {{color:answer.primary_action_hover_border}};
 }
 QDialog#questionSolverDialog QPushButton#questionSessionEndButton {
     background-color: #FFF7F8;
@@ -3854,17 +3852,15 @@ QDialog#questionSolverDialog QPushButton#questionSessionSkipButton:hover {
     border-color: #607086;
 }
 QDialog#questionSolverDialog QPushButton#primaryButton {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #4B50DF, stop:1 #586DE3);
-    color: #FFFFFF;
-    border: 1px solid #7885F0;
+    background: {{gradient:gradient.action_primary}};
+    color: {{color:text.on_action}};
+    border: 1px solid {{color:answer.primary_action_border}};
     border-radius: 9px;
     font-weight: 850;
 }
 QDialog#questionSolverDialog QPushButton#primaryButton:hover {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #595EE8, stop:1 #6579EC);
-    border-color: #A2AAFF;
+    background: {{gradient:gradient.action_primary_hover}};
+    border-color: {{color:answer.primary_action_hover_border}};
 }
 QDialog#questionSolverDialog QPushButton#questionSessionEndButton {
     background-color: #2B2027;
@@ -4075,18 +4071,16 @@ QDialog#questionSolverDialog QPushButton#questionSessionSkipButton:hover {
     border-color: #707C8B;
 }
 QDialog#questionSolverDialog QPushButton#primaryButton {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #4447E8, stop:0.52 #4347E1, stop:1 #3C42D2);
-    color: #FFFFFF;
-    border: 1px solid #7C83FF;
+    background: {{gradient:gradient.action_primary}};
+    color: {{color:text.on_action}};
+    border: 1px solid {{color:answer.primary_action_border}};
     border-radius: 10px;
     font-size: 9.2pt;
     font-weight: 900;
 }
 QDialog#questionSolverDialog QPushButton#primaryButton:hover {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #5355F2, stop:0.52 #4F54EB, stop:1 #464DDE);
-    border-color: #B1B7FF;
+    background: {{gradient:gradient.action_primary_hover}};
+    border-color: {{color:answer.primary_action_hover_border}};
 }
 QDialog#questionSolverDialog QPushButton#questionSessionEndButton {
     background-color: #2A2026;
@@ -4595,17 +4589,17 @@ QDialog#questionSolverDialog QLabel#questionSolverExplanationTitle {
     font-weight: 800;
 }
 QDialog#questionSolverDialog QToolButton#questionSolverExplanationEditButton {
-    background-color: #FFFFFF;
-    color: #475569;
-    border: 1px solid #CBD5E1;
+    background-color: {{color:answer.edit_action_surface}};
+    color: {{color:icon.default}};
+    border: 1px solid {{color:answer.editor_border}};
     border-radius: 7px;
     font-size: 13pt;
     font-weight: 800;
 }
 QDialog#questionSolverDialog QToolButton#questionSolverExplanationEditButton:hover {
-    background-color: #EEF2FF;
-    color: #4338CA;
-    border-color: #A5B4FC;
+    background-color: {{color:answer.edit_action_hover_surface}};
+    color: {{color:answer.edit_action_hover_text}};
+    border-color: {{color:answer.edit_action_hover_border}};
 }
 QDialog#questionSolverDialog QTextEdit#questionSolverExplanationEditor {
     background-color: {{color:answer.editor_surface}};
@@ -4615,17 +4609,17 @@ QDialog#questionSolverDialog QTextEdit#questionSolverExplanationEditor {
     padding: 7px;
 }
 QDialog#questionSolverDialog QPushButton#questionSolverExplanationSaveButton {
-    background-color: #4F46E5;
-    color: #FFFFFF;
-    border: 1px solid #4338CA;
+    background-color: {{color:answer.save_action_surface}};
+    color: {{color:answer.save_action_text}};
+    border: 1px solid {{color:answer.save_action_border}};
     border-radius: 8px;
     font-weight: 800;
     padding: 6px 14px;
 }
 QDialog#questionSolverDialog QPushButton#questionSolverExplanationCancelButton {
-    background-color: #FFFFFF;
-    color: #475569;
-    border: 1px solid #CBD5E1;
+    background-color: {{color:answer.cancel_action_surface}};
+    color: {{color:icon.default}};
+    border: 1px solid {{color:answer.editor_border}};
     border-radius: 8px;
     font-weight: 700;
     padding: 6px 14px;
@@ -4639,17 +4633,17 @@ QDialog#questionSolverDialog QLabel#questionSolverExplanationTitle {
     font-weight: 800;
 }
 QDialog#questionSolverDialog QToolButton#questionSolverExplanationEditButton {
-    background-color: #182235;
-    color: #CBD5E1;
-    border: 1px solid #475569;
+    background-color: {{color:answer.edit_action_surface}};
+    color: {{color:icon.default}};
+    border: 1px solid {{color:answer.editor_border}};
     border-radius: 7px;
     font-size: 13pt;
     font-weight: 800;
 }
 QDialog#questionSolverDialog QToolButton#questionSolverExplanationEditButton:hover {
-    background-color: #273449;
-    color: #FFFFFF;
-    border-color: #8B95FF;
+    background-color: {{color:answer.edit_action_hover_surface}};
+    color: {{color:answer.edit_action_hover_text}};
+    border-color: {{color:answer.edit_action_hover_border}};
 }
 QDialog#questionSolverDialog QTextEdit#questionSolverExplanationEditor {
     background-color: {{color:answer.editor_surface}};
@@ -4659,17 +4653,17 @@ QDialog#questionSolverDialog QTextEdit#questionSolverExplanationEditor {
     padding: 7px;
 }
 QDialog#questionSolverDialog QPushButton#questionSolverExplanationSaveButton {
-    background-color: #6366F1;
-    color: #FFFFFF;
-    border: 1px solid #818CF8;
+    background-color: {{color:answer.save_action_surface}};
+    color: {{color:answer.save_action_text}};
+    border: 1px solid {{color:answer.save_action_border}};
     border-radius: 8px;
     font-weight: 800;
     padding: 6px 14px;
 }
 QDialog#questionSolverDialog QPushButton#questionSolverExplanationCancelButton {
-    background-color: #1F2937;
-    color: #CBD5E1;
-    border: 1px solid #475569;
+    background-color: {{color:answer.cancel_action_surface}};
+    color: {{color:icon.default}};
+    border: 1px solid {{color:answer.editor_border}};
     border-radius: 8px;
     font-weight: 700;
     padding: 6px 14px;
@@ -4683,17 +4677,17 @@ QDialog#questionSolverDialog QLabel#questionSolverExplanationTitle {
     font-weight: 800;
 }
 QDialog#questionSolverDialog QToolButton#questionSolverExplanationEditButton {
-    background-color: #0D1D2D;
-    color: #B6D9E8;
-    border: 1px solid #355F82;
+    background-color: {{color:answer.edit_action_surface}};
+    color: {{color:icon.default}};
+    border: 1px solid {{color:answer.editor_border}};
     border-radius: 7px;
     font-size: 13pt;
     font-weight: 800;
 }
 QDialog#questionSolverDialog QToolButton#questionSolverExplanationEditButton:hover {
-    background-color: #15324A;
-    color: #F2FBFF;
-    border-color: #4BC9F2;
+    background-color: {{color:answer.edit_action_hover_surface}};
+    color: {{color:answer.edit_action_hover_text}};
+    border-color: {{color:answer.edit_action_hover_border}};
 }
 QDialog#questionSolverDialog QTextEdit#questionSolverExplanationEditor {
     background-color: {{color:answer.editor_surface}};
@@ -4705,17 +4699,17 @@ QDialog#questionSolverDialog QTextEdit#questionSolverExplanationEditor {
     selection-color: {{color:text.selection_accent}};
 }
 QDialog#questionSolverDialog QPushButton#questionSolverExplanationSaveButton {
-    background-color: #19527A;
-    color: #F1FAFF;
-    border: 1px solid #4BC9F2;
+    background-color: {{color:answer.save_action_surface}};
+    color: {{color:answer.save_action_text}};
+    border: 1px solid {{color:answer.save_action_border}};
     border-radius: 8px;
     font-weight: 800;
     padding: 6px 14px;
 }
 QDialog#questionSolverDialog QPushButton#questionSolverExplanationCancelButton {
-    background-color: #0D1D2D;
-    color: #B6D9E8;
-    border: 1px solid #355F82;
+    background-color: {{color:answer.cancel_action_surface}};
+    color: {{color:icon.default}};
+    border: 1px solid {{color:answer.editor_border}};
     border-radius: 8px;
     font-weight: 700;
     padding: 6px 14px;
@@ -6686,17 +6680,17 @@ QPushButton#sectionEditButton:hover {
     }
 
     QFrame#questionSolverFeedback[resultState="correta"] {
-        background-color: #f0fdf4;
-        border-color: #86efac;
+        background-color: {{color:feedback.success_surface}};
+        border-color: {{color:feedback.success_border}};
     }
 
     QFrame#questionSolverFeedback[resultState="errada"] {
-        background-color: #fef2f2;
-        border-color: #fca5a5;
+        background-color: {{color:feedback.danger_surface}};
+        border-color: {{color:feedback.danger_border}};
     }
 
     QLabel#questionSolverFeedbackTitle {
-        color: #111827;
+        color: {{color:text.on_feedback}};
         font-size: 10pt;
         font-weight: 800;
     }
@@ -13709,17 +13703,17 @@ def stylesheet_escuro():
     }
 
     QFrame#questionSolverFeedback[resultState="correta"] {
-        background-color: #163523;
-        border-color: #22c55e;
+        background-color: {{color:feedback.success_surface}};
+        border-color: {{color:feedback.success_border}};
     }
 
     QFrame#questionSolverFeedback[resultState="errada"] {
-        background-color: #3f1218;
-        border-color: #ef4444;
+        background-color: {{color:feedback.danger_surface}};
+        border-color: {{color:feedback.danger_border}};
     }
 
     QLabel#questionSolverFeedbackTitle {
-        color: #f8fafc;
+        color: {{color:text.on_feedback}};
         font-size: 10pt;
         font-weight: 800;
     }

@@ -41,6 +41,18 @@ class InlineExplanationEditor058Tests(unittest.TestCase):
         self.assertIn("questionSolverExplanationEditor", init)
         self.assertIn("self.feedback_explicacao_salvar", init)
         self.assertIn("self.feedback_explicacao_cancelar", init)
+        self.assertIn(
+            "self.feedback_explicacao_editar.clicked.connect(self.iniciar_edicao_explicacao)",
+            init,
+        )
+        self.assertIn(
+            "self.feedback_explicacao_salvar.clicked.connect(self.salvar_edicao_explicacao)",
+            init,
+        )
+        self.assertIn(
+            "self.feedback_explicacao_cancelar.clicked.connect(self.cancelar_edicao_explicacao)",
+            init,
+        )
 
     def test_icone_so_aparece_no_feedback_confirmado(self):
         confirmar = ast.unparse(metodo(TREE, "JanelaResolverQuestoes", "confirmar_resposta"))
@@ -63,6 +75,14 @@ class InlineExplanationEditor058Tests(unittest.TestCase):
         self.assertIn("self.questao_atual['explicacao'] = nova_explicacao", salvar)
         self.assertIn("self.atualizar_texto_feedback_explicacao()", salvar)
         self.assertIn("self.finalizar_edicao_explicacao()", salvar)
+
+    def test_cancelar_descarta_o_editor_e_restaura_o_feedback_atual(self):
+        cancelar = ast.unparse(
+            metodo(TREE, "JanelaResolverQuestoes", "cancelar_edicao_explicacao")
+        )
+        self.assertIn("if not self._editando_explicacao", cancelar)
+        self.assertIn("self.atualizar_texto_feedback_explicacao()", cancelar)
+        self.assertIn("self.finalizar_edicao_explicacao()", cancelar)
 
     def test_banco_atualiza_apenas_explicacao_sem_schema_novo(self):
         atualizar = ast.unparse(funcao(BANCO_TREE, "atualizar_explicacao_questao"))

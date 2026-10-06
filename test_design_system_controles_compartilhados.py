@@ -80,7 +80,9 @@ class SharedControlsBaselineTests(unittest.TestCase):
         self.assertIn("from ui.design import render_qss", TEMA_SOURCE)
         self.assertGreaterEqual(TEMA_SOURCE.count("{{color:"), 146)
         # Quatro gradientes compartilhados da 3C e quatro do Resolvedor 3E-A1.
-        self.assertEqual(TEMA_SOURCE.count("{{gradient:"), 8)
+        # 4 controles compartilhados + 4 estados do núcleo do Resolvedor
+        # + 6 ações primárias normal/hover da Etapa 3E-A2.
+        self.assertEqual(TEMA_SOURCE.count("{{gradient:"), 14)
 
     def test_tokens_de_controles_reproduzem_valores_legados(self) -> None:
         expected = {

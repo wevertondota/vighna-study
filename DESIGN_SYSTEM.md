@@ -2,7 +2,7 @@
 
 ## Escopo atual
 
-Este documento descreve a fundação criada na Etapa 2 e as integrações de caracterização já concluídas. `icones.py` consome `icon.*`; o splash externo, o indicador de tarefas e somente o fallback `JanelaInicializacao` de `main.py` consomem tokens visuais fixos. Em `tema.py`, os controles genéricos compartilhados, o domínio Calendário e o núcleo interativo do Resolvedor migrado na Etapa 3E-A1 consomem tokens. O calendário mensal também usa `qcolor()` nos seus `QTextCharFormat`. O chrome da sessão, as ações do editor e Confirmar/Próxima permanecem legados. A cascata dos temas continua inalterada.
+Este documento descreve a fundação criada na Etapa 2 e as integrações de caracterização já concluídas. `icones.py` consome `icon.*`; o splash externo, o indicador de tarefas e somente o fallback `JanelaInicializacao` de `main.py` consomem tokens visuais fixos. Em `tema.py`, os controles genéricos compartilhados, o domínio Calendário e o Resolvedor migrado nas Etapas 3E-A1/3E-A2 consomem tokens. O calendário mensal também usa `qcolor()` nos seus `QTextCharFormat`. O chrome geral da sessão permanece legado. A cascata dos temas continua inalterada.
 
 A API central fica em `ui/design/` e possui quatro níveis:
 
@@ -105,8 +105,11 @@ da sessão. A Etapa 3E-A1 caracteriza superfície, borda, texto, indicador,
 foco de teclado, tachamento, tesoura, correção, explicação e corpo do editor.
 Os tokens `answer.struck_gradient` e `answer.correct_gradient`, por exemplo,
 preservam direção e stops próprios; igualdade física com `feedback.*` não
-autoriza a consolidação. Botões do editor, ação principal e feedback de
-resultado permanecem para a 3E-A2.
+autoriza a consolidação. A Etapa 3E-A2 caracteriza as ações do editor, a ação
+primária Confirmar/Próxima e o painel de feedback. Este último consome
+`feedback.success_*`/`feedback.danger_*` somente nos papéis de superfície e
+borda que foram recaracterizados contra a cascata real; as alternativas
+continuam independentes em `answer.correct_*`/`answer.incorrect_*`.
 
 ## Consumo em QSS
 
