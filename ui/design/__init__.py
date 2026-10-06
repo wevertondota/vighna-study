@@ -5,6 +5,10 @@ ser carregado. Adaptadores Qt fazem importação tardia apenas quando chamados.
 """
 
 from .adapters import (
+    fixed_qcolor,
+    fixed_qlineargradient,
+    fixed_qss_color,
+    fixed_qss_gradient,
     gradient_to_qss,
     qbrush,
     qcolor,
@@ -33,12 +37,15 @@ from .themes import (
     ThemeDefinition,
     ThemeName,
     TokenNotFoundError,
+    fixed_color,
+    fixed_gradient,
     get_theme,
 )
 from .tokens import (
     ALL_TOKENS,
     COMPONENT_TOKEN_COUNT,
     COMPONENT_TOKENS,
+    FIXED_TOKEN_PATHS,
     SEMANTIC_TOKEN_COUNT,
     SEMANTIC_TOKENS,
     TokenKind,
@@ -54,6 +61,7 @@ __all__ = (
     "ALL_TOKENS",
     "COMPONENT_TOKEN_COUNT",
     "COMPONENT_TOKENS",
+    "FIXED_TOKEN_PATHS",
     "ColorValue",
     "DARK_THEME",
     "DIAGONAL_DOWN",
@@ -77,6 +85,12 @@ __all__ = (
     "TokenSpec",
     "VERTICAL",
     "VisualState",
+    "fixed_color",
+    "fixed_gradient",
+    "fixed_qcolor",
+    "fixed_qlineargradient",
+    "fixed_qss_color",
+    "fixed_qss_gradient",
     "get_theme",
     "gradient",
     "gradient_to_qss",

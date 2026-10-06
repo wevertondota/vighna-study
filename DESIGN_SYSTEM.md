@@ -2,7 +2,7 @@
 
 ## Escopo atual
 
-Este documento descreve a fundação criada na Etapa 2 e sua primeira integração de caracterização. Ela permanece desconectada de `tema.py`, `main.py`, `startup_splash.py` e `tarefas_pesadas.py`; `icones.py` consome apenas os tokens `icon.action`, `icon.highlight` e `icon.configuration`, preservando seus valores legados. A cascata dos temas e os demais estilos continuam inalterados.
+Este documento descreve a fundação criada na Etapa 2 e as integrações de caracterização já concluídas. `icones.py` consome `icon.*`; o splash externo, o indicador de tarefas e somente o fallback `JanelaInicializacao` de `main.py` consomem tokens visuais fixos. `tema.py` e os demais componentes permanecem legados. A cascata dos temas continua inalterada.
 
 A API central fica em `ui/design/` e possui quatro níveis:
 
@@ -26,7 +26,8 @@ Os identificadores `hex_...` são propositadamente físicos. Eles evitam atribui
 `TokenSpec` registra caminho, nível e tipo. Existem dois níveis públicos:
 
 - semântico: `canvas.*`, `surface.*`, `text.*`, `border.*`, `action.*`, `feedback.*`, `focus.*`, `icon.*`, `overlay.*`, `glow.*` e `gradient.*`;
-- componente: `answer.*`, `progress.*`, `calendar.*`, `chart.*` e `focus_mode.*`.
+- componente temático: `answer.*`, `progress.*`, `calendar.*`, `chart.*` e `focus_mode.*`;
+- componente fixo: `system_status.*`, `startup.*` e `task_indicator.*`.
 
 `VisualState` padroniza os estados `normal`, `hover`, `pressed`, `selected`, `focused`, `keyboard_focus`, `checked`, `disabled`, `correct`, `incorrect` e `struck`.
 
@@ -43,6 +44,8 @@ Claro, Escuro e Futurista implementam exatamente o mesmo contrato. Cada `ThemeDe
 
 O Futurista possui uma representação completa na nova infraestrutura, sem depender do objeto do tema Escuro. Isso apenas torna a fundação apta a uma separação futura. A cascata legada `Escuro + overrides Futurista` de `tema.py` não foi alterada nem contornada.
 
+Os tokens de componente fixo são cadastrados com o mesmo valor nos três contratos e resolvidos por `fixed_color()`/`fixed_gradient()`. A importação valida essa invariância. Assim, splash e indicador não passam a variar com o tema por efeito colateral.
+
 Tokens ausentes e acessos com tipo errado geram `TokenNotFoundError`; não existe fallback silencioso.
 
 ### `gradients.py`: gradientes estruturados
@@ -55,11 +58,15 @@ Tokens ausentes e acessos com tipo errado geram `TokenNotFoundError`; não exist
 - `ColorValue` em cada stop, inclusive alpha por `#AARRGGBB`;
 - variante por tema, mantida no respectivo `ThemeDefinition`.
 
-As 201 ocorrências legadas não foram migradas. Foram modelados somente gradientes representativos necessários para validar a arquitetura.
+Das 201 ocorrências inventariadas, somente os dois QLinearGradient do splash foram migrados até aqui. Os demais gradientes legados continuam inalterados.
+
+Gradientes fixos também podem receber coordenadas dinâmicas no adaptador QPainter. Direção efetiva, stops, posições e alpha permanecem centralizados sem congelar a geometria calculada em runtime.
 
 ### `adapters.py`: consumidores
 
 Os adaptadores não mantêm estado e não exigem widgets ativos. O pacote `ui.design` não importa PySide6 nem QtAwesome durante sua importação. `PySide6.QtGui` só é carregado quando um adaptador Qt é efetivamente chamado.
+
+Para componentes deliberadamente independentes do tema existem `fixed_qss_color()`, `fixed_qss_gradient()`, `fixed_qcolor()` e `fixed_qlineargradient()`. Esses adaptadores só aceitam caminhos declarados em `FIXED_TOKEN_PATHS`.
 
 ## Contrato e nomenclatura
 
@@ -79,6 +86,8 @@ Exemplos válidos:
 - `answer.keyboard_focus_border` — borda exclusiva da navegação por teclado;
 - `calendar.week_predicted_surface` — superfície da semana prevista;
 - `gradient.action_primary` — gradiente semântico de ação.
+- `system_status.progress_track` — trilho fixo compartilhado por startup e tarefas;
+- `startup.shimmer_gradient` — brilho móvel do splash com alpha preservado.
 
 Não se deve usar nomes de cor (`blue_500`) no contrato semântico, nomes de tela para papéis gerais, nem números de versão no caminho.
 
@@ -104,6 +113,14 @@ trecho = f"QPushButton {{ background: {fundo}; }}"
 
 Não concatene alpha ou altere a cor devolvida no consumidor. Se o papel precisar de uma variante, ela deve existir no contrato.
 
+Para um visual deliberadamente fixo:
+
+```python
+from ui.design import fixed_qss_color
+
+cor = fixed_qss_color("system_status.text_primary")
+```
+
 ## Consumo em QPainter
 
 Os adaptadores retornam objetos prontos de `PySide6.QtGui`:
@@ -115,6 +132,17 @@ cor = qcolor("escuro", "text.primary")
 pincel = qbrush("escuro", "surface.primary")
 caneta = qpen("escuro", "border.default", width=1.5)
 gradiente = qlineargradient("futurista", "gradient.hero")
+```
+
+Quando a geometria nasce no `paintEvent`, as coordenadas podem ser informadas sem recriar os stops:
+
+```python
+from ui.design import fixed_qlineargradient
+
+gradiente = fixed_qlineargradient(
+    "startup.progress_gradient",
+    coordinates=(esquerda, 0, direita, 0),
+)
 ```
 
 Essas funções não criam `QApplication` e não importam `QtWidgets`.
@@ -144,6 +172,8 @@ Antes de criar um token:
 6. Registre na paleta qualquer valor físico novo já aprovado.
 7. Acrescente testes de contrato e do adaptador relevante.
 8. Migre o consumidor em uma mudança separada, com comparação visual antes/depois.
+
+Se o componente for comprovadamente fixo, registre o mesmo valor nos três contratos, inclua o caminho em `FIXED_TOKEN_PATHS` e consuma somente pelos adaptadores `fixed_*`. Não use esse mecanismo para evitar uma decisão temática ainda não caracterizada.
 
 ## Quando não criar um token
 

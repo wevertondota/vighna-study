@@ -9,7 +9,7 @@ from typing import Mapping
 
 from .gradients import GradientDirection, GradientSpec, gradient
 from .palette import ColorValue, PALETTE
-from .tokens import ALL_TOKENS, TokenKind, TokenSpec, token_spec
+from .tokens import ALL_TOKENS, FIXED_TOKEN_PATHS, TokenKind, TokenSpec, token_spec
 
 
 class ThemeName(str, Enum):
@@ -239,8 +239,33 @@ def _component_colors(c: Mapping[str, str], overrides: Mapping[str, str]) -> dic
         "focus_mode.action": c["action_primary"],
         "focus_mode.danger": c["action_destructive"],
     }
+    colors.update(_FIXED_COMPONENT_COLORS)
     colors.update(overrides)
     return colors
+
+
+_FIXED_COMPONENT_COLORS = {
+    "system_status.canvas": "#071522",
+    "system_status.border": "#214A64",
+    "system_status.surface": "#081927",
+    "system_status.surface_border": "#15364C",
+    "system_status.text_primary": "#F5F8FF",
+    "system_status.text_status": "#EAF4FF",
+    "system_status.text_secondary": "#8FAAC0",
+    "system_status.text_accent": "#67B7FF",
+    "system_status.progress_track": "#081A28",
+    "system_status.progress_border": "#315B76",
+    "system_status.progress_fill": "#3A8DF1",
+    "startup.logo_surface": "#091927",
+    "startup.logo_border": "#1D4058",
+    "startup.subtitle_text": "#9FB9D0",
+    "startup.footer_text": "#4E718A",
+    "startup.logo_fallback": "#6DC1FF",
+    "startup.progress_pulse": "#6FC3FF",
+    "task_indicator.mark_surface": "#0A2233",
+    "task_indicator.mark_border": "#286483",
+    "task_indicator.mark_text": "#74C7FF",
+}
 
 
 def _refs(colors: Mapping[str, str]) -> dict[str, str]:
@@ -423,6 +448,16 @@ def _theme_gradients(kind: ThemeName) -> dict[str, GradientSpec]:
         "progress.fill_gradient": _palette_gradient(*action),
         "focus_mode.action_gradient": _palette_gradient(*focus_action),
         "focus_mode.action_hover_gradient": _palette_gradient(*focus_hover),
+        "startup.progress_gradient": _palette_gradient(
+            (0.0, "#2E74D8"),
+            (0.55, "#3A8DF1"),
+            (1.0, "#4CA8FF"),
+        ),
+        "startup.shimmer_gradient": _palette_gradient(
+            (0.0, "#007DD7FF"),
+            (0.5, "#96AFE8FF"),
+            (1.0, "#007DD7FF"),
+        ),
     }
 
 
@@ -442,6 +477,38 @@ THEMES: Mapping[ThemeName, ThemeDefinition] = MappingProxyType(
         ThemeName.FUTURISTIC: FUTURISTIC_THEME,
     }
 )
+
+
+def fixed_color(token: str | TokenSpec) -> ColorValue:
+    """Resolve uma cor deliberadamente fixa e valida sua invariância temática."""
+
+    path = token.path if isinstance(token, TokenSpec) else token
+    if path not in FIXED_TOKEN_PATHS:
+        raise TokenNotFoundError(f"Token visual fixo inexistente: {path!r}")
+    colors = tuple(theme.color(path) for theme in THEMES.values())
+    if len(set(colors)) != 1:
+        raise ThemeContractError(f"Token fixo varia entre temas: {path!r}")
+    return colors[0]
+
+
+def fixed_gradient(token: str | TokenSpec) -> GradientSpec:
+    """Resolve um gradiente deliberadamente fixo e valida os três contratos."""
+
+    path = token.path if isinstance(token, TokenSpec) else token
+    if path not in FIXED_TOKEN_PATHS:
+        raise TokenNotFoundError(f"Token visual fixo inexistente: {path!r}")
+    gradients = tuple(theme.gradient(path) for theme in THEMES.values())
+    if len(set(gradients)) != 1:
+        raise ThemeContractError(f"Gradiente fixo varia entre temas: {path!r}")
+    return gradients[0]
+
+
+for _fixed_path in FIXED_TOKEN_PATHS:
+    _fixed_spec = token_spec(_fixed_path)
+    if _fixed_spec.kind is TokenKind.COLOR:
+        fixed_color(_fixed_spec)
+    else:
+        fixed_gradient(_fixed_spec)
 
 
 def get_theme(theme: ThemeName | str) -> ThemeDefinition:

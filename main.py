@@ -80,6 +80,7 @@ from tema import (
 )
 
 from icones import criar_icone
+from ui.design import fixed_qss_color
 
 from backup import (
     fazer_backup,
@@ -32781,7 +32782,8 @@ class JanelaInicializacao(QDialog):
         else:
             logo.setText("V")
             logo.setStyleSheet(
-                "font-size: 25px; font-weight: 800; color: #6DC1FF;"
+                "font-size: 25px; font-weight: 800; "
+                f"color: {fixed_qss_color('startup.logo_fallback')};"
             )
         logo_layout.addWidget(logo)
         topo.addWidget(logo_box, 0, Qt.AlignVCenter)
@@ -32854,37 +32856,47 @@ class JanelaInicializacao(QDialog):
 
         self.setStyleSheet(
             "QDialog {"
-            " background: #071522; border: 1px solid #214A64; border-radius: 17px;"
+            f" background: {fixed_qss_color('system_status.canvas')};"
+            f" border: 1px solid {fixed_qss_color('system_status.border')}; border-radius: 17px;"
             "}"
             "QFrame#startupFallbackLogoBox {"
-            " background: #091927; border: 1px solid #1D4058; border-radius: 13px;"
+            f" background: {fixed_qss_color('startup.logo_surface')};"
+            f" border: 1px solid {fixed_qss_color('startup.logo_border')}; border-radius: 13px;"
             "}"
             "QLabel#startupFallbackTitle {"
-            " color: #F5F8FF; font-family: 'Segoe UI'; font-size: 23px; font-weight: 800;"
+            f" color: {fixed_qss_color('system_status.text_primary')};"
+            " font-family: 'Segoe UI'; font-size: 23px; font-weight: 800;"
             "}"
             "QLabel#startupFallbackSubtitle {"
-            " color: #9FB9D0; font-family: 'Segoe UI'; font-size: 12px;"
+            f" color: {fixed_qss_color('startup.subtitle_text')};"
+            " font-family: 'Segoe UI'; font-size: 12px;"
             "}"
             "QFrame#startupFallbackPanel {"
-            " background: #081927; border: 1px solid #15364C; border-radius: 13px;"
+            f" background: {fixed_qss_color('system_status.surface')};"
+            f" border: 1px solid {fixed_qss_color('system_status.surface_border')}; border-radius: 13px;"
             "}"
             "QLabel#startupFallbackStatus {"
-            " color: #EAF4FF; font-family: 'Segoe UI'; font-size: 13px; font-weight: 650;"
+            f" color: {fixed_qss_color('system_status.text_status')};"
+            " font-family: 'Segoe UI'; font-size: 13px; font-weight: 650;"
             "}"
             "QLabel#startupFallbackPercent {"
-            " color: #67B7FF; font-family: 'Segoe UI'; font-size: 13px; font-weight: 800;"
+            f" color: {fixed_qss_color('system_status.text_accent')};"
+            " font-family: 'Segoe UI'; font-size: 13px; font-weight: 800;"
             "}"
             "QLabel#startupFallbackDetail {"
-            " color: #8FAAC0; font-family: 'Segoe UI'; font-size: 11px;"
+            f" color: {fixed_qss_color('system_status.text_secondary')};"
+            " font-family: 'Segoe UI'; font-size: 11px;"
             "}"
             "QLabel#startupFallbackFooter {"
-            " color: #4E718A; font-family: 'Segoe UI'; font-size: 9px; letter-spacing: 0.35px;"
+            f" color: {fixed_qss_color('startup.footer_text')};"
+            " font-family: 'Segoe UI'; font-size: 9px; letter-spacing: 0.35px;"
             "}"
             "QProgressBar {"
-            " border: 1px solid #315B76; border-radius: 8px; background: #081A28;"
+            f" border: 1px solid {fixed_qss_color('system_status.progress_border')};"
+            f" border-radius: 8px; background: {fixed_qss_color('system_status.progress_track')};"
             "}"
             "QProgressBar::chunk {"
-            " border-radius: 7px; background: #3A8DF1;"
+            f" border-radius: 7px; background: {fixed_qss_color('system_status.progress_fill')};"
             "}"
         )
 

@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
     QProgressBar,
     QVBoxLayout,
 )
+from ui.design import fixed_qss_color
 
 
 class _SinaisWorker(QObject):
@@ -209,16 +210,26 @@ class IndicadorTarefa(QFrame):
         raiz.addWidget(painel)
 
         self.setStyleSheet(
-            "QFrame#taskIndicatorRoot { background: #071522; border: 1px solid #214A64; border-radius: 16px; }"
-            "QLabel#taskIndicatorMark { background: #0A2233; border: 1px solid #286483; "
-            "border-radius: 10px; color: #74C7FF; font-size: 19px; font-weight: 900; }"
-            "QLabel#taskIndicatorTitle { color: #F5F8FF; font-size: 15px; font-weight: 800; }"
-            "QLabel#taskIndicatorDetail { color: #8FAAC0; font-size: 10px; }"
-            "QFrame#taskIndicatorPanel { background: #081927; border: 1px solid #15364C; border-radius: 10px; }"
-            "QLabel#taskIndicatorStatus { color: #EAF4FF; font-size: 11px; font-weight: 650; }"
-            "QLabel#taskIndicatorPercent { color: #67B7FF; font-size: 11px; font-weight: 800; }"
-            "QProgressBar { border: 1px solid #315B76; border-radius: 6px; background: #081A28; }"
-            "QProgressBar::chunk { border-radius: 5px; background: #3A8DF1; }"
+            f"QFrame#taskIndicatorRoot {{ background: {fixed_qss_color('system_status.canvas')};"
+            f" border: 1px solid {fixed_qss_color('system_status.border')}; border-radius: 16px; }}"
+            f"QLabel#taskIndicatorMark {{ background: {fixed_qss_color('task_indicator.mark_surface')};"
+            f" border: 1px solid {fixed_qss_color('task_indicator.mark_border')}; "
+            f"border-radius: 10px; color: {fixed_qss_color('task_indicator.mark_text')};"
+            " font-size: 19px; font-weight: 900; }"
+            f"QLabel#taskIndicatorTitle {{ color: {fixed_qss_color('system_status.text_primary')};"
+            " font-size: 15px; font-weight: 800; }"
+            f"QLabel#taskIndicatorDetail {{ color: {fixed_qss_color('system_status.text_secondary')};"
+            " font-size: 10px; }"
+            f"QFrame#taskIndicatorPanel {{ background: {fixed_qss_color('system_status.surface')};"
+            f" border: 1px solid {fixed_qss_color('system_status.surface_border')}; border-radius: 10px; }}"
+            f"QLabel#taskIndicatorStatus {{ color: {fixed_qss_color('system_status.text_status')};"
+            " font-size: 11px; font-weight: 650; }"
+            f"QLabel#taskIndicatorPercent {{ color: {fixed_qss_color('system_status.text_accent')};"
+            " font-size: 11px; font-weight: 800; }"
+            f"QProgressBar {{ border: 1px solid {fixed_qss_color('system_status.progress_border')};"
+            f" border-radius: 6px; background: {fixed_qss_color('system_status.progress_track')}; }}"
+            f"QProgressBar::chunk {{ border-radius: 5px;"
+            f" background: {fixed_qss_color('system_status.progress_fill')}; }}"
         )
 
         self._timer_animacao = QTimer(self)

@@ -91,11 +91,25 @@ _COMPONENT_COLOR_PATHS = (
     "chart.series_4", "chart.series_5", "chart.series_6", "chart.positive", "chart.negative",
     "focus_mode.canvas", "focus_mode.panel", "focus_mode.panel_active", "focus_mode.text",
     "focus_mode.timer", "focus_mode.border", "focus_mode.action", "focus_mode.danger",
+    "system_status.canvas", "system_status.border", "system_status.surface",
+    "system_status.surface_border", "system_status.text_primary", "system_status.text_status",
+    "system_status.text_secondary", "system_status.text_accent", "system_status.progress_track",
+    "system_status.progress_border", "system_status.progress_fill",
+    "startup.logo_surface", "startup.logo_border", "startup.subtitle_text",
+    "startup.footer_text", "startup.logo_fallback", "startup.progress_pulse",
+    "task_indicator.mark_surface", "task_indicator.mark_border", "task_indicator.mark_text",
 )
 
 _COMPONENT_GRADIENT_PATHS = (
     "answer.selected_gradient", "answer.correct_gradient", "answer.incorrect_gradient",
     "progress.fill_gradient", "focus_mode.action_gradient", "focus_mode.action_hover_gradient",
+    "startup.progress_gradient", "startup.shimmer_gradient",
+)
+
+FIXED_TOKEN_PATHS = frozenset(
+    path
+    for path in (*_COMPONENT_COLOR_PATHS, *_COMPONENT_GRADIENT_PATHS)
+    if path.startswith(("system_status.", "startup.", "task_indicator."))
 )
 
 

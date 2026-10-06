@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from .gradients import GradientSpec
-from .themes import ThemeDefinition, ThemeName, get_theme
+from .themes import ThemeDefinition, ThemeName, fixed_color, fixed_gradient, get_theme
 
 if TYPE_CHECKING:
     from PySide6.QtGui import QBrush, QColor, QLinearGradient, QPen
@@ -48,13 +48,33 @@ def qss_gradient(theme: ThemeInput, token: str) -> str:
     return gradient_to_qss(_theme(theme).gradient(token))
 
 
+def fixed_qss_color(token: str) -> str:
+    """Retorna uma cor de componente deliberadamente independente do tema."""
+
+    return fixed_color(token).value
+
+
+def fixed_qss_gradient(token: str) -> str:
+    return gradient_to_qss(fixed_gradient(token))
+
+
+def _qcolor_value(color) -> "QColor":
+    from PySide6.QtGui import QColor
+
+    alpha, red, green, blue = color.argb
+    return QColor(red, green, blue, alpha)
+
+
 def qcolor(theme: ThemeInput, token: str) -> "QColor":
     """Cria QColor sem exigir QApplication ou importar widgets."""
 
-    from PySide6.QtGui import QColor
+    return _qcolor_value(_theme(theme).color(token))
 
-    alpha, red, green, blue = _theme(theme).color(token).argb
-    return QColor(red, green, blue, alpha)
+
+def fixed_qcolor(token: str) -> "QColor":
+    """Cria QColor de um token fixo sem exigir QApplication."""
+
+    return _qcolor_value(fixed_color(token))
 
 
 def qbrush(theme: ThemeInput, token: str) -> "QBrush":
@@ -73,16 +93,38 @@ def qpen(theme: ThemeInput, token: str, width: float = 1.0) -> "QPen":
     return pen
 
 
-def qlineargradient(theme: ThemeInput, token: str) -> "QLinearGradient":
-    from PySide6.QtGui import QColor, QLinearGradient
+def _qlineargradient_spec(
+    spec: GradientSpec,
+    coordinates: tuple[float, float, float, float] | None = None,
+) -> "QLinearGradient":
+    from PySide6.QtGui import QLinearGradient
 
-    spec = _theme(theme).gradient(token)
-    direction = spec.direction
-    result = QLinearGradient(direction.x1, direction.y1, direction.x2, direction.y2)
+    if coordinates is None:
+        direction = spec.direction
+        coordinates = (direction.x1, direction.y1, direction.x2, direction.y2)
+    result = QLinearGradient(*coordinates)
     for stop in spec.stops:
-        alpha, red, green, blue = stop.color.argb
-        result.setColorAt(stop.position, QColor(red, green, blue, alpha))
+        result.setColorAt(stop.position, _qcolor_value(stop.color))
     return result
+
+
+def qlineargradient(
+    theme: ThemeInput,
+    token: str,
+    *,
+    coordinates: tuple[float, float, float, float] | None = None,
+) -> "QLinearGradient":
+    return _qlineargradient_spec(_theme(theme).gradient(token), coordinates)
+
+
+def fixed_qlineargradient(
+    token: str,
+    *,
+    coordinates: tuple[float, float, float, float] | None = None,
+) -> "QLinearGradient":
+    """Cria gradiente fixo, aceitando coordenadas dinâmicas do QPainter."""
+
+    return _qlineargradient_spec(fixed_gradient(token), coordinates)
 
 
 def qtawesome_color(theme: ThemeInput, token: str) -> str:

@@ -17,6 +17,8 @@ import time
 import uuid
 from pathlib import Path
 
+from ui.design import fixed_qcolor, fixed_qlineargradient, fixed_qss_color
+
 
 ARG_SPLASH_WORKER = "--vighna-startup-splash"
 
@@ -228,7 +230,7 @@ def executar_splash_worker_cli(argv=None) -> int:
     from math import sin, pi
 
     from PySide6.QtCore import Qt, QTimer, QRectF, QPointF
-    from PySide6.QtGui import QColor, QPainter, QPainterPath, QLinearGradient, QPen, QIcon, QBrush
+    from PySide6.QtGui import QPainter, QPainterPath, QPen, QIcon, QBrush
     from PySide6.QtWidgets import (
         QApplication,
         QDialog,
@@ -282,8 +284,8 @@ def executar_splash_worker_cli(argv=None) -> int:
             raio = rect.height() / 2.0
             trilha = QPainterPath()
             trilha.addRoundedRect(rect, raio, raio)
-            painter.fillPath(trilha, QColor("#081A28"))
-            painter.setPen(QPen(QColor("#315B76"), 1.0))
+            painter.fillPath(trilha, fixed_qcolor("system_status.progress_track"))
+            painter.setPen(QPen(fixed_qcolor("system_status.progress_border"), 1.0))
             painter.drawPath(trilha)
 
             proporcao = max(0.0, min(1.0, self._valor_visual / 100.0))
@@ -295,10 +297,10 @@ def executar_splash_worker_cli(argv=None) -> int:
             preenchimento = QPainterPath()
             preenchimento.addRoundedRect(preenchimento_rect, raio, raio)
 
-            gradiente = QLinearGradient(preenchimento_rect.left(), 0, preenchimento_rect.right(), 0)
-            gradiente.setColorAt(0.0, QColor("#2E74D8"))
-            gradiente.setColorAt(0.55, QColor("#3A8DF1"))
-            gradiente.setColorAt(1.0, QColor("#4CA8FF"))
+            gradiente = fixed_qlineargradient(
+                "startup.progress_gradient",
+                coordinates=(preenchimento_rect.left(), 0, preenchimento_rect.right(), 0),
+            )
             painter.save()
             painter.setClipPath(trilha)
             painter.fillPath(preenchimento, QBrush(gradiente))
@@ -306,10 +308,10 @@ def executar_splash_worker_cli(argv=None) -> int:
             # Reflexo móvel: continua atravessando a área preenchida mesmo
             # quando o percentual verdadeiro não muda.
             centro = rect.left() + (rect.width() + 90.0) * self._fase_shimmer
-            brilho = QLinearGradient(centro - 36.0, 0, centro + 36.0, 0)
-            brilho.setColorAt(0.0, QColor(125, 215, 255, 0))
-            brilho.setColorAt(0.50, QColor(175, 232, 255, 150))
-            brilho.setColorAt(1.0, QColor(125, 215, 255, 0))
+            brilho = fixed_qlineargradient(
+                "startup.shimmer_gradient",
+                coordinates=(centro - 36.0, 0, centro + 36.0, 0),
+            )
             painter.setClipPath(preenchimento)
             painter.fillRect(rect, QBrush(brilho))
 
@@ -317,7 +319,9 @@ def executar_splash_worker_cli(argv=None) -> int:
             intensidade = int(42 + 26 * (0.5 + 0.5 * sin(self._fase_pulso * 2.0 * pi)))
             x_frente = min(rect.right() - raio, rect.left() + largura)
             painter.setPen(Qt.NoPen)
-            painter.setBrush(QColor(111, 195, 255, intensidade))
+            cor_pulso = fixed_qcolor("startup.progress_pulse")
+            cor_pulso.setAlpha(intensidade)
+            painter.setBrush(cor_pulso)
             painter.drawEllipse(QPointF(x_frente, rect.center().y()), 4.0, 4.0)
             painter.restore()
 
@@ -384,7 +388,10 @@ def executar_splash_worker_cli(argv=None) -> int:
                 self.logo.setPixmap(pixmap)
             else:
                 self.logo.setText("V")
-                self.logo.setStyleSheet("font-size: 25px; font-weight: 800; color: #6DC1FF;")
+                self.logo.setStyleSheet(
+                    "font-size: 25px; font-weight: 800; "
+                    f"color: {fixed_qss_color('startup.logo_fallback')};"
+                )
             logo_layout.addWidget(self.logo)
             topo.addWidget(logo_box, 0, Qt.AlignVCenter)
 
@@ -450,31 +457,40 @@ def executar_splash_worker_cli(argv=None) -> int:
 
             self.setStyleSheet(
                 "QFrame#startupShell {"
-                " background: #071522; border: 1px solid #214A64; border-radius: 17px;"
+                f" background: {fixed_qss_color('system_status.canvas')};"
+                f" border: 1px solid {fixed_qss_color('system_status.border')}; border-radius: 17px;"
                 "}"
                 "QFrame#startupLogoBox {"
-                " background: #091927; border: 1px solid #1D4058; border-radius: 13px;"
+                f" background: {fixed_qss_color('startup.logo_surface')};"
+                f" border: 1px solid {fixed_qss_color('startup.logo_border')}; border-radius: 13px;"
                 "}"
                 "QLabel#startupTitle {"
-                " color: #F5F8FF; font-family: 'Segoe UI'; font-size: 23px; font-weight: 800;"
+                f" color: {fixed_qss_color('system_status.text_primary')};"
+                " font-family: 'Segoe UI'; font-size: 23px; font-weight: 800;"
                 "}"
                 "QLabel#startupSubtitle {"
-                " color: #9FB9D0; font-family: 'Segoe UI'; font-size: 12px;"
+                f" color: {fixed_qss_color('startup.subtitle_text')};"
+                " font-family: 'Segoe UI'; font-size: 12px;"
                 "}"
                 "QFrame#startupPanel {"
-                " background: #081927; border: 1px solid #15364C; border-radius: 13px;"
+                f" background: {fixed_qss_color('system_status.surface')};"
+                f" border: 1px solid {fixed_qss_color('system_status.surface_border')}; border-radius: 13px;"
                 "}"
                 "QLabel#startupStatus {"
-                " color: #EAF4FF; font-family: 'Segoe UI'; font-size: 13px; font-weight: 650;"
+                f" color: {fixed_qss_color('system_status.text_status')};"
+                " font-family: 'Segoe UI'; font-size: 13px; font-weight: 650;"
                 "}"
                 "QLabel#startupPercent {"
-                " color: #67B7FF; font-family: 'Segoe UI'; font-size: 13px; font-weight: 800;"
+                f" color: {fixed_qss_color('system_status.text_accent')};"
+                " font-family: 'Segoe UI'; font-size: 13px; font-weight: 800;"
                 "}"
                 "QLabel#startupDetail {"
-                " color: #8FAAC0; font-family: 'Segoe UI'; font-size: 11px;"
+                f" color: {fixed_qss_color('system_status.text_secondary')};"
+                " font-family: 'Segoe UI'; font-size: 11px;"
                 "}"
                 "QLabel#startupFooter {"
-                " color: #4E718A; font-family: 'Segoe UI'; font-size: 9px; letter-spacing: 0.35px;"
+                f" color: {fixed_qss_color('startup.footer_text')};"
+                " font-family: 'Segoe UI'; font-size: 9px; letter-spacing: 0.35px;"
                 "}"
             )
 
