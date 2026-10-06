@@ -1,0 +1,91 @@
+"""Adaptadores sem estado para consumidores QSS, QPainter e QtAwesome."""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from .gradients import GradientSpec
+from .themes import ThemeDefinition, ThemeName, get_theme
+
+if TYPE_CHECKING:
+    from PySide6.QtGui import QBrush, QColor, QLinearGradient, QPen
+
+
+ThemeInput = ThemeDefinition | ThemeName | str
+
+
+def _theme(theme: ThemeInput) -> ThemeDefinition:
+    return theme if isinstance(theme, ThemeDefinition) else get_theme(theme)
+
+
+def qss_color(theme: ThemeInput, token: str) -> str:
+    """Retorna uma cor pronta para interpolação em QSS."""
+
+    return _theme(theme).color(token).value
+
+
+def _number(value: float) -> str:
+    return f"{value:g}"
+
+
+def gradient_to_qss(spec: GradientSpec) -> str:
+    direction = spec.direction
+    coordinates = (
+        f"x1:{_number(direction.x1)}",
+        f"y1:{_number(direction.y1)}",
+        f"x2:{_number(direction.x2)}",
+        f"y2:{_number(direction.y2)}",
+    )
+    stops = tuple(
+        f"stop:{_number(stop.position)} {stop.color.value}" for stop in spec.stops
+    )
+    return f"qlineargradient({', '.join((*coordinates, *stops))})"
+
+
+def qss_gradient(theme: ThemeInput, token: str) -> str:
+    """Retorna um ``qlineargradient`` preservando direção, stops e alpha."""
+
+    return gradient_to_qss(_theme(theme).gradient(token))
+
+
+def qcolor(theme: ThemeInput, token: str) -> "QColor":
+    """Cria QColor sem exigir QApplication ou importar widgets."""
+
+    from PySide6.QtGui import QColor
+
+    alpha, red, green, blue = _theme(theme).color(token).argb
+    return QColor(red, green, blue, alpha)
+
+
+def qbrush(theme: ThemeInput, token: str) -> "QBrush":
+    from PySide6.QtGui import QBrush
+
+    return QBrush(qcolor(theme, token))
+
+
+def qpen(theme: ThemeInput, token: str, width: float = 1.0) -> "QPen":
+    from PySide6.QtGui import QPen
+
+    if width < 0:
+        raise ValueError("A largura de QPen não pode ser negativa.")
+    pen = QPen(qcolor(theme, token))
+    pen.setWidthF(width)
+    return pen
+
+
+def qlineargradient(theme: ThemeInput, token: str) -> "QLinearGradient":
+    from PySide6.QtGui import QColor, QLinearGradient
+
+    spec = _theme(theme).gradient(token)
+    direction = spec.direction
+    result = QLinearGradient(direction.x1, direction.y1, direction.x2, direction.y2)
+    for stop in spec.stops:
+        alpha, red, green, blue = stop.color.argb
+        result.setColorAt(stop.position, QColor(red, green, blue, alpha))
+    return result
+
+
+def qtawesome_color(theme: ThemeInput, token: str) -> str:
+    """Cor para o argumento ``color=`` do QtAwesome, sem importar QtAwesome."""
+
+    return qss_color(theme, token)

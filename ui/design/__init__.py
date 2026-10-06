@@ -1,0 +1,94 @@
+"""API pública da fundação do Design System do VighnaStudy.
+
+O pacote não é conectado aos estilos legados nesta etapa e não importa Qt ao
+ser carregado. Adaptadores Qt fazem importação tardia apenas quando chamados.
+"""
+
+from .adapters import (
+    gradient_to_qss,
+    qbrush,
+    qcolor,
+    qlineargradient,
+    qpen,
+    qss_color,
+    qss_gradient,
+    qtawesome_color,
+)
+from .gradients import (
+    DIAGONAL_DOWN,
+    HORIZONTAL,
+    VERTICAL,
+    GradientDirection,
+    GradientSpec,
+    GradientStop,
+    gradient,
+)
+from .palette import ColorValue, PALETTE, PhysicalPalette, palette_color, physical_name
+from .themes import (
+    DARK_THEME,
+    FUTURISTIC_THEME,
+    LIGHT_THEME,
+    THEMES,
+    ThemeContractError,
+    ThemeDefinition,
+    ThemeName,
+    TokenNotFoundError,
+    get_theme,
+)
+from .tokens import (
+    ALL_TOKENS,
+    COMPONENT_TOKEN_COUNT,
+    COMPONENT_TOKENS,
+    SEMANTIC_TOKEN_COUNT,
+    SEMANTIC_TOKENS,
+    TokenKind,
+    TokenLevel,
+    TokenSpec,
+    VisualState,
+    iter_tokens,
+    token_spec,
+)
+
+
+__all__ = (
+    "ALL_TOKENS",
+    "COMPONENT_TOKEN_COUNT",
+    "COMPONENT_TOKENS",
+    "ColorValue",
+    "DARK_THEME",
+    "DIAGONAL_DOWN",
+    "FUTURISTIC_THEME",
+    "GradientDirection",
+    "GradientSpec",
+    "GradientStop",
+    "HORIZONTAL",
+    "LIGHT_THEME",
+    "PALETTE",
+    "PhysicalPalette",
+    "SEMANTIC_TOKEN_COUNT",
+    "SEMANTIC_TOKENS",
+    "THEMES",
+    "ThemeContractError",
+    "ThemeDefinition",
+    "ThemeName",
+    "TokenKind",
+    "TokenLevel",
+    "TokenNotFoundError",
+    "TokenSpec",
+    "VERTICAL",
+    "VisualState",
+    "get_theme",
+    "gradient",
+    "gradient_to_qss",
+    "iter_tokens",
+    "palette_color",
+    "physical_name",
+    "qbrush",
+    "qcolor",
+    "qlineargradient",
+    "qpen",
+    "qss_color",
+    "qss_gradient",
+    "qtawesome_color",
+    "token_spec",
+)

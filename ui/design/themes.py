@@ -1,0 +1,455 @@
+"""Definições completas dos temas no novo contrato, ainda desconectadas da UI."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from enum import Enum
+from types import MappingProxyType
+from typing import Mapping
+
+from .gradients import GradientDirection, GradientSpec, gradient
+from .palette import ColorValue, PALETTE
+from .tokens import ALL_TOKENS, TokenKind, TokenSpec, token_spec
+
+
+class ThemeName(str, Enum):
+    LIGHT = "claro"
+    DARK = "escuro"
+    FUTURISTIC = "futurista"
+
+
+class ThemeContractError(ValueError):
+    """Indica que uma definição não cumpre o contrato público."""
+
+
+class TokenNotFoundError(KeyError):
+    """Indica acesso explícito a um token inexistente ou do tipo incorreto."""
+
+
+_COLOR_PATHS = frozenset(token.path for token in ALL_TOKENS if token.kind is TokenKind.COLOR)
+_GRADIENT_PATHS = frozenset(token.path for token in ALL_TOKENS if token.kind is TokenKind.GRADIENT)
+
+
+@dataclass(frozen=True, slots=True)
+class ThemeDefinition:
+    name: ThemeName
+    color_references: Mapping[str, str]
+    gradients: Mapping[str, GradientSpec]
+
+    def __post_init__(self) -> None:
+        color_references = MappingProxyType(dict(self.color_references))
+        gradients = MappingProxyType(dict(self.gradients))
+        object.__setattr__(self, "color_references", color_references)
+        object.__setattr__(self, "gradients", gradients)
+        self.validate_contract()
+
+    def validate_contract(self) -> None:
+        color_paths = set(self.color_references)
+        gradient_paths = set(self.gradients)
+        if color_paths != _COLOR_PATHS:
+            missing = sorted(_COLOR_PATHS - color_paths)
+            extra = sorted(color_paths - _COLOR_PATHS)
+            raise ThemeContractError(
+                f"Contrato de cores incompleto em {self.name.value}: ausentes={missing}, extras={extra}"
+            )
+        if gradient_paths != _GRADIENT_PATHS:
+            missing = sorted(_GRADIENT_PATHS - gradient_paths)
+            extra = sorted(gradient_paths - _GRADIENT_PATHS)
+            raise ThemeContractError(
+                f"Contrato de gradientes incompleto em {self.name.value}: ausentes={missing}, extras={extra}"
+            )
+        unknown_references = sorted(
+            reference for reference in self.color_references.values() if reference not in PALETTE
+        )
+        if unknown_references:
+            raise ThemeContractError(
+                f"Referências físicas desconhecidas em {self.name.value}: {unknown_references}"
+            )
+
+    def color(self, token: str | TokenSpec) -> ColorValue:
+        path = token.path if isinstance(token, TokenSpec) else token
+        try:
+            reference = self.color_references[path]
+        except KeyError as exc:
+            if path in _GRADIENT_PATHS:
+                raise TokenNotFoundError(f"{path!r} é gradiente, não cor.") from exc
+            raise TokenNotFoundError(f"Token de cor inexistente: {path!r}") from exc
+        return PALETTE[reference]
+
+    def gradient(self, token: str | TokenSpec) -> GradientSpec:
+        path = token.path if isinstance(token, TokenSpec) else token
+        try:
+            return self.gradients[path]
+        except KeyError as exc:
+            if path in _COLOR_PATHS:
+                raise TokenNotFoundError(f"{path!r} é cor, não gradiente.") from exc
+            raise TokenNotFoundError(f"Token de gradiente inexistente: {path!r}") from exc
+
+    def resolve(self, token: str | TokenSpec) -> ColorValue | GradientSpec:
+        path = token.path if isinstance(token, TokenSpec) else token
+        try:
+            spec = token_spec(path)
+        except KeyError as exc:
+            raise TokenNotFoundError(f"Token inexistente: {path!r}") from exc
+        return self.color(path) if spec.kind is TokenKind.COLOR else self.gradient(path)
+
+
+def _semantic_colors(c: Mapping[str, str]) -> dict[str, str]:
+    return {
+        "canvas.app": c["canvas_app"],
+        "canvas.dialog": c["canvas_dialog"],
+        "canvas.inset": c["canvas_inset"],
+        "surface.primary": c["surface_primary"],
+        "surface.secondary": c["surface_secondary"],
+        "surface.tertiary": c["surface_tertiary"],
+        "surface.elevated": c["surface_elevated"],
+        "surface.inset": c["surface_inset"],
+        "surface.hover": c["surface_hover"],
+        "surface.pressed": c["surface_pressed"],
+        "surface.selected": c["surface_selected"],
+        "surface.disabled": c["surface_disabled"],
+        "text.primary": c["text_primary"],
+        "text.secondary": c["text_secondary"],
+        "text.muted": c["text_muted"],
+        "text.disabled": c["text_disabled"],
+        "text.inverse": c["text_inverse"],
+        "text.link": c["text_link"],
+        "text.on_action": c["text_on_action"],
+        "text.on_feedback": c["text_on_feedback"],
+        "border.default": c["border_default"],
+        "border.subtle": c["border_subtle"],
+        "border.strong": c["border_strong"],
+        "border.hover": c["border_hover"],
+        "border.active": c["border_active"],
+        "border.selected": c["border_selected"],
+        "border.disabled": c["border_disabled"],
+        "border.focus": c["border_focus"],
+        "action.primary": c["action_primary"],
+        "action.primary_hover": c["action_primary_hover"],
+        "action.primary_pressed": c["action_primary_pressed"],
+        "action.primary_disabled": c["action_primary_disabled"],
+        "action.secondary": c["action_secondary"],
+        "action.secondary_hover": c["action_secondary_hover"],
+        "action.secondary_pressed": c["action_secondary_pressed"],
+        "action.secondary_disabled": c["action_secondary_disabled"],
+        "action.ghost": c["action_ghost"],
+        "action.ghost_hover": c["action_ghost_hover"],
+        "action.destructive": c["action_destructive"],
+        "action.destructive_hover": c["action_destructive_hover"],
+        "feedback.success_surface": c["success_surface"],
+        "feedback.success_text": c["success_text"],
+        "feedback.success_border": c["success_border"],
+        "feedback.success_icon": c["success_icon"],
+        "feedback.warning_surface": c["warning_surface"],
+        "feedback.warning_text": c["warning_text"],
+        "feedback.warning_border": c["warning_border"],
+        "feedback.warning_icon": c["warning_icon"],
+        "feedback.danger_surface": c["danger_surface"],
+        "feedback.danger_text": c["danger_text"],
+        "feedback.danger_border": c["danger_border"],
+        "feedback.danger_icon": c["danger_icon"],
+        "feedback.info_surface": c["info_surface"],
+        "feedback.info_text": c["info_text"],
+        "feedback.info_border": c["info_border"],
+        "feedback.info_icon": c["info_icon"],
+        "focus.ring": c["focus_ring"],
+        "focus.keyboard": c["focus_keyboard"],
+        "icon.default": c["icon_default"],
+        "icon.muted": c["icon_muted"],
+        "icon.disabled": c["icon_disabled"],
+        "icon.action": c["icon_action"],
+        "icon.highlight": c["icon_highlight"],
+        "icon.configuration": c["icon_configuration"],
+        "overlay.scrim": c["overlay_scrim"],
+        "overlay.light": c["overlay_light"],
+        "overlay.dark": c["overlay_dark"],
+        "overlay.selection": c["overlay_selection"],
+        "glow.primary": c["glow_primary"],
+        "glow.focus": c["glow_focus"],
+        "glow.success": c["glow_success"],
+        "glow.danger": c["glow_danger"],
+    }
+
+
+def _component_colors(c: Mapping[str, str], overrides: Mapping[str, str]) -> dict[str, str]:
+    colors = {
+        "answer.normal_surface": c["surface_primary"],
+        "answer.normal_border": c["border_default"],
+        "answer.normal_text": c["text_primary"],
+        "answer.hover_surface": c["surface_hover"],
+        "answer.hover_border": c["border_hover"],
+        "answer.pressed_surface": c["surface_pressed"],
+        "answer.pressed_border": c["border_active"],
+        "answer.selected_surface": c["surface_selected"],
+        "answer.selected_border": c["border_selected"],
+        "answer.selected_text": c["text_primary"],
+        "answer.focused_border": c["border_focus"],
+        "answer.keyboard_focus_border": c["focus_keyboard"],
+        "answer.checked_indicator": c["action_primary"],
+        "answer.disabled_surface": c["surface_disabled"],
+        "answer.disabled_border": c["border_disabled"],
+        "answer.disabled_text": c["text_disabled"],
+        "answer.correct_surface": c["success_surface"],
+        "answer.correct_border": c["success_border"],
+        "answer.correct_text": c["success_text"],
+        "answer.incorrect_surface": c["danger_surface"],
+        "answer.incorrect_border": c["danger_border"],
+        "answer.incorrect_text": c["danger_text"],
+        "answer.struck_surface": c["surface_disabled"],
+        "answer.struck_border": c["border_disabled"],
+        "answer.struck_text": c["text_muted"],
+        "answer.explanation_surface": c["surface_secondary"],
+        "answer.explanation_text": c["text_secondary"],
+        "answer.editor_surface": c["surface_primary"],
+        "answer.editor_border": c["border_focus"],
+        "answer.editor_selection": c["overlay_selection"],
+        "progress.track": c["surface_inset"],
+        "progress.fill": c["action_primary"],
+        "progress.text": c["text_secondary"],
+        "progress.complete": c["success_icon"],
+        "progress.warning": c["warning_icon"],
+        "calendar.surface": c["surface_primary"],
+        "calendar.today_surface": c["info_surface"],
+        "calendar.today_border": c["info_border"],
+        "calendar.today_text": c["info_text"],
+        "calendar.selected_surface": c["surface_selected"],
+        "calendar.selected_text": c["text_primary"],
+        "calendar.week_predicted_surface": c["warning_surface"],
+        "calendar.week_predicted_border": c["warning_border"],
+        "calendar.week_predicted_text": c["warning_text"],
+        "calendar.weekend_text": c["text_secondary"],
+        "calendar.outside_month_text": c["text_disabled"],
+        "chart.axis": c["border_strong"],
+        "chart.grid": c["border_subtle"],
+        "chart.label": c["text_secondary"],
+        "chart.series_1": c["action_primary"],
+        "chart.series_2": c["info_icon"],
+        "chart.series_3": c["success_icon"],
+        "chart.series_4": c["warning_icon"],
+        "chart.series_5": c["danger_icon"],
+        "chart.series_6": c["icon_highlight"],
+        "chart.positive": c["success_icon"],
+        "chart.negative": c["danger_icon"],
+        "focus_mode.canvas": c["canvas_app"],
+        "focus_mode.panel": c["surface_secondary"],
+        "focus_mode.panel_active": c["surface_selected"],
+        "focus_mode.text": c["text_primary"],
+        "focus_mode.timer": c["icon_highlight"],
+        "focus_mode.border": c["border_active"],
+        "focus_mode.action": c["action_primary"],
+        "focus_mode.danger": c["action_destructive"],
+    }
+    colors.update(overrides)
+    return colors
+
+
+def _refs(colors: Mapping[str, str]) -> dict[str, str]:
+    return {path: PALETTE.reference(value) for path, value in colors.items()}
+
+
+def _make_theme(
+    name: ThemeName,
+    roles: Mapping[str, str],
+    component_overrides: Mapping[str, str],
+    gradients: Mapping[str, GradientSpec],
+) -> ThemeDefinition:
+    colors = _semantic_colors(roles)
+    colors.update(_component_colors(roles, component_overrides))
+    return ThemeDefinition(name, _refs(colors), gradients)
+
+
+def _palette_gradient(
+    *stops: tuple[float, str],
+    direction: GradientDirection | None = None,
+) -> GradientSpec:
+    """Monta stops somente com cores previamente registradas na paleta física."""
+
+    resolved = tuple(
+        (position, PALETTE[PALETTE.reference(value)]) for position, value in stops
+    )
+    return gradient(*resolved, direction=direction)
+
+
+_LIGHT = {
+    "canvas_app": "#F5F7FA", "canvas_dialog": "#FFFFFF", "canvas_inset": "#EEF2F7",
+    "surface_primary": "#FFFFFF", "surface_secondary": "#F8FAFC", "surface_tertiary": "#F1F5F9",
+    "surface_elevated": "#FFFFFF", "surface_inset": "#E8EDF3", "surface_hover": "#F8FAFC",
+    "surface_pressed": "#EEF2F7", "surface_selected": "#F0F2FF", "surface_disabled": "#F1F5F9",
+    "text_primary": "#1F2937", "text_secondary": "#475569", "text_muted": "#64748B",
+    "text_disabled": "#94A3B8", "text_inverse": "#FFFFFF", "text_link": "#28679E",
+    "text_on_action": "#FFFFFF", "text_on_feedback": "#1F2937",
+    "border_default": "#E0E6ED", "border_subtle": "#E2E8F0", "border_strong": "#CBD5E1",
+    "border_hover": "#BEC9D6", "border_active": "#7882E8", "border_selected": "#7882E8",
+    "border_disabled": "#E2E8F0", "border_focus": "#5965D8",
+    "action_primary": "#5965D8", "action_primary_hover": "#595EE8", "action_primary_pressed": "#4B50DF",
+    "action_primary_disabled": "#94A3B8", "action_secondary": "#EEF2F7",
+    "action_secondary_hover": "#E2E8F0", "action_secondary_pressed": "#CBD5E1",
+    "action_secondary_disabled": "#F1F5F9", "action_ghost": "transparent", "action_ghost_hover": "#F8FAFC",
+    "action_destructive": "#D76676", "action_destructive_hover": "#E18491",
+    "success_surface": "#EEF9F4", "success_text": "#173127", "success_border": "#64B992", "success_icon": "#4EAD80",
+    "warning_surface": "#FFF8E8", "warning_text": "#9A6614", "warning_border": "#F0DEB4", "warning_icon": "#9A6614",
+    "danger_surface": "#FFF1F3", "danger_text": "#351D24", "danger_border": "#E18491", "danger_icon": "#D76676",
+    "info_surface": "#EEF6FF", "info_text": "#28679E", "info_border": "#D2E6FA", "info_icon": "#28679E",
+    "focus_ring": "#5965D8", "focus_keyboard": "#7882E8",
+    "icon_default": "#475569", "icon_muted": "#64748B", "icon_disabled": "#94A3B8",
+    "icon_action": "#5965D8", "icon_highlight": "#28679E", "icon_configuration": "#64748B",
+    "overlay_scrim": "#66000000", "overlay_light": "#80FFFFFF", "overlay_dark": "#33000000", "overlay_selection": "#335965D8",
+    "glow_primary": "#335965D8", "glow_focus": "#335965D8", "glow_success": "#64B992", "glow_danger": "#E18491",
+}
+
+_DARK = {
+    "canvas_app": "#101722", "canvas_dialog": "#182230", "canvas_inset": "#111827",
+    "surface_primary": "#182230", "surface_secondary": "#172033", "surface_tertiary": "#151F2C",
+    "surface_elevated": "#273449", "surface_inset": "#111827", "surface_hover": "#192534",
+    "surface_pressed": "#151F2C", "surface_selected": "#1D2440", "surface_disabled": "#172033",
+    "text_primary": "#F8FAFC", "text_secondary": "#CBD5E1", "text_muted": "#94A3B8",
+    "text_disabled": "#64748B", "text_inverse": "#111827", "text_link": "#8FD8FF",
+    "text_on_action": "#FFFFFF", "text_on_feedback": "#F8FAFC",
+    "border_default": "#2F3D4D", "border_subtle": "#273449", "border_strong": "#475569",
+    "border_hover": "#4A5A6E", "border_active": "#7882E8", "border_selected": "#747FE9",
+    "border_disabled": "#334155", "border_focus": "#7882E8",
+    "action_primary": "#5965D8", "action_primary_hover": "#6579EC", "action_primary_pressed": "#4B50DF",
+    "action_primary_disabled": "#475569", "action_secondary": "#273449",
+    "action_secondary_hover": "#334155", "action_secondary_pressed": "#2F3D4D",
+    "action_secondary_disabled": "#172033", "action_ghost": "transparent", "action_ghost_hover": "#192534",
+    "action_destructive": "#D76676", "action_destructive_hover": "#E18491",
+    "success_surface": "#173127", "success_text": "#EEF9F4", "success_border": "#4EAD80", "success_icon": "#64B992",
+    "warning_surface": "#402827", "warning_text": "#FFF8E8", "warning_border": "#8D554D", "warning_icon": "#F0DEB4",
+    "danger_surface": "#351D24", "danger_text": "#FFF1F3", "danger_border": "#D76676", "danger_icon": "#E18491",
+    "info_surface": "#17334E", "info_text": "#D9F4FF", "info_border": "#315D79", "info_icon": "#8FD8FF",
+    "focus_ring": "#7882E8", "focus_keyboard": "#6579EC",
+    "icon_default": "#CBD5E1", "icon_muted": "#94A3B8", "icon_disabled": "#64748B",
+    "icon_action": "#7882E8", "icon_highlight": "#8FD8FF", "icon_configuration": "#94A3B8",
+    "overlay_scrim": "#66000000", "overlay_light": "#80FFFFFF", "overlay_dark": "#33000000", "overlay_selection": "#335965D8",
+    "glow_primary": "#335965D8", "glow_focus": "#7882E8", "glow_success": "#4EAD80", "glow_danger": "#D76676",
+}
+
+_FUTURISTIC = {
+    "canvas_app": "#0B111D", "canvas_dialog": "#0D1D2D", "canvas_inset": "#07111E",
+    "surface_primary": "#0D1D2D", "surface_secondary": "#101F30", "surface_tertiary": "#0C1A29",
+    "surface_elevated": "#10283C", "surface_inset": "#07111E", "surface_hover": "#162130",
+    "surface_pressed": "#14283B", "surface_selected": "#1D2440", "surface_disabled": "#101F30",
+    "text_primary": "#EAF7FF", "text_secondary": "#B6D9E8", "text_muted": "#82ABC5",
+    "text_disabled": "#55768B", "text_inverse": "#07111E", "text_link": "#8FD8FF",
+    "text_on_action": "#FFFFFF", "text_on_feedback": "#EAF7FF",
+    "border_default": "#2B3747", "border_subtle": "#2E5C78", "border_strong": "#315D79",
+    "border_hover": "#46566A", "border_active": "#3F7599", "border_selected": "#757FFF",
+    "border_disabled": "#2B3747", "border_focus": "#757FFF",
+    "action_primary": "#4447E8", "action_primary_hover": "#5355F2", "action_primary_pressed": "#3C42D2",
+    "action_primary_disabled": "#46566A", "action_secondary": "#132B40",
+    "action_secondary_hover": "#183850", "action_secondary_pressed": "#14283B",
+    "action_secondary_disabled": "#101F30", "action_ghost": "transparent", "action_ghost_hover": "#132B40",
+    "action_destructive": "#D96777", "action_destructive_hover": "#E18491",
+    "success_surface": "#153127", "success_text": "#EEF9F4", "success_border": "#4EBA86", "success_icon": "#64B992",
+    "warning_surface": "#402827", "warning_text": "#FFF8E8", "warning_border": "#8D554D", "warning_icon": "#F0DEB4",
+    "danger_surface": "#351C24", "danger_text": "#FFF1F3", "danger_border": "#D96777", "danger_icon": "#E18491",
+    "info_surface": "#17334E", "info_text": "#D9F4FF", "info_border": "#3F7599", "info_icon": "#8FD8FF",
+    "focus_ring": "#757FFF", "focus_keyboard": "#8FD8FF",
+    "icon_default": "#B6D9E8", "icon_muted": "#82ABC5", "icon_disabled": "#55768B",
+    "icon_action": "#757FFF", "icon_highlight": "#8FD8FF", "icon_configuration": "#BCE7FF",
+    "overlay_scrim": "#66000000", "overlay_light": "#80FFFFFF", "overlay_dark": "#33000000", "overlay_selection": "#335965D8",
+    "glow_primary": "#757FFF", "glow_focus": "#8FD8FF", "glow_success": "#4EBA86", "glow_danger": "#D96777",
+}
+
+
+_LIGHT_COMPONENT_OVERRIDES = {
+    "answer.normal_surface": "#FFFFFF", "answer.normal_border": "#E0E6ED",
+    "answer.hover_surface": "#F9FAFC", "answer.hover_border": "#BEC9D6",
+    "answer.selected_surface": "#F0F2FF", "answer.selected_border": "#7882E8",
+    "answer.checked_indicator": "#5965D8", "answer.correct_surface": "#EEF9F4",
+    "answer.correct_border": "#64B992", "answer.incorrect_surface": "#FFF1F3",
+    "answer.incorrect_border": "#E18491",
+}
+_DARK_COMPONENT_OVERRIDES = {
+    "answer.normal_surface": "#151F2C", "answer.normal_border": "#2F3D4D",
+    "answer.hover_surface": "#192534", "answer.hover_border": "#4A5A6E",
+    "answer.selected_surface": "#1D2440", "answer.selected_border": "#747FE9",
+    "answer.correct_surface": "#173127", "answer.correct_border": "#4EAD80",
+    "answer.incorrect_surface": "#351D24", "answer.incorrect_border": "#D76676",
+}
+_FUTURISTIC_COMPONENT_OVERRIDES = {
+    "answer.normal_surface": "#111A27", "answer.normal_border": "#2B3747",
+    "answer.hover_surface": "#162130", "answer.hover_border": "#46566A",
+    "answer.selected_surface": "#1B213A", "answer.selected_border": "#757FFF",
+    "answer.correct_surface": "#153127", "answer.correct_border": "#4EBA86",
+    "answer.incorrect_surface": "#351C24", "answer.incorrect_border": "#D96777",
+    "focus_mode.canvas": "#0B111D", "focus_mode.panel": "#101F30",
+    "focus_mode.panel_active": "#10283C", "focus_mode.text": "#EAF7FF",
+    "focus_mode.timer": "#8FD8FF", "focus_mode.border": "#3F7599",
+    "focus_mode.action": "#D62B3D", "focus_mode.danger": "#D96777",
+}
+
+
+def _theme_gradients(kind: ThemeName) -> dict[str, GradientSpec]:
+    if kind is ThemeName.LIGHT:
+        action = ((0.0, "#4B50DF"), (1.0, "#586DE3"))
+        action_hover = ((0.0, "#595EE8"), (1.0, "#6579EC"))
+        selected = ((0.0, "#F0F2FF"), (1.0, "#F0F2FF"))
+        correct = ((0.0, "#EEF9F4"), (1.0, "#EEF9F4"))
+        incorrect = ((0.0, "#FFF1F3"), (1.0, "#FFF1F3"))
+        surface = ((0.0, "#FFFFFF"), (1.0, "#F8FAFC"))
+        focus_action = action
+        focus_hover = action_hover
+    elif kind is ThemeName.DARK:
+        action = ((0.0, "#4B50DF"), (1.0, "#586DE3"))
+        action_hover = ((0.0, "#595EE8"), (1.0, "#6579EC"))
+        selected = ((0.0, "#1D2440"), (1.0, "#1D2440"))
+        correct = ((0.0, "#173127"), (1.0, "#173127"))
+        incorrect = ((0.0, "#351D24"), (1.0, "#351D24"))
+        surface = ((0.0, "#273449"), (1.0, "#182230"))
+        focus_action = action
+        focus_hover = action_hover
+    else:
+        action = ((0.0, "#4447E8"), (0.52, "#4347E1"), (1.0, "#3C42D2"))
+        action_hover = ((0.0, "#5355F2"), (0.52, "#4F54EB"), (1.0, "#464DDE"))
+        selected = ((0.0, "#1B213A"), (1.0, "#18243A"))
+        correct = ((0.0, "#153127"), (1.0, "#12271F"))
+        incorrect = ((0.0, "#351C24"), (1.0, "#2A171D"))
+        surface = ((0.0, "#10283C"), (1.0, "#0D1D2D"))
+        focus_action = ((0.0, "#B51F31"), (0.52, "#D62B3D"), (1.0, "#F04458"))
+        focus_hover = ((0.0, "#CE293B"), (0.52, "#E83B4C"), (1.0, "#FF596B"))
+
+    return {
+        "gradient.action_primary": _palette_gradient(*action),
+        "gradient.action_primary_hover": _palette_gradient(*action_hover),
+        "gradient.surface_elevated": _palette_gradient(
+            *surface, direction=GradientDirection(0.0, 0.0, 1.0, 1.0)
+        ),
+        "gradient.hero": _palette_gradient(*surface),
+        "gradient.progress": _palette_gradient(*action),
+        "answer.selected_gradient": _palette_gradient(*selected),
+        "answer.correct_gradient": _palette_gradient(*correct),
+        "answer.incorrect_gradient": _palette_gradient(*incorrect),
+        "progress.fill_gradient": _palette_gradient(*action),
+        "focus_mode.action_gradient": _palette_gradient(*focus_action),
+        "focus_mode.action_hover_gradient": _palette_gradient(*focus_hover),
+    }
+
+
+LIGHT_THEME = _make_theme(ThemeName.LIGHT, _LIGHT, _LIGHT_COMPONENT_OVERRIDES, _theme_gradients(ThemeName.LIGHT))
+DARK_THEME = _make_theme(ThemeName.DARK, _DARK, _DARK_COMPONENT_OVERRIDES, _theme_gradients(ThemeName.DARK))
+FUTURISTIC_THEME = _make_theme(
+    ThemeName.FUTURISTIC,
+    _FUTURISTIC,
+    _FUTURISTIC_COMPONENT_OVERRIDES,
+    _theme_gradients(ThemeName.FUTURISTIC),
+)
+
+THEMES: Mapping[ThemeName, ThemeDefinition] = MappingProxyType(
+    {
+        ThemeName.LIGHT: LIGHT_THEME,
+        ThemeName.DARK: DARK_THEME,
+        ThemeName.FUTURISTIC: FUTURISTIC_THEME,
+    }
+)
+
+
+def get_theme(theme: ThemeName | str) -> ThemeDefinition:
+    if isinstance(theme, ThemeDefinition):
+        return theme
+    try:
+        name = theme if isinstance(theme, ThemeName) else ThemeName(str(theme).strip().lower())
+    except ValueError as exc:
+        valid = ", ".join(item.value for item in ThemeName)
+        raise ValueError(f"Tema desconhecido: {theme!r}. Valores válidos: {valid}.") from exc
+    return THEMES[name]
