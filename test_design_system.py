@@ -26,6 +26,7 @@ from ui.design import (
     qcolor,
     qlineargradient,
     qpen,
+    render_qss,
     qss_color,
     qss_gradient,
     qtawesome_color,
@@ -125,11 +126,24 @@ class DesignSystemAdapterTests(unittest.TestCase):
         self.assertEqual((color.alpha(), color.red(), color.green(), color.blue()), (102, 0, 0, 0))
         self.assertEqual(qbrush("claro", "action.primary").color().name(), "#5965d8")
         pen = qpen("escuro", "border.default", 2.5)
-        self.assertEqual(pen.color().name(), "#2f3d4d")
+        self.assertEqual(pen.color().name(), "#40536a")
         self.assertEqual(pen.widthF(), 2.5)
         qt_gradient = qlineargradient("futurista", "gradient.action_primary")
         self.assertEqual([position for position, _color in qt_gradient.stops()], [0.0, 0.52, 1.0])
         self.assertIsNone(QApplication.instance())
+
+    def test_renderizador_qss_resolve_cores_e_gradientes(self) -> None:
+        template = (
+            "QWidget { color: {{color:text.primary}}; "
+            "background: {{gradient:gradient.control_input}}; }"
+        )
+        result = render_qss("futurista", template)
+        self.assertIn("color: #D8EEFF", result)
+        self.assertIn("stop:0 #10253A", result)
+        self.assertIn("stop:1 #0A1829", result)
+        self.assertNotIn("{{", result)
+        with self.assertRaisesRegex(ValueError, "Marcador de token QSS inválido"):
+            render_qss("claro", "QWidget { color: {{color:TokenInvalido}}; }")
 
     def test_qpen_rejeita_largura_negativa(self) -> None:
         with self.assertRaises(ValueError):

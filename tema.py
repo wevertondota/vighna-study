@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import QApplication
+from ui.design import render_qss
 
 
 TEMAS_VALIDOS = {
@@ -5153,7 +5154,7 @@ QLabel#calendarForecastEmpty {
 """
 
 def stylesheet_claro():
-    return r"""
+    return render_qss("claro", r"""
     * {
         font-family: "Segoe UI";
         font-size: 10pt;
@@ -8389,25 +8390,25 @@ QPushButton#sectionEditButton:hover {
     QPushButton {
         min-height: 30px;
         padding: 6px 12px;
-        background-color: #ffffff;
-        color: #1f2937;
-        border: 1px solid #cbd5e1;
+        background-color: {{color:action.secondary}};
+        color: {{color:text.primary}};
+        border: 1px solid {{color:border.strong}};
         border-radius: 8px;
     }
 
     QPushButton:hover {
-        background-color: #f1f5f9;
-        border-color: #94a3b8;
+        background-color: {{color:action.secondary_hover}};
+        border-color: {{color:border.hover}};
     }
 
     QPushButton:pressed {
-        background-color: #e2e8f0;
+        background-color: {{color:action.secondary_pressed}};
     }
 
     QPushButton:disabled {
-        color: #94a3b8;
-        background-color: #f8fafc;
-        border-color: #e2e8f0;
+        color: {{color:text.disabled}};
+        background-color: {{color:action.secondary_disabled}};
+        border-color: {{color:border.disabled}};
     }
 
     QPushButton#primaryButton {
@@ -8548,8 +8549,8 @@ QPushButton#sectionEditButton:hover {
     }
 
     QToolTip {
-        background-color: #111827;
-        color: #ffffff;
+        background-color: {{color:surface.inverse}};
+        color: {{color:text.on_action}};
         border: none;
         padding: 5px;
     }
@@ -8805,12 +8806,12 @@ QPushButton#sectionEditButton:hover {
     QSpinBox,
     QDateEdit,
     QTextEdit {
-        background-color: #ffffff;
-        color: #182033;
-        border: 1px solid #cbd3df;
+        background-color: {{color:surface.primary}};
+        color: {{color:text.control}};
+        border: 1px solid {{color:border.default}};
         border-radius: 8px;
-        selection-background-color: #ded9ff;
-        selection-color: #182033;
+        selection-background-color: {{color:overlay.selection}};
+        selection-color: {{color:text.control}};
     }
 
     QLineEdit:focus,
@@ -8818,78 +8819,78 @@ QPushButton#sectionEditButton:hover {
     QSpinBox:focus,
     QDateEdit:focus,
     QTextEdit:focus {
-        border: 1px solid #7667e8;
+        border: 1px solid {{color:focus.ring}};
     }
 
     QComboBox QAbstractItemView {
-        background-color: #ffffff;
-        color: #182033;
-        selection-background-color: #edeaff;
-        selection-color: #342a88;
-        border: 1px solid #cbd3df;
+        background-color: {{color:surface.elevated}};
+        color: {{color:text.control}};
+        selection-background-color: {{color:action.ghost_hover}};
+        selection-color: {{color:text.selection_accent}};
+        border: 1px solid {{color:border.default}};
     }
 
     QTableWidget,
     QTreeWidget {
-        background-color: #ffffff;
-        color: #20293a;
-        border: 1px solid #d5dce8;
+        background-color: {{color:surface.secondary}};
+        color: {{color:text.secondary}};
+        border: 1px solid {{color:border.subtle}};
         border-radius: 9px;
-        gridline-color: #edf0f5;
-        selection-background-color: #eeeaff;
-        selection-color: #2d246f;
+        gridline-color: {{color:border.grid}};
+        selection-background-color: {{color:surface.selected}};
+        selection-color: {{color:text.selected}};
     }
 
     QHeaderView::section {
-        background-color: #f7f8fb;
-        color: #4f5b70;
+        background-color: {{color:surface.tertiary}};
+        color: {{color:text.header}};
         border: none;
-        border-right: 1px solid #e4e8ef;
-        border-bottom: 1px solid #dce2eb;
+        border-right: 1px solid {{color:border.divider}};
+        border-bottom: 1px solid {{color:border.divider_strong}};
         padding: 7px;
         font-weight: 700;
     }
 
     QTabWidget::pane {
-        background-color: #ffffff;
-        border: 1px solid #d5dce8;
+        background-color: {{color:surface.secondary}};
+        border: 1px solid {{color:border.subtle}};
         border-radius: 9px;
     }
 
     QTabBar::tab {
-        background-color: #eef1f6;
-        color: #68758d;
+        background-color: {{color:surface.inset}};
+        color: {{color:text.muted}};
         padding: 8px 14px;
     }
 
     QTabBar::tab:selected {
-        background-color: #ffffff;
-        color: #5a49cf;
+        background-color: {{color:surface.primary}};
+        color: {{color:text.link}};
         font-weight: 800;
     }
 
     QScrollBar:vertical {
-        background: #eef1f6;
+        background: {{color:surface.inset}};
         width: 10px;
         margin: 0px;
         border: none;
     }
 
     QScrollBar::handle:vertical {
-        background: #c3cad6;
+        background: {{color:surface.interactive}};
         min-height: 28px;
         border-radius: 5px;
     }
 
     QScrollBar::handle:vertical:hover {
-        background: #aeb7c6;
+        background: {{color:surface.hover}};
     }
 
     QScrollBar::add-line:vertical,
     QScrollBar::sub-line:vertical,
     QScrollBar::add-page:vertical,
     QScrollBar::sub-page:vertical {
-        background: transparent;
+        background: {{color:action.ghost}};
         height: 0px;
     }
 
@@ -12167,11 +12168,11 @@ QPushButton#sectionEditButton:hover {
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_CLARO + ESTILO_DASHBOARD_MODERNO_CLARO + ESTILO_FOCO_DASHBOARD_CLARO + ESTILO_ALGORITMO_DASHBOARD_CLARO + ESTILO_BUSCA_GLOBAL_CLARO + ESTILO_PALETA_HARMONICA_DASHBOARD_CLARO + ESTILO_DESIGN_SYSTEM_DASHBOARD_CLARO + ESTILO_INTELIGENCIA_RESUMO_CLARO + ESTILO_TOPICOS_DISCIPLINA_CLARO + ESTILO_RESOLVEDOR_CLARO + ESTILO_TOPICO_DETALHES_CLARO + ESTILO_RESOLVEDOR_ELIMINADAS_CLARO + ESTILO_RESOLVEDOR_TECLADO_CLARO + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_CLARO + ESTILO_CALENDARIO_PREVISAO_CLARO
+""" + ESTILO_JORNADA_CLARO + ESTILO_DASHBOARD_MODERNO_CLARO + ESTILO_FOCO_DASHBOARD_CLARO + ESTILO_ALGORITMO_DASHBOARD_CLARO + ESTILO_BUSCA_GLOBAL_CLARO + ESTILO_PALETA_HARMONICA_DASHBOARD_CLARO + ESTILO_DESIGN_SYSTEM_DASHBOARD_CLARO + ESTILO_INTELIGENCIA_RESUMO_CLARO + ESTILO_TOPICOS_DISCIPLINA_CLARO + ESTILO_RESOLVEDOR_CLARO + ESTILO_TOPICO_DETALHES_CLARO + ESTILO_RESOLVEDOR_ELIMINADAS_CLARO + ESTILO_RESOLVEDOR_TECLADO_CLARO + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_CLARO + ESTILO_CALENDARIO_PREVISAO_CLARO)
 
 
 def stylesheet_escuro():
-    return r"""
+    return render_qss("escuro", r"""
     * {
         font-family: "Segoe UI";
         font-size: 10pt;
@@ -15411,25 +15412,25 @@ def stylesheet_escuro():
     QPushButton {
         min-height: 30px;
         padding: 6px 12px;
-        background-color: #1f2937;
-        color: #e5e7eb;
-        border: 1px solid #475569;
+        background-color: {{color:action.secondary}};
+        color: {{color:text.primary}};
+        border: 1px solid {{color:border.strong}};
         border-radius: 8px;
     }
 
     QPushButton:hover {
-        background-color: #273449;
-        border-color: #64748b;
+        background-color: {{color:action.secondary_hover}};
+        border-color: {{color:border.hover}};
     }
 
     QPushButton:pressed {
-        background-color: #334155;
+        background-color: {{color:action.secondary_pressed}};
     }
 
     QPushButton:disabled {
-        color: #64748b;
-        background-color: #172033;
-        border-color: #334155;
+        color: {{color:text.disabled}};
+        background-color: {{color:action.secondary_disabled}};
+        border-color: {{color:border.disabled}};
     }
 
     QPushButton#primaryButton {
@@ -15563,8 +15564,8 @@ def stylesheet_escuro():
     }
 
     QToolTip {
-        background-color: #f8fafc;
-        color: #111827;
+        background-color: {{color:surface.inverse}};
+        color: {{color:text.inverse}};
         border: none;
         padding: 5px;
     }
@@ -15820,12 +15821,12 @@ def stylesheet_escuro():
     QSpinBox,
     QDateEdit,
     QTextEdit {
-        background-color: #172434;
-        color: #edf1f7;
-        border: 1px solid #40536a;
+        background-color: {{color:surface.primary}};
+        color: {{color:text.control}};
+        border: 1px solid {{color:border.default}};
         border-radius: 8px;
-        selection-background-color: #5549ad;
-        selection-color: #ffffff;
+        selection-background-color: {{color:overlay.selection}};
+        selection-color: {{color:text.on_action}};
     }
 
     QLineEdit:focus,
@@ -15833,78 +15834,78 @@ def stylesheet_escuro():
     QSpinBox:focus,
     QDateEdit:focus,
     QTextEdit:focus {
-        border: 1px solid #8879f3;
+        border: 1px solid {{color:focus.ring}};
     }
 
     QComboBox QAbstractItemView {
-        background-color: #172434;
-        color: #edf1f7;
-        selection-background-color: #3b356f;
-        selection-color: #ffffff;
-        border: 1px solid #40536a;
+        background-color: {{color:surface.elevated}};
+        color: {{color:text.control}};
+        selection-background-color: {{color:action.ghost_hover}};
+        selection-color: {{color:text.selection_accent}};
+        border: 1px solid {{color:border.default}};
     }
 
     QTableWidget,
     QTreeWidget {
-        background-color: #121e2d;
-        color: #e6ebf3;
-        border: 1px solid #314357;
+        background-color: {{color:surface.secondary}};
+        color: {{color:text.secondary}};
+        border: 1px solid {{color:border.subtle}};
         border-radius: 9px;
-        gridline-color: #25364a;
-        selection-background-color: #39336e;
-        selection-color: #ffffff;
+        gridline-color: {{color:border.grid}};
+        selection-background-color: {{color:surface.selected}};
+        selection-color: {{color:text.on_action}};
     }
 
     QHeaderView::section {
-        background-color: #182535;
-        color: #c8d0dd;
+        background-color: {{color:surface.tertiary}};
+        color: {{color:text.header}};
         border: none;
-        border-right: 1px solid #2d3e52;
-        border-bottom: 1px solid #40536a;
+        border-right: 1px solid {{color:border.divider}};
+        border-bottom: 1px solid {{color:border.divider_strong}};
         padding: 7px;
         font-weight: 700;
     }
 
     QTabWidget::pane {
-        background-color: #121e2d;
-        border: 1px solid #314357;
+        background-color: {{color:surface.secondary}};
+        border: 1px solid {{color:border.subtle}};
         border-radius: 9px;
     }
 
     QTabBar::tab {
-        background-color: #182535;
-        color: #96a3b6;
+        background-color: {{color:surface.tertiary}};
+        color: {{color:text.muted}};
         padding: 8px 14px;
     }
 
     QTabBar::tab:selected {
-        background-color: #121e2d;
-        color: #bdb3ff;
+        background-color: {{color:surface.secondary}};
+        color: {{color:text.link}};
         font-weight: 800;
     }
 
     QScrollBar:vertical {
-        background: #101a28;
+        background: {{color:surface.inset}};
         width: 10px;
         margin: 0px;
         border: none;
     }
 
     QScrollBar::handle:vertical {
-        background: #42536a;
+        background: {{color:surface.interactive}};
         min-height: 28px;
         border-radius: 5px;
     }
 
     QScrollBar::handle:vertical:hover {
-        background: #586b84;
+        background: {{color:surface.hover}};
     }
 
     QScrollBar::add-line:vertical,
     QScrollBar::sub-line:vertical,
     QScrollBar::add-page:vertical,
     QScrollBar::sub-page:vertical {
-        background: transparent;
+        background: {{color:action.ghost}};
         height: 0px;
     }
 
@@ -18622,7 +18623,7 @@ def stylesheet_escuro():
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_ESCURO + ESTILO_DASHBOARD_MODERNO_ESCURO + ESTILO_FOCO_DASHBOARD_ESCURO + ESTILO_ALGORITMO_DASHBOARD_ESCURO + ESTILO_BUSCA_GLOBAL_ESCURO + ESTILO_INTELIGENCIA_RESUMO_ESCURO + ESTILO_TOPICOS_DISCIPLINA_ESCURO + ESTILO_RESOLVEDOR_ESCURO + ESTILO_TOPICO_DETALHES_ESCURO + ESTILO_RESOLVEDOR_ELIMINADAS_ESCURO + ESTILO_RESOLVEDOR_TECLADO_ESCURO + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_ESCURO + ESTILO_CALENDARIO_PREVISAO_ESCURO
+""" + ESTILO_JORNADA_ESCURO + ESTILO_DASHBOARD_MODERNO_ESCURO + ESTILO_FOCO_DASHBOARD_ESCURO + ESTILO_ALGORITMO_DASHBOARD_ESCURO + ESTILO_BUSCA_GLOBAL_ESCURO + ESTILO_INTELIGENCIA_RESUMO_ESCURO + ESTILO_TOPICOS_DISCIPLINA_ESCURO + ESTILO_RESOLVEDOR_ESCURO + ESTILO_TOPICO_DETALHES_ESCURO + ESTILO_RESOLVEDOR_ELIMINADAS_ESCURO + ESTILO_RESOLVEDOR_TECLADO_ESCURO + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_ESCURO + ESTILO_CALENDARIO_PREVISAO_ESCURO)
 
 
 
@@ -18635,7 +18636,7 @@ def stylesheet_futurista():
     telas antigas e novas sem alterar os estilos Claro/Escuro existentes.
     """
 
-    return stylesheet_escuro() + r"""
+    return stylesheet_escuro() + render_qss("futurista", r"""
 
     /* ======================================================
        VIGHNA FUTURISTA — TERCEIRO TEMA
@@ -18757,25 +18758,25 @@ def stylesheet_futurista():
     /* Refinos globais — Futurista
        Camada sutil para os controles de uso geral do programa. */
     QPushButton {
-        background-color: #11253a;
-        color: #d8eeff;
-        border: 1px solid #386688;
+        background-color: {{color:action.secondary}};
+        color: {{color:text.primary}};
+        border: 1px solid {{color:border.strong}};
         border-radius: 9px;
         padding: 6px 12px;
     }
     QPushButton:hover {
-        background-color: #17314b;
-        border-color: #58a6d3;
-        color: #f4fbff;
+        background-color: {{color:action.secondary_hover}};
+        border-color: {{color:border.hover}};
+        color: {{color:text.interactive_hover}};
     }
     QPushButton:pressed {
-        background-color: #0f2235;
-        border-color: #4b88b0;
+        background-color: {{color:action.secondary_pressed}};
+        border-color: {{color:border.active}};
     }
     QPushButton:disabled {
-        background-color: #0d1827;
-        color: #638097;
-        border-color: #28465d;
+        background-color: {{color:action.secondary_disabled}};
+        color: {{color:text.disabled}};
+        border-color: {{color:border.disabled}};
     }
 
     QToolButton {
@@ -18796,34 +18797,34 @@ def stylesheet_futurista():
     QPlainTextEdit,
     QAbstractSpinBox,
     QComboBox {
-        background-color: #0d1d2d;
-        color: #e7f5ff;
-        border: 1px solid #355f82;
+        background-color: {{color:surface.primary}};
+        color: {{color:text.control_subtle}};
+        border: 1px solid {{color:border.control_subtle}};
         border-radius: 9px;
         padding: 6px 10px;
-        selection-background-color: #285b8d;
-        selection-color: #ffffff;
+        selection-background-color: {{color:overlay.selection_subtle}};
+        selection-color: {{color:text.on_action}};
     }
     QLineEdit:hover,
     QTextEdit:hover,
     QPlainTextEdit:hover,
     QAbstractSpinBox:hover,
     QComboBox:hover {
-        border-color: #4f8ebd;
+        border-color: {{color:border.control_hover}};
     }
     QLineEdit:focus,
     QTextEdit:focus,
     QPlainTextEdit:focus,
     QAbstractSpinBox:focus,
     QComboBox:focus {
-        border: 1px solid #70c6e8;
-        background-color: #102436;
+        border: 1px solid {{color:border.focus}};
+        background-color: {{color:surface.focused}};
     }
     QLineEdit[readOnly="true"],
     QTextEdit[readOnly="true"],
     QPlainTextEdit[readOnly="true"] {
-        background-color: #0b1724;
-        color: #9cb4c8;
+        background-color: {{color:canvas.inset}};
+        color: {{color:text.readonly}};
     }
     QComboBox QAbstractItemView {
         background-color: #0d1d2d;
@@ -18900,7 +18901,7 @@ def stylesheet_futurista():
 
     QCheckBox,
     QRadioButton {
-        color: #d9ecff;
+        color: {{color:text.choice}};
         spacing: 8px;
     }
     QCheckBox::indicator,
@@ -18909,30 +18910,30 @@ def stylesheet_futurista():
         height: 16px;
     }
     QCheckBox::indicator {
-        background-color: #0d1d2d;
-        border: 1px solid #5a8bb1;
+        background-color: {{color:surface.primary}};
+        border: 1px solid {{color:border.control_indicator}};
         border-radius: 4px;
     }
     QRadioButton::indicator {
-        background-color: #0d1d2d;
-        border: 1px solid #5a8bb1;
+        background-color: {{color:surface.primary}};
+        border: 1px solid {{color:border.control_indicator}};
         border-radius: 8px;
     }
     QCheckBox::indicator:checked,
     QRadioButton::indicator:checked {
-        background-color: #2c6fa0;
-        border-color: #7fd5ef;
+        background-color: {{color:action.checked}};
+        border-color: {{color:border.checked}};
     }
 
     QProgressBar {
-        background-color: #102235;
-        color: #eaf7ff;
-        border: 1px solid #315a7a;
+        background-color: {{color:progress.track}};
+        color: {{color:progress.text}};
+        border: 1px solid {{color:progress.border}};
         border-radius: 6px;
         text-align: center;
     }
     QProgressBar::chunk {
-        background-color: #4aa5d3;
+        background-color: {{color:progress.fill}};
         border-radius: 5px;
     }
 
@@ -18950,9 +18951,9 @@ def stylesheet_futurista():
         color: #ffffff;
     }
     QToolTip {
-        background-color: #102235;
-        color: #eef9ff;
-        border: 1px solid #4d88b4;
+        background-color: {{color:surface.inverse}};
+        color: {{color:text.control}};
+        border: 1px solid {{color:border.selected}};
         padding: 5px 7px;
     }
 
@@ -19228,14 +19229,12 @@ def stylesheet_futurista():
     QSpinBox,
     QDateEdit,
     QTextEdit {
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-            stop:0 #10253a,
-            stop:1 #0a1829);
-        color: #eef9ff;
-        border: 1px solid #40668b;
+        background: {{gradient:gradient.control_input}};
+        color: {{color:text.control}};
+        border: 1px solid {{color:border.default}};
         border-radius: 10px;
-        selection-background-color: #365e9f;
-        selection-color: #ffffff;
+        selection-background-color: {{color:overlay.selection}};
+        selection-color: {{color:text.on_action}};
     }
 
     QLineEdit:focus,
@@ -19243,51 +19242,47 @@ def stylesheet_futurista():
     QSpinBox:focus,
     QDateEdit:focus,
     QTextEdit:focus {
-        border: 1px solid #59e3ff;
+        border: 1px solid {{color:focus.ring}};
     }
 
     QComboBox QAbstractItemView {
-        background-color: #102238;
-        color: #eef8ff;
-        selection-background-color: #27496d;
-        selection-color: #ffffff;
-        border: 1px solid #40668b;
+        background-color: {{color:surface.elevated}};
+        color: {{color:text.popup}};
+        selection-background-color: {{color:action.ghost_hover}};
+        selection-color: {{color:text.selection_accent}};
+        border: 1px solid {{color:border.default}};
     }
 
     QTableWidget,
     QTreeWidget {
-        background-color: #0a192b;
-        color: #e7f3ff;
-        border: 1px solid #305474;
+        background-color: {{color:surface.secondary}};
+        color: {{color:text.secondary}};
+        border: 1px solid {{color:border.subtle}};
         border-radius: 10px;
-        gridline-color: #20394f;
-        selection-background-color: #234766;
-        selection-color: #ffffff;
+        gridline-color: {{color:border.grid}};
+        selection-background-color: {{color:surface.selected}};
+        selection-color: {{color:text.on_action}};
     }
 
     QHeaderView::section {
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-            stop:0 #132c45,
-            stop:1 #0c1d31);
-        color: #b7cede;
+        background: {{gradient:gradient.control_header}};
+        color: {{color:text.header}};
         border: none;
-        border-right: 1px solid #284965;
-        border-bottom: 1px solid #346080;
+        border-right: 1px solid {{color:border.divider}};
+        border-bottom: 1px solid {{color:border.divider_strong}};
         padding: 8px;
         font-weight: 700;
     }
 
     QTabWidget::pane {
-        background-color: #0a192b;
-        border: 1px solid #305474;
+        background-color: {{color:surface.secondary}};
+        border: 1px solid {{color:border.subtle}};
         border-radius: 10px;
     }
 
     QTabBar::tab {
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-            stop:0 #132b42,
-            stop:1 #0c1d30);
-        color: #91abc0;
+        background: {{gradient:gradient.control_tab}};
+        color: {{color:text.muted}};
         border: 1px solid #315573;
         border-bottom: none;
         border-top-left-radius: 9px;
@@ -19297,10 +19292,8 @@ def stylesheet_futurista():
     }
 
     QTabBar::tab:selected {
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-            stop:0 #0e6677,
-            stop:1 #323e8e);
-        color: #d9fcff;
+        background: {{gradient:gradient.control_selected}};
+        color: {{color:text.link}};
         border: 1px solid #55e7ff;
         font-weight: 800;
     }
@@ -19361,26 +19354,26 @@ def stylesheet_futurista():
     }
 
     QScrollBar:vertical {
-        background: #0a1726;
+        background: {{color:surface.inset}};
         width: 10px;
         border: none;
     }
 
     QScrollBar::handle:vertical {
-        background: #365f86;
+        background: {{color:surface.interactive}};
         min-height: 28px;
         border-radius: 5px;
     }
 
     QScrollBar::handle:vertical:hover {
-        background: #4d82ae;
+        background: {{color:surface.hover}};
     }
 
     QScrollBar::add-line:vertical,
     QScrollBar::sub-line:vertical,
     QScrollBar::add-page:vertical,
     QScrollBar::sub-page:vertical {
-        background: transparent;
+        background: {{color:action.ghost}};
         height: 0px;
     }
 
@@ -22067,7 +22060,7 @@ def stylesheet_futurista():
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_FUTURISTA + ESTILO_DASHBOARD_MODERNO_FUTURISTA + ESTILO_FOCO_DASHBOARD_FUTURISTA + ESTILO_ALGORITMO_DASHBOARD_FUTURISTA + ESTILO_BUSCA_GLOBAL_FUTURISTA + ESTILO_INTELIGENCIA_RESUMO_FUTURISTA + ESTILO_TOPICOS_DISCIPLINA_FUTURISTA + ESTILO_DASHBOARD_NEO_FUTURISTA + ESTILO_RESOLVEDOR_FUTURISTA + ESTILO_TOPICO_DETALHES_FUTURISTA + ESTILO_RESOLVEDOR_ELIMINADAS_FUTURISTA + ESTILO_RESOLVEDOR_TECLADO_FUTURISTA + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_FUTURISTA + ESTILO_CALENDARIO_PREVISAO_FUTURISTA
+""" + ESTILO_JORNADA_FUTURISTA + ESTILO_DASHBOARD_MODERNO_FUTURISTA + ESTILO_FOCO_DASHBOARD_FUTURISTA + ESTILO_ALGORITMO_DASHBOARD_FUTURISTA + ESTILO_BUSCA_GLOBAL_FUTURISTA + ESTILO_INTELIGENCIA_RESUMO_FUTURISTA + ESTILO_TOPICOS_DISCIPLINA_FUTURISTA + ESTILO_DASHBOARD_NEO_FUTURISTA + ESTILO_RESOLVEDOR_FUTURISTA + ESTILO_TOPICO_DETALHES_FUTURISTA + ESTILO_RESOLVEDOR_ELIMINADAS_FUTURISTA + ESTILO_RESOLVEDOR_TECLADO_FUTURISTA + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_FUTURISTA + ESTILO_CALENDARIO_PREVISAO_FUTURISTA)
 
 def aplicar_tema(
     app,

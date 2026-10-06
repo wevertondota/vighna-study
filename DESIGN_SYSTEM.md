@@ -2,7 +2,7 @@
 
 ## Escopo atual
 
-Este documento descreve a fundação criada na Etapa 2 e as integrações de caracterização já concluídas. `icones.py` consome `icon.*`; o splash externo, o indicador de tarefas e somente o fallback `JanelaInicializacao` de `main.py` consomem tokens visuais fixos. `tema.py` e os demais componentes permanecem legados. A cascata dos temas continua inalterada.
+Este documento descreve a fundação criada na Etapa 2 e as integrações de caracterização já concluídas. `icones.py` consome `icon.*`; o splash externo, o indicador de tarefas e somente o fallback `JanelaInicializacao` de `main.py` consomem tokens visuais fixos. Em `tema.py`, apenas controles genéricos compartilhados consomem tokens; estilos específicos de telas e módulos permanecem legados. A cascata dos temas continua inalterada.
 
 A API central fica em `ui/design/` e possui quatro níveis:
 
@@ -58,7 +58,7 @@ Tokens ausentes e acessos com tipo errado geram `TokenNotFoundError`; não exist
 - `ColorValue` em cada stop, inclusive alpha por `#AARRGGBB`;
 - variante por tema, mantida no respectivo `ThemeDefinition`.
 
-Das 201 ocorrências inventariadas, somente os dois QLinearGradient do splash foram migrados até aqui. Os demais gradientes legados continuam inalterados.
+Das 201 ocorrências inventariadas, foram migrados os dois `QLinearGradient` do splash e quatro gradientes QSS de controles compartilhados do tema Futurista. Os demais gradientes legados continuam inalterados.
 
 Gradientes fixos também podem receber coordenadas dinâmicas no adaptador QPainter. Direção efetiva, stops, posições e alpha permanecem centralizados sem congelar a geometria calculada em runtime.
 
@@ -111,6 +111,25 @@ fundo = qss_gradient("futurista", "gradient.action_primary")
 trecho = f"QPushButton {{ background: {fundo}; }}"
 ```
 
+Para blocos QSS extensos, `render_qss()` evita converter todo o texto em
+`f-string` e resolve apenas marcadores explícitos:
+
+```python
+from ui.design import render_qss
+
+trecho = render_qss("claro", """
+QLineEdit {
+    color: {{color:text.control}};
+    border: 1px solid {{color:border.default}};
+    background: {{gradient:gradient.control_input}};
+}
+""")
+```
+
+Os únicos formatos reconhecidos são `{{color:caminho}}` e
+`{{gradient:caminho}}`; tokens ausentes ou do tipo errado continuam falhando
+explicitamente.
+
 Não concatene alpha ou altere a cor devolvida no consumidor. Se o papel precisar de uma variante, ela deve existir no contrato.
 
 Para um visual deliberadamente fixo:
@@ -147,7 +166,7 @@ gradiente = fixed_qlineargradient(
 
 Essas funções não criam `QApplication` e não importam `QtWidgets`.
 
-## Consumo futuro em QtAwesome
+## Consumo em QtAwesome
 
 `qtawesome_color()` devolve a representação de cor aceita pelo argumento `color=`:
 

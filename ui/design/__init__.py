@@ -1,7 +1,7 @@
-"""API pública da fundação do Design System do VighnaStudy.
+"""API pública do Design System do VighnaStudy.
 
-O pacote não é conectado aos estilos legados nesta etapa e não importa Qt ao
-ser carregado. Adaptadores Qt fazem importação tardia apenas quando chamados.
+Os consumidores são migrados incrementalmente; importar o pacote não carrega
+Qt. Adaptadores Qt fazem importação tardia apenas quando chamados.
 """
 
 from .adapters import (
@@ -16,6 +16,7 @@ from .adapters import (
     qpen,
     qss_color,
     qss_gradient,
+    render_qss,
     qtawesome_color,
 )
 from .gradients import (
@@ -103,6 +104,7 @@ __all__ = (
     "qpen",
     "qss_color",
     "qss_gradient",
+    "render_qss",
     "qtawesome_color",
     "token_spec",
 )

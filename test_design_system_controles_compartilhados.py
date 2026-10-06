@@ -1,0 +1,174 @@
+"""Caracterização da migração dos controles visuais compartilhados."""
+
+from __future__ import annotations
+
+import hashlib
+from pathlib import Path
+import re
+import unittest
+
+import tema
+from ui.design import get_theme
+
+
+ROOT = Path(__file__).resolve().parent
+TEMA_SOURCE = (ROOT / "tema.py").read_text(encoding="utf-8")
+
+EXPECTED_STYLESHEET_BASELINE = {
+    "claro": "139709f8c57e00f16848668f9226703c7f8ff391dd9aea2bba8b2eae20ac2c5f",
+    "escuro": "ebbc21363d0035058301d060eb099fb2d33b992e8537c20f9bf1e77f8a2b4f3e",
+    "futurista": "0e588bb372946b4a6f61ad406c817fd155cac8c3c4286e9f93b7a09d06dc8622",
+}
+
+
+def _normalize_hex_case(stylesheet: str) -> str:
+    normalized = re.sub(
+        r"#[0-9A-Fa-f]{3,8}\b",
+        lambda match: match.group(0).upper(),
+        stylesheet,
+    )
+    return re.sub(r"\s+", " ", normalized).strip()
+
+
+class SharedControlsBaselineTests(unittest.TestCase):
+    def test_stylesheets_completos_preservam_linha_de_base(self) -> None:
+        stylesheets = {
+            "claro": tema.stylesheet_claro(),
+            "escuro": tema.stylesheet_escuro(),
+            "futurista": tema.stylesheet_futurista(),
+        }
+        for theme, stylesheet in stylesheets.items():
+            with self.subTest(theme=theme):
+                normalized = _normalize_hex_case(stylesheet)
+                self.assertEqual(
+                    hashlib.sha256(normalized.encode("utf-8")).hexdigest(),
+                    EXPECTED_STYLESHEET_BASELINE[theme],
+                )
+
+    def test_estados_globais_relevantes_estao_caracterizados(self) -> None:
+        light = tema.stylesheet_claro()
+        dark = tema.stylesheet_escuro()
+        futuristic = tema.stylesheet_futurista()
+
+        for stylesheet in (light, dark, futuristic):
+            self.assertIn("QPushButton:hover", stylesheet)
+            self.assertIn("QPushButton:pressed", stylesheet)
+            self.assertIn("QPushButton:disabled", stylesheet)
+            self.assertIn("QLineEdit:focus", stylesheet)
+            self.assertIn("QTableWidget", stylesheet)
+            self.assertIn("QHeaderView::section", stylesheet)
+            self.assertIn("QTabBar::tab:selected", stylesheet)
+            self.assertIn("QScrollBar::handle:vertical:hover", stylesheet)
+            self.assertIn("QToolTip", stylesheet)
+
+        light = light.lower()
+        dark = dark.lower()
+        futuristic = futuristic.lower()
+        self.assertIn("background-color: #ffffff;\n        color: #1f2937;", light)
+        self.assertIn("background-color: #1f2937;\n        color: #e5e7eb;", dark)
+        self.assertIn("background-color: #11253a;\n        color: #d8eeff;", futuristic)
+        self.assertIn("selection-background-color: #ded9ff;", light)
+        self.assertIn("selection-background-color: #5549ad;", dark)
+        self.assertIn("stop:0 #10253a", futuristic)
+        self.assertIn("stop:1 #0a1829", futuristic)
+        self.assertIn("background-color: #4aa5d3;", futuristic)
+
+    def test_cascata_futurista_permanece_sobre_escuro(self) -> None:
+        self.assertIn("return stylesheet_escuro() +", TEMA_SOURCE)
+
+    def test_fonte_dos_blocos_migrados_usa_renderizador_publico(self) -> None:
+        self.assertIn("from ui.design import render_qss", TEMA_SOURCE)
+        self.assertEqual(TEMA_SOURCE.count("{{color:"), 146)
+        self.assertEqual(TEMA_SOURCE.count("{{gradient:"), 4)
+
+    def test_tokens_de_controles_reproduzem_valores_legados(self) -> None:
+        expected = {
+            "claro": {
+                "action.secondary": "#FFFFFF",
+                "text.control": "#182033",
+                "border.default": "#CBD3DF",
+                "focus.ring": "#7667E8",
+                "surface.selected": "#EEEAFF",
+            },
+            "escuro": {
+                "action.secondary": "#1F2937",
+                "text.control": "#EDF1F7",
+                "border.default": "#40536A",
+                "focus.ring": "#8879F3",
+                "surface.selected": "#39336E",
+            },
+            "futurista": {
+                "action.secondary": "#11253A",
+                "text.control": "#EEF9FF",
+                "border.default": "#40668B",
+                "focus.ring": "#59E3FF",
+                "surface.selected": "#234766",
+                "progress.fill": "#4AA5D3",
+            },
+        }
+        for theme_name, values in expected.items():
+            theme = get_theme(theme_name)
+            for token, value in values.items():
+                with self.subTest(theme=theme_name, token=token):
+                    self.assertEqual(theme.color(token).value, value)
+
+    def test_gradientes_genericos_futuristas_preservam_direcao_e_stops(self) -> None:
+        theme = get_theme("futurista")
+        expected = {
+            "gradient.control_input": ((0.0, 0.0, 1.0, 1.0), ("#10253A", "#0A1829")),
+            "gradient.control_header": ((0.0, 0.0, 1.0, 0.0), ("#132C45", "#0C1D31")),
+            "gradient.control_tab": ((0.0, 0.0, 1.0, 0.0), ("#132B42", "#0C1D30")),
+            "gradient.control_selected": ((0.0, 0.0, 1.0, 0.0), ("#0E6677", "#323E8E")),
+        }
+        for token, (direction, colors) in expected.items():
+            with self.subTest(token=token):
+                spec = theme.gradient(token)
+                self.assertEqual(
+                    (spec.direction.x1, spec.direction.y1, spec.direction.x2, spec.direction.y2),
+                    direction,
+                )
+                self.assertEqual(tuple(stop.position for stop in spec.stops), (0.0, 1.0))
+                self.assertEqual(tuple(stop.color.value for stop in spec.stops), colors)
+
+    def test_tokens_de_componentes_fora_do_escopo_nao_derivam(self) -> None:
+        expected = {
+            "claro": {
+                "answer.explanation_surface": "#F8FAFC",
+                "answer.editor_selection": "#335965D8",
+                "calendar.selected_surface": "#F0F2FF",
+                "chart.grid": "#E2E8F0",
+                "focus_mode.panel": "#F8FAFC",
+            },
+            "escuro": {
+                "answer.explanation_surface": "#172033",
+                "answer.editor_surface": "#182230",
+                "calendar.selected_surface": "#1D2440",
+                "chart.grid": "#273449",
+                "focus_mode.panel": "#172033",
+            },
+            "futurista": {
+                "answer.focused_border": "#757FFF",
+                "answer.editor_selection": "#335965D8",
+                "calendar.selected_surface": "#1D2440",
+                "chart.grid": "#2E5C78",
+                "focus_mode.panel": "#101F30",
+            },
+        }
+        for theme_name, values in expected.items():
+            theme = get_theme(theme_name)
+            for token, value in values.items():
+                with self.subTest(theme=theme_name, token=token):
+                    self.assertEqual(theme.color(token).value, value)
+
+    def test_qss_entregue_nao_expoe_marcadores_internos(self) -> None:
+        for stylesheet in (
+            tema.stylesheet_claro(),
+            tema.stylesheet_escuro(),
+            tema.stylesheet_futurista(),
+        ):
+            self.assertNotIn("{{color:", stylesheet)
+            self.assertNotIn("{{gradient:", stylesheet)
+
+
+if __name__ == "__main__":
+    unittest.main()
