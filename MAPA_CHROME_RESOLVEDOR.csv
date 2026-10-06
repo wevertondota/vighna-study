@@ -1,0 +1,120 @@
+componente,seletor,estado,tema,valor,funcao_visual,camada,ativo_ou_sombreado,token_existente_candidato,token_novo_candidato,observacao,ocorrencias_hex
+janela,QDialog#questionSolverDialog,normal,Claro,#F5F7FA,fundo do canvas,A,ativo,canvas.app,,equivalencia exata,1
+janela,QDialog#questionSolverDialog,normal,Escuro,#101722,fundo do canvas,A,ativo,canvas.app,,equivalencia exata,1
+janela,QDialog#questionSolverDialog,normal,Futurista,#0B111D,fundo do canvas,A,ativo,canvas.app,,equivalencia exata,1
+cabeçalho,QLabel#pageTitle,normal,Claro,#172033,título,A,ativo,,session.title_text,,1
+cabeçalho,QLabel#pageTitle,normal,Escuro,#F3F6FA,título,A,ativo,,session.title_text,,1
+cabeçalho,QLabel#pageTitle,normal,Futurista,#F5F7FB,título,A,ativo,,session.title_text,,1
+cabeçalho,QLabel#pageSubtitle,normal,Claro,#718096,subtítulo,A,ativo,,session.subtitle_text,,1
+cabeçalho,QLabel#pageSubtitle,normal,Escuro,#96A3B3,subtítulo,A,ativo,,session.subtitle_text,,1
+cabeçalho,QLabel#pageSubtitle,normal,Futurista,#AAB5C2,subtítulo,A,ativo,,session.subtitle_text,,1
+overview,QFrame#questionSessionOverviewCard,normal,Claro,superfície=#FFFFFF; borda=#DDE4EC,cartão superior,A,ativo,,session.panel_surface + session.overview_border,,2
+overview,QFrame#questionSessionOverviewCard,normal,Escuro,superfície=#182230; borda=#344154,cartão superior,A,ativo,,session.panel_surface + session.overview_border,,2
+overview,QFrame#questionSessionOverviewCard,normal,Futurista,gradiente=0 #202733|.55 #222A36|1 #1D2430; borda=#475364,cartão superior,A,ativo,,session.overview_gradient + session.overview_border,diagonal 0 0 1 1,4
+overview,QLabel#questionSessionEyebrow,normal,Claro,#7B8797,rótulo,A,ativo,,session.eyebrow_text,,1
+overview,QLabel#questionSessionEyebrow,normal,Escuro,#8392A5,rótulo,A,ativo,,session.eyebrow_text,,1
+overview,QLabel#questionSessionEyebrow,normal,Futurista,#AAB4C0,rótulo,A,ativo,,session.eyebrow_text,,1
+contador,QLabel#questionSessionProgressText,normal,Claro,#202B3C,Questão N de total,A,ativo,progress.text,progress.session_text,progress.text diverge nos temas,1
+contador,QLabel#questionSessionProgressText,normal,Escuro,#EDF2F7,Questão N de total,A,ativo,progress.text,progress.session_text,progress.text diverge nos temas,1
+contador,QLabel#questionSessionProgressText,normal,Futurista,#F5F7FB,Questão N de total,A,ativo,progress.text,progress.session_text,progress.text diverge nos temas,1
+ciclo,QLabel#questionSessionCycleText,normal,Claro,#657286,texto contextual,A,ativo,,session.cycle_text,pode ficar oculto,1
+ciclo,QLabel#questionSessionCycleText,normal,Escuro,#A1ADBB,texto contextual,A,ativo,,session.cycle_text,pode ficar oculto,1
+ciclo,QLabel#questionSessionCycleText,normal,Futurista,#B8C1CD,texto contextual,A,ativo,,session.cycle_text,pode ficar oculto,1
+progresso,QProgressBar#questionSessionProgress,normal,Claro,#E8EDF3,trilho,A,ativo,progress.track,progress.session_track,só Claro coincide,1
+progresso,QProgressBar#questionSessionProgress,normal,Escuro,#2C3745,trilho,A,ativo,progress.track,progress.session_track,,1
+progresso,QProgressBar#questionSessionProgress,normal,Futurista,#3B424F,trilho,A,ativo,progress.track,progress.session_track,,1
+progresso,QProgressBar#questionSessionProgress::chunk,normal,Claro,0 #4F5FE8|1 #6B86F2,preenchimento,A,ativo,progress.fill_gradient,,horizontal opaco; recaracterizar token,2
+progresso,QProgressBar#questionSessionProgress::chunk,normal,Escuro,0 #5964E8|1 #6E8BEF,preenchimento,A,ativo,progress.fill_gradient,,horizontal opaco; recaracterizar token,2
+progresso,QProgressBar#questionSessionProgress::chunk,normal,Futurista,0 #5358EA|.52 #5B64EE|1 #718BF5,preenchimento,A,ativo,progress.fill_gradient,,horizontal opaco,3
+miniestatística,QFrame#questionSessionMiniStat,normal,Claro,superfície=#F7F9FC; borda=#E3E8EF,cartão métrico,A,ativo,,session.metric_surface + session.metric_border,,2
+miniestatística,QFrame#questionSessionMiniStat,normal,Escuro,superfície=#141D29; borda=#2D3949,cartão métrico,A,ativo,,session.metric_surface + session.metric_border,,2
+miniestatística,QFrame#questionSessionMiniStat,normal,Futurista,superfície=#171F2B; borda=#344050,cartão métrico,A,ativo,,session.metric_surface + session.metric_border,,2
+miniestatística,QLabel#questionSessionMiniLabel,normal,Claro,#7A8798,rótulo,A,ativo,,session.metric_label_text,,1
+miniestatística,QLabel#questionSessionMiniLabel,normal,Escuro,#8D9BAD,rótulo,A,ativo,,session.metric_label_text,,1
+miniestatística,QLabel#questionSessionMiniLabel,normal,Futurista,#98A5B4,rótulo,A,ativo,,session.metric_label_text,,1
+miniestatística,QLabel#questionSessionMiniValue,neutral,Claro,#1F2937,valor,A,ativo,text.primary,session.metric_value_text,só Claro coincide,1
+miniestatística,QLabel#questionSessionMiniValue,neutral,Escuro,#F2F5F8,valor,A,ativo,text.primary,session.metric_value_text,,1
+miniestatística,QLabel#questionSessionMiniValue,neutral,Futurista,#F8FAFC,valor,A,ativo,text.primary,session.metric_value_text,,1
+miniestatística,"QLabel#questionSessionMiniValue[metricRole=success]",success,Claro,#17815D,acertos,A,ativo,feedback.success_text,session.metric_success_text,valores diferentes,1
+miniestatística,"QLabel#questionSessionMiniValue[metricRole=success]",success,Escuro,#79D6AA,acertos,A,ativo,feedback.success_text,session.metric_success_text,valores diferentes,1
+miniestatística,"QLabel#questionSessionMiniValue[metricRole=success]",success,Futurista,#82DBB4,acertos,A,ativo,feedback.success_text,session.metric_success_text,valores diferentes,1
+miniestatística,"QLabel#questionSessionMiniValue[metricRole=danger]",danger,Claro,#C44758,erros,A,ativo,feedback.danger_text,session.metric_danger_text,valores diferentes,1
+miniestatística,"QLabel#questionSessionMiniValue[metricRole=danger]",danger,Escuro,#F08A98,erros,A,ativo,feedback.danger_text,session.metric_danger_text,valores diferentes,1
+miniestatística,"QLabel#questionSessionMiniValue[metricRole=danger]",danger,Futurista,#F28B99,erros,A,ativo,feedback.danger_text,session.metric_danger_text,valores diferentes,1
+miniestatística,"QLabel#questionSessionMiniValue[metricRole=warning]",warning,Claro,#B16A18,puladas,A,ativo,feedback.warning_text,session.metric_warning_text,valores diferentes,1
+miniestatística,"QLabel#questionSessionMiniValue[metricRole=warning]",warning,Escuro,#E5B16B,puladas,A,ativo,feedback.warning_text,session.metric_warning_text,valores diferentes,1
+miniestatística,"QLabel#questionSessionMiniValue[metricRole=warning]",warning,Futurista,#E9B66E,puladas,A,ativo,feedback.warning_text,session.metric_warning_text,valores diferentes,1
+modo foco,QFrame#questionSessionFocusBar + QLabel#questionSessionFocusState,normal,Claro,superfície=#F7F9FC; borda=#E1E6ED; texto=#536173,outro recorte,E,ativo,focus.*,,fora de 3E-B2,3
+modo foco,QFrame#questionSessionFocusBar + QLabel#questionSessionFocusState,normal,Escuro,superfície=#151E2A; borda=#303D4E; texto=#A7B4C3,outro recorte,E,ativo,focus.*,,fora de 3E-B2,3
+modo foco,QFrame#questionSessionFocusBar + QLabel#questionSessionFocusState,normal,Futurista,superfície=#151D28; borda=#354151; texto=#B1BCC9,outro recorte,E,ativo,focus.*,,fora de 3E-B2,3
+retorno,QPushButton#subtleButton,normal,Claro,superfície=#FFFFFF; texto=#334155; borda=#CFD8E3,Dashboard,A (fora das 316),ativo,action.secondary,session.navigation_surface + session.navigation_text + session.navigation_border,,3
+retorno,QPushButton#subtleButton,hover,Claro,superfície=#F6FBFF; texto=#235F98; borda=#9FC7E7,Dashboard,A (fora das 316),ativo,action.secondary_hover,session.navigation_hover_surface + session.navigation_hover_text + session.navigation_hover_border,,3
+retorno,QPushButton#subtleButton,normal,Escuro,superfície=#162333; texto=#DCE6F0; borda=#33475E,Dashboard,A (fora das 316),ativo,action.secondary,session.navigation_surface + session.navigation_text + session.navigation_border,,3
+retorno,QPushButton#subtleButton,hover,Escuro,superfície=#1C3145; texto=#9BD5FF; borda=#4D89B8,Dashboard,A (fora das 316),ativo,action.secondary_hover,session.navigation_hover_surface + session.navigation_hover_text + session.navigation_hover_border,,3
+retorno,QDialog#questionSolverDialog QPushButton#subtleButton,normal,Futurista,superfície=#232B36; texto=#D1D9E2; borda=#5A6472,Dashboard,A,ativo,action.secondary,session.navigation_surface + session.navigation_text + session.navigation_border,também alcança botões do Modo Foco,3
+retorno,QDialog#questionSolverDialog QPushButton#subtleButton:hover,hover,Futurista,superfície=#2C3643; texto=#FFFFFF; borda=#7A8594,Dashboard,A,ativo,action.secondary_hover,session.navigation_hover_surface + session.navigation_hover_text + session.navigation_hover_border,também alcança botões do Modo Foco,3
+cronômetro,QLabel#mockExamTimer,normal,Claro,superfície=#F5F3FF; texto=#6D28D9; borda=#C4B5FD,tempo,A (fora das 316),ativo,,session.timer_surface + session.timer_text + session.timer_border,visível em simulado,3
+cronômetro,QLabel#mockExamTimer,normal,Escuro,superfície=#2E1065; texto=#DDD6FE; borda=#7C3AED,tempo,A (fora das 316),ativo,,session.timer_surface + session.timer_text + session.timer_border,visível em simulado,3
+cronômetro,QLabel#mockExamTimer,normal,Futurista,superfície=#152A46; texto=#9EEEFF; borda=#42CAE9,tempo,A (fora das 316),ativo,,session.timer_surface + session.timer_text + session.timer_border,visível em simulado,3
+contexto,QLabel#questionSolverDiscipline,normal,Claro,#5866C8,disciplina,A,ativo,,session.discipline_text,,1
+contexto,QLabel#questionSolverDiscipline,normal,Escuro,#96A0FF,disciplina,A,ativo,,session.discipline_text,,1
+contexto,QLabel#questionSolverDiscipline,normal,Futurista,#969FFF,disciplina,A,ativo,,session.discipline_text,,1
+contexto,QLabel#questionSolverMeta,normal,Claro,#5D697A,tópico/metadado,A,ativo,,session.meta_text,,1
+contexto,QLabel#questionSolverMeta,normal,Escuro,#A8B4C2,tópico/metadado,A,ativo,,session.meta_text,,1
+contexto,QLabel#questionSolverMeta,normal,Futurista,#B6C0CB,tópico/metadado,A,ativo,,session.meta_text,,1
+contexto,QLabel#questionSolverQuestionIndex,normal,Claro,#606BC9,índice,A,ativo,,session.question_index_text,,1
+contexto,QLabel#questionSolverQuestionIndex,normal,Escuro,#9BA4FF,índice,A,ativo,,session.question_index_text,,1
+contexto,QLabel#questionSolverQuestionIndex,normal,Futurista,#9BA4FF,índice,A,ativo,,session.question_index_text,,1
+enunciado,QFrame#questionSolverStatementCard + QLabel#questionSolverStatement,normal,Claro,superfície=#FFFFFF; borda=#DCE3EB; texto=#172033,corpo pedagógico,E,ativo,answer.*,,fora do chrome,3
+enunciado,QFrame#questionSolverStatementCard + QLabel#questionSolverStatement,normal,Escuro,superfície=#182230; borda=#344154; texto=#F2F6FA,corpo pedagógico,E,ativo,answer.*,,fora do chrome,3
+enunciado,QFrame#questionSolverStatementCard + QLabel#questionSolverStatement,normal,Futurista,gradiente=0 #171F2B|1 #141C27; borda=#3C4858; texto=#F2F6FA,corpo pedagógico,E,ativo,answer.*,,fora do chrome; diagonal,4
+painel de ações,QFrame#questionSessionActionPanel,normal,Claro,superfície=#FFFFFF; borda=#DDE4EC,rodapé,A,ativo,,session.panel_surface + session.action_panel_border,,2
+painel de ações,QFrame#questionSessionActionPanel,normal,Escuro,superfície=#182230; borda=#344154,rodapé,A,ativo,,session.panel_surface + session.action_panel_border,,2
+painel de ações,QFrame#questionSessionActionPanel,normal,Futurista,gradiente=0 #171F2B|1 #151D28; borda=#3A4656,rodapé,A,ativo,,session.action_panel_gradient + session.action_panel_border,horizontal,3
+flags,"QCheckBox#questionSessionDoubt,QCheckBox#questionSessionAnalysisFlag",normal,Futurista,#B7C1CD,texto,A,ativo,,session.doubt_text + session.analysis_text,uma declaração compartilhada,1
+flags,QCheckBox#questionSessionDoubt:checked,checked,Futurista,#AEB5FF,texto,A,ativo,,session.doubt_checked_text,,1
+flags,QCheckBox#questionSessionAnalysisFlag:checked,checked,Futurista,#F0C47C,texto,A,ativo,,session.analysis_checked_text,,1
+dúvida,QCheckBox#questionSessionDoubt,normal,Claro,#475569,texto,B,ativo,,session.doubt_text,legado ainda ativo,1
+dúvida,QCheckBox#questionSessionDoubt:checked,checked,Claro,#1D4ED8,texto,B,ativo,,session.doubt_checked_text,legado ainda ativo,1
+dúvida,QCheckBox#questionSessionDoubt::indicator,normal,Claro,superfície=#FFFFFF; borda=#64748B,indicador,B,ativo,,session.flag_indicator_surface + session.doubt_indicator_border,,2
+dúvida,QCheckBox#questionSessionDoubt::indicator:hover,hover,Claro,#2563EB,borda,B,ativo,,session.doubt_indicator_hover_border,,1
+dúvida,QCheckBox#questionSessionDoubt::indicator:checked,checked,Claro,superfície=#2563EB; borda=#1D4ED8,indicador,B,ativo,,session.doubt_indicator_checked_surface + session.doubt_indicator_checked_border,,2
+dúvida,QCheckBox#questionSessionDoubt::indicator:disabled,disabled,Claro,superfície=#E2E8F0; borda=#94A3B8,indicador,B,ativo,,session.doubt_indicator_disabled_surface + session.doubt_indicator_disabled_border,,2
+análise,QCheckBox#questionSessionAnalysisFlag,normal,Claro,#64748B,texto,B,ativo,,session.analysis_text,legado ainda ativo,1
+análise,QCheckBox#questionSessionAnalysisFlag:checked,checked,Claro,#92400E,texto,B,ativo,,session.analysis_checked_text,legado ainda ativo,1
+análise,QCheckBox#questionSessionAnalysisFlag::indicator,normal,Claro,superfície=#FFFFFF; borda=#94A3B8,indicador,B,ativo,,session.flag_indicator_surface + session.analysis_indicator_border,,2
+análise,QCheckBox#questionSessionAnalysisFlag::indicator:hover,hover,Claro,#D97706,borda,B,ativo,,session.analysis_indicator_hover_border,,1
+análise,QCheckBox#questionSessionAnalysisFlag::indicator:checked,checked,Claro,superfície=#F59E0B; borda=#B45309,indicador,B,ativo,,session.analysis_indicator_checked_surface + session.analysis_indicator_checked_border,,2
+dúvida,QCheckBox#questionSessionDoubt,normal,Escuro,#CBD5E1,texto,B,ativo,,session.doubt_text,herdado pelo Futurista antes do override de texto,1
+dúvida,QCheckBox#questionSessionDoubt:checked,checked,Escuro,#93C5FD,texto,B,ativo,,session.doubt_checked_text,herdado pelo Futurista antes do override de texto,1
+dúvida,QCheckBox#questionSessionDoubt::indicator,normal,Escuro,superfície=#111827; borda=#94A3B8,indicador,B,ativo,,session.flag_indicator_surface + session.doubt_indicator_border,indicador também efetivo no Futurista,2
+dúvida,QCheckBox#questionSessionDoubt::indicator:hover,hover,Escuro,#60A5FA,borda,B,ativo,,session.doubt_indicator_hover_border,indicador também efetivo no Futurista,1
+dúvida,QCheckBox#questionSessionDoubt::indicator:checked,checked,Escuro,superfície=#3B82F6; borda=#93C5FD,indicador,B,ativo,,session.doubt_indicator_checked_surface + session.doubt_indicator_checked_border,indicador também efetivo no Futurista,2
+dúvida,QCheckBox#questionSessionDoubt::indicator:disabled,disabled,Escuro,superfície=#1F2937; borda=#475569,indicador,B,ativo,,session.doubt_indicator_disabled_surface + session.doubt_indicator_disabled_border,indicador também efetivo no Futurista,2
+análise,QCheckBox#questionSessionAnalysisFlag,normal,Escuro,#94A3B8,texto,B,ativo,,session.analysis_text,herdado pelo Futurista antes do override de texto,1
+análise,QCheckBox#questionSessionAnalysisFlag:checked,checked,Escuro,#FBBF24,texto,B,ativo,,session.analysis_checked_text,herdado pelo Futurista antes do override de texto,1
+análise,QCheckBox#questionSessionAnalysisFlag::indicator,normal,Escuro,superfície=#111827; borda=#64748B,indicador,B,ativo,,session.flag_indicator_surface + session.analysis_indicator_border,indicador também efetivo no Futurista,2
+análise,QCheckBox#questionSessionAnalysisFlag::indicator:hover,hover,Escuro,#F59E0B,borda,B,ativo,,session.analysis_indicator_hover_border,indicador também efetivo no Futurista,1
+análise,QCheckBox#questionSessionAnalysisFlag::indicator:checked,checked,Escuro,superfície=#D97706; borda=#FBBF24,indicador,B,ativo,,session.analysis_indicator_checked_surface + session.analysis_indicator_checked_border,indicador também efetivo no Futurista,2
+pular,QPushButton#questionSessionSkipButton,normal,Claro,superfície=#F5F7FA; texto=#4F5D6E; borda=#CCD5DF,ação secundária,A,ativo,action.secondary,session.skip_surface + session.skip_text + session.skip_border,,3
+pular,QPushButton#questionSessionSkipButton:hover,hover,Claro,superfície=#EDF1F5; borda=#AFBAC8,ação secundária,A,ativo,action.secondary_hover,session.skip_hover_surface + session.skip_hover_border,texto herdado,2
+pular,QPushButton#questionSessionSkipButton,normal,Escuro,superfície=#202B39; texto=#C8D1DC; borda=#445265,ação secundária,A,ativo,action.secondary,session.skip_surface + session.skip_text + session.skip_border,,3
+pular,QPushButton#questionSessionSkipButton:hover,hover,Escuro,superfície=#273444; borda=#607086,ação secundária,A,ativo,action.secondary_hover,session.skip_hover_surface + session.skip_hover_border,texto herdado,2
+pular,QPushButton#questionSessionSkipButton,normal,Futurista,superfície=#202833; texto=#CED6E0; borda=#505B69,ação secundária,A,ativo,action.secondary,session.skip_surface + session.skip_text + session.skip_border,,3
+pular,QPushButton#questionSessionSkipButton:hover,hover,Futurista,superfície=#293341; texto=#FFFFFF; borda=#707C8B,ação secundária,A,ativo,text.on_action,session.skip_hover_surface + session.skip_hover_border,texto pode reutilizar text.on_action,3
+encerrar,QPushButton#questionSessionEndButton,normal,Claro,superfície=#FFF7F8; texto=#A54050; borda=#E9BCC4,ação destrutiva,A,ativo,action.destructive,session.end_surface + session.end_text + session.end_border,,3
+encerrar,QPushButton#questionSessionEndButton:hover,hover,Claro,superfície=#FFF0F2; borda=#DC929E,ação destrutiva,A,ativo,action.destructive_hover,session.end_hover_surface + session.end_hover_border,texto herdado,2
+encerrar,QPushButton#questionSessionEndButton,normal,Escuro,superfície=#2B2027; texto=#FFB8C2; borda=#724350,ação destrutiva,A,ativo,action.destructive,session.end_surface + session.end_text + session.end_border,,3
+encerrar,QPushButton#questionSessionEndButton:hover,hover,Escuro,superfície=#38262D; borda=#985766,ação destrutiva,A,ativo,action.destructive_hover,session.end_hover_surface + session.end_hover_border,texto herdado,2
+encerrar,QPushButton#questionSessionEndButton,normal,Futurista,superfície=#2A2026; texto=#FFBAC4; borda=#70434F,ação destrutiva,A,ativo,action.destructive,session.end_surface + session.end_text + session.end_border,,3
+encerrar,QPushButton#questionSessionEndButton:hover,hover,Futurista,superfície=#38262E; texto=#FFD5DB; borda=#9A5968,ação destrutiva,A,ativo,action.destructive_hover,session.end_hover_surface + session.end_hover_text + session.end_hover_border,,3
+legado sombreado,seletores questionSolver/questionSession antigos,agregado,Claro,valores diversos,regras substituídas,C,sombreado,,,33 ocorrências no bloco legado,33
+genérico sombreado,progresso e ações genéricas antigas,agregado,Claro,valores diversos,regras substituídas,C,sombreado,,,8 ocorrências,8
+legado sombreado,seletores questionSolver/questionSession antigos,agregado,Escuro,valores diversos,regras substituídas,C,sombreado,,,33 ocorrências no bloco legado,33
+genérico sombreado,progresso e ações genéricas antigas,agregado,Escuro,valores diversos,regras substituídas,C,sombreado,,,8 ocorrências,8
+legado sombreado,seletores Futuristas antigos,agregado,Futurista,valores diversos,regras substituídas,C,sombreado,,,24 ocorrências,24
+genérico sombreado,seletores Futuristas gerais,agregado,Futurista,valores diversos,regras substituídas,C,sombreado,,,13 ocorrências,13
+resumo final,questionSessionSummaryCard/Detail/Table,agregado,Claro,valores diversos,finalização,D,ativo,,,migrar em 3E-C,7
+resumo final,questionSessionSummaryCard/Detail/Table,agregado,Escuro,valores diversos,finalização,D,ativo,,,migrar em 3E-C,7
+configuração pré-sessão,questionSessionConfig/Profile/Availability,agregado,Claro,valores diversos,entrada da sessão,E,ativo,,,fora do chrome ativo,9
+configuração pré-sessão,questionSessionConfig/Profile/Availability,agregado,Escuro,valores diversos,entrada da sessão,E,ativo,,,fora do chrome ativo,9
