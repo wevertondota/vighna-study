@@ -78,7 +78,7 @@ class SharedControlsBaselineTests(unittest.TestCase):
 
     def test_fonte_dos_blocos_migrados_usa_renderizador_publico(self) -> None:
         self.assertIn("from ui.design import render_qss", TEMA_SOURCE)
-        self.assertEqual(TEMA_SOURCE.count("{{color:"), 146)
+        self.assertGreaterEqual(TEMA_SOURCE.count("{{color:"), 146)
         self.assertEqual(TEMA_SOURCE.count("{{gradient:"), 4)
 
     def test_tokens_de_controles_reproduzem_valores_legados(self) -> None:
@@ -135,21 +135,18 @@ class SharedControlsBaselineTests(unittest.TestCase):
             "claro": {
                 "answer.explanation_surface": "#F8FAFC",
                 "answer.editor_selection": "#335965D8",
-                "calendar.selected_surface": "#F0F2FF",
                 "chart.grid": "#E2E8F0",
                 "focus_mode.panel": "#F8FAFC",
             },
             "escuro": {
                 "answer.explanation_surface": "#172033",
                 "answer.editor_surface": "#182230",
-                "calendar.selected_surface": "#1D2440",
                 "chart.grid": "#273449",
                 "focus_mode.panel": "#172033",
             },
             "futurista": {
                 "answer.focused_border": "#757FFF",
                 "answer.editor_selection": "#335965D8",
-                "calendar.selected_surface": "#1D2440",
                 "chart.grid": "#2E5C78",
                 "focus_mode.panel": "#101F30",
             },

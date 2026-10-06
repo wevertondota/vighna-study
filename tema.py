@@ -4731,68 +4731,68 @@ ESTILO_CALENDARIO_PREVISAO_CLARO = r"""
 QPushButton#calendarViewToggle {
     min-height: 30px;
     padding: 4px 13px;
-    background-color: #ffffff;
-    color: #64748b;
-    border: 1px solid #d7e0ea;
+    background-color: {{color:calendar.forecast_toggle_surface}};
+    color: {{color:calendar.forecast_toggle_text}};
+    border: 1px solid {{color:calendar.forecast_toggle_border}};
     border-radius: 8px;
     font-weight: 700;
 }
 QPushButton#calendarViewToggle:hover {
-    background-color: #f8fafc;
-    color: #334155;
-    border-color: #cbd5e1;
+    background-color: {{color:calendar.forecast_toggle_hover_surface}};
+    color: {{color:calendar.forecast_toggle_hover_text}};
+    border-color: {{color:calendar.forecast_toggle_hover_border}};
 }
 QPushButton#calendarViewToggle:checked {
-    background-color: #e8f1ff;
-    color: #1d4ed8;
-    border-color: #93c5fd;
+    background-color: {{color:calendar.forecast_toggle_checked_surface}};
+    color: {{color:calendar.forecast_action_text}};
+    border-color: {{color:calendar.forecast_toggle_checked_border}};
 }
 QLabel#calendarForecastHeaderHint,
 QLabel#calendarForecastSubtitle,
 QLabel#calendarForecastUpdated,
 QLabel#calendarForecastReason,
 QLabel#calendarForecastDayDate {
-    color: #64748b;
-    background: transparent;
+    color: {{color:calendar.forecast_meta_text}};
+    background: {{color:action.ghost}};
 }
 QFrame#calendarForecastPanel {
-    background-color: #ffffff;
-    border: 1px solid #dbe3ed;
+    background-color: {{color:calendar.forecast_panel_surface}};
+    border: 1px solid {{color:calendar.forecast_panel_border}};
     border-radius: 11px;
 }
 QLabel#calendarForecastTitle {
-    color: #111827;
+    color: {{color:calendar.forecast_title_text}};
     font-size: 15px;
     font-weight: 800;
 }
 QLabel#calendarForecastNotice {
-    color: #475569;
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
+    color: {{color:calendar.forecast_notice_text}};
+    background-color: {{color:calendar.week_predicted_surface}};
+    border: 1px solid {{color:calendar.week_predicted_border}};
     border-radius: 8px;
     padding: 7px 9px;
 }
 QScrollArea#calendarForecastScroll,
 QScrollArea#calendarForecastScroll > QWidget > QWidget,
 QWidget#calendarForecastBoard {
-    background-color: transparent;
+    background-color: {{color:action.ghost}};
     border: none;
 }
 QFrame#calendarForecastDay {
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background-color: {{color:calendar.week_predicted_surface}};
+    border: 1px solid {{color:calendar.week_predicted_border}};
     border-radius: 10px;
 }
 QFrame#calendarForecastDay[dayState="today"] {
-    background-color: #f0f7ff;
-    border: 1px solid #93c5fd;
+    background-color: {{color:calendar.forecast_today_surface}};
+    border: 1px solid {{color:calendar.today_border}};
 }
 QFrame#calendarForecastDay[dayState="past"] {
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background-color: {{color:calendar.forecast_past_surface}};
+    border: 1px solid {{color:calendar.forecast_past_border}};
 }
 QLabel#calendarForecastDayName {
-    color: #0f172a;
+    color: {{color:calendar.week_predicted_text}};
     font-weight: 800;
     font-size: 10.5pt;
 }
@@ -4801,46 +4801,46 @@ QLabel#calendarForecastDayDate {
     font-weight: 600;
 }
 QLabel#calendarForecastDayCount {
-    background-color: #e2e8f0;
-    color: #475569;
+    background-color: {{color:calendar.forecast_count_surface}};
+    color: {{color:calendar.forecast_count_text}};
     border-radius: 7px;
     padding: 2px 7px;
     font-size: 8pt;
     font-weight: 800;
 }
 QFrame#calendarForecastCard {
-    background-color: #ffffff;
-    border: 1px solid #dbe3ed;
-    border-left: 3px solid #64748b;
+    background-color: {{color:calendar.forecast_card_surface}};
+    border: 1px solid {{color:calendar.forecast_panel_border}};
+    border-left: 3px solid {{color:calendar.forecast_card_accent}};
     border-radius: 8px;
 }
 QFrame#calendarForecastCard[forecastKind="revisao"] {
-    border-left-color: #2563eb;
+    border-left-color: {{color:calendar.forecast_review}};
 }
 QFrame#calendarForecastCard[forecastKind="realizado"] {
-    border-left-color: #16a34a;
+    border-left-color: {{color:calendar.forecast_completed}};
 }
 QFrame#calendarForecastCard[forecastKind="recomendacao"] {
-    border-left-color: #7c3aed;
+    border-left-color: {{color:calendar.forecast_recommendation}};
 }
 QFrame#calendarForecastCard[forecastKind="simulado"] {
-    border-left-color: #d97706;
+    border-left-color: {{color:calendar.forecast_simulation}};
 }
 QLabel#calendarForecastDiscipline {
-    color: #475569;
+    color: {{color:calendar.forecast_discipline_text}};
     font-size: 8pt;
     font-weight: 800;
 }
 QLabel#calendarForecastCardTitle {
-    color: #111827;
+    color: {{color:calendar.forecast_card_text}};
     font-size: 9.5pt;
     font-weight: 700;
 }
 QLabel#calendarForecastKind,
 QLabel#calendarForecastLoad {
-    background-color: #f1f5f9;
-    color: #475569;
-    border: 1px solid #e2e8f0;
+    background-color: {{color:calendar.forecast_badge_surface}};
+    color: {{color:calendar.forecast_badge_text}};
+    border: 1px solid {{color:calendar.forecast_badge_border}};
     border-radius: 6px;
     padding: 2px 5px;
     font-size: 7.5pt;
@@ -4850,21 +4850,21 @@ QLabel#calendarForecastReason {
     font-size: 7.8pt;
 }
 QToolButton#calendarForecastOpen {
-    background-color: transparent;
-    color: #64748b;
-    border: 1px solid transparent;
+    background-color: {{color:action.ghost}};
+    color: {{color:calendar.forecast_open_text}};
+    border: 1px solid {{color:action.ghost}};
     border-radius: 6px;
     font-weight: 800;
 }
 QToolButton#calendarForecastOpen:hover {
-    background-color: #e8f1ff;
-    color: #1d4ed8;
-    border-color: #bfdbfe;
+    background-color: {{color:calendar.forecast_open_hover_surface}};
+    color: {{color:calendar.forecast_action_text}};
+    border-color: {{color:calendar.forecast_open_hover_border}};
 }
 QLabel#calendarForecastDayEmpty,
 QLabel#calendarForecastEmpty {
-    color: #94a3b8;
-    background: transparent;
+    color: {{color:calendar.forecast_empty_text}};
+    background: {{color:action.ghost}};
     padding: 18px 7px;
 }
 """
@@ -4873,68 +4873,68 @@ ESTILO_CALENDARIO_PREVISAO_ESCURO = r"""
 QPushButton#calendarViewToggle {
     min-height: 30px;
     padding: 4px 13px;
-    background-color: #172033;
-    color: #94a3b8;
-    border: 1px solid #334155;
+    background-color: {{color:calendar.forecast_toggle_surface}};
+    color: {{color:calendar.forecast_toggle_text}};
+    border: 1px solid {{color:calendar.forecast_toggle_border}};
     border-radius: 8px;
     font-weight: 700;
 }
 QPushButton#calendarViewToggle:hover {
-    background-color: #273449;
-    color: #e2e8f0;
-    border-color: #475569;
+    background-color: {{color:calendar.forecast_toggle_hover_surface}};
+    color: {{color:calendar.forecast_toggle_hover_text}};
+    border-color: {{color:calendar.forecast_toggle_hover_border}};
 }
 QPushButton#calendarViewToggle:checked {
-    background-color: #172554;
-    color: #93c5fd;
-    border-color: #1e40af;
+    background-color: {{color:calendar.forecast_toggle_checked_surface}};
+    color: {{color:calendar.forecast_action_text}};
+    border-color: {{color:calendar.forecast_toggle_checked_border}};
 }
 QLabel#calendarForecastHeaderHint,
 QLabel#calendarForecastSubtitle,
 QLabel#calendarForecastUpdated,
 QLabel#calendarForecastReason,
 QLabel#calendarForecastDayDate {
-    color: #94a3b8;
-    background: transparent;
+    color: {{color:calendar.forecast_meta_text}};
+    background: {{color:action.ghost}};
 }
 QFrame#calendarForecastPanel {
-    background-color: #182235;
-    border: 1px solid #334155;
+    background-color: {{color:calendar.forecast_panel_surface}};
+    border: 1px solid {{color:calendar.forecast_panel_border}};
     border-radius: 11px;
 }
 QLabel#calendarForecastTitle {
-    color: #f8fafc;
+    color: {{color:calendar.forecast_title_text}};
     font-size: 15px;
     font-weight: 800;
 }
 QLabel#calendarForecastNotice {
-    color: #cbd5e1;
-    background-color: #172033;
-    border: 1px solid #334155;
+    color: {{color:calendar.forecast_notice_text}};
+    background-color: {{color:calendar.week_predicted_surface}};
+    border: 1px solid {{color:calendar.week_predicted_border}};
     border-radius: 8px;
     padding: 7px 9px;
 }
 QScrollArea#calendarForecastScroll,
 QScrollArea#calendarForecastScroll > QWidget > QWidget,
 QWidget#calendarForecastBoard {
-    background-color: transparent;
+    background-color: {{color:action.ghost}};
     border: none;
 }
 QFrame#calendarForecastDay {
-    background-color: #172033;
-    border: 1px solid #334155;
+    background-color: {{color:calendar.week_predicted_surface}};
+    border: 1px solid {{color:calendar.week_predicted_border}};
     border-radius: 10px;
 }
 QFrame#calendarForecastDay[dayState="today"] {
-    background-color: #172554;
-    border: 1px solid #1e40af;
+    background-color: {{color:calendar.forecast_today_surface}};
+    border: 1px solid {{color:calendar.today_border}};
 }
 QFrame#calendarForecastDay[dayState="past"] {
-    background-color: #151e2e;
-    border: 1px solid #2b394b;
+    background-color: {{color:calendar.forecast_past_surface}};
+    border: 1px solid {{color:calendar.forecast_past_border}};
 }
 QLabel#calendarForecastDayName {
-    color: #f8fafc;
+    color: {{color:calendar.week_predicted_text}};
     font-weight: 800;
     font-size: 10.5pt;
 }
@@ -4943,46 +4943,46 @@ QLabel#calendarForecastDayDate {
     font-weight: 600;
 }
 QLabel#calendarForecastDayCount {
-    background-color: #273449;
-    color: #cbd5e1;
+    background-color: {{color:calendar.forecast_count_surface}};
+    color: {{color:calendar.forecast_count_text}};
     border-radius: 7px;
     padding: 2px 7px;
     font-size: 8pt;
     font-weight: 800;
 }
 QFrame#calendarForecastCard {
-    background-color: #1d293d;
-    border: 1px solid #334155;
-    border-left: 3px solid #64748b;
+    background-color: {{color:calendar.forecast_card_surface}};
+    border: 1px solid {{color:calendar.forecast_panel_border}};
+    border-left: 3px solid {{color:calendar.forecast_card_accent}};
     border-radius: 8px;
 }
 QFrame#calendarForecastCard[forecastKind="revisao"] {
-    border-left-color: #60a5fa;
+    border-left-color: {{color:calendar.forecast_review}};
 }
 QFrame#calendarForecastCard[forecastKind="realizado"] {
-    border-left-color: #4ade80;
+    border-left-color: {{color:calendar.forecast_completed}};
 }
 QFrame#calendarForecastCard[forecastKind="recomendacao"] {
-    border-left-color: #a78bfa;
+    border-left-color: {{color:calendar.forecast_recommendation}};
 }
 QFrame#calendarForecastCard[forecastKind="simulado"] {
-    border-left-color: #f59e0b;
+    border-left-color: {{color:calendar.forecast_simulation}};
 }
 QLabel#calendarForecastDiscipline {
-    color: #94a3b8;
+    color: {{color:calendar.forecast_discipline_text}};
     font-size: 8pt;
     font-weight: 800;
 }
 QLabel#calendarForecastCardTitle {
-    color: #f1f5f9;
+    color: {{color:calendar.forecast_card_text}};
     font-size: 9.5pt;
     font-weight: 700;
 }
 QLabel#calendarForecastKind,
 QLabel#calendarForecastLoad {
-    background-color: #273449;
-    color: #cbd5e1;
-    border: 1px solid #3b4a61;
+    background-color: {{color:calendar.forecast_badge_surface}};
+    color: {{color:calendar.forecast_badge_text}};
+    border: 1px solid {{color:calendar.forecast_badge_border}};
     border-radius: 6px;
     padding: 2px 5px;
     font-size: 7.5pt;
@@ -4992,21 +4992,21 @@ QLabel#calendarForecastReason {
     font-size: 7.8pt;
 }
 QToolButton#calendarForecastOpen {
-    background-color: transparent;
-    color: #94a3b8;
-    border: 1px solid transparent;
+    background-color: {{color:action.ghost}};
+    color: {{color:calendar.forecast_open_text}};
+    border: 1px solid {{color:action.ghost}};
     border-radius: 6px;
     font-weight: 800;
 }
 QToolButton#calendarForecastOpen:hover {
-    background-color: #273449;
-    color: #93c5fd;
-    border-color: #475569;
+    background-color: {{color:calendar.forecast_open_hover_surface}};
+    color: {{color:calendar.forecast_action_text}};
+    border-color: {{color:calendar.forecast_open_hover_border}};
 }
 QLabel#calendarForecastDayEmpty,
 QLabel#calendarForecastEmpty {
-    color: #64748b;
-    background: transparent;
+    color: {{color:calendar.forecast_empty_text}};
+    background: {{color:action.ghost}};
     padding: 18px 7px;
 }
 """
@@ -5015,68 +5015,68 @@ ESTILO_CALENDARIO_PREVISAO_FUTURISTA = r"""
 QPushButton#calendarViewToggle {
     min-height: 30px;
     padding: 4px 13px;
-    background-color: #0D1D2D;
-    color: #84A9BD;
-    border: 1px solid #294B63;
+    background-color: {{color:calendar.forecast_toggle_surface}};
+    color: {{color:calendar.forecast_toggle_text}};
+    border: 1px solid {{color:calendar.forecast_toggle_border}};
     border-radius: 8px;
     font-weight: 700;
 }
 QPushButton#calendarViewToggle:hover {
-    background-color: #123049;
-    color: #D7F3FF;
-    border-color: #39789A;
+    background-color: {{color:calendar.forecast_toggle_hover_surface}};
+    color: {{color:calendar.forecast_toggle_hover_text}};
+    border-color: {{color:calendar.forecast_toggle_hover_border}};
 }
 QPushButton#calendarViewToggle:checked {
-    background-color: #143A55;
-    color: #BDF7FF;
-    border-color: #45BCE8;
+    background-color: {{color:calendar.forecast_toggle_checked_surface}};
+    color: {{color:calendar.forecast_action_text}};
+    border-color: {{color:calendar.forecast_toggle_checked_border}};
 }
 QLabel#calendarForecastHeaderHint,
 QLabel#calendarForecastSubtitle,
 QLabel#calendarForecastUpdated,
 QLabel#calendarForecastReason,
 QLabel#calendarForecastDayDate {
-    color: #7FA2B5;
-    background: transparent;
+    color: {{color:calendar.forecast_meta_text}};
+    background: {{color:action.ghost}};
 }
 QFrame#calendarForecastPanel {
-    background-color: #0B1A27;
-    border: 1px solid #294B63;
+    background-color: {{color:calendar.forecast_panel_surface}};
+    border: 1px solid {{color:calendar.forecast_panel_border}};
     border-radius: 11px;
 }
 QLabel#calendarForecastTitle {
-    color: #E7F7FF;
+    color: {{color:calendar.forecast_title_text}};
     font-size: 15px;
     font-weight: 800;
 }
 QLabel#calendarForecastNotice {
-    color: #9FC4D6;
-    background-color: #0D1D2D;
-    border: 1px solid #294B63;
+    color: {{color:calendar.forecast_notice_text}};
+    background-color: {{color:calendar.week_predicted_surface}};
+    border: 1px solid {{color:calendar.week_predicted_border}};
     border-radius: 8px;
     padding: 7px 9px;
 }
 QScrollArea#calendarForecastScroll,
 QScrollArea#calendarForecastScroll > QWidget > QWidget,
 QWidget#calendarForecastBoard {
-    background-color: transparent;
+    background-color: {{color:action.ghost}};
     border: none;
 }
 QFrame#calendarForecastDay {
-    background-color: #0D1D2D;
-    border: 1px solid #294B63;
+    background-color: {{color:calendar.week_predicted_surface}};
+    border: 1px solid {{color:calendar.week_predicted_border}};
     border-radius: 10px;
 }
 QFrame#calendarForecastDay[dayState="today"] {
-    background-color: #10304A;
-    border: 1px solid #3D9BC5;
+    background-color: {{color:calendar.forecast_today_surface}};
+    border: 1px solid {{color:calendar.today_border}};
 }
 QFrame#calendarForecastDay[dayState="past"] {
-    background-color: #0B1824;
-    border: 1px solid #223D50;
+    background-color: {{color:calendar.forecast_past_surface}};
+    border: 1px solid {{color:calendar.forecast_past_border}};
 }
 QLabel#calendarForecastDayName {
-    color: #E9F8FF;
+    color: {{color:calendar.week_predicted_text}};
     font-weight: 800;
     font-size: 10.5pt;
 }
@@ -5085,46 +5085,46 @@ QLabel#calendarForecastDayDate {
     font-weight: 600;
 }
 QLabel#calendarForecastDayCount {
-    background-color: #153149;
-    color: #A8D9EE;
+    background-color: {{color:calendar.forecast_count_surface}};
+    color: {{color:calendar.forecast_count_text}};
     border-radius: 7px;
     padding: 2px 7px;
     font-size: 8pt;
     font-weight: 800;
 }
 QFrame#calendarForecastCard {
-    background-color: #102334;
-    border: 1px solid #294B63;
-    border-left: 3px solid #5F8296;
+    background-color: {{color:calendar.forecast_card_surface}};
+    border: 1px solid {{color:calendar.forecast_panel_border}};
+    border-left: 3px solid {{color:calendar.forecast_card_accent}};
     border-radius: 8px;
 }
 QFrame#calendarForecastCard[forecastKind="revisao"] {
-    border-left-color: #4BC9F2;
+    border-left-color: {{color:calendar.forecast_review}};
 }
 QFrame#calendarForecastCard[forecastKind="realizado"] {
-    border-left-color: #74F1C5;
+    border-left-color: {{color:calendar.forecast_completed}};
 }
 QFrame#calendarForecastCard[forecastKind="recomendacao"] {
-    border-left-color: #8D7CFF;
+    border-left-color: {{color:calendar.forecast_recommendation}};
 }
 QFrame#calendarForecastCard[forecastKind="simulado"] {
-    border-left-color: #E7B14B;
+    border-left-color: {{color:calendar.forecast_simulation}};
 }
 QLabel#calendarForecastDiscipline {
-    color: #82ABC0;
+    color: {{color:calendar.forecast_discipline_text}};
     font-size: 8pt;
     font-weight: 800;
 }
 QLabel#calendarForecastCardTitle {
-    color: #E7F5FF;
+    color: {{color:calendar.forecast_card_text}};
     font-size: 9.5pt;
     font-weight: 700;
 }
 QLabel#calendarForecastKind,
 QLabel#calendarForecastLoad {
-    background-color: #153149;
-    color: #A8D9EE;
-    border: 1px solid #315B75;
+    background-color: {{color:calendar.forecast_badge_surface}};
+    color: {{color:calendar.forecast_badge_text}};
+    border: 1px solid {{color:calendar.forecast_badge_border}};
     border-radius: 6px;
     padding: 2px 5px;
     font-size: 7.5pt;
@@ -5134,21 +5134,21 @@ QLabel#calendarForecastReason {
     font-size: 7.8pt;
 }
 QToolButton#calendarForecastOpen {
-    background-color: transparent;
-    color: #82ABC0;
-    border: 1px solid transparent;
+    background-color: {{color:action.ghost}};
+    color: {{color:calendar.forecast_open_text}};
+    border: 1px solid {{color:action.ghost}};
     border-radius: 6px;
     font-weight: 800;
 }
 QToolButton#calendarForecastOpen:hover {
-    background-color: #153149;
-    color: #BDF7FF;
-    border-color: #39789A;
+    background-color: {{color:calendar.forecast_open_hover_surface}};
+    color: {{color:calendar.forecast_action_text}};
+    border-color: {{color:calendar.forecast_open_hover_border}};
 }
 QLabel#calendarForecastDayEmpty,
 QLabel#calendarForecastEmpty {
-    color: #638397;
-    background: transparent;
+    color: {{color:calendar.forecast_empty_text}};
+    background: {{color:action.ghost}};
     padding: 18px 7px;
 }
 """
@@ -5219,22 +5219,22 @@ def stylesheet_claro():
 
     QFrame#calendarPanel,
     QFrame#calendarDayPanel {
-        background-color: #ffffff;
-        border: 1px solid #dbe3ed;
+        background-color: {{color:calendar.surface}};
+        border: 1px solid {{color:calendar.border}};
         border-radius: 11px;
     }
 
     QLabel#calendarDateTitle {
-        background: transparent;
-        color: #111827;
+        background: {{color:action.ghost}};
+        color: {{color:calendar.title_text}};
         font-size: 15px;
         font-weight: 700;
     }
 
     QLabel#calendarCountBadge {
-        background-color: #f1f5f9;
-        color: #475569;
-        border: 1px solid #e2e8f0;
+        background-color: {{color:calendar.badge_surface}};
+        color: {{color:calendar.badge_text}};
+        border: 1px solid {{color:calendar.badge_border}};
         border-radius: 7px;
         padding: 4px 8px;
         font-size: 9pt;
@@ -5242,36 +5242,36 @@ def stylesheet_claro():
     }
 
     QLabel#calendarLegendToday {
-        color: #2563eb;
-        background: transparent;
+        color: {{color:calendar.legend_today}};
+        background: {{color:action.ghost}};
         font-weight: 600;
     }
 
     QLabel#calendarLegendLate {
-        color: #dc2626;
-        background: transparent;
+        color: {{color:calendar.legend_late}};
+        background: {{color:action.ghost}};
         font-weight: 600;
     }
 
     QLabel#calendarLegendFuture {
-        color: #16a34a;
-        background: transparent;
+        color: {{color:calendar.legend_scheduled}};
+        background: {{color:action.ghost}};
         font-weight: 600;
     }
 
     QCalendarWidget#reviewCalendar {
-        background-color: #ffffff;
+        background-color: {{color:calendar.surface}};
         border: none;
     }
 
     QCalendarWidget#reviewCalendar QWidget#qt_calendar_navigationbar {
-        background-color: #f8fafc;
+        background-color: {{color:calendar.navigation_surface}};
         border-radius: 8px;
     }
 
     QCalendarWidget#reviewCalendar QToolButton {
-        background-color: transparent;
-        color: #1f2937;
+        background-color: {{color:action.ghost}};
+        color: {{color:calendar.text}};
         border: none;
         border-radius: 6px;
         padding: 5px 8px;
@@ -5279,22 +5279,22 @@ def stylesheet_claro():
     }
 
     QCalendarWidget#reviewCalendar QToolButton:hover {
-        background-color: #e2e8f0;
+        background-color: {{color:calendar.navigation_hover_surface}};
     }
 
     QCalendarWidget#reviewCalendar QSpinBox {
-        background-color: #ffffff;
-        color: #1f2937;
-        border: 1px solid #cbd5e1;
+        background-color: {{color:calendar.input_surface}};
+        color: {{color:calendar.text}};
+        border: 1px solid {{color:calendar.input_border}};
         border-radius: 6px;
         padding: 3px 6px;
     }
 
     QCalendarWidget#reviewCalendar QAbstractItemView {
-        background-color: #ffffff;
-        color: #1f2937;
-        selection-background-color: #2563eb;
-        selection-color: #ffffff;
+        background-color: {{color:calendar.surface}};
+        color: {{color:calendar.text}};
+        selection-background-color: {{color:calendar.selected_surface}};
+        selection-color: {{color:calendar.selected_text}};
         border: none;
         outline: none;
     }
@@ -12237,22 +12237,22 @@ def stylesheet_escuro():
 
     QFrame#calendarPanel,
     QFrame#calendarDayPanel {
-        background-color: #182235;
-        border: 1px solid #334155;
+        background-color: {{color:calendar.surface}};
+        border: 1px solid {{color:calendar.border}};
         border-radius: 11px;
     }
 
     QLabel#calendarDateTitle {
-        background: transparent;
-        color: #f8fafc;
+        background: {{color:action.ghost}};
+        color: {{color:calendar.title_text}};
         font-size: 15px;
         font-weight: 700;
     }
 
     QLabel#calendarCountBadge {
-        background-color: #273449;
-        color: #cbd5e1;
-        border: 1px solid #334155;
+        background-color: {{color:calendar.badge_surface}};
+        color: {{color:calendar.badge_text}};
+        border: 1px solid {{color:calendar.badge_border}};
         border-radius: 7px;
         padding: 4px 8px;
         font-size: 9pt;
@@ -12260,36 +12260,36 @@ def stylesheet_escuro():
     }
 
     QLabel#calendarLegendToday {
-        color: #93c5fd;
-        background: transparent;
+        color: {{color:calendar.legend_today}};
+        background: {{color:action.ghost}};
         font-weight: 600;
     }
 
     QLabel#calendarLegendLate {
-        color: #fca5a5;
-        background: transparent;
+        color: {{color:calendar.legend_late}};
+        background: {{color:action.ghost}};
         font-weight: 600;
     }
 
     QLabel#calendarLegendFuture {
-        color: #86efac;
-        background: transparent;
+        color: {{color:calendar.legend_scheduled}};
+        background: {{color:action.ghost}};
         font-weight: 600;
     }
 
     QCalendarWidget#reviewCalendar {
-        background-color: #182235;
+        background-color: {{color:calendar.surface}};
         border: none;
     }
 
     QCalendarWidget#reviewCalendar QWidget#qt_calendar_navigationbar {
-        background-color: #172033;
+        background-color: {{color:calendar.navigation_surface}};
         border-radius: 8px;
     }
 
     QCalendarWidget#reviewCalendar QToolButton {
-        background-color: transparent;
-        color: #e5e7eb;
+        background-color: {{color:action.ghost}};
+        color: {{color:calendar.text}};
         border: none;
         border-radius: 6px;
         padding: 5px 8px;
@@ -12297,22 +12297,22 @@ def stylesheet_escuro():
     }
 
     QCalendarWidget#reviewCalendar QToolButton:hover {
-        background-color: #273449;
+        background-color: {{color:calendar.navigation_hover_surface}};
     }
 
     QCalendarWidget#reviewCalendar QSpinBox {
-        background-color: #172033;
-        color: #e5e7eb;
-        border: 1px solid #475569;
+        background-color: {{color:calendar.input_surface}};
+        color: {{color:calendar.text}};
+        border: 1px solid {{color:calendar.input_border}};
         border-radius: 6px;
         padding: 3px 6px;
     }
 
     QCalendarWidget#reviewCalendar QAbstractItemView {
-        background-color: #182235;
-        color: #e5e7eb;
-        selection-background-color: #2563eb;
-        selection-color: #ffffff;
+        background-color: {{color:calendar.surface}};
+        color: {{color:calendar.text}};
+        selection-background-color: {{color:calendar.selected_surface}};
+        selection-color: {{color:calendar.selected_text}};
         border: none;
         outline: none;
     }

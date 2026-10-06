@@ -80,7 +80,7 @@ from tema import (
 )
 
 from icones import criar_icone
-from ui.design import fixed_qss_color
+from ui.design import fixed_qss_color, qcolor
 
 from backup import (
     fazer_backup,
@@ -50169,51 +50169,20 @@ class SistemaEstudos(QMainWindow):
             )
         )
 
-        if tema_atual == "futurista":
-            cores = {
-                "hoje": (
-                    "#BDF7FF",
-                    "#124E68"
-                ),
-                "atrasada": (
-                    "#FF9BAC",
-                    "#4B1D2C"
-                ),
-                "agendada": (
-                    "#74F1C5",
-                    "#124334"
-                )
-            }
-        elif tema_atual == "escuro":
-            cores = {
-                "hoje": (
-                    "#93c5fd",
-                    "#1e3a8a"
-                ),
-                "atrasada": (
-                    "#fca5a5",
-                    "#4c1d24"
-                ),
-                "agendada": (
-                    "#86efac",
-                    "#163523"
-                )
-            }
-        else:
-            cores = {
-                "hoje": (
-                    "#1d4ed8",
-                    "#dbeafe"
-                ),
-                "atrasada": (
-                    "#b91c1c",
-                    "#fee2e2"
-                ),
-                "agendada": (
-                    "#15803d",
-                    "#dcfce7"
-                )
-            }
+        tokens_cores = {
+            "hoje": (
+                "calendar.today_text",
+                "calendar.today_surface"
+            ),
+            "atrasada": (
+                "calendar.late_text",
+                "calendar.late_surface"
+            ),
+            "agendada": (
+                "calendar.scheduled_text",
+                "calendar.scheduled_surface"
+            )
+        }
 
         for data_texto in sorted(
             dias_ocupados
@@ -50235,13 +50204,15 @@ class SistemaEstudos(QMainWindow):
 
             formato = QTextCharFormat()
             formato.setForeground(
-                QColor(
-                    cores[chave][0]
+                qcolor(
+                    tema_atual,
+                    tokens_cores[chave][0]
                 )
             )
             formato.setBackground(
-                QColor(
-                    cores[chave][1]
+                qcolor(
+                    tema_atual,
+                    tokens_cores[chave][1]
                 )
             )
             formato.setFontWeight(

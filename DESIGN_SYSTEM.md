@@ -2,7 +2,7 @@
 
 ## Escopo atual
 
-Este documento descreve a fundação criada na Etapa 2 e as integrações de caracterização já concluídas. `icones.py` consome `icon.*`; o splash externo, o indicador de tarefas e somente o fallback `JanelaInicializacao` de `main.py` consomem tokens visuais fixos. Em `tema.py`, apenas controles genéricos compartilhados consomem tokens; estilos específicos de telas e módulos permanecem legados. A cascata dos temas continua inalterada.
+Este documento descreve a fundação criada na Etapa 2 e as integrações de caracterização já concluídas. `icones.py` consome `icon.*`; o splash externo, o indicador de tarefas e somente o fallback `JanelaInicializacao` de `main.py` consomem tokens visuais fixos. Em `tema.py`, os controles genéricos compartilhados e o domínio Calendário consomem tokens; os demais estilos específicos de telas e módulos permanecem legados. O calendário mensal também usa `qcolor()` nos seus `QTextCharFormat`. A cascata dos temas continua inalterada.
 
 A API central fica em `ui/design/` e possui quatro níveis:
 
@@ -85,11 +85,20 @@ Exemplos válidos:
 - `feedback.danger_border` — borda de feedback de erro/perigo;
 - `answer.keyboard_focus_border` — borda exclusiva da navegação por teclado;
 - `calendar.week_predicted_surface` — superfície da semana prevista;
+- `calendar.late_surface` — marcação mensal de revisão atrasada;
+- `calendar.forecast_review` — acento de um card de revisão na Semana prevista;
 - `gradient.action_primary` — gradiente semântico de ação.
 - `system_status.progress_track` — trilho fixo compartilhado por startup e tarefas;
 - `startup.shimmer_gradient` — brilho móvel do splash com alpha preservado.
 
 Não se deve usar nomes de cor (`blue_500`) no contrato semântico, nomes de tela para papéis gerais, nem números de versão no caminho.
+
+No domínio `calendar.*`, os papéis mensais (`today_*`, `late_*`,
+`scheduled_*`, `selected_*`) permanecem separados dos papéis da Semana
+prevista (`forecast_*`). Uma coincidência física entre esses grupos não autoriza
+compartilhar o token: os estados têm ciclos de evolução e consumidores distintos.
+Papéis realmente comuns à semana, como `week_predicted_*` e `today_border`, são
+reutilizados entre seus seletores.
 
 ## Consumo em QSS
 
