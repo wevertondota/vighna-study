@@ -207,6 +207,11 @@ def _component_colors(c: Mapping[str, str], overrides: Mapping[str, str]) -> dic
         "answer.focused_border": c["border_focus"],
         "answer.keyboard_focus_border": c["focus_keyboard"],
         "answer.checked_indicator": c["action_primary"],
+        "answer.indicator_surface": c["surface_primary"],
+        "answer.indicator_border": c["border_strong"],
+        "answer.indicator_hover_border": c["border_hover"],
+        "answer.indicator_checked_border": c["border_selected"],
+        "answer.indicator_text": c["text_choice"],
         "answer.disabled_surface": c["surface_disabled"],
         "answer.disabled_border": c["border_disabled"],
         "answer.disabled_text": c["text_disabled"],
@@ -219,10 +224,21 @@ def _component_colors(c: Mapping[str, str], overrides: Mapping[str, str]) -> dic
         "answer.struck_surface": c["surface_disabled"],
         "answer.struck_border": c["border_disabled"],
         "answer.struck_text": c["text_muted"],
+        "answer.struck_hover_surface": c["surface_hover"],
+        "answer.struck_hover_border": c["border_hover"],
+        "answer.eliminate_text": c["icon_muted"],
+        "answer.eliminate_hover_surface": c["surface_hover"],
+        "answer.eliminate_hover_text": c["icon_default"],
+        "answer.eliminate_checked_surface": c["surface_selected"],
+        "answer.eliminate_checked_text": c["text_primary"],
+        "answer.eliminate_checked_border": c["border_selected"],
         "answer.explanation_surface": c["surface_secondary"],
+        "answer.explanation_border": c["border_default"],
+        "answer.explanation_title_text": c["text_primary"],
         "answer.explanation_text": c["text_secondary"],
         "answer.editor_surface": c["surface_primary"],
         "answer.editor_border": c["border_focus"],
+        "answer.editor_text": c["text_primary"],
         "answer.editor_selection": c["overlay_selection"],
         "progress.track": c["surface_inset"],
         "progress.border": c["border_subtle"],
@@ -431,13 +447,28 @@ _FUTURISTIC = {
 
 _LIGHT_COMPONENT_OVERRIDES = {
     "answer.normal_surface": "#FFFFFF", "answer.normal_border": "#E0E6ED",
+    "answer.normal_text": "#1F2937",
     "answer.hover_surface": "#F9FAFC", "answer.hover_border": "#BEC9D6",
     "answer.selected_surface": "#F0F2FF", "answer.selected_border": "#7882E8",
-    "answer.checked_indicator": "#5965D8", "answer.correct_surface": "#EEF9F4",
+    "answer.selected_text": "#1F2937", "answer.keyboard_focus_border": "#5966D9",
+    "answer.checked_indicator": "#5965D8",
+    "answer.indicator_surface": "#FFFFFF", "answer.indicator_border": "#8A96A6",
+    "answer.indicator_hover_border": "#6672D9",
+    "answer.indicator_checked_border": "#5965D8", "answer.indicator_text": "#1E293B",
+    "answer.disabled_text": "#CBD5E1", "answer.correct_surface": "#EEF9F4",
     "answer.correct_border": "#64B992", "answer.incorrect_surface": "#FFF1F3",
-    "answer.incorrect_border": "#E18491", "answer.struck_text": "#64748B",
-    "answer.explanation_surface": "#F8FAFC", "answer.explanation_text": "#475569",
-    "answer.editor_selection": "#335965D8",
+    "answer.incorrect_border": "#E18491", "answer.struck_surface": "#E7ECF2",
+    "answer.struck_border": "#8796A8", "answer.struck_text": "#718096",
+    "answer.struck_hover_surface": "#E3E9F0", "answer.struck_hover_border": "#728398",
+    "answer.eliminate_text": "#94A3B8", "answer.eliminate_hover_surface": "#F1F5F9",
+    "answer.eliminate_hover_text": "#475569",
+    "answer.eliminate_checked_surface": "#D8E0E9",
+    "answer.eliminate_checked_text": "#334155",
+    "answer.eliminate_checked_border": "#8493A6",
+    "answer.explanation_surface": "#F8FAFC", "answer.explanation_border": "#DBE3ED",
+    "answer.explanation_title_text": "#334155", "answer.explanation_text": "#475569",
+    "answer.editor_surface": "#FFFFFF", "answer.editor_border": "#CBD5E1",
+    "answer.editor_text": "#334155", "answer.editor_selection": "#DED9FF",
     "progress.track": "#E8EDF3", "progress.text": "#475569",
     "calendar.surface": "#FFFFFF", "calendar.border": "#DBE3ED", "calendar.text": "#1F2937",
     "calendar.title_text": "#111827",
@@ -478,14 +509,29 @@ _LIGHT_COMPONENT_OVERRIDES = {
 }
 _DARK_COMPONENT_OVERRIDES = {
     "answer.normal_surface": "#151F2C", "answer.normal_border": "#2F3D4D",
-    "answer.normal_text": "#F8FAFC",
+    "answer.normal_text": "#E2E8F0",
     "answer.hover_surface": "#192534", "answer.hover_border": "#4A5A6E",
     "answer.selected_surface": "#1D2440", "answer.selected_border": "#747FE9",
-    "answer.selected_text": "#F8FAFC", "answer.struck_text": "#94A3B8",
+    "answer.selected_text": "#E2E8F0", "answer.keyboard_focus_border": "#8B95FF",
+    "answer.checked_indicator": "#626DE0",
+    "answer.indicator_surface": "#101722", "answer.indicator_border": "#687789",
+    "answer.indicator_hover_border": "#8791F2",
+    "answer.indicator_checked_border": "#A4ABFF", "answer.indicator_text": "#E2E8F0",
+    "answer.disabled_text": "#475569",
+    "answer.struck_surface": "#0B121C", "answer.struck_border": "#526276",
+    "answer.struck_text": "#627488", "answer.struck_hover_surface": "#0E1723",
+    "answer.struck_hover_border": "#66788E",
+    "answer.eliminate_text": "#64748B", "answer.eliminate_hover_surface": "#273449",
+    "answer.eliminate_hover_text": "#CBD5E1",
+    "answer.eliminate_checked_surface": "#1D2A38",
+    "answer.eliminate_checked_text": "#A1B2C3",
+    "answer.eliminate_checked_border": "#5A6D82",
     "answer.correct_surface": "#173127", "answer.correct_border": "#4EAD80",
     "answer.incorrect_surface": "#351D24", "answer.incorrect_border": "#D76676",
-    "answer.explanation_surface": "#172033", "answer.explanation_text": "#CBD5E1",
-    "answer.editor_surface": "#182230", "answer.editor_selection": "#335965D8",
+    "answer.explanation_surface": "#1F2937", "answer.explanation_border": "#334155",
+    "answer.explanation_title_text": "#CBD5E1", "answer.explanation_text": "#CBD5E1",
+    "answer.editor_surface": "#111827", "answer.editor_border": "#475569",
+    "answer.editor_text": "#E2E8F0", "answer.editor_selection": "#5549AD",
     "progress.track": "#111827", "progress.text": "#CBD5E1",
     "calendar.surface": "#182235", "calendar.border": "#334155", "calendar.text": "#E5E7EB",
     "calendar.title_text": "#F8FAFC",
@@ -527,15 +573,28 @@ _DARK_COMPONENT_OVERRIDES = {
 }
 _FUTURISTIC_COMPONENT_OVERRIDES = {
     "answer.normal_surface": "#111A27", "answer.normal_border": "#2B3747",
-    "answer.normal_text": "#EAF7FF",
+    "answer.normal_text": "#DFE7EF",
     "answer.hover_surface": "#162130", "answer.hover_border": "#46566A",
     "answer.selected_surface": "#1B213A", "answer.selected_border": "#757FFF",
-    "answer.selected_text": "#EAF7FF", "answer.pressed_border": "#3F7599",
-    "answer.focused_border": "#757FFF", "answer.disabled_border": "#2B3747",
-    "answer.disabled_text": "#55768B", "answer.struck_border": "#2B3747",
-    "answer.struck_text": "#82ABC5", "answer.explanation_surface": "#101F30",
-    "answer.explanation_text": "#B6D9E8", "answer.editor_border": "#757FFF",
-    "answer.editor_selection": "#335965D8",
+    "answer.selected_text": "#DFE7EF", "answer.pressed_border": "#3F7599",
+    "answer.focused_border": "#757FFF", "answer.keyboard_focus_border": "#4BC9F2",
+    "answer.checked_indicator": "#6269E8",
+    "answer.indicator_surface": "#0E1622", "answer.indicator_border": "#687789",
+    "answer.indicator_hover_border": "#8A94FA",
+    "answer.indicator_checked_border": "#ADB2FF", "answer.indicator_text": "#EAF0F6",
+    "answer.disabled_border": "#2B3747", "answer.disabled_text": "#475569",
+    "answer.struck_surface": "#07101A", "answer.struck_border": "#3E617A",
+    "answer.struck_text": "#607A8E", "answer.struck_hover_surface": "#0A1622",
+    "answer.struck_hover_border": "#507A97",
+    "answer.eliminate_text": "#718094", "answer.eliminate_hover_surface": "#222C39",
+    "answer.eliminate_hover_text": "#CAD4DF",
+    "answer.eliminate_checked_surface": "#132C3F",
+    "answer.eliminate_checked_text": "#B5D1E2",
+    "answer.eliminate_checked_border": "#507A97",
+    "answer.explanation_surface": "#171F2B", "answer.explanation_border": "#3A4656",
+    "answer.explanation_title_text": "#9FC4DD", "answer.explanation_text": "#CBD5E1",
+    "answer.editor_surface": "#0A1725", "answer.editor_border": "#355F82",
+    "answer.editor_text": "#E7F5FF", "answer.editor_selection": "#285B8D",
     "answer.correct_surface": "#153127", "answer.correct_border": "#4EBA86",
     "answer.incorrect_surface": "#351C24", "answer.incorrect_border": "#D96777",
     "progress.track": "#102235", "progress.border": "#315A7A",
@@ -589,6 +648,7 @@ def _theme_gradients(kind: ThemeName) -> dict[str, GradientSpec]:
         selected = ((0.0, "#F0F2FF"), (1.0, "#F0F2FF"))
         correct = ((0.0, "#EEF9F4"), (1.0, "#EEF9F4"))
         incorrect = ((0.0, "#FFF1F3"), (1.0, "#FFF1F3"))
+        struck = ((0.0, "#E7ECF2"), (1.0, "#E7ECF2"))
         surface = ((0.0, "#FFFFFF"), (1.0, "#F8FAFC"))
         focus_action = action
         focus_hover = action_hover
@@ -602,6 +662,7 @@ def _theme_gradients(kind: ThemeName) -> dict[str, GradientSpec]:
         selected = ((0.0, "#1D2440"), (1.0, "#1D2440"))
         correct = ((0.0, "#173127"), (1.0, "#173127"))
         incorrect = ((0.0, "#351D24"), (1.0, "#351D24"))
+        struck = ((0.0, "#0B121C"), (1.0, "#0B121C"))
         surface = ((0.0, "#273449"), (1.0, "#182230"))
         focus_action = action
         focus_hover = action_hover
@@ -615,6 +676,7 @@ def _theme_gradients(kind: ThemeName) -> dict[str, GradientSpec]:
         selected = ((0.0, "#1B213A"), (1.0, "#18243A"))
         correct = ((0.0, "#153127"), (1.0, "#12271F"))
         incorrect = ((0.0, "#351C24"), (1.0, "#2A171D"))
+        struck = ((0.0, "#07101A"), (0.55, "#08121D"), (1.0, "#060D16"))
         surface = ((0.0, "#10283C"), (1.0, "#0D1D2D"))
         focus_action = ((0.0, "#B51F31"), (0.52, "#D62B3D"), (1.0, "#F04458"))
         focus_hover = ((0.0, "#CE293B"), (0.52, "#E83B4C"), (1.0, "#FF596B"))
@@ -638,8 +700,15 @@ def _theme_gradients(kind: ThemeName) -> dict[str, GradientSpec]:
         "gradient.control_tab": _palette_gradient(*control_tab),
         "gradient.control_selected": _palette_gradient(*control_selected),
         "answer.selected_gradient": _palette_gradient(*selected),
-        "answer.correct_gradient": _palette_gradient(*correct),
-        "answer.incorrect_gradient": _palette_gradient(*incorrect),
+        "answer.correct_gradient": _palette_gradient(
+            *correct, direction=GradientDirection(0.0, 0.0, 1.0, 1.0)
+        ),
+        "answer.incorrect_gradient": _palette_gradient(
+            *incorrect, direction=GradientDirection(0.0, 0.0, 1.0, 1.0)
+        ),
+        "answer.struck_gradient": _palette_gradient(
+            *struck, direction=GradientDirection(0.0, 0.0, 1.0, 1.0)
+        ),
         "progress.fill_gradient": _palette_gradient(*action),
         "focus_mode.action_gradient": _palette_gradient(*focus_action),
         "focus_mode.action_hover_gradient": _palette_gradient(*focus_hover),

@@ -3628,39 +3628,39 @@ QDialog#questionSolverDialog QLabel#questionSolverStatement {
     font-size: 10.8pt;
 }
 QDialog#questionSolverDialog QFrame#questionSolverAlternative {
-    background-color: #FFFFFF;
-    border: 1px solid #E0E6ED;
+    background-color: {{color:answer.normal_surface}};
+    border: 1px solid {{color:answer.normal_border}};
     border-radius: 10px;
 }
 QDialog#questionSolverDialog QFrame#questionSolverAlternative[answerState="normal"]:hover {
-    background-color: #F9FAFC;
-    border-color: #BEC9D6;
+    background-color: {{color:answer.hover_surface}};
+    border-color: {{color:answer.hover_border}};
 }
 QDialog#questionSolverDialog QFrame#questionSolverAlternative[selectionState="selected"][answerState="normal"] {
-    background-color: #F0F2FF;
-    border: 1px solid #7882E8;
+    background-color: {{color:answer.selected_surface}};
+    border: 1px solid {{color:answer.selected_border}};
 }
 QDialog#questionSolverDialog QFrame#questionSolverAlternative[answerState="correta"] {
-    background-color: #EEF9F4;
-    border-color: #64B992;
+    background-color: {{color:answer.correct_surface}};
+    border-color: {{color:answer.correct_border}};
 }
 QDialog#questionSolverDialog QFrame#questionSolverAlternative[answerState="errada"] {
-    background-color: #FFF1F3;
-    border-color: #E18491;
+    background-color: {{color:answer.incorrect_surface}};
+    border-color: {{color:answer.incorrect_border}};
 }
 QDialog#questionSolverDialog QRadioButton#questionSolverRadio::indicator {
     width: 17px;
     height: 17px;
-    border: 2px solid #8A96A6;
+    border: 2px solid {{color:answer.indicator_border}};
     border-radius: 9px;
-    background-color: #FFFFFF;
+    background-color: {{color:answer.indicator_surface}};
 }
 QDialog#questionSolverDialog QRadioButton#questionSolverRadio::indicator:hover {
-    border-color: #6672D9;
+    border-color: {{color:answer.indicator_hover_border}};
 }
 QDialog#questionSolverDialog QRadioButton#questionSolverRadio::indicator:checked {
-    background-color: #5965D8;
-    border-color: #5965D8;
+    background-color: {{color:answer.checked_indicator}};
+    border-color: {{color:answer.indicator_checked_border}};
 }
 QDialog#questionSolverDialog QFrame#questionSessionActionPanel {
     background-color: #FFFFFF;
@@ -3803,39 +3803,39 @@ QDialog#questionSolverDialog QLabel#questionSolverStatement {
     font-size: 10.8pt;
 }
 QDialog#questionSolverDialog QFrame#questionSolverAlternative {
-    background-color: #151F2C;
-    border: 1px solid #2F3D4D;
+    background-color: {{color:answer.normal_surface}};
+    border: 1px solid {{color:answer.normal_border}};
     border-radius: 10px;
 }
 QDialog#questionSolverDialog QFrame#questionSolverAlternative[answerState="normal"]:hover {
-    background-color: #192534;
-    border-color: #4A5A6E;
+    background-color: {{color:answer.hover_surface}};
+    border-color: {{color:answer.hover_border}};
 }
 QDialog#questionSolverDialog QFrame#questionSolverAlternative[selectionState="selected"][answerState="normal"] {
-    background-color: #1D2440;
-    border: 1px solid #747FE9;
+    background-color: {{color:answer.selected_surface}};
+    border: 1px solid {{color:answer.selected_border}};
 }
 QDialog#questionSolverDialog QFrame#questionSolverAlternative[answerState="correta"] {
-    background-color: #173127;
-    border-color: #4EAD80;
+    background-color: {{color:answer.correct_surface}};
+    border-color: {{color:answer.correct_border}};
 }
 QDialog#questionSolverDialog QFrame#questionSolverAlternative[answerState="errada"] {
-    background-color: #351D24;
-    border-color: #D76676;
+    background-color: {{color:answer.incorrect_surface}};
+    border-color: {{color:answer.incorrect_border}};
 }
 QDialog#questionSolverDialog QRadioButton#questionSolverRadio::indicator {
     width: 17px;
     height: 17px;
-    border: 2px solid #687789;
+    border: 2px solid {{color:answer.indicator_border}};
     border-radius: 9px;
-    background-color: #101722;
+    background-color: {{color:answer.indicator_surface}};
 }
 QDialog#questionSolverDialog QRadioButton#questionSolverRadio::indicator:hover {
-    border-color: #8791F2;
+    border-color: {{color:answer.indicator_hover_border}};
 }
 QDialog#questionSolverDialog QRadioButton#questionSolverRadio::indicator:checked {
-    background-color: #626DE0;
-    border-color: #A4ABFF;
+    background-color: {{color:answer.checked_indicator}};
+    border-color: {{color:answer.indicator_checked_border}};
 }
 QDialog#questionSolverDialog QFrame#questionSessionActionPanel {
     background-color: #182230;
@@ -3995,60 +3995,57 @@ QDialog#questionSolverDialog QLabel#questionSolverStatement {
     font-size: 10.9pt;
 }
 QDialog#questionSolverDialog QFrame#questionSolverAlternative {
-    background-color: #111A27;
-    border: 1px solid #2B3747;
+    background-color: {{color:answer.normal_surface}};
+    border: 1px solid {{color:answer.normal_border}};
     border-radius: 11px;
 }
 QDialog#questionSolverDialog QFrame#questionSolverAlternative[answerState="normal"]:hover {
-    background-color: #162130;
-    border-color: #46566A;
+    background-color: {{color:answer.hover_surface}};
+    border-color: {{color:answer.hover_border}};
 }
 QDialog#questionSolverDialog QFrame#questionSolverAlternative[selectionState="selected"][answerState="normal"] {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #1B213A, stop:1 #18243A);
-    border: 1px solid #757FFF;
+    background: {{gradient:answer.selected_gradient}};
+    border: 1px solid {{color:answer.selected_border}};
 }
 QDialog#questionSolverDialog QFrame#questionSolverAlternative[answerState="correta"] {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-        stop:0 #153127, stop:1 #12271F);
-    border-color: #4EBA86;
+    background: {{gradient:answer.correct_gradient}};
+    border-color: {{color:answer.correct_border}};
 }
 QDialog#questionSolverDialog QFrame#questionSolverAlternative[answerState="errada"] {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-        stop:0 #351C24, stop:1 #2A171D);
-    border-color: #D96777;
+    background: {{gradient:answer.incorrect_gradient}};
+    border-color: {{color:answer.incorrect_border}};
 }
 QDialog#questionSolverDialog QRadioButton#questionSolverRadio {
-    color: #EAF0F6;
+    color: {{color:answer.indicator_text}};
     font-weight: 900;
     spacing: 7px;
 }
 QDialog#questionSolverDialog QRadioButton#questionSolverRadio::indicator {
     width: 17px;
     height: 17px;
-    border: 2px solid #687789;
+    border: 2px solid {{color:answer.indicator_border}};
     border-radius: 9px;
-    background-color: #0E1622;
+    background-color: {{color:answer.indicator_surface}};
 }
 QDialog#questionSolverDialog QRadioButton#questionSolverRadio::indicator:hover {
-    border-color: #8A94FA;
+    border-color: {{color:answer.indicator_hover_border}};
 }
 QDialog#questionSolverDialog QRadioButton#questionSolverRadio::indicator:checked {
-    background-color: #6269E8;
-    border-color: #ADB2FF;
+    background-color: {{color:answer.checked_indicator}};
+    border-color: {{color:answer.indicator_checked_border}};
 }
 QDialog#questionSolverDialog QLabel#questionSolverAlternativeText {
-    color: #DFE7EF;
+    color: {{color:answer.normal_text}};
     font-size: 9.8pt;
 }
 QDialog#questionSolverDialog QToolButton#questionSolverEliminateButton {
-    color: #718094;
+    color: {{color:answer.eliminate_text}};
     border: none;
     background: transparent;
 }
 QDialog#questionSolverDialog QToolButton#questionSolverEliminateButton:hover {
-    background-color: #222C39;
-    color: #CAD4DF;
+    background-color: {{color:answer.eliminate_hover_surface}};
+    color: {{color:answer.eliminate_hover_text}};
     border-radius: 6px;
 }
 QDialog#questionSolverDialog QFrame#questionSessionActionPanel {
@@ -4104,8 +4101,8 @@ QDialog#questionSolverDialog QPushButton#questionSessionEndButton:hover {
     color: #FFD5DB;
 }
 QDialog#questionSolverDialog QFrame#questionSolverFeedback {
-    background-color: #171F2B;
-    border: 1px solid #3A4656;
+    background-color: {{color:answer.explanation_surface}};
+    border: 1px solid {{color:answer.explanation_border}};
     border-radius: 11px;
 }
 """
@@ -4510,64 +4507,63 @@ QDialog#topicDetailsDialog QTableWidget#topicHistoryTable { background-color:#0B
 # ============================================================
 ESTILO_RESOLVEDOR_ELIMINADAS_CLARO = r"""
 QDialog#questionSolverDialog QFrame#questionSolverAlternative[eliminated="true"][answerState="normal"] {
-    background-color: #E7ECF2;
-    border: 2px dashed #8796A8;
+    background-color: {{color:answer.struck_surface}};
+    border: 2px dashed {{color:answer.struck_border}};
 }
 QDialog#questionSolverDialog QFrame#questionSolverAlternative[eliminated="true"][answerState="normal"]:hover {
-    background-color: #E3E9F0;
-    border-color: #728398;
+    background-color: {{color:answer.struck_hover_surface}};
+    border-color: {{color:answer.struck_hover_border}};
 }
 QDialog#questionSolverDialog QLabel#questionSolverAlternativeText[eliminated="true"],
 QDialog#questionSolverDialog QRadioButton#questionSolverRadio[eliminated="true"] {
-    color: #718096;
+    color: {{color:answer.struck_text}};
 }
 QDialog#questionSolverDialog QToolButton#questionSolverEliminateButton:checked {
-    background-color: #D8E0E9;
-    color: #334155;
-    border: 1px solid #8493A6;
+    background-color: {{color:answer.eliminate_checked_surface}};
+    color: {{color:answer.eliminate_checked_text}};
+    border: 1px solid {{color:answer.eliminate_checked_border}};
     border-radius: 6px;
 }
 """
 
 ESTILO_RESOLVEDOR_ELIMINADAS_ESCURO = r"""
 QDialog#questionSolverDialog QFrame#questionSolverAlternative[eliminated="true"][answerState="normal"] {
-    background-color: #0B121C;
-    border: 2px dashed #526276;
+    background-color: {{color:answer.struck_surface}};
+    border: 2px dashed {{color:answer.struck_border}};
 }
 QDialog#questionSolverDialog QFrame#questionSolverAlternative[eliminated="true"][answerState="normal"]:hover {
-    background-color: #0E1723;
-    border-color: #66788E;
+    background-color: {{color:answer.struck_hover_surface}};
+    border-color: {{color:answer.struck_hover_border}};
 }
 QDialog#questionSolverDialog QLabel#questionSolverAlternativeText[eliminated="true"],
 QDialog#questionSolverDialog QRadioButton#questionSolverRadio[eliminated="true"] {
-    color: #627488;
+    color: {{color:answer.struck_text}};
 }
 QDialog#questionSolverDialog QToolButton#questionSolverEliminateButton:checked {
-    background-color: #1D2A38;
-    color: #A1B2C3;
-    border: 1px solid #5A6D82;
+    background-color: {{color:answer.eliminate_checked_surface}};
+    color: {{color:answer.eliminate_checked_text}};
+    border: 1px solid {{color:answer.eliminate_checked_border}};
     border-radius: 6px;
 }
 """
 
 ESTILO_RESOLVEDOR_ELIMINADAS_FUTURISTA = r"""
 QDialog#questionSolverDialog QFrame#questionSolverAlternative[eliminated="true"][answerState="normal"] {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-        stop:0 #07101A, stop:0.55 #08121D, stop:1 #060D16);
-    border: 2px dashed #3E617A;
+    background: {{gradient:answer.struck_gradient}};
+    border: 2px dashed {{color:answer.struck_border}};
 }
 QDialog#questionSolverDialog QFrame#questionSolverAlternative[eliminated="true"][answerState="normal"]:hover {
-    background-color: #0A1622;
-    border-color: #507A97;
+    background-color: {{color:answer.struck_hover_surface}};
+    border-color: {{color:answer.struck_hover_border}};
 }
 QDialog#questionSolverDialog QLabel#questionSolverAlternativeText[eliminated="true"],
 QDialog#questionSolverDialog QRadioButton#questionSolverRadio[eliminated="true"] {
-    color: #607A8E;
+    color: {{color:answer.struck_text}};
 }
 QDialog#questionSolverDialog QToolButton#questionSolverEliminateButton:checked {
-    background-color: #132C3F;
-    color: #B5D1E2;
-    border: 1px solid #507A97;
+    background-color: {{color:answer.eliminate_checked_surface}};
+    color: {{color:answer.eliminate_checked_text}};
+    border: 1px solid {{color:answer.eliminate_checked_border}};
     border-radius: 6px;
 }
 """
@@ -4576,25 +4572,25 @@ QDialog#questionSolverDialog QToolButton#questionSolverEliminateButton:checked {
 # continuar visível também quando a alternativa está selecionada ou eliminada.
 ESTILO_RESOLVEDOR_TECLADO_CLARO = r"""
 QDialog#questionSolverDialog QFrame#questionSolverAlternative[keyboardFocus="true"][answerState="normal"] {
-    border: 2px solid #5966D9;
+    border: 2px solid {{color:answer.keyboard_focus_border}};
 }
 """
 
 ESTILO_RESOLVEDOR_TECLADO_ESCURO = r"""
 QDialog#questionSolverDialog QFrame#questionSolverAlternative[keyboardFocus="true"][answerState="normal"] {
-    border: 2px solid #8B95FF;
+    border: 2px solid {{color:answer.keyboard_focus_border}};
 }
 """
 
 ESTILO_RESOLVEDOR_TECLADO_FUTURISTA = r"""
 QDialog#questionSolverDialog QFrame#questionSolverAlternative[keyboardFocus="true"][answerState="normal"] {
-    border: 2px solid #4BC9F2;
+    border: 2px solid {{color:answer.keyboard_focus_border}};
 }
 """
 
 ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_CLARO = r"""
 QDialog#questionSolverDialog QLabel#questionSolverExplanationTitle {
-    color: #334155;
+    color: {{color:answer.explanation_title_text}};
     font-size: 8.5pt;
     font-weight: 800;
 }
@@ -4612,9 +4608,9 @@ QDialog#questionSolverDialog QToolButton#questionSolverExplanationEditButton:hov
     border-color: #A5B4FC;
 }
 QDialog#questionSolverDialog QTextEdit#questionSolverExplanationEditor {
-    background-color: #FFFFFF;
-    color: #334155;
-    border: 1px solid #CBD5E1;
+    background-color: {{color:answer.editor_surface}};
+    color: {{color:answer.editor_text}};
+    border: 1px solid {{color:answer.editor_border}};
     border-radius: 8px;
     padding: 7px;
 }
@@ -4638,7 +4634,7 @@ QDialog#questionSolverDialog QPushButton#questionSolverExplanationCancelButton {
 
 ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_ESCURO = r"""
 QDialog#questionSolverDialog QLabel#questionSolverExplanationTitle {
-    color: #CBD5E1;
+    color: {{color:answer.explanation_title_text}};
     font-size: 8.5pt;
     font-weight: 800;
 }
@@ -4656,9 +4652,9 @@ QDialog#questionSolverDialog QToolButton#questionSolverExplanationEditButton:hov
     border-color: #8B95FF;
 }
 QDialog#questionSolverDialog QTextEdit#questionSolverExplanationEditor {
-    background-color: #111827;
-    color: #E2E8F0;
-    border: 1px solid #475569;
+    background-color: {{color:answer.editor_surface}};
+    color: {{color:answer.editor_text}};
+    border: 1px solid {{color:answer.editor_border}};
     border-radius: 8px;
     padding: 7px;
 }
@@ -4682,7 +4678,7 @@ QDialog#questionSolverDialog QPushButton#questionSolverExplanationCancelButton {
 
 ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_FUTURISTA = r"""
 QDialog#questionSolverDialog QLabel#questionSolverExplanationTitle {
-    color: #9FC4DD;
+    color: {{color:answer.explanation_title_text}};
     font-size: 8.5pt;
     font-weight: 800;
 }
@@ -4700,13 +4696,13 @@ QDialog#questionSolverDialog QToolButton#questionSolverExplanationEditButton:hov
     border-color: #4BC9F2;
 }
 QDialog#questionSolverDialog QTextEdit#questionSolverExplanationEditor {
-    background-color: #0A1725;
-    color: #E7F5FF;
-    border: 1px solid #355F82;
+    background-color: {{color:answer.editor_surface}};
+    color: {{color:answer.editor_text}};
+    border: 1px solid {{color:answer.editor_border}};
     border-radius: 8px;
     padding: 7px;
-    selection-background-color: #285B8D;
-    selection-color: #FFFFFF;
+    selection-background-color: {{color:answer.editor_selection}};
+    selection-color: {{color:text.selection_accent}};
 }
 QDialog#questionSolverDialog QPushButton#questionSolverExplanationSaveButton {
     background-color: #19527A;
@@ -6565,13 +6561,13 @@ QPushButton#sectionEditButton:hover {
     }
 
     QRadioButton#questionSolverRadio {
-        color: #1e293b;
+        color: {{color:answer.indicator_text}};
         font-weight: 800;
         spacing: 5px;
     }
 
     QLabel#questionSolverAlternativeText {
-        color: #1f2937;
+        color: {{color:answer.normal_text}};
         font-size: 10pt;
     }
 
@@ -6593,7 +6589,7 @@ QPushButton#sectionEditButton:hover {
 
     QToolButton#questionSolverEliminateButton {
         background: transparent;
-        color: #94a3b8;
+        color: {{color:answer.eliminate_text}};
         border: none;
         border-radius: 5px;
         font-size: 11pt;
@@ -6601,8 +6597,8 @@ QPushButton#sectionEditButton:hover {
     }
 
     QToolButton#questionSolverEliminateButton:hover {
-        background-color: #f1f5f9;
-        color: #475569;
+        background-color: {{color:answer.eliminate_hover_surface}};
+        color: {{color:answer.eliminate_hover_text}};
     }
 
     QToolButton#questionSolverEliminateButton:checked {
@@ -6611,7 +6607,7 @@ QPushButton#sectionEditButton:hover {
     }
 
     QToolButton#questionSolverEliminateButton:disabled {
-        color: #cbd5e1;
+        color: {{color:answer.disabled_text}};
     }
 
     QCheckBox#questionSessionDoubt {
@@ -6684,8 +6680,8 @@ QPushButton#sectionEditButton:hover {
     }
 
     QFrame#questionSolverFeedback {
-        background-color: #f8fafc;
-        border: 1px solid #dbe3ed;
+        background-color: {{color:answer.explanation_surface}};
+        border: 1px solid {{color:answer.explanation_border}};
         border-radius: 9px;
     }
 
@@ -6706,7 +6702,7 @@ QPushButton#sectionEditButton:hover {
     }
 
     QLabel#questionSolverExplanation {
-        color: #475569;
+        color: {{color:answer.explanation_text}};
         font-size: 9.5pt;
     }
 
@@ -13588,13 +13584,13 @@ def stylesheet_escuro():
     }
 
     QRadioButton#questionSolverRadio {
-        color: #e2e8f0;
+        color: {{color:answer.indicator_text}};
         font-weight: 800;
         spacing: 5px;
     }
 
     QLabel#questionSolverAlternativeText {
-        color: #e2e8f0;
+        color: {{color:answer.normal_text}};
         font-size: 10pt;
     }
 
@@ -13616,7 +13612,7 @@ def stylesheet_escuro():
 
     QToolButton#questionSolverEliminateButton {
         background: transparent;
-        color: #64748b;
+        color: {{color:answer.eliminate_text}};
         border: none;
         border-radius: 5px;
         font-size: 11pt;
@@ -13624,8 +13620,8 @@ def stylesheet_escuro():
     }
 
     QToolButton#questionSolverEliminateButton:hover {
-        background-color: #273449;
-        color: #cbd5e1;
+        background-color: {{color:answer.eliminate_hover_surface}};
+        color: {{color:answer.eliminate_hover_text}};
     }
 
     QToolButton#questionSolverEliminateButton:checked {
@@ -13634,7 +13630,7 @@ def stylesheet_escuro():
     }
 
     QToolButton#questionSolverEliminateButton:disabled {
-        color: #475569;
+        color: {{color:answer.disabled_text}};
     }
 
     QCheckBox#questionSessionDoubt {
@@ -13707,8 +13703,8 @@ def stylesheet_escuro():
     }
 
     QFrame#questionSolverFeedback {
-        background-color: #1f2937;
-        border: 1px solid #334155;
+        background-color: {{color:answer.explanation_surface}};
+        border: 1px solid {{color:answer.explanation_border}};
         border-radius: 9px;
     }
 
@@ -13729,7 +13725,7 @@ def stylesheet_escuro():
     }
 
     QLabel#questionSolverExplanation {
-        color: #cbd5e1;
+        color: {{color:answer.explanation_text}};
         font-size: 9.5pt;
     }
 

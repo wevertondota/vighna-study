@@ -79,7 +79,8 @@ class SharedControlsBaselineTests(unittest.TestCase):
     def test_fonte_dos_blocos_migrados_usa_renderizador_publico(self) -> None:
         self.assertIn("from ui.design import render_qss", TEMA_SOURCE)
         self.assertGreaterEqual(TEMA_SOURCE.count("{{color:"), 146)
-        self.assertEqual(TEMA_SOURCE.count("{{gradient:"), 4)
+        # Quatro gradientes compartilhados da 3C e quatro do Resolvedor 3E-A1.
+        self.assertEqual(TEMA_SOURCE.count("{{gradient:"), 8)
 
     def test_tokens_de_controles_reproduzem_valores_legados(self) -> None:
         expected = {
@@ -130,23 +131,17 @@ class SharedControlsBaselineTests(unittest.TestCase):
                 self.assertEqual(tuple(stop.position for stop in spec.stops), (0.0, 1.0))
                 self.assertEqual(tuple(stop.color.value for stop in spec.stops), colors)
 
-    def test_tokens_de_componentes_fora_do_escopo_nao_derivam(self) -> None:
+    def test_tokens_de_componentes_ainda_fora_do_escopo_nao_derivam(self) -> None:
         expected = {
             "claro": {
-                "answer.explanation_surface": "#F8FAFC",
-                "answer.editor_selection": "#335965D8",
                 "chart.grid": "#E2E8F0",
                 "focus_mode.panel": "#F8FAFC",
             },
             "escuro": {
-                "answer.explanation_surface": "#172033",
-                "answer.editor_surface": "#182230",
                 "chart.grid": "#273449",
                 "focus_mode.panel": "#172033",
             },
             "futurista": {
-                "answer.focused_border": "#757FFF",
-                "answer.editor_selection": "#335965D8",
                 "chart.grid": "#2E5C78",
                 "focus_mode.panel": "#101F30",
             },

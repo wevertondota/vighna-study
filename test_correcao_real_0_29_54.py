@@ -2,6 +2,8 @@ import ast
 import unittest
 from pathlib import Path
 
+import tema
+
 ROOT = Path(__file__).resolve().parent
 MAIN = (ROOT / "main.py").read_text(encoding="utf-8")
 TEMA = (ROOT / "tema.py").read_text(encoding="utf-8")
@@ -37,7 +39,8 @@ class CorrecaoReal054Tests(unittest.TestCase):
         self.assertIn('ESTILO_RESOLVEDOR_ELIMINADAS_CLARO', TEMA)
         self.assertIn('ESTILO_RESOLVEDOR_ELIMINADAS_ESCURO', TEMA)
         self.assertIn('ESTILO_RESOLVEDOR_ELIMINADAS_FUTURISTA', TEMA)
-        self.assertIn('border: 2px dashed #3E617A', TEMA)
+        self.assertIn('border: 2px dashed {{color:answer.struck_border}}', TEMA)
+        self.assertIn('border: 2px dashed #3E617A', tema.stylesheet_futurista())
 
     def test_tachamento_final_e_aplicado_depois_da_camada_futurista_base(self):
         retorno = TEMA[TEMA.index('def stylesheet_futurista():'):]

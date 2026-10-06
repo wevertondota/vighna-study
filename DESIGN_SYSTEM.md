@@ -2,7 +2,7 @@
 
 ## Escopo atual
 
-Este documento descreve a fundação criada na Etapa 2 e as integrações de caracterização já concluídas. `icones.py` consome `icon.*`; o splash externo, o indicador de tarefas e somente o fallback `JanelaInicializacao` de `main.py` consomem tokens visuais fixos. Em `tema.py`, os controles genéricos compartilhados e o domínio Calendário consomem tokens; os demais estilos específicos de telas e módulos permanecem legados. O calendário mensal também usa `qcolor()` nos seus `QTextCharFormat`. A cascata dos temas continua inalterada.
+Este documento descreve a fundação criada na Etapa 2 e as integrações de caracterização já concluídas. `icones.py` consome `icon.*`; o splash externo, o indicador de tarefas e somente o fallback `JanelaInicializacao` de `main.py` consomem tokens visuais fixos. Em `tema.py`, os controles genéricos compartilhados, o domínio Calendário e o núcleo interativo do Resolvedor migrado na Etapa 3E-A1 consomem tokens. O calendário mensal também usa `qcolor()` nos seus `QTextCharFormat`. O chrome da sessão, as ações do editor e Confirmar/Próxima permanecem legados. A cascata dos temas continua inalterada.
 
 A API central fica em `ui/design/` e possui quatro níveis:
 
@@ -58,7 +58,7 @@ Tokens ausentes e acessos com tipo errado geram `TokenNotFoundError`; não exist
 - `ColorValue` em cada stop, inclusive alpha por `#AARRGGBB`;
 - variante por tema, mantida no respectivo `ThemeDefinition`.
 
-Das 201 ocorrências inventariadas, foram migrados os dois `QLinearGradient` do splash e quatro gradientes QSS de controles compartilhados do tema Futurista. Os demais gradientes legados continuam inalterados.
+Das 201 ocorrências inventariadas, foram migrados os dois `QLinearGradient` do splash, quatro gradientes QSS de controles compartilhados e os gradientes de alternativa selecionada, correta, incorreta e tachada do Resolvedor. Os demais gradientes legados continuam inalterados.
 
 Gradientes fixos também podem receber coordenadas dinâmicas no adaptador QPainter. Direção efetiva, stops, posições e alpha permanecem centralizados sem congelar a geometria calculada em runtime.
 
@@ -99,6 +99,14 @@ prevista (`forecast_*`). Uma coincidência física entre esses grupos não autor
 compartilhar o token: os estados têm ciclos de evolução e consumidores distintos.
 Papéis realmente comuns à semana, como `week_predicted_*` e `today_border`, são
 reutilizados entre seus seletores.
+
+No domínio `answer.*`, a fronteira semântica separa a alternativa do restante
+da sessão. A Etapa 3E-A1 caracteriza superfície, borda, texto, indicador,
+foco de teclado, tachamento, tesoura, correção, explicação e corpo do editor.
+Os tokens `answer.struck_gradient` e `answer.correct_gradient`, por exemplo,
+preservam direção e stops próprios; igualdade física com `feedback.*` não
+autoriza a consolidação. Botões do editor, ação principal e feedback de
+resultado permanecem para a 3E-A2.
 
 ## Consumo em QSS
 
