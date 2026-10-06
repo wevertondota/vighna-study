@@ -292,7 +292,7 @@ _LIGHT = {
     "info_surface": "#EEF6FF", "info_text": "#28679E", "info_border": "#D2E6FA", "info_icon": "#28679E",
     "focus_ring": "#5965D8", "focus_keyboard": "#7882E8",
     "icon_default": "#475569", "icon_muted": "#64748B", "icon_disabled": "#94A3B8",
-    "icon_action": "#5965D8", "icon_highlight": "#28679E", "icon_configuration": "#64748B",
+    "icon_action": "#355874", "icon_highlight": "#FFFFFF", "icon_configuration": "#0F3989",
     "overlay_scrim": "#66000000", "overlay_light": "#80FFFFFF", "overlay_dark": "#33000000", "overlay_selection": "#335965D8",
     "glow_primary": "#335965D8", "glow_focus": "#335965D8", "glow_success": "#64B992", "glow_danger": "#E18491",
 }
@@ -319,7 +319,7 @@ _DARK = {
     "info_surface": "#17334E", "info_text": "#D9F4FF", "info_border": "#315D79", "info_icon": "#8FD8FF",
     "focus_ring": "#7882E8", "focus_keyboard": "#6579EC",
     "icon_default": "#CBD5E1", "icon_muted": "#94A3B8", "icon_disabled": "#64748B",
-    "icon_action": "#7882E8", "icon_highlight": "#8FD8FF", "icon_configuration": "#94A3B8",
+    "icon_action": "#BED0E1", "icon_highlight": "#FFFFFF", "icon_configuration": "#BED0E1",
     "overlay_scrim": "#66000000", "overlay_light": "#80FFFFFF", "overlay_dark": "#33000000", "overlay_selection": "#335965D8",
     "glow_primary": "#335965D8", "glow_focus": "#7882E8", "glow_success": "#4EAD80", "glow_danger": "#D76676",
 }
@@ -346,7 +346,7 @@ _FUTURISTIC = {
     "info_surface": "#17334E", "info_text": "#D9F4FF", "info_border": "#3F7599", "info_icon": "#8FD8FF",
     "focus_ring": "#757FFF", "focus_keyboard": "#8FD8FF",
     "icon_default": "#B6D9E8", "icon_muted": "#82ABC5", "icon_disabled": "#55768B",
-    "icon_action": "#757FFF", "icon_highlight": "#8FD8FF", "icon_configuration": "#BCE7FF",
+    "icon_action": "#B6D9E8", "icon_highlight": "#FFFFFF", "icon_configuration": "#B6D9E8",
     "overlay_scrim": "#66000000", "overlay_light": "#80FFFFFF", "overlay_dark": "#33000000", "overlay_selection": "#335965D8",
     "glow_primary": "#757FFF", "glow_focus": "#8FD8FF", "glow_success": "#4EBA86", "glow_danger": "#D96777",
 }

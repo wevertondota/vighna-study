@@ -2,7 +2,7 @@
 
 ## Escopo atual
 
-Este documento descreve a fundação criada na Etapa 2. Ela ainda não está conectada a `tema.py`, `main.py`, `startup_splash.py`, `tarefas_pesadas.py` ou `icones.py`. A interface continua consumindo integralmente os estilos legados; portanto, a existência deste pacote não muda a aparência nem a cascata dos temas.
+Este documento descreve a fundação criada na Etapa 2 e sua primeira integração de caracterização. Ela permanece desconectada de `tema.py`, `main.py`, `startup_splash.py` e `tarefas_pesadas.py`; `icones.py` consome apenas os tokens `icon.action`, `icon.highlight` e `icon.configuration`, preservando seus valores legados. A cascata dos temas e os demais estilos continuam inalterados.
 
 A API central fica em `ui/design/` e possui quatro níveis:
 
@@ -130,7 +130,7 @@ cor = qtawesome_color("futurista", "icon.configuration")
 # qta.icon("fa5s.cog", color=cor)  # integração reservada para etapa futura
 ```
 
-`icones.py` não foi migrado. A função existe para que, quando autorizado, `icon.action`, `icon.highlight`, `icon.configuration` e demais papéis substituam decisões locais sem fazer QtAwesome virar dependência do núcleo.
+`icones.py` usa essa função para resolver `icon.action`, `icon.highlight` e `icon.configuration`. Os nomes dos glifos, tamanhos, lógica QtAwesome e fallback por arquivo continuam sob responsabilidade da camada de ícones; QtAwesome não se torna dependência do núcleo do Design System.
 
 ## Como criar um token
 

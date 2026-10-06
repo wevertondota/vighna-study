@@ -109,7 +109,7 @@ class DesignSystemContractTests(unittest.TestCase):
 class DesignSystemAdapterTests(unittest.TestCase):
     def test_adaptadores_qss_e_qtawesome(self) -> None:
         self.assertEqual(qss_color("claro", "canvas.app"), "#F5F7FA")
-        self.assertEqual(qtawesome_color("futurista", "icon.action"), "#757FFF")
+        self.assertEqual(qtawesome_color("futurista", "icon.action"), "#B6D9E8")
         result = qss_gradient("futurista", "gradient.action_primary")
         self.assertEqual(
             result,

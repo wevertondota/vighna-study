@@ -10,6 +10,7 @@ from pathlib import Path
 from PySide6.QtGui import QIcon
 
 from tema import normalizar_tema
+from ui.design import qtawesome_color
 
 try:
     import qtawesome as qta
@@ -19,19 +20,19 @@ except ImportError:  # fallback seguro para ambientes ainda não preparados
 
 CORES_ICONES = {
     "claro": {
-        "acao": "#355874",
-        "destaque": "#FFFFFF",
-        "configuracao": "#0F3989",
+        "acao": "icon.action",
+        "destaque": "icon.highlight",
+        "configuracao": "icon.configuration",
     },
     "escuro": {
-        "acao": "#BED0E1",
-        "destaque": "#FFFFFF",
-        "configuracao": "#BED0E1",
+        "acao": "icon.action",
+        "destaque": "icon.highlight",
+        "configuracao": "icon.configuration",
     },
     "futurista": {
-        "acao": "#B6D9E8",
-        "destaque": "#FFFFFF",
-        "configuracao": "#B6D9E8",
+        "acao": "icon.action",
+        "destaque": "icon.highlight",
+        "configuracao": "icon.configuration",
     },
 }
 
@@ -42,10 +43,11 @@ def qtawesome_disponivel():
 
 def cor_icone(tema="claro", papel="acao"):
     tema = normalizar_tema(tema)
-    return CORES_ICONES.get(tema, CORES_ICONES["claro"]).get(
+    token = CORES_ICONES.get(tema, CORES_ICONES["claro"]).get(
         papel,
         CORES_ICONES[tema]["acao"],
     )
+    return qtawesome_color(tema, token)
 
 
 def criar_icone(
