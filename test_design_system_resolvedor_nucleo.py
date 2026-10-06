@@ -172,8 +172,8 @@ def _constant_source(name: str, next_name: str) -> str:
 class ResolverCoreDesignSystemTests(unittest.TestCase):
     def test_contract_includes_approved_stage_3e_a2_budget(self) -> None:
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 172)
-        self.assertEqual(len(ALL_TOKENS), 274)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 191)
+        self.assertEqual(len(ALL_TOKENS), 293)
         self.assertEqual(
             sum(token.path.startswith("answer.") for token in COMPONENT_TOKENS),
             60,

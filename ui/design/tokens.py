@@ -101,6 +101,13 @@ _COMPONENT_COLOR_PATHS = (
     "answer.cancel_action_surface",
     "answer.primary_action_border", "answer.primary_action_hover_border",
     "progress.track", "progress.border", "progress.fill", "progress.text", "progress.complete", "progress.warning",
+    "progress.session_text", "progress.session_track",
+    "session.title_text", "session.subtitle_text", "session.panel_surface",
+    "session.overview_border", "session.eyebrow_text", "session.cycle_text",
+    "session.metric_surface", "session.metric_border", "session.metric_label_text",
+    "session.metric_value_text", "session.metric_success_text",
+    "session.metric_danger_text", "session.metric_warning_text",
+    "session.discipline_text", "session.meta_text", "session.question_index_text",
     "calendar.surface", "calendar.today_surface", "calendar.today_border", "calendar.today_text",
     "calendar.selected_surface", "calendar.selected_text", "calendar.week_predicted_surface",
     "calendar.week_predicted_border", "calendar.week_predicted_text", "calendar.weekend_text",
@@ -144,7 +151,8 @@ _COMPONENT_COLOR_PATHS = (
 _COMPONENT_GRADIENT_PATHS = (
     "answer.selected_gradient", "answer.correct_gradient", "answer.incorrect_gradient",
     "answer.struck_gradient",
-    "progress.fill_gradient", "focus_mode.action_gradient", "focus_mode.action_hover_gradient",
+    "progress.fill_gradient", "session.overview_gradient",
+    "focus_mode.action_gradient", "focus_mode.action_hover_gradient",
     "startup.progress_gradient", "startup.shimmer_gradient",
 )
 

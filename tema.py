@@ -3531,66 +3531,65 @@ QWidget#dashboardRoot QFrame#topProfileBar {
 # ============================================================
 ESTILO_RESOLVEDOR_CLARO = r"""
 QDialog#questionSolverDialog {
-    background-color: #F5F7FA;
+    background-color: {{color:canvas.app}};
 }
 QDialog#questionSolverDialog QLabel#pageTitle {
-    color: #172033;
+    color: {{color:session.title_text}};
     font-size: 19px;
     font-weight: 900;
 }
 QDialog#questionSolverDialog QLabel#pageSubtitle {
-    color: #718096;
+    color: {{color:session.subtitle_text}};
     font-size: 8.6pt;
 }
 QDialog#questionSolverDialog QFrame#questionSessionOverviewCard {
-    background-color: #FFFFFF;
-    border: 1px solid #DDE4EC;
+    background-color: {{color:session.panel_surface}};
+    border: 1px solid {{color:session.overview_border}};
     border-radius: 14px;
 }
 QDialog#questionSolverDialog QLabel#questionSessionEyebrow {
-    color: #7B8797;
+    color: {{color:session.eyebrow_text}};
     font-size: 7.6pt;
     font-weight: 850;
     letter-spacing: 0.8px;
 }
 QDialog#questionSolverDialog QLabel#questionSessionProgressText {
-    color: #202B3C;
+    color: {{color:progress.session_text}};
     font-size: 9pt;
     font-weight: 850;
 }
 QDialog#questionSolverDialog QLabel#questionSessionCycleText {
-    color: #657286;
+    color: {{color:session.cycle_text}};
     font-size: 8.5pt;
     font-weight: 700;
 }
 QDialog#questionSolverDialog QProgressBar#questionSessionProgress {
-    background-color: #E8EDF3;
+    background-color: {{color:progress.session_track}};
     border: none;
     border-radius: 4px;
 }
 QDialog#questionSolverDialog QProgressBar#questionSessionProgress::chunk {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #4F5FE8, stop:1 #6B86F2);
+    background: {{gradient:progress.fill_gradient}};
     border-radius: 4px;
 }
 QDialog#questionSolverDialog QFrame#questionSessionMiniStat {
-    background-color: #F7F9FC;
-    border: 1px solid #E3E8EF;
+    background-color: {{color:session.metric_surface}};
+    border: 1px solid {{color:session.metric_border}};
     border-radius: 9px;
 }
 QDialog#questionSolverDialog QLabel#questionSessionMiniLabel {
-    color: #7A8798;
+    color: {{color:session.metric_label_text}};
     font-size: 8pt;
     font-weight: 700;
 }
 QDialog#questionSolverDialog QLabel#questionSessionMiniValue {
-    color: #1F2937;
+    color: {{color:session.metric_value_text}};
     font-size: 9.5pt;
     font-weight: 900;
 }
-QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="success"] { color: #17815D; }
-QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="danger"] { color: #C44758; }
-QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="warning"] { color: #B16A18; }
+QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="success"] { color: {{color:session.metric_success_text}}; }
+QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="danger"] { color: {{color:session.metric_danger_text}}; }
+QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="warning"] { color: {{color:session.metric_warning_text}}; }
 QDialog#questionSolverDialog QFrame#questionSessionFocusBar {
     background-color: #F7F9FC;
     border: 1px solid #E1E6ED;
@@ -3602,13 +3601,13 @@ QDialog#questionSolverDialog QLabel#questionSessionFocusState {
     font-weight: 800;
 }
 QDialog#questionSolverDialog QLabel#questionSolverDiscipline {
-    color: #5866C8;
+    color: {{color:session.discipline_text}};
     font-size: 7.8pt;
     font-weight: 900;
     letter-spacing: 0.8px;
 }
 QDialog#questionSolverDialog QLabel#questionSolverMeta {
-    color: #5D697A;
+    color: {{color:session.meta_text}};
     font-size: 8.7pt;
     font-weight: 700;
 }
@@ -3618,7 +3617,7 @@ QDialog#questionSolverDialog QFrame#questionSolverStatementCard {
     border-radius: 12px;
 }
 QDialog#questionSolverDialog QLabel#questionSolverQuestionIndex {
-    color: #606BC9;
+    color: {{color:session.question_index_text}};
     font-size: 7.8pt;
     font-weight: 900;
     letter-spacing: 0.8px;
@@ -3704,66 +3703,65 @@ QDialog#questionSolverDialog QPushButton#questionSessionEndButton:hover {
 
 ESTILO_RESOLVEDOR_ESCURO = r"""
 QDialog#questionSolverDialog {
-    background-color: #101722;
+    background-color: {{color:canvas.app}};
 }
 QDialog#questionSolverDialog QLabel#pageTitle {
-    color: #F3F6FA;
+    color: {{color:session.title_text}};
     font-size: 19px;
     font-weight: 900;
 }
 QDialog#questionSolverDialog QLabel#pageSubtitle {
-    color: #96A3B3;
+    color: {{color:session.subtitle_text}};
     font-size: 8.6pt;
 }
 QDialog#questionSolverDialog QFrame#questionSessionOverviewCard {
-    background-color: #182230;
-    border: 1px solid #344154;
+    background-color: {{color:session.panel_surface}};
+    border: 1px solid {{color:session.overview_border}};
     border-radius: 14px;
 }
 QDialog#questionSolverDialog QLabel#questionSessionEyebrow {
-    color: #8392A5;
+    color: {{color:session.eyebrow_text}};
     font-size: 7.6pt;
     font-weight: 850;
     letter-spacing: 0.8px;
 }
 QDialog#questionSolverDialog QLabel#questionSessionProgressText {
-    color: #EDF2F7;
+    color: {{color:progress.session_text}};
     font-size: 9pt;
     font-weight: 850;
 }
 QDialog#questionSolverDialog QLabel#questionSessionCycleText {
-    color: #A1ADBB;
+    color: {{color:session.cycle_text}};
     font-size: 8.5pt;
     font-weight: 700;
 }
 QDialog#questionSolverDialog QProgressBar#questionSessionProgress {
-    background-color: #2C3745;
+    background-color: {{color:progress.session_track}};
     border: none;
     border-radius: 4px;
 }
 QDialog#questionSolverDialog QProgressBar#questionSessionProgress::chunk {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #5964E8, stop:1 #6E8BEF);
+    background: {{gradient:progress.fill_gradient}};
     border-radius: 4px;
 }
 QDialog#questionSolverDialog QFrame#questionSessionMiniStat {
-    background-color: #141D29;
-    border: 1px solid #2D3949;
+    background-color: {{color:session.metric_surface}};
+    border: 1px solid {{color:session.metric_border}};
     border-radius: 9px;
 }
 QDialog#questionSolverDialog QLabel#questionSessionMiniLabel {
-    color: #8D9BAD;
+    color: {{color:session.metric_label_text}};
     font-size: 8pt;
     font-weight: 700;
 }
 QDialog#questionSolverDialog QLabel#questionSessionMiniValue {
-    color: #F2F5F8;
+    color: {{color:session.metric_value_text}};
     font-size: 9.5pt;
     font-weight: 900;
 }
-QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="success"] { color: #79D6AA; }
-QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="danger"] { color: #F08A98; }
-QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="warning"] { color: #E5B16B; }
+QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="success"] { color: {{color:session.metric_success_text}}; }
+QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="danger"] { color: {{color:session.metric_danger_text}}; }
+QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="warning"] { color: {{color:session.metric_warning_text}}; }
 QDialog#questionSolverDialog QFrame#questionSessionFocusBar {
     background-color: #151E2A;
     border: 1px solid #303D4E;
@@ -3775,13 +3773,13 @@ QDialog#questionSolverDialog QLabel#questionSessionFocusState {
     font-weight: 800;
 }
 QDialog#questionSolverDialog QLabel#questionSolverDiscipline {
-    color: #96A0FF;
+    color: {{color:session.discipline_text}};
     font-size: 7.8pt;
     font-weight: 900;
     letter-spacing: 0.8px;
 }
 QDialog#questionSolverDialog QLabel#questionSolverMeta {
-    color: #A8B4C2;
+    color: {{color:session.meta_text}};
     font-size: 8.7pt;
     font-weight: 700;
 }
@@ -3791,7 +3789,7 @@ QDialog#questionSolverDialog QFrame#questionSolverStatementCard {
     border-radius: 12px;
 }
 QDialog#questionSolverDialog QLabel#questionSolverQuestionIndex {
-    color: #9BA4FF;
+    color: {{color:session.question_index_text}};
     font-size: 7.8pt;
     font-weight: 900;
     letter-spacing: 0.8px;
@@ -3878,67 +3876,65 @@ QDialog#questionSolverDialog QPushButton#questionSessionEndButton:hover {
 ESTILO_RESOLVEDOR_FUTURISTA = r"""
 /* Resolver — mesma família visual do Dashboard Neo, com menor ruído. */
 QDialog#questionSolverDialog {
-    background-color: #0B111D;
+    background-color: {{color:canvas.app}};
 }
 QDialog#questionSolverDialog QLabel#pageTitle {
-    color: #F5F7FB;
+    color: {{color:session.title_text}};
     font-size: 20px;
     font-weight: 900;
 }
 QDialog#questionSolverDialog QLabel#pageSubtitle {
-    color: #AAB5C2;
+    color: {{color:session.subtitle_text}};
     font-size: 8.6pt;
 }
 QDialog#questionSolverDialog QFrame#questionSessionOverviewCard {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-        stop:0 #202733, stop:0.55 #222A36, stop:1 #1D2430);
-    border: 1px solid #475364;
+    background: {{gradient:session.overview_gradient}};
+    border: 1px solid {{color:session.overview_border}};
     border-radius: 15px;
 }
 QDialog#questionSolverDialog QLabel#questionSessionEyebrow {
-    color: #AAB4C0;
+    color: {{color:session.eyebrow_text}};
     font-size: 7.5pt;
     font-weight: 900;
     letter-spacing: 0.9px;
 }
 QDialog#questionSolverDialog QLabel#questionSessionProgressText {
-    color: #F5F7FB;
+    color: {{color:progress.session_text}};
     font-size: 9.1pt;
     font-weight: 900;
 }
 QDialog#questionSolverDialog QLabel#questionSessionCycleText {
-    color: #B8C1CD;
+    color: {{color:session.cycle_text}};
     font-size: 8.4pt;
     font-weight: 700;
 }
 QDialog#questionSolverDialog QProgressBar#questionSessionProgress {
-    background-color: #3B424F;
+    background-color: {{color:progress.session_track}};
     border: none;
     border-radius: 4px;
 }
 QDialog#questionSolverDialog QProgressBar#questionSessionProgress::chunk {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #5358EA, stop:0.52 #5B64EE, stop:1 #718BF5);
+    background: {{gradient:progress.fill_gradient}};
     border-radius: 4px;
 }
 QDialog#questionSolverDialog QFrame#questionSessionMiniStat {
-    background-color: #171F2B;
-    border: 1px solid #344050;
+    background-color: {{color:session.metric_surface}};
+    border: 1px solid {{color:session.metric_border}};
     border-radius: 10px;
 }
 QDialog#questionSolverDialog QLabel#questionSessionMiniLabel {
-    color: #98A5B4;
+    color: {{color:session.metric_label_text}};
     font-size: 7.9pt;
     font-weight: 700;
 }
 QDialog#questionSolverDialog QLabel#questionSessionMiniValue {
-    color: #F8FAFC;
+    color: {{color:session.metric_value_text}};
     font-size: 9.5pt;
     font-weight: 900;
 }
-QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="success"] { color: #82DBB4; }
-QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="danger"] { color: #F28B99; }
-QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="warning"] { color: #E9B66E; }
+QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="success"] { color: {{color:session.metric_success_text}}; }
+QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="danger"] { color: {{color:session.metric_danger_text}}; }
+QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="warning"] { color: {{color:session.metric_warning_text}}; }
 QDialog#questionSolverDialog QFrame#questionSessionFocusBar {
     background-color: #151D28;
     border: 1px solid #354151;
@@ -3964,13 +3960,13 @@ QDialog#questionSolverDialog QPushButton#subtleButton:hover {
     border-color: #7A8594;
 }
 QDialog#questionSolverDialog QLabel#questionSolverDiscipline {
-    color: #969FFF;
+    color: {{color:session.discipline_text}};
     font-size: 7.7pt;
     font-weight: 900;
     letter-spacing: 0.9px;
 }
 QDialog#questionSolverDialog QLabel#questionSolverMeta {
-    color: #B6C0CB;
+    color: {{color:session.meta_text}};
     font-size: 8.8pt;
     font-weight: 700;
 }
@@ -3981,7 +3977,7 @@ QDialog#questionSolverDialog QFrame#questionSolverStatementCard {
     border-radius: 13px;
 }
 QDialog#questionSolverDialog QLabel#questionSolverQuestionIndex {
-    color: #9BA4FF;
+    color: {{color:session.question_index_text}};
     font-size: 7.7pt;
     font-weight: 900;
     letter-spacing: 0.9px;

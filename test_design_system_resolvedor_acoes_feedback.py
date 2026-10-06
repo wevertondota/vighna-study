@@ -94,8 +94,8 @@ def _selector_blocks(selector: str) -> list[str]:
 
 class ResolverActionsFeedbackDesignSystemTests(unittest.TestCase):
     def test_contract_growth_stays_inside_stage_budget(self) -> None:
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 172)
-        self.assertEqual(len(ALL_TOKENS), 274)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 191)
+        self.assertEqual(len(ALL_TOKENS), 293)
         self.assertEqual(
             sum(token.path.startswith("answer.") for token in ALL_TOKENS),
             60,

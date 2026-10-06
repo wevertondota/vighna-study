@@ -2,7 +2,7 @@
 
 ## Escopo atual
 
-Este documento descreve a fundação criada na Etapa 2 e as integrações de caracterização já concluídas. `icones.py` consome `icon.*`; o splash externo, o indicador de tarefas e somente o fallback `JanelaInicializacao` de `main.py` consomem tokens visuais fixos. Em `tema.py`, os controles genéricos compartilhados, o domínio Calendário e o Resolvedor migrado nas Etapas 3E-A1/3E-A2 consomem tokens. O calendário mensal também usa `qcolor()` nos seus `QTextCharFormat`. O chrome geral da sessão permanece legado. A cascata dos temas continua inalterada.
+Este documento descreve a fundação criada na Etapa 2 e as integrações de caracterização já concluídas. `icones.py` consome `icon.*`; o splash externo, o indicador de tarefas e somente o fallback `JanelaInicializacao` de `main.py` consomem tokens visuais fixos. Em `tema.py`, os controles genéricos compartilhados, o domínio Calendário e o Resolvedor migrado nas Etapas 3E-A1/3E-A2/3E-B2a consomem tokens. O calendário mensal também usa `qcolor()` nos seus `QTextCharFormat`. Estrutura e leitura do chrome da sessão já estão migradas; ações secundárias, flags e demais recortes continuam legados. A cascata dos temas continua inalterada.
 
 A API central fica em `ui/design/` e possui quatro níveis:
 
@@ -26,7 +26,7 @@ Os identificadores `hex_...` são propositadamente físicos. Eles evitam atribui
 `TokenSpec` registra caminho, nível e tipo. Existem dois níveis públicos:
 
 - semântico: `canvas.*`, `surface.*`, `text.*`, `border.*`, `action.*`, `feedback.*`, `focus.*`, `icon.*`, `overlay.*`, `glow.*` e `gradient.*`;
-- componente temático: `answer.*`, `progress.*`, `calendar.*`, `chart.*` e `focus_mode.*`;
+- componente temático: `answer.*`, `progress.*`, `session.*`, `calendar.*`, `chart.*` e `focus_mode.*`;
 - componente fixo: `system_status.*`, `startup.*` e `task_indicator.*`.
 
 `VisualState` padroniza os estados `normal`, `hover`, `pressed`, `selected`, `focused`, `keyboard_focus`, `checked`, `disabled`, `correct`, `incorrect` e `struck`.
@@ -58,7 +58,7 @@ Tokens ausentes e acessos com tipo errado geram `TokenNotFoundError`; não exist
 - `ColorValue` em cada stop, inclusive alpha por `#AARRGGBB`;
 - variante por tema, mantida no respectivo `ThemeDefinition`.
 
-Das 201 ocorrências inventariadas, foram migrados os dois `QLinearGradient` do splash, quatro gradientes QSS de controles compartilhados e os gradientes de alternativa selecionada, correta, incorreta e tachada do Resolvedor. Os demais gradientes legados continuam inalterados.
+Das 201 ocorrências inventariadas, foram migrados os dois `QLinearGradient` do splash, quatro gradientes QSS de controles compartilhados, os gradientes de alternativa selecionada, correta, incorreta e tachada e, na 3E-B2a, os gradientes de overview e progresso da sessão. Os demais gradientes legados continuam inalterados.
 
 Gradientes fixos também podem receber coordenadas dinâmicas no adaptador QPainter. Direção efetiva, stops, posições e alpha permanecem centralizados sem congelar a geometria calculada em runtime.
 
@@ -110,6 +110,12 @@ primária Confirmar/Próxima e o painel de feedback. Este último consome
 `feedback.success_*`/`feedback.danger_*` somente nos papéis de superfície e
 borda que foram recaracterizados contra a cascata real; as alternativas
 continuam independentes em `answer.correct_*`/`answer.incorrect_*`.
+
+No domínio `session.*`, a Etapa 3E-B2a caracteriza somente estrutura e leitura
+da sessão ativa: cabeçalho, overview, métricas e contexto da questão. O fundo
+reutiliza `canvas.app`; o progresso usa `progress.session_*` e o gradiente de
+preenchimento real em `progress.fill_gradient`. Ações, flags, Modo Foco,
+enunciado e resumo final permanecem fora dessa fronteira.
 
 ## Consumo em QSS
 

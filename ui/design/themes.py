@@ -256,6 +256,24 @@ def _component_colors(c: Mapping[str, str], overrides: Mapping[str, str]) -> dic
         "progress.text": c["text_secondary"],
         "progress.complete": c["success_icon"],
         "progress.warning": c["warning_icon"],
+        "progress.session_text": c["text_secondary"],
+        "progress.session_track": c["surface_inset"],
+        "session.title_text": c["text_primary"],
+        "session.subtitle_text": c["text_muted"],
+        "session.panel_surface": c["surface_primary"],
+        "session.overview_border": c["border_default"],
+        "session.eyebrow_text": c["text_muted"],
+        "session.cycle_text": c["text_muted"],
+        "session.metric_surface": c["surface_secondary"],
+        "session.metric_border": c["border_subtle"],
+        "session.metric_label_text": c["text_muted"],
+        "session.metric_value_text": c["text_primary"],
+        "session.metric_success_text": c["success_text"],
+        "session.metric_danger_text": c["danger_text"],
+        "session.metric_warning_text": c["warning_text"],
+        "session.discipline_text": c["text_link"],
+        "session.meta_text": c["text_muted"],
+        "session.question_index_text": c["text_link"],
         "calendar.surface": c["surface_primary"],
         "calendar.today_surface": c["info_surface"],
         "calendar.today_border": c["info_border"],
@@ -494,6 +512,15 @@ _LIGHT_COMPONENT_OVERRIDES = {
     "answer.primary_action_border": "#7885F0",
     "answer.primary_action_hover_border": "#98A2F7",
     "progress.track": "#E8EDF3", "progress.text": "#475569",
+    "progress.session_text": "#202B3C", "progress.session_track": "#E8EDF3",
+    "session.title_text": "#172033", "session.subtitle_text": "#718096",
+    "session.panel_surface": "#FFFFFF", "session.overview_border": "#DDE4EC",
+    "session.eyebrow_text": "#7B8797", "session.cycle_text": "#657286",
+    "session.metric_surface": "#F7F9FC", "session.metric_border": "#E3E8EF",
+    "session.metric_label_text": "#7A8798", "session.metric_value_text": "#1F2937",
+    "session.metric_success_text": "#17815D", "session.metric_danger_text": "#C44758",
+    "session.metric_warning_text": "#B16A18", "session.discipline_text": "#5866C8",
+    "session.meta_text": "#5D697A", "session.question_index_text": "#606BC9",
     "calendar.surface": "#FFFFFF", "calendar.border": "#DBE3ED", "calendar.text": "#1F2937",
     "calendar.title_text": "#111827",
     "calendar.today_surface": "#DBEAFE", "calendar.today_border": "#93C5FD",
@@ -565,6 +592,15 @@ _DARK_COMPONENT_OVERRIDES = {
     "answer.primary_action_border": "#7885F0",
     "answer.primary_action_hover_border": "#A2AAFF",
     "progress.track": "#111827", "progress.text": "#CBD5E1",
+    "progress.session_text": "#EDF2F7", "progress.session_track": "#2C3745",
+    "session.title_text": "#F3F6FA", "session.subtitle_text": "#96A3B3",
+    "session.panel_surface": "#182230", "session.overview_border": "#344154",
+    "session.eyebrow_text": "#8392A5", "session.cycle_text": "#A1ADBB",
+    "session.metric_surface": "#141D29", "session.metric_border": "#2D3949",
+    "session.metric_label_text": "#8D9BAD", "session.metric_value_text": "#F2F5F8",
+    "session.metric_success_text": "#79D6AA", "session.metric_danger_text": "#F08A98",
+    "session.metric_warning_text": "#E5B16B", "session.discipline_text": "#96A0FF",
+    "session.meta_text": "#A8B4C2", "session.question_index_text": "#9BA4FF",
     "calendar.surface": "#182235", "calendar.border": "#334155", "calendar.text": "#E5E7EB",
     "calendar.title_text": "#F8FAFC",
     "calendar.today_surface": "#1E3A8A", "calendar.today_border": "#1E40AF",
@@ -639,6 +675,15 @@ _FUTURISTIC_COMPONENT_OVERRIDES = {
     "answer.incorrect_surface": "#351C24", "answer.incorrect_border": "#D96777",
     "progress.track": "#102235", "progress.border": "#315A7A",
     "progress.fill": "#4AA5D3", "progress.text": "#EAF7FF",
+    "progress.session_text": "#F5F7FB", "progress.session_track": "#3B424F",
+    "session.title_text": "#F5F7FB", "session.subtitle_text": "#AAB5C2",
+    "session.panel_surface": "#202733", "session.overview_border": "#475364",
+    "session.eyebrow_text": "#AAB4C0", "session.cycle_text": "#B8C1CD",
+    "session.metric_surface": "#171F2B", "session.metric_border": "#344050",
+    "session.metric_label_text": "#98A5B4", "session.metric_value_text": "#F8FAFC",
+    "session.metric_success_text": "#82DBB4", "session.metric_danger_text": "#F28B99",
+    "session.metric_warning_text": "#E9B66E", "session.discipline_text": "#969FFF",
+    "session.meta_text": "#B6C0CB", "session.question_index_text": "#9BA4FF",
     "calendar.surface": "#182235", "calendar.border": "#334155", "calendar.text": "#E5E7EB",
     "calendar.title_text": "#F8FAFC",
     "calendar.today_surface": "#124E68", "calendar.today_border": "#3D9BC5",
@@ -696,6 +741,8 @@ def _theme_gradients(kind: ThemeName) -> dict[str, GradientSpec]:
         control_header = ((0.0, "#F7F8FB"), (1.0, "#F7F8FB"))
         control_tab = ((0.0, "#EEF1F6"), (1.0, "#EEF1F6"))
         control_selected = ((0.0, "#FFFFFF"), (1.0, "#FFFFFF"))
+        session_overview = ((0.0, "#FFFFFF"), (1.0, "#FFFFFF"))
+        session_progress = ((0.0, "#4F5FE8"), (1.0, "#6B86F2"))
     elif kind is ThemeName.DARK:
         action = ((0.0, "#4B50DF"), (1.0, "#586DE3"))
         action_hover = ((0.0, "#595EE8"), (1.0, "#6579EC"))
@@ -710,6 +757,8 @@ def _theme_gradients(kind: ThemeName) -> dict[str, GradientSpec]:
         control_header = ((0.0, "#182535"), (1.0, "#182535"))
         control_tab = ((0.0, "#182535"), (1.0, "#182535"))
         control_selected = ((0.0, "#121E2D"), (1.0, "#121E2D"))
+        session_overview = ((0.0, "#182230"), (1.0, "#182230"))
+        session_progress = ((0.0, "#5964E8"), (1.0, "#6E8BEF"))
     else:
         action = ((0.0, "#4447E8"), (0.52, "#4347E1"), (1.0, "#3C42D2"))
         action_hover = ((0.0, "#5355F2"), (0.52, "#4F54EB"), (1.0, "#464DDE"))
@@ -724,6 +773,12 @@ def _theme_gradients(kind: ThemeName) -> dict[str, GradientSpec]:
         control_header = ((0.0, "#132C45"), (1.0, "#0C1D31"))
         control_tab = ((0.0, "#132B42"), (1.0, "#0C1D30"))
         control_selected = ((0.0, "#0E6677"), (1.0, "#323E8E"))
+        session_overview = (
+            (0.0, "#202733"), (0.55, "#222A36"), (1.0, "#1D2430")
+        )
+        session_progress = (
+            (0.0, "#5358EA"), (0.52, "#5B64EE"), (1.0, "#718BF5")
+        )
 
     return {
         "gradient.action_primary": _palette_gradient(*action),
@@ -749,7 +804,10 @@ def _theme_gradients(kind: ThemeName) -> dict[str, GradientSpec]:
         "answer.struck_gradient": _palette_gradient(
             *struck, direction=GradientDirection(0.0, 0.0, 1.0, 1.0)
         ),
-        "progress.fill_gradient": _palette_gradient(*action),
+        "progress.fill_gradient": _palette_gradient(*session_progress),
+        "session.overview_gradient": _palette_gradient(
+            *session_overview, direction=GradientDirection(0.0, 0.0, 1.0, 1.0)
+        ),
         "focus_mode.action_gradient": _palette_gradient(*focus_action),
         "focus_mode.action_hover_gradient": _palette_gradient(*focus_hover),
         "startup.progress_gradient": _palette_gradient(
