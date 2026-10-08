@@ -179,6 +179,17 @@ caneta = qpen("escuro", "border.default", width=1.5)
 gradiente = qlineargradient("futurista", "gradient.hero")
 ```
 
+
+No domínio de Cards globais, o Bloco A centraliza as superfícies básicas `dialogCard`, `metricCard` e `miniStat` em `card.*`. Os textos métricos são escopados aos próprios cards para não alterar consumidores históricos que reutilizam `metricLabel`, `miniStatLabel` ou `miniStatValue` fora dessas superfícies.
+O Bloco B centraliza apenas o shell compartilhado `studyActionCard` — superfície, borda e os estados `review`/`adaptive` — em `card.study_action_*`. O consumidor do Dashboard mantém o contrato `dashboard.study_questions_*`, que continua prevalecendo pela maior especificidade dos seletores.
+O Bloco C centraliza o shell compartilhado `myEvolutionStatCard` e as cores de `myEvolutionStatLabel`, `myEvolutionStatValue` e `myEvolutionStatDetail` somente quando descendentes desse card, em `card.evolution_stat_*`. `myEvolutionFilterBar`, `myEvolutionPanel` e os mesmos labels fora do card continuam na cascata histórica.
+
+No domínio `focus_mode.*`, a integração contextual no Resolvedor centraliza `questionSessionFocusBar`, `questionSessionFocusState` e somente os dois `subtleButton` descendentes da faixa. O seletor descendente preserva todos os demais `subtleButton`; geometria, tipografia e comportamento continuam na cascata histórica.
+
+Na Navegação principal, a command palette usa `navigation.command_*`. Os seis retornos `← Voltar` das telas principais mantêm `objectName="subtleButton"`, mas são marcados com `navigationBack=true`; a camada final consome `navigation.back_*` e não altera os demais consumidores de `subtleButton`.
+
+No Dashboard, os consumidores programáticos ativos `DashboardPlanningArcWidget` e `DashboardDonutWidget` também seguem esse contrato: a geometria e a lógica do `paintEvent()` permanecem locais, enquanto as cores são resolvidas por `qcolor()` nos tokens `dashboard.planning_arc_*` e `dashboard.quality_donut_*`.
+
 Quando a geometria nasce no `paintEvent`, as coordenadas podem ser informadas sem recriar os stops:
 
 ```python

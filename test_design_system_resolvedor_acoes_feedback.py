@@ -6,8 +6,12 @@ import hashlib
 from pathlib import Path
 import re
 import unittest
+from _design_system_test_helpers import strip_cards_global_block_a
 
 import tema
+
+# 3E-B2c: o hash Futurista muda apenas pela separação autorizada da cor
+# normal das flags; equivalência integral com B2b2 validada no teste de flags.
 from ui.design import ALL_TOKENS, COMPONENT_TOKEN_COUNT, get_theme
 
 
@@ -15,9 +19,9 @@ ROOT = Path(__file__).resolve().parent
 TEMA_SOURCE = (ROOT / "tema.py").read_text(encoding="utf-8")
 
 EXPECTED_STYLESHEET_BASELINE = {
-    "claro": "139709f8c57e00f16848668f9226703c7f8ff391dd9aea2bba8b2eae20ac2c5f",
-    "escuro": "ebbc21363d0035058301d060eb099fb2d33b992e8537c20f9bf1e77f8a2b4f3e",
-    "futurista": "0e588bb372946b4a6f61ad406c817fd155cac8c3c4286e9f93b7a09d06dc8622",
+    "claro": "cef0365e8cdd703fc73df505529d0e97672e5c49f036c0cba3b7ee50d42f23fe",
+    "escuro": "5e365d9be91deb9d29532b8954c4cc8d66acf8142f019d3706aafba0a3e548cb",
+    "futurista": "edc56b82ac5c720c06dac89700ec039d4d62536a31709d881ff1078960605dce",
 }
 
 EXPECTED_COLORS = {
@@ -92,10 +96,42 @@ def _selector_blocks(selector: str) -> list[str]:
     return re.findall(rf"{re.escape(selector)}\s*\{{.*?\}}", TEMA_SOURCE, re.DOTALL)
 
 
+
+def strip_navigation_search_layer(theme_name: str, qss: str) -> str:
+    qss = strip_cards_global_block_a(tema, theme_name, qss)
+    """Remove apenas a camada aditiva da Busca global para snapshots históricos."""
+    # Remove primeiro a camada posterior de Retornos ao Dashboard, quando presente.
+    if hasattr(tema, "ESTILO_NAVEGACAO_RETORNOS_DASHBOARD"):
+        if theme_name == "futurista":
+            final_back = tema.render_qss("futurista", tema.ESTILO_NAVEGACAO_RETORNOS_DASHBOARD)
+            inherited_back = tema.render_qss("escuro", tema.ESTILO_NAVEGACAO_RETORNOS_DASHBOARD)
+            if qss.endswith(final_back):
+                qss = qss[:-len(final_back)]
+            if inherited_back in qss:
+                qss = qss.replace(inherited_back, "", 1)
+        else:
+            back_layer = tema.render_qss(theme_name, tema.ESTILO_NAVEGACAO_RETORNOS_DASHBOARD)
+            if qss.endswith(back_layer):
+                qss = qss[:-len(back_layer)]
+            else:
+                qss = qss.replace(back_layer, "", 1)
+    if theme_name == "futurista":
+        final = tema.render_qss("futurista", tema.ESTILO_NAVEGACAO_BUSCA_GLOBAL)
+        inherited = tema.render_qss("escuro", tema.ESTILO_NAVEGACAO_BUSCA_GLOBAL)
+        if qss.endswith(final):
+            qss = qss[:-len(final)]
+        if inherited in qss:
+            qss = qss.replace(inherited, "", 1)
+        return qss
+    layer = tema.render_qss(theme_name, tema.ESTILO_NAVEGACAO_BUSCA_GLOBAL)
+    if qss.endswith(layer):
+        return qss[:-len(layer)]
+    return qss.replace(layer, "", 1)
+
 class ResolverActionsFeedbackDesignSystemTests(unittest.TestCase):
     def test_contract_growth_stays_inside_stage_budget(self) -> None:
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 191)
-        self.assertEqual(len(ALL_TOKENS), 293)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 928)
+        self.assertEqual(len(ALL_TOKENS), 1030)
         self.assertEqual(
             sum(token.path.startswith("answer.") for token in ALL_TOKENS),
             60,
@@ -235,7 +271,8 @@ class ResolverActionsFeedbackDesignSystemTests(unittest.TestCase):
     def test_complete_stylesheet_hashes_remain_identical(self) -> None:
         for theme_name in EXPECTED_STYLESHEET_BASELINE:
             factory = getattr(tema, f"stylesheet_{theme_name}")
-            digest = hashlib.sha256(_canonical_qss(factory()).encode("utf-8")).hexdigest()
+            qss = strip_navigation_search_layer(theme_name, factory())
+            digest = hashlib.sha256(_canonical_qss(qss).encode("utf-8")).hexdigest()
             self.assertEqual(digest, EXPECTED_STYLESHEET_BASELINE[theme_name])
 
 

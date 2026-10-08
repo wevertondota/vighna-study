@@ -3525,6 +3525,262 @@ QWidget#dashboardRoot QFrame#topProfileBar {
 
 
 # ============================================================
+# Design System — Dashboard — Bloco A: Shell e cabeçalho
+# Camada final, estritamente escopada aos componentes de chrome do
+# Dashboard. Não altera layout, métricas, comportamento ou submódulos.
+# ============================================================
+ESTILO_DASHBOARD_SHELL_CLARO = r"""
+/* DESIGN SYSTEM — DASHBOARD BLOCO A — CLARO */
+QWidget#dashboardPage,
+QScrollArea#dashboardScroll,
+QWidget#dashboardRoot {
+    background-color: {{color:dashboard.canvas}};
+}
+
+QWidget#dashboardRoot QLabel#pageTitle {
+    color: {{color:dashboard.title_text}};
+}
+QWidget#dashboardRoot QLabel#pageSubtitle {
+    color: {{color:dashboard.subtitle_text}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardTopBar {
+    background-color: {{color:dashboard.topbar_surface}};
+    border-color: {{color:dashboard.topbar_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QFrame#topProfileBar {
+    background-color: {{color:dashboard.profile_bar_surface}};
+    border-color: {{color:dashboard.profile_bar_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QLabel#topProfileLabel {
+    color: {{color:dashboard.profile_label_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QComboBox#topProfileCombo {
+    background-color: {{color:dashboard.profile_input_surface}};
+    color: {{color:dashboard.profile_input_text}};
+    border-color: {{color:dashboard.profile_input_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QComboBox#topProfileCombo:hover,
+QWidget#dashboardRoot QFrame#dashboardTopBar QComboBox#topProfileCombo:focus {
+    background-color: {{color:dashboard.profile_input_hover_surface}};
+    border-color: {{color:dashboard.profile_input_hover_border}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#globalSearchTrigger {
+    background-color: {{color:dashboard.search_surface}};
+    color: {{color:dashboard.search_text}};
+    border-color: {{color:dashboard.search_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#globalSearchTrigger:hover {
+    background-color: {{color:dashboard.search_hover_surface}};
+    color: {{color:dashboard.search_hover_text}};
+    border-color: {{color:dashboard.search_hover_border}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#questionsNavButton {
+    background-color: {{color:dashboard.nav_surface}};
+    color: {{color:dashboard.nav_text}};
+    border-color: {{color:dashboard.nav_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#questionsNavButton:hover {
+    background-color: {{color:dashboard.nav_hover_surface}};
+    color: {{color:dashboard.nav_hover_text}};
+    border-color: {{color:dashboard.nav_hover_border}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#subtleButton {
+    background-color: {{color:dashboard.secondary_surface}};
+    color: {{color:dashboard.secondary_text}};
+    border-color: {{color:dashboard.secondary_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#subtleButton:hover {
+    background-color: {{color:dashboard.secondary_hover_surface}};
+    color: {{color:dashboard.secondary_hover_text}};
+    border-color: {{color:dashboard.secondary_hover_border}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#topAccentButton {
+    background-color: {{color:dashboard.accent_surface}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#topAccentButton:hover {
+    background-color: {{color:dashboard.accent_hover_surface}};
+}
+"""
+
+
+ESTILO_DASHBOARD_SHELL_ESCURO = r"""
+/* DESIGN SYSTEM — DASHBOARD BLOCO A — ESCURO */
+QWidget#dashboardPage,
+QScrollArea#dashboardScroll,
+QWidget#dashboardRoot {
+    background-color: {{color:dashboard.canvas}};
+}
+
+QWidget#dashboardRoot QLabel#pageTitle {
+    color: {{color:dashboard.title_text}};
+}
+QWidget#dashboardRoot QLabel#pageSubtitle {
+    color: {{color:dashboard.subtitle_text}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardTopBar {
+    background-color: {{color:dashboard.topbar_surface}};
+    border-color: {{color:dashboard.topbar_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QFrame#topProfileBar {
+    background-color: {{color:dashboard.profile_bar_surface}};
+    border-color: {{color:dashboard.profile_bar_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QLabel#topProfileLabel {
+    color: {{color:dashboard.profile_label_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QComboBox#topProfileCombo {
+    background-color: {{color:dashboard.profile_input_surface}};
+    color: {{color:dashboard.profile_input_text}};
+    border-color: {{color:dashboard.profile_input_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QComboBox#topProfileCombo:focus {
+    border-color: {{color:dashboard.profile_input_hover_border}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#globalSearchTrigger {
+    background-color: {{color:dashboard.search_surface}};
+    color: {{color:dashboard.search_text}};
+    border-color: {{color:dashboard.search_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#globalSearchTrigger:hover {
+    background-color: {{color:dashboard.search_hover_surface}};
+    color: {{color:dashboard.search_hover_text}};
+    border-color: {{color:dashboard.search_hover_border}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#questionsNavButton {
+    background-color: {{color:dashboard.nav_surface}};
+    color: {{color:dashboard.nav_text}};
+    border-color: {{color:dashboard.nav_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#questionsNavButton:hover {
+    background-color: {{color:dashboard.nav_hover_surface}};
+    color: {{color:dashboard.nav_hover_text}};
+    border-color: {{color:dashboard.nav_hover_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#questionsNavButton:pressed {
+    background-color: {{color:dashboard.nav_pressed_surface}};
+    border-color: {{color:dashboard.nav_pressed_border}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#subtleButton {
+    background-color: {{color:dashboard.secondary_surface}};
+    color: {{color:dashboard.secondary_text}};
+    border-color: {{color:dashboard.secondary_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#subtleButton:hover {
+    background-color: {{color:dashboard.secondary_hover_surface}};
+    color: {{color:dashboard.secondary_hover_text}};
+    border-color: {{color:dashboard.secondary_hover_border}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#topAccentButton {
+    background-color: {{color:dashboard.accent_surface}};
+    border-color: {{color:dashboard.accent_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#topAccentButton:hover {
+    background-color: {{color:dashboard.accent_hover_surface}};
+    border-color: {{color:dashboard.accent_hover_border}};
+}
+"""
+
+
+ESTILO_DASHBOARD_SHELL_FUTURISTA = r"""
+/* DESIGN SYSTEM — DASHBOARD BLOCO A — FUTURISTA */
+QWidget#dashboardPage,
+QScrollArea#dashboardScroll,
+QWidget#dashboardRoot {
+    background-color: {{color:dashboard.canvas}};
+}
+
+QWidget#dashboardRoot QLabel#pageTitle {
+    color: {{color:dashboard.title_text}};
+}
+QWidget#dashboardRoot QLabel#pageSubtitle {
+    color: {{color:dashboard.subtitle_text}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardTopBar {
+    background: {{gradient:dashboard.topbar_gradient}};
+    border-color: {{color:dashboard.topbar_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QFrame#topProfileBar {
+    background-color: {{color:dashboard.profile_bar_surface}};
+    border-color: {{color:dashboard.profile_bar_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QLabel#topProfileLabel {
+    color: {{color:dashboard.profile_label_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QComboBox#topProfileCombo {
+    background-color: {{color:dashboard.profile_input_surface}};
+    color: {{color:dashboard.profile_input_text}};
+    border-color: {{color:dashboard.profile_input_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QComboBox#topProfileCombo:hover,
+QWidget#dashboardRoot QFrame#dashboardTopBar QComboBox#topProfileCombo:focus {
+    background-color: {{color:dashboard.profile_input_hover_surface}};
+    border-color: {{color:dashboard.profile_input_hover_border}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#globalSearchTrigger {
+    background-color: {{color:dashboard.search_surface}};
+    color: {{color:dashboard.search_text}};
+    border-color: {{color:dashboard.search_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#globalSearchTrigger:hover {
+    background-color: {{color:dashboard.search_hover_surface}};
+    color: {{color:dashboard.search_hover_text}};
+    border-color: {{color:dashboard.search_hover_border}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#questionsNavButton {
+    background: {{gradient:dashboard.nav_gradient}};
+    color: {{color:dashboard.nav_text}};
+    border-color: {{color:dashboard.nav_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#questionsNavButton:hover {
+    background: {{gradient:dashboard.nav_hover_gradient}};
+    color: {{color:dashboard.nav_hover_text}};
+    border-color: {{color:dashboard.nav_hover_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#questionsNavButton:pressed {
+    background-color: {{color:dashboard.nav_pressed_surface}};
+    border-color: {{color:dashboard.nav_pressed_border}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#subtleButton {
+    background-color: {{color:dashboard.secondary_surface}};
+    color: {{color:dashboard.secondary_text}};
+    border-color: {{color:dashboard.secondary_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#subtleButton:hover {
+    background-color: {{color:dashboard.secondary_hover_surface}};
+    color: {{color:dashboard.secondary_hover_text}};
+    border-color: {{color:dashboard.secondary_hover_border}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#topAccentButton {
+    background-color: {{color:dashboard.accent_surface}};
+    border-color: {{color:dashboard.accent_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#topAccentButton:hover {
+    background-color: {{color:dashboard.accent_hover_surface}};
+    border-color: {{color:dashboard.accent_hover_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTopBar QPushButton#topAccentButton:pressed {
+    background-color: {{color:dashboard.accent_pressed_surface}};
+}
+"""
+
+
+
+# ============================================================
 # Resolvedor de questões — modo concentração
 # Mantém a linguagem dos cards do Dashboard, mas reduz ornamentos no
 # conteúdo pedagógico. A variante futurista sobrescreve esta base ao final.
@@ -3600,6 +3856,16 @@ QDialog#questionSolverDialog QLabel#questionSessionFocusState {
     font-size: 8.3pt;
     font-weight: 800;
 }
+QDialog#questionSolverDialog QPushButton#subtleButton[sessionNavigation="true"] {
+    background-color: {{color:session.navigation_surface}};
+    color: {{color:session.navigation_text}};
+    border: 1px solid {{color:session.navigation_border}};
+}
+QDialog#questionSolverDialog QPushButton#subtleButton[sessionNavigation="true"]:hover {
+    background-color: {{color:session.navigation_hover_surface}};
+    color: {{color:session.navigation_hover_text}};
+    border-color: {{color:session.navigation_hover_border}};
+}
 QDialog#questionSolverDialog QLabel#questionSolverDiscipline {
     color: {{color:session.discipline_text}};
     font-size: 7.8pt;
@@ -3612,8 +3878,8 @@ QDialog#questionSolverDialog QLabel#questionSolverMeta {
     font-weight: 700;
 }
 QDialog#questionSolverDialog QFrame#questionSolverStatementCard {
-    background-color: #FFFFFF;
-    border: 1px solid #DCE3EB;
+    background-color: {{color:session.statement_surface}};
+    border: 1px solid {{color:session.statement_border}};
     border-radius: 12px;
 }
 QDialog#questionSolverDialog QLabel#questionSolverQuestionIndex {
@@ -3623,8 +3889,13 @@ QDialog#questionSolverDialog QLabel#questionSolverQuestionIndex {
     letter-spacing: 0.8px;
 }
 QDialog#questionSolverDialog QLabel#questionSolverStatement {
-    color: #172033;
+    color: {{color:session.statement_text}};
     font-size: 10.8pt;
+}
+QDialog#questionSolverDialog QLabel#questionSessionSummaryDetail {
+    background-color: {{color:feedback.queue_detail_surface}};
+    color: {{color:feedback.queue_detail_text}};
+    border-color: {{color:feedback.queue_detail_border}};
 }
 QDialog#questionSolverDialog QFrame#questionSolverAlternative {
     background-color: {{color:answer.normal_surface}};
@@ -3662,20 +3933,20 @@ QDialog#questionSolverDialog QRadioButton#questionSolverRadio::indicator:checked
     border-color: {{color:answer.indicator_checked_border}};
 }
 QDialog#questionSolverDialog QFrame#questionSessionActionPanel {
-    background-color: #FFFFFF;
-    border: 1px solid #DDE4EC;
+    background-color: {{color:session.action_panel_surface}};
+    border: 1px solid {{color:session.action_panel_border}};
     border-radius: 13px;
 }
 QDialog#questionSolverDialog QPushButton#questionSessionSkipButton {
-    background-color: #F5F7FA;
-    color: #4F5D6E;
-    border: 1px solid #CCD5DF;
+    background-color: {{color:session.skip_surface}};
+    color: {{color:session.skip_text}};
+    border: 1px solid {{color:session.skip_border}};
     border-radius: 9px;
     font-weight: 750;
 }
 QDialog#questionSolverDialog QPushButton#questionSessionSkipButton:hover {
-    background-color: #EDF1F5;
-    border-color: #AFBAC8;
+    background-color: {{color:session.skip_hover_surface}};
+    border-color: {{color:session.skip_hover_border}};
 }
 QDialog#questionSolverDialog QPushButton#primaryButton {
     background: {{gradient:gradient.action_primary}};
@@ -3689,15 +3960,15 @@ QDialog#questionSolverDialog QPushButton#primaryButton:hover {
     border-color: {{color:answer.primary_action_hover_border}};
 }
 QDialog#questionSolverDialog QPushButton#questionSessionEndButton {
-    background-color: #FFF7F8;
-    color: #A54050;
-    border: 1px solid #E9BCC4;
+    background-color: {{color:session.end_surface}};
+    color: {{color:session.end_text}};
+    border: 1px solid {{color:session.end_border}};
     border-radius: 9px;
     font-weight: 750;
 }
 QDialog#questionSolverDialog QPushButton#questionSessionEndButton:hover {
-    background-color: #FFF0F2;
-    border-color: #DC929E;
+    background-color: {{color:session.end_hover_surface}};
+    border-color: {{color:session.end_hover_border}};
 }
 """
 
@@ -3772,6 +4043,16 @@ QDialog#questionSolverDialog QLabel#questionSessionFocusState {
     font-size: 8.3pt;
     font-weight: 800;
 }
+QDialog#questionSolverDialog QPushButton#subtleButton[sessionNavigation="true"] {
+    background-color: {{color:session.navigation_surface}};
+    color: {{color:session.navigation_text}};
+    border: 1px solid {{color:session.navigation_border}};
+}
+QDialog#questionSolverDialog QPushButton#subtleButton[sessionNavigation="true"]:hover {
+    background-color: {{color:session.navigation_hover_surface}};
+    color: {{color:session.navigation_hover_text}};
+    border-color: {{color:session.navigation_hover_border}};
+}
 QDialog#questionSolverDialog QLabel#questionSolverDiscipline {
     color: {{color:session.discipline_text}};
     font-size: 7.8pt;
@@ -3784,8 +4065,8 @@ QDialog#questionSolverDialog QLabel#questionSolverMeta {
     font-weight: 700;
 }
 QDialog#questionSolverDialog QFrame#questionSolverStatementCard {
-    background-color: #182230;
-    border: 1px solid #344154;
+    background-color: {{color:session.statement_surface}};
+    border: 1px solid {{color:session.statement_border}};
     border-radius: 12px;
 }
 QDialog#questionSolverDialog QLabel#questionSolverQuestionIndex {
@@ -3795,8 +4076,13 @@ QDialog#questionSolverDialog QLabel#questionSolverQuestionIndex {
     letter-spacing: 0.8px;
 }
 QDialog#questionSolverDialog QLabel#questionSolverStatement {
-    color: #F2F6FA;
+    color: {{color:session.statement_text}};
     font-size: 10.8pt;
+}
+QDialog#questionSolverDialog QLabel#questionSessionSummaryDetail {
+    background-color: {{color:feedback.queue_detail_surface}};
+    color: {{color:feedback.queue_detail_text}};
+    border-color: {{color:feedback.queue_detail_border}};
 }
 QDialog#questionSolverDialog QFrame#questionSolverAlternative {
     background-color: {{color:answer.normal_surface}};
@@ -3834,20 +4120,20 @@ QDialog#questionSolverDialog QRadioButton#questionSolverRadio::indicator:checked
     border-color: {{color:answer.indicator_checked_border}};
 }
 QDialog#questionSolverDialog QFrame#questionSessionActionPanel {
-    background-color: #182230;
-    border: 1px solid #344154;
+    background-color: {{color:session.action_panel_surface}};
+    border: 1px solid {{color:session.action_panel_border}};
     border-radius: 13px;
 }
 QDialog#questionSolverDialog QPushButton#questionSessionSkipButton {
-    background-color: #202B39;
-    color: #C8D1DC;
-    border: 1px solid #445265;
+    background-color: {{color:session.skip_surface}};
+    color: {{color:session.skip_text}};
+    border: 1px solid {{color:session.skip_border}};
     border-radius: 9px;
     font-weight: 750;
 }
 QDialog#questionSolverDialog QPushButton#questionSessionSkipButton:hover {
-    background-color: #273444;
-    border-color: #607086;
+    background-color: {{color:session.skip_hover_surface}};
+    border-color: {{color:session.skip_hover_border}};
 }
 QDialog#questionSolverDialog QPushButton#primaryButton {
     background: {{gradient:gradient.action_primary}};
@@ -3861,15 +4147,15 @@ QDialog#questionSolverDialog QPushButton#primaryButton:hover {
     border-color: {{color:answer.primary_action_hover_border}};
 }
 QDialog#questionSolverDialog QPushButton#questionSessionEndButton {
-    background-color: #2B2027;
-    color: #FFB8C2;
-    border: 1px solid #724350;
+    background-color: {{color:session.end_surface}};
+    color: {{color:session.end_text}};
+    border: 1px solid {{color:session.end_border}};
     border-radius: 9px;
     font-weight: 750;
 }
 QDialog#questionSolverDialog QPushButton#questionSessionEndButton:hover {
-    background-color: #38262D;
-    border-color: #985766;
+    background-color: {{color:session.end_hover_surface}};
+    border-color: {{color:session.end_hover_border}};
 }
 """
 
@@ -3959,6 +4245,16 @@ QDialog#questionSolverDialog QPushButton#subtleButton:hover {
     color: #FFFFFF;
     border-color: #7A8594;
 }
+QDialog#questionSolverDialog QPushButton#subtleButton[sessionNavigation="true"] {
+    background-color: {{color:session.navigation_surface}};
+    color: {{color:session.navigation_text}};
+    border: 1px solid {{color:session.navigation_border}};
+}
+QDialog#questionSolverDialog QPushButton#subtleButton[sessionNavigation="true"]:hover {
+    background-color: {{color:session.navigation_hover_surface}};
+    color: {{color:session.navigation_hover_text}};
+    border-color: {{color:session.navigation_hover_border}};
+}
 QDialog#questionSolverDialog QLabel#questionSolverDiscipline {
     color: {{color:session.discipline_text}};
     font-size: 7.7pt;
@@ -3971,9 +4267,8 @@ QDialog#questionSolverDialog QLabel#questionSolverMeta {
     font-weight: 700;
 }
 QDialog#questionSolverDialog QFrame#questionSolverStatementCard {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-        stop:0 #171F2B, stop:1 #141C27);
-    border: 1px solid #3C4858;
+    background: {{gradient:session.statement_gradient}};
+    border: 1px solid {{color:session.statement_border}};
     border-radius: 13px;
 }
 QDialog#questionSolverDialog QLabel#questionSolverQuestionIndex {
@@ -3983,7 +4278,7 @@ QDialog#questionSolverDialog QLabel#questionSolverQuestionIndex {
     letter-spacing: 0.9px;
 }
 QDialog#questionSolverDialog QLabel#questionSolverStatement {
-    color: #F2F6FA;
+    color: {{color:session.statement_text}};
     font-size: 10.9pt;
 }
 QDialog#questionSolverDialog QFrame#questionSolverAlternative {
@@ -4041,30 +4336,30 @@ QDialog#questionSolverDialog QToolButton#questionSolverEliminateButton:hover {
     border-radius: 6px;
 }
 QDialog#questionSolverDialog QFrame#questionSessionActionPanel {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 #171F2B, stop:1 #151D28);
-    border: 1px solid #3A4656;
+    background: {{gradient:session.action_panel_gradient}};
+    border: 1px solid {{color:session.action_panel_border}};
     border-radius: 13px;
 }
 QDialog#questionSolverDialog QCheckBox#questionSessionDoubt,
 QDialog#questionSolverDialog QCheckBox#questionSessionAnalysisFlag {
-    color: #B7C1CD;
     background: transparent;
     font-size: 8.6pt;
 }
-QDialog#questionSolverDialog QCheckBox#questionSessionDoubt:checked { color: #AEB5FF; }
-QDialog#questionSolverDialog QCheckBox#questionSessionAnalysisFlag:checked { color: #F0C47C; }
+QDialog#questionSolverDialog QCheckBox#questionSessionDoubt { color: {{color:session.doubt_text}}; }
+QDialog#questionSolverDialog QCheckBox#questionSessionAnalysisFlag { color: {{color:session.analysis_text}}; }
+QDialog#questionSolverDialog QCheckBox#questionSessionDoubt:checked { color: {{color:session.doubt_checked_text}}; }
+QDialog#questionSolverDialog QCheckBox#questionSessionAnalysisFlag:checked { color: {{color:session.analysis_checked_text}}; }
 QDialog#questionSolverDialog QPushButton#questionSessionSkipButton {
-    background-color: #202833;
-    color: #CED6E0;
-    border: 1px solid #505B69;
+    background-color: {{color:session.skip_surface}};
+    color: {{color:session.skip_text}};
+    border: 1px solid {{color:session.skip_border}};
     border-radius: 10px;
     font-weight: 800;
 }
 QDialog#questionSolverDialog QPushButton#questionSessionSkipButton:hover {
-    background-color: #293341;
-    color: #FFFFFF;
-    border-color: #707C8B;
+    background-color: {{color:session.skip_hover_surface}};
+    color: {{color:session.skip_hover_text}};
+    border-color: {{color:session.skip_hover_border}};
 }
 QDialog#questionSolverDialog QPushButton#primaryButton {
     background: {{gradient:gradient.action_primary}};
@@ -4079,16 +4374,16 @@ QDialog#questionSolverDialog QPushButton#primaryButton:hover {
     border-color: {{color:answer.primary_action_hover_border}};
 }
 QDialog#questionSolverDialog QPushButton#questionSessionEndButton {
-    background-color: #2A2026;
-    color: #FFBAC4;
-    border: 1px solid #70434F;
+    background-color: {{color:session.end_surface}};
+    color: {{color:session.end_text}};
+    border: 1px solid {{color:session.end_border}};
     border-radius: 10px;
     font-weight: 800;
 }
 QDialog#questionSolverDialog QPushButton#questionSessionEndButton:hover {
-    background-color: #38262E;
-    border-color: #9A5968;
-    color: #FFD5DB;
+    background-color: {{color:session.end_hover_surface}};
+    border-color: {{color:session.end_hover_border}};
+    color: {{color:session.end_hover_text}};
 }
 QDialog#questionSolverDialog QFrame#questionSolverFeedback {
     background-color: {{color:answer.explanation_surface}};
@@ -5139,6 +5434,1418 @@ QLabel#calendarForecastEmpty {
 }
 """
 
+
+# ============================================================
+# Design System — Dashboard — Bloco B: Foco + Planejamento de hoje
+# Camada aditiva. Migra somente decisões cromáticas do primeiro módulo;
+# geometria, tipografia, sinais, slots, persistência e QPainter permanecem legados.
+# ============================================================
+ESTILO_DASHBOARD_BLOCO_B_CLARO = r"""
+QWidget#dashboardRoot QFrame#dashboardFocusPanel {
+    background-color: {{color:dashboard.focus_panel_surface}};
+    border-color: {{color:dashboard.focus_panel_border}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard {
+    background: {{gradient:dashboard.focus_card_gradient}};
+    border-color: {{color:dashboard.focus_card_border}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardCardIcon {
+    color: {{color:dashboard.focus_icon_text}};
+    background-color: {{color:dashboard.focus_icon_surface}};
+    border-color: {{color:dashboard.focus_icon_border}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardCardTitle {
+    color: {{color:dashboard.focus_title_text}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardBadge {
+    color: {{color:dashboard.focus_badge_text}};
+    background-color: {{color:dashboard.focus_badge_surface}};
+    border-color: {{color:dashboard.focus_badge_border}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardDescription {
+    color: {{color:dashboard.focus_description_text}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardDetail,
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusQuickHint {
+    color: {{color:dashboard.focus_detail_text}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardCaption {
+    color: {{color:dashboard.focus_caption_text}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#dashboardTodayFocusValue {
+    color: {{color:dashboard.focus_value_text}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QFrame#dashboardQuickAccess[embedded="true"] {
+    background-color: {{color:dashboard.focus_goal_surface}};
+    border-color: {{color:dashboard.focus_goal_border}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#dashboardQuickAccessTitle {
+    color: {{color:dashboard.focus_goal_title_text}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QProgressBar#dashboardTodayProgress {
+    background-color: {{color:dashboard.focus_progress_track}};
+    border: none;
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QProgressBar#dashboardTodayProgress::chunk {
+    background-color: {{color:dashboard.focus_progress_fill}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QPushButton#dashboardFocusPrimaryButton {
+    background: {{gradient:dashboard.focus_action_gradient}};
+    color: {{color:dashboard.focus_action_text}};
+    border-color: {{color:dashboard.focus_action_border}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QPushButton#dashboardFocusPrimaryButton:hover {
+    background: {{gradient:dashboard.focus_action_hover_gradient}};
+    border-color: {{color:dashboard.focus_action_hover_border}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QPushButton#dashboardFocusPrimaryButton:pressed {
+    background: {{color:dashboard.focus_action_pressed_surface}};
+    border-color: {{color:dashboard.focus_action_pressed_border}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardInsightSummary {
+    background: {{gradient:dashboard.planning_card_gradient}};
+    border-color: {{color:dashboard.planning_card_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardInsightSummaryIcon {
+    color: {{color:dashboard.planning_icon_text}};
+    background-color: {{color:dashboard.planning_icon_surface}};
+    border-color: {{color:dashboard.planning_icon_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardInsightSummaryTitle {
+    color: {{color:dashboard.planning_title_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardInsightSummaryDate {
+    color: {{color:dashboard.planning_date_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardPlanningHeroTitle {
+    color: {{color:dashboard.planning_hero_title_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardPlanningHeroValue {
+    color: {{color:dashboard.planning_hero_value_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardPlanningHeroDetail {
+    color: {{color:dashboard.planning_hero_detail_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QProgressBar#dashboardInsightSummaryProgress {
+    background-color: {{color:dashboard.planning_progress_track}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QProgressBar#dashboardInsightSummaryProgress::chunk {
+    background: {{gradient:dashboard.planning_progress_gradient}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QFrame#dashboardPlanningOperational {
+    background-color: {{color:dashboard.planning_operational_surface}};
+    border-color: {{color:dashboard.planning_operational_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardInsightSummaryRowTitle {
+    color: {{color:dashboard.planning_row_title_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardPlanningOperationalValue {
+    color: {{color:dashboard.planning_operational_value_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardInsightSummaryRowDetail {
+    color: {{color:dashboard.planning_row_detail_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QFrame#dashboardPlanningDivider {
+    color: {{color:dashboard.planning_divider}};
+    background-color: {{color:dashboard.planning_divider}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardPlanningWeekLabel {
+    color: {{color:dashboard.planning_week_label_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#weeklyGoalStatus {
+    background-color: {{color:dashboard.planning_status_surface}};
+    color: {{color:dashboard.planning_status_text}};
+    border-color: {{color:dashboard.planning_status_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#weeklyGoalStatus[weekState="concluida"] {
+    background-color: {{color:dashboard.planning_status_done_surface}};
+    color: {{color:dashboard.planning_status_done_text}};
+    border-color: {{color:dashboard.planning_status_done_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#weeklyGoalStatus[weekState="atencao"] {
+    background-color: {{color:dashboard.planning_status_attention_surface}};
+    color: {{color:dashboard.planning_status_attention_text}};
+    border-color: {{color:dashboard.planning_status_attention_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#weeklyGoalStatus[weekState="andamento"] {
+    background-color: {{color:dashboard.planning_status_active_surface}};
+    color: {{color:dashboard.planning_status_active_text}};
+    border-color: {{color:dashboard.planning_status_active_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QPushButton#planningSummaryButton {
+    background-color: {{color:dashboard.planning_button_surface}};
+    color: {{color:dashboard.planning_button_text}};
+    border-color: {{color:dashboard.planning_button_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QPushButton#planningSummaryButton:hover {
+    background-color: {{color:dashboard.planning_button_hover_surface}};
+    color: {{color:dashboard.planning_button_hover_text}};
+    border-color: {{color:dashboard.planning_button_hover_border}};
+}
+"""
+
+ESTILO_DASHBOARD_BLOCO_B_ESCURO = r"""
+QWidget#dashboardRoot QFrame#dashboardFocusPanel {
+    background-color: {{color:dashboard.focus_panel_surface}};
+    border-color: {{color:dashboard.focus_panel_border}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard {
+    background: {{gradient:dashboard.focus_card_gradient}};
+    border-color: {{color:dashboard.focus_card_border}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardCardIcon {
+    color: {{color:dashboard.focus_icon_text}};
+    background-color: {{color:dashboard.focus_icon_surface}};
+    border-color: {{color:dashboard.focus_icon_border}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardCardTitle {
+    color: {{color:dashboard.focus_title_text}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardBadge {
+    color: {{color:dashboard.focus_badge_text}};
+    background-color: {{color:dashboard.focus_badge_surface}};
+    border-color: {{color:dashboard.focus_badge_border}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardDescription {
+    color: {{color:dashboard.focus_description_text}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardDetail,
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusQuickHint {
+    color: {{color:dashboard.focus_detail_text}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardCaption {
+    color: {{color:dashboard.focus_caption_text}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#dashboardTodayFocusValue {
+    color: {{color:dashboard.focus_value_text}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QFrame#dashboardQuickAccess[embedded="true"] {
+    background-color: {{color:dashboard.focus_goal_surface}};
+    border-color: {{color:dashboard.focus_goal_border}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#dashboardQuickAccessTitle {
+    color: {{color:dashboard.focus_goal_title_text}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QProgressBar#dashboardTodayProgress {
+    background-color: {{color:dashboard.focus_progress_track}};
+    border: none;
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QProgressBar#dashboardTodayProgress::chunk {
+    background-color: {{color:dashboard.focus_progress_fill}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QPushButton#dashboardFocusPrimaryButton {
+    background: {{gradient:dashboard.focus_action_gradient}};
+    color: {{color:dashboard.focus_action_text}};
+    border-color: {{color:dashboard.focus_action_border}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QPushButton#dashboardFocusPrimaryButton:hover {
+    background: {{gradient:dashboard.focus_action_hover_gradient}};
+    border-color: {{color:dashboard.focus_action_hover_border}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardInsightSummary {
+    background: {{gradient:dashboard.planning_card_gradient}};
+    border-color: {{color:dashboard.planning_card_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardInsightSummaryIcon {
+    color: {{color:dashboard.planning_icon_text}};
+    background-color: transparent;
+    border: none;
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardInsightSummaryTitle {
+    color: {{color:dashboard.planning_title_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardInsightSummaryDate {
+    color: {{color:dashboard.planning_date_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardPlanningHeroTitle {
+    color: {{color:dashboard.planning_hero_title_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardPlanningHeroValue {
+    color: {{color:dashboard.planning_hero_value_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardPlanningHeroDetail {
+    color: {{color:dashboard.planning_hero_detail_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QProgressBar#dashboardInsightSummaryProgress {
+    background-color: {{color:dashboard.planning_progress_track}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QProgressBar#dashboardInsightSummaryProgress::chunk {
+    background: {{gradient:dashboard.planning_progress_gradient}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QFrame#dashboardPlanningOperational {
+    background-color: {{color:dashboard.planning_operational_surface}};
+    border-color: {{color:dashboard.planning_operational_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardInsightSummaryRowTitle {
+    color: {{color:dashboard.planning_row_title_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardPlanningOperationalValue {
+    color: {{color:dashboard.planning_operational_value_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardInsightSummaryRowDetail {
+    color: {{color:dashboard.planning_row_detail_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QFrame#dashboardPlanningDivider {
+    color: {{color:dashboard.planning_divider}};
+    background-color: {{color:dashboard.planning_divider}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardPlanningWeekLabel {
+    color: {{color:dashboard.planning_week_label_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#weeklyGoalStatus {
+    background-color: {{color:dashboard.planning_status_surface}};
+    color: {{color:dashboard.planning_status_text}};
+    border-color: {{color:dashboard.planning_status_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#weeklyGoalStatus[weekState="concluida"] {
+    background-color: {{color:dashboard.planning_status_done_surface}};
+    color: {{color:dashboard.planning_status_done_text}};
+    border-color: {{color:dashboard.planning_status_done_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#weeklyGoalStatus[weekState="atencao"] {
+    background-color: {{color:dashboard.planning_status_attention_surface}};
+    color: {{color:dashboard.planning_status_attention_text}};
+    border-color: {{color:dashboard.planning_status_attention_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#weeklyGoalStatus[weekState="andamento"] {
+    background-color: {{color:dashboard.planning_status_active_surface}};
+    color: {{color:dashboard.planning_status_active_text}};
+    border-color: {{color:dashboard.planning_status_active_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QPushButton#planningSummaryButton {
+    background-color: {{color:dashboard.planning_button_surface}};
+    color: {{color:dashboard.planning_button_text}};
+    border-color: {{color:dashboard.planning_button_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QPushButton#planningSummaryButton:hover {
+    background-color: {{color:dashboard.planning_button_hover_surface}};
+    color: {{color:dashboard.planning_button_hover_text}};
+    border-color: {{color:dashboard.planning_button_hover_border}};
+}
+"""
+
+ESTILO_DASHBOARD_BLOCO_B_FUTURISTA = r"""
+QWidget#dashboardRoot QFrame#dashboardFocusPanel {
+    background-color: {{color:dashboard.focus_panel_surface}};
+    border-color: {{color:dashboard.focus_panel_border}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard {
+    background: {{gradient:dashboard.focus_card_gradient}};
+    border-color: {{color:dashboard.focus_card_border}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardCardIcon {
+    color: {{color:dashboard.focus_icon_text}};
+    background-color: {{color:dashboard.focus_icon_surface}};
+    border-color: {{color:dashboard.focus_icon_border}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardCardTitle {
+    color: {{color:dashboard.focus_title_text}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardBadge {
+    color: {{color:dashboard.focus_badge_text}};
+    background-color: {{color:dashboard.focus_badge_surface}};
+    border-color: {{color:dashboard.focus_badge_border}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardDescription {
+    color: {{color:dashboard.focus_description_text}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardDetail,
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusQuickHint {
+    color: {{color:dashboard.focus_detail_text}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardCaption {
+    color: {{color:dashboard.focus_caption_text}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#dashboardTodayFocusValue {
+    color: {{color:dashboard.focus_value_text}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QFrame#dashboardQuickAccess[embedded="true"] {
+    background-color: {{color:dashboard.focus_goal_surface}};
+    border-color: {{color:dashboard.focus_goal_border}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#dashboardQuickAccessTitle {
+    color: {{color:dashboard.focus_goal_title_text}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QProgressBar#dashboardTodayProgress {
+    background-color: {{color:dashboard.focus_progress_track}};
+    border: 1px solid {{color:dashboard.focus_progress_border}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QProgressBar#dashboardTodayProgress::chunk {
+    background-color: {{color:dashboard.focus_progress_fill}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QPushButton#dashboardFocusPrimaryButton {
+    background: {{gradient:dashboard.focus_action_gradient}};
+    color: {{color:dashboard.focus_action_text}};
+    border-color: {{color:dashboard.focus_action_border}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QPushButton#dashboardFocusPrimaryButton:hover {
+    background: {{gradient:dashboard.focus_action_hover_gradient}};
+    border-color: {{color:dashboard.focus_action_hover_border}};
+}
+QWidget#dashboardRoot QFrame#focusDashboardMainCard QPushButton#dashboardFocusPrimaryButton:pressed {
+    background: {{color:dashboard.focus_action_pressed_surface}};
+    border-color: {{color:dashboard.focus_action_pressed_border}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardInsightSummary {
+    background: {{gradient:dashboard.planning_card_gradient}};
+    border-color: {{color:dashboard.planning_card_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardInsightSummaryIcon {
+    color: {{color:dashboard.planning_icon_text}};
+    background-color: {{color:dashboard.planning_icon_surface}};
+    border-color: {{color:dashboard.planning_icon_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardInsightSummaryTitle {
+    color: {{color:dashboard.planning_title_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardInsightSummaryDate {
+    color: {{color:dashboard.planning_date_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardPlanningHeroTitle {
+    color: {{color:dashboard.planning_hero_title_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardPlanningHeroValue {
+    color: {{color:dashboard.planning_hero_value_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardPlanningHeroDetail {
+    color: {{color:dashboard.planning_hero_detail_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QProgressBar#dashboardInsightSummaryProgress {
+    background-color: {{color:dashboard.planning_progress_track}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QProgressBar#dashboardInsightSummaryProgress::chunk {
+    background: {{gradient:dashboard.planning_progress_gradient}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QFrame#dashboardPlanningOperational {
+    background-color: transparent;
+    border: none;
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardInsightSummaryRowTitle {
+    color: {{color:dashboard.planning_row_title_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardPlanningOperationalValue {
+    color: {{color:dashboard.planning_operational_value_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardInsightSummaryRowDetail {
+    color: {{color:dashboard.planning_row_detail_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QFrame#dashboardPlanningDivider {
+    color: {{color:dashboard.planning_divider}};
+    background-color: {{color:dashboard.planning_divider}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#dashboardPlanningWeekLabel {
+    color: {{color:dashboard.planning_week_label_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#weeklyGoalStatus {
+    background-color: {{color:dashboard.planning_status_surface}};
+    color: {{color:dashboard.planning_status_text}};
+    border-color: {{color:dashboard.planning_status_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#weeklyGoalStatus[weekState="concluida"] {
+    background-color: {{color:dashboard.planning_status_done_surface}};
+    color: {{color:dashboard.planning_status_done_text}};
+    border-color: {{color:dashboard.planning_status_done_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#weeklyGoalStatus[weekState="atencao"] {
+    background-color: {{color:dashboard.planning_status_attention_surface}};
+    color: {{color:dashboard.planning_status_attention_text}};
+    border-color: {{color:dashboard.planning_status_attention_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QLabel#weeklyGoalStatus[weekState="andamento"] {
+    background-color: {{color:dashboard.planning_status_active_surface}};
+    color: {{color:dashboard.planning_status_active_text}};
+    border-color: {{color:dashboard.planning_status_active_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QPushButton#planningSummaryButton {
+    background-color: {{color:dashboard.planning_button_surface}};
+    color: {{color:dashboard.planning_button_text}};
+    border-color: {{color:dashboard.planning_button_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardInsightSummary QPushButton#planningSummaryButton:hover {
+    background-color: {{color:dashboard.planning_button_hover_surface}};
+    color: {{color:dashboard.planning_button_hover_text}};
+    border-color: {{color:dashboard.planning_button_hover_border}};
+}
+"""
+
+
+
+# ============================================================
+# Design System — Dashboard — Bloco C
+# Recomendação do algoritmo + Seu progresso + Acessos rápidos.
+# Camada aditiva e estritamente cromática. Estrutura, tipografia,
+# dimensões, comportamento e estados funcionais permanecem legados.
+# ============================================================
+ESTILO_DASHBOARD_BLOCO_C = r"""
+QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"],
+QWidget#dashboardRoot QFrame#dashboardTodayAction[heroCentral="true"] {
+    background: {{gradient:dashboard.recommendation_card_gradient}};
+    border-color: {{color:dashboard.recommendation_card_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTodayAction QLabel#algorithmDashboardIcon {
+    background: {{gradient:dashboard.recommendation_icon_gradient}};
+    color: {{color:dashboard.recommendation_icon_text}};
+    border-color: {{color:dashboard.recommendation_icon_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTodayAction QLabel#algorithmDashboardTitle {
+    color: {{color:dashboard.recommendation_title_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardTodayAction QLabel#algorithmDashboardSubtitle {
+    color: {{color:dashboard.recommendation_subtitle_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardTodayAction QPushButton#algorithmDashboardHelp {
+    background-color: {{color:dashboard.recommendation_help_surface}};
+    color: {{color:dashboard.recommendation_help_text}};
+    border-color: {{color:dashboard.recommendation_help_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTodayAction QPushButton#algorithmDashboardHelp:hover {
+    background-color: {{color:dashboard.recommendation_help_hover_surface}};
+    color: {{color:dashboard.recommendation_help_hover_text}};
+    border-color: {{color:dashboard.recommendation_help_hover_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTodayAction QFrame#algorithmRecommendationBody {
+    background-color: {{color:dashboard.recommendation_body_surface}};
+    border-color: {{color:dashboard.recommendation_body_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTodayAction QLabel#algorithmDashboardReady {
+    color: {{color:dashboard.recommendation_ready_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] QPushButton#dashboardTodayPrimaryButton,
+QWidget#dashboardRoot QFrame#dashboardTodayAction[heroCentral="true"] QPushButton#dashboardTodayPrimaryButton {
+    background: {{gradient:dashboard.recommendation_primary_gradient}};
+    color: {{color:dashboard.recommendation_primary_text}};
+    border-color: {{color:dashboard.recommendation_primary_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] QPushButton#dashboardTodayPrimaryButton:hover,
+QWidget#dashboardRoot QFrame#dashboardTodayAction[heroCentral="true"] QPushButton#dashboardTodayPrimaryButton:hover {
+    background: {{gradient:dashboard.recommendation_primary_hover_gradient}};
+    border-color: {{color:dashboard.recommendation_primary_hover_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] QPushButton#dashboardTodayPrimaryButton:pressed,
+QWidget#dashboardRoot QFrame#dashboardTodayAction[heroCentral="true"] QPushButton#dashboardTodayPrimaryButton:pressed {
+    background-color: {{color:dashboard.recommendation_primary_pressed_surface}};
+    border-color: {{color:dashboard.recommendation_primary_pressed_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] QPushButton#dashboardTodayButton,
+QWidget#dashboardRoot QFrame#dashboardTodayAction[heroCentral="true"] QPushButton#dashboardTodayButton {
+    color: {{color:dashboard.recommendation_secondary_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardTodayAction[simpleHero="true"] QPushButton#dashboardTodayButton:hover,
+QWidget#dashboardRoot QFrame#dashboardTodayAction[heroCentral="true"] QPushButton#dashboardTodayButton:hover {
+    color: {{color:dashboard.recommendation_secondary_hover_text}};
+}
+
+QWidget#dashboardRoot QFrame#focusQuickCard[cardRole="progress"] {
+    background: {{gradient:dashboard.progress_card_gradient}};
+    border-color: {{color:dashboard.progress_card_border}};
+}
+QWidget#dashboardRoot QFrame#focusQuickCard[cardRole="progress"] QLabel#focusQuickIcon {
+    color: {{color:dashboard.progress_icon_text}};
+    background-color: {{color:dashboard.progress_icon_surface}};
+    border-color: {{color:dashboard.progress_icon_border}};
+}
+QWidget#dashboardRoot QFrame#focusQuickCard[cardRole="progress"] QLabel#focusDashboardCardTitle {
+    color: {{color:dashboard.progress_title_text}};
+}
+QWidget#dashboardRoot QFrame#focusQuickCard[cardRole="progress"] QLabel#focusDashboardDescription {
+    color: {{color:dashboard.progress_description_text}};
+}
+QWidget#dashboardRoot QFrame#focusQuickCard[cardRole="progress"] QLabel#focusDashboardDetail,
+QWidget#dashboardRoot QFrame#focusQuickCard[cardRole="progress"] QLabel#focusQuickHint {
+    color: {{color:dashboard.progress_detail_text}};
+}
+QWidget#dashboardRoot QFrame#focusQuickCard[cardRole="progress"] QLabel#dashboardProgressBadge {
+    background-color: {{color:dashboard.progress_badge_surface}};
+    color: {{color:dashboard.progress_badge_text}};
+    border-color: {{color:dashboard.progress_badge_border}};
+}
+QWidget#dashboardRoot QFrame#focusQuickCard[cardRole="progress"] QProgressBar#dashboardTodayProgress {
+    background-color: {{color:dashboard.progress_track}};
+}
+QWidget#dashboardRoot QFrame#focusQuickCard[cardRole="progress"] QProgressBar#dashboardTodayProgress::chunk {
+    background: {{gradient:dashboard.progress_fill_gradient}};
+}
+QWidget#dashboardRoot QFrame#focusQuickCard[cardRole="progress"] QPushButton#subtleButton {
+    background-color: {{color:dashboard.progress_button_surface}};
+    color: {{color:dashboard.progress_button_text}};
+    border-color: {{color:dashboard.progress_button_border}};
+}
+QWidget#dashboardRoot QFrame#focusQuickCard[cardRole="progress"] QPushButton#subtleButton:hover {
+    background-color: {{color:dashboard.progress_button_hover_surface}};
+    color: {{color:dashboard.progress_button_hover_text}};
+    border-color: {{color:dashboard.progress_button_hover_border}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardQuickAccess[embedded="false"] {
+    background: {{gradient:dashboard.quick_access_gradient}};
+    border-color: {{color:dashboard.quick_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardQuickAccess[embedded="false"] QPushButton#dashboardSectionToggle {
+    color: {{color:dashboard.quick_toggle_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardQuickAccess[embedded="false"] QPushButton#toolbarButton {
+    background: {{gradient:dashboard.quick_toolbar_gradient}};
+    color: {{color:dashboard.quick_toolbar_text}};
+    border-color: {{color:dashboard.quick_toolbar_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardQuickAccess[embedded="false"] QPushButton#toolbarButton:hover {
+    background: {{gradient:dashboard.quick_toolbar_hover_gradient}};
+    color: {{color:dashboard.quick_toolbar_hover_text}};
+    border-color: {{color:dashboard.quick_toolbar_hover_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardQuickAccess[embedded="false"] QPushButton#pauseNavButton {
+    background: {{gradient:dashboard.quick_pause_gradient}};
+    color: {{color:dashboard.quick_pause_text}};
+    border-color: {{color:dashboard.quick_pause_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardQuickAccess[embedded="false"] QPushButton#pauseNavButton:hover {
+    background: {{gradient:dashboard.quick_pause_hover_gradient}};
+    color: {{color:dashboard.quick_pause_hover_text}};
+    border-color: {{color:dashboard.quick_pause_hover_border}};
+}
+"""
+
+
+# ============================================================
+# Design System — Dashboard — Bloco D
+# Visão geral: Ritmo de estudo + Qualidade + Progresso do edital.
+# Camada aditiva e cromática. DashboardDonutWidget permanece fora
+# deste contrato porque seu desenho é realizado por QPainter.
+# ============================================================
+ESTILO_DASHBOARD_BLOCO_D = r"""
+QWidget#dashboardRoot QFrame#dashboardOverviewCard {
+    background: {{gradient:dashboard.overview_card_gradient}};
+    border-color: {{color:dashboard.overview_card_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard QLabel#dashboardOverviewTitle {
+    color: {{color:dashboard.overview_title_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard QLabel#dashboardOverviewInfo {
+    color: {{color:dashboard.overview_info_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard QFrame#dashboardOverviewDivider {
+    background-color: {{color:dashboard.overview_divider}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard QFrame#dashboardOverviewVerticalDivider {
+    background-color: {{color:dashboard.overview_vertical_divider}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="rhythm"] QLabel#dashboardRhythmMainValue {
+    color: {{color:dashboard.rhythm_main_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="rhythm"] QLabel#dashboardRhythmCaption {
+    color: {{color:dashboard.rhythm_caption_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="rhythm"] QLabel#dashboardRhythmLineLabel {
+    color: {{color:dashboard.rhythm_line_label_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="rhythm"] QFrame#dashboardRhythmLine[metricRole="today"] QLabel#dashboardRhythmDot {
+    color: {{color:dashboard.rhythm_today_dot_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="rhythm"] QFrame#dashboardRhythmLine[metricRole="late"] QLabel#dashboardRhythmDot {
+    color: {{color:dashboard.rhythm_late_dot_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="rhythm"] QFrame#dashboardRhythmLine[metricRole="today"] QLabel#dashboardRhythmLineValue {
+    color: {{color:dashboard.rhythm_today_value_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="rhythm"] QFrame#dashboardRhythmLine[metricRole="late"] QLabel#dashboardRhythmLineValue {
+    color: {{color:dashboard.rhythm_late_value_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="rhythm"] QLabel#dashboardRhythmStatus[statusRole="ok"] {
+    color: {{color:dashboard.rhythm_status_ok_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="rhythm"] QLabel#dashboardRhythmStatus[statusRole="attention"] {
+    color: {{color:dashboard.rhythm_status_attention_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="rhythm"] QLabel#dashboardFocusSummary {
+    color: {{color:dashboard.rhythm_summary_text}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="quality"] QLabel#dashboardQualityEyebrow {
+    color: {{color:dashboard.quality_eyebrow_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="quality"] QLabel#dashboardQualityCaption {
+    color: {{color:dashboard.quality_caption_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="quality"] QFrame#dashboardQualityTrendBox {
+    background-color: {{color:dashboard.quality_trend_surface}};
+    border-color: {{color:dashboard.quality_trend_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="quality"] QLabel#dashboardQualityTrendValue {
+    color: {{color:dashboard.quality_trend_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="quality"] QLabel#dashboardQualityTrendValue[trendRole="positive"] {
+    color: {{color:dashboard.quality_trend_positive_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="quality"] QLabel#dashboardQualityTrendValue[trendRole="negative"] {
+    color: {{color:dashboard.quality_trend_negative_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="quality"] QLabel#dashboardQualityTrendValue[trendRole="stable"] {
+    color: {{color:dashboard.quality_trend_stable_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="quality"] QLabel#dashboardQualityTrendLabel {
+    color: {{color:dashboard.quality_trend_label_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="quality"] QLabel#dashboardQualityFooter {
+    color: {{color:dashboard.quality_footer_text}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="projection"] QPushButton#dashboardProjectionTitleButton {
+    color: {{color:dashboard.projection_title_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="projection"] QLabel#dashboardProjectionCaption {
+    color: {{color:dashboard.projection_caption_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="projection"] QLabel#dashboardProjectionDetail {
+    color: {{color:dashboard.projection_detail_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="projection"] QLabel#dashboardProjectionPercent {
+    color: {{color:dashboard.projection_percent_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="projection"] QProgressBar#dashboardProjectionBar {
+    background-color: {{color:dashboard.projection_bar_track}};
+    border-color: {{color:dashboard.projection_bar_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="projection"] QProgressBar#dashboardProjectionBar::chunk {
+    background-color: {{color:dashboard.projection_bar_fill}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="projection"] QFrame#dashboardProjectionMetric {
+    background-color: {{color:dashboard.projection_metric_surface}};
+    border-color: {{color:dashboard.projection_metric_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="projection"] QLabel#dashboardProjectionMetricLabel {
+    color: {{color:dashboard.projection_metric_label_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="projection"] QLabel#dashboardProjectionMetricValue {
+    color: {{color:dashboard.projection_metric_value_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="projection"] QFrame#dashboardProjectionMetric[metricRole="consolidating"] QLabel#dashboardProjectionMetricValue {
+    color: {{color:dashboard.projection_metric_consolidating_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="projection"] QFrame#dashboardProjectionMetric[metricRole="consolidated"] QLabel#dashboardProjectionMetricValue {
+    color: {{color:dashboard.projection_metric_consolidated_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="projection"] QFrame#dashboardProjectionMetric[metricRole="domain"] QLabel#dashboardProjectionMetricValue {
+    color: {{color:dashboard.projection_metric_domain_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="projection"] QPushButton#effectivenessOpenButton,
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="projection"] QPushButton#syllabusOpenButton {
+    background: {{gradient:dashboard.projection_action_gradient}};
+    color: {{color:dashboard.projection_action_text}};
+    border-color: {{color:dashboard.projection_action_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="projection"] QPushButton#effectivenessOpenButton:hover,
+QWidget#dashboardRoot QFrame#dashboardOverviewCard[overviewRole="projection"] QPushButton#syllabusOpenButton:hover {
+    background: {{gradient:dashboard.projection_action_hover_gradient}};
+    color: {{color:dashboard.projection_action_text}};
+    border-color: {{color:dashboard.projection_action_hover_border}};
+}
+"""
+
+
+# ============================================================
+# Design System — Dashboard — Bloco E
+# Notificações e alertas: painel + prioridade + ritmo do edital.
+# Camada aditiva e cromática, restrita aos consumidores ativos.
+# Seletores históricos dashboardNoticeRow/dashboardNotificationsTitle
+# permanecem deliberadamente fora deste contrato.
+# ============================================================
+ESTILO_DASHBOARD_BLOCO_E = r"""
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel {
+    background-color: {{color:dashboard.notifications_panel_surface}};
+    border-color: {{color:dashboard.notifications_panel_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QPushButton#dashboardGroupToggle {
+    color: {{color:dashboard.notifications_toggle_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QPushButton#dashboardGroupToggle:hover {
+    background-color: {{color:dashboard.notifications_toggle_hover_surface}};
+    color: {{color:dashboard.notifications_toggle_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QPushButton#dashboardGroupToggle[expanded="false"] {
+    color: {{color:dashboard.notifications_toggle_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QLabel#dashboardNotificationsSubtitle {
+    color: {{color:dashboard.notifications_subtitle_text}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="priority"],
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="priority"][alertState="monitorar"],
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="priority"][alertState="atencao"] {
+    background-color: {{color:dashboard.attention_priority_surface}};
+    border-color: {{color:dashboard.attention_priority_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="priority"][alertState="ok"] {
+    background-color: {{color:dashboard.attention_priority_ok_surface}};
+    border-color: {{color:dashboard.attention_priority_ok_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="priority"][alertState="critico"] {
+    background-color: {{color:dashboard.attention_priority_critical_surface}};
+    border-color: {{color:dashboard.attention_priority_critical_border}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="priority"] QLabel#dashboardAttentionIcon,
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="priority"][alertState="monitorar"] QLabel#dashboardAttentionIcon,
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="priority"][alertState="atencao"] QLabel#dashboardAttentionIcon {
+    background-color: {{color:dashboard.attention_priority_icon_surface}};
+    color: {{color:dashboard.attention_priority_icon_text}};
+    border-color: {{color:dashboard.attention_priority_icon_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="priority"][alertState="ok"] QLabel#dashboardAttentionIcon {
+    background-color: {{color:dashboard.attention_priority_icon_ok_surface}};
+    color: {{color:dashboard.attention_priority_icon_ok_text}};
+    border-color: {{color:dashboard.attention_priority_icon_ok_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="priority"][alertState="critico"] QLabel#dashboardAttentionIcon {
+    background-color: {{color:dashboard.attention_priority_icon_critical_surface}};
+    color: {{color:dashboard.attention_priority_icon_critical_text}};
+    border-color: {{color:dashboard.attention_priority_icon_critical_border}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard QLabel#dashboardAttentionEyebrow {
+    color: {{color:dashboard.attention_eyebrow_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard QLabel#dashboardAttentionTitle {
+    color: {{color:dashboard.attention_title_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard QLabel#dashboardAttentionDescription {
+    color: {{color:dashboard.attention_description_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard QLabel#dashboardAttentionMeta {
+    color: {{color:dashboard.attention_meta_text}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="priority"] QLabel#dashboardAttentionBadge,
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="priority"][alertState="monitorar"] QLabel#dashboardAttentionBadge,
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="priority"][alertState="atencao"] QLabel#dashboardAttentionBadge {
+    background-color: {{color:dashboard.attention_badge_surface}};
+    color: {{color:dashboard.attention_badge_text}};
+    border-color: {{color:dashboard.attention_badge_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="priority"][alertState="ok"] QLabel#dashboardAttentionBadge {
+    background-color: {{color:dashboard.attention_badge_ok_surface}};
+    color: {{color:dashboard.attention_badge_ok_text}};
+    border-color: {{color:dashboard.attention_badge_ok_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="priority"][alertState="critico"] QLabel#dashboardAttentionBadge {
+    background-color: {{color:dashboard.attention_badge_critical_surface}};
+    color: {{color:dashboard.attention_badge_critical_text}};
+    border-color: {{color:dashboard.attention_badge_critical_border}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="priority"] QPushButton#syllabusAlertButton {
+    background-color: {{color:dashboard.attention_action_surface}};
+    color: {{color:dashboard.attention_action_text}};
+    border-color: {{color:dashboard.attention_action_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="priority"] QPushButton#syllabusAlertButton:hover {
+    background-color: {{color:dashboard.attention_action_hover_surface}};
+    color: {{color:dashboard.attention_action_hover_text}};
+    border-color: {{color:dashboard.attention_action_hover_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="priority"] QPushButton#syllabusAlertButton:disabled {
+    background-color: {{color:dashboard.attention_action_disabled_surface}};
+    color: {{color:dashboard.attention_action_disabled_text}};
+    border-color: {{color:dashboard.attention_action_disabled_border}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="pace"] {
+    background-color: {{color:dashboard.attention_pace_surface}};
+    border-color: {{color:dashboard.attention_pace_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="pace"] QLabel#dashboardAttentionIcon {
+    background-color: {{color:dashboard.attention_pace_icon_surface}};
+    color: {{color:dashboard.attention_pace_icon_text}};
+    border-color: {{color:dashboard.attention_pace_icon_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="pace"] QLabel#dashboardPaceBadge {
+    background-color: {{color:dashboard.attention_pace_badge_surface}};
+    color: {{color:dashboard.attention_pace_badge_text}};
+    border-color: {{color:dashboard.attention_pace_badge_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="pace"] QPushButton#syllabusForecastButton {
+    background-color: {{color:dashboard.attention_forecast_action_surface}};
+    color: {{color:dashboard.attention_forecast_action_text}};
+    border-color: {{color:dashboard.attention_forecast_action_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="pace"] QPushButton#syllabusForecastButton:hover {
+    background-color: {{color:dashboard.attention_forecast_action_hover_surface}};
+    color: {{color:dashboard.attention_forecast_action_hover_text}};
+    border-color: {{color:dashboard.attention_forecast_action_hover_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionCard[attentionRole="pace"] QPushButton#syllabusForecastButton:disabled {
+    background-color: {{color:dashboard.attention_forecast_action_surface}};
+    color: {{color:dashboard.attention_forecast_action_text}};
+    border-color: {{color:dashboard.attention_forecast_action_disabled_border}};
+}
+
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionFooter {
+    background-color: {{color:dashboard.attention_footer_surface}};
+    border-color: {{color:dashboard.attention_footer_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionFooter QLabel#dashboardAttentionFooterItem {
+    color: {{color:dashboard.attention_footer_item_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardNotificationsPanel QFrame#dashboardAttentionFooter QLabel#dashboardAttentionFooterHint {
+    color: {{color:dashboard.attention_footer_hint_text}};
+}
+"""
+
+
+# ============================================================
+# Design System — Dashboard — Bloco F
+# Planejamento completo. Camada cromática aditiva e isolada sob
+# #dashboardRoot #planningPanel; não altera estrutura/comportamento.
+# ============================================================
+ESTILO_DASHBOARD_BLOCO_F = r"""
+QWidget#dashboardRoot QFrame#planningPanel {
+    background-color: {{color:dashboard.planning_full_panel_surface}};
+    border-color: {{color:dashboard.planning_full_panel_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#dashboardSectionToggle {
+    color: {{color:dashboard.planning_full_toggle_text}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#dashboardSectionToggle:hover {
+    background-color: {{color:dashboard.planning_full_toggle_hover_surface}};
+    color: {{color:dashboard.planning_full_toggle_text}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#dashboardSectionToggle[expanded="false"] {
+    color: {{color:dashboard.planning_full_toggle_text}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QLabel#planningSectionSubtitle { color: {{color:dashboard.planning_full_subtitle_text}}; }
+QWidget#dashboardRoot QFrame#planningPanel QLabel#planningSubsectionTitle { color: {{color:dashboard.planning_full_subsection_title_text}}; }
+QWidget#dashboardRoot QFrame#planningPanel QLabel#planningSubsectionHint { color: {{color:dashboard.planning_full_subsection_hint_text}}; }
+QWidget#dashboardRoot QFrame#planningPanel QLabel#planningMicroLabel { color: {{color:dashboard.planning_full_micro_label_text}}; }
+
+QWidget#dashboardRoot QFrame#planningPanel QFrame#dailyGoalBox,
+QWidget#dashboardRoot QFrame#planningPanel QFrame#weeklyLoadBox,
+QWidget#dashboardRoot QFrame#planningPanel QFrame#weeklyGoalBox {
+    background-color: {{color:dashboard.planning_full_box_surface}};
+    border-color: {{color:dashboard.planning_full_box_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QLabel#planningItemTitle,
+QWidget#dashboardRoot QFrame#planningPanel QLabel#weeklyGoalTitle { color: {{color:dashboard.planning_full_item_title_text}}; }
+QWidget#dashboardRoot QFrame#planningPanel QLabel#dailyGoalValue { color: {{color:dashboard.planning_full_daily_value_text}}; }
+QWidget#dashboardRoot QFrame#planningPanel QProgressBar#dailyGoalProgress { background-color: {{color:dashboard.planning_full_daily_progress_track}}; }
+QWidget#dashboardRoot QFrame#planningPanel QProgressBar#dailyGoalProgress::chunk { background-color: {{color:dashboard.planning_full_daily_progress_fill}}; }
+QWidget#dashboardRoot QFrame#planningPanel QProgressBar#dailyGoalProgress[goalState="concluida"]::chunk { background-color: {{color:dashboard.planning_full_progress_complete_fill}}; }
+QWidget#dashboardRoot QFrame#planningPanel QLabel#planningHint { color: {{color:dashboard.planning_full_hint_text}}; }
+QWidget#dashboardRoot QFrame#planningPanel QLabel#planningHint[goalState="concluida"] { color: {{color:dashboard.planning_full_hint_complete_text}}; }
+
+QWidget#dashboardRoot QFrame#planningPanel QLabel#planningTotalBadge {
+    background-color: {{color:dashboard.planning_full_total_badge_surface}};
+    color: {{color:dashboard.planning_full_total_badge_text}};
+    border-color: {{color:dashboard.planning_full_total_badge_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QFrame#weekDayLoad {
+    background-color: {{color:dashboard.planning_full_inset_surface}};
+    border-color: {{color:dashboard.planning_full_inset_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QFrame#weekDayLoad[loadLevel="leve"][today="false"] {
+    background-color: {{color:dashboard.planning_full_day_light_surface}};
+    border-color: {{color:dashboard.planning_full_day_light_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QFrame#weekDayLoad[loadLevel="moderada"][today="false"] {
+    background-color: {{color:dashboard.planning_full_day_moderate_surface}};
+    border-color: {{color:dashboard.planning_full_day_moderate_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QFrame#weekDayLoad[loadLevel="alta"][today="false"] {
+    background-color: {{color:dashboard.planning_full_day_high_surface}};
+    border-color: {{color:dashboard.planning_full_day_high_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QFrame#weekDayLoad[today="true"] {
+    background-color: {{color:dashboard.planning_full_day_today_surface}};
+    border-color: {{color:dashboard.planning_full_day_today_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QFrame#weekDayLoad QLabel#weekDayName { color: {{color:dashboard.planning_full_day_name_text}}; }
+QWidget#dashboardRoot QFrame#planningPanel QFrame#weekDayLoad QLabel#weekDayDate { color: {{color:dashboard.planning_full_day_date_text}}; }
+QWidget#dashboardRoot QFrame#planningPanel QFrame#weekDayLoad QLabel#weekDayCount { color: {{color:dashboard.planning_full_day_count_text}}; }
+QWidget#dashboardRoot QFrame#planningPanel QFrame#weekDayLoad[today="true"] QLabel#weekDayName,
+QWidget#dashboardRoot QFrame#planningPanel QFrame#weekDayLoad[today="true"] QLabel#weekDayCount { color: {{color:dashboard.planning_full_day_today_text}}; }
+QWidget#dashboardRoot QFrame#planningPanel QFrame#weekDayLoad[today="true"] QLabel#weekDayDate { color: {{color:dashboard.planning_full_day_today_date_text}}; }
+
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#planningGoalButton,
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#planningJourneyButton,
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#planningAutoPlanButton {
+    background: {{gradient:dashboard.planning_full_primary_action_gradient}};
+    color: {{color:dashboard.planning_full_primary_action_text}};
+    border-color: {{color:dashboard.planning_full_primary_action_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#planningGoalButton:hover,
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#planningAutoPlanButton:hover {
+    background: {{gradient:dashboard.planning_full_primary_action_hover_gradient}};
+    color: {{color:dashboard.planning_full_primary_action_text}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#planningGoalButton:hover { border-color: {{color:dashboard.planning_full_goal_hover_border}}; }
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#planningJourneyButton:hover {
+    background: {{gradient:dashboard.planning_full_journey_hover_gradient}};
+    color: {{color:dashboard.planning_full_primary_action_text}};
+    border-color: {{color:dashboard.planning_full_journey_hover_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#planningJourneyButton[journeyState="pausada"] {
+    background: {{gradient:dashboard.planning_full_journey_paused_gradient}};
+    color: {{color:dashboard.planning_full_journey_paused_text}};
+    border-color: {{color:dashboard.planning_full_journey_paused_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#planningJourneyButton[journeyState="encerrada"] {
+    background: {{gradient:dashboard.planning_full_journey_ended_gradient}};
+    color: {{color:dashboard.planning_full_journey_ended_text}};
+    border-color: {{color:dashboard.planning_full_journey_ended_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#planningAutoPlanButton:hover { border-color: {{color:dashboard.planning_full_auto_hover_border}}; }
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#planningAutoPlanButton[hasPlan="true"] {
+    background: {{gradient:dashboard.planning_full_auto_active_gradient}};
+    border-color: {{color:dashboard.planning_full_auto_active_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#planningAutoPlanButton[hasPlan="true"]:hover {
+    background: {{gradient:dashboard.planning_full_auto_active_hover_gradient}};
+    border-color: {{color:dashboard.planning_full_auto_active_hover_border}};
+}
+
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#planningSummaryButton {
+    background: {{gradient:dashboard.planning_full_summary_gradient}};
+    color: {{color:dashboard.planning_full_summary_text}};
+    border-color: {{color:dashboard.planning_full_summary_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#planningSummaryButton:hover {
+    background: {{gradient:dashboard.planning_full_summary_hover_gradient}};
+    color: {{color:dashboard.planning_full_summary_hover_text}};
+    border-color: {{color:dashboard.planning_full_summary_hover_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#planningSummaryButton:pressed {
+    background: {{gradient:dashboard.planning_full_summary_pressed_gradient}};
+    color: {{color:dashboard.planning_full_summary_pressed_text}};
+    border-color: {{color:dashboard.planning_full_summary_pressed_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#planningRedistributeButton {
+    background: {{gradient:dashboard.planning_full_redistribute_gradient}};
+    color: {{color:dashboard.planning_full_redistribute_text}};
+    border-color: {{color:dashboard.planning_full_redistribute_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#planningRedistributeButton:hover {
+    background: {{gradient:dashboard.planning_full_redistribute_hover_gradient}};
+    color: {{color:dashboard.planning_full_redistribute_hover_text}};
+    border-color: {{color:dashboard.planning_full_redistribute_hover_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#planningRedistributeButton:pressed {
+    background: {{gradient:dashboard.planning_full_redistribute_pressed_gradient}};
+    color: {{color:dashboard.planning_full_redistribute_pressed_text}};
+    border-color: {{color:dashboard.planning_full_redistribute_pressed_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#planningRedistributeButton[hasSuggestion="true"] {
+    background: {{gradient:dashboard.planning_full_redistribute_suggest_gradient}};
+    color: {{color:dashboard.planning_full_redistribute_suggest_text}};
+    border-color: {{color:dashboard.planning_full_redistribute_suggest_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QPushButton#planningRedistributeButton[hasSuggestion="true"]:hover {
+    background: {{gradient:dashboard.planning_full_redistribute_suggest_hover_gradient}};
+    color: {{color:dashboard.planning_full_redistribute_suggest_hover_text}};
+    border-color: {{color:dashboard.planning_full_redistribute_suggest_hover_border}};
+}
+
+QWidget#dashboardRoot QFrame#planningPanel QLabel#weeklyGoalPeriod { color: {{color:dashboard.planning_full_week_period_text}}; }
+QWidget#dashboardRoot QFrame#planningPanel QLabel#weeklyGoalStatus,
+QWidget#dashboardRoot QFrame#planningPanel QLabel#weeklyGoalStatus[weekState="desativada"] {
+    background-color: {{color:dashboard.planning_full_week_status_off_surface}};
+    color: {{color:dashboard.planning_full_week_status_off_text}};
+    border-color: {{color:dashboard.planning_full_week_status_off_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QLabel#weeklyGoalStatus[weekState="andamento"] {
+    background-color: {{color:dashboard.planning_full_week_status_active_surface}};
+    color: {{color:dashboard.planning_full_week_status_active_text}};
+    border-color: {{color:dashboard.planning_full_week_status_active_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QLabel#weeklyGoalStatus[weekState="atencao"] {
+    background-color: {{color:dashboard.planning_full_week_status_attention_surface}};
+    color: {{color:dashboard.planning_full_week_status_attention_text}};
+    border-color: {{color:dashboard.planning_full_week_status_attention_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QLabel#weeklyGoalStatus[weekState="concluida"] {
+    background-color: {{color:dashboard.planning_full_week_status_done_surface}};
+    color: {{color:dashboard.planning_full_week_status_done_text}};
+    border-color: {{color:dashboard.planning_full_week_status_done_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QFrame#weeklyGoalEmptyState {
+    background-color: {{color:dashboard.planning_full_inset_surface}};
+    border-color: {{color:dashboard.planning_full_empty_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QLabel#weeklyGoalEmptyTitle { color: {{color:dashboard.planning_full_empty_title_text}}; }
+QWidget#dashboardRoot QFrame#planningPanel QFrame#weeklyGoalMetric {
+    background-color: {{color:dashboard.planning_full_inset_surface}};
+    border-color: {{color:dashboard.planning_full_inset_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QLabel#weeklyGoalMetricTitle { color: {{color:dashboard.planning_full_metric_title_text}}; }
+QWidget#dashboardRoot QFrame#planningPanel QLabel#weeklyGoalValue { color: {{color:dashboard.planning_full_metric_value_text}}; }
+QWidget#dashboardRoot QFrame#planningPanel QLabel#weeklyGoalHint { color: {{color:dashboard.planning_full_metric_hint_text}}; }
+QWidget#dashboardRoot QFrame#planningPanel QLabel#weeklyGoalHint[goalState="concluida"] { color: {{color:dashboard.planning_full_hint_complete_text}}; }
+QWidget#dashboardRoot QFrame#planningPanel QProgressBar#weeklyGoalProgress {
+    background-color: {{color:dashboard.planning_full_metric_track}};
+    border-color: {{color:dashboard.planning_full_metric_border}};
+}
+QWidget#dashboardRoot QFrame#planningPanel QProgressBar#weeklyGoalProgress::chunk { background: {{gradient:dashboard.planning_full_metric_progress_gradient}}; }
+QWidget#dashboardRoot QFrame#planningPanel QProgressBar#weeklyGoalProgress[goalState="concluida"]::chunk { background: {{gradient:dashboard.planning_full_metric_progress_complete_gradient}}; }
+"""
+
+
+# ============================================================
+# Design System — Dashboard — Bloco G
+# Estudo por questões. Camada cromática aditiva e isolada sob
+# #dashboardRoot #studyNowPanel; não altera estrutura/comportamento.
+# ============================================================
+ESTILO_DASHBOARD_BLOCO_G = r"""
+QWidget#dashboardRoot QFrame#studyNowPanel {
+    background-color: {{color:dashboard.study_questions_panel_surface}};
+    border-color: {{color:dashboard.study_questions_panel_border}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QLabel#studyNowIcon {
+    background-color: {{color:dashboard.study_questions_header_icon_surface}};
+    color: {{color:dashboard.study_questions_header_icon_text}};
+    border-color: {{color:dashboard.study_questions_header_icon_border}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QPushButton#dashboardSectionToggle {
+    color: {{color:dashboard.study_questions_toggle_text}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QPushButton#dashboardSectionToggle:hover {
+    background-color: {{color:dashboard.study_questions_toggle_hover_surface}};
+    color: {{color:dashboard.study_questions_toggle_text}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QPushButton#dashboardSectionToggle[expanded="false"] {
+    color: {{color:dashboard.study_questions_toggle_text}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QLabel#dashboardActionSectionSubtitle {
+    color: {{color:dashboard.study_questions_subtitle_text}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QLabel#questionsFoundationText {
+    color: {{color:dashboard.study_questions_foundation_text}};
+}
+
+QWidget#dashboardRoot QFrame#studyNowPanel QFrame#studyActionCard[actionRole="review"],
+QWidget#dashboardRoot QFrame#studyNowPanel QFrame#strategyCompactCard[actionRole="recovery"] {
+    background: {{gradient:dashboard.study_questions_base_card_gradient}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QFrame#studyActionCard[actionRole="review"] {
+    border-color: {{color:dashboard.study_questions_review_border}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QFrame#strategyCompactCard[actionRole="adaptive"] {
+    background-color: {{color:dashboard.study_questions_adaptive_surface}};
+    border-color: {{color:dashboard.study_questions_adaptive_border}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QFrame#strategyCompactCard[actionRole="simulation"] {
+    background: {{gradient:dashboard.study_questions_simulation_card_gradient}};
+    border-color: {{color:dashboard.study_questions_simulation_border}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QFrame#strategyCompactCard[actionRole="recovery"] {
+    border-color: {{color:dashboard.study_questions_recovery_border}};
+}
+
+QWidget#dashboardRoot QFrame#studyNowPanel QLabel#studyCardIcon {
+    background-color: {{color:dashboard.study_questions_review_icon_surface}};
+    color: {{color:dashboard.study_questions_review_icon_text}};
+    border-color: {{color:dashboard.study_questions_review_icon_border}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QLabel#strategyCardIcon {
+    background-color: {{color:dashboard.study_questions_strategy_icon_surface}};
+    color: {{color:dashboard.study_questions_strategy_icon_text}};
+    border-color: {{color:dashboard.study_questions_strategy_icon_border}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QFrame#strategyCompactCard[actionRole="simulation"] QLabel#strategyCardIcon {
+    background-color: {{color:dashboard.study_questions_simulation_icon_surface}};
+    color: {{color:dashboard.study_questions_simulation_icon_text}};
+    border-color: {{color:dashboard.study_questions_simulation_icon_border}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QLabel#studyActionTitle,
+QWidget#dashboardRoot QFrame#studyNowPanel QLabel#strategyCardTitle {
+    color: {{color:dashboard.study_questions_title_text}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QLabel#studyReviewCount {
+    color: {{color:dashboard.study_questions_review_count_text}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QLabel#studyActionDescription,
+QWidget#dashboardRoot QFrame#studyNowPanel QLabel#strategyCardDescription {
+    color: {{color:dashboard.study_questions_description_text}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QLabel#studyReviewDetail {
+    color: {{color:dashboard.study_questions_review_detail_text}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QLabel#studyAdaptiveCriteria {
+    color: {{color:dashboard.study_questions_criteria_text}};
+}
+
+QWidget#dashboardRoot QFrame#studyNowPanel QLabel#assessmentBadge {
+    background-color: {{color:dashboard.study_questions_assessment_badge_surface}};
+    color: {{color:dashboard.study_questions_assessment_badge_text}};
+    border-color: {{color:dashboard.study_questions_assessment_badge_border}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QFrame#assessmentStat {
+    background-color: {{color:dashboard.study_questions_assessment_stat_surface}};
+    border-color: {{color:dashboard.study_questions_assessment_stat_border}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QLabel#assessmentStatLabel {
+    color: {{color:dashboard.study_questions_assessment_stat_label_text}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QLabel#assessmentStatValue {
+    color: {{color:dashboard.study_questions_assessment_stat_value_text}};
+}
+
+QWidget#dashboardRoot QFrame#studyNowPanel QPushButton#subtleButton {
+    background-color: {{color:dashboard.study_questions_subtle_surface}};
+    color: {{color:dashboard.study_questions_subtle_text}};
+    border-color: {{color:dashboard.study_questions_subtle_border}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QPushButton#subtleButton:hover {
+    background-color: {{color:dashboard.study_questions_subtle_hover_surface}};
+    color: {{color:dashboard.study_questions_subtle_hover_text}};
+    border-color: {{color:dashboard.study_questions_subtle_hover_border}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QPushButton#adaptiveDashboardButton {
+    background: {{gradient:dashboard.study_questions_adaptive_action_gradient}};
+    color: {{color:dashboard.study_questions_adaptive_action_text}};
+    border-color: {{color:dashboard.study_questions_adaptive_action_border}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QPushButton#adaptiveDashboardButton:hover {
+    background: {{gradient:dashboard.study_questions_adaptive_action_hover_gradient}};
+    color: {{color:dashboard.study_questions_adaptive_action_hover_text}};
+    border-color: {{color:dashboard.study_questions_adaptive_action_hover_border}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QPushButton#mockExamDashboardButton {
+    background: {{gradient:dashboard.study_questions_simulation_action_gradient}};
+    color: {{color:dashboard.study_questions_simulation_action_text}};
+    border-color: {{color:dashboard.study_questions_simulation_action_border}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QPushButton#mockExamDashboardButton:hover {
+    background: {{gradient:dashboard.study_questions_simulation_action_hover_gradient}};
+    color: {{color:dashboard.study_questions_simulation_action_hover_text}};
+    border-color: {{color:dashboard.study_questions_simulation_action_hover_border}};
+}
+
+QWidget#dashboardRoot QFrame#studyNowPanel QFrame#studyManualFooter {
+    background-color: {{color:dashboard.study_questions_manual_footer_surface}};
+    border-color: {{color:dashboard.study_questions_manual_footer_border}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QLabel#studyReviewSourceBadge {
+    background-color: {{color:dashboard.study_questions_manual_badge_surface}};
+    color: {{color:dashboard.study_questions_manual_badge_text}};
+    border-color: {{color:dashboard.study_questions_manual_badge_border}};
+}
+QWidget#dashboardRoot QFrame#studyNowPanel QLabel#dashboardTodayDetail {
+    color: {{color:dashboard.study_questions_manual_text}};
+}
+"""
+
+
+# ============================================================
+# Design System — Dashboard — Bloco H
+# Disciplinas e acabamento inferior. Camada cromática aditiva
+# limitada a consumidores ativos sob #dashboardRoot.
+# ============================================================
+ESTILO_DASHBOARD_BLOCO_H = r"""
+QWidget#dashboardRoot QFrame#dashboardCenterBar {
+    background-color: {{color:dashboard.disciplines_header_surface}};
+    border-color: {{color:dashboard.disciplines_header_border}};
+}
+QWidget#dashboardRoot QPushButton#dashboardSectionToggleCentered {
+    color: {{color:dashboard.disciplines_toggle_text}};
+}
+QWidget#dashboardRoot QPushButton#dashboardSectionToggleCentered:hover {
+    background-color: {{color:dashboard.disciplines_toggle_hover_surface}};
+    color: {{color:dashboard.disciplines_toggle_text}};
+}
+QWidget#dashboardRoot QPushButton#dashboardSectionToggleCentered[expanded="false"] {
+    color: {{color:dashboard.disciplines_toggle_text}};
+}
+QWidget#dashboardRoot QFrame#dashboardCenterBar QPushButton#sectionEditButton {
+    background-color: {{color:dashboard.disciplines_edit_surface}};
+    color: {{color:dashboard.disciplines_edit_text}};
+    border-color: {{color:dashboard.disciplines_edit_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardCenterBar QPushButton#sectionEditButton:hover {
+    background-color: {{color:dashboard.disciplines_edit_hover_surface}};
+    color: {{color:dashboard.disciplines_edit_hover_text}};
+    border-color: {{color:dashboard.disciplines_edit_hover_border}};
+}
+QWidget#dashboardRoot QFrame#dashboardCenterBar QPushButton#sectionEditButton:pressed {
+    background-color: {{color:dashboard.disciplines_edit_pressed_surface}};
+    color: {{color:dashboard.disciplines_edit_text}};
+    border-color: {{color:dashboard.disciplines_edit_pressed_border}};
+}
+QWidget#dashboardRoot QPushButton#disciplineButton {
+    background-color: {{color:dashboard.disciplines_button_surface}};
+    color: {{color:dashboard.disciplines_button_text}};
+    border-color: {{color:dashboard.disciplines_button_border}};
+}
+QWidget#dashboardRoot QPushButton#disciplineButton:hover {
+    background-color: {{color:dashboard.disciplines_button_hover_surface}};
+    color: {{color:dashboard.disciplines_button_hover_text}};
+    border-color: {{color:dashboard.disciplines_button_hover_border}};
+}
+"""
+
+# ============================================================
+# Design System — Navegação principal — Busca global
+# Camada cromática aditiva, restrita ao QDialog da command palette.
+# O gatilho globalSearchTrigger continua pertencendo ao Dashboard A.
+# ============================================================
+ESTILO_NAVEGACAO_BUSCA_GLOBAL = r"""
+QDialog#globalSearchDialog {
+    background-color: {{color:navigation.command_canvas}};
+}
+QDialog#globalSearchDialog QLabel#globalSearchTitle {
+    color: {{color:navigation.command_title_text}};
+}
+QDialog#globalSearchDialog QLabel#globalSearchSubtitle,
+QDialog#globalSearchDialog QLabel#globalSearchStatus,
+QDialog#globalSearchDialog QLabel#globalSearchHint {
+    color: {{color:navigation.command_meta_text}};
+}
+QDialog#globalSearchDialog QLabel#globalSearchShortcut {
+    background-color: {{color:navigation.command_shortcut_surface}};
+    color: {{color:navigation.command_shortcut_text}};
+    border-color: {{color:navigation.command_shortcut_border}};
+}
+QDialog#globalSearchDialog QLineEdit#globalSearchInput {
+    background-color: {{color:navigation.command_input_surface}};
+    color: {{color:navigation.command_input_text}};
+    border-color: {{color:navigation.command_input_border}};
+    selection-background-color: {{color:navigation.command_input_selection}};
+}
+QDialog#globalSearchDialog QLineEdit#globalSearchInput:focus {
+    border-color: {{color:navigation.command_input_focus_border}};
+}
+QDialog#globalSearchDialog QTableWidget#globalSearchResults {
+    background-color: {{color:navigation.command_results_surface}};
+    color: {{color:navigation.command_results_text}};
+    border-color: {{color:navigation.command_results_border}};
+    selection-background-color: {{color:navigation.command_results_selection_surface}};
+    selection-color: {{color:navigation.command_results_selection_text}};
+}
+QDialog#globalSearchDialog QTableWidget#globalSearchResults::item {
+    border-bottom-color: {{color:navigation.command_results_divider}};
+}
+QDialog#globalSearchDialog QHeaderView::section {
+    background-color: {{color:navigation.command_header_surface}};
+    color: {{color:navigation.command_header_text}};
+    border-bottom-color: {{color:navigation.command_header_border}};
+}
+"""
+
+# ============================================================
+# Design System — Navegação principal — Retornos ao Dashboard
+# Camada aditiva de alta precisão: somente os seis subtleButton
+# marcados explicitamente com navigationBack=true.
+# ============================================================
+ESTILO_NAVEGACAO_RETORNOS_DASHBOARD = r"""
+QPushButton#subtleButton[navigationBack="true"] {
+    background: {{gradient:navigation.back_surface_gradient}};
+    color: {{color:navigation.back_text}};
+    border-color: {{color:navigation.back_border}};
+}
+QPushButton#subtleButton[navigationBack="true"]:hover {
+    background: {{gradient:navigation.back_hover_surface_gradient}};
+    color: {{color:navigation.back_hover_text}};
+    border-color: {{color:navigation.back_hover_border}};
+}
+"""
+
+# ============================================================
+# Design System — Cards globais — Bloco A
+# Superfícies básicas e métricas. Camada cromática aditiva,
+# escopada aos shells genéricos e aos textos internos dos cards.
+# ============================================================
+ESTILO_CARDS_GLOBAIS_BLOCO_A = r"""
+QFrame#dialogCard {
+    background-color: {{color:card.dialog_surface}};
+    border-color: {{color:card.dialog_border}};
+}
+QFrame#metricCard {
+    background-color: {{color:card.metric_surface}};
+    border-color: {{color:card.metric_border}};
+}
+QFrame#metricCard QLabel#metricLabel {
+    color: {{color:card.metric_label_text}};
+}
+QFrame#metricCard QLabel#metricValue {
+    color: {{color:card.metric_value_text}};
+}
+QFrame#miniStat {
+    background-color: {{color:card.mini_stat_surface}};
+    border-color: {{color:card.mini_stat_border}};
+}
+QFrame#miniStat QLabel#miniStatLabel {
+    color: {{color:card.metric_label_text}};
+}
+QFrame#miniStat QLabel#miniStatValue {
+    color: {{color:card.metric_value_text}};
+}
+"""
+
+# ============================================================
+# Design System — Cards globais — Bloco B
+# Shell compartilhado studyActionCard. Somente superfície e borda;
+# textos, geometria e comportamento permanecem na cascata histórica.
+# ============================================================
+ESTILO_CARDS_GLOBAIS_BLOCO_B = r"""
+QFrame#studyActionCard {
+    background: {{gradient:card.study_action_surface_gradient}};
+    border-color: {{color:card.study_action_border}};
+}
+QFrame#studyActionCard[actionRole="review"] {
+    border-color: {{color:card.study_action_review_border}};
+}
+QFrame#studyActionCard[actionRole="adaptive"] {
+    background: {{gradient:card.study_action_adaptive_surface_gradient}};
+    border-color: {{color:card.study_action_adaptive_border}};
+}
+"""
+
+# ============================================================
+# Design System — Cards globais — Bloco C
+# myEvolutionStatCard compartilhado. Somente shell e cores dos
+# textos descendentes; a família myEvolution restante fica intacta.
+# ============================================================
+ESTILO_CARDS_GLOBAIS_BLOCO_C = r"""
+QFrame#myEvolutionStatCard {
+    background: {{gradient:card.evolution_stat_surface_gradient}};
+    border-color: {{color:card.evolution_stat_border}};
+}
+QFrame#myEvolutionStatCard QLabel#myEvolutionStatLabel {
+    color: {{color:card.evolution_stat_label_text}};
+}
+QFrame#myEvolutionStatCard QLabel#myEvolutionStatValue {
+    color: {{color:card.evolution_stat_value_text}};
+}
+QFrame#myEvolutionStatCard QLabel#myEvolutionStatDetail {
+    color: {{color:card.evolution_stat_detail_text}};
+}
+"""
+
+# ============================================================
+# Design System — Modo Foco — Integração no Resolvedor
+# Camada cromática aditiva da faixa contextual de Foco.
+# Não altera geometria, tipografia, callbacks ou objectNames.
+# ============================================================
+ESTILO_MODO_FOCO_INTEGRACAO_RESOLVEDOR = r"""
+QDialog#questionSolverDialog QFrame#questionSessionFocusBar {
+    background-color: {{color:focus_mode.session_bar_surface}};
+    border-color: {{color:focus_mode.session_bar_border}};
+}
+QDialog#questionSolverDialog QLabel#questionSessionFocusState {
+    color: {{color:focus_mode.session_bar_status_text}};
+}
+QDialog#questionSolverDialog QFrame#questionSessionFocusBar QPushButton#subtleButton {
+    background-color: {{color:focus_mode.session_bar_button_surface}};
+    color: {{color:focus_mode.session_bar_button_text}};
+    border-color: {{color:focus_mode.session_bar_button_border}};
+}
+QDialog#questionSolverDialog QFrame#questionSessionFocusBar QPushButton#subtleButton:hover {
+    background-color: {{color:focus_mode.session_bar_button_hover_surface}};
+    color: {{color:focus_mode.session_bar_button_hover_text}};
+    border-color: {{color:focus_mode.session_bar_button_hover_border}};
+}
+"""
+
 def stylesheet_claro():
     return render_qss("claro", r"""
     * {
@@ -5923,8 +7630,8 @@ QPushButton#sectionEditButton:hover {
     }
 
     QFrame#questionsInventoryStrip {
-        background-color: #ffffff;
-        border: 1px solid #dbe3ed;
+        background-color: {{color:questions_center.inventory_surface}};
+        border: 1px solid {{color:questions_center.inventory_border}};
         border-radius: 11px;
     }
 
@@ -5935,20 +7642,20 @@ QPushButton#sectionEditButton:hover {
 
     QLabel#questionsInventoryValue {
         background: transparent;
-        color: #4338ca;
+        color: {{color:questions_center.inventory_value_text}};
         font-size: 14pt;
         font-weight: 900;
     }
 
     QLabel#questionsInventoryLabel {
         background: transparent;
-        color: #64748b;
+        color: {{color:questions_center.inventory_label_text}};
         font-size: 8.5pt;
         font-weight: 700;
     }
 
     QFrame#questionsInventoryDivider {
-        background-color: #e2e8f0;
+        background-color: {{color:questions_center.inventory_divider}};
         border: none;
     }
 
@@ -6394,9 +8101,9 @@ QPushButton#sectionEditButton:hover {
     }
 
     QLabel#mockExamTimer {
-        background-color: #f5f3ff;
-        color: #6d28d9;
-        border: 1px solid #c4b5fd;
+        background-color: {{color:session.timer_surface}};
+        color: {{color:session.timer_text}};
+        border: 1px solid {{color:session.timer_border}};
         border-radius: 7px;
         padding: 5px 8px;
         font-size: 9pt;
@@ -6602,66 +8309,66 @@ QPushButton#sectionEditButton:hover {
 
     QCheckBox#questionSessionDoubt {
         background: transparent;
-        color: #475569;
+        color: {{color:session.doubt_text}};
         font-weight: 700;
         spacing: 9px;
         padding: 4px 0;
     }
 
     QCheckBox#questionSessionDoubt:checked {
-        color: #1d4ed8;
+        color: {{color:session.doubt_checked_text}};
     }
 
     QCheckBox#questionSessionDoubt::indicator {
-        background-color: #ffffff;
-        border: 2px solid #64748b;
+        background-color: {{color:session.flag_indicator_surface}};
+        border: 2px solid {{color:session.doubt_indicator_border}};
         border-radius: 5px;
         width: 20px;
         height: 20px;
     }
 
     QCheckBox#questionSessionDoubt::indicator:hover {
-        border-color: #2563eb;
+        border-color: {{color:session.doubt_indicator_hover_border}};
     }
 
     QCheckBox#questionSessionDoubt::indicator:checked {
-        background-color: #2563eb;
-        border-color: #1d4ed8;
+        background-color: {{color:session.doubt_indicator_checked_surface}};
+        border-color: {{color:session.doubt_indicator_checked_border}};
     }
 
     QCheckBox#questionSessionDoubt::indicator:disabled {
-        background-color: #e2e8f0;
-        border-color: #94a3b8;
+        background-color: {{color:session.doubt_indicator_disabled_surface}};
+        border-color: {{color:session.doubt_indicator_disabled_border}};
     }
 
     QCheckBox#questionSessionAnalysisFlag {
         background: transparent;
-        color: #64748b;
+        color: {{color:session.analysis_text}};
         font-weight: 600;
         spacing: 7px;
         padding: 4px 8px;
     }
 
     QCheckBox#questionSessionAnalysisFlag:checked {
-        color: #92400e;
+        color: {{color:session.analysis_checked_text}};
         font-weight: 700;
     }
 
     QCheckBox#questionSessionAnalysisFlag::indicator {
-        background-color: #ffffff;
-        border: 2px solid #94a3b8;
+        background-color: {{color:session.flag_indicator_surface}};
+        border: 2px solid {{color:session.analysis_indicator_border}};
         border-radius: 4px;
         width: 16px;
         height: 16px;
     }
 
     QCheckBox#questionSessionAnalysisFlag::indicator:hover {
-        border-color: #d97706;
+        border-color: {{color:session.analysis_indicator_hover_border}};
     }
 
     QCheckBox#questionSessionAnalysisFlag::indicator:checked {
-        background-color: #f59e0b;
-        border-color: #b45309;
+        background-color: {{color:session.analysis_indicator_checked_surface}};
+        border-color: {{color:session.analysis_indicator_checked_border}};
     }
 
     QFrame#questionSessionActionPanel {
@@ -6710,6 +8417,101 @@ QPushButton#sectionEditButton:hover {
         border: 1px solid #dbe3ed;
         border-radius: 8px;
         gridline-color: transparent;
+    }
+
+    QDialog#questionSessionSummaryDialog {
+        background-color: {{color:summary.canvas}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#pageTitle {
+        color: {{color:summary.title_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#pageSubtitle {
+        color: {{color:summary.subtitle_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QFrame#questionSessionSummaryCard {
+        background-color: {{color:summary.metric_surface}};
+        border-color: {{color:summary.metric_border}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#miniStatLabel {
+        color: {{color:summary.metric_label_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#miniStatValue {
+        color: {{color:summary.metric_value_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#questionSessionSummaryDetail {
+        background-color: {{color:summary.detail_surface}};
+        color: {{color:summary.detail_text}};
+        border-color: {{color:summary.detail_border}};
+    }
+
+    QDialog#questionSessionSummaryDialog QTableWidget#questionSessionSummaryTable {
+        background-color: {{color:summary.table_surface}};
+        border-color: {{color:summary.table_border}};
+    }
+
+    QDialog#questionSessionSummaryDialog QFrame#questionReviewIntegrationCard {
+        background-color: {{color:summary.review_surface}};
+        border-color: {{color:summary.review_border}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#questionReviewIntegrationTitle {
+        color: {{color:summary.review_title_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#questionReviewIntegrationText {
+        color: {{color:summary.review_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QFrame#adaptiveSummaryCard {
+        background-color: {{color:summary.adaptive_surface}};
+        border-color: {{color:summary.adaptive_border}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#adaptiveSummaryTitle {
+        color: {{color:summary.adaptive_title_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#adaptiveSummaryText {
+        color: {{color:summary.adaptive_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QFrame#effectivenessImpactCard {
+        background-color: {{color:summary.effectiveness_surface}};
+        border-color: {{color:summary.effectiveness_border}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#effectivenessImpactTitle {
+        color: {{color:summary.effectiveness_title_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QFrame#effectivenessImpactMetric {
+        background-color: {{color:summary.effectiveness_metric_surface}};
+        border-color: {{color:summary.effectiveness_metric_border}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#effectivenessImpactLabel,
+    QDialog#questionSessionSummaryDialog QLabel#effectivenessImpactFooter {
+        color: {{color:summary.effectiveness_metric_label_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#effectivenessImpactValue {
+        color: {{color:summary.effectiveness_metric_value_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#mockExamResultSectionTitle {
+        color: {{color:summary.mock_exam_section_title_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#mockExamCorrectionNotice {
+        background-color: {{color:summary.mock_exam_notice_surface}};
+        color: {{color:summary.mock_exam_notice_text}};
+        border-color: {{color:summary.mock_exam_notice_border}};
     }
 
     QPushButton#questionsNavButton {
@@ -11515,109 +13317,136 @@ QPushButton#sectionEditButton:hover {
     }
 
     QLabel#pauseHubTitle {
-        color: #182433;
+        color: {{color:pause.hub_title_text}};
         font-size: 17px;
         font-weight: 800;
     }
 
-    QLabel#pauseHubSubtitle,
-    QLabel#gameHint,
+    QLabel#pauseHubSubtitle {
+        color: {{color:pause.hub_subtitle_text}};
+        font-size: 9pt;
+    }
+
+    QLabel#gameHint {
+        color: {{color:game.hint_text}};
+        font-size: 9pt;
+    }
+
     QLabel#pauseTimerStatus {
-        color: #64748b;
+        color: {{color:pause.timer_status_text}};
         font-size: 9pt;
     }
 
     QFrame#pauseTimerPanel {
-        background-color: #f3fafa;
-        border: 1px solid #c7e1e1;
+        background-color: {{color:pause.timer_panel_surface}};
+        border: 1px solid {{color:pause.timer_panel_border}};
         border-radius: 10px;
     }
 
-    QFrame#pauseRecordsPanel,
+    QFrame#pauseRecordsPanel {
+        background-color: {{color:pause.records_panel_surface}};
+        border: 1px solid {{color:pause.records_panel_border}};
+        border-radius: 11px;
+    }
+
     QFrame#gameBoardPanel {
-        background-color: #ffffff;
-        border: 1px solid #d9e2ec;
+        background-color: {{color:game.board_surface}};
+        border: 1px solid {{color:game.board_border}};
         border-radius: 11px;
     }
 
     QFrame#pauseRecordCard {
-        background-color: #f8fafc;
-        border: 1px solid #e1e8f0;
+        background-color: {{color:pause.record_card_surface}};
+        border: 1px solid {{color:pause.record_card_border}};
         border-radius: 8px;
     }
 
-    QLabel#pauseSectionTitle,
-    QLabel#gameTitle {
-        color: #243449;
-        font-weight: 800;
-    }
-
     QLabel#pauseSectionTitle {
+        color: {{color:pause.section_title_text}};
+        font-weight: 800;
         font-size: 9.5pt;
     }
 
     QLabel#gameTitle {
+        color: {{color:game.title_text}};
+        font-weight: 800;
         font-size: 13pt;
     }
 
     QLabel#pauseRecordTitle {
-        color: #64748b;
+        color: {{color:pause.record_title_text}};
         font-size: 8.5pt;
         font-weight: 700;
     }
 
-    QLabel#pauseRecordValue,
+    QLabel#pauseRecordValue {
+        color: {{color:pause.record_value_text}};
+        font-weight: 800;
+    }
+
     QLabel#gameMetric {
-        color: #214f70;
+        color: {{color:game.metric_text}};
         font-weight: 800;
     }
 
     QLabel#gameStatus {
-        color: #526276;
+        color: {{color:game.status_text}};
         font-size: 9pt;
     }
 
     QLabel#pauseTimerValue {
         min-width: 74px;
         padding: 4px 10px;
-        background-color: #ffffff;
-        color: #286d70;
-        border: 1px solid #b9dcdd;
+        background-color: {{color:pause.timer_value_surface}};
+        color: {{color:pause.timer_value_text}};
+        border: 1px solid {{color:pause.timer_value_border}};
         border-radius: 7px;
         font-size: 12pt;
         font-weight: 900;
     }
 
-    QPushButton#pausePrimaryButton,
-    QPushButton#gamePrimaryButton {
-        background-color: #2d8b8d;
-        color: #ffffff;
-        border: 1px solid #2d8b8d;
+    QPushButton#pausePrimaryButton {
+        background-color: {{color:pause.primary_surface}};
+        color: {{color:text.on_action}};
+        border: 1px solid {{color:pause.primary_border}};
         border-radius: 8px;
         font-weight: 800;
     }
 
-    QPushButton#pausePrimaryButton:hover,
+    QPushButton#gamePrimaryButton {
+        background-color: {{color:game.primary_surface}};
+        color: {{color:text.on_action}};
+        border: 1px solid {{color:game.primary_border}};
+        border-radius: 8px;
+        font-weight: 800;
+    }
+
+    QPushButton#pausePrimaryButton:hover {
+        background-color: {{color:pause.primary_hover_surface}};
+        border-color: {{color:pause.primary_hover_border}};
+        color: {{color:text.on_action}};
+    }
+
     QPushButton#gamePrimaryButton:hover {
-        background-color: #247678;
-        border-color: #247678;
-        color: #ffffff;
+        background-color: {{color:game.primary_hover_surface}};
+        border-color: {{color:game.primary_hover_border}};
+        color: {{color:text.on_action}};
     }
 
     QPushButton#pauseSecondaryButton,
     QPushButton#pauseBackButton {
-        background-color: #ffffff;
-        color: #326fd3;
-        border: 1px solid #a9c4ee;
+        background-color: {{color:pause.secondary_surface}};
+        color: {{color:pause.secondary_text}};
+        border: 1px solid {{color:pause.secondary_border}};
         border-radius: 8px;
         font-weight: 700;
     }
 
     QPushButton#pauseSecondaryButton:hover,
     QPushButton#pauseBackButton:hover {
-        background-color: #eef5ff;
-        color: #285fb5;
-        border-color: #7fa8e8;
+        background-color: {{color:pause.secondary_hover_surface}};
+        color: {{color:pause.secondary_hover_text}};
+        border-color: {{color:pause.secondary_hover_border}};
     }
 
     QPushButton#chimpCellButton,
@@ -11626,9 +13455,9 @@ QPushButton#sectionEditButton:hover {
     QPushButton#puzzleTileButton,
     QPushButton#rotationOptionButton {
         min-height: 46px;
-        background-color: #f7fafc;
-        color: #243449;
-        border: 1px solid #cfd9e5;
+        background-color: {{color:game.cell_surface}};
+        color: {{color:game.cell_text}};
+        border: 1px solid {{color:game.cell_border}};
         border-radius: 9px;
         font-size: 12pt;
         font-weight: 900;
@@ -11647,65 +13476,65 @@ QPushButton#sectionEditButton:hover {
     }
 
     QPushButton#chimpCellButton[cellState="number"] {
-        background-color: #edf5ff;
-        color: #275f9f;
-        border-color: #9fc3ec;
+        background-color: {{color:game.chimp_number_surface}};
+        color: {{color:game.chimp_number_text}};
+        border-color: {{color:game.chimp_number_border}};
     }
 
     QPushButton#chimpCellButton[cellState="correct"] {
-        background-color: #e6f7f3;
-        color: #257565;
-        border-color: #8bd2c3;
+        background-color: {{color:game.chimp_correct_surface}};
+        color: {{color:game.chimp_correct_text}};
+        border-color: {{color:game.chimp_correct_border}};
     }
 
     QPushButton#memoryCardButton[cardState="hidden"] {
-        background-color: #eef3f8;
-        color: #60758a;
-        border-color: #c9d5e1;
+        background-color: {{color:game.memory_hidden_surface}};
+        color: {{color:game.memory_hidden_text}};
+        border-color: {{color:game.memory_hidden_border}};
     }
 
     QPushButton#memoryCardButton[cardState="open"] {
-        background-color: #e9f2ff;
-        color: #255f9e;
-        border-color: #8fb8e8;
+        background-color: {{color:game.memory_open_surface}};
+        color: {{color:game.memory_open_text}};
+        border-color: {{color:game.memory_open_border}};
     }
 
     QPushButton#memoryCardButton[cardState="matched"] {
-        background-color: #e4f6f0;
-        color: #247060;
-        border-color: #8ccbbb;
+        background-color: {{color:game.memory_matched_surface}};
+        color: {{color:game.memory_matched_text}};
+        border-color: {{color:game.memory_matched_border}};
     }
 
     QPushButton#sequenceCellButton {
-        background-color: #edf2f7;
-        border-color: #cbd6e2;
+        background-color: {{color:game.sequence_surface}};
+        border-color: {{color:game.sequence_border}};
     }
 
     QPushButton#sequenceCellButton[lit="true"] {
-        background-color: #e6b85a;
-        border-color: #c9922c;
+        background-color: {{color:game.sequence_lit_surface}};
+        border-color: {{color:game.sequence_lit_border}};
     }
 
     QPushButton#puzzleTileButton[tileState="movable"] {
-        background-color: #edf5ff;
-        color: #275f9f;
-        border-color: #98bee9;
+        background-color: {{color:game.puzzle_movable_surface}};
+        color: {{color:game.puzzle_movable_text}};
+        border-color: {{color:game.puzzle_movable_border}};
     }
 
     QPushButton#puzzleTileButton[tileState="blank"] {
-        background-color: #edf1f5;
-        border-color: #e0e6ed;
-        color: transparent;
+        background-color: {{color:game.puzzle_blank_surface}};
+        border-color: {{color:game.puzzle_blank_border}};
+        color: {{color:game.puzzle_blank_text}};
     }
 
     QPushButton#rotationOptionButton[answerState="correct"] {
-        background-color: #e4f6f0;
-        border-color: #60b89e;
+        background-color: {{color:game.rotation_correct_surface}};
+        border-color: {{color:game.rotation_correct_border}};
     }
 
     QPushButton#rotationOptionButton[answerState="wrong"] {
-        background-color: #fff0f1;
-        border-color: #d88b96;
+        background-color: {{color:game.rotation_wrong_surface}};
+        border-color: {{color:game.rotation_wrong_border}};
     }
 
 
@@ -11729,89 +13558,87 @@ QPushButton#sectionEditButton:hover {
     }
     QScrollArea#focusScrollArea { border: none; background: transparent; }
     QWidget#focusScrollContent { background: transparent; }
-    QLabel#focusTitle { color: #182433; font-size: 17px; font-weight: 800; }
+    QLabel#focusTitle { color: {{color:focus_mode.text}}; font-size: 17px; font-weight: 800; }
     QLabel#focusSubtitle, QLabel#focusWindowHint, QLabel#focusStatLabel, QLabel#focusStatusLabel {
-        color: #64748b; font-size: 9pt;
+        color: {{color:focus_mode.secondary_text}}; font-size: 9pt;
     }
     QFrame#focusStatsPanel { background-color: #f6f9fd; border: 1px solid #d8e2ee; border-radius: 10px; }
     QLabel#focusStatValue { color: #285f9e; font-size: 13pt; font-weight: 900; }
     QFrame#focusConfigPanel, QFrame#focusRecentPanel {
-        background-color: #ffffff; border: 1px solid #d9e2ec; border-radius: 11px;
+        background-color: {{color:focus_mode.panel}}; border: 1px solid {{color:focus_mode.border}}; border-radius: 11px;
     }
     QFrame#focusOptionalPanel {
-        background-color: #f8fbff; border: 1px dashed #c9d8e8; border-radius: 10px;
+        background-color: {{color:focus_mode.optional_surface}}; border: 1px dashed {{color:focus_mode.optional_border}}; border-radius: 10px;
     }
     QLabel#focusAutoQuestionsNotice {
-        background-color: #eef6ff;
-        color: #245889;
-        border: 1px solid #b9d3ee;
+        background-color: {{color:focus_mode.notice_surface}};
+        color: {{color:focus_mode.notice_text}};
+        border: 1px solid {{color:focus_mode.notice_border}};
         border-radius: 9px;
         padding: 8px 12px;
         font-size: 9pt;
         font-weight: 800;
     }
     QFrame#focusActivePanel {
-        background-color: #f3f8ff; border: 1px solid #bcd4ef; border-radius: 12px;
+        background-color: {{color:focus_mode.panel_active}}; border: 1px solid {{color:focus_mode.panel_active_border}}; border-radius: 12px;
     }
-    QLabel#focusSectionTitle, QLabel#focusContextLabel { color: #243449; font-weight: 800; }
-    QLabel#focusTimerValue { color: #285f9e; font-size: 32px; font-weight: 900; }
+    QLabel#focusSectionTitle, QLabel#focusContextLabel { color: {{color:focus_mode.section_text}}; font-weight: 800; }
+    QLabel#focusTimerValue { color: {{color:focus_mode.timer}}; font-size: 32px; font-weight: 900; }
     QLabel#dashboardFocusSummary { color: #53708c; font-size: 8.4pt; font-weight: 700; }
     QPushButton#focusPresetButton, QPushButton#focusSecondaryButton, QPushButton#focusPauseButton {
-        background-color: #ffffff; color: #32679f; border: 1px solid #b9cee4; border-radius: 8px; font-weight: 700;
+        background-color: {{color:focus_mode.secondary_action_surface}}; color: {{color:focus_mode.secondary_action_text}}; border: 1px solid {{color:focus_mode.secondary_action_border}}; border-radius: 8px; font-weight: 700;
     }
     QPushButton#focusPresetButton:hover, QPushButton#focusSecondaryButton:hover, QPushButton#focusPauseButton:hover {
-        background-color: #eef6ff; border-color: #8db7e4; color: #245889;
+        background-color: {{color:focus_mode.secondary_action_hover_surface}}; border-color: {{color:focus_mode.secondary_action_hover_border}}; color: {{color:focus_mode.secondary_action_hover_text}};
     }
     QPushButton#focusPrimaryButton {
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-            stop:0 #c91f2b, stop:0.52 #dc2626, stop:1 #ef4444);
-        color: #ffffff; border: 1px solid #a91520; border-radius: 10px;
+        background: {{gradient:focus_mode.action_gradient}};
+        color: {{color:text.on_action}}; border: 1px solid {{color:focus_mode.action_border}}; border-radius: 10px;
         font-weight: 900; font-size: 10.2pt; padding: 8px 22px;
     }
     QPushButton#focusPrimaryButton:hover {
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-            stop:0 #b81924, stop:0.52 #cf202b, stop:1 #e43742);
-        border-color: #8f111a;
+        background: {{gradient:focus_mode.action_hover_gradient}};
+        border-color: {{color:focus_mode.action_hover_border}};
     }
-    QPushButton#focusPrimaryButton:pressed { background-color: #a91520; border-color: #7f1018; }
+    QPushButton#focusPrimaryButton:pressed { background-color: {{color:focus_mode.action}}; border-color: {{color:focus_mode.action_pressed_border}}; }
     QPushButton#focusDangerButton {
-        background-color: #fff7f5; color: #a84a3f; border: 1px solid #e4b6b0; border-radius: 8px; font-weight: 700;
+        background-color: {{color:focus_mode.danger}}; color: {{color:focus_mode.danger_text}}; border: 1px solid {{color:focus_mode.danger_border}}; border-radius: 8px; font-weight: 700;
     }
-    QPushButton#focusDangerButton:hover { background-color: #ffebe8; border-color: #d8948b; }
+    QPushButton#focusDangerButton:hover { background-color: {{color:focus_mode.danger_hover_surface}}; border-color: {{color:focus_mode.danger_hover_border}}; }
 
-    QFrame#postFocusHero { background-color: #f2f7ff; border: 1px solid #bfd5ee; border-radius: 12px; }
-    QFrame#postFocusContentCard { background-color: #ffffff; border: 1px solid #d9e2ec; border-radius: 10px; }
-    QFrame#postFocusResultCard { background-color: #f6fbf7; border: 1px solid #bfdcc7; border-radius: 10px; }
-    QLabel#postFocusResultValue { color: #247344; font-size: 13pt; font-weight: 900; }
-    QPushButton#postFocusContinue { background-color: #e9f3ff; color: #235fae; border: 1px solid #afccea; border-radius: 9px; font-weight: 900; padding: 7px 14px; }
-    QPushButton#postFocusContinue:hover { background-color: #dcecff; border-color: #8eb7e1; }
-    QLabel#postFocusEyebrow { color: #53708c; font-size: 8.3pt; font-weight: 800; }
-    QLabel#postFocusTime { color: #235fae; font-size: 25px; font-weight: 900; }
-    QLabel#postFocusStatus, QLabel#postFocusDetail, QLabel#postFocusNote { color: #64748b; }
-    QLabel#postFocusContentTitle { color: #203247; font-size: 11pt; font-weight: 800; }
-    QLabel#postFocusQuestion { color: #203247; font-size: 10.5pt; font-weight: 900; }
-    QPushButton#postFocusPrimary { background-color: #326fd3; color: #ffffff; border: 1px solid #326fd3; border-radius: 9px; font-weight: 800; padding: 7px 14px; }
-    QPushButton#postFocusPrimary:hover { background-color: #285fb5; border-color: #285fb5; }
-    QPushButton#postFocusSecondary { background-color: #ffffff; color: #32679f; border: 1px solid #b9cee4; border-radius: 9px; font-weight: 800; padding: 7px 14px; }
-    QPushButton#postFocusSecondary:hover { background-color: #eef6ff; border-color: #8db7e4; }
-    QPushButton#postFocusGhost { background: transparent; color: #53708c; border: 1px solid #d1dbe6; border-radius: 8px; font-weight: 700; padding: 6px 12px; }
-    QPushButton#postFocusGhost:hover { background-color: #f4f7fb; color: #2c5279; }
-    QPushButton#postFocusSecondary:disabled { color: #9aa9b8; background-color: #f4f6f8; border-color: #dce3ea; }
-    QFrame#focusHeroPanel { background-color: #eef6ff; border: 1px solid #cfe0f2; border-radius: 14px; }
-    QLabel#focusHeroEyebrow { color: #5e7b98; font-size: 8.3pt; font-weight: 800; letter-spacing: 0.4px; }
-    QLabel#focusHeroValue { color: #285f9e; font-size: 24px; font-weight: 900; }
-    QLabel#focusHeroStatus { color: #203247; font-size: 10pt; font-weight: 800; }
-    QLabel#focusHeroNote, QLabel#focusConfigHint, QLabel#focusHistoryHint, QLabel#focusFieldLabel { color: #64748b; }
-    QFrame#focusHeroMiniCard { background-color: #ffffff; border: 1px solid #d8e2ee; border-radius: 11px; }
-    QLabel#focusHeroMiniLabel { color: #6b7d90; font-size: 8.2pt; font-weight: 700; }
-    QLabel#focusHeroMiniValue { color: #244f83; font-size: 12pt; font-weight: 900; }
-    QLabel#postFocusDialogTitle { color: #203247; font-size: 16px; font-weight: 900; }
-    QLabel#postFocusDialogSubtitle { color: #64748b; }
-    QFrame#postFocusMiniCard { background-color: #ffffff; border: 1px solid #d9e2ec; border-radius: 10px; }
-    QLabel#postFocusMiniLabel { color: #6b7d90; font-size: 8.2pt; font-weight: 800; }
-    QLabel#postFocusMiniValue { color: #235fae; font-size: 11.5pt; font-weight: 900; }
-    QProgressBar#focusProgressBar { min-height: 8px; max-height: 8px; background-color: #e4edf7; border: none; border-radius: 4px; }
-    QProgressBar#focusProgressBar::chunk { background-color: #3b82d0; border-radius: 4px; }
+    QFrame#postFocusHero { background-color: {{color:post_focus.hero_surface}}; border: 1px solid {{color:post_focus.hero_border}}; border-radius: 12px; }
+    QFrame#postFocusContentCard { background-color: {{color:post_focus.content_surface}}; border: 1px solid {{color:post_focus.content_border}}; border-radius: 10px; }
+    QFrame#postFocusResultCard { background-color: {{color:post_focus.result_surface}}; border: 1px solid {{color:post_focus.result_border}}; border-radius: 10px; }
+    QLabel#postFocusResultValue { color: {{color:post_focus.result_value_text}}; font-size: 13pt; font-weight: 900; }
+    QPushButton#postFocusContinue { background-color: {{color:post_focus.continue_surface}}; color: {{color:post_focus.continue_text}}; border: 1px solid {{color:post_focus.continue_border}}; border-radius: 9px; font-weight: 900; padding: 7px 14px; }
+    QPushButton#postFocusContinue:hover { background-color: {{color:post_focus.continue_hover_surface}}; border-color: {{color:post_focus.continue_hover_border}}; }
+    QLabel#postFocusEyebrow { color: {{color:post_focus.eyebrow_text}}; font-size: 8.3pt; font-weight: 800; }
+    QLabel#postFocusTime { color: {{color:post_focus.time_text}}; font-size: 25px; font-weight: 900; }
+    QLabel#postFocusStatus, QLabel#postFocusDetail, QLabel#postFocusNote { color: {{color:post_focus.meta_text}}; }
+    QLabel#postFocusContentTitle { color: {{color:post_focus.strong_text}}; font-size: 11pt; font-weight: 800; }
+    QLabel#postFocusQuestion { color: {{color:post_focus.strong_text}}; font-size: 10.5pt; font-weight: 900; }
+    QPushButton#postFocusPrimary { background-color: {{color:post_focus.primary_surface}}; color: {{color:text.on_action}}; border: 1px solid {{color:post_focus.primary_border}}; border-radius: 9px; font-weight: 800; padding: 7px 14px; }
+    QPushButton#postFocusPrimary:hover { background-color: {{color:post_focus.primary_hover_surface}}; border-color: {{color:post_focus.primary_hover_border}}; }
+    QPushButton#postFocusSecondary { background-color: {{color:post_focus.secondary_surface}}; color: {{color:post_focus.secondary_text}}; border: 1px solid {{color:post_focus.secondary_border}}; border-radius: 9px; font-weight: 800; padding: 7px 14px; }
+    QPushButton#postFocusSecondary:hover { background-color: {{color:post_focus.secondary_hover_surface}}; border-color: {{color:post_focus.secondary_hover_border}}; }
+    QPushButton#postFocusGhost { background: transparent; color: {{color:post_focus.ghost_text}}; border: 1px solid {{color:post_focus.ghost_border}}; border-radius: 8px; font-weight: 700; padding: 6px 12px; }
+    QPushButton#postFocusGhost:hover { background-color: {{color:post_focus.ghost_hover_surface}}; color: {{color:post_focus.ghost_hover_text}}; }
+    QPushButton#postFocusSecondary:disabled { color: {{color:post_focus.secondary_disabled_text}}; background-color: {{color:post_focus.secondary_disabled_surface}}; border-color: {{color:post_focus.secondary_disabled_border}}; }
+    QFrame#focusHeroPanel { background-color: {{color:focus_mode.hero_surface}}; border: 1px solid {{color:focus_mode.hero_border}}; border-radius: 14px; }
+    QLabel#focusHeroEyebrow { color: {{color:focus_mode.hero_eyebrow_text}}; font-size: 8.3pt; font-weight: 800; letter-spacing: 0.4px; }
+    QLabel#focusHeroValue { color: {{color:focus_mode.hero_value_text}}; font-size: 24px; font-weight: 900; }
+    QLabel#focusHeroStatus { color: {{color:focus_mode.hero_status_text}}; font-size: 10pt; font-weight: 800; }
+    QLabel#focusHeroNote, QLabel#focusConfigHint, QLabel#focusHistoryHint, QLabel#focusFieldLabel { color: {{color:focus_mode.meta_text}}; }
+    QFrame#focusHeroMiniCard { background-color: {{color:focus_mode.mini_surface}}; border: 1px solid {{color:focus_mode.mini_border}}; border-radius: 11px; }
+    QLabel#focusHeroMiniLabel { color: {{color:focus_mode.mini_label_text}}; font-size: 8.2pt; font-weight: 700; }
+    QLabel#focusHeroMiniValue { color: {{color:focus_mode.mini_value_text}}; font-size: 12pt; font-weight: 900; }
+    QLabel#postFocusDialogTitle { color: {{color:post_focus.dialog_title_text}}; font-size: 16px; font-weight: 900; }
+    QLabel#postFocusDialogSubtitle { color: {{color:post_focus.dialog_subtitle_text}}; }
+    QFrame#postFocusMiniCard { background-color: {{color:post_focus.mini_surface}}; border: 1px solid {{color:post_focus.mini_border}}; border-radius: 10px; }
+    QLabel#postFocusMiniLabel { color: {{color:post_focus.mini_label_text}}; font-size: 8.2pt; font-weight: 800; }
+    QLabel#postFocusMiniValue { color: {{color:post_focus.mini_value_text}}; font-size: 11.5pt; font-weight: 900; }
+    QProgressBar#focusProgressBar { min-height: 8px; max-height: 8px; background-color: {{color:focus_mode.progress_track}}; border: none; border-radius: 4px; }
+    QProgressBar#focusProgressBar::chunk { background-color: {{color:focus_mode.progress_fill}}; border-radius: 4px; }
 
 
     
@@ -12154,7 +13981,7 @@ QPushButton#sectionEditButton:hover {
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_CLARO + ESTILO_DASHBOARD_MODERNO_CLARO + ESTILO_FOCO_DASHBOARD_CLARO + ESTILO_ALGORITMO_DASHBOARD_CLARO + ESTILO_BUSCA_GLOBAL_CLARO + ESTILO_PALETA_HARMONICA_DASHBOARD_CLARO + ESTILO_DESIGN_SYSTEM_DASHBOARD_CLARO + ESTILO_INTELIGENCIA_RESUMO_CLARO + ESTILO_TOPICOS_DISCIPLINA_CLARO + ESTILO_RESOLVEDOR_CLARO + ESTILO_TOPICO_DETALHES_CLARO + ESTILO_RESOLVEDOR_ELIMINADAS_CLARO + ESTILO_RESOLVEDOR_TECLADO_CLARO + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_CLARO + ESTILO_CALENDARIO_PREVISAO_CLARO)
+""" + ESTILO_JORNADA_CLARO + ESTILO_DASHBOARD_MODERNO_CLARO + ESTILO_FOCO_DASHBOARD_CLARO + ESTILO_ALGORITMO_DASHBOARD_CLARO + ESTILO_BUSCA_GLOBAL_CLARO + ESTILO_PALETA_HARMONICA_DASHBOARD_CLARO + ESTILO_DESIGN_SYSTEM_DASHBOARD_CLARO + ESTILO_INTELIGENCIA_RESUMO_CLARO + ESTILO_TOPICOS_DISCIPLINA_CLARO + ESTILO_RESOLVEDOR_CLARO + ESTILO_TOPICO_DETALHES_CLARO + ESTILO_RESOLVEDOR_ELIMINADAS_CLARO + ESTILO_RESOLVEDOR_TECLADO_CLARO + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_CLARO + ESTILO_CALENDARIO_PREVISAO_CLARO + ESTILO_DASHBOARD_SHELL_CLARO + render_qss("claro", ESTILO_DASHBOARD_BLOCO_B_CLARO) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_C) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_D) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_E) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_F) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_G) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_H) + render_qss("claro", ESTILO_NAVEGACAO_BUSCA_GLOBAL) + render_qss("claro", ESTILO_NAVEGACAO_RETORNOS_DASHBOARD) + render_qss("claro", ESTILO_CARDS_GLOBAIS_BLOCO_A) + render_qss("claro", ESTILO_CARDS_GLOBAIS_BLOCO_B) + render_qss("claro", ESTILO_CARDS_GLOBAIS_BLOCO_C) + render_qss("claro", ESTILO_MODO_FOCO_INTEGRACAO_RESOLVEDOR))
 
 
 def stylesheet_escuro():
@@ -12910,8 +14737,8 @@ def stylesheet_escuro():
     }
 
     QFrame#questionsInventoryStrip {
-        background-color: #121c2d;
-        border: 1px solid #334155;
+        background-color: {{color:questions_center.inventory_surface}};
+        border: 1px solid {{color:questions_center.inventory_border}};
         border-radius: 11px;
     }
 
@@ -12922,20 +14749,20 @@ def stylesheet_escuro():
 
     QLabel#questionsInventoryValue {
         background: transparent;
-        color: #a5b4fc;
+        color: {{color:questions_center.inventory_value_text}};
         font-size: 14pt;
         font-weight: 900;
     }
 
     QLabel#questionsInventoryLabel {
         background: transparent;
-        color: #94a3b8;
+        color: {{color:questions_center.inventory_label_text}};
         font-size: 8.5pt;
         font-weight: 700;
     }
 
     QFrame#questionsInventoryDivider {
-        background-color: #334155;
+        background-color: {{color:questions_center.inventory_divider}};
         border: none;
     }
 
@@ -13417,9 +15244,9 @@ def stylesheet_escuro():
     }
 
     QLabel#mockExamTimer {
-        background-color: #2e1065;
-        color: #ddd6fe;
-        border: 1px solid #7c3aed;
+        background-color: {{color:session.timer_surface}};
+        color: {{color:session.timer_text}};
+        border: 1px solid {{color:session.timer_border}};
         border-radius: 7px;
         padding: 5px 8px;
         font-size: 9pt;
@@ -13625,66 +15452,66 @@ def stylesheet_escuro():
 
     QCheckBox#questionSessionDoubt {
         background: transparent;
-        color: #cbd5e1;
+        color: {{color:session.doubt_text}};
         font-weight: 700;
         spacing: 9px;
         padding: 4px 0;
     }
 
     QCheckBox#questionSessionDoubt:checked {
-        color: #93c5fd;
+        color: {{color:session.doubt_checked_text}};
     }
 
     QCheckBox#questionSessionDoubt::indicator {
-        background-color: #111827;
-        border: 2px solid #94a3b8;
+        background-color: {{color:session.flag_indicator_surface}};
+        border: 2px solid {{color:session.doubt_indicator_border}};
         border-radius: 5px;
         width: 20px;
         height: 20px;
     }
 
     QCheckBox#questionSessionDoubt::indicator:hover {
-        border-color: #60a5fa;
+        border-color: {{color:session.doubt_indicator_hover_border}};
     }
 
     QCheckBox#questionSessionDoubt::indicator:checked {
-        background-color: #3b82f6;
-        border-color: #93c5fd;
+        background-color: {{color:session.doubt_indicator_checked_surface}};
+        border-color: {{color:session.doubt_indicator_checked_border}};
     }
 
     QCheckBox#questionSessionDoubt::indicator:disabled {
-        background-color: #1f2937;
-        border-color: #475569;
+        background-color: {{color:session.doubt_indicator_disabled_surface}};
+        border-color: {{color:session.doubt_indicator_disabled_border}};
     }
 
     QCheckBox#questionSessionAnalysisFlag {
         background: transparent;
-        color: #94a3b8;
+        color: {{color:session.analysis_text}};
         font-weight: 600;
         spacing: 7px;
         padding: 4px 8px;
     }
 
     QCheckBox#questionSessionAnalysisFlag:checked {
-        color: #fbbf24;
+        color: {{color:session.analysis_checked_text}};
         font-weight: 700;
     }
 
     QCheckBox#questionSessionAnalysisFlag::indicator {
-        background-color: #111827;
-        border: 2px solid #64748b;
+        background-color: {{color:session.flag_indicator_surface}};
+        border: 2px solid {{color:session.analysis_indicator_border}};
         border-radius: 4px;
         width: 16px;
         height: 16px;
     }
 
     QCheckBox#questionSessionAnalysisFlag::indicator:hover {
-        border-color: #f59e0b;
+        border-color: {{color:session.analysis_indicator_hover_border}};
     }
 
     QCheckBox#questionSessionAnalysisFlag::indicator:checked {
-        background-color: #d97706;
-        border-color: #fbbf24;
+        background-color: {{color:session.analysis_indicator_checked_surface}};
+        border-color: {{color:session.analysis_indicator_checked_border}};
     }
 
     QFrame#questionSessionActionPanel {
@@ -13733,6 +15560,101 @@ def stylesheet_escuro():
         border: 1px solid #334155;
         border-radius: 8px;
         gridline-color: transparent;
+    }
+
+    QDialog#questionSessionSummaryDialog {
+        background-color: {{color:summary.canvas}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#pageTitle {
+        color: {{color:summary.title_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#pageSubtitle {
+        color: {{color:summary.subtitle_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QFrame#questionSessionSummaryCard {
+        background-color: {{color:summary.metric_surface}};
+        border-color: {{color:summary.metric_border}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#miniStatLabel {
+        color: {{color:summary.metric_label_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#miniStatValue {
+        color: {{color:summary.metric_value_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#questionSessionSummaryDetail {
+        background-color: {{color:summary.detail_surface}};
+        color: {{color:summary.detail_text}};
+        border-color: {{color:summary.detail_border}};
+    }
+
+    QDialog#questionSessionSummaryDialog QTableWidget#questionSessionSummaryTable {
+        background-color: {{color:summary.table_surface}};
+        border-color: {{color:summary.table_border}};
+    }
+
+    QDialog#questionSessionSummaryDialog QFrame#questionReviewIntegrationCard {
+        background-color: {{color:summary.review_surface}};
+        border-color: {{color:summary.review_border}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#questionReviewIntegrationTitle {
+        color: {{color:summary.review_title_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#questionReviewIntegrationText {
+        color: {{color:summary.review_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QFrame#adaptiveSummaryCard {
+        background-color: {{color:summary.adaptive_surface}};
+        border-color: {{color:summary.adaptive_border}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#adaptiveSummaryTitle {
+        color: {{color:summary.adaptive_title_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#adaptiveSummaryText {
+        color: {{color:summary.adaptive_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QFrame#effectivenessImpactCard {
+        background-color: {{color:summary.effectiveness_surface}};
+        border-color: {{color:summary.effectiveness_border}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#effectivenessImpactTitle {
+        color: {{color:summary.effectiveness_title_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QFrame#effectivenessImpactMetric {
+        background-color: {{color:summary.effectiveness_metric_surface}};
+        border-color: {{color:summary.effectiveness_metric_border}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#effectivenessImpactLabel,
+    QDialog#questionSessionSummaryDialog QLabel#effectivenessImpactFooter {
+        color: {{color:summary.effectiveness_metric_label_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#effectivenessImpactValue {
+        color: {{color:summary.effectiveness_metric_value_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#mockExamResultSectionTitle {
+        color: {{color:summary.mock_exam_section_title_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#mockExamCorrectionNotice {
+        background-color: {{color:summary.mock_exam_notice_surface}};
+        color: {{color:summary.mock_exam_notice_text}};
+        border-color: {{color:summary.mock_exam_notice_border}};
     }
 
     QPushButton#questionsNavButton {
@@ -18132,104 +20054,136 @@ def stylesheet_escuro():
     }
 
     QLabel#pauseHubTitle {
-        color: #eef5fb;
+        color: {{color:pause.hub_title_text}};
         font-size: 17px;
         font-weight: 800;
     }
 
-    QLabel#pauseHubSubtitle,
-    QLabel#gameHint,
+    QLabel#pauseHubSubtitle {
+        color: {{color:pause.hub_subtitle_text}};
+        font-size: 9pt;
+    }
+
+    QLabel#gameHint {
+        color: {{color:game.hint_text}};
+        font-size: 9pt;
+    }
+
     QLabel#pauseTimerStatus {
-        color: #8fa2b5;
+        color: {{color:pause.timer_status_text}};
         font-size: 9pt;
     }
 
     QFrame#pauseTimerPanel {
-        background-color: #142a31;
-        border: 1px solid #31565f;
+        background-color: {{color:pause.timer_panel_surface}};
+        border: 1px solid {{color:pause.timer_panel_border}};
         border-radius: 10px;
     }
 
-    QFrame#pauseRecordsPanel,
+    QFrame#pauseRecordsPanel {
+        background-color: {{color:pause.records_panel_surface}};
+        border: 1px solid {{color:pause.records_panel_border}};
+        border-radius: 11px;
+    }
+
     QFrame#gameBoardPanel {
-        background-color: #151f2d;
-        border: 1px solid #33465a;
+        background-color: {{color:game.board_surface}};
+        border: 1px solid {{color:game.board_border}};
         border-radius: 11px;
     }
 
     QFrame#pauseRecordCard {
-        background-color: #192636;
-        border: 1px solid #33475d;
+        background-color: {{color:pause.record_card_surface}};
+        border: 1px solid {{color:pause.record_card_border}};
         border-radius: 8px;
     }
 
-    QLabel#pauseSectionTitle,
-    QLabel#gameTitle {
-        color: #e8eef5;
+    QLabel#pauseSectionTitle {
+        color: {{color:pause.section_title_text}};
         font-weight: 800;
+        font-size: 9.5pt;
     }
 
-    QLabel#pauseSectionTitle { font-size: 9.5pt; }
-    QLabel#gameTitle { font-size: 13pt; }
+    QLabel#gameTitle {
+        color: {{color:game.title_text}};
+        font-weight: 800;
+        font-size: 13pt;
+    }
 
     QLabel#pauseRecordTitle {
-        color: #8799ad;
+        color: {{color:pause.record_title_text}};
         font-size: 8.5pt;
         font-weight: 700;
     }
 
-    QLabel#pauseRecordValue,
+    QLabel#pauseRecordValue {
+        color: {{color:pause.record_value_text}};
+        font-weight: 800;
+    }
+
     QLabel#gameMetric {
-        color: #9dd9e1;
+        color: {{color:game.metric_text}};
         font-weight: 800;
     }
 
     QLabel#gameStatus {
-        color: #a5b2c1;
+        color: {{color:game.status_text}};
         font-size: 9pt;
     }
 
     QLabel#pauseTimerValue {
         min-width: 74px;
         padding: 4px 10px;
-        background-color: #162333;
-        color: #a5e6e2;
-        border: 1px solid #3f7478;
+        background-color: {{color:pause.timer_value_surface}};
+        color: {{color:pause.timer_value_text}};
+        border: 1px solid {{color:pause.timer_value_border}};
         border-radius: 7px;
         font-size: 12pt;
         font-weight: 900;
     }
 
-    QPushButton#pausePrimaryButton,
-    QPushButton#gamePrimaryButton {
-        background-color: #287779;
-        color: #ffffff;
-        border: 1px solid #3b9798;
+    QPushButton#pausePrimaryButton {
+        background-color: {{color:pause.primary_surface}};
+        color: {{color:text.on_action}};
+        border: 1px solid {{color:pause.primary_border}};
         border-radius: 8px;
         font-weight: 800;
     }
 
-    QPushButton#pausePrimaryButton:hover,
+    QPushButton#gamePrimaryButton {
+        background-color: {{color:game.primary_surface}};
+        color: {{color:text.on_action}};
+        border: 1px solid {{color:game.primary_border}};
+        border-radius: 8px;
+        font-weight: 800;
+    }
+
+    QPushButton#pausePrimaryButton:hover {
+        background-color: {{color:pause.primary_hover_surface}};
+        border-color: {{color:pause.primary_hover_border}};
+        color: {{color:text.on_action}};
+    }
+
     QPushButton#gamePrimaryButton:hover {
-        background-color: #328a8c;
-        border-color: #50a8a9;
-        color: #ffffff;
+        background-color: {{color:game.primary_hover_surface}};
+        border-color: {{color:game.primary_hover_border}};
+        color: {{color:text.on_action}};
     }
 
     QPushButton#pauseSecondaryButton,
     QPushButton#pauseBackButton {
-        background-color: #162333;
-        color: #a9c9ff;
-        border: 1px solid #4e6f9e;
+        background-color: {{color:pause.secondary_surface}};
+        color: {{color:pause.secondary_text}};
+        border: 1px solid {{color:pause.secondary_border}};
         border-radius: 8px;
         font-weight: 700;
     }
 
     QPushButton#pauseSecondaryButton:hover,
     QPushButton#pauseBackButton:hover {
-        background-color: #1b3048;
-        color: #d7e7ff;
-        border-color: #6b92ca;
+        background-color: {{color:pause.secondary_hover_surface}};
+        color: {{color:pause.secondary_hover_text}};
+        border-color: {{color:pause.secondary_hover_border}};
     }
 
     QPushButton#chimpCellButton,
@@ -18237,9 +20191,9 @@ def stylesheet_escuro():
     QPushButton#sequenceCellButton,
     QPushButton#puzzleTileButton,
     QPushButton#rotationOptionButton {
-        background-color: #1b2939;
-        color: #dfe8f2;
-        border: 1px solid #3a4e64;
+        background-color: {{color:game.cell_surface}};
+        color: {{color:game.cell_text}};
+        border: 1px solid {{color:game.cell_border}};
         border-radius: 9px;
         font-size: 12pt;
         font-weight: 900;
@@ -18258,65 +20212,65 @@ def stylesheet_escuro():
     }
 
     QPushButton#chimpCellButton[cellState="number"] {
-        background-color: #1d3550;
-        color: #a8cff7;
-        border-color: #4f79a5;
+        background-color: {{color:game.chimp_number_surface}};
+        color: {{color:game.chimp_number_text}};
+        border-color: {{color:game.chimp_number_border}};
     }
 
     QPushButton#chimpCellButton[cellState="correct"] {
-        background-color: #173b35;
-        color: #9ae0ce;
-        border-color: #3f8173;
+        background-color: {{color:game.chimp_correct_surface}};
+        color: {{color:game.chimp_correct_text}};
+        border-color: {{color:game.chimp_correct_border}};
     }
 
     QPushButton#memoryCardButton[cardState="hidden"] {
-        background-color: #202d3d;
-        color: #8da0b4;
-        border-color: #3b4f65;
+        background-color: {{color:game.memory_hidden_surface}};
+        color: {{color:game.memory_hidden_text}};
+        border-color: {{color:game.memory_hidden_border}};
     }
 
     QPushButton#memoryCardButton[cardState="open"] {
-        background-color: #1d3855;
-        color: #b2d5fb;
-        border-color: #557fae;
+        background-color: {{color:game.memory_open_surface}};
+        color: {{color:game.memory_open_text}};
+        border-color: {{color:game.memory_open_border}};
     }
 
     QPushButton#memoryCardButton[cardState="matched"] {
-        background-color: #183a34;
-        color: #9ee0d0;
-        border-color: #477f73;
+        background-color: {{color:game.memory_matched_surface}};
+        color: {{color:game.memory_matched_text}};
+        border-color: {{color:game.memory_matched_border}};
     }
 
     QPushButton#sequenceCellButton {
-        background-color: #202e3e;
-        border-color: #3c5065;
+        background-color: {{color:game.sequence_surface}};
+        border-color: {{color:game.sequence_border}};
     }
 
     QPushButton#sequenceCellButton[lit="true"] {
-        background-color: #a97625;
-        border-color: #d2a049;
+        background-color: {{color:game.sequence_lit_surface}};
+        border-color: {{color:game.sequence_lit_border}};
     }
 
     QPushButton#puzzleTileButton[tileState="movable"] {
-        background-color: #1c3855;
-        color: #acd2fa;
-        border-color: #527ba8;
+        background-color: {{color:game.puzzle_movable_surface}};
+        color: {{color:game.puzzle_movable_text}};
+        border-color: {{color:game.puzzle_movable_border}};
     }
 
     QPushButton#puzzleTileButton[tileState="blank"] {
-        background-color: #121c29;
-        border-color: #26384b;
-        color: transparent;
+        background-color: {{color:game.puzzle_blank_surface}};
+        border-color: {{color:game.puzzle_blank_border}};
+        color: {{color:game.puzzle_blank_text}};
     }
 
     QPushButton#rotationOptionButton[answerState="correct"] {
-        background-color: #183a34;
-        border-color: #477f73;
+        background-color: {{color:game.rotation_correct_surface}};
+        border-color: {{color:game.rotation_correct_border}};
     }
 
     QPushButton#rotationOptionButton[answerState="wrong"] {
-        background-color: #45232b;
-        border-color: #a45f6e;
+        background-color: {{color:game.rotation_wrong_surface}};
+        border-color: {{color:game.rotation_wrong_border}};
     }
 
 
@@ -18330,69 +20284,67 @@ def stylesheet_escuro():
     QPushButton#focusNavButton:hover { background-color: #203b58; color: #d2e9ff; border-color: #5689bd; }
     QScrollArea#focusScrollArea { border: none; background: transparent; }
     QWidget#focusScrollContent { background: transparent; }
-    QLabel#focusTitle { color: #eef5fb; font-size: 17px; font-weight: 800; }
-    QLabel#focusSubtitle, QLabel#focusWindowHint, QLabel#focusStatLabel, QLabel#focusStatusLabel { color: #8fa2b5; font-size: 9pt; }
+    QLabel#focusTitle { color: {{color:focus_mode.text}}; font-size: 17px; font-weight: 800; }
+    QLabel#focusSubtitle, QLabel#focusWindowHint, QLabel#focusStatLabel, QLabel#focusStatusLabel { color: {{color:focus_mode.secondary_text}}; font-size: 9pt; }
     QFrame#focusStatsPanel { background-color: #142232; border: 1px solid #33495f; border-radius: 10px; }
     QLabel#focusStatValue { color: #9dcbff; font-size: 13pt; font-weight: 900; }
-    QFrame#focusConfigPanel, QFrame#focusRecentPanel { background-color: #151f2d; border: 1px solid #33465a; border-radius: 11px; }
-    QFrame#focusActivePanel { background-color: #15283c; border: 1px solid #3b6289; border-radius: 12px; }
-    QLabel#focusSectionTitle, QLabel#focusContextLabel { color: #e8eef5; font-weight: 800; }
-    QLabel#focusTimerValue { color: #a9d3ff; font-size: 32px; font-weight: 900; }
+    QFrame#focusConfigPanel, QFrame#focusRecentPanel { background-color: {{color:focus_mode.panel}}; border: 1px solid {{color:focus_mode.border}}; border-radius: 11px; }
+    QFrame#focusActivePanel { background-color: {{color:focus_mode.panel_active}}; border: 1px solid {{color:focus_mode.panel_active_border}}; border-radius: 12px; }
+    QLabel#focusSectionTitle, QLabel#focusContextLabel { color: {{color:focus_mode.section_text}}; font-weight: 800; }
+    QLabel#focusTimerValue { color: {{color:focus_mode.timer}}; font-size: 32px; font-weight: 900; }
     QLabel#dashboardFocusSummary { color: #8ca4bb; font-size: 8.4pt; font-weight: 700; }
     QPushButton#focusPresetButton, QPushButton#focusSecondaryButton, QPushButton#focusPauseButton {
-        background-color: #172536; color: #b9d8f7; border: 1px solid #3a5877; border-radius: 8px; font-weight: 700;
+        background-color: {{color:focus_mode.secondary_action_surface}}; color: {{color:focus_mode.secondary_action_text}}; border: 1px solid {{color:focus_mode.secondary_action_border}}; border-radius: 8px; font-weight: 700;
     }
     QPushButton#focusPresetButton:hover, QPushButton#focusSecondaryButton:hover, QPushButton#focusPauseButton:hover {
-        background-color: #20374f; border-color: #527ba5; color: #e0f0ff;
+        background-color: {{color:focus_mode.secondary_action_hover_surface}}; border-color: {{color:focus_mode.secondary_action_hover_border}}; color: {{color:focus_mode.secondary_action_hover_text}};
     }
     QPushButton#focusPrimaryButton {
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-            stop:0 #b91c2a, stop:0.52 #d92d3a, stop:1 #f04451);
-        color: #ffffff; border: 1px solid #ff6973; border-radius: 10px;
+        background: {{gradient:focus_mode.action_gradient}};
+        color: {{color:text.on_action}}; border: 1px solid {{color:focus_mode.action_border}}; border-radius: 10px;
         font-weight: 900; font-size: 10.2pt; padding: 8px 22px;
     }
     QPushButton#focusPrimaryButton:hover {
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-            stop:0 #cf2634, stop:0.52 #e63b47, stop:1 #ff5964);
-        border-color: #ff9298;
+        background: {{gradient:focus_mode.action_hover_gradient}};
+        border-color: {{color:focus_mode.action_hover_border}};
     }
-    QPushButton#focusPrimaryButton:pressed { background-color: #9f1723; border-color: #ff5964; }
-    QPushButton#focusDangerButton { background-color: #392322; color: #f0b6ae; border: 1px solid #70433e; border-radius: 8px; font-weight: 700; }
-    QPushButton#focusDangerButton:hover { background-color: #4b2b28; border-color: #945950; }
+    QPushButton#focusPrimaryButton:pressed { background-color: {{color:focus_mode.action}}; border-color: {{color:focus_mode.action_pressed_border}}; }
+    QPushButton#focusDangerButton { background-color: {{color:focus_mode.danger}}; color: {{color:focus_mode.danger_text}}; border: 1px solid {{color:focus_mode.danger_border}}; border-radius: 8px; font-weight: 700; }
+    QPushButton#focusDangerButton:hover { background-color: {{color:focus_mode.danger_hover_surface}}; border-color: {{color:focus_mode.danger_hover_border}}; }
 
-    QFrame#postFocusHero { background-color: #172536; border: 1px solid #365574; border-radius: 12px; }
-    QFrame#postFocusContentCard { background-color: #151f2d; border: 1px solid #33465a; border-radius: 10px; }
-    QFrame#postFocusResultCard { background-color: #172a24; border: 1px solid #365f4c; border-radius: 10px; }
-    QLabel#postFocusResultValue { color: #91d6ac; font-size: 13pt; font-weight: 900; }
-    QPushButton#postFocusContinue { background-color: #20374f; color: #d6eaff; border: 1px solid #527ba5; border-radius: 9px; font-weight: 900; padding: 7px 14px; }
-    QPushButton#postFocusContinue:hover { background-color: #294760; border-color: #6b95bf; }
-    QLabel#postFocusEyebrow { color: #8ca4bb; font-size: 8.3pt; font-weight: 800; }
-    QLabel#postFocusTime { color: #a9d3ff; font-size: 25px; font-weight: 900; }
-    QLabel#postFocusStatus, QLabel#postFocusDetail, QLabel#postFocusNote { color: #8ca4bb; }
-    QLabel#postFocusContentTitle, QLabel#postFocusQuestion { color: #e0edf8; font-weight: 800; }
+    QFrame#postFocusHero { background-color: {{color:post_focus.hero_surface}}; border: 1px solid {{color:post_focus.hero_border}}; border-radius: 12px; }
+    QFrame#postFocusContentCard { background-color: {{color:post_focus.content_surface}}; border: 1px solid {{color:post_focus.content_border}}; border-radius: 10px; }
+    QFrame#postFocusResultCard { background-color: {{color:post_focus.result_surface}}; border: 1px solid {{color:post_focus.result_border}}; border-radius: 10px; }
+    QLabel#postFocusResultValue { color: {{color:post_focus.result_value_text}}; font-size: 13pt; font-weight: 900; }
+    QPushButton#postFocusContinue { background-color: {{color:post_focus.continue_surface}}; color: {{color:post_focus.continue_text}}; border: 1px solid {{color:post_focus.continue_border}}; border-radius: 9px; font-weight: 900; padding: 7px 14px; }
+    QPushButton#postFocusContinue:hover { background-color: {{color:post_focus.continue_hover_surface}}; border-color: {{color:post_focus.continue_hover_border}}; }
+    QLabel#postFocusEyebrow { color: {{color:post_focus.eyebrow_text}}; font-size: 8.3pt; font-weight: 800; }
+    QLabel#postFocusTime { color: {{color:post_focus.time_text}}; font-size: 25px; font-weight: 900; }
+    QLabel#postFocusStatus, QLabel#postFocusDetail, QLabel#postFocusNote { color: {{color:post_focus.meta_text}}; }
+    QLabel#postFocusContentTitle, QLabel#postFocusQuestion { color: {{color:post_focus.strong_text}}; font-weight: 800; }
     QLabel#postFocusQuestion { font-size: 10.5pt; font-weight: 900; }
-    QPushButton#postFocusPrimary { background-color: #416ab7; color: #ffffff; border: 1px solid #4c7bcf; border-radius: 9px; font-weight: 800; padding: 7px 14px; }
-    QPushButton#postFocusPrimary:hover { background-color: #355ba3; border-color: #426ec4; }
-    QPushButton#postFocusSecondary { background-color: #172536; color: #b9d8f7; border: 1px solid #3a5877; border-radius: 9px; font-weight: 800; padding: 7px 14px; }
-    QPushButton#postFocusSecondary:hover { background-color: #20374f; border-color: #527ba5; }
-    QPushButton#postFocusGhost { background: transparent; color: #8ca4bb; border: 1px solid #33465a; border-radius: 8px; font-weight: 700; padding: 6px 12px; }
-    QPushButton#postFocusGhost:hover { background-color: #1b2a3b; color: #d2e6f8; }
-    QPushButton#postFocusSecondary:disabled { color: #627488; background-color: #17202b; border-color: #2b3949; }
-    QFrame#focusHeroPanel { background-color: #15283c; border: 1px solid #3b6289; border-radius: 14px; }
-    QLabel#focusHeroEyebrow { color: #8ca4bb; font-size: 8.3pt; font-weight: 800; letter-spacing: 0.4px; }
-    QLabel#focusHeroValue { color: #a9d3ff; font-size: 24px; font-weight: 900; }
-    QLabel#focusHeroStatus { color: #e0edf8; font-size: 10pt; font-weight: 800; }
-    QLabel#focusHeroNote, QLabel#focusConfigHint, QLabel#focusHistoryHint, QLabel#focusFieldLabel { color: #8ca4bb; }
-    QFrame#focusHeroMiniCard { background-color: #172536; border: 1px solid #3a5877; border-radius: 11px; }
-    QLabel#focusHeroMiniLabel { color: #90a8bf; font-size: 8.2pt; font-weight: 700; }
-    QLabel#focusHeroMiniValue { color: #d6eaff; font-size: 12pt; font-weight: 900; }
-    QLabel#postFocusDialogTitle { color: #e0edf8; font-size: 16px; font-weight: 900; }
-    QLabel#postFocusDialogSubtitle { color: #8ca4bb; }
-    QFrame#postFocusMiniCard { background-color: #172536; border: 1px solid #365574; border-radius: 10px; }
-    QLabel#postFocusMiniLabel { color: #8ca4bb; font-size: 8.2pt; font-weight: 800; }
-    QLabel#postFocusMiniValue { color: #d6eaff; font-size: 11.5pt; font-weight: 900; }
-    QProgressBar#focusProgressBar { min-height: 8px; max-height: 8px; background-color: #27384a; border: none; border-radius: 4px; }
-    QProgressBar#focusProgressBar::chunk { background-color: #4f83c5; border-radius: 4px; }
+    QPushButton#postFocusPrimary { background-color: {{color:post_focus.primary_surface}}; color: {{color:text.on_action}}; border: 1px solid {{color:post_focus.primary_border}}; border-radius: 9px; font-weight: 800; padding: 7px 14px; }
+    QPushButton#postFocusPrimary:hover { background-color: {{color:post_focus.primary_hover_surface}}; border-color: {{color:post_focus.primary_hover_border}}; }
+    QPushButton#postFocusSecondary { background-color: {{color:post_focus.secondary_surface}}; color: {{color:post_focus.secondary_text}}; border: 1px solid {{color:post_focus.secondary_border}}; border-radius: 9px; font-weight: 800; padding: 7px 14px; }
+    QPushButton#postFocusSecondary:hover { background-color: {{color:post_focus.secondary_hover_surface}}; border-color: {{color:post_focus.secondary_hover_border}}; }
+    QPushButton#postFocusGhost { background: transparent; color: {{color:post_focus.ghost_text}}; border: 1px solid {{color:post_focus.ghost_border}}; border-radius: 8px; font-weight: 700; padding: 6px 12px; }
+    QPushButton#postFocusGhost:hover { background-color: {{color:post_focus.ghost_hover_surface}}; color: {{color:post_focus.ghost_hover_text}}; }
+    QPushButton#postFocusSecondary:disabled { color: {{color:post_focus.secondary_disabled_text}}; background-color: {{color:post_focus.secondary_disabled_surface}}; border-color: {{color:post_focus.secondary_disabled_border}}; }
+    QFrame#focusHeroPanel { background-color: {{color:focus_mode.hero_surface}}; border: 1px solid {{color:focus_mode.hero_border}}; border-radius: 14px; }
+    QLabel#focusHeroEyebrow { color: {{color:focus_mode.hero_eyebrow_text}}; font-size: 8.3pt; font-weight: 800; letter-spacing: 0.4px; }
+    QLabel#focusHeroValue { color: {{color:focus_mode.hero_value_text}}; font-size: 24px; font-weight: 900; }
+    QLabel#focusHeroStatus { color: {{color:focus_mode.hero_status_text}}; font-size: 10pt; font-weight: 800; }
+    QLabel#focusHeroNote, QLabel#focusConfigHint, QLabel#focusHistoryHint, QLabel#focusFieldLabel { color: {{color:focus_mode.meta_text}}; }
+    QFrame#focusHeroMiniCard { background-color: {{color:focus_mode.mini_surface}}; border: 1px solid {{color:focus_mode.mini_border}}; border-radius: 11px; }
+    QLabel#focusHeroMiniLabel { color: {{color:focus_mode.mini_label_text}}; font-size: 8.2pt; font-weight: 700; }
+    QLabel#focusHeroMiniValue { color: {{color:focus_mode.mini_value_text}}; font-size: 12pt; font-weight: 900; }
+    QLabel#postFocusDialogTitle { color: {{color:post_focus.dialog_title_text}}; font-size: 16px; font-weight: 900; }
+    QLabel#postFocusDialogSubtitle { color: {{color:post_focus.dialog_subtitle_text}}; }
+    QFrame#postFocusMiniCard { background-color: {{color:post_focus.mini_surface}}; border: 1px solid {{color:post_focus.mini_border}}; border-radius: 10px; }
+    QLabel#postFocusMiniLabel { color: {{color:post_focus.mini_label_text}}; font-size: 8.2pt; font-weight: 800; }
+    QLabel#postFocusMiniValue { color: {{color:post_focus.mini_value_text}}; font-size: 11.5pt; font-weight: 900; }
+    QProgressBar#focusProgressBar { min-height: 8px; max-height: 8px; background-color: {{color:focus_mode.progress_track}}; border: none; border-radius: 4px; }
+    QProgressBar#focusProgressBar::chunk { background-color: {{color:focus_mode.progress_fill}}; border-radius: 4px; }
 
 
     
@@ -18609,7 +20561,7 @@ def stylesheet_escuro():
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_ESCURO + ESTILO_DASHBOARD_MODERNO_ESCURO + ESTILO_FOCO_DASHBOARD_ESCURO + ESTILO_ALGORITMO_DASHBOARD_ESCURO + ESTILO_BUSCA_GLOBAL_ESCURO + ESTILO_INTELIGENCIA_RESUMO_ESCURO + ESTILO_TOPICOS_DISCIPLINA_ESCURO + ESTILO_RESOLVEDOR_ESCURO + ESTILO_TOPICO_DETALHES_ESCURO + ESTILO_RESOLVEDOR_ELIMINADAS_ESCURO + ESTILO_RESOLVEDOR_TECLADO_ESCURO + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_ESCURO + ESTILO_CALENDARIO_PREVISAO_ESCURO)
+""" + ESTILO_JORNADA_ESCURO + ESTILO_DASHBOARD_MODERNO_ESCURO + ESTILO_FOCO_DASHBOARD_ESCURO + ESTILO_ALGORITMO_DASHBOARD_ESCURO + ESTILO_BUSCA_GLOBAL_ESCURO + ESTILO_INTELIGENCIA_RESUMO_ESCURO + ESTILO_TOPICOS_DISCIPLINA_ESCURO + ESTILO_RESOLVEDOR_ESCURO + ESTILO_TOPICO_DETALHES_ESCURO + ESTILO_RESOLVEDOR_ELIMINADAS_ESCURO + ESTILO_RESOLVEDOR_TECLADO_ESCURO + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_ESCURO + ESTILO_CALENDARIO_PREVISAO_ESCURO + ESTILO_DASHBOARD_SHELL_ESCURO + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_B_ESCURO) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_C) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_D) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_E) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_F) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_G) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_H) + render_qss("escuro", ESTILO_NAVEGACAO_BUSCA_GLOBAL) + render_qss("escuro", ESTILO_NAVEGACAO_RETORNOS_DASHBOARD) + render_qss("escuro", ESTILO_CARDS_GLOBAIS_BLOCO_A) + render_qss("escuro", ESTILO_CARDS_GLOBAIS_BLOCO_B) + render_qss("escuro", ESTILO_CARDS_GLOBAIS_BLOCO_C) + render_qss("escuro", ESTILO_MODO_FOCO_INTEGRACAO_RESOLVEDOR))
 
 
 
@@ -18658,6 +20610,36 @@ def stylesheet_futurista():
     QLabel#pageSubtitle,
     QLabel#mutedLabel {
         color: #87a6c2;
+    }
+
+    QDialog#questionSessionSummaryDialog {
+        background-color: {{color:summary.canvas}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#pageTitle {
+        color: {{color:summary.title_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#pageSubtitle {
+        color: {{color:summary.subtitle_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QFrame#adaptiveSummaryCard {
+        background: {{gradient:summary.adaptive_gradient}};
+        border-color: {{color:summary.adaptive_border}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#adaptiveSummaryTitle {
+        color: {{color:summary.adaptive_title_text}};
+    }
+
+    QDialog#questionSessionSummaryDialog QFrame#effectivenessImpactCard {
+        background: {{gradient:summary.effectiveness_gradient}};
+        border-color: {{color:summary.effectiveness_border}};
+    }
+
+    QDialog#questionSessionSummaryDialog QLabel#effectivenessImpactTitle {
+        color: {{color:summary.effectiveness_title_text}};
     }
 
     QLabel#questionAlternativeText {
@@ -19332,9 +21314,9 @@ def stylesheet_futurista():
     }
 
     QLabel#mockExamTimer {
-        background-color: #152a46;
-        color: #9eeeff;
-        border: 1px solid #42cae9;
+        background-color: {{color:session.timer_surface}};
+        color: {{color:session.timer_text}};
+        border: 1px solid {{color:session.timer_border}};
         border-radius: 8px;
         font-weight: 900;
     }
@@ -21628,69 +23610,93 @@ def stylesheet_futurista():
     }
 
     QFrame#pauseTimerPanel {
-        background-color: #102b35;
-        border: 1px solid #2f7180;
+        background-color: {{color:pause.timer_panel_surface}};
+        border: 1px solid {{color:pause.timer_panel_border}};
         border-radius: 11px;
     }
 
-    QFrame#pauseRecordsPanel,
+    QFrame#pauseRecordsPanel {
+        background-color: {{color:pause.records_panel_surface}};
+        border: 1px solid {{color:pause.records_panel_border}};
+        border-radius: 12px;
+    }
+
     QFrame#gameBoardPanel {
-        background-color: #101f30;
-        border: 1px solid #315d79;
+        background-color: {{color:game.board_surface}};
+        border: 1px solid {{color:game.board_border}};
         border-radius: 12px;
     }
 
     QFrame#pauseRecordCard {
-        background-color: #13283a;
-        border: 1px solid #315d79;
+        background-color: {{color:pause.record_card_surface}};
+        border: 1px solid {{color:pause.record_card_border}};
         border-radius: 9px;
     }
 
-    QLabel#pauseHubTitle,
-    QLabel#gameTitle,
+    QLabel#pauseHubTitle {
+        color: {{color:pause.hub_title_text}};
+        font-weight: 800;
+    }
+
     QLabel#pauseSectionTitle {
-        color: #e1f7ff;
+        color: {{color:pause.section_title_text}};
+        font-weight: 800;
+    }
+
+    QLabel#gameTitle {
+        color: {{color:game.title_text}};
         font-weight: 800;
     }
 
     QLabel#pauseHubTitle { font-size: 17px; }
     QLabel#gameTitle { font-size: 13pt; }
-    QLabel#pauseHubSubtitle,
-    QLabel#gameHint,
-    QLabel#pauseTimerStatus,
-    QLabel#gameStatus { color: #8eafc3; }
+    QLabel#pauseHubSubtitle { color: {{color:pause.hub_subtitle_text}}; }
+    QLabel#gameHint { color: {{color:game.hint_text}}; }
+    QLabel#pauseTimerStatus { color: {{color:pause.timer_status_text}}; }
+    QLabel#gameStatus { color: {{color:game.status_text}}; }
 
-    QLabel#pauseRecordValue,
-    QLabel#gameMetric,
-    QLabel#pauseTimerValue {
-        color: #8de7e5;
+    QLabel#pauseRecordValue {
+        color: {{color:pause.record_value_text}};
+        font-weight: 900;
+    }
+
+    QLabel#gameMetric {
+        color: {{color:game.metric_text}};
         font-weight: 900;
     }
 
     QLabel#pauseTimerValue {
+        color: {{color:pause.timer_value_text}};
+        font-weight: 900;
         min-width: 74px;
         padding: 4px 10px;
-        background-color: #102033;
-        border: 1px solid #49aeb9;
+        background-color: {{color:pause.timer_value_surface}};
+        border: 1px solid {{color:pause.timer_value_border}};
         border-radius: 8px;
         font-size: 12pt;
     }
 
-    QPushButton#pausePrimaryButton,
+    QPushButton#pausePrimaryButton {
+        background: {{gradient:pause.primary_gradient}};
+        color: {{color:text.on_action}};
+        border: 1px solid {{color:pause.primary_border}};
+        border-radius: 10px;
+        font-weight: 800;
+    }
+
     QPushButton#gamePrimaryButton {
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-            stop:0 #1d7476, stop:1 #307f91);
-        color: #ffffff;
-        border: 1px solid #62d6d5;
+        background: {{gradient:game.primary_gradient}};
+        color: {{color:text.on_action}};
+        border: 1px solid {{color:game.primary_border}};
         border-radius: 10px;
         font-weight: 800;
     }
 
     QPushButton#pauseBackButton,
     QPushButton#pauseSecondaryButton {
-        background-color: #102033;
-        color: #b6d9ff;
-        border: 1px solid #4f7eb7;
+        background-color: {{color:pause.secondary_surface}};
+        color: {{color:pause.secondary_text}};
+        border: 1px solid {{color:pause.secondary_border}};
         border-radius: 10px;
         font-weight: 700;
     }
@@ -21700,9 +23706,9 @@ def stylesheet_futurista():
     QPushButton#sequenceCellButton,
     QPushButton#puzzleTileButton,
     QPushButton#rotationOptionButton {
-        background-color: #14283b;
-        color: #e5f5ff;
-        border: 1px solid #386681;
+        background-color: {{color:game.cell_surface}};
+        color: {{color:game.cell_text}};
+        border: 1px solid {{color:game.cell_border}};
         border-radius: 10px;
         font-size: 12pt;
         font-weight: 900;
@@ -21720,40 +23726,55 @@ def stylesheet_futurista():
         padding: 0px;
     }
 
-    QPushButton#chimpCellButton[cellState="number"],
-    QPushButton#memoryCardButton[cardState="open"],
-    QPushButton#puzzleTileButton[tileState="movable"] {
-        background-color: #173b5c;
-        color: #b7e3ff;
-        border-color: #5aa9dc;
+    QPushButton#chimpCellButton[cellState="number"] {
+        background-color: {{color:game.chimp_number_surface}};
+        color: {{color:game.chimp_number_text}};
+        border-color: {{color:game.chimp_number_border}};
     }
 
-    QPushButton#chimpCellButton[cellState="correct"],
+    QPushButton#memoryCardButton[cardState="open"] {
+        background-color: {{color:game.memory_open_surface}};
+        color: {{color:game.memory_open_text}};
+        border-color: {{color:game.memory_open_border}};
+    }
+
+    QPushButton#puzzleTileButton[tileState="movable"] {
+        background-color: {{color:game.puzzle_movable_surface}};
+        color: {{color:game.puzzle_movable_text}};
+        border-color: {{color:game.puzzle_movable_border}};
+    }
+
+    QPushButton#chimpCellButton[cellState="correct"] {
+        background-color: {{color:game.chimp_correct_surface}};
+        color: {{color:game.chimp_correct_text}};
+        border-color: {{color:game.chimp_correct_border}};
+    }
+
     QPushButton#memoryCardButton[cardState="matched"] {
-        background-color: #17413d;
-        color: #aaf6e4;
-        border-color: #53baa7;
+        background-color: {{color:game.memory_matched_surface}};
+        color: {{color:game.memory_matched_text}};
+        border-color: {{color:game.memory_matched_border}};
     }
 
     QPushButton#sequenceCellButton[lit="true"] {
-        background-color: #b17f2b;
-        border-color: #f0c15d;
+        background-color: {{color:game.sequence_lit_surface}};
+        border-color: {{color:game.sequence_lit_border}};
     }
 
     QPushButton#puzzleTileButton[tileState="blank"] {
-        background-color: #0d1825;
-        border-color: #203d52;
-        color: transparent;
+        background-color: {{color:game.puzzle_blank_surface}};
+        border-color: {{color:game.puzzle_blank_border}};
+        color: {{color:game.puzzle_blank_text}};
     }
 
     QPushButton#rotationOptionButton[answerState="correct"] {
-        background-color: #17413d;
-        border-color: #53baa7;
+        background-color: {{color:game.rotation_correct_surface}};
+        border-color: {{color:game.rotation_correct_border}};
     }
 
     QPushButton#rotationOptionButton[answerState="wrong"] {
-        background-color: #48212f;
-        border-color: #c25978;
+        background-color: {{color:game.rotation_wrong_surface}};
+        border-color: {{color:game.rotation_wrong_border}};
     }
 
 
@@ -21771,69 +23792,67 @@ def stylesheet_futurista():
     }
     QScrollArea#focusScrollArea { border: none; background: transparent; }
     QWidget#focusScrollContent { background: transparent; }
-    QLabel#focusTitle, QLabel#focusSectionTitle, QLabel#focusContextLabel { color: #e1f7ff; font-weight: 800; }
+    QLabel#focusTitle, QLabel#focusSectionTitle, QLabel#focusContextLabel { color: {{color:focus_mode.section_text}}; font-weight: 800; }
     QLabel#focusTitle { font-size: 17px; }
-    QLabel#focusSubtitle, QLabel#focusWindowHint, QLabel#focusStatLabel, QLabel#focusStatusLabel { color: #8eafc3; }
+    QLabel#focusSubtitle, QLabel#focusWindowHint, QLabel#focusStatLabel, QLabel#focusStatusLabel { color: {{color:focus_mode.secondary_text}}; }
     QFrame#focusStatsPanel { background-color: #102638; border: 1px solid #315d79; border-radius: 11px; }
-    QLabel#focusStatValue, QLabel#focusTimerValue { color: #8fd8ff; font-weight: 900; }
+    QLabel#focusStatValue, QLabel#focusTimerValue { color: {{color:focus_mode.timer}}; font-weight: 900; }
     QLabel#focusStatValue { font-size: 13pt; }
     QLabel#focusTimerValue { font-size: 32px; }
-    QFrame#focusConfigPanel, QFrame#focusRecentPanel { background-color: #101f30; border: 1px solid #315d79; border-radius: 12px; }
-    QFrame#focusActivePanel { background-color: #10283c; border: 1px solid #3f7599; border-radius: 12px; }
+    QFrame#focusConfigPanel, QFrame#focusRecentPanel { background-color: {{color:focus_mode.panel}}; border: 1px solid {{color:focus_mode.border}}; border-radius: 12px; }
+    QFrame#focusActivePanel { background-color: {{color:focus_mode.panel_active}}; border: 1px solid {{color:focus_mode.panel_active_border}}; border-radius: 12px; }
     QLabel#dashboardFocusSummary { color: #82abc5; font-size: 8.4pt; font-weight: 700; }
     QPushButton#focusPresetButton, QPushButton#focusSecondaryButton, QPushButton#focusPauseButton {
-        background-color: #132b40; color: #bce7ff; border: 1px solid #3e7397; border-radius: 9px; font-weight: 700;
+        background-color: {{color:focus_mode.secondary_action_surface}}; color: {{color:focus_mode.secondary_action_text}}; border: 1px solid {{color:focus_mode.secondary_action_border}}; border-radius: 9px; font-weight: 700;
     }
     QPushButton#focusPresetButton:hover, QPushButton#focusSecondaryButton:hover, QPushButton#focusPauseButton:hover {
-        background-color: #183850; color: #edfbff; border-color: #65b9df;
+        background-color: {{color:focus_mode.secondary_action_hover_surface}}; color: {{color:focus_mode.secondary_action_hover_text}}; border-color: {{color:focus_mode.secondary_action_hover_border}};
     }
     QPushButton#focusPrimaryButton {
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-            stop:0 #b51f31, stop:0.52 #d62b3d, stop:1 #f04458);
-        color: #ffffff; border: 1px solid #ff7382; border-radius: 12px;
+        background: {{gradient:focus_mode.action_gradient}};
+        color: {{color:text.on_action}}; border: 1px solid {{color:focus_mode.action_border}}; border-radius: 12px;
         font-weight: 900; font-size: 10.2pt; padding: 8px 22px;
     }
     QPushButton#focusPrimaryButton:hover {
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-            stop:0 #ce293b, stop:0.52 #e83b4c, stop:1 #ff596b);
-        border-color: #ffabb3;
+        background: {{gradient:focus_mode.action_hover_gradient}};
+        border-color: {{color:focus_mode.action_hover_border}};
     }
-    QPushButton#focusPrimaryButton:pressed { background-color: #981827; border-color: #ff596b; }
-    QPushButton#focusDangerButton { background-color: #402827; color: #ffd0c9; border: 1px solid #8d554d; border-radius: 9px; font-weight: 700; }
+    QPushButton#focusPrimaryButton:pressed { background-color: {{color:focus_mode.action}}; border-color: {{color:focus_mode.action_pressed_border}}; }
+    QPushButton#focusDangerButton { background-color: {{color:focus_mode.danger}}; color: {{color:focus_mode.danger_text}}; border: 1px solid {{color:focus_mode.danger_border}}; border-radius: 9px; font-weight: 700; }
 
-    QFrame#postFocusHero { background-color: #10283c; border: 1px solid #3f7599; border-radius: 12px; }
-    QFrame#postFocusContentCard { background-color: #101f30; border: 1px solid #315d79; border-radius: 10px; }
-    QFrame#postFocusResultCard { background-color: #102c2b; border: 1px solid #34756d; border-radius: 10px; }
-    QLabel#postFocusResultValue { color: #8de2c2; font-size: 13pt; font-weight: 900; }
-    QPushButton#postFocusContinue { background-color: #173b55; color: #d9f4ff; border: 1px solid #4f8fb7; border-radius: 10px; font-weight: 900; padding: 7px 14px; }
-    QPushButton#postFocusContinue:hover { background-color: #1d4967; border-color: #70b7df; }
-    QLabel#postFocusEyebrow { color: #82abc5; font-size: 8.3pt; font-weight: 800; }
-    QLabel#postFocusTime { color: #bce7ff; font-size: 25px; font-weight: 900; }
-    QLabel#postFocusStatus, QLabel#postFocusDetail, QLabel#postFocusNote { color: #82abc5; }
-    QLabel#postFocusContentTitle, QLabel#postFocusQuestion { color: #eaf8ff; font-weight: 800; }
+    QFrame#postFocusHero { background-color: {{color:post_focus.hero_surface}}; border: 1px solid {{color:post_focus.hero_border}}; border-radius: 12px; }
+    QFrame#postFocusContentCard { background-color: {{color:post_focus.content_surface}}; border: 1px solid {{color:post_focus.content_border}}; border-radius: 10px; }
+    QFrame#postFocusResultCard { background-color: {{color:post_focus.result_surface}}; border: 1px solid {{color:post_focus.result_border}}; border-radius: 10px; }
+    QLabel#postFocusResultValue { color: {{color:post_focus.result_value_text}}; font-size: 13pt; font-weight: 900; }
+    QPushButton#postFocusContinue { background-color: {{color:post_focus.continue_surface}}; color: {{color:post_focus.continue_text}}; border: 1px solid {{color:post_focus.continue_border}}; border-radius: 10px; font-weight: 900; padding: 7px 14px; }
+    QPushButton#postFocusContinue:hover { background-color: {{color:post_focus.continue_hover_surface}}; border-color: {{color:post_focus.continue_hover_border}}; }
+    QLabel#postFocusEyebrow { color: {{color:post_focus.eyebrow_text}}; font-size: 8.3pt; font-weight: 800; }
+    QLabel#postFocusTime { color: {{color:post_focus.time_text}}; font-size: 25px; font-weight: 900; }
+    QLabel#postFocusStatus, QLabel#postFocusDetail, QLabel#postFocusNote { color: {{color:post_focus.meta_text}}; }
+    QLabel#postFocusContentTitle, QLabel#postFocusQuestion { color: {{color:post_focus.strong_text}}; font-weight: 800; }
     QLabel#postFocusQuestion { font-size: 10.5pt; font-weight: 900; }
-    QPushButton#postFocusPrimary { background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #355f9f, stop:1 #4c7ee0); color: #ffffff; border: 1px solid #7dadff; border-radius: 10px; font-weight: 900; padding: 7px 14px; }
-    QPushButton#postFocusPrimary:hover { border-color: #b9d7ff; }
-    QPushButton#postFocusSecondary { background-color: #132b40; color: #bce7ff; border: 1px solid #3e7397; border-radius: 9px; font-weight: 800; padding: 7px 14px; }
-    QPushButton#postFocusSecondary:hover { background-color: #183850; border-color: #65b9df; }
-    QPushButton#postFocusGhost { background: transparent; color: #82abc5; border: 1px solid #315d79; border-radius: 8px; font-weight: 700; padding: 6px 12px; }
-    QPushButton#postFocusGhost:hover { background-color: #132b40; color: #d9f4ff; }
-    QPushButton#postFocusSecondary:disabled { color: #55768b; background-color: #102231; border-color: #29495e; }
-    QFrame#focusHeroPanel { background-color: #10283c; border: 1px solid #3f7599; border-radius: 14px; }
-    QLabel#focusHeroEyebrow { color: #82abc5; font-size: 8.3pt; font-weight: 800; letter-spacing: 0.45px; }
-    QLabel#focusHeroValue { color: #bce7ff; font-size: 24px; font-weight: 900; }
-    QLabel#focusHeroStatus { color: #eaf8ff; font-size: 10pt; font-weight: 800; }
-    QLabel#focusHeroNote, QLabel#focusConfigHint, QLabel#focusHistoryHint, QLabel#focusFieldLabel { color: #82abc5; }
-    QFrame#focusHeroMiniCard { background-color: #132b40; border: 1px solid #3e7397; border-radius: 11px; }
-    QLabel#focusHeroMiniLabel { color: #82abc5; font-size: 8.2pt; font-weight: 700; }
-    QLabel#focusHeroMiniValue { color: #d9f4ff; font-size: 12pt; font-weight: 900; }
-    QLabel#postFocusDialogTitle { color: #eaf8ff; font-size: 16px; font-weight: 900; }
-    QLabel#postFocusDialogSubtitle { color: #82abc5; }
-    QFrame#postFocusMiniCard { background-color: #132b40; border: 1px solid #3e7397; border-radius: 10px; }
-    QLabel#postFocusMiniLabel { color: #82abc5; font-size: 8.2pt; font-weight: 800; }
-    QLabel#postFocusMiniValue { color: #d9f4ff; font-size: 11.5pt; font-weight: 900; }
-    QProgressBar#focusProgressBar { min-height: 8px; max-height: 8px; background-color: #173046; border: 1px solid #2e5c78; border-radius: 4px; }
-    QProgressBar#focusProgressBar::chunk { background-color: #55a7d5; border-radius: 4px; }
+    QPushButton#postFocusPrimary { background: {{gradient:post_focus.primary_gradient}}; color: {{color:text.on_action}}; border: 1px solid {{color:post_focus.primary_border}}; border-radius: 10px; font-weight: 900; padding: 7px 14px; }
+    QPushButton#postFocusPrimary:hover { border-color: {{color:post_focus.primary_hover_border}}; }
+    QPushButton#postFocusSecondary { background-color: {{color:post_focus.secondary_surface}}; color: {{color:post_focus.secondary_text}}; border: 1px solid {{color:post_focus.secondary_border}}; border-radius: 9px; font-weight: 800; padding: 7px 14px; }
+    QPushButton#postFocusSecondary:hover { background-color: {{color:post_focus.secondary_hover_surface}}; border-color: {{color:post_focus.secondary_hover_border}}; }
+    QPushButton#postFocusGhost { background: transparent; color: {{color:post_focus.ghost_text}}; border: 1px solid {{color:post_focus.ghost_border}}; border-radius: 8px; font-weight: 700; padding: 6px 12px; }
+    QPushButton#postFocusGhost:hover { background-color: {{color:post_focus.ghost_hover_surface}}; color: {{color:post_focus.ghost_hover_text}}; }
+    QPushButton#postFocusSecondary:disabled { color: {{color:post_focus.secondary_disabled_text}}; background-color: {{color:post_focus.secondary_disabled_surface}}; border-color: {{color:post_focus.secondary_disabled_border}}; }
+    QFrame#focusHeroPanel { background-color: {{color:focus_mode.hero_surface}}; border: 1px solid {{color:focus_mode.hero_border}}; border-radius: 14px; }
+    QLabel#focusHeroEyebrow { color: {{color:focus_mode.hero_eyebrow_text}}; font-size: 8.3pt; font-weight: 800; letter-spacing: 0.45px; }
+    QLabel#focusHeroValue { color: {{color:focus_mode.hero_value_text}}; font-size: 24px; font-weight: 900; }
+    QLabel#focusHeroStatus { color: {{color:focus_mode.hero_status_text}}; font-size: 10pt; font-weight: 800; }
+    QLabel#focusHeroNote, QLabel#focusConfigHint, QLabel#focusHistoryHint, QLabel#focusFieldLabel { color: {{color:focus_mode.meta_text}}; }
+    QFrame#focusHeroMiniCard { background-color: {{color:focus_mode.mini_surface}}; border: 1px solid {{color:focus_mode.mini_border}}; border-radius: 11px; }
+    QLabel#focusHeroMiniLabel { color: {{color:focus_mode.mini_label_text}}; font-size: 8.2pt; font-weight: 700; }
+    QLabel#focusHeroMiniValue { color: {{color:focus_mode.mini_value_text}}; font-size: 12pt; font-weight: 900; }
+    QLabel#postFocusDialogTitle { color: {{color:post_focus.dialog_title_text}}; font-size: 16px; font-weight: 900; }
+    QLabel#postFocusDialogSubtitle { color: {{color:post_focus.dialog_subtitle_text}}; }
+    QFrame#postFocusMiniCard { background-color: {{color:post_focus.mini_surface}}; border: 1px solid {{color:post_focus.mini_border}}; border-radius: 10px; }
+    QLabel#postFocusMiniLabel { color: {{color:post_focus.mini_label_text}}; font-size: 8.2pt; font-weight: 800; }
+    QLabel#postFocusMiniValue { color: {{color:post_focus.mini_value_text}}; font-size: 11.5pt; font-weight: 900; }
+    QProgressBar#focusProgressBar { min-height: 8px; max-height: 8px; background-color: {{color:focus_mode.progress_track}}; border: 1px solid {{color:focus_mode.progress_border}}; border-radius: 4px; }
+    QProgressBar#focusProgressBar::chunk { background-color: {{color:focus_mode.progress_fill}}; border-radius: 4px; }
 
 
     
@@ -22046,7 +24065,7 @@ def stylesheet_futurista():
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_FUTURISTA + ESTILO_DASHBOARD_MODERNO_FUTURISTA + ESTILO_FOCO_DASHBOARD_FUTURISTA + ESTILO_ALGORITMO_DASHBOARD_FUTURISTA + ESTILO_BUSCA_GLOBAL_FUTURISTA + ESTILO_INTELIGENCIA_RESUMO_FUTURISTA + ESTILO_TOPICOS_DISCIPLINA_FUTURISTA + ESTILO_DASHBOARD_NEO_FUTURISTA + ESTILO_RESOLVEDOR_FUTURISTA + ESTILO_TOPICO_DETALHES_FUTURISTA + ESTILO_RESOLVEDOR_ELIMINADAS_FUTURISTA + ESTILO_RESOLVEDOR_TECLADO_FUTURISTA + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_FUTURISTA + ESTILO_CALENDARIO_PREVISAO_FUTURISTA)
+""" + ESTILO_JORNADA_FUTURISTA + ESTILO_DASHBOARD_MODERNO_FUTURISTA + ESTILO_FOCO_DASHBOARD_FUTURISTA + ESTILO_ALGORITMO_DASHBOARD_FUTURISTA + ESTILO_BUSCA_GLOBAL_FUTURISTA + ESTILO_INTELIGENCIA_RESUMO_FUTURISTA + ESTILO_TOPICOS_DISCIPLINA_FUTURISTA + ESTILO_DASHBOARD_NEO_FUTURISTA + ESTILO_RESOLVEDOR_FUTURISTA + ESTILO_TOPICO_DETALHES_FUTURISTA + ESTILO_RESOLVEDOR_ELIMINADAS_FUTURISTA + ESTILO_RESOLVEDOR_TECLADO_FUTURISTA + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_FUTURISTA + ESTILO_CALENDARIO_PREVISAO_FUTURISTA + ESTILO_DASHBOARD_SHELL_FUTURISTA + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_B_FUTURISTA) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_C) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_D) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_E) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_F) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_G) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_H) + render_qss("futurista", ESTILO_NAVEGACAO_BUSCA_GLOBAL) + render_qss("futurista", ESTILO_NAVEGACAO_RETORNOS_DASHBOARD) + render_qss("futurista", ESTILO_CARDS_GLOBAIS_BLOCO_A) + render_qss("futurista", ESTILO_CARDS_GLOBAIS_BLOCO_B) + render_qss("futurista", ESTILO_CARDS_GLOBAIS_BLOCO_C) + render_qss("futurista", ESTILO_MODO_FOCO_INTEGRACAO_RESOLVEDOR))
 
 def aplicar_tema(
     app,

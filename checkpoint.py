@@ -55,6 +55,7 @@ PASTAS_RECURSIVAS_OPCIONAIS = {
     "icons",
     "icones",
     "statistics_core",
+    "ui",
 }
 
 EXTENSOES_RECURSOS = {
@@ -296,6 +297,7 @@ def _arquivos_do_projeto(pasta: Path) -> list[tuple[Path, str]]:
 
     for nome_pasta in sorted(PASTAS_RECURSIVAS_OPCIONAIS):
         raiz = pasta / nome_pasta
+        extensoes = EXTENSOES_PROJETO if nome_pasta == "ui" else EXTENSOES_RECURSOS
 
         if not raiz.is_dir():
             continue
@@ -308,7 +310,7 @@ def _arquivos_do_projeto(pasta: Path) -> list[tuple[Path, str]]:
             if partes & PASTAS_IGNORADAS:
                 continue
 
-            if caminho.suffix.lower() not in EXTENSOES_RECURSOS:
+            if caminho.suffix.lower() not in extensoes:
                 continue
 
             try:

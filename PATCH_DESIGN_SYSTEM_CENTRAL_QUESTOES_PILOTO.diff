@@ -1,0 +1,141 @@
+--- a/tema.py
++++ b/tema.py
+@@ -7630,8 +7630,8 @@
+     }
+
+     QFrame#questionsInventoryStrip {
+-        background-color: #ffffff;
+-        border: 1px solid #dbe3ed;
++        background-color: {{color:questions_center.inventory_surface}};
++        border: 1px solid {{color:questions_center.inventory_border}};
+         border-radius: 11px;
+     }
+
+@@ -7642,20 +7642,20 @@
+
+     QLabel#questionsInventoryValue {
+         background: transparent;
+-        color: #4338ca;
++        color: {{color:questions_center.inventory_value_text}};
+         font-size: 14pt;
+         font-weight: 900;
+     }
+
+     QLabel#questionsInventoryLabel {
+         background: transparent;
+-        color: #64748b;
++        color: {{color:questions_center.inventory_label_text}};
+         font-size: 8.5pt;
+         font-weight: 700;
+     }
+
+     QFrame#questionsInventoryDivider {
+-        background-color: #e2e8f0;
++        background-color: {{color:questions_center.inventory_divider}};
+         border: none;
+     }
+
+@@ -14737,8 +14737,8 @@
+     }
+
+     QFrame#questionsInventoryStrip {
+-        background-color: #121c2d;
+-        border: 1px solid #334155;
++        background-color: {{color:questions_center.inventory_surface}};
++        border: 1px solid {{color:questions_center.inventory_border}};
+         border-radius: 11px;
+     }
+
+@@ -14749,20 +14749,20 @@
+
+     QLabel#questionsInventoryValue {
+         background: transparent;
+-        color: #a5b4fc;
++        color: {{color:questions_center.inventory_value_text}};
+         font-size: 14pt;
+         font-weight: 900;
+     }
+
+     QLabel#questionsInventoryLabel {
+         background: transparent;
+-        color: #94a3b8;
++        color: {{color:questions_center.inventory_label_text}};
+         font-size: 8.5pt;
+         font-weight: 700;
+     }
+
+     QFrame#questionsInventoryDivider {
+-        background-color: #334155;
++        background-color: {{color:questions_center.inventory_divider}};
+         border: none;
+     }
+
+--- a/ui/design/tokens.py
++++ b/ui/design/tokens.py
+@@ -759,6 +759,12 @@
+     "navigation.back_border",
+     "navigation.back_hover_text",
+     "navigation.back_hover_border",
++    # Central de Questões — faixa de inventário (piloto cromático)
++    "questions_center.inventory_surface",
++    "questions_center.inventory_border",
++    "questions_center.inventory_value_text",
++    "questions_center.inventory_label_text",
++    "questions_center.inventory_divider",
+     "card.dialog_surface",
+     "card.dialog_border",
+     "card.metric_surface",
+--- a/ui/design/themes.py
++++ b/ui/design/themes.py
+@@ -480,6 +480,13 @@
+
+
+ _LIGHT_COMPONENT_OVERRIDES = {
++    # Central de Questões — faixa de inventário; paridade cromática legada.
++    "questions_center.inventory_surface": "#FFFFFF",
++    "questions_center.inventory_border": "#DBE3ED",
++    "questions_center.inventory_value_text": "#4338CA",
++    "questions_center.inventory_label_text": "#64748B",
++    "questions_center.inventory_divider": "#E2E8F0",
++
+     "summary.canvas": "#F4F6FA",
+     "summary.title_text": "#151C2A",
+     "summary.subtitle_text": "#69778C",
+@@ -1249,6 +1256,13 @@
+
+ }
+ _DARK_COMPONENT_OVERRIDES = {
++    # Central de Questões — faixa de inventário; paridade cromática legada.
++    "questions_center.inventory_surface": "#121C2D",
++    "questions_center.inventory_border": "#334155",
++    "questions_center.inventory_value_text": "#A5B4FC",
++    "questions_center.inventory_label_text": "#94A3B8",
++    "questions_center.inventory_divider": "#334155",
++
+     "summary.canvas": "#0D1624",
+     "summary.title_text": "#EEF3F8",
+     "summary.subtitle_text": "#8F9CAF",
+@@ -2019,6 +2033,13 @@
+
+ }
+ _FUTURISTIC_COMPONENT_OVERRIDES = {
++    # Central de Questões — faixa de inventário; paridade cromática legada.
++    "questions_center.inventory_surface": "#121C2D",
++    "questions_center.inventory_border": "#334155",
++    "questions_center.inventory_value_text": "#A5B4FC",
++    "questions_center.inventory_label_text": "#94A3B8",
++    "questions_center.inventory_divider": "#334155",
++
+     "summary.canvas": "#07111E",
+     "summary.title_text": "#E7F5FB",
+     "summary.subtitle_text": "#7F9FB4",
+--- a/ui/design/palette.py
++++ b/ui/design/palette.py
+@@ -114,6 +114,7 @@
+     "#151F2C",
+     "#111A27",
+     "#111827",
++    "#121C2D",  # Central de Questões — faixa de inventário (escuro/futurista)
+     "#101722",
+     "#0B111D",
+     "#07111E",

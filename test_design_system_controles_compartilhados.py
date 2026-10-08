@@ -6,8 +6,12 @@ import hashlib
 from pathlib import Path
 import re
 import unittest
+from _design_system_test_helpers import strip_cards_global_block_a
 
 import tema
+
+# 3E-B2c: o hash Futurista muda apenas pela separação autorizada da cor
+# normal das flags; equivalência integral com B2b2 validada no teste de flags.
 from ui.design import get_theme
 
 
@@ -15,9 +19,9 @@ ROOT = Path(__file__).resolve().parent
 TEMA_SOURCE = (ROOT / "tema.py").read_text(encoding="utf-8")
 
 EXPECTED_STYLESHEET_BASELINE = {
-    "claro": "139709f8c57e00f16848668f9226703c7f8ff391dd9aea2bba8b2eae20ac2c5f",
-    "escuro": "ebbc21363d0035058301d060eb099fb2d33b992e8537c20f9bf1e77f8a2b4f3e",
-    "futurista": "0e588bb372946b4a6f61ad406c817fd155cac8c3c4286e9f93b7a09d06dc8622",
+    "claro": "cef0365e8cdd703fc73df505529d0e97672e5c49f036c0cba3b7ee50d42f23fe",
+    "escuro": "5e365d9be91deb9d29532b8954c4cc8d66acf8142f019d3706aafba0a3e548cb",
+    "futurista": "edc56b82ac5c720c06dac89700ec039d4d62536a31709d881ff1078960605dce",
 }
 
 
@@ -30,6 +34,38 @@ def _normalize_hex_case(stylesheet: str) -> str:
     return re.sub(r"\s+", " ", normalized).strip()
 
 
+
+def strip_navigation_search_layer(theme_name: str, qss: str) -> str:
+    qss = strip_cards_global_block_a(tema, theme_name, qss)
+    """Remove apenas a camada aditiva da Busca global para snapshots históricos."""
+    # Remove primeiro a camada posterior de Retornos ao Dashboard, quando presente.
+    if hasattr(tema, "ESTILO_NAVEGACAO_RETORNOS_DASHBOARD"):
+        if theme_name == "futurista":
+            final_back = tema.render_qss("futurista", tema.ESTILO_NAVEGACAO_RETORNOS_DASHBOARD)
+            inherited_back = tema.render_qss("escuro", tema.ESTILO_NAVEGACAO_RETORNOS_DASHBOARD)
+            if qss.endswith(final_back):
+                qss = qss[:-len(final_back)]
+            if inherited_back in qss:
+                qss = qss.replace(inherited_back, "", 1)
+        else:
+            back_layer = tema.render_qss(theme_name, tema.ESTILO_NAVEGACAO_RETORNOS_DASHBOARD)
+            if qss.endswith(back_layer):
+                qss = qss[:-len(back_layer)]
+            else:
+                qss = qss.replace(back_layer, "", 1)
+    if theme_name == "futurista":
+        final = tema.render_qss("futurista", tema.ESTILO_NAVEGACAO_BUSCA_GLOBAL)
+        inherited = tema.render_qss("escuro", tema.ESTILO_NAVEGACAO_BUSCA_GLOBAL)
+        if qss.endswith(final):
+            qss = qss[:-len(final)]
+        if inherited in qss:
+            qss = qss.replace(inherited, "", 1)
+        return qss
+    layer = tema.render_qss(theme_name, tema.ESTILO_NAVEGACAO_BUSCA_GLOBAL)
+    if qss.endswith(layer):
+        return qss[:-len(layer)]
+    return qss.replace(layer, "", 1)
+
 class SharedControlsBaselineTests(unittest.TestCase):
     def test_stylesheets_completos_preservam_linha_de_base(self) -> None:
         stylesheets = {
@@ -39,6 +75,7 @@ class SharedControlsBaselineTests(unittest.TestCase):
         }
         for theme, stylesheet in stylesheets.items():
             with self.subTest(theme=theme):
+                stylesheet = strip_navigation_search_layer(theme, stylesheet)
                 normalized = _normalize_hex_case(stylesheet)
                 self.assertEqual(
                     hashlib.sha256(normalized.encode("utf-8")).hexdigest(),
@@ -81,8 +118,15 @@ class SharedControlsBaselineTests(unittest.TestCase):
         self.assertGreaterEqual(TEMA_SOURCE.count("{{color:"), 146)
         # 4 controles compartilhados + 4 estados do núcleo do Resolvedor
         # + 6 ações primárias normal/hover da 3E-A2
-        # + 3 progressos e 1 overview da 3E-B2a.
-        self.assertEqual(TEMA_SOURCE.count("{{gradient:"), 18)
+        # + 3 progressos e 1 overview da 3E-B2a
+        # + 1 painel inferior Futurista da 3E-B2b2
+        # + 6 consumidores dos gradientes do Modo Foco (normal/hover × 3 temas)
+        # + 1 consumidor do gradiente primário do Pós-Foco Futurista.
+        # + 11 gradientes tokenizados do Dashboard Bloco C.
+        # + 3 gradientes tokenizados do Dashboard Bloco D.
+        # + 2 gradientes do shell compartilhado studyActionCard (Cards globais B).
+        # + 1 gradiente do shell compartilhado myEvolutionStatCard (Cards globais C).
+        self.assertEqual(TEMA_SOURCE.count("{{gradient:"), 91)
 
     def test_tokens_de_controles_reproduzem_valores_legados(self) -> None:
         expected = {
@@ -133,15 +177,15 @@ class SharedControlsBaselineTests(unittest.TestCase):
                 self.assertEqual(tuple(stop.position for stop in spec.stops), (0.0, 1.0))
                 self.assertEqual(tuple(stop.color.value for stop in spec.stops), colors)
 
-    def test_tokens_de_componentes_ainda_fora_do_escopo_nao_derivam(self) -> None:
+    def test_tokens_de_chart_e_foco_preservam_contratos_explicitos(self) -> None:
         expected = {
             "claro": {
                 "chart.grid": "#E2E8F0",
-                "focus_mode.panel": "#F8FAFC",
+                "focus_mode.panel": "#FFFFFF",
             },
             "escuro": {
                 "chart.grid": "#273449",
-                "focus_mode.panel": "#172033",
+                "focus_mode.panel": "#151F2D",
             },
             "futurista": {
                 "chart.grid": "#2E5C78",

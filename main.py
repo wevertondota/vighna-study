@@ -80,7 +80,7 @@ from tema import (
 )
 
 from icones import criar_icone
-from ui.design import fixed_qss_color, qcolor
+from ui.design import fixed_qss_color, qcolor, qss_color
 
 from backup import (
     fazer_backup,
@@ -13987,6 +13987,7 @@ class JanelaResumoResolucaoQuestoes(QDialog):
         super().__init__(
             parent
         )
+        self.setObjectName("questionSessionSummaryDialog")
         self.setWindowModality(Qt.WindowModal)
 
         # Janela operacional ampla: permite maximizar/restaurar
@@ -16306,6 +16307,7 @@ class JanelaResolverQuestoes(QDialog):
 
         self.botao_dashboard = QPushButton("Dashboard")
         self.botao_dashboard.setObjectName("subtleButton")
+        self.botao_dashboard.setProperty("sessionNavigation", True)
         self.botao_dashboard.setFixedHeight(34)
         self.botao_dashboard.setToolTip(
             "Minimizar a bateria e voltar ao Dashboard sem encerrar a sessão."
@@ -29458,6 +29460,46 @@ class JanelaConfiguracoes(QDialog):
 
         self.atualizar_status_checkpoint()
 
+        # ====================================================
+        # CENTRAL DE ATUALIZAÇÕES E SEGURANÇA (AUTORIZAÇÃO OBRIGATÓRIA)
+        # ====================================================
+        secao_atualizacao, layout_atualizacao = self.criar_secao_configuracao(
+            "Atualizações e segurança",
+            "Importe pacotes verificados e autorize a atualização sem substituir seus estudos.",
+        )
+        opcao_atualizacao = QFrame()
+        opcao_atualizacao.setObjectName("settingsOption")
+        conteudo_atualizacao = QVBoxLayout(opcao_atualizacao)
+        conteudo_atualizacao.setContentsMargins(14, 11, 14, 12)
+        conteudo_atualizacao.setSpacing(8)
+        titulo_atualizacao = QLabel(f"Versão instalada • {VIGHNA_VERSION} ({VIGHNA_BUILD})")
+        titulo_atualizacao.setObjectName("configOptionTitle")
+        texto_atualizacao = QLabel(
+            "Nenhuma atualização é automática. Antes de instalar, o Vighna "
+            "confere o pacote, faz backup consistente e bloqueia alterações "
+            "não suportadas no banco de dados. A janela de instalação "
+            "é independente e pode ser minimizada."
+        )
+        texto_atualizacao.setObjectName("mutedLabel")
+        texto_atualizacao.setWordWrap(True)
+        botao_importar_atualizacao = QPushButton("Selecionar pacote ZIP e verificar")
+        botao_importar_atualizacao.setObjectName("toolbarButton")
+        botao_importar_atualizacao.clicked.connect(self.iniciar_atualizacao_segura)
+        conteudo_atualizacao.addWidget(titulo_atualizacao)
+        conteudo_atualizacao.addWidget(texto_atualizacao)
+        conteudo_atualizacao.addWidget(botao_importar_atualizacao)
+        botao_historico = QPushButton("Consultar histórico de atualizações")
+        botao_historico.setObjectName("subtleButton")
+        botao_historico.clicked.connect(self.abrir_historico_atualizacoes)
+        conteudo_atualizacao.addWidget(botao_historico)
+        layout_atualizacao.addWidget(opcao_atualizacao)
+        self.registrar_opcao_pesquisa(
+            secao_atualizacao, opcao_atualizacao,
+            "Atualizações e segurança",
+            "atualizar pacote zip instalação instalar build versão segurança "
+            "backup preservar histórico respostas progresso minimizar",
+        )
+
         self.conteudo_config_layout.addStretch()
 
         scroll.setWidget(
@@ -29576,6 +29618,45 @@ class JanelaConfiguracoes(QDialog):
         self.filtrar_configuracoes(
             ""
         )
+
+    def iniciar_atualizacao_segura(self):
+        from vighna_update_ui import selecionar_e_autorizar
+        selecionar_e_autorizar(self)
+
+    def abrir_historico_atualizacoes(self):
+        from caminhos import PASTA_DADOS
+        historico = PASTA_DADOS / "backups" / "atualizacoes" / "historico.jsonl"
+        janela = QDialog(self)
+        janela.setWindowTitle("Histórico de atualizações — VighnaStudy")
+        janela.resize(660, 410)
+        layout = QVBoxLayout(janela)
+        titulo = QLabel("Histórico de instalações e recuperações")
+        titulo.setObjectName("pageTitle")
+        layout.addWidget(titulo)
+        registros = QTextEdit()
+        registros.setReadOnly(True)
+        if historico.is_file():
+            linhas = historico.read_text(encoding="utf-8").splitlines()[-80:]
+            resumo = []
+            for linha in reversed(linhas):
+                try:
+                    item = json.loads(linha)
+                    resumo.append(
+                        f"{item.get('date', '—')}  •  {item.get('status', '—')}  •  "
+                        f"{item.get('from', '—')} → {item.get('to', '—')}"
+                    )
+                    if item.get("error"):
+                        resumo.append("  Motivo: " + str(item["error"]))
+                except (TypeError, ValueError):
+                    continue
+            registros.setPlainText("\n".join(resumo) or "Sem registros válidos.")
+        else:
+            registros.setPlainText("Nenhuma atualização foi executada por esta Central.")
+        layout.addWidget(registros)
+        botao = QPushButton("Fechar")
+        botao.clicked.connect(janela.accept)
+        layout.addWidget(botao)
+        janela.exec()
 
     def criar_secao_configuracao(
         self,
@@ -32571,7 +32652,14 @@ class DashboardPlanningArcWidget(QWidget):
         y = 8
         rect = QRectF(x, y, largura, altura * 2)
 
-        trilha = QPen(QColor(207, 243, 225, 82), 8)
+        tema_atual = normalizar_tema(
+            getattr(self.window(), "tema_atual", "claro")
+        )
+
+        trilha = QPen(
+            qcolor(tema_atual, "dashboard.planning_arc_track"),
+            8
+        )
         trilha.setCapStyle(Qt.RoundCap)
         painter.setPen(trilha)
         painter.drawArc(rect, 180 * 16, -180 * 16)
@@ -32582,7 +32670,10 @@ class DashboardPlanningArcWidget(QWidget):
             proporcao = 0.0
 
         if proporcao > 0:
-            valor = QPen(QColor('#B9FFE3'), 8)
+            valor = QPen(
+                qcolor(tema_atual, "dashboard.planning_arc_fill"),
+                8
+            )
             valor.setCapStyle(Qt.RoundCap)
             painter.setPen(valor)
             painter.drawArc(rect, 180 * 16, int(-180 * 16 * proporcao))
@@ -32591,7 +32682,9 @@ class DashboardPlanningArcWidget(QWidget):
         fonte.setPointSize(16)
         fonte.setBold(True)
         painter.setFont(fonte)
-        painter.setPen(QColor('#F4FFFA'))
+        painter.setPen(
+            qcolor(tema_atual, "dashboard.planning_arc_text")
+        )
         texto = f"{self._atual} / {self._meta}" if self._meta > 0 else f"{self._atual}"
         painter.drawText(
             QRectF(0, 18, self.width(), 56),
@@ -32658,10 +32751,15 @@ class DashboardDonutWidget(QWidget):
             self.foregroundRole()
         )
 
-        cor_trilha = QColor(
-            "#263B4F"
+        tema_atual = normalizar_tema(
+            getattr(self.window(), "tema_atual", "claro")
+        )
+
+        cor_trilha = qcolor(
+            tema_atual,
+            "dashboard.quality_donut_track_dark"
             if cor_texto.lightness() > 150
-            else "#DCE5ED"
+            else "dashboard.quality_donut_track_light"
         )
 
         caneta_trilha = QPen(
@@ -32683,7 +32781,7 @@ class DashboardDonutWidget(QWidget):
         # Cor principal do gráfico levemente mais azulada para conversar melhor
         # com os botões e com a barra de progresso do dashboard.
         caneta_valor = QPen(
-            QColor("#2FB4C7"),
+            qcolor(tema_atual, "dashboard.quality_donut_fill"),
             11
         )
         caneta_valor.setCapStyle(
@@ -39024,18 +39122,24 @@ class SistemaEstudos(QMainWindow):
                 )
                 if tema_atual == "futurista":
                     botao.setStyleSheet(
-                        "background-color:#173244; color:#8FA8B8; "
-                        "border:1px solid #466477; text-align:left; padding-left:14px;"
+                        f"background-color:{qss_color('futurista', 'dashboard.disciplines_disabled_surface')}; "
+                        f"color:{qss_color('futurista', 'dashboard.disciplines_disabled_text')}; "
+                        f"border:1px solid {qss_color('futurista', 'dashboard.disciplines_disabled_border')}; "
+                        "text-align:left; padding-left:14px;"
                     )
                 elif tema_atual == "escuro":
                     botao.setStyleSheet(
-                        "background-color:#28313d; color:#94A3B8; "
-                        "border:1px solid #475569; text-align:left; padding-left:14px;"
+                        f"background-color:{qss_color('escuro', 'dashboard.disciplines_disabled_surface')}; "
+                        f"color:{qss_color('escuro', 'dashboard.disciplines_disabled_text')}; "
+                        f"border:1px solid {qss_color('escuro', 'dashboard.disciplines_disabled_border')}; "
+                        "text-align:left; padding-left:14px;"
                     )
                 else:
                     botao.setStyleSheet(
-                        "background-color:#E2E8F0; color:#64748B; "
-                        "border:1px solid #CBD5E1; text-align:left; padding-left:14px;"
+                        f"background-color:{qss_color('claro', 'dashboard.disciplines_disabled_surface')}; "
+                        f"color:{qss_color('claro', 'dashboard.disciplines_disabled_text')}; "
+                        f"border:1px solid {qss_color('claro', 'dashboard.disciplines_disabled_border')}; "
+                        "text-align:left; padding-left:14px;"
                     )
                 botao.setText(f"{nome}  • desligada")
                 botao.setToolTip(
@@ -45988,6 +46092,10 @@ class SistemaEstudos(QMainWindow):
         voltar.setObjectName(
             "subtleButton"
         )
+        voltar.setProperty(
+            "navigationBack",
+            True
+        )
         voltar.setFixedWidth(
             88
         )
@@ -47212,6 +47320,10 @@ class SistemaEstudos(QMainWindow):
         )
         voltar.setObjectName(
             "subtleButton"
+        )
+        voltar.setProperty(
+            "navigationBack",
+            True
         )
         voltar.setFixedWidth(
             88
@@ -49029,6 +49141,10 @@ class SistemaEstudos(QMainWindow):
         voltar.setObjectName(
             "subtleButton"
         )
+        voltar.setProperty(
+            "navigationBack",
+            True
+        )
         voltar.setFixedWidth(
             88
         )
@@ -50554,6 +50670,10 @@ class SistemaEstudos(QMainWindow):
         )
         voltar.setObjectName(
             "subtleButton"
+        )
+        voltar.setProperty(
+            "navigationBack",
+            True
         )
         voltar.setFixedWidth(
             88
@@ -54338,6 +54458,10 @@ class SistemaEstudos(QMainWindow):
         )
         voltar.setObjectName(
             "subtleButton"
+        )
+        voltar.setProperty(
+            "navigationBack",
+            True
         )
         voltar.setFixedWidth(
             88
@@ -61551,6 +61675,10 @@ class SistemaEstudos(QMainWindow):
         )
         voltar.setObjectName(
             "subtleButton"
+        )
+        voltar.setProperty(
+            "navigationBack",
+            True
         )
         voltar.setFixedWidth(
             88

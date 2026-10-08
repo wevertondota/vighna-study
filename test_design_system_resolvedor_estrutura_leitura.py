@@ -6,8 +6,12 @@ import hashlib
 from pathlib import Path
 import re
 import unittest
+from _design_system_test_helpers import strip_cards_global_block_a
 
 import tema
+
+# 3E-B2c: o hash Futurista muda apenas pela separação autorizada da cor
+# normal das flags; equivalência integral com B2b2 validada no teste de flags.
 from ui.design import ALL_TOKENS, COMPONENT_TOKEN_COUNT, SEMANTIC_TOKEN_COUNT, get_theme
 
 
@@ -15,9 +19,9 @@ ROOT = Path(__file__).resolve().parent
 TEMA_SOURCE = (ROOT / "tema.py").read_text(encoding="utf-8")
 
 EXPECTED_STYLESHEET_BASELINE = {
-    "claro": "139709f8c57e00f16848668f9226703c7f8ff391dd9aea2bba8b2eae20ac2c5f",
-    "escuro": "ebbc21363d0035058301d060eb099fb2d33b992e8537c20f9bf1e77f8a2b4f3e",
-    "futurista": "0e588bb372946b4a6f61ad406c817fd155cac8c3c4286e9f93b7a09d06dc8622",
+    "claro": "cef0365e8cdd703fc73df505529d0e97672e5c49f036c0cba3b7ee50d42f23fe",
+    "escuro": "5e365d9be91deb9d29532b8954c4cc8d66acf8142f019d3706aafba0a3e548cb",
+    "futurista": "edc56b82ac5c720c06dac89700ec039d4d62536a31709d881ff1078960605dce",
 }
 
 EXPECTED_COLORS = {
@@ -125,11 +129,43 @@ def _selector_block(source: str, selector: str) -> str:
     return match.group(0)
 
 
+
+def strip_navigation_search_layer(theme_name: str, qss: str) -> str:
+    qss = strip_cards_global_block_a(tema, theme_name, qss)
+    """Remove apenas a camada aditiva da Busca global para snapshots históricos."""
+    # Remove primeiro a camada posterior de Retornos ao Dashboard, quando presente.
+    if hasattr(tema, "ESTILO_NAVEGACAO_RETORNOS_DASHBOARD"):
+        if theme_name == "futurista":
+            final_back = tema.render_qss("futurista", tema.ESTILO_NAVEGACAO_RETORNOS_DASHBOARD)
+            inherited_back = tema.render_qss("escuro", tema.ESTILO_NAVEGACAO_RETORNOS_DASHBOARD)
+            if qss.endswith(final_back):
+                qss = qss[:-len(final_back)]
+            if inherited_back in qss:
+                qss = qss.replace(inherited_back, "", 1)
+        else:
+            back_layer = tema.render_qss(theme_name, tema.ESTILO_NAVEGACAO_RETORNOS_DASHBOARD)
+            if qss.endswith(back_layer):
+                qss = qss[:-len(back_layer)]
+            else:
+                qss = qss.replace(back_layer, "", 1)
+    if theme_name == "futurista":
+        final = tema.render_qss("futurista", tema.ESTILO_NAVEGACAO_BUSCA_GLOBAL)
+        inherited = tema.render_qss("escuro", tema.ESTILO_NAVEGACAO_BUSCA_GLOBAL)
+        if qss.endswith(final):
+            qss = qss[:-len(final)]
+        if inherited in qss:
+            qss = qss.replace(inherited, "", 1)
+        return qss
+    layer = tema.render_qss(theme_name, tema.ESTILO_NAVEGACAO_BUSCA_GLOBAL)
+    if qss.endswith(layer):
+        return qss[:-len(layer)]
+    return qss.replace(layer, "", 1)
+
 class ResolverStructureReadingDesignSystemTests(unittest.TestCase):
     def test_contract_grows_by_exactly_the_approved_nineteen_tokens(self) -> None:
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 191)
-        self.assertEqual(len(ALL_TOKENS), 293)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 928)
+        self.assertEqual(len(ALL_TOKENS), 1030)
         added = {
             "progress.session_text",
             "progress.session_track",
@@ -186,7 +222,7 @@ class ResolverStructureReadingDesignSystemTests(unittest.TestCase):
             _constant_source("ESTILO_RESOLVEDOR_ESCURO", "ESTILO_RESOLVEDOR_FUTURISTA"),
             _constant_source("ESTILO_RESOLVEDOR_FUTURISTA", "ESTILO_TOPICO_DETALHES_CLARO"),
         )
-        for source, remaining in zip(constants, (18, 18, 31)):
+        for source, remaining in zip(constants, (3, 3, 9)):
             for selector in AUTHORIZED_SELECTORS:
                 with self.subTest(selector=selector, remaining=remaining):
                     self.assertNotRegex(_selector_block(source, selector), r"#[0-9A-Fa-f]{6,8}\b")
@@ -227,10 +263,9 @@ class ResolverStructureReadingDesignSystemTests(unittest.TestCase):
     def test_non_authorized_chrome_and_content_remain_literal(self) -> None:
         for marker in (
             "#F7F9FC", "#151E2A", "#151D28",  # Modo Foco
-            "#DCE3EB", "#F2F6FA", "#3C4858",  # enunciado
-            "#CCD5DF", "#445265", "#505B69",  # Pular
-            "#E9BCC4", "#724350", "#70434F",  # Encerrar
-            "#3A4656", "#B7C1CD",              # painel/flags Futuristas
+            # Enunciado migrado e validado pela 3E-B2f.
+            # Flags migradas e validadas pela 3E-B2c.
+            # Painel/Pular/Encerrar migrados e validados pela 3E-B2b2.
         ):
             with self.subTest(marker=marker):
                 self.assertIn(marker, TEMA_SOURCE)
@@ -253,7 +288,8 @@ class ResolverStructureReadingDesignSystemTests(unittest.TestCase):
     def test_complete_stylesheet_hashes_remain_identical(self) -> None:
         for theme_name, expected in EXPECTED_STYLESHEET_BASELINE.items():
             stylesheet = getattr(tema, f"stylesheet_{theme_name}")()
-            digest = hashlib.sha256(_canonical_qss(stylesheet).encode("utf-8")).hexdigest()
+            baseline_qss = strip_navigation_search_layer(theme_name, stylesheet)
+            digest = hashlib.sha256(_canonical_qss(baseline_qss).encode("utf-8")).hexdigest()
             self.assertEqual(digest, expected)
             self.assertNotIn("{{color:", stylesheet)
             self.assertNotIn("{{gradient:", stylesheet)
