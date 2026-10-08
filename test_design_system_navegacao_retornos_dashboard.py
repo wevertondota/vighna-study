@@ -55,12 +55,12 @@ EXPECTED_GRADIENTS = {
     ),
 }
 
-BASE_MAIN_HASH = "98c51d9eb1bf791d96a59a8d6b4e403bd6914348d0773fe0185a9c6a22d3fa3a"
-BASE_SEARCH_TEMA_HASH = "d9ea7a462661fb35dca10b87e0b89ead5f3ec23a3855f8eb8aa1412e344d6ded"
+BASE_MAIN_HASH = "3915e17d3b0baacc52532853c0206c7896e53710c2cc594292f911bd46bd1a46"
+BASE_SEARCH_TEMA_HASH = "bb2fe6161030c1fede8fbe6c49daa1c31b04ff288745e2d1a2ef8d48e01f832e"
 PROTECTED_HASHES = {
     "navegacao.py": "2cb3439a580cf867af9870750a82e06777718961dd84819e0705a96838c8b862",
-    "estudos.db": "034940a33ea792957d8fafbf5c528db7cd895db69031696fbdd3f0a0ce5a41ef",
-    "versao.py": "c201d237e622dd2269838e54914458fd775c7ec1a91f07b518775ee833caa439",
+    "estudos.db": "7152284f813f16c42bb4586d4d929b53d5d97efe8cf6e290ff9b80faf11b9c26",
+    "versao.py": "ae19e3d250f581849a09245b27469b2cb1b1aef48d862338e888679d58b20d67",
     "foco.py": "8fbe4659f3371683738a3fa239a789b3bca26ab47dc68f38a69829a33afd03ed",
     "jogos.py": "498aab65a2a13efa070ae2f912536b5ddc1aada31e23a28846def6a617492286",
     "checkpoint.py": "947295fdf2035d6f65d5d43f70e1d6e5e1c411d92eaca264a469a221b6b61c38",
@@ -131,8 +131,8 @@ def rollback_tema(source: str) -> str:
 class NavigationBackDesignSystemTests(unittest.TestCase):
     def test_contrato_e_orcamento_final(self):
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 928)
-        self.assertEqual(len(ALL_TOKENS), 1030)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
+        self.assertEqual(len(ALL_TOKENS), 1106)
         for path in COLOR_TOKENS:
             self.assertIs(token_spec(path).kind, TokenKind.COLOR)
         for path in GRADIENT_TOKENS:
@@ -213,7 +213,7 @@ class NavigationBackDesignSystemTests(unittest.TestCase):
             digest = hashlib.sha256((ROOT / relative).read_bytes()).hexdigest()
             self.assertEqual(digest, expected, relative)
         self.assertEqual(VIGHNA_VERSION, "0.29.59")
-        self.assertEqual(VIGHNA_BUILD, "updates-center-v1")
+        self.assertEqual(VIGHNA_BUILD, "questions-center-editor-viewer-futuristic-text-v1")
         self.assertEqual(VIGHNA_SCHEMA, 25)
 
 

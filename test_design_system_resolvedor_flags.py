@@ -62,11 +62,11 @@ VALUES = {'claro': {'flag_indicator_surface': '#FFFFFF',
                'analysis_indicator_hover_border': '#F59E0B',
                'analysis_indicator_checked_surface': '#D97706',
                'analysis_indicator_checked_border': '#FBBF24'}}
-SOURCE_HASHES = {'main.py': '2cfc317db5716638499d945c505c0936909f3cbcb31f705e80bfedbe3cf641f4', 'foco.py': '8fbe4659f3371683738a3fa239a789b3bca26ab47dc68f38a69829a33afd03ed', 'checkpoint.py': '947295fdf2035d6f65d5d43f70e1d6e5e1c411d92eaca264a469a221b6b61c38', 'versao.py': 'c201d237e622dd2269838e54914458fd775c7ec1a91f07b518775ee833caa439'}
+SOURCE_HASHES = {'main.py': 'ac2edad86f4d554b8c7df9b323d38ab4d5ca4f019421e68474bcec6d9552f095', 'foco.py': '8fbe4659f3371683738a3fa239a789b3bca26ab47dc68f38a69829a33afd03ed', 'checkpoint.py': '947295fdf2035d6f65d5d43f70e1d6e5e1c411d92eaca264a469a221b6b61c38', 'versao.py': 'ae19e3d250f581849a09245b27469b2cb1b1aef48d862338e888679d58b20d67'}
 BASE_HASHES = {
-    "claro": "94b7d97a21118db14d1490cd97f34bfe56ef26354ce7bf9d204a4355623269b9",
-    "escuro": "52298070b2d47d90e738bb3a3951f0f3e0e8bbda0ecea1126ce715bfb6810be5",
-    "futurista": "1b79f426349812489f69acbd0746bfd0f2ec1286fb84f70e411478588744225d",
+    "claro": "c5078146a9c6de57f6cf87126f149efe3a715db97e35f1ec28cecbd75854dbae",
+    "escuro": "d3ce368444e878d12a6c6f41c8b9e05500c8e12c771f74e5aa07cbe0f8bf27b6",
+    "futurista": "1d256f15098dd7e1f9583e2f996739badc51da80167da303b08bef616dcdc49d",
 }
 
 
@@ -216,8 +216,8 @@ class SessionFlagsTests(unittest.TestCase):
         actual = {s.path for s in ALL_TOKENS if s.path.startswith(("session.doubt_", "session.analysis_", "session.flag_"))}
         self.assertEqual(actual, expected)
         self.assertEqual(len(expected), 15)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 928)
-        self.assertEqual(len(ALL_TOKENS), 1030)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
+        self.assertEqual(len(ALL_TOKENS), 1106)
         for name in expected:
             self.assertIs(token_spec(name).kind, TokenKind.COLOR)
 

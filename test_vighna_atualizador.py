@@ -11,7 +11,7 @@ from pathlib import Path
 
 from vighna_update_engine import (FORMAT, UpdateError, backup_database,
                                   check_database, inspect_package, install_package,
-                                  recover_incomplete_updates, sha256_bytes,
+                                  package_usage, recover_incomplete_updates, sha256_bytes,
                                   valid_source_path)
 
 OLD = 'base-build'
@@ -105,6 +105,32 @@ class UpdateTests(unittest.TestCase):
     def test_block_version_mismatch(self):
         self.create_package(change=lambda m: m.update(target_build='unexpected'))
         with self.assertRaises(UpdateError):inspect_package(self.package,self.root)
+
+    def test_package_usage_distinguishes_new_installed_failed_and_current(self):
+        self.create_package()
+        usage = package_usage(self.package, self.root)
+        self.assertEqual(usage['state'], 'new')
+        digest = usage['sha256']
+        history = self.root / 'backups' / 'atualizacoes' / 'historico.jsonl'
+        history.parent.mkdir(parents=True)
+
+        installed = [
+            {'id':'run-installed', 'status':'started', 'package':self.package.name,
+             'sha256':digest, 'to':NEW},
+            {'id':'run-installed', 'status':'installed', 'package':self.package.name,
+             'sha256':digest, 'to':NEW},
+        ]
+        history.write_text('\n'.join(json.dumps(item) for item in installed) + '\n')
+        self.assertEqual(package_usage(self.package, self.root)['state'], 'installed_exact')
+
+        failed = {'id':'run-failed', 'status':'failed', 'package':self.package.name,
+                  'sha256':digest, 'to':NEW}
+        history.write_text(json.dumps(failed) + '\n')
+        self.assertEqual(package_usage(self.package, self.root)['state'], 'failed')
+
+        history.unlink()
+        (self.root / 'versao.py').write_bytes(make_version(NEW))
+        self.assertEqual(package_usage(self.package, self.root)['state'], 'installed_current')
 
     def test_compile_failure_leaves_original_program_and_db(self):
         self.create_package()

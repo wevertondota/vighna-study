@@ -127,19 +127,19 @@ BASELINE_GAME_CASCADE_HASHES = {
 }
 
 EXPECTED_QSS_NORMALIZED = {
-    "claro": "eeba3c038c38703e8da3c59a81fdccee74e8f8dfd3e3cb29735f10544391e946",
-    "escuro": "4dcd474191f214dda638db3414c8834a2888c9b988b6cf45be06505af92ab738",
+    "claro": "c8975fa69de340d0fd51e2d5a1b4d91477286cadfddd1a9fe1c77e71a51ed8e3",
+    "escuro": "250d6f47d8fa10e4b6aee8e9692053693094f1d25e7c92a5b1c45da96eeb46c5",
     # Difere estruturalmente do Passo 4 somente pela separação dos grupos de
     # estados coincidentes; a cascata game.* acima permanece idêntica.
-    "futurista": "0e80f4d9f6705261e8aa01db0b5e7d057d81a0ed4a37d3a04ab7b10eac997ca7",
+    "futurista": "c5dc8d9ad8681a5b10fae61326ceb5b795873feb6453fb66f05b9accaa600b48",
 }
 
 PROTECTED_HASHES = {
-    "main.py": "bdb0815e71387bd87d40498bf535ef839d19a1a9086d55e0582ea50946713b45",
+    "main.py": "0e8ec1248b38d4bac3ffce756f3a35dabb0ba1a2c0f757996b53f6a2f4b7a02b",
     "foco.py": "8fbe4659f3371683738a3fa239a789b3bca26ab47dc68f38a69829a33afd03ed",
     "jogos.py": "498aab65a2a13efa070ae2f912536b5ddc1aada31e23a28846def6a617492286",
-    "estudos.db": "034940a33ea792957d8fafbf5c528db7cd895db69031696fbdd3f0a0ce5a41ef",
-    "versao.py": "c201d237e622dd2269838e54914458fd775c7ec1a91f07b518775ee833caa439",
+    "estudos.db": "7152284f813f16c42bb4586d4d929b53d5d97efe8cf6e290ff9b80faf11b9c26",
+    "versao.py": "ae19e3d250f581849a09245b27469b2cb1b1aef48d862338e888679d58b20d67",
     "checkpoint.py": "947295fdf2035d6f65d5d43f70e1d6e5e1c411d92eaca264a469a221b6b61c38",
 }
 
@@ -179,8 +179,8 @@ def _source_rules(source: str):
 class DesignSystemJogosPasso5Tests(unittest.TestCase):
     def test_contagem_final_do_passo_5(self):
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 928)
-        self.assertEqual(len(ALL_TOKENS), 1030)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
+        self.assertEqual(len(ALL_TOKENS), 1106)
 
     def test_exatamente_42_colors_e_um_gradiente_game(self):
         self.assertEqual(len(GAME_COLOR_TOKENS), 42)

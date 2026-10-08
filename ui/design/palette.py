@@ -115,6 +115,13 @@ _CURRENT_PHYSICAL_VALUES = (
     "#111A27",
     "#111827",
     "#121C2D",  # Central de Questões — faixa de inventário (escuro/futurista)
+    "#12253D",  # Central de Questões — título administrativo no tema claro
+    "#627387",  # Central de Questões — descrição administrativa no tema claro
+    "#FFF7ED",  # Central de Questões — estados análise
+    "#2D2415",  # Central de Questões — botões de análise
+    "#3A2D17",  # Central de Questões — botões de análise
+    "#FEF3C7",  # Central de Questões — botões de análise
+    "#FFFBEB",  # Central de Questões — botões de análise
     "#101722",
     "#0B111D",
     "#07111E",
@@ -488,6 +495,7 @@ _CURRENT_PHYSICAL_VALUES = (
     "#16A34A",
     "#DBEAFE",
     "#B91C1C",
+    "#991B1B",  # Histórico/Caderno de Erros — revisar erros
     "#FEE2E2",
     "#15803D",
     "#DCFCE7",
@@ -504,6 +512,11 @@ _CURRENT_PHYSICAL_VALUES = (
     "#86EFAC",
     "#4C1D24",
     "#163523",
+    "#14532D",  # Selo do gabarito — editor/visualizador
+    "#052E16",  # Avisos históricos — Editor/Visualizador
+    "#FDE68A",  # Avisos históricos — Editor/Visualizador
+    "#422006",  # Avisos históricos — Editor/Visualizador
+    "#A16207",  # Avisos históricos — Editor/Visualizador
     "#172554",
     "#151E2E",
     "#2B394B",

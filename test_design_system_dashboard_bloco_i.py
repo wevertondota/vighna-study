@@ -37,11 +37,11 @@ EXPECTED = {
     "dashboard.quality_donut_fill": "#2FB4C7",
 }
 
-BASE_H_MAIN_HASH = "2a48becdca1907644dedd23b33d19299dfdee2834440815537d6479df3b827b8"
-BASE_H_TEMA_HASH = "d164c3b89ca1bb6535a393e70a371d4148e1bf1d76aa03299e9eac55d4861cc7"
+BASE_H_MAIN_HASH = "28696592e974791eb4b766c4a69ebc747109c589fd909f0cf276e7a403efa608"
+BASE_H_TEMA_HASH = "e2a79152ca7cafa0936c19b0d66c6c5e41b04906f17687e2b46a7c6b1b65e1f7"
 PROTECTED_HASHES = {
-    "estudos.db": "034940a33ea792957d8fafbf5c528db7cd895db69031696fbdd3f0a0ce5a41ef",
-    "versao.py": "c201d237e622dd2269838e54914458fd775c7ec1a91f07b518775ee833caa439",
+    "estudos.db": "7152284f813f16c42bb4586d4d929b53d5d97efe8cf6e290ff9b80faf11b9c26",
+    "versao.py": "ae19e3d250f581849a09245b27469b2cb1b1aef48d862338e888679d58b20d67",
     "foco.py": "8fbe4659f3371683738a3fa239a789b3bca26ab47dc68f38a69829a33afd03ed",
     "jogos.py": "498aab65a2a13efa070ae2f912536b5ddc1aada31e23a28846def6a617492286",
     "checkpoint.py": "947295fdf2035d6f65d5d43f70e1d6e5e1c411d92eaca264a469a221b6b61c38",
@@ -122,8 +122,8 @@ def rollback_main_i(source: str) -> str:
 class DashboardBlockIDesignSystemTests(unittest.TestCase):
     def test_orcamento_final_e_contrato_exato(self):
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 928)
-        self.assertEqual(len(ALL_TOKENS), 1030)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
+        self.assertEqual(len(ALL_TOKENS), 1106)
         self.assertEqual(len(TOKENS), 6)
         for path in TOKENS:
             self.assertIs(token_spec(path).kind, TokenKind.COLOR)
@@ -198,7 +198,7 @@ class DashboardBlockIDesignSystemTests(unittest.TestCase):
             digest = hashlib.sha256((ROOT / relative).read_bytes()).hexdigest()
             self.assertEqual(digest, expected, relative)
         self.assertEqual(VIGHNA_VERSION, "0.29.59")
-        self.assertEqual(VIGHNA_BUILD, "updates-center-v1")
+        self.assertEqual(VIGHNA_BUILD, "questions-center-editor-viewer-futuristic-text-v1")
         self.assertEqual(VIGHNA_SCHEMA, 25)
 
     def test_prioridade_dormente_permanece_intocada(self):

@@ -140,9 +140,9 @@ EXPECTED_GRADIENTS = {
 }
 
 BASELINE_NORMALIZED_HASHES = {
-    "claro": "cef0365e8cdd703fc73df505529d0e97672e5c49f036c0cba3b7ee50d42f23fe",
-    "escuro": "5e365d9be91deb9d29532b8954c4cc8d66acf8142f019d3706aafba0a3e548cb",
-    "futurista": "edc56b82ac5c720c06dac89700ec039d4d62536a31709d881ff1078960605dce",
+    "claro": "71c6c022b5fb4a3798f5bb9f837fc55fc9fa3bf4d558832688dd7fb25d8c7cdb",
+    "escuro": "25dd9d735b8aa542020a05bbc3318cc91aba79f0b2f89995cea0a272d8bc1056",
+    "futurista": "d4176c63eae7f8b0349fce4eb50ada9b5186473a8d0aba884ad7aa4e41f5b448",
 }
 
 
@@ -187,8 +187,8 @@ def strip_navigation_search_layer(theme_name: str, qss: str) -> str:
 class DesignSystemModoFocoPasso2Tests(unittest.TestCase):
     def test_contagem_de_tokens(self):
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 928)
-        self.assertEqual(len(ALL_TOKENS), 1030)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
+        self.assertEqual(len(ALL_TOKENS), 1106)
 
     def test_novos_contratos_sao_color_e_gradientes_mantem_tipo(self):
         for path in NEW_COLOR_TOKENS + RECHARACTERIZED_COLOR_TOKENS:

@@ -77,21 +77,21 @@ EXPECTED = {
 }
 
 CURRENT_HASHES = {
-    "claro": "377b349f9564f3ca4f00c05a3e58b942290c60db08f3ce902886b0bf855dc8ed",
-    "escuro": "60471c1750c25666a3a07fb7be7392ca42e71023e8cc273a0bd1535cf20ecb35",
-    "futurista": "c00e04362fcdb449bc79d3337faa1f7bb83143b829128aad465204a7762ceb94",
+    "claro": "828f96d828f7dadc111451769650ef83ee5fb5b774a43ac8bc22d3cfd1f8d9f9",
+    "escuro": "7479dce86b49ddc9afdbf844b9217232f40aa4ec160069af7877d2cc5cbd39fa",
+    "futurista": "6862f94c1f93abf7100ddddbf13b18759fcce4acc13a1a13ba119c4d10678239",
 }
 B2G_HASHES = {
-    "claro": "ce4accdafcfabc2d431feafe3f3ab7009a66ecfd8c2717157036bcab4cb0020f",
-    "escuro": "fd26fc88cde100bb19e6eb3ea7c6fa51eb5cf734d12f2320eb1301421d3129ba",
-    "futurista": "5e6c0dc38f94712b067551cba0a2266f207f6d5f7f6da2a0b7f9f16a92a79bb6",
+    "claro": "36d5e80a7261f17f219b271b95503910f02782efbff3a54cf5a599cf55edb358",
+    "escuro": "8adcafab6f97c546b3b034606465b69e6e0aaa29d958d1a5587cd640749638cc",
+    "futurista": "72e6cc59edf1f38d3c3f19c08391949c85da3ce1214c895dfcc579fd2dc7fd83",
 }
 PROTECTED = {
     "banco.py": "c263a502f0761d1f9fb7f910b35474cbda18b529a5244978614cc27342b32c94",
     "foco.py": "8fbe4659f3371683738a3fa239a789b3bca26ab47dc68f38a69829a33afd03ed",
     "checkpoint.py": "947295fdf2035d6f65d5d43f70e1d6e5e1c411d92eaca264a469a221b6b61c38",
-    "versao.py": "c201d237e622dd2269838e54914458fd775c7ec1a91f07b518775ee833caa439",
-    "estudos.db": "034940a33ea792957d8fafbf5c528db7cd895db69031696fbdd3f0a0ce5a41ef",
+    "versao.py": "ae19e3d250f581849a09245b27469b2cb1b1aef48d862338e888679d58b20d67",
+    "estudos.db": "7152284f813f16c42bb4586d4d929b53d5d97efe8cf6e290ff9b80faf11b9c26",
 }
 
 SUMMARY_RULE = re.compile(
@@ -205,8 +205,8 @@ def canonical(value: str) -> str:
 class SummaryFinalPassATests(unittest.TestCase):
     def test_exact_sixteen_new_component_color_tokens(self) -> None:
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 928)
-        self.assertEqual(len(ALL_TOKENS), 1030)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
+        self.assertEqual(len(ALL_TOKENS), 1106)
         actual = {t.path for t in ALL_TOKENS if t.path.startswith("summary.")}
         self.assertTrue(SUMMARY_TOKENS < actual)
         for path in SUMMARY_TOKENS:
@@ -288,7 +288,7 @@ class SummaryFinalPassATests(unittest.TestCase):
         for relative, expected in PROTECTED.items():
             self.assertEqual(hashlib.sha256((ROOT / relative).read_bytes()).hexdigest(), expected)
         self.assertEqual(VIGHNA_VERSION, "0.29.59")
-        self.assertEqual(VIGHNA_BUILD, "updates-center-v1")
+        self.assertEqual(VIGHNA_BUILD, "questions-center-editor-viewer-futuristic-text-v1")
         self.assertEqual(VIGHNA_SCHEMA, 25)
 
 

@@ -67,15 +67,15 @@ EXPECTED = {
 }
 
 PROTECTED_HASHES = {
-    "main.py": "bdb0815e71387bd87d40498bf535ef839d19a1a9086d55e0582ea50946713b45",
+    "main.py": "0e8ec1248b38d4bac3ffce756f3a35dabb0ba1a2c0f757996b53f6a2f4b7a02b",
     "navegacao.py": "2cb3439a580cf867af9870750a82e06777718961dd84819e0705a96838c8b862",
-    "estudos.db": "034940a33ea792957d8fafbf5c528db7cd895db69031696fbdd3f0a0ce5a41ef",
-    "versao.py": "c201d237e622dd2269838e54914458fd775c7ec1a91f07b518775ee833caa439",
+    "estudos.db": "7152284f813f16c42bb4586d4d929b53d5d97efe8cf6e290ff9b80faf11b9c26",
+    "versao.py": "ae19e3d250f581849a09245b27469b2cb1b1aef48d862338e888679d58b20d67",
     "foco.py": "8fbe4659f3371683738a3fa239a789b3bca26ab47dc68f38a69829a33afd03ed",
     "jogos.py": "498aab65a2a13efa070ae2f912536b5ddc1aada31e23a28846def6a617492286",
     "checkpoint.py": "947295fdf2035d6f65d5d43f70e1d6e5e1c411d92eaca264a469a221b6b61c38",
 }
-BASE_I_TEMA_HASH = "d164c3b89ca1bb6535a393e70a371d4148e1bf1d76aa03299e9eac55d4861cc7"
+BASE_I_TEMA_HASH = "e2a79152ca7cafa0936c19b0d66c6c5e41b04906f17687e2b46a7c6b1b65e1f7"
 
 
 def layer_template() -> str:
@@ -132,8 +132,8 @@ def rollback_tema(source: str) -> str:
 class NavigationCommandPaletteDesignSystemTests(unittest.TestCase):
     def test_orcamento_final_e_contrato(self):
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 928)
-        self.assertEqual(len(ALL_TOKENS), 1030)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
+        self.assertEqual(len(ALL_TOKENS), 1106)
         self.assertEqual(len(TOKENS), 20)
         for path in TOKENS:
             self.assertIs(token_spec(path).kind, TokenKind.COLOR)
@@ -209,7 +209,7 @@ class NavigationCommandPaletteDesignSystemTests(unittest.TestCase):
             digest = hashlib.sha256((ROOT / relative).read_bytes()).hexdigest()
             self.assertEqual(digest, expected, relative)
         self.assertEqual(VIGHNA_VERSION, "0.29.59")
-        self.assertEqual(VIGHNA_BUILD, "updates-center-v1")
+        self.assertEqual(VIGHNA_BUILD, "questions-center-editor-viewer-futuristic-text-v1")
         self.assertEqual(VIGHNA_SCHEMA, 25)
 
     def test_dialogo_mantem_objectnames_e_comportamento_no_navegacao(self):

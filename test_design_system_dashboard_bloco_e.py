@@ -272,19 +272,19 @@ EXPECTED_COLORS = {
 }
 
 BLOCK_D_QSS = {
-    "claro": "67eb7f0c5eee80785bbe7595d4ca9374c9fc2985b34034ede312c06e69e49e08",
-    "escuro": "1109df37ba34574f0607dd9ee3839a770c74aed8906dece461e9c2e8b81f7624",
-    "futurista": "07717d507c118a34f4b8ca7c62556c60a8b0fdc874f7d30f379d19b4ed379d6c",
+    "claro": "3dd56c660dfb443b5043bc90fa8246e7707819cb1d6ef00a46a8daa67a92a853",
+    "escuro": "fed11ea49f011a3a33be16b4cbdda06a61a26fce62763284c3c450af15b21abb",
+    "futurista": "450554152a93d52646afafa8410b8185603f9e238ad5bf2cbdcef36a9e074c3e",
 }
 BLOCK_E_QSS = {
-    "claro": "81f1c8fc6eebb10cd8dccea854795798f3871a11da372eea4baf02b5f71eb2c4",
-    "escuro": "ef56315047f797aabc02a33118b97a4f6992c775e696c9b1d61509030df45186",
-    "futurista": "29e36ecb0c7cbb06dfe15821c7c07b84ad6a81dc75a48f2d5fe56db70fe9079d",
+    "claro": "e5570c7884119c04747ca75fbf6cd51bf000d84030fe4d44d04cdbcc4c31b2b0",
+    "escuro": "f999f4384b0349810268a4d317714daf4cc9583d4727f9d09882a2c64a052722",
+    "futurista": "9acb5c6f43803adefd796cdc444026c9069339036e67a25adb4c179c7e8f27a0",
 }
 PROTECTED_HASHES = {
-    "main.py": "bdb0815e71387bd87d40498bf535ef839d19a1a9086d55e0582ea50946713b45",
-    "estudos.db": "034940a33ea792957d8fafbf5c528db7cd895db69031696fbdd3f0a0ce5a41ef",
-    "versao.py": "c201d237e622dd2269838e54914458fd775c7ec1a91f07b518775ee833caa439",
+    "main.py": "0e8ec1248b38d4bac3ffce756f3a35dabb0ba1a2c0f757996b53f6a2f4b7a02b",
+    "estudos.db": "7152284f813f16c42bb4586d4d929b53d5d97efe8cf6e290ff9b80faf11b9c26",
+    "versao.py": "ae19e3d250f581849a09245b27469b2cb1b1aef48d862338e888679d58b20d67",
     "foco.py": "8fbe4659f3371683738a3fa239a789b3bca26ab47dc68f38a69829a33afd03ed",
     "jogos.py": "498aab65a2a13efa070ae2f912536b5ddc1aada31e23a28846def6a617492286",
     "checkpoint.py": "947295fdf2035d6f65d5d43f70e1d6e5e1c411d92eaca264a469a221b6b61c38",
@@ -385,8 +385,8 @@ def strip_block_e(theme_name: str, qss: str) -> str:
 class DashboardBlockEDesignSystemTests(unittest.TestCase):
     def test_orcamento_de_tokens_exato(self):
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 928)
-        self.assertEqual(len(ALL_TOKENS), 1030)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
+        self.assertEqual(len(ALL_TOKENS), 1106)
         self.assertEqual(len(COLOR_TOKENS), 61)
         paths = {token.path for token in ALL_TOKENS}
         self.assertTrue(BLOCK_E_TOKENS <= paths)
@@ -469,7 +469,7 @@ class DashboardBlockEDesignSystemTests(unittest.TestCase):
 
     def test_metadata_permanece_inalterada(self):
         self.assertEqual(VIGHNA_VERSION, "0.29.59")
-        self.assertEqual(VIGHNA_BUILD, "updates-center-v1")
+        self.assertEqual(VIGHNA_BUILD, "questions-center-editor-viewer-futuristic-text-v1")
         self.assertEqual(VIGHNA_SCHEMA, 25)
 
 

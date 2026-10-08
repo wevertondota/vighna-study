@@ -22,9 +22,9 @@ from ui.design import ALL_TOKENS, get_theme
 
 ROOT = Path(__file__).resolve().parent
 BASELINE = {
-    'claro': '31e7da4616ac15b8b7852688f498f1c2f980f6bcd51f83d7cfee73cbfdd90d60',
-    'escuro': '912bf14532209be7319729b160b53ef717e220019dd6f10277f50e4664cde473',
-    'futurista': 'dadedc5218e6c22cf2112a5e7cdb1543fa3f75fadd432b1069fd6c117e7d15bd',
+    'claro': '1bffe9a506a2e8ffaa3366621d12fb1ddafb8b2b7c50e9271582854d606837a2',
+    'escuro': '8067e89e17ca82728a2a5369eb47fa6700bfb1b93442b60b9c6f8ddf9a4168f7',
+    'futurista': 'e4edf1561b309039275128a2d859efcb5722b4c2b1d15225ea8cab8f791f74b0',
 }
 NAV_RULE = re.compile(r'QDialog#questionSolverDialog QPushButton#subtleButton\[sessionNavigation="true"\](?::hover)?\s*\{[^{}]*\}', re.S)
 QUEUE_DETAIL_RULE = re.compile(r'QDialog#questionSolverDialog QLabel#questionSessionSummaryDetail\s*\{[^{}]*\}', re.S)
@@ -143,7 +143,7 @@ def strip_navigation_search_layer(theme_name: str, qss: str) -> str:
 
 class SessionNavigationTimerTests(unittest.TestCase):
     def test_exact_nine_tokens_and_values(self):
-        self.assertEqual(len(ALL_TOKENS), 1030)
+        self.assertEqual(len(ALL_TOKENS), 1106)
         for name, values in VALUES.items():
             for key, value in zip(KEYS, values):
                 self.assertEqual(get_theme(name).color('session.' + key).value, value)

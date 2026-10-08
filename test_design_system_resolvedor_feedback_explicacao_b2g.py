@@ -29,14 +29,14 @@ EXPECTED_VALUES = {
     "futurista": ("#172554", "#BFDBFE", "#1D4ED8"),
 }
 EXPECTED_NORMALIZED_HASHES = {
-    "claro": "eeba3c038c38703e8da3c59a81fdccee74e8f8dfd3e3cb29735f10544391e946",
-    "escuro": "4dcd474191f214dda638db3414c8834a2888c9b988b6cf45be06505af92ab738",
-    "futurista": "0e80f4d9f6705261e8aa01db0b5e7d057d81a0ed4a37d3a04ab7b10eac997ca7",
+    "claro": "c8975fa69de340d0fd51e2d5a1b4d91477286cadfddd1a9fe1c77e71a51ed8e3",
+    "escuro": "250d6f47d8fa10e4b6aee8e9692053693094f1d25e7c92a5b1c45da96eeb46c5",
+    "futurista": "c5dc8d9ad8681a5b10fae61326ceb5b795873feb6453fb66f05b9accaa600b48",
 }
 BASE_FILE_HASHES = {
     "banco.py": "c263a502f0761d1f9fb7f910b35474cbda18b529a5244978614cc27342b32c94",
-    "estudos.db": "034940a33ea792957d8fafbf5c528db7cd895db69031696fbdd3f0a0ce5a41ef",
-    "versao.py": "c201d237e622dd2269838e54914458fd775c7ec1a91f07b518775ee833caa439",
+    "estudos.db": "7152284f813f16c42bb4586d4d929b53d5d97efe8cf6e290ff9b80faf11b9c26",
+    "versao.py": "ae19e3d250f581849a09245b27469b2cb1b1aef48d862338e888679d58b20d67",
 }
 EDITOR_SOURCE_HASHES = {
     "ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_CLARO": "dc7a771a73331aa16b3140897813797325fd94f31faf71a443267999d3b90cef",
@@ -68,8 +68,8 @@ def _selector_block(source: str, selector: str) -> str:
 class ResolverFeedbackExplanationB2gTests(unittest.TestCase):
     def test_contract_adds_exactly_three_component_color_tokens(self) -> None:
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 928)
-        self.assertEqual(len(ALL_TOKENS), 1030)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
+        self.assertEqual(len(ALL_TOKENS), 1106)
         expected = {
             "feedback.queue_detail_surface",
             "feedback.queue_detail_text",
@@ -174,7 +174,7 @@ class ResolverFeedbackExplanationB2gTests(unittest.TestCase):
             digest = hashlib.sha256((ROOT / relative).read_bytes()).hexdigest()
             self.assertEqual(digest, expected)
         self.assertEqual(VIGHNA_VERSION, "0.29.59")
-        self.assertEqual(VIGHNA_BUILD, "updates-center-v1")
+        self.assertEqual(VIGHNA_BUILD, "questions-center-editor-viewer-futuristic-text-v1")
         self.assertEqual(VIGHNA_SCHEMA, 25)
 
     def test_rendered_qss_has_expected_new_snapshots_and_no_unresolved_markers(self) -> None:

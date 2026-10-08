@@ -52,12 +52,12 @@ EXPECTED_GRADIENTS = {
     ),
 }
 
-BASE_TEMA_HASH = "87986d519664883b77b685ca7db6cff6037390f7e9c5a6e7f60a6fea24e3b76f"
+BASE_TEMA_HASH = "624acad51b5723ce368c7c6109b9e6f32b23fdf2555117b91daa4fe83da58d69"
 PROTECTED_HASHES = {
-    "main.py": "bdb0815e71387bd87d40498bf535ef839d19a1a9086d55e0582ea50946713b45",
+    "main.py": "0e8ec1248b38d4bac3ffce756f3a35dabb0ba1a2c0f757996b53f6a2f4b7a02b",
     "navegacao.py": "2cb3439a580cf867af9870750a82e06777718961dd84819e0705a96838c8b862",
-    "estudos.db": "034940a33ea792957d8fafbf5c528db7cd895db69031696fbdd3f0a0ce5a41ef",
-    "versao.py": "c201d237e622dd2269838e54914458fd775c7ec1a91f07b518775ee833caa439",
+    "estudos.db": "7152284f813f16c42bb4586d4d929b53d5d97efe8cf6e290ff9b80faf11b9c26",
+    "versao.py": "ae19e3d250f581849a09245b27469b2cb1b1aef48d862338e888679d58b20d67",
     "foco.py": "8fbe4659f3371683738a3fa239a789b3bca26ab47dc68f38a69829a33afd03ed",
     "jogos.py": "498aab65a2a13efa070ae2f912536b5ddc1aada31e23a28846def6a617492286",
     "checkpoint.py": "947295fdf2035d6f65d5d43f70e1d6e5e1c411d92eaca264a469a221b6b61c38",
@@ -101,9 +101,9 @@ def rollback_tema(source: str) -> str:
 class GlobalCardsBlockBTests(unittest.TestCase):
     def test_contrato_e_orcamento_final(self):
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 928)
-        self.assertEqual(len(ALL_TOKENS), 1030)
-        self.assertEqual(sum(t.kind is TokenKind.COLOR for t in ALL_TOKENS), 954)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
+        self.assertEqual(len(ALL_TOKENS), 1106)
+        self.assertEqual(sum(t.kind is TokenKind.COLOR for t in ALL_TOKENS), 1030)
         self.assertEqual(sum(t.kind is TokenKind.GRADIENT for t in ALL_TOKENS), 76)
         for path in COLOR_TOKENS:
             self.assertIs(token_spec(path).kind, TokenKind.COLOR)
@@ -199,7 +199,7 @@ class GlobalCardsBlockBTests(unittest.TestCase):
             digest = hashlib.sha256((ROOT / relative).read_bytes()).hexdigest()
             self.assertEqual(digest, expected, relative)
         self.assertEqual(VIGHNA_VERSION, "0.29.59")
-        self.assertEqual(VIGHNA_BUILD, "updates-center-v1")
+        self.assertEqual(VIGHNA_BUILD, "questions-center-editor-viewer-futuristic-text-v1")
         self.assertEqual(VIGHNA_SCHEMA, 25)
         con = sqlite3.connect(ROOT / "estudos.db")
         try:

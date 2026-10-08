@@ -59,14 +59,14 @@ EXPECTED_GRADIENT_STOPS = {
     "futurista": ("#12283F", "#09192B"),
 }
 PASS_A_NORMALIZED = {
-    "claro":"377b349f9564f3ca4f00c05a3e58b942290c60db08f3ce902886b0bf855dc8ed",
-    "escuro":"60471c1750c25666a3a07fb7be7392ca42e71023e8cc273a0bd1535cf20ecb35",
-    "futurista":"c00e04362fcdb449bc79d3337faa1f7bb83143b829128aad465204a7762ceb94",
+    "claro":"828f96d828f7dadc111451769650ef83ee5fb5b774a43ac8bc22d3cfd1f8d9f9",
+    "escuro":"7479dce86b49ddc9afdbf844b9217232f40aa4ec160069af7877d2cc5cbd39fa",
+    "futurista":"6862f94c1f93abf7100ddddbf13b18759fcce4acc13a1a13ba119c4d10678239",
 }
 CURRENT_NORMALIZED = {
-    "claro":"eeba3c038c38703e8da3c59a81fdccee74e8f8dfd3e3cb29735f10544391e946",
-    "escuro":"4dcd474191f214dda638db3414c8834a2888c9b988b6cf45be06505af92ab738",
-    "futurista":"0e80f4d9f6705261e8aa01db0b5e7d057d81a0ed4a37d3a04ab7b10eac997ca7",
+    "claro":"c8975fa69de340d0fd51e2d5a1b4d91477286cadfddd1a9fe1c77e71a51ed8e3",
+    "escuro":"250d6f47d8fa10e4b6aee8e9692053693094f1d25e7c92a5b1c45da96eeb46c5",
+    "futurista":"c5dc8d9ad8681a5b10fae61326ceb5b795873feb6453fb66f05b9accaa600b48",
 }
 PASS_B_MARKERS = (
     "#adaptiveSummaryCard", "#adaptiveSummaryTitle", "#adaptiveSummaryText",
@@ -190,8 +190,8 @@ def strip_pass_b_rules(qss: str) -> str:
 class SummaryFinalPassBTests(unittest.TestCase):
     def test_exact_seventeen_pass_b_tokens_and_final_counts(self) -> None:
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 928)
-        self.assertEqual(len(ALL_TOKENS), 1030)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
+        self.assertEqual(len(ALL_TOKENS), 1106)
         paths = {t.path for t in ALL_TOKENS}
         self.assertTrue(PASS_B_TOKENS <= paths)
         self.assertEqual(len(PASS_B_TOKENS), 17)
@@ -272,7 +272,7 @@ class SummaryFinalPassBTests(unittest.TestCase):
 
     def test_metadata_unchanged(self) -> None:
         self.assertEqual(VIGHNA_VERSION, "0.29.59")
-        self.assertEqual(VIGHNA_BUILD, "updates-center-v1")
+        self.assertEqual(VIGHNA_BUILD, "questions-center-editor-viewer-futuristic-text-v1")
         self.assertEqual(VIGHNA_SCHEMA, 25)
 
 

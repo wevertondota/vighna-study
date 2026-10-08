@@ -208,22 +208,22 @@ EXPECTED_GRADIENTS = {
 }
 
 OLD_QSS_BASELINE = {
-    "claro": "ae984441b7a8eed69fcc9427003d28c96f631a2e7ed8c2b60504469af7441ab4",
-    "escuro": "1a5a8ed63656acff1afdd27ce501a7cde18a157b1cb95e01dd305129f18847fd",
-    "futurista": "4b118824e007ab2d02141e87fd994c58df0bd6fb07eff64ed5ad0ecfce090e4c",
+    "claro": "f55c1984eb6b53e16e7272d93c236ce019b25424c30da6c6b8aa3b1065dbf019",
+    "escuro": "5a5c1f21c3f3886a82f449e16b3c5142d60221b354534e23dd5f547033173b48",
+    "futurista": "2b26facf797658e6042939471644bf2353321d90c3ddde569baa9e4640887335",
 }
 NEW_QSS_BASELINE = {
-    "claro": "257d65d1427b26067616ee97408571e5354bd618bd512cfabd4b887d314bdb9b",
-    "escuro": "777e1ffb22578576303bc7123a936eeb264ac712faed3efef3fbd9f6cebdcba5",
-    "futurista": "53f523143c157af9cfa8f22619dcb23fed38f230d6d299fd7e119570ff042e14",
+    "claro": "f9dfec4dd2238a1955f9760f12b9df93adcf3eb32cd8ff457cb5d4a7b1cf2c14",
+    "escuro": "b16a2d1643a53053b00c804fc6685a2e534836c217bee334986fdeeba016f70a",
+    "futurista": "0fa780a4826fd9dfea4b5b15404ce22fbe8543516a199cdb04d1733e221b98a8",
 }
 
 PROTECTED_HASHES = {
-    "main.py": "bdb0815e71387bd87d40498bf535ef839d19a1a9086d55e0582ea50946713b45",
+    "main.py": "0e8ec1248b38d4bac3ffce756f3a35dabb0ba1a2c0f757996b53f6a2f4b7a02b",
     "foco.py": "8fbe4659f3371683738a3fa239a789b3bca26ab47dc68f38a69829a33afd03ed",
     "jogos.py": "498aab65a2a13efa070ae2f912536b5ddc1aada31e23a28846def6a617492286",
-    "estudos.db": "034940a33ea792957d8fafbf5c528db7cd895db69031696fbdd3f0a0ce5a41ef",
-    "versao.py": "c201d237e622dd2269838e54914458fd775c7ec1a91f07b518775ee833caa439",
+    "estudos.db": "7152284f813f16c42bb4586d4d929b53d5d97efe8cf6e290ff9b80faf11b9c26",
+    "versao.py": "ae19e3d250f581849a09245b27469b2cb1b1aef48d862338e888679d58b20d67",
     "checkpoint.py": "947295fdf2035d6f65d5d43f70e1d6e5e1c411d92eaca264a469a221b6b61c38",
 }
 
@@ -329,8 +329,8 @@ def strip_dashboard_block_b(theme_name: str, qss: str) -> str:
 class DashboardBlockADesignSystemTests(unittest.TestCase):
     def test_orcamento_de_tokens_do_bloco_a(self):
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 928)
-        self.assertEqual(len(ALL_TOKENS), 1030)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
+        self.assertEqual(len(ALL_TOKENS), 1106)
         self.assertEqual(len(DASHBOARD_COLOR_TOKENS), 38)
         self.assertEqual(len(DASHBOARD_GRADIENT_TOKENS), 3)
         for path in DASHBOARD_COLOR_TOKENS:

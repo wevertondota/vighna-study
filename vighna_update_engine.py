@@ -134,6 +134,79 @@ def _metadata(package):
         raise UpdateError(f'Falha ao examinar o ZIP: {err}') from err
 
 
+
+
+def package_usage(package, root):
+    """Identifica um ZIP pelo SHA-256, com compatibilidade com histórico legado.
+
+    Não registra seleção nem modifica o banco. `installed_build` indica que um
+    build foi instalado antes, não necessariamente que os bytes são iguais.
+    """
+    package = Path(package).resolve()
+    root = Path(root).resolve()
+    manifest = _metadata(package)
+    digest = hash_file(package)
+    current_version, current_build, _ = version_from_file(root / 'versao.py')
+    target = manifest['target_build']
+    history = root / 'backups' / 'atualizacoes' / 'historico.jsonl'
+    entries = []
+    if history.is_file():
+        try:
+            with history.open('r', encoding='utf-8') as stream:
+                for line in stream:
+                    try:
+                        entry = json.loads(line)
+                    except (ValueError, UnicodeDecodeError):
+                        continue  # linha histórica incompleta não invalida o restante
+                    if isinstance(entry, dict):
+                        entries.append(entry)
+        except OSError as exc:
+            raise UpdateError('Não foi possível consultar o histórico de atualizações.') from exc
+
+    # Agrupa eventos por execução. `started` sem finalização NÃO é sucesso.
+    runs = {}
+    for entry in entries:
+        run_id = entry.get('id')
+        if not isinstance(run_id, str) or not run_id:
+            continue
+        previous = runs.setdefault(run_id, {})
+        previous.update({k: v for k, v in entry.items() if v is not None})
+        if entry.get('status') in ('started', 'installed', 'failed'):
+            previous['status'] = entry['status']
+            previous['date'] = entry.get('date', previous.get('date', ''))
+
+    installed = [run for run in runs.values() if run.get('status') == 'installed'
+                 and run.get('sha256') == digest]
+    same_build = [run for run in runs.values() if run.get('status') == 'installed'
+                  and run.get('to') == target]
+    failed = [run for run in runs.values() if run.get('status') == 'failed'
+              and run.get('sha256') == digest]
+    incomplete = [run for run in runs.values() if run.get('status') == 'started'
+                  and run.get('sha256') == digest]
+    # Registros antigos não armazenavam SHA. Compara nome E build apenas como
+    # pista de uma tentativa; nunca afirma igualdade de conteúdo do ZIP.
+    legacy_attempts = [run for run in runs.values() if not run.get('sha256')
+                       and run.get('to') == target and run.get('package') == package.name]
+
+    if installed:
+        state, record = 'installed_exact', installed[-1]
+    elif (current_version, current_build) == (manifest['target_version'], target):
+        state, record = 'installed_current', None
+    elif same_build:
+        state, record = 'installed_build', same_build[-1]
+    elif failed:
+        state, record = 'failed', failed[-1]
+    elif incomplete:
+        state, record = 'incomplete', incomplete[-1]
+    elif legacy_attempts:
+        state, record = 'legacy_attempt', legacy_attempts[-1]
+    else:
+        state, record = 'new', None
+    return {'state': state, 'sha256': digest, 'manifest': manifest,
+            'record': record, 'filename': package.name}
+
+
+
 def inspect_package(package, root, *, base=None):
     root = Path(root).resolve()
     manifest = _metadata(package)
@@ -277,6 +350,7 @@ def install_package(package, root, *, python_exe, report=lambda progress, status
     root = Path(root).resolve()
     package = Path(package).resolve()
     manifest = inspect_package(package, root)
+    package_sha256 = hash_file(package)
     source_db = root / 'estudos.db'
     backup_root = root / 'backups' / 'atualizacoes'
     run_id = datetime.now().strftime('%Y%m%d_%H%M%S') + '_' + uuid.uuid4().hex[:8]
@@ -299,7 +373,7 @@ def install_package(package, root, *, python_exe, report=lambda progress, status
         saved.mkdir(parents=True, exist_ok=False)
         backup_database(source_db, saved / 'estudos.db')
         _log(history, {'date': datetime.now().isoformat(), 'id':run_id, 'status':'started',
-                       'package':package.name,'from':manifest['base_build'],'to':manifest['target_build']})
+                       'sha256':package_sha256, 'package':package.name,'from':manifest['base_build'],'to':manifest['target_build']})
         work.mkdir(parents=True)
         report(25, 'Preparando os arquivos de código, sem copiar dados de estudo...')
         for src, rel in _source_files(root):
@@ -374,7 +448,9 @@ def install_package(package, root, *, python_exe, report=lambda progress, status
         state['phase'] = 'installed'
         _write_atomic_json(saved / 'state.json', state)
         _log(history, {'date':datetime.now().isoformat(),'id':run_id,'status':'installed',
-                       'to':manifest['target_build'],'backup':str(saved)})
+                       'sha256':package_sha256, 'package':package.name,
+                       'from':manifest['base_build'], 'to':manifest['target_build'],
+                       'backup':str(saved)})
         report(100, 'Atualização concluída. Seu histórico de estudos foi preservado.')
         return {'backup':str(saved), 'executable':str(active_exe_dir / 'VighnaStudy.exe'), 'manifest':manifest}
     except Exception as err:
@@ -388,6 +464,8 @@ def install_package(package, root, *, python_exe, report=lambda progress, status
                 rollback_errors.append(str(rollback_error))
         try:
             _log(history, {'date':datetime.now().isoformat(), 'id':run_id, 'status':'failed',
+                           'sha256':package_sha256, 'package':package.name,
+                           'from':manifest['base_build'], 'to':manifest['target_build'],
                            'error':str(err), 'rollback_errors':rollback_errors})
         except OSError:
             pass

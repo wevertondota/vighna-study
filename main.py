@@ -15862,14 +15862,14 @@ class JanelaBancoErros(QDialog):
         raiz.addWidget(filtros_card)
 
         distribuicao_card = QFrame()
-        distribuicao_card.setObjectName("questionSessionSummaryCard")
+        distribuicao_card.setObjectName("errorBankDistributionCard")
         distribuicao_layout = QVBoxLayout(distribuicao_card)
         distribuicao_layout.setContentsMargins(12, 9, 12, 9)
         distribuicao_layout.setSpacing(4)
         distribuicao_titulo = QLabel("Pendências por disciplina")
         distribuicao_titulo.setObjectName("miniStatLabel")
         self.distribuicao = QLabel("—")
-        self.distribuicao.setObjectName("questionSessionSummaryDetail")
+        self.distribuicao.setObjectName("errorBankDistributionDetail")
         self.distribuicao.setWordWrap(True)
         distribuicao_layout.addWidget(distribuicao_titulo)
         distribuicao_layout.addWidget(self.distribuicao)
@@ -15879,7 +15879,7 @@ class JanelaBancoErros(QDialog):
             "Acertou: sai da fila. Errou ou não respondeu: permanece pendente. "
             "As respostas desta tela não entram no histórico acadêmico."
         )
-        explicacao.setObjectName("questionReviewIntegrationText")
+        explicacao.setObjectName("errorBankExplanation")
         explicacao.setWordWrap(True)
         raiz.addWidget(explicacao)
         raiz.addStretch(1)
@@ -29488,6 +29488,13 @@ class JanelaConfiguracoes(QDialog):
         conteudo_atualizacao.addWidget(titulo_atualizacao)
         conteudo_atualizacao.addWidget(texto_atualizacao)
         conteudo_atualizacao.addWidget(botao_importar_atualizacao)
+        self.status_verificacao_zip = QLabel(
+            "ZIP: nenhum pacote selecionado nesta sessão.\n"
+            "O Vighna avisará se o arquivo ou build já tiver sido instalado."
+        )
+        self.status_verificacao_zip.setObjectName("mutedLabel")
+        self.status_verificacao_zip.setWordWrap(True)
+        conteudo_atualizacao.addWidget(self.status_verificacao_zip)
         botao_historico = QPushButton("Consultar histórico de atualizações")
         botao_historico.setObjectName("subtleButton")
         botao_historico.clicked.connect(self.abrir_historico_atualizacoes)
@@ -29645,6 +29652,10 @@ class JanelaConfiguracoes(QDialog):
                         f"{item.get('date', '—')}  •  {item.get('status', '—')}  •  "
                         f"{item.get('from', '—')} → {item.get('to', '—')}"
                     )
+                    if item.get('package'):
+                        resumo.append("  ZIP: " + str(item['package']))
+                    if item.get('sha256'):
+                        resumo.append("  SHA-256: " + str(item['sha256'])[:20] + "…")
                     if item.get("error"):
                         resumo.append("  Motivo: " + str(item["error"]))
                 except (TypeError, ValueError):

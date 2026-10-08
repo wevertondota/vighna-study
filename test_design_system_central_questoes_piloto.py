@@ -16,9 +16,9 @@ import unittest
 
 ROOT = Path(__file__).resolve().parent
 EXPECTED_QSS_SHA_CANON = {
-    'claro': '39462b13d99fc62f585b6d7881e41fc724dd4b681343358c97b2a7321ab2a1ac',
-    'escuro': '3025a872da4f2e331ea0f9903b175cc940cdc43e256a83ed7809f9e027244ec5',
-    'futurista': 'ea2243c33271d031227c45fd1788d060f1f16759074e1ab8d36763de6b5b8826',
+    'claro': '2ceb672c5eafe8b5e733944231dcef4ed3912ab5b8f6206a45a385aa25daf5bd',
+    'escuro': '9d236b75d6fd6df45ff2f3b2765e30a73598d1e98c3a2efbeae40cbd48741341',
+    'futurista': '817108872cf834cb9c2af8afbc6d90b30cc7ead410d741b306a395ba3f81f494',
 }
 EXPECTED_VALUES = {
     'claro': ('#FFFFFF','#DBE3ED','#4338CA','#64748B','#E2E8F0'),
@@ -29,13 +29,13 @@ ROLES = ('inventory_surface','inventory_border','inventory_value_text','inventor
 SELECTORS = ('QFrame#questionsInventoryStrip','QLabel#questionsInventoryValue',
              'QLabel#questionsInventoryLabel','QFrame#questionsInventoryDivider')
 PROTECTED = {
-    'main.py':'bdb0815e71387bd87d40498bf535ef839d19a1a9086d55e0582ea50946713b45',
+    'main.py':'0e8ec1248b38d4bac3ffce756f3a35dabb0ba1a2c0f757996b53f6a2f4b7a02b',
     'foco.py':'8fbe4659f3371683738a3fa239a789b3bca26ab47dc68f38a69829a33afd03ed',
     'navegacao.py':'2cb3439a580cf867af9870750a82e06777718961dd84819e0705a96838c8b862',
     'jogos.py':'498aab65a2a13efa070ae2f912536b5ddc1aada31e23a28846def6a617492286',
     'checkpoint.py':'947295fdf2035d6f65d5d43f70e1d6e5e1c411d92eaca264a469a221b6b61c38',
-    'estudos.db':'034940a33ea792957d8fafbf5c528db7cd895db69031696fbdd3f0a0ce5a41ef',
-    'versao.py':'c201d237e622dd2269838e54914458fd775c7ec1a91f07b518775ee833caa439',
+    'estudos.db':'7152284f813f16c42bb4586d4d929b53d5d97efe8cf6e290ff9b80faf11b9c26',
+    'versao.py':'ae19e3d250f581849a09245b27469b2cb1b1aef48d862338e888679d58b20d67',
 }
 
 def _load_tema():
@@ -66,8 +66,8 @@ class CentralQuestoesInventarioPilotoTests(unittest.TestCase):
         cls.TokenKind = TokenKind
 
     def test_01_contract_count(self):
-        self.assertEqual(len(self.tokens),1030)
-        self.assertEqual(sum(t.path.startswith('questions_center.') for t in self.tokens),5)
+        self.assertEqual(len(self.tokens),1106)
+        self.assertEqual(sum(t.path.startswith('questions_center.') for t in self.tokens),30)
 
     def test_02_all_tokens_resolvable_in_three_themes(self):
         for theme_name in EXPECTED_VALUES:

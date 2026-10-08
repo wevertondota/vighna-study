@@ -22,9 +22,9 @@ CARD = "QDialog#questionSolverDialog QFrame#questionSolverStatementCard"
 TEXT = "QDialog#questionSolverDialog QLabel#questionSolverStatement"
 
 BASELINE = {
-    "claro": "bf7d2c74a009ff1c00347454f3423085f97980385ff54744710301d9bb9b116a",
-    "escuro": "2b78491b7bb289ff02aeed93e83a31f2389e1cb4aa1d7612b3c83c542243cb48",
-    "futurista": "205a747cb43a51309133a0d4aa6e927db20d8ffe4d1decdabc8c39964487d333",
+    "claro": "41163c96428ebacd62c25f5038021f51532f1c8ec41253c26dfe4fbd83e93a8a",
+    "escuro": "3b313cb0085c5f2d06fbb981f5b2660ba585d36e2595b4ab7ac8ad4bc19d7ec5",
+    "futurista": "01450cc14995f4c252243555dfac88536d8a0961b99a6bc235cab5f43e99b9b4",
 }
 
 COLORS = {
@@ -96,8 +96,8 @@ class StatementB2FTests(unittest.TestCase):
             if token.path.startswith("session.statement_")
         }
         self.assertEqual(actual, expected)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 928)
-        self.assertEqual(len(ALL_TOKENS), 1030)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
+        self.assertEqual(len(ALL_TOKENS), 1106)
 
         self.assertIs(
             token_spec("session.statement_gradient").kind,
@@ -212,7 +212,7 @@ class StatementB2FTests(unittest.TestCase):
         digest = hashlib.sha256(main.read_bytes()).hexdigest()
         self.assertEqual(
             digest,
-            "bdb0815e71387bd87d40498bf535ef839d19a1a9086d55e0582ea50946713b45",
+            "0e8ec1248b38d4bac3ffce756f3a35dabb0ba1a2c0f757996b53f6a2f4b7a02b",
         )
 
     def test_resolved_qss_hashes_remain_identical(self):
