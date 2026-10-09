@@ -86,6 +86,45 @@ class PhysicalPalette(Mapping[str, ColorValue]):
 # Recorte representativo e literal da paleta existente. A lista não pretende
 # absorver as 3.310 cores inventariadas antes da migração dos componentes.
 _CURRENT_PHYSICAL_VALUES = (
+    # Estatísticas — Minha Evolução: valores físicos legados ausentes
+    "#15263A",
+    "#152820",
+    "#28364A",
+    "#2B2519",
+    "#2F4256",
+    "#2F5142",
+    "#31506C",
+    "#315C78",
+    "#326553",
+    "#57482B",
+    "#6A5835",
+    "#6F8C9F",
+    "#7591A4",
+    "#7D8999",
+    "#7E90A4",
+    "#7F8C9E",
+    "#8293A7",
+    "#D4E2F4",
+    "#D7E1EA",
+    "#D7EADF",
+    "#E1091C2B",
+    "#E2E8EF",
+    "#E6EDF4",
+    "#EAD9B3",
+    "#F3FAF6",
+    "#FFF8EB",
+    # Estatísticas — statisticsTabs: valores físicos legados ausentes
+    "#C7D2E0",
+    "#DFE8F3",
+    # Profile badge — Claro, Escuro e Futurista
+    "#173F61",
+    "#211F48",
+    "#332668",
+    "#4B438D",
+    "#50A9E5",
+    "#AFEAFF",
+    "#CDC6FF",
+    "#F0EDFF",
     "transparent",
     "#000000",
     "#FFFFFF",
@@ -122,6 +161,8 @@ _CURRENT_PHYSICAL_VALUES = (
     "#3A2D17",  # Central de Questões — botões de análise
     "#FEF3C7",  # Central de Questões — botões de análise
     "#FFFBEB",  # Central de Questões — botões de análise
+    "#FECACA",  # validação VPQ: borda revisão, tema Claro
+    "#450A0A",  # validação VPQ: superfície revisão, tema Escuro/Futurista
     "#101722",
     "#0B111D",
     "#07111E",
@@ -494,8 +535,13 @@ _CURRENT_PHYSICAL_VALUES = (
     "#DC2626",
     "#16A34A",
     "#DBEAFE",
+    "#7AA7DF",
+    "#E5EDF7",
+    "#4F86C8",
     "#B91C1C",
     "#991B1B",  # Histórico/Caderno de Erros — revisar erros
+    "#7F1D1D",  # Botão destrutivo administrativo — borda escura
+    "#3F1D27",  # Botão destrutivo administrativo — hover escuro
     "#FEE2E2",
     "#15803D",
     "#DCFCE7",
@@ -1671,6 +1717,42 @@ _CURRENT_PHYSICAL_VALUES = (
     "#465162",
     "#343C8A",
     "#2E3644",
+    # Controles administrativos: subtleButton/toolbarButton compartilhados
+    "#1E2144",
+    "#263044",
+    "#35475D",
+    "#5545C8",
+    "#665BC4",
+    "#B9AFFF",
+    "#C4BAFF",
+    "#CFD6E2",
+    "#E2E7EF",
+    "#F6F4FF",
+
+    # Gradientes agrupados de primaryButton no tema Futurista
+    "#405DEC",
+    "#526CFF",
+    "#685FF1",
+    "#8A4FE8",
+    "#8C89FF",
+    "#985EFF",
+    "#B6B3FF",
+
+    # Controles compartilhados — primaryButton, camadas cromaticas agrupadas
+    "#255DBE",
+    "#2F6FDF",
+    "#5144C5",
+    "#6254D9",
+    "#6D5CE7",
+    "#7869EB",
+    "#7A69EF",
+    "#8B7DF5",
+    # Tabelas — nivel inativo (fundos especificos dos temas Escuro e Futurista)
+    "#263241",
+    "#132B39",
+    # Planejamento compartilhado — subtleButton / botoes de resumo
+    "#476076",
+    "#B9C8D7",
 )
 
 

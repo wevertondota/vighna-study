@@ -62,11 +62,11 @@ VALUES = {'claro': {'flag_indicator_surface': '#FFFFFF',
                'analysis_indicator_hover_border': '#F59E0B',
                'analysis_indicator_checked_surface': '#D97706',
                'analysis_indicator_checked_border': '#FBBF24'}}
-SOURCE_HASHES = {'main.py': 'ac2edad86f4d554b8c7df9b323d38ab4d5ca4f019421e68474bcec6d9552f095', 'foco.py': '8fbe4659f3371683738a3fa239a789b3bca26ab47dc68f38a69829a33afd03ed', 'checkpoint.py': '947295fdf2035d6f65d5d43f70e1d6e5e1c411d92eaca264a469a221b6b61c38', 'versao.py': 'ae19e3d250f581849a09245b27469b2cb1b1aef48d862338e888679d58b20d67'}
+SOURCE_HASHES = {'main.py': 'a8713479507a481991bf4fde56e394865823eba3d5e96ccfa08b7ad1db7e3f29', 'foco.py': '8fbe4659f3371683738a3fa239a789b3bca26ab47dc68f38a69829a33afd03ed', 'checkpoint.py': '947295fdf2035d6f65d5d43f70e1d6e5e1c411d92eaca264a469a221b6b61c38', 'versao.py': '49e9d1b5c82bc10c70bd79ca5f494961e3cae3553cd4b70af1565bca661f9ac2'}
 BASE_HASHES = {
     "claro": "c5078146a9c6de57f6cf87126f149efe3a715db97e35f1ec28cecbd75854dbae",
     "escuro": "d3ce368444e878d12a6c6f41c8b9e05500c8e12c771f74e5aa07cbe0f8bf27b6",
-    "futurista": "1d256f15098dd7e1f9583e2f996739badc51da80167da303b08bef616dcdc49d",
+    "futurista": "4d55da81a1e0f3901395f15992a8041f4c03f1afbb335865195a94afd7cb60c0",
 }
 
 
@@ -216,8 +216,8 @@ class SessionFlagsTests(unittest.TestCase):
         actual = {s.path for s in ALL_TOKENS if s.path.startswith(("session.doubt_", "session.analysis_", "session.flag_"))}
         self.assertEqual(actual, expected)
         self.assertEqual(len(expected), 15)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
-        self.assertEqual(len(ALL_TOKENS), 1106)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1148)
+        self.assertEqual(len(ALL_TOKENS), 1250)
         for name in expected:
             self.assertIs(token_spec(name).kind, TokenKind.COLOR)
 

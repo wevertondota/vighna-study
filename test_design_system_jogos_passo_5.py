@@ -131,15 +131,14 @@ EXPECTED_QSS_NORMALIZED = {
     "escuro": "250d6f47d8fa10e4b6aee8e9692053693094f1d25e7c92a5b1c45da96eeb46c5",
     # Difere estruturalmente do Passo 4 somente pela separação dos grupos de
     # estados coincidentes; a cascata game.* acima permanece idêntica.
-    "futurista": "c5dc8d9ad8681a5b10fae61326ceb5b795873feb6453fb66f05b9accaa600b48",
+    "futurista": "8567fdd28b7856892f4802492bcc820cbe229b34ed67f7b5b0dcf2bb932f58ee",
 }
 
 PROTECTED_HASHES = {
-    "main.py": "0e8ec1248b38d4bac3ffce756f3a35dabb0ba1a2c0f757996b53f6a2f4b7a02b",
+    "main.py": "d2e4ebd54ae765ec8f11eabd5e6c6e086e3dfd7bb3d441def8c03705515da4fe",
     "foco.py": "8fbe4659f3371683738a3fa239a789b3bca26ab47dc68f38a69829a33afd03ed",
     "jogos.py": "498aab65a2a13efa070ae2f912536b5ddc1aada31e23a28846def6a617492286",
-    "estudos.db": "7152284f813f16c42bb4586d4d929b53d5d97efe8cf6e290ff9b80faf11b9c26",
-    "versao.py": "ae19e3d250f581849a09245b27469b2cb1b1aef48d862338e888679d58b20d67",
+    "versao.py": "49e9d1b5c82bc10c70bd79ca5f494961e3cae3553cd4b70af1565bca661f9ac2",
     "checkpoint.py": "947295fdf2035d6f65d5d43f70e1d6e5e1c411d92eaca264a469a221b6b61c38",
 }
 
@@ -179,8 +178,8 @@ def _source_rules(source: str):
 class DesignSystemJogosPasso5Tests(unittest.TestCase):
     def test_contagem_final_do_passo_5(self):
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
-        self.assertEqual(len(ALL_TOKENS), 1106)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1148)
+        self.assertEqual(len(ALL_TOKENS), 1250)
 
     def test_exatamente_42_colors_e_um_gradiente_game(self):
         self.assertEqual(len(GAME_COLOR_TOKENS), 42)

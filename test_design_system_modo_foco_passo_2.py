@@ -142,7 +142,7 @@ EXPECTED_GRADIENTS = {
 BASELINE_NORMALIZED_HASHES = {
     "claro": "71c6c022b5fb4a3798f5bb9f837fc55fc9fa3bf4d558832688dd7fb25d8c7cdb",
     "escuro": "25dd9d735b8aa542020a05bbc3318cc91aba79f0b2f89995cea0a272d8bc1056",
-    "futurista": "d4176c63eae7f8b0349fce4eb50ada9b5186473a8d0aba884ad7aa4e41f5b448",
+    "futurista": "0e1011b5790c7a6f775d70ef4a59dd60a4c1587de412e9533bed2e39b1cba14f",
 }
 
 
@@ -187,8 +187,8 @@ def strip_navigation_search_layer(theme_name: str, qss: str) -> str:
 class DesignSystemModoFocoPasso2Tests(unittest.TestCase):
     def test_contagem_de_tokens(self):
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
-        self.assertEqual(len(ALL_TOKENS), 1106)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1148)
+        self.assertEqual(len(ALL_TOKENS), 1250)
 
     def test_novos_contratos_sao_color_e_gradientes_mantem_tipo(self):
         for path in NEW_COLOR_TOKENS + RECHARACTERIZED_COLOR_TOKENS:

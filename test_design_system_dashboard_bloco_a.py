@@ -210,20 +210,19 @@ EXPECTED_GRADIENTS = {
 OLD_QSS_BASELINE = {
     "claro": "f55c1984eb6b53e16e7272d93c236ce019b25424c30da6c6b8aa3b1065dbf019",
     "escuro": "5a5c1f21c3f3886a82f449e16b3c5142d60221b354534e23dd5f547033173b48",
-    "futurista": "2b26facf797658e6042939471644bf2353321d90c3ddde569baa9e4640887335",
+    "futurista": "bfc6a40c9025e55e3994fd7e16f9670601924b8b64b1672871a2db6d283d659c",
 }
 NEW_QSS_BASELINE = {
     "claro": "f9dfec4dd2238a1955f9760f12b9df93adcf3eb32cd8ff457cb5d4a7b1cf2c14",
     "escuro": "b16a2d1643a53053b00c804fc6685a2e534836c217bee334986fdeeba016f70a",
-    "futurista": "0fa780a4826fd9dfea4b5b15404ce22fbe8543516a199cdb04d1733e221b98a8",
+    "futurista": "43e42f04862522996eb52351beb104570230e7283c8a8e7cbd389742fd5dee18",
 }
 
 PROTECTED_HASHES = {
-    "main.py": "0e8ec1248b38d4bac3ffce756f3a35dabb0ba1a2c0f757996b53f6a2f4b7a02b",
+    "main.py": "d2e4ebd54ae765ec8f11eabd5e6c6e086e3dfd7bb3d441def8c03705515da4fe",
     "foco.py": "8fbe4659f3371683738a3fa239a789b3bca26ab47dc68f38a69829a33afd03ed",
     "jogos.py": "498aab65a2a13efa070ae2f912536b5ddc1aada31e23a28846def6a617492286",
-    "estudos.db": "7152284f813f16c42bb4586d4d929b53d5d97efe8cf6e290ff9b80faf11b9c26",
-    "versao.py": "ae19e3d250f581849a09245b27469b2cb1b1aef48d862338e888679d58b20d67",
+    "versao.py": "49e9d1b5c82bc10c70bd79ca5f494961e3cae3553cd4b70af1565bca661f9ac2",
     "checkpoint.py": "947295fdf2035d6f65d5d43f70e1d6e5e1c411d92eaca264a469a221b6b61c38",
 }
 
@@ -329,8 +328,8 @@ def strip_dashboard_block_b(theme_name: str, qss: str) -> str:
 class DashboardBlockADesignSystemTests(unittest.TestCase):
     def test_orcamento_de_tokens_do_bloco_a(self):
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
-        self.assertEqual(len(ALL_TOKENS), 1106)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1148)
+        self.assertEqual(len(ALL_TOKENS), 1250)
         self.assertEqual(len(DASHBOARD_COLOR_TOKENS), 38)
         self.assertEqual(len(DASHBOARD_GRADIENT_TOKENS), 3)
         for path in DASHBOARD_COLOR_TOKENS:

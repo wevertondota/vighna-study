@@ -118,17 +118,16 @@ EXPECTED_GRADIENTS = {
 BLOCK_C_QSS = {
     'claro':'f85c48f827422ae6626447f9d478b4c680580500b7fb8d7fb9943121b5072010',
     'escuro':'fb27b1e4192b9e61fc3c4cfe83f77066158d5725a9a83566f506209bfd9c8435',
-    'futurista':'a32756c9a8c52319967765c6e49890aa7022a98eff92a3f858d23f749cd8e255',
+    'futurista':'254910444067c63066973d0604624db00d33e0a65a4ffa7b7135401b9f9a350c',
 }
 BLOCK_D_QSS = {
     'claro':'3dd56c660dfb443b5043bc90fa8246e7707819cb1d6ef00a46a8daa67a92a853',
     'escuro':'fed11ea49f011a3a33be16b4cbdda06a61a26fce62763284c3c450af15b21abb',
-    'futurista':'450554152a93d52646afafa8410b8185603f9e238ad5bf2cbdcef36a9e074c3e',
+    'futurista':'c1bc7d5ef047358e4392c4908eda4ddbb53c1966e651ef8c7cea869f39844f14',
 }
 PROTECTED_HASHES = {
-    'main.py':'0e8ec1248b38d4bac3ffce756f3a35dabb0ba1a2c0f757996b53f6a2f4b7a02b',
-    'estudos.db':'7152284f813f16c42bb4586d4d929b53d5d97efe8cf6e290ff9b80faf11b9c26',
-    'versao.py':'ae19e3d250f581849a09245b27469b2cb1b1aef48d862338e888679d58b20d67',
+    'main.py':'d2e4ebd54ae765ec8f11eabd5e6c6e086e3dfd7bb3d441def8c03705515da4fe',
+    'versao.py':'49e9d1b5c82bc10c70bd79ca5f494961e3cae3553cd4b70af1565bca661f9ac2',
     'foco.py':'8fbe4659f3371683738a3fa239a789b3bca26ab47dc68f38a69829a33afd03ed',
     'jogos.py':'498aab65a2a13efa070ae2f912536b5ddc1aada31e23a28846def6a617492286',
     'checkpoint.py':'947295fdf2035d6f65d5d43f70e1d6e5e1c411d92eaca264a469a221b6b61c38',
@@ -244,8 +243,8 @@ def strip_block_d(theme_name: str, qss: str) -> str:
 class DashboardBlockDDesignSystemTests(unittest.TestCase):
     def test_orcamento_de_tokens_exato(self):
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
-        self.assertEqual(len(ALL_TOKENS), 1106)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1148)
+        self.assertEqual(len(ALL_TOKENS), 1250)
         self.assertEqual(len(COLOR_TOKENS), 42)
         self.assertEqual(len(GRADIENT_TOKENS), 3)
         self.assertEqual(len(BLOCK_D_TOKENS), 45)
@@ -329,7 +328,7 @@ class DashboardBlockDDesignSystemTests(unittest.TestCase):
 
     def test_metadata_permanece_inalterada(self):
         self.assertEqual(VIGHNA_VERSION, '0.29.59')
-        self.assertEqual(VIGHNA_BUILD, 'questions-center-editor-viewer-futuristic-text-v1')
+        self.assertEqual(VIGHNA_BUILD, 'statistics-my-evolution-tokens-v1')
         self.assertEqual(VIGHNA_SCHEMA, 25)
 
 

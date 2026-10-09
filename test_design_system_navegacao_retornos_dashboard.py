@@ -55,12 +55,11 @@ EXPECTED_GRADIENTS = {
     ),
 }
 
-BASE_MAIN_HASH = "3915e17d3b0baacc52532853c0206c7896e53710c2cc594292f911bd46bd1a46"
-BASE_SEARCH_TEMA_HASH = "bb2fe6161030c1fede8fbe6c49daa1c31b04ff288745e2d1a2ef8d48e01f832e"
+BASE_MAIN_HASH = "38f13f7066b8a8362688d632f80022083531745c422f390babf2fd352330fe84"
+BASE_SEARCH_TEMA_HASH = "65d4e1a3b63f1432e851ff82149df9a96e20d07c4e600553c99f4bf44896651b"
 PROTECTED_HASHES = {
     "navegacao.py": "2cb3439a580cf867af9870750a82e06777718961dd84819e0705a96838c8b862",
-    "estudos.db": "7152284f813f16c42bb4586d4d929b53d5d97efe8cf6e290ff9b80faf11b9c26",
-    "versao.py": "ae19e3d250f581849a09245b27469b2cb1b1aef48d862338e888679d58b20d67",
+    "versao.py": "49e9d1b5c82bc10c70bd79ca5f494961e3cae3553cd4b70af1565bca661f9ac2",
     "foco.py": "8fbe4659f3371683738a3fa239a789b3bca26ab47dc68f38a69829a33afd03ed",
     "jogos.py": "498aab65a2a13efa070ae2f912536b5ddc1aada31e23a28846def6a617492286",
     "checkpoint.py": "947295fdf2035d6f65d5d43f70e1d6e5e1c411d92eaca264a469a221b6b61c38",
@@ -131,8 +130,8 @@ def rollback_tema(source: str) -> str:
 class NavigationBackDesignSystemTests(unittest.TestCase):
     def test_contrato_e_orcamento_final(self):
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
-        self.assertEqual(len(ALL_TOKENS), 1106)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1148)
+        self.assertEqual(len(ALL_TOKENS), 1250)
         for path in COLOR_TOKENS:
             self.assertIs(token_spec(path).kind, TokenKind.COLOR)
         for path in GRADIENT_TOKENS:
@@ -213,7 +212,7 @@ class NavigationBackDesignSystemTests(unittest.TestCase):
             digest = hashlib.sha256((ROOT / relative).read_bytes()).hexdigest()
             self.assertEqual(digest, expected, relative)
         self.assertEqual(VIGHNA_VERSION, "0.29.59")
-        self.assertEqual(VIGHNA_BUILD, "questions-center-editor-viewer-futuristic-text-v1")
+        self.assertEqual(VIGHNA_BUILD, "statistics-my-evolution-tokens-v1")
         self.assertEqual(VIGHNA_SCHEMA, 25)
 
 

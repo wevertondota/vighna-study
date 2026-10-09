@@ -300,17 +300,16 @@ EXPECTED_GRADIENTS = {
 BLOCK_A_QSS = {
     "claro": "f9dfec4dd2238a1955f9760f12b9df93adcf3eb32cd8ff457cb5d4a7b1cf2c14",
     "escuro": "b16a2d1643a53053b00c804fc6685a2e534836c217bee334986fdeeba016f70a",
-    "futurista": "0fa780a4826fd9dfea4b5b15404ce22fbe8543516a199cdb04d1733e221b98a8",
+    "futurista": "43e42f04862522996eb52351beb104570230e7283c8a8e7cbd389742fd5dee18",
 }
 BLOCK_B_QSS = {
     "claro": "9192b93101c8fe71a8fee1887c004a7a42bf9f7b622acfd383ef10fe94c5a51e",
     "escuro": "def70b0b7fca2306396e1740589f391fed66ddb362b373aae672617c9daa52b7",
-    "futurista": "75ecfdd3dae6887d16ca39471382b84c2714dee83b57798d7ff017c3e066890d",
+    "futurista": "1169daa1f505ed0dcad24d0dd10ee8729536c2c4d6720f2a2cbecf929a6c4cbc",
 }
 PROTECTED_HASHES = {
-    "main.py": "0e8ec1248b38d4bac3ffce756f3a35dabb0ba1a2c0f757996b53f6a2f4b7a02b",
-    "estudos.db": "7152284f813f16c42bb4586d4d929b53d5d97efe8cf6e290ff9b80faf11b9c26",
-    "versao.py": "ae19e3d250f581849a09245b27469b2cb1b1aef48d862338e888679d58b20d67",
+    "main.py": "d2e4ebd54ae765ec8f11eabd5e6c6e086e3dfd7bb3d441def8c03705515da4fe",
+    "versao.py": "49e9d1b5c82bc10c70bd79ca5f494961e3cae3553cd4b70af1565bca661f9ac2",
     "foco.py": "8fbe4659f3371683738a3fa239a789b3bca26ab47dc68f38a69829a33afd03ed",
     "jogos.py": "498aab65a2a13efa070ae2f912536b5ddc1aada31e23a28846def6a617492286",
     "checkpoint.py": "947295fdf2035d6f65d5d43f70e1d6e5e1c411d92eaca264a469a221b6b61c38",
@@ -459,8 +458,8 @@ def strip_block_b(theme_name: str, qss: str) -> str:
 class DashboardBlockBDesignSystemTests(unittest.TestCase):
     def test_orcamento_de_tokens_exato(self):
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
-        self.assertEqual(len(ALL_TOKENS), 1106)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1148)
+        self.assertEqual(len(ALL_TOKENS), 1250)
         self.assertEqual(len(COLOR_TOKENS), 60)
         self.assertEqual(len(GRADIENT_TOKENS), 5)
         self.assertEqual(len(BLOCK_B_TOKENS), 65)
@@ -544,7 +543,7 @@ class DashboardBlockBDesignSystemTests(unittest.TestCase):
 
     def test_metadata_permanece_inalterada(self):
         self.assertEqual(VIGHNA_VERSION, "0.29.59")
-        self.assertEqual(VIGHNA_BUILD, "questions-center-editor-viewer-futuristic-text-v1")
+        self.assertEqual(VIGHNA_BUILD, "statistics-my-evolution-tokens-v1")
         self.assertEqual(VIGHNA_SCHEMA, 25)
 
 if __name__ == "__main__":

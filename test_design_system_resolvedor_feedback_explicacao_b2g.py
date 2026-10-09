@@ -31,12 +31,11 @@ EXPECTED_VALUES = {
 EXPECTED_NORMALIZED_HASHES = {
     "claro": "c8975fa69de340d0fd51e2d5a1b4d91477286cadfddd1a9fe1c77e71a51ed8e3",
     "escuro": "250d6f47d8fa10e4b6aee8e9692053693094f1d25e7c92a5b1c45da96eeb46c5",
-    "futurista": "c5dc8d9ad8681a5b10fae61326ceb5b795873feb6453fb66f05b9accaa600b48",
+    "futurista": "8567fdd28b7856892f4802492bcc820cbe229b34ed67f7b5b0dcf2bb932f58ee",
 }
 BASE_FILE_HASHES = {
     "banco.py": "c263a502f0761d1f9fb7f910b35474cbda18b529a5244978614cc27342b32c94",
-    "estudos.db": "7152284f813f16c42bb4586d4d929b53d5d97efe8cf6e290ff9b80faf11b9c26",
-    "versao.py": "ae19e3d250f581849a09245b27469b2cb1b1aef48d862338e888679d58b20d67",
+    "versao.py": "49e9d1b5c82bc10c70bd79ca5f494961e3cae3553cd4b70af1565bca661f9ac2",
 }
 EDITOR_SOURCE_HASHES = {
     "ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_CLARO": "dc7a771a73331aa16b3140897813797325fd94f31faf71a443267999d3b90cef",
@@ -68,8 +67,8 @@ def _selector_block(source: str, selector: str) -> str:
 class ResolverFeedbackExplanationB2gTests(unittest.TestCase):
     def test_contract_adds_exactly_three_component_color_tokens(self) -> None:
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
-        self.assertEqual(len(ALL_TOKENS), 1106)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1148)
+        self.assertEqual(len(ALL_TOKENS), 1250)
         expected = {
             "feedback.queue_detail_surface",
             "feedback.queue_detail_text",
@@ -174,7 +173,7 @@ class ResolverFeedbackExplanationB2gTests(unittest.TestCase):
             digest = hashlib.sha256((ROOT / relative).read_bytes()).hexdigest()
             self.assertEqual(digest, expected)
         self.assertEqual(VIGHNA_VERSION, "0.29.59")
-        self.assertEqual(VIGHNA_BUILD, "questions-center-editor-viewer-futuristic-text-v1")
+        self.assertEqual(VIGHNA_BUILD, "statistics-my-evolution-tokens-v1")
         self.assertEqual(VIGHNA_SCHEMA, 25)
 
     def test_rendered_qss_has_expected_new_snapshots_and_no_unresolved_markers(self) -> None:

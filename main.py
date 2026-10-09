@@ -392,8 +392,8 @@ def aplicar_destaque_tabela(
                 "#11382F"
             ),
             "inativo": (
-                "#8FA8B8",
-                "#132B39"
+                qss_color(tema, "table_highlight.inactive_text"),
+                qss_color(tema, "table_highlight.inactive_surface")
             ),
         }
     elif tema == "escuro":
@@ -415,8 +415,8 @@ def aplicar_destaque_tabela(
                 "#163523"
             ),
             "inativo": (
-                "#94A3B8",
-                "#263241"
+                qss_color(tema, "table_highlight.inactive_text"),
+                qss_color(tema, "table_highlight.inactive_surface")
             ),
         }
     else:
@@ -438,8 +438,8 @@ def aplicar_destaque_tabela(
                 "#DCFCE7"
             ),
             "inativo": (
-                "#64748B",
-                "#E2E8F0"
+                qss_color(tema, "table_highlight.inactive_text"),
+                qss_color(tema, "table_highlight.inactive_surface")
             ),
         }
 
@@ -9375,6 +9375,9 @@ class JanelaGerenciarQuestoesTopico(QDialog):
         self.arvore.clear()
         item_para_selecionar = None
         primeiro_topico = None
+        tema_arvore = normalizar_tema(
+            obter_configuracao_texto("tema_interface", "claro")
+        )
         for disciplina in sorted(grupos, key=str.lower):
             topicos = grupos[disciplina]
             total_disciplina = sum(len(v) for v in topicos.values())
@@ -9391,7 +9394,9 @@ class JanelaGerenciarQuestoesTopico(QDialog):
             pai.setData(0, Qt.UserRole + 1, disciplina)
             pai.setData(0, Qt.UserRole + 4, disciplina_pausada)
             if disciplina_pausada:
-                pai.setForeground(0, QBrush(QColor("#64748B")))
+                pai.setForeground(
+                    0, QBrush(qcolor(tema_arvore, "questions_center.tree_disabled_discipline_text"))
+                )
                 pai.setToolTip(0, "Disciplina desligada no perfil atual.")
             self.arvore.addTopLevelItem(pai)
             for (topico_id, topico), questoes in sorted(
@@ -39071,6 +39076,30 @@ class SistemaEstudos(QMainWindow):
                 salvar=False
             )
 
+    def _estilo_disciplina_desligada_dashboard(self, tema):
+        """Estilo local tokenizado; mantem a representacao anterior do QSS."""
+        tema = normalizar_tema(tema)
+        return (
+            f"background-color:{qss_color(tema, 'dashboard.disciplines_disabled_surface')}; "
+            f"color:{qss_color(tema, 'dashboard.disciplines_disabled_text')}; "
+            f"border:1px solid {qss_color(tema, 'dashboard.disciplines_disabled_border')}; "
+            "text-align:left; padding-left:14px;"
+        )
+
+    def atualizar_estilos_disciplinas_desligadas_dashboard(self):
+        """Atualiza botoes existentes apos troca de tema, sem refazer o grid."""
+        layout = getattr(self, "botoes_disciplinas_layout", None)
+        if layout is None:
+            return
+        estilo = self._estilo_disciplina_desligada_dashboard(self.tema_atual)
+        for indice in range(layout.count()):
+            item = layout.itemAt(indice)
+            botao = item.widget() if item is not None else None
+            if botao is None or not botao.property("dashboardDisciplinaDesligada"):
+                continue
+            if botao.styleSheet() != estilo:
+                botao.setStyleSheet(estilo)
+
     def carregar_botoes_disciplinas(self):
         if not hasattr(
             self,
@@ -39115,6 +39144,10 @@ class SistemaEstudos(QMainWindow):
             )
             return
 
+        tema_atual = normalizar_tema(
+            obter_configuracao_texto("tema_interface", "claro")
+        )
+
         for indice, (_, nome, pausada) in enumerate(
             disciplinas
         ):
@@ -39128,30 +39161,10 @@ class SistemaEstudos(QMainWindow):
                 "disciplineButton"
             )
             if pausada:
-                tema_atual = normalizar_tema(
-                    obter_configuracao_texto("tema_interface", "claro")
+                botao.setProperty("dashboardDisciplinaDesligada", True)
+                botao.setStyleSheet(
+                    self._estilo_disciplina_desligada_dashboard(tema_atual)
                 )
-                if tema_atual == "futurista":
-                    botao.setStyleSheet(
-                        f"background-color:{qss_color('futurista', 'dashboard.disciplines_disabled_surface')}; "
-                        f"color:{qss_color('futurista', 'dashboard.disciplines_disabled_text')}; "
-                        f"border:1px solid {qss_color('futurista', 'dashboard.disciplines_disabled_border')}; "
-                        "text-align:left; padding-left:14px;"
-                    )
-                elif tema_atual == "escuro":
-                    botao.setStyleSheet(
-                        f"background-color:{qss_color('escuro', 'dashboard.disciplines_disabled_surface')}; "
-                        f"color:{qss_color('escuro', 'dashboard.disciplines_disabled_text')}; "
-                        f"border:1px solid {qss_color('escuro', 'dashboard.disciplines_disabled_border')}; "
-                        "text-align:left; padding-left:14px;"
-                    )
-                else:
-                    botao.setStyleSheet(
-                        f"background-color:{qss_color('claro', 'dashboard.disciplines_disabled_surface')}; "
-                        f"color:{qss_color('claro', 'dashboard.disciplines_disabled_text')}; "
-                        f"border:1px solid {qss_color('claro', 'dashboard.disciplines_disabled_border')}; "
-                        "text-align:left; padding-left:14px;"
-                    )
                 botao.setText(f"{nome}  • desligada")
                 botao.setToolTip(
                     "Disciplina desligada temporariamente. Clique para abrir e gerenciar."
@@ -60815,6 +60828,7 @@ class SistemaEstudos(QMainWindow):
                 )
             )
             self.atualizar_icones_interface()
+            self.atualizar_estilos_disciplinas_desligadas_dashboard()
             self.cache_analitico.invalidar("regularidade:")
             self.cache_analitico.invalidar("estatisticas:regularidade:")
             self._estado_estatisticas.marcar_sujas(("Regularidade",), resumo=False)

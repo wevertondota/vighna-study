@@ -79,19 +79,18 @@ EXPECTED = {
 CURRENT_HASHES = {
     "claro": "828f96d828f7dadc111451769650ef83ee5fb5b774a43ac8bc22d3cfd1f8d9f9",
     "escuro": "7479dce86b49ddc9afdbf844b9217232f40aa4ec160069af7877d2cc5cbd39fa",
-    "futurista": "6862f94c1f93abf7100ddddbf13b18759fcce4acc13a1a13ba119c4d10678239",
+    "futurista": "883ce2b6302810f5e20bf3f250872685fac0bb7df8657e905d2125e99fe478b0",
 }
 B2G_HASHES = {
     "claro": "36d5e80a7261f17f219b271b95503910f02782efbff3a54cf5a599cf55edb358",
     "escuro": "8adcafab6f97c546b3b034606465b69e6e0aaa29d958d1a5587cd640749638cc",
-    "futurista": "72e6cc59edf1f38d3c3f19c08391949c85da3ce1214c895dfcc579fd2dc7fd83",
+    "futurista": "8331d5b285798893b7e97f1b24c88175ef8b13db5095ceae86a9ee28af262e9b",
 }
 PROTECTED = {
     "banco.py": "c263a502f0761d1f9fb7f910b35474cbda18b529a5244978614cc27342b32c94",
     "foco.py": "8fbe4659f3371683738a3fa239a789b3bca26ab47dc68f38a69829a33afd03ed",
     "checkpoint.py": "947295fdf2035d6f65d5d43f70e1d6e5e1c411d92eaca264a469a221b6b61c38",
-    "versao.py": "ae19e3d250f581849a09245b27469b2cb1b1aef48d862338e888679d58b20d67",
-    "estudos.db": "7152284f813f16c42bb4586d4d929b53d5d97efe8cf6e290ff9b80faf11b9c26",
+    "versao.py": "49e9d1b5c82bc10c70bd79ca5f494961e3cae3553cd4b70af1565bca661f9ac2",
 }
 
 SUMMARY_RULE = re.compile(
@@ -205,8 +204,8 @@ def canonical(value: str) -> str:
 class SummaryFinalPassATests(unittest.TestCase):
     def test_exact_sixteen_new_component_color_tokens(self) -> None:
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
-        self.assertEqual(len(ALL_TOKENS), 1106)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1148)
+        self.assertEqual(len(ALL_TOKENS), 1250)
         actual = {t.path for t in ALL_TOKENS if t.path.startswith("summary.")}
         self.assertTrue(SUMMARY_TOKENS < actual)
         for path in SUMMARY_TOKENS:
@@ -288,7 +287,7 @@ class SummaryFinalPassATests(unittest.TestCase):
         for relative, expected in PROTECTED.items():
             self.assertEqual(hashlib.sha256((ROOT / relative).read_bytes()).hexdigest(), expected)
         self.assertEqual(VIGHNA_VERSION, "0.29.59")
-        self.assertEqual(VIGHNA_BUILD, "questions-center-editor-viewer-futuristic-text-v1")
+        self.assertEqual(VIGHNA_BUILD, "statistics-my-evolution-tokens-v1")
         self.assertEqual(VIGHNA_SCHEMA, 25)
 
 

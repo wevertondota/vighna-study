@@ -61,12 +61,12 @@ EXPECTED_GRADIENT_STOPS = {
 PASS_A_NORMALIZED = {
     "claro":"828f96d828f7dadc111451769650ef83ee5fb5b774a43ac8bc22d3cfd1f8d9f9",
     "escuro":"7479dce86b49ddc9afdbf844b9217232f40aa4ec160069af7877d2cc5cbd39fa",
-    "futurista":"6862f94c1f93abf7100ddddbf13b18759fcce4acc13a1a13ba119c4d10678239",
+    "futurista":"883ce2b6302810f5e20bf3f250872685fac0bb7df8657e905d2125e99fe478b0",
 }
 CURRENT_NORMALIZED = {
     "claro":"c8975fa69de340d0fd51e2d5a1b4d91477286cadfddd1a9fe1c77e71a51ed8e3",
     "escuro":"250d6f47d8fa10e4b6aee8e9692053693094f1d25e7c92a5b1c45da96eeb46c5",
-    "futurista":"c5dc8d9ad8681a5b10fae61326ceb5b795873feb6453fb66f05b9accaa600b48",
+    "futurista":"8567fdd28b7856892f4802492bcc820cbe229b34ed67f7b5b0dcf2bb932f58ee",
 }
 PASS_B_MARKERS = (
     "#adaptiveSummaryCard", "#adaptiveSummaryTitle", "#adaptiveSummaryText",
@@ -190,8 +190,8 @@ def strip_pass_b_rules(qss: str) -> str:
 class SummaryFinalPassBTests(unittest.TestCase):
     def test_exact_seventeen_pass_b_tokens_and_final_counts(self) -> None:
         self.assertEqual(SEMANTIC_TOKEN_COUNT, 102)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
-        self.assertEqual(len(ALL_TOKENS), 1106)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1148)
+        self.assertEqual(len(ALL_TOKENS), 1250)
         paths = {t.path for t in ALL_TOKENS}
         self.assertTrue(PASS_B_TOKENS <= paths)
         self.assertEqual(len(PASS_B_TOKENS), 17)
@@ -272,7 +272,7 @@ class SummaryFinalPassBTests(unittest.TestCase):
 
     def test_metadata_unchanged(self) -> None:
         self.assertEqual(VIGHNA_VERSION, "0.29.59")
-        self.assertEqual(VIGHNA_BUILD, "questions-center-editor-viewer-futuristic-text-v1")
+        self.assertEqual(VIGHNA_BUILD, "statistics-my-evolution-tokens-v1")
         self.assertEqual(VIGHNA_SCHEMA, 25)
 
 

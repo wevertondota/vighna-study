@@ -24,7 +24,7 @@ TEXT = "QDialog#questionSolverDialog QLabel#questionSolverStatement"
 BASELINE = {
     "claro": "41163c96428ebacd62c25f5038021f51532f1c8ec41253c26dfe4fbd83e93a8a",
     "escuro": "3b313cb0085c5f2d06fbb981f5b2660ba585d36e2595b4ab7ac8ad4bc19d7ec5",
-    "futurista": "01450cc14995f4c252243555dfac88536d8a0961b99a6bc235cab5f43e99b9b4",
+    "futurista": "9a374976b4cada0cb1823ec9f54455b03186b65a6acdb2226c784e3f89e3ebd1",
 }
 
 COLORS = {
@@ -96,8 +96,8 @@ class StatementB2FTests(unittest.TestCase):
             if token.path.startswith("session.statement_")
         }
         self.assertEqual(actual, expected)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
-        self.assertEqual(len(ALL_TOKENS), 1106)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1148)
+        self.assertEqual(len(ALL_TOKENS), 1250)
 
         self.assertIs(
             token_spec("session.statement_gradient").kind,
@@ -212,7 +212,7 @@ class StatementB2FTests(unittest.TestCase):
         digest = hashlib.sha256(main.read_bytes()).hexdigest()
         self.assertEqual(
             digest,
-            "0e8ec1248b38d4bac3ffce756f3a35dabb0ba1a2c0f757996b53f6a2f4b7a02b",
+            "d2e4ebd54ae765ec8f11eabd5e6c6e086e3dfd7bb3d441def8c03705515da4fe",
         )
 
     def test_resolved_qss_hashes_remain_identical(self):

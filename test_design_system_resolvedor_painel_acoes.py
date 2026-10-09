@@ -59,7 +59,7 @@ VALUES = {'claro': {'action_panel_surface': '#FFFFFF',
 HASHES = {
     "claro": "71c6c022b5fb4a3798f5bb9f837fc55fc9fa3bf4d558832688dd7fb25d8c7cdb",
     "escuro": "25dd9d735b8aa542020a05bbc3318cc91aba79f0b2f89995cea0a272d8bc1056",
-    "futurista": "d4176c63eae7f8b0349fce4eb50ada9b5186473a8d0aba884ad7aa4e41f5b448",
+    "futurista": "0e1011b5790c7a6f775d70ef4a59dd60a4c1587de412e9533bed2e39b1cba14f",
 }
 SELECTORS = (
     "QDialog#questionSolverDialog QFrame#questionSessionActionPanel",
@@ -70,7 +70,7 @@ SELECTORS = (
 )
 SOURCE_HASHES = {'checkpoint.py': '947295fdf2035d6f65d5d43f70e1d6e5e1c411d92eaca264a469a221b6b61c38',
  'foco.py': '8fbe4659f3371683738a3fa239a789b3bca26ab47dc68f38a69829a33afd03ed',
- 'main.py': 'ac2edad86f4d554b8c7df9b323d38ab4d5ca4f019421e68474bcec6d9552f095'}
+ 'main.py': 'a8713479507a481991bf4fde56e394865823eba3d5e96ccfa08b7ad1db7e3f29'}
 
 
 def canonical(qss):
@@ -125,8 +125,8 @@ class SessionActionPanelTests(unittest.TestCase):
         expected = {"session." + key for key in VALUES["claro"]} | {"session.action_panel_gradient"}
         actual = {spec.path for spec in ALL_TOKENS if spec.path.startswith(("session.action_panel_", "session.skip_", "session.end_"))}
         self.assertEqual(actual, expected)
-        self.assertEqual(COMPONENT_TOKEN_COUNT, 1004)
-        self.assertEqual(len(ALL_TOKENS), 1106)
+        self.assertEqual(COMPONENT_TOKEN_COUNT, 1148)
+        self.assertEqual(len(ALL_TOKENS), 1250)
         for path in expected:
             with self.subTest(token=path):
                 kind = TokenKind.GRADIENT if path.endswith("_gradient") else TokenKind.COLOR
