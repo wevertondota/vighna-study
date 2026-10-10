@@ -144,6 +144,22 @@ _COMPONENT_COLOR_PATHS = (
     "planning.subsection_hint_text",
     "planning.micro_label_text",
 
+    # Planejamento Futurista — Futurista — títulos e textos auxiliares
+    "planning.neo_section_subtitle_text",
+    "planning.neo_subsection_title_text",
+    "planning.neo_subsection_aux_text",
+
+    # Planejamento Futurista — Futurista — cartões e valor diário
+    "planning.neo_goal_card_border",
+    "planning.neo_goal_card_title_text",
+    "planning.neo_daily_goal_value_text",
+
+    # Planejamento Futurista — Futurista — indicador total e progresso diário
+    "planning.neo_total_badge_text",
+    "planning.neo_total_badge_border",
+    "planning.neo_daily_progress_track",
+    "planning.neo_daily_progress_fill",
+
     # Planejamento A — migração cromática
     "planning.panel_surface",
     "planning.panel_border",

@@ -22818,19 +22818,19 @@ def stylesheet_futurista():
     }
 
     QLabel#planningSectionSubtitle {
-        color: #7997aa;
+        color: {{color:planning.neo_section_subtitle_text}};
         font-size: 8pt;
     }
 
     QLabel#planningSubsectionTitle {
-        color: #c6dce7;
+        color: {{color:planning.neo_subsection_title_text}};
         font-size: 9pt;
         font-weight: 700;
     }
 
     QLabel#planningSubsectionHint,
     QLabel#planningMicroLabel {
-        color: #6f8ca0;
+        color: {{color:planning.neo_subsection_aux_text}};
         font-size: 7.4pt;
     }
 
@@ -22838,27 +22838,27 @@ def stylesheet_futurista():
     QFrame#weeklyLoadBox,
     QFrame#weeklyGoalBox {
         background-color: rgba(11,30,46,225);
-        border: 1px solid #294b61;
+        border: 1px solid {{color:planning.neo_goal_card_border}};
         border-radius: 9px;
     }
 
     QLabel#planningItemTitle,
     QLabel#weeklyGoalTitle {
-        color: #bfd5df;
+        color: {{color:planning.neo_goal_card_title_text}};
         font-size: 8.7pt;
         font-weight: 700;
     }
 
     QLabel#dailyGoalValue {
-        color: #dcecf3;
+        color: {{color:planning.neo_daily_goal_value_text}};
         font-size: 13pt;
         font-weight: 700;
     }
 
     QLabel#planningTotalBadge {
         background-color: rgba(10,27,42,220);
-        color: #83a0b2;
-        border: 1px solid #2d536a;
+        color: {{color:planning.neo_total_badge_text}};
+        border: 1px solid {{color:planning.neo_total_badge_border}};
         border-radius: 6px;
         padding: 3px 7px;
         font-size: 7.3pt;
@@ -22866,13 +22866,13 @@ def stylesheet_futurista():
     }
 
     QProgressBar#dailyGoalProgress {
-        background-color: #1c3343;
+        background-color: {{color:planning.neo_daily_progress_track}};
         border: none;
         border-radius: 4px;
     }
 
     QProgressBar#dailyGoalProgress::chunk {
-        background-color: #3b78b1;
+        background-color: {{color:planning.neo_daily_progress_fill}};
         border-radius: 4px;
     }
 

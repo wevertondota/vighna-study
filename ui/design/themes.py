@@ -544,6 +544,22 @@ _LIGHT_COMPONENT_OVERRIDES = {
     "planning.subsection_hint_text": "#8994A4",
     "planning.micro_label_text": "#929DAC",
 
+    # Planejamento Futurista — Futurista — títulos e textos auxiliares
+    "planning.neo_section_subtitle_text": "#7C899A",
+    "planning.neo_subsection_title_text": "#273246",
+    "planning.neo_subsection_aux_text": "#8994A4",
+
+    # Planejamento Futurista — Futurista — cartões e valor diário
+    "planning.neo_goal_card_border": "#DFE5ED",
+    "planning.neo_goal_card_title_text": "#344055",
+    "planning.neo_daily_goal_value_text": "#202B3D",
+
+    # Planejamento Futurista — Futurista — indicador total e progresso diário
+    "planning.neo_total_badge_text": "#657286",
+    "planning.neo_total_badge_border": "#DBE2EA",
+    "planning.neo_daily_progress_track": "#E5EAF0",
+    "planning.neo_daily_progress_fill": "#3976D5",
+
     "planning.panel_surface": "#FFFFFF",
     "planning.panel_border": "#DBE3ED",
     "planning.settings_surface": "#FFFFFF",
@@ -1982,6 +1998,22 @@ _DARK_COMPONENT_OVERRIDES = {
     # Planejamento — Subseções — Textos Auxiliares
     "planning.subsection_hint_text": "#78899D",
     "planning.micro_label_text": "#78899D",
+
+    # Planejamento Futurista — Futurista — títulos e textos auxiliares
+    "planning.neo_section_subtitle_text": "#8999AA",
+    "planning.neo_subsection_title_text": "#D6DFE8",
+    "planning.neo_subsection_aux_text": "#78899D",
+
+    # Planejamento Futurista — Futurista — cartões e valor diário
+    "planning.neo_goal_card_border": "#2E4054",
+    "planning.neo_goal_card_title_text": "#CBD6E0",
+    "planning.neo_daily_goal_value_text": "#E1E8F0",
+
+    # Planejamento Futurista — Futurista — indicador total e progresso diário
+    "planning.neo_total_badge_text": "#91A1B4",
+    "planning.neo_total_badge_border": "#33465B",
+    "planning.neo_daily_progress_track": "#263646",
+    "planning.neo_daily_progress_fill": "#4779C7",
 
     "planning.panel_surface": "#1F2937",
     "planning.panel_border": "#334155",
@@ -3422,6 +3454,22 @@ _FUTURISTIC_COMPONENT_OVERRIDES = {
     # Planejamento — Subseções — Textos Auxiliares
     "planning.subsection_hint_text": "#6F8CA0",
     "planning.micro_label_text": "#6F8CA0",
+
+    # Planejamento Futurista — Futurista — títulos e textos auxiliares
+    "planning.neo_section_subtitle_text": "#7997AA",
+    "planning.neo_subsection_title_text": "#C6DCE7",
+    "planning.neo_subsection_aux_text": "#6F8CA0",
+
+    # Planejamento Futurista — Futurista — cartões e valor diário
+    "planning.neo_goal_card_border": "#294B61",
+    "planning.neo_goal_card_title_text": "#BFD5DF",
+    "planning.neo_daily_goal_value_text": "#DCECF3",
+
+    # Planejamento Futurista — Futurista — indicador total e progresso diário
+    "planning.neo_total_badge_text": "#83A0B2",
+    "planning.neo_total_badge_border": "#2D536A",
+    "planning.neo_daily_progress_track": "#1C3343",
+    "planning.neo_daily_progress_fill": "#3B78B1",
 
     "planning.panel_surface": "#1F2937",
     "planning.panel_border": "#334155",
