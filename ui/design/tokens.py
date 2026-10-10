@@ -76,6 +76,406 @@ _SEMANTIC_GRADIENT_PATHS = (
 )
 
 _COMPONENT_COLOR_PATHS = (
+    # Modais — Sessão A — Cartões de configuração e resumo da sessão — estrutura
+    "session_modal.cards_surface",
+    "session_modal.cards_border",
+
+    # Modais — Sessão B — Progresso da sessão — texto, trilho e preenchimento
+    "session_modal.progress_text",
+    "session_modal.progress_track",
+    "session_modal.progress_fill",
+
+    # Modais — Sessão C — Minicartão de estatísticas da sessão — estrutura
+    "session_modal.mini_stat_surface",
+    "session_modal.mini_stat_border",
+
+    # Estudo — Sessão A — Cartões da fila e sessão atual — fundo e borda
+    "study_session.queue_card_surface",
+    "study_session.queue_card_border",
+    "study_session.current_card_surface",
+    "study_session.current_card_border",
+
+    # Estudo — Sessão B — Rótulos da fila e da sessão — seis textos
+    "study_session.eyebrow_text",
+    "study_session.position_text",
+    "study_session.discipline_text",
+    "study_session.topic_text",
+    "study_session.detail_value_text",
+    "study_session.section_title_text",
+
+    # Planejamento A — migração cromática
+    "planning.panel_surface",
+    "planning.panel_border",
+
+    # Planejamento B — migração cromática
+    "planning.settings_surface",
+    "planning.settings_border",
+    "planning.settings_title",
+    "planning.load_light",
+    "planning.load_moderate",
+    "planning.load_high",
+    "planning.main_title",
+
+    # Planejamento C — migração cromática
+    "planning.goal_surface",
+    "planning.goal_text",
+    "planning.goal_border",
+
+    # Planejamento: PLANEJAMENTO_RESUMO_BOTAO_BASE_V1
+    "planning.summary_button_surface",
+    "planning.summary_button_text",
+    "planning.summary_button_border",
+
+    # Planejamento: PLANEJAMENTO_RESUMO_BOTAO_HOVER_V1
+    "planning.summary_button_hover_surface",
+    "planning.summary_button_hover_border",
+    "planning.summary_button_hover_text",
+
+    # Planejamento D — migração cromática
+    "planning.goal_hover_surface",
+    "planning.goal_hover_border",
+    "planning.goal_hover_text",
+
+    # Estudo — Botões A — Botão Pausar — estados normal e hover
+    "study_session.pause_button_surface",
+    "study_session.pause_button_text",
+    "study_session.pause_button_border",
+    "study_session.pause_button_hover_surface",
+    "study_session.pause_button_hover_emphasis",
+
+    # Estudo — Botões B — Botão Encerrar — estados normal e hover
+    "study_session.end_button_surface",
+    "study_session.end_button_text",
+    "study_session.end_button_border",
+    "study_session.end_button_hover_surface",
+    "study_session.end_button_hover_emphasis",
+
+    # Estudo — Botões C — Botão Pular — estados normal e hover
+    "study_session.skip_button_surface",
+    "study_session.skip_button_text",
+    "study_session.skip_button_border",
+    "study_session.skip_button_hover_surface",
+    "study_session.skip_button_hover_emphasis",
+
+    # Estudo — Sessão C — Tabela da fila de estudos — fundo e borda
+    "study_session.table_surface",
+    "study_session.table_border",
+
+    # Modais — Sessão D — Minicartão de estatísticas da sessão — rótulo e valor
+    "session_modal.mini_stat_label",
+    "session_modal.mini_stat_value",
+
+    # Modais — Botão Simulados da Central de Questões — Base V1
+    "mock_exam.questions_button_surface",
+    "mock_exam.questions_button_text",
+    "mock_exam.questions_button_border",
+
+    # Modais — Botão Simulados da Central de Questões — Hover V1
+    "mock_exam.questions_button_hover_surface",
+    "mock_exam.questions_button_hover_border",
+
+    # Modais — Botões de Iniciar e Dashboard dos Simulados — Base V1
+    "mock_exam.primary_button_surface",
+    "mock_exam.primary_button_text",
+    "mock_exam.primary_button_border",
+
+    # Modais — Botões de Iniciar e Dashboard dos Simulados — Hover V1
+    "mock_exam.primary_button_hover_surface",
+    "mock_exam.primary_button_hover_border",
+
+    # Modais — Título dos Resultados dos Simulados V1
+    "mock_exam.result_section_title_text",
+
+    # Modais — Aviso de Correção dos Simulados V1
+    "mock_exam.correction_notice_surface",
+    "mock_exam.correction_notice_text",
+    "mock_exam.correction_notice_border",
+
+    # Modais — Aviso de Regras dos Simulados V1
+    "mock_exam.rule_notice_surface",
+    "mock_exam.rule_notice_text",
+    "mock_exam.rule_notice_border",
+
+    # Modais — Rótulos do Cartão de Configuração de Simulados V1
+    "mock_exam.config_card_label_text",
+    "mock_exam.section_title_text",
+    "mock_exam.preview_summary_text",
+    "mock_exam.explanation_text",
+
+    # Modais — Cartão de Configuração de Simulados (Base) V1
+    "mock_exam.config_card_surface",
+    "mock_exam.config_card_border",
+
+    # Modais — Botões de Acesso à Efetividade (Hover) V1
+    "effectiveness.open_button_hover_surface",
+    "effectiveness.open_button_hover_border",
+
+    # Modais — Botões de Acesso à Efetividade (Base) V1
+    "effectiveness.open_button_surface",
+    "effectiveness.open_button_text",
+    "effectiveness.open_button_border",
+
+    # Modais — Textos das Métricas de Impacto da Efetividade V1
+    "effectiveness.impact_metric_label_text",
+    "effectiveness.impact_metric_value_text",
+    "effectiveness.impact_metric_footer_text",
+
+    # Modais — Minicartão de Métricas de Impacto da Efetividade V1
+    "effectiveness.impact_metric_surface",
+    "effectiveness.impact_metric_border",
+
+    # Modais — Título do Cartão de Impacto da Efetividade V1
+    "effectiveness.impact_title_text",
+
+    # Modais — Cartão de Impacto da Efetividade V1
+    "effectiveness.impact_card_surface",
+    "effectiveness.impact_card_border",
+
+    # Modais — Aviso de Acompanhamento da Efetividade V1
+    "effectiveness.tracking_notice_text",
+
+    # Modais — Barra de Filtros da Efetividade V1
+    "effectiveness.filter_bar_surface",
+    "effectiveness.filter_bar_border",
+    "effectiveness.filter_bar_label_text",
+
+    # Modais — Selo de Calibração: Nível Forte V1
+    "effectiveness.calibration_badge_strong_surface",
+    "effectiveness.calibration_badge_strong_text",
+    "effectiveness.calibration_badge_strong_border",
+
+    # Modais — Selo de Calibração: Níveis Inicial/Moderada V1
+    "effectiveness.calibration_badge_caution_surface",
+    "effectiveness.calibration_badge_caution_text",
+    "effectiveness.calibration_badge_caution_border",
+
+    # Modais — Selo de Calibração: Texto Base V1
+    "effectiveness.calibration_badge_text",
+
+    # Modais — Selo de Calibração: Fundo e Borda Base V1
+    "effectiveness.calibration_badge_surface",
+    "effectiveness.calibration_badge_border",
+
+    # Modais — Metadados da Calibração V1
+    "effectiveness.calibration_weights_text",
+    "effectiveness.calibration_observations_text",
+
+    # Modais — Texto Descritivo da Calibração V1
+    "effectiveness.calibration_body_text",
+
+    # Modais — Título da Calibração de Efetividade V1
+    "effectiveness.calibration_title_text",
+
+    # Modais — Cartão de Calibração de Efetividade V1
+    "effectiveness.calibration_card_surface",
+    "effectiveness.calibration_card_border",
+
+    # Modais — Texto auxiliar das estatísticas de efetividade V1
+    "effectiveness.stat_hint_text",
+
+    # Modais — Detalhes em Somente Leitura V1
+    "modal_details.readonly_surface",
+    "modal_details.readonly_border",
+
+    # Modais — Avisos Informativos Compartilhados V1
+    "modal_notice.info_surface",
+    "modal_notice.info_text",
+    "modal_notice.info_border",
+
+    # Modais — Rótulos de campos da Revisão Manual V1
+    "modal_revision.field_label_text",
+
+    # Modais — Sugestão de agendamento da Revisão Manual V1
+    "modal_revision.suggestion_surface",
+    "modal_revision.suggestion_border",
+    "modal_revision.suggestion_text",
+
+    # Modais — Resultado percentual da Revisão Manual V1
+    "modal_revision.result_surface",
+    "modal_revision.result_text",
+    "modal_revision.result_border",
+
+    # Modais — Selo de Revisão Manual V1
+    "modal_revision.badge_surface",
+    "modal_revision.badge_text",
+    "modal_revision.badge_border",
+
+    # Modais — Disponibilidade da Sessão V1
+    "modal_session_availability.default_surface",
+    "modal_session_availability.default_text",
+    "modal_session_availability.default_border",
+    "modal_session_availability.available_surface",
+    "modal_session_availability.available_text",
+    "modal_session_availability.available_border",
+    "modal_session_availability.empty_surface",
+    "modal_session_availability.empty_text",
+    "modal_session_availability.empty_border",
+
+    # Modais — Barra de Foco do Resolvedor V1
+    "session.focus_bar_surface",
+    "session.focus_bar_border",
+    "session.focus_state_text",
+
+    # Modais — Ações compactas V1 (linha e edição)
+    "modal_compact_actions.row_text",
+    "modal_compact_actions.row_border",
+    "modal_compact_actions.row_hover_surface",
+    "modal_compact_actions.row_hover_border",
+    "modal_compact_actions.edit_surface",
+    "modal_compact_actions.edit_text",
+    "modal_compact_actions.edit_border",
+    "modal_compact_actions.edit_hover_surface",
+    "modal_compact_actions.edit_hover_border",
+    "modal_compact_actions.edit_hover_text",
+    "modal_compact_actions.edit_pressed_surface",
+    "modal_compact_actions.edit_pressed_border",
+
+    # Modais — Cartões de Início e Resumo da Sessão V1
+    "modal_session_cards.card_border",
+    "modal_session_cards.card_surface",
+    "modal_session_cards.objective_border",
+    "modal_session_cards.objective_surface",
+    "modal_session_cards.objective_text",
+    "modal_session_cards.table_border",
+    "modal_session_cards.table_surface",
+
+    # Modais — Resumo Diário V1
+    "modal_daily.compare_average_text",
+    "modal_daily.compare_border",
+    "modal_daily.compare_surface",
+    "modal_daily.compare_value_text",
+    "modal_daily.goal_value_text",
+    "modal_daily.hint_completed_text",
+    "modal_daily.hint_text",
+    "modal_daily.panel_border",
+    "modal_daily.panel_surface",
+    "modal_daily.progress_completed_surface",
+    "modal_daily.progress_fill_surface",
+    "modal_daily.progress_track_surface",
+    "modal_daily.section_title_text",
+    "modal_daily.table_border",
+    "modal_daily.table_surface",
+    "modal_daily.trend_negative_text",
+    "modal_daily.trend_positive_text",
+    "modal_daily.trend_text",
+
+    # Modais — Cartões de Estudo e Domínio Legados V1
+    "modal_study.dialog_card_border",
+    "modal_study.dialog_card_surface",
+    "modal_study.domain_bar_chunk_surface",
+    "modal_study.domain_bar_surface",
+    "modal_study.domain_card_border",
+    "modal_study.domain_card_surface",
+    "modal_study.domain_component_border",
+    "modal_study.domain_component_label_text",
+    "modal_study.domain_component_surface",
+    "modal_study.domain_component_value_text",
+    "modal_study.domain_evidence_text",
+    "modal_study.domain_level_critico_surface",
+    "modal_study.domain_level_critico_text",
+    "modal_study.domain_level_desenvolvimento_surface",
+    "modal_study.domain_level_desenvolvimento_text",
+    "modal_study.domain_level_dominado_surface",
+    "modal_study.domain_level_dominado_text",
+    "modal_study.domain_level_surface",
+    "modal_study.domain_level_text",
+    "modal_study.domain_reasons_text",
+    "modal_study.domain_score_text",
+    "modal_study.domain_subtitle_text",
+    "modal_study.domain_title_text",
+
+    # Modais — Detalhes do Tópico V1 (migração QSS sem redesenho)
+    "modal_topic.breadcrumb_text",
+    "modal_topic.compact_metric_border",
+    "modal_topic.compact_metric_surface",
+    "modal_topic.compact_metric_value_text",
+    "modal_topic.details_tabs_selected_bottom_border",
+    "modal_topic.details_tabs_selected_text",
+    "modal_topic.details_tabs_text",
+    "modal_topic.dialog_surface",
+    "modal_topic.domain_bar_modern_chunk_surface",
+    "modal_topic.domain_bar_modern_surface",
+    "modal_topic.domain_card_modern_border",
+    "modal_topic.domain_card_modern_surface",
+    "modal_topic.domain_component_label_modern_text",
+    "modal_topic.domain_component_modern_border",
+    "modal_topic.domain_component_modern_surface",
+    "modal_topic.domain_component_value_modern_text",
+    "modal_topic.domain_evidence_modern_text",
+    "modal_topic.domain_insight_attention_border",
+    "modal_topic.domain_insight_attention_surface",
+    "modal_topic.domain_insight_border",
+    "modal_topic.domain_insight_domain_insight_text_attention_text",
+    "modal_topic.domain_insight_domain_insight_text_strength_text",
+    "modal_topic.domain_insight_strength_border",
+    "modal_topic.domain_insight_strength_surface",
+    "modal_topic.domain_insight_surface",
+    "modal_topic.domain_insight_title_text",
+    "modal_topic.domain_level_modern_critico_surface",
+    "modal_topic.domain_level_modern_critico_text",
+    "modal_topic.domain_level_modern_desenvolvimento_surface",
+    "modal_topic.domain_level_modern_desenvolvimento_text",
+    "modal_topic.domain_level_modern_dominado_surface",
+    "modal_topic.domain_level_modern_dominado_text",
+    "modal_topic.domain_level_modern_surface",
+    "modal_topic.domain_level_modern_text",
+    "modal_topic.domain_score_modern_text",
+    "modal_topic.domain_subtitle_modern_text",
+    "modal_topic.domain_title_modern_text",
+    "modal_topic.evolution_empty_border",
+    "modal_topic.evolution_empty_icon_text",
+    "modal_topic.evolution_empty_surface",
+    "modal_topic.evolution_empty_text_text",
+    "modal_topic.evolution_empty_title_text",
+    "modal_topic.hero_card_border",
+    "modal_topic.hero_card_surface",
+    "modal_topic.hero_subtitle_text",
+    "modal_topic.hero_title_text",
+    "modal_topic.history_table_alternate_surface",
+    "modal_topic.history_table_border",
+    "modal_topic.history_table_surface",
+    "modal_topic.legacy_notice_border",
+    "modal_topic.legacy_notice_surface",
+    "modal_topic.legacy_notice_text",
+    "modal_topic.metric_card_border",
+    "modal_topic.metric_card_domain_border",
+    "modal_topic.metric_card_domain_surface",
+    "modal_topic.metric_card_metric_value_domain_text",
+    "modal_topic.metric_card_surface",
+    "modal_topic.metric_label_text",
+    "modal_topic.metric_value_text",
+    "modal_topic.next_date_text",
+    "modal_topic.next_description_text",
+    "modal_topic.next_eyebrow_text",
+    "modal_topic.next_primary_button_border",
+    "modal_topic.next_primary_button_hover_border",
+    "modal_topic.next_primary_button_hover_surface",
+    "modal_topic.next_primary_button_surface",
+    "modal_topic.next_primary_button_text",
+    "modal_topic.next_status_future_surface",
+    "modal_topic.next_status_future_text",
+    "modal_topic.next_status_overdue_surface",
+    "modal_topic.next_status_overdue_text",
+    "modal_topic.next_status_soon_surface",
+    "modal_topic.next_status_soon_text",
+    "modal_topic.next_status_surface",
+    "modal_topic.next_status_text",
+    "modal_topic.next_status_today_surface",
+    "modal_topic.next_status_today_text",
+    "modal_topic.next_step_card_border",
+    "modal_topic.next_step_card_surface",
+    "modal_topic.questions_button_border",
+    "modal_topic.questions_button_hover_border",
+    "modal_topic.questions_button_hover_surface",
+    "modal_topic.questions_button_hover_text",
+    "modal_topic.questions_button_surface",
+    "modal_topic.questions_button_text",
+    "modal_topic.study_button_border",
+    "modal_topic.study_button_hover_border",
+    "modal_topic.study_button_hover_surface",
+    "modal_topic.study_button_surface",
+    "modal_topic.study_button_text",
+
     "answer.normal_surface", "answer.normal_border", "answer.normal_text",
     "answer.hover_surface", "answer.hover_border",
     "answer.pressed_surface", "answer.pressed_border",
@@ -806,6 +1206,57 @@ _COMPONENT_COLOR_PATHS = (
     "statistics_tabs.selected_border",
     "statistics_tabs.pane_border",
     "statistics_tabs.pane_surface",
+    "admin_shared.filter_bar_surface",
+    "admin_shared.filter_bar_border",
+    "reports.period_surface",
+    "reports.period_text",
+    "reports.period_border",
+    "reports.comparison_surface",
+    "reports.comparison_border",
+    "reports.metric_surface",
+    "reports.metric_border",
+    "reports.value_text",
+    "reports.trend_positive_text",
+    "reports.trend_negative_text",
+    "reports.trend_neutral_text",
+    # Relatório Estratégico V1 — valores semânticos de componente
+    "strategic_report.action_border",
+    "strategic_report.action_surface",
+    "strategic_report.action_text",
+    "strategic_report.evolution_border",
+    "strategic_report.evolution_surface",
+    "strategic_report.evolution_value_text",
+    "strategic_report.frame_emphasis_border",
+    "strategic_report.metric_border",
+    "strategic_report.metric_detail_text",
+    "strategic_report.metric_label_text",
+    "strategic_report.metric_surface",
+    "strategic_report.metric_value_text",
+    "strategic_report.panel_border",
+    "strategic_report.panel_surface",
+    "strategic_report.prep_attention_text",
+    "strategic_report.prep_building_text",
+    "strategic_report.prep_good_text",
+    "strategic_report.prep_insufficient_text",
+    "strategic_report.prep_shared_warning_text",
+    "strategic_report.prep_strong_text",
+    "strategic_report.risk_high_border",
+    "strategic_report.risk_high_surface",
+    "strategic_report.risk_high_text",
+    "strategic_report.risk_low_border",
+    "strategic_report.risk_low_surface",
+    "strategic_report.risk_low_text",
+    "strategic_report.risk_medium_border",
+    "strategic_report.risk_medium_surface",
+    "strategic_report.risk_medium_text",
+    "strategic_report.section_title_text",
+    "strategic_report.subtitle_text",
+    "strategic_report.table_border",
+    "strategic_report.table_surface",
+    "strategic_report.title_text",
+    "strategic_report.trend_negative_text",
+    "strategic_report.trend_neutral_text",
+    "strategic_report.trend_positive_text",
     "my_evolution.shell_surface",
     "my_evolution.title_text",
     "my_evolution.insight_surface",
@@ -944,6 +1395,8 @@ _COMPONENT_COLOR_PATHS = (
     "admin_shared.subtle_planning_border",
     "admin_shared.subtle_planning_hover_surface",
     "admin_shared.subtle_planning_hover_border",
+    # Modais — Rótulo contextual compartilhado V1
+    "admin_shared.context_label_text",
     "admin_shared.profile_badge_base_surface",
     "admin_shared.profile_badge_base_text",
     "admin_shared.profile_badge_base_border",
@@ -1001,6 +1454,13 @@ _COMPONENT_COLOR_PATHS = (
 )
 
 _COMPONENT_GRADIENT_PATHS = (
+    # Modais — Detalhes do Tópico V1
+    "modal_topic.domain_bar_modern_chunk_surface_gradient",
+    "modal_topic.next_step_card_surface_gradient",
+    "modal_topic.study_button_hover_surface_gradient",
+    "modal_topic.study_button_surface_gradient",
+
+    "strategic_report.frame_gradient", "strategic_report.action_gradient",
     "answer.selected_gradient", "answer.correct_gradient", "answer.incorrect_gradient",
     "answer.struck_gradient",
     "progress.fill_gradient", "session.overview_gradient", "session.statement_gradient",

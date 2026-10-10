@@ -3847,12 +3847,12 @@ QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="success
 QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="danger"] { color: {{color:session.metric_danger_text}}; }
 QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="warning"] { color: {{color:session.metric_warning_text}}; }
 QDialog#questionSolverDialog QFrame#questionSessionFocusBar {
-    background-color: #F7F9FC;
-    border: 1px solid #E1E6ED;
+    background-color: {{color:session.focus_bar_surface}};
+    border: 1px solid {{color:session.focus_bar_border}};
     border-radius: 10px;
 }
 QDialog#questionSolverDialog QLabel#questionSessionFocusState {
-    color: #536173;
+    color: {{color:session.focus_state_text}};
     font-size: 8.3pt;
     font-weight: 800;
 }
@@ -4034,12 +4034,12 @@ QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="success
 QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="danger"] { color: {{color:session.metric_danger_text}}; }
 QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="warning"] { color: {{color:session.metric_warning_text}}; }
 QDialog#questionSolverDialog QFrame#questionSessionFocusBar {
-    background-color: #151E2A;
-    border: 1px solid #303D4E;
+    background-color: {{color:session.focus_bar_surface}};
+    border: 1px solid {{color:session.focus_bar_border}};
     border-radius: 10px;
 }
 QDialog#questionSolverDialog QLabel#questionSessionFocusState {
-    color: #A7B4C3;
+    color: {{color:session.focus_state_text}};
     font-size: 8.3pt;
     font-weight: 800;
 }
@@ -4222,12 +4222,12 @@ QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="success
 QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="danger"] { color: {{color:session.metric_danger_text}}; }
 QDialog#questionSolverDialog QLabel#questionSessionMiniValue[metricRole="warning"] { color: {{color:session.metric_warning_text}}; }
 QDialog#questionSolverDialog QFrame#questionSessionFocusBar {
-    background-color: #151D28;
-    border: 1px solid #354151;
+    background-color: {{color:session.focus_bar_surface}};
+    border: 1px solid {{color:session.focus_bar_border}};
     border-radius: 11px;
 }
 QDialog#questionSolverDialog QLabel#questionSessionFocusState {
-    color: #B1BCC9;
+    color: {{color:session.focus_state_text}};
     font-size: 8.2pt;
     font-weight: 800;
 }
@@ -4395,49 +4395,49 @@ QDialog#questionSolverDialog QFrame#questionSolverFeedback {
 
 ESTILO_TOPICO_DETALHES_CLARO = r"""
 QDialog#topicDetailsDialog {
-    background-color: #F5F7FA;
+    background-color: {{color:modal_topic.dialog_surface}};
 }
 QDialog#topicDetailsDialog QFrame#topicHeroCard,
 QDialog#topicDetailsDialog QFrame#topicEvolutionCard,
 QDialog#topicDetailsDialog QFrame#topicHistoryCard,
 QDialog#topicDetailsDialog QFrame#topicHistoryDetailsCard {
-    background-color: #FFFFFF;
-    border: 1px solid #DCE4ED;
+    background-color: {{color:modal_topic.hero_card_surface}};
+    border: 1px solid {{color:modal_topic.hero_card_border}};
     border-radius: 13px;
 }
 QDialog#topicDetailsDialog QLabel#topicBreadcrumb {
-    color: #5C7FA2;
+    color: {{color:modal_topic.breadcrumb_text}};
     font-size: 8.5pt;
     font-weight: 700;
 }
 QDialog#topicDetailsDialog QLabel#topicHeroTitle {
-    color: #17263A;
+    color: {{color:modal_topic.hero_title_text}};
     font-size: 18pt;
     font-weight: 900;
 }
 QDialog#topicDetailsDialog QLabel#topicHeroSubtitle {
-    color: #728094;
+    color: {{color:modal_topic.hero_subtitle_text}};
     font-size: 9pt;
 }
 QDialog#topicDetailsDialog QPushButton#topicStudyButton {
-    background: qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #356FD0,stop:1 #4D7FE0);
-    color: #FFFFFF;
-    border: 1px solid #5D8DE2;
+    background: {{gradient:modal_topic.study_button_surface_gradient}};
+    color: {{color:modal_topic.study_button_text}};
+    border: 1px solid {{color:modal_topic.study_button_border}};
     border-radius: 10px;
     font-weight: 900;
     padding: 7px 16px;
 }
 QDialog#topicDetailsDialog QPushButton#topicStudyButton:hover {
-    background: qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #2E63BC,stop:1 #416FD0);
-    border-color: #7EA6EA;
+    background: {{gradient:modal_topic.study_button_hover_surface_gradient}};
+    border-color: {{color:modal_topic.study_button_hover_border}};
 }
 QDialog#topicDetailsDialog QPushButton#topicQuestionsButton,
 QDialog#topicDetailsDialog QPushButton#topicHistoryButton,
 QDialog#topicDetailsDialog QPushButton#topicNextSecondaryButton,
 QDialog#topicDetailsDialog QPushButton#topicNextGhostButton {
-    background-color: #FFFFFF;
-    color: #37658F;
-    border: 1px solid #C8D8E8;
+    background-color: {{color:modal_topic.questions_button_surface}};
+    color: {{color:modal_topic.questions_button_text}};
+    border: 1px solid {{color:modal_topic.questions_button_border}};
     border-radius: 9px;
     font-weight: 700;
     padding: 6px 12px;
@@ -4446,47 +4446,47 @@ QDialog#topicDetailsDialog QPushButton#topicQuestionsButton:hover,
 QDialog#topicDetailsDialog QPushButton#topicHistoryButton:hover,
 QDialog#topicDetailsDialog QPushButton#topicNextSecondaryButton:hover,
 QDialog#topicDetailsDialog QPushButton#topicNextGhostButton:hover {
-    background-color: #F1F7FD;
-    border-color: #90B6DA;
-    color: #245782;
+    background-color: {{color:modal_topic.questions_button_hover_surface}};
+    border-color: {{color:modal_topic.questions_button_hover_border}};
+    color: {{color:modal_topic.questions_button_hover_text}};
 }
 QDialog#topicDetailsDialog QFrame#topicMetricCard {
-    background-color: #F8FAFD;
-    border: 1px solid #DCE5EF;
+    background-color: {{color:modal_topic.metric_card_surface}};
+    border: 1px solid {{color:modal_topic.metric_card_border}};
     border-radius: 10px;
 }
 QDialog#topicDetailsDialog QFrame#topicMetricCard[metricRole="domain"] {
-    background-color: #F1F7FF;
-    border-color: #C7DAF2;
+    background-color: {{color:modal_topic.metric_card_domain_surface}};
+    border-color: {{color:modal_topic.metric_card_domain_border}};
 }
 QDialog#topicDetailsDialog QLabel#topicMetricLabel,
 QDialog#topicDetailsDialog QLabel#topicCompactMetricLabel {
-    color: #748398;
+    color: {{color:modal_topic.metric_label_text}};
     font-size: 8.2pt;
     font-weight: 700;
 }
 QDialog#topicDetailsDialog QLabel#topicMetricValue {
-    color: #17263A;
+    color: {{color:modal_topic.metric_value_text}};
     font-size: 13pt;
     font-weight: 900;
 }
 QDialog#topicDetailsDialog QFrame#topicMetricCard[metricRole="domain"] QLabel#topicMetricValue {
-    color: #2D65B5;
+    color: {{color:modal_topic.metric_card_metric_value_domain_text}};
 }
 QDialog#topicDetailsDialog QFrame#topicCompactMetric {
-    background-color: #F8FAFC;
-    border: 1px solid #E1E7EF;
+    background-color: {{color:modal_topic.compact_metric_surface}};
+    border: 1px solid {{color:modal_topic.compact_metric_border}};
     border-radius: 8px;
 }
 QDialog#topicDetailsDialog QLabel#topicCompactMetricValue {
-    color: #334A62;
+    color: {{color:modal_topic.compact_metric_value_text}};
     font-size: 8.7pt;
     font-weight: 900;
 }
 QDialog#topicDetailsDialog QLabel#topicLegacyNotice {
-    color: #8A641B;
-    background-color: #FFF9EA;
-    border: 1px solid #EAD9AA;
+    color: {{color:modal_topic.legacy_notice_text}};
+    background-color: {{color:modal_topic.legacy_notice_surface}};
+    border: 1px solid {{color:modal_topic.legacy_notice_border}};
     border-radius: 8px;
     padding: 6px 10px;
     font-size: 8.2pt;
@@ -4497,288 +4497,288 @@ QDialog#topicDetailsDialog QTabWidget#topicDetailsTabs::pane {
 }
 QDialog#topicDetailsDialog QTabWidget#topicDetailsTabs QTabBar::tab {
     background: transparent;
-    color: #708197;
+    color: {{color:modal_topic.details_tabs_text}};
     border: 0;
     border-bottom: 2px solid transparent;
     padding: 8px 15px;
     font-weight: 700;
 }
 QDialog#topicDetailsDialog QTabWidget#topicDetailsTabs QTabBar::tab:selected {
-    color: #286AA3;
-    border-bottom-color: #3A8FD0;
+    color: {{color:modal_topic.details_tabs_selected_text}};
+    border-bottom-color: {{color:modal_topic.details_tabs_selected_bottom_border}};
 }
 QDialog#topicDetailsDialog QFrame#topicDomainCardModern {
-    background-color: #F8FBFF;
-    border: 1px solid #CFE0F2;
+    background-color: {{color:modal_topic.domain_card_modern_surface}};
+    border: 1px solid {{color:modal_topic.domain_card_modern_border}};
     border-radius: 13px;
 }
 QDialog#topicDetailsDialog QLabel#topicDomainTitleModern,
 QDialog#topicDetailsDialog QLabel#topicSectionTitle {
-    color: #1B2B3E;
+    color: {{color:modal_topic.domain_title_modern_text}};
     font-size: 10.5pt;
     font-weight: 900;
 }
 QDialog#topicDetailsDialog QLabel#topicDomainSubtitleModern,
 QDialog#topicDetailsDialog QLabel#topicEvolutionSummary,
 QDialog#topicDetailsDialog QLabel#topicHistoryHint {
-    color: #728094;
+    color: {{color:modal_topic.domain_subtitle_modern_text}};
     font-size: 8.4pt;
 }
 QDialog#topicDetailsDialog QLabel#topicDomainScoreModern {
-    color: #2D65B5;
+    color: {{color:modal_topic.domain_score_modern_text}};
     font-size: 18px;
     font-weight: 900;
 }
 QDialog#topicDetailsDialog QLabel#topicDomainLevelModern {
-    background-color: #E8EEF5;
-    color: #52657A;
+    background-color: {{color:modal_topic.domain_level_modern_surface}};
+    color: {{color:modal_topic.domain_level_modern_text}};
     border-radius: 8px;
     padding: 4px 8px;
     font-size: 8.2pt;
     font-weight: 900;
 }
 QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="critico"],
-QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="fragil"] { background-color:#FDEAEA; color:#B43E45; }
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="fragil"] { background-color:{{color:modal_topic.domain_level_modern_critico_surface}}; color:{{color:modal_topic.domain_level_modern_critico_text}}; }
 QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="desenvolvimento"],
-QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="consolidando"] { background-color:#FFF3D7; color:#956313; }
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="consolidando"] { background-color:{{color:modal_topic.domain_level_modern_desenvolvimento_surface}}; color:{{color:modal_topic.domain_level_modern_desenvolvimento_text}}; }
 QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="dominado"],
-QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="forte"] { background-color:#E6F6ED; color:#24714A; }
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="forte"] { background-color:{{color:modal_topic.domain_level_modern_dominado_surface}}; color:{{color:modal_topic.domain_level_modern_dominado_text}}; }
 QDialog#topicDetailsDialog QProgressBar#topicDomainBarModern {
-    background-color: #DFE8F2;
+    background-color: {{color:modal_topic.domain_bar_modern_surface}};
     border: none;
     border-radius: 4px;
 }
 QDialog#topicDetailsDialog QProgressBar#topicDomainBarModern::chunk {
-    background: qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #4D7FE0,stop:1 #55C8B3);
+    background: {{gradient:modal_topic.domain_bar_modern_chunk_surface_gradient}};
     border-radius: 4px;
 }
 QDialog#topicDetailsDialog QFrame#topicDomainComponentModern {
-    background-color: #FFFFFF;
-    border: 1px solid #DFE7F0;
+    background-color: {{color:modal_topic.domain_component_modern_surface}};
+    border: 1px solid {{color:modal_topic.domain_component_modern_border}};
     border-radius: 8px;
 }
 QDialog#topicDetailsDialog QLabel#topicDomainComponentLabelModern,
 QDialog#topicDetailsDialog QLabel#topicDomainEvidenceLabel {
-    color: #7A899B;
+    color: {{color:modal_topic.domain_component_label_modern_text}};
     font-size: 7.7pt;
     font-weight: 700;
 }
 QDialog#topicDetailsDialog QLabel#topicDomainComponentValueModern {
-    color: #203349;
+    color: {{color:modal_topic.domain_component_value_modern_text}};
     font-size: 10.5pt;
     font-weight: 900;
 }
 QDialog#topicDetailsDialog QFrame#topicDomainInsight {
-    background-color: #FFFFFF;
-    border: 1px solid #DDE6EF;
+    background-color: {{color:modal_topic.domain_insight_surface}};
+    border: 1px solid {{color:modal_topic.domain_insight_border}};
     border-radius: 8px;
 }
-QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="strength"] { border-color:#BFDCCA; background-color:#F6FBF8; }
-QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="attention"] { border-color:#E7D7AE; background-color:#FFFBF1; }
+QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="strength"] { border-color:{{color:modal_topic.domain_insight_strength_border}}; background-color:{{color:modal_topic.domain_insight_strength_surface}}; }
+QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="attention"] { border-color:{{color:modal_topic.domain_insight_attention_border}}; background-color:{{color:modal_topic.domain_insight_attention_surface}}; }
 QDialog#topicDetailsDialog QLabel#topicDomainInsightTitle {
-    color: #738397;
+    color: {{color:modal_topic.domain_insight_title_text}};
     font-size: 7.5pt;
     font-weight: 900;
 }
-QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="strength"] QLabel#topicDomainInsightText { color:#367258; }
-QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="attention"] QLabel#topicDomainInsightText { color:#8D6B27; }
+QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="strength"] QLabel#topicDomainInsightText { color:{{color:modal_topic.domain_insight_domain_insight_text_strength_text}}; }
+QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="attention"] QLabel#topicDomainInsightText { color:{{color:modal_topic.domain_insight_domain_insight_text_attention_text}}; }
 QDialog#topicDetailsDialog QLabel#topicDomainInsightText,
 QDialog#topicDetailsDialog QLabel#topicDomainEvidenceModern {
     font-size: 8.2pt;
 }
-QDialog#topicDetailsDialog QLabel#topicDomainEvidenceModern { color:#54677B; }
+QDialog#topicDetailsDialog QLabel#topicDomainEvidenceModern { color:{{color:modal_topic.domain_evidence_modern_text}}; }
 QDialog#topicDetailsDialog QFrame#topicNextStepCard {
-    background-color: #F6F9FD;
-    border: 1px solid #D4E0EC;
+    background-color: {{color:modal_topic.next_step_card_surface}};
+    border: 1px solid {{color:modal_topic.next_step_card_border}};
     border-radius: 13px;
 }
 QDialog#topicDetailsDialog QLabel#topicNextEyebrow {
-    color: #71839A;
+    color: {{color:modal_topic.next_eyebrow_text}};
     font-size: 8pt;
     font-weight: 900;
 }
 QDialog#topicDetailsDialog QLabel#topicNextStatus {
-    color: #4F657A;
-    background-color: #E8EEF5;
+    color: {{color:modal_topic.next_status_text}};
+    background-color: {{color:modal_topic.next_status_surface}};
     border-radius: 8px;
     padding: 4px 8px;
     font-size: 7.8pt;
     font-weight: 900;
 }
-QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="overdue"] { color:#B0444A; background-color:#FDEAEA; }
-QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="today"] { color:#986618; background-color:#FFF0D0; }
-QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="soon"] { color:#2F6FA6; background-color:#EAF4FE; }
-QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="future"] { color:#337A5B; background-color:#E8F6EE; }
-QDialog#topicDetailsDialog QLabel#topicNextDate { color:#1D3550; font-size:17px; font-weight:900; }
+QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="overdue"] { color:{{color:modal_topic.next_status_overdue_text}}; background-color:{{color:modal_topic.next_status_overdue_surface}}; }
+QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="today"] { color:{{color:modal_topic.next_status_today_text}}; background-color:{{color:modal_topic.next_status_today_surface}}; }
+QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="soon"] { color:{{color:modal_topic.next_status_soon_text}}; background-color:{{color:modal_topic.next_status_soon_surface}}; }
+QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="future"] { color:{{color:modal_topic.next_status_future_text}}; background-color:{{color:modal_topic.next_status_future_surface}}; }
+QDialog#topicDetailsDialog QLabel#topicNextDate { color:{{color:modal_topic.next_date_text}}; font-size:17px; font-weight:900; }
 QDialog#topicDetailsDialog QLabel#topicNextDescription,
-QDialog#topicDetailsDialog QLabel#topicNextMeta { color:#6D7C8E; font-size:8.4pt; }
+QDialog#topicDetailsDialog QLabel#topicNextMeta { color:{{color:modal_topic.next_description_text}}; font-size:8.4pt; }
 QDialog#topicDetailsDialog QPushButton#topicNextPrimaryButton {
-    background-color:#356FD0; color:#FFFFFF; border:1px solid #5A8DDD; border-radius:9px; font-weight:900; padding:7px 12px;
+    background-color:{{color:modal_topic.next_primary_button_surface}}; color:{{color:modal_topic.next_primary_button_text}}; border:1px solid {{color:modal_topic.next_primary_button_border}}; border-radius:9px; font-weight:900; padding:7px 12px;
 }
-QDialog#topicDetailsDialog QPushButton#topicNextPrimaryButton:hover { background-color:#2D63BC; border-color:#79A5E7; }
+QDialog#topicDetailsDialog QPushButton#topicNextPrimaryButton:hover { background-color:{{color:modal_topic.next_primary_button_hover_surface}}; border-color:{{color:modal_topic.next_primary_button_hover_border}}; }
 QDialog#topicDetailsDialog QFrame#topicEvolutionEmpty {
-    background-color:#F8FAFC;
-    border:1px dashed #CBD8E5;
+    background-color:{{color:modal_topic.evolution_empty_surface}};
+    border:1px dashed {{color:modal_topic.evolution_empty_border}};
     border-radius:10px;
 }
-QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyIcon { color:#72A4CF; font-size:24px; }
-QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyTitle { color:#2C435A; font-size:10pt; font-weight:900; }
-QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyText { color:#788696; font-size:8.5pt; }
+QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyIcon { color:{{color:modal_topic.evolution_empty_icon_text}}; font-size:24px; }
+QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyTitle { color:{{color:modal_topic.evolution_empty_title_text}}; font-size:10pt; font-weight:900; }
+QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyText { color:{{color:modal_topic.evolution_empty_text_text}}; font-size:8.5pt; }
 QDialog#topicDetailsDialog QTableWidget#topicHistoryTable {
-    background-color:#FFFFFF;
-    alternate-background-color:#F8FAFC;
-    border:1px solid #DFE6EE;
+    background-color:{{color:modal_topic.history_table_surface}};
+    alternate-background-color:{{color:modal_topic.history_table_alternate_surface}};
+    border:1px solid {{color:modal_topic.history_table_border}};
     border-radius:8px;
 }
 """
 
 ESTILO_TOPICO_DETALHES_ESCURO = r"""
-QDialog#topicDetailsDialog { background-color:#111827; }
+QDialog#topicDetailsDialog { background-color:{{color:modal_topic.dialog_surface}}; }
 QDialog#topicDetailsDialog QFrame#topicHeroCard,
 QDialog#topicDetailsDialog QFrame#topicEvolutionCard,
 QDialog#topicDetailsDialog QFrame#topicHistoryCard,
 QDialog#topicDetailsDialog QFrame#topicHistoryDetailsCard {
-    background-color:#182235; border:1px solid #334155; border-radius:13px;
+    background-color:{{color:modal_topic.hero_card_surface}}; border:1px solid {{color:modal_topic.hero_card_border}}; border-radius:13px;
 }
-QDialog#topicDetailsDialog QLabel#topicBreadcrumb { color:#88A4C0; font-size:8.5pt; font-weight:700; }
-QDialog#topicDetailsDialog QLabel#topicHeroTitle { color:#F4F8FC; font-size:18pt; font-weight:900; }
-QDialog#topicDetailsDialog QLabel#topicHeroSubtitle { color:#94A3B8; font-size:9pt; }
-QDialog#topicDetailsDialog QPushButton#topicStudyButton { background-color:#416AB7; color:#FFF; border:1px solid #527FD0; border-radius:10px; font-weight:900; padding:7px 16px; }
-QDialog#topicDetailsDialog QPushButton#topicStudyButton:hover { background-color:#355BA3; border-color:#6E98DF; }
+QDialog#topicDetailsDialog QLabel#topicBreadcrumb { color:{{color:modal_topic.breadcrumb_text}}; font-size:8.5pt; font-weight:700; }
+QDialog#topicDetailsDialog QLabel#topicHeroTitle { color:{{color:modal_topic.hero_title_text}}; font-size:18pt; font-weight:900; }
+QDialog#topicDetailsDialog QLabel#topicHeroSubtitle { color:{{color:modal_topic.hero_subtitle_text}}; font-size:9pt; }
+QDialog#topicDetailsDialog QPushButton#topicStudyButton { background-color:{{color:modal_topic.study_button_surface}}; color:{{color:modal_topic.study_button_text}}; border:1px solid {{color:modal_topic.study_button_border}}; border-radius:10px; font-weight:900; padding:7px 16px; }
+QDialog#topicDetailsDialog QPushButton#topicStudyButton:hover { background-color:{{color:modal_topic.study_button_hover_surface}}; border-color:{{color:modal_topic.study_button_hover_border}}; }
 QDialog#topicDetailsDialog QPushButton#topicQuestionsButton,
 QDialog#topicDetailsDialog QPushButton#topicHistoryButton,
 QDialog#topicDetailsDialog QPushButton#topicNextSecondaryButton,
-QDialog#topicDetailsDialog QPushButton#topicNextGhostButton { background-color:#172536; color:#BCD7F0; border:1px solid #3A5877; border-radius:9px; font-weight:700; padding:6px 12px; }
+QDialog#topicDetailsDialog QPushButton#topicNextGhostButton { background-color:{{color:modal_topic.questions_button_surface}}; color:{{color:modal_topic.questions_button_text}}; border:1px solid {{color:modal_topic.questions_button_border}}; border-radius:9px; font-weight:700; padding:6px 12px; }
 QDialog#topicDetailsDialog QPushButton#topicQuestionsButton:hover,
 QDialog#topicDetailsDialog QPushButton#topicHistoryButton:hover,
 QDialog#topicDetailsDialog QPushButton#topicNextSecondaryButton:hover,
-QDialog#topicDetailsDialog QPushButton#topicNextGhostButton:hover { background-color:#20374F; border-color:#527BA5; color:#E5F2FF; }
-QDialog#topicDetailsDialog QFrame#topicMetricCard { background-color:#172131; border:1px solid #33465A; border-radius:10px; }
-QDialog#topicDetailsDialog QFrame#topicMetricCard[metricRole="domain"] { background-color:#172536; border-color:#365574; }
+QDialog#topicDetailsDialog QPushButton#topicNextGhostButton:hover { background-color:{{color:modal_topic.questions_button_hover_surface}}; border-color:{{color:modal_topic.questions_button_hover_border}}; color:{{color:modal_topic.questions_button_hover_text}}; }
+QDialog#topicDetailsDialog QFrame#topicMetricCard { background-color:{{color:modal_topic.metric_card_surface}}; border:1px solid {{color:modal_topic.metric_card_border}}; border-radius:10px; }
+QDialog#topicDetailsDialog QFrame#topicMetricCard[metricRole="domain"] { background-color:{{color:modal_topic.metric_card_domain_surface}}; border-color:{{color:modal_topic.metric_card_domain_border}}; }
 QDialog#topicDetailsDialog QLabel#topicMetricLabel,
-QDialog#topicDetailsDialog QLabel#topicCompactMetricLabel { color:#8CA4BB; font-size:8.2pt; font-weight:700; }
-QDialog#topicDetailsDialog QLabel#topicMetricValue { color:#E8F1FA; font-size:13pt; font-weight:900; }
-QDialog#topicDetailsDialog QFrame#topicMetricCard[metricRole="domain"] QLabel#topicMetricValue { color:#A9D3FF; }
-QDialog#topicDetailsDialog QFrame#topicCompactMetric { background-color:#151F2D; border:1px solid #33465A; border-radius:8px; }
-QDialog#topicDetailsDialog QLabel#topicCompactMetricValue { color:#C5D8EA; font-size:8.7pt; font-weight:900; }
-QDialog#topicDetailsDialog QLabel#topicLegacyNotice { color:#D9BC7B; background-color:#332A1B; border:1px solid #675637; border-radius:8px; padding:6px 10px; font-size:8.2pt; }
+QDialog#topicDetailsDialog QLabel#topicCompactMetricLabel { color:{{color:modal_topic.metric_label_text}}; font-size:8.2pt; font-weight:700; }
+QDialog#topicDetailsDialog QLabel#topicMetricValue { color:{{color:modal_topic.metric_value_text}}; font-size:13pt; font-weight:900; }
+QDialog#topicDetailsDialog QFrame#topicMetricCard[metricRole="domain"] QLabel#topicMetricValue { color:{{color:modal_topic.metric_card_metric_value_domain_text}}; }
+QDialog#topicDetailsDialog QFrame#topicCompactMetric { background-color:{{color:modal_topic.compact_metric_surface}}; border:1px solid {{color:modal_topic.compact_metric_border}}; border-radius:8px; }
+QDialog#topicDetailsDialog QLabel#topicCompactMetricValue { color:{{color:modal_topic.compact_metric_value_text}}; font-size:8.7pt; font-weight:900; }
+QDialog#topicDetailsDialog QLabel#topicLegacyNotice { color:{{color:modal_topic.legacy_notice_text}}; background-color:{{color:modal_topic.legacy_notice_surface}}; border:1px solid {{color:modal_topic.legacy_notice_border}}; border-radius:8px; padding:6px 10px; font-size:8.2pt; }
 QDialog#topicDetailsDialog QTabWidget#topicDetailsTabs::pane { border:0; background:transparent; }
-QDialog#topicDetailsDialog QTabWidget#topicDetailsTabs QTabBar::tab { background:transparent; color:#8296AB; border:0; border-bottom:2px solid transparent; padding:8px 15px; font-weight:700; }
-QDialog#topicDetailsDialog QTabWidget#topicDetailsTabs QTabBar::tab:selected { color:#BBD9F5; border-bottom-color:#5B94C7; }
-QDialog#topicDetailsDialog QFrame#topicDomainCardModern { background-color:#172033; border:1px solid #365574; border-radius:13px; }
+QDialog#topicDetailsDialog QTabWidget#topicDetailsTabs QTabBar::tab { background:transparent; color:{{color:modal_topic.details_tabs_text}}; border:0; border-bottom:2px solid transparent; padding:8px 15px; font-weight:700; }
+QDialog#topicDetailsDialog QTabWidget#topicDetailsTabs QTabBar::tab:selected { color:{{color:modal_topic.details_tabs_selected_text}}; border-bottom-color:{{color:modal_topic.details_tabs_selected_bottom_border}}; }
+QDialog#topicDetailsDialog QFrame#topicDomainCardModern { background-color:{{color:modal_topic.domain_card_modern_surface}}; border:1px solid {{color:modal_topic.domain_card_modern_border}}; border-radius:13px; }
 QDialog#topicDetailsDialog QLabel#topicDomainTitleModern,
-QDialog#topicDetailsDialog QLabel#topicSectionTitle { color:#EEF5FB; font-size:10.5pt; font-weight:900; }
+QDialog#topicDetailsDialog QLabel#topicSectionTitle { color:{{color:modal_topic.domain_title_modern_text}}; font-size:10.5pt; font-weight:900; }
 QDialog#topicDetailsDialog QLabel#topicDomainSubtitleModern,
 QDialog#topicDetailsDialog QLabel#topicEvolutionSummary,
-QDialog#topicDetailsDialog QLabel#topicHistoryHint { color:#8CA4BB; font-size:8.4pt; }
-QDialog#topicDetailsDialog QLabel#topicDomainScoreModern { color:#A9D3FF; font-size:18px; font-weight:900; }
-QDialog#topicDetailsDialog QLabel#topicDomainLevelModern { background-color:#334155; color:#CBD5E1; border-radius:8px; padding:4px 8px; font-size:8.2pt; font-weight:900; }
+QDialog#topicDetailsDialog QLabel#topicHistoryHint { color:{{color:modal_topic.domain_subtitle_modern_text}}; font-size:8.4pt; }
+QDialog#topicDetailsDialog QLabel#topicDomainScoreModern { color:{{color:modal_topic.domain_score_modern_text}}; font-size:18px; font-weight:900; }
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern { background-color:{{color:modal_topic.domain_level_modern_surface}}; color:{{color:modal_topic.domain_level_modern_text}}; border-radius:8px; padding:4px 8px; font-size:8.2pt; font-weight:900; }
 QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="critico"],
-QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="fragil"] { background-color:#451C20; color:#F4A8AF; }
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="fragil"] { background-color:{{color:modal_topic.domain_level_modern_critico_surface}}; color:{{color:modal_topic.domain_level_modern_critico_text}}; }
 QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="desenvolvimento"],
-QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="consolidando"] { background-color:#42351C; color:#F2CE7B; }
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="consolidando"] { background-color:{{color:modal_topic.domain_level_modern_desenvolvimento_surface}}; color:{{color:modal_topic.domain_level_modern_desenvolvimento_text}}; }
 QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="dominado"],
-QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="forte"] { background-color:#17372B; color:#8ED5AD; }
-QDialog#topicDetailsDialog QProgressBar#topicDomainBarModern { background-color:#2C3D50; border:none; border-radius:4px; }
-QDialog#topicDetailsDialog QProgressBar#topicDomainBarModern::chunk { background-color:#5596CF; border-radius:4px; }
-QDialog#topicDetailsDialog QFrame#topicDomainComponentModern { background-color:#182235; border:1px solid #33465A; border-radius:8px; }
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern[domainLevel="forte"] { background-color:{{color:modal_topic.domain_level_modern_dominado_surface}}; color:{{color:modal_topic.domain_level_modern_dominado_text}}; }
+QDialog#topicDetailsDialog QProgressBar#topicDomainBarModern { background-color:{{color:modal_topic.domain_bar_modern_surface}}; border:none; border-radius:4px; }
+QDialog#topicDetailsDialog QProgressBar#topicDomainBarModern::chunk { background-color:{{color:modal_topic.domain_bar_modern_chunk_surface}}; border-radius:4px; }
+QDialog#topicDetailsDialog QFrame#topicDomainComponentModern { background-color:{{color:modal_topic.domain_component_modern_surface}}; border:1px solid {{color:modal_topic.domain_component_modern_border}}; border-radius:8px; }
 QDialog#topicDetailsDialog QLabel#topicDomainComponentLabelModern,
-QDialog#topicDetailsDialog QLabel#topicDomainEvidenceLabel { color:#849BB1; font-size:7.7pt; font-weight:700; }
-QDialog#topicDetailsDialog QLabel#topicDomainComponentValueModern { color:#E8F1F9; font-size:10.5pt; font-weight:900; }
-QDialog#topicDetailsDialog QFrame#topicDomainInsight { background-color:#172131; border:1px solid #33465A; border-radius:8px; }
-QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="strength"] { border-color:#365F4C; background-color:#172A24; }
-QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="attention"] { border-color:#665638; background-color:#30291D; }
-QDialog#topicDetailsDialog QLabel#topicDomainInsightTitle { color:#849BB1; font-size:7.5pt; font-weight:900; }
-QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="strength"] QLabel#topicDomainInsightText { color:#91D6AC; }
-QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="attention"] QLabel#topicDomainInsightText { color:#D9BC7B; }
+QDialog#topicDetailsDialog QLabel#topicDomainEvidenceLabel { color:{{color:modal_topic.domain_component_label_modern_text}}; font-size:7.7pt; font-weight:700; }
+QDialog#topicDetailsDialog QLabel#topicDomainComponentValueModern { color:{{color:modal_topic.domain_component_value_modern_text}}; font-size:10.5pt; font-weight:900; }
+QDialog#topicDetailsDialog QFrame#topicDomainInsight { background-color:{{color:modal_topic.domain_insight_surface}}; border:1px solid {{color:modal_topic.domain_insight_border}}; border-radius:8px; }
+QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="strength"] { border-color:{{color:modal_topic.domain_insight_strength_border}}; background-color:{{color:modal_topic.domain_insight_strength_surface}}; }
+QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="attention"] { border-color:{{color:modal_topic.domain_insight_attention_border}}; background-color:{{color:modal_topic.domain_insight_attention_surface}}; }
+QDialog#topicDetailsDialog QLabel#topicDomainInsightTitle { color:{{color:modal_topic.domain_insight_title_text}}; font-size:7.5pt; font-weight:900; }
+QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="strength"] QLabel#topicDomainInsightText { color:{{color:modal_topic.domain_insight_domain_insight_text_strength_text}}; }
+QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="attention"] QLabel#topicDomainInsightText { color:{{color:modal_topic.domain_insight_domain_insight_text_attention_text}}; }
 QDialog#topicDetailsDialog QLabel#topicDomainInsightText,
 QDialog#topicDetailsDialog QLabel#topicDomainEvidenceModern { font-size:8.2pt; }
-QDialog#topicDetailsDialog QLabel#topicDomainEvidenceModern { color:#9CB0C3; }
-QDialog#topicDetailsDialog QFrame#topicNextStepCard { background-color:#151F2D; border:1px solid #33465A; border-radius:13px; }
-QDialog#topicDetailsDialog QLabel#topicNextEyebrow { color:#8CA4BB; font-size:8pt; font-weight:900; }
-QDialog#topicDetailsDialog QLabel#topicNextStatus { color:#B7C5D4; background-color:#2B3949; border-radius:8px; padding:4px 8px; font-size:7.8pt; font-weight:900; }
-QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="overdue"] { color:#F4A8AF; background-color:#451C20; }
-QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="today"] { color:#F1CA75; background-color:#42351C; }
-QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="soon"] { color:#A9D3FF; background-color:#20374F; }
-QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="future"] { color:#91D6AC; background-color:#17372B; }
-QDialog#topicDetailsDialog QLabel#topicNextDate { color:#E0EDF8; font-size:17px; font-weight:900; }
+QDialog#topicDetailsDialog QLabel#topicDomainEvidenceModern { color:{{color:modal_topic.domain_evidence_modern_text}}; }
+QDialog#topicDetailsDialog QFrame#topicNextStepCard { background-color:{{color:modal_topic.next_step_card_surface}}; border:1px solid {{color:modal_topic.next_step_card_border}}; border-radius:13px; }
+QDialog#topicDetailsDialog QLabel#topicNextEyebrow { color:{{color:modal_topic.next_eyebrow_text}}; font-size:8pt; font-weight:900; }
+QDialog#topicDetailsDialog QLabel#topicNextStatus { color:{{color:modal_topic.next_status_text}}; background-color:{{color:modal_topic.next_status_surface}}; border-radius:8px; padding:4px 8px; font-size:7.8pt; font-weight:900; }
+QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="overdue"] { color:{{color:modal_topic.next_status_overdue_text}}; background-color:{{color:modal_topic.next_status_overdue_surface}}; }
+QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="today"] { color:{{color:modal_topic.next_status_today_text}}; background-color:{{color:modal_topic.next_status_today_surface}}; }
+QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="soon"] { color:{{color:modal_topic.next_status_soon_text}}; background-color:{{color:modal_topic.next_status_soon_surface}}; }
+QDialog#topicDetailsDialog QLabel#topicNextStatus[scheduleState="future"] { color:{{color:modal_topic.next_status_future_text}}; background-color:{{color:modal_topic.next_status_future_surface}}; }
+QDialog#topicDetailsDialog QLabel#topicNextDate { color:{{color:modal_topic.next_date_text}}; font-size:17px; font-weight:900; }
 QDialog#topicDetailsDialog QLabel#topicNextDescription,
-QDialog#topicDetailsDialog QLabel#topicNextMeta { color:#8CA4BB; font-size:8.4pt; }
-QDialog#topicDetailsDialog QPushButton#topicNextPrimaryButton { background-color:#416AB7; color:#FFF; border:1px solid #527FD0; border-radius:9px; font-weight:900; padding:7px 12px; }
-QDialog#topicDetailsDialog QPushButton#topicNextPrimaryButton:hover { background-color:#355BA3; border-color:#6E98DF; }
-QDialog#topicDetailsDialog QFrame#topicEvolutionEmpty { background-color:#151F2D; border:1px dashed #3A4B5D; border-radius:10px; }
-QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyIcon { color:#6FA8D4; font-size:24px; }
-QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyTitle { color:#DDEAF5; font-size:10pt; font-weight:900; }
-QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyText { color:#879AAD; font-size:8.5pt; }
-QDialog#topicDetailsDialog QTableWidget#topicHistoryTable { background-color:#151F2D; alternate-background-color:#172536; border:1px solid #33465A; border-radius:8px; }
+QDialog#topicDetailsDialog QLabel#topicNextMeta { color:{{color:modal_topic.next_description_text}}; font-size:8.4pt; }
+QDialog#topicDetailsDialog QPushButton#topicNextPrimaryButton { background-color:{{color:modal_topic.next_primary_button_surface}}; color:{{color:modal_topic.next_primary_button_text}}; border:1px solid {{color:modal_topic.next_primary_button_border}}; border-radius:9px; font-weight:900; padding:7px 12px; }
+QDialog#topicDetailsDialog QPushButton#topicNextPrimaryButton:hover { background-color:{{color:modal_topic.next_primary_button_hover_surface}}; border-color:{{color:modal_topic.next_primary_button_hover_border}}; }
+QDialog#topicDetailsDialog QFrame#topicEvolutionEmpty { background-color:{{color:modal_topic.evolution_empty_surface}}; border:1px dashed {{color:modal_topic.evolution_empty_border}}; border-radius:10px; }
+QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyIcon { color:{{color:modal_topic.evolution_empty_icon_text}}; font-size:24px; }
+QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyTitle { color:{{color:modal_topic.evolution_empty_title_text}}; font-size:10pt; font-weight:900; }
+QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyText { color:{{color:modal_topic.evolution_empty_text_text}}; font-size:8.5pt; }
+QDialog#topicDetailsDialog QTableWidget#topicHistoryTable { background-color:{{color:modal_topic.history_table_surface}}; alternate-background-color:{{color:modal_topic.history_table_alternate_surface}}; border:1px solid {{color:modal_topic.history_table_border}}; border-radius:8px; }
 """
 
 ESTILO_TOPICO_DETALHES_FUTURISTA = r"""
-QDialog#topicDetailsDialog { background-color:#07111E; }
+QDialog#topicDetailsDialog { background-color:{{color:modal_topic.dialog_surface}}; }
 QDialog#topicDetailsDialog QFrame#topicHeroCard,
 QDialog#topicDetailsDialog QFrame#topicEvolutionCard,
 QDialog#topicDetailsDialog QFrame#topicHistoryCard,
 QDialog#topicDetailsDialog QFrame#topicHistoryDetailsCard {
-    background-color:#0D1D2D; border:1px solid #2E5A77; border-radius:13px;
+    background-color:{{color:modal_topic.hero_card_surface}}; border:1px solid {{color:modal_topic.hero_card_border}}; border-radius:13px;
 }
-QDialog#topicDetailsDialog QLabel#topicBreadcrumb { color:#78A9C7; }
-QDialog#topicDetailsDialog QLabel#topicHeroTitle { color:#ECFAFF; }
-QDialog#topicDetailsDialog QLabel#topicHeroSubtitle { color:#82A8BE; }
+QDialog#topicDetailsDialog QLabel#topicBreadcrumb { color:{{color:modal_topic.breadcrumb_text}}; }
+QDialog#topicDetailsDialog QLabel#topicHeroTitle { color:{{color:modal_topic.hero_title_text}}; }
+QDialog#topicDetailsDialog QLabel#topicHeroSubtitle { color:{{color:modal_topic.hero_subtitle_text}}; }
 QDialog#topicDetailsDialog QPushButton#topicStudyButton,
 QDialog#topicDetailsDialog QPushButton#topicNextPrimaryButton {
-    background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #4447E8,stop:0.5 #4F54EB,stop:1 #5355F2);
-    color:#FFF; border:1px solid #8488FF;
+    background:{{gradient:modal_topic.study_button_surface_gradient}};
+    color:{{color:modal_topic.study_button_text}}; border:1px solid {{color:modal_topic.study_button_border}};
 }
 QDialog#topicDetailsDialog QPushButton#topicStudyButton:hover,
-QDialog#topicDetailsDialog QPushButton#topicNextPrimaryButton:hover { border-color:#B8BBFF; }
+QDialog#topicDetailsDialog QPushButton#topicNextPrimaryButton:hover { border-color:{{color:modal_topic.study_button_hover_border}}; }
 QDialog#topicDetailsDialog QPushButton#topicQuestionsButton,
 QDialog#topicDetailsDialog QPushButton#topicHistoryButton,
 QDialog#topicDetailsDialog QPushButton#topicNextSecondaryButton,
-QDialog#topicDetailsDialog QPushButton#topicNextGhostButton { background-color:#10263A; color:#BCE7FF; border-color:#376D90; }
+QDialog#topicDetailsDialog QPushButton#topicNextGhostButton { background-color:{{color:modal_topic.questions_button_surface}}; color:{{color:modal_topic.questions_button_text}}; border-color:{{color:modal_topic.questions_button_border}}; }
 QDialog#topicDetailsDialog QPushButton#topicQuestionsButton:hover,
 QDialog#topicDetailsDialog QPushButton#topicHistoryButton:hover,
 QDialog#topicDetailsDialog QPushButton#topicNextSecondaryButton:hover,
-QDialog#topicDetailsDialog QPushButton#topicNextGhostButton:hover { background-color:#17344B; border-color:#57B9DF; color:#EEFBFF; }
-QDialog#topicDetailsDialog QFrame#topicMetricCard { background-color:#102236; border:1px solid #2F5872; }
-QDialog#topicDetailsDialog QFrame#topicMetricCard[metricRole="domain"] { background-color:#102A3F; border-color:#397AA3; }
+QDialog#topicDetailsDialog QPushButton#topicNextGhostButton:hover { background-color:{{color:modal_topic.questions_button_hover_surface}}; border-color:{{color:modal_topic.questions_button_hover_border}}; color:{{color:modal_topic.questions_button_hover_text}}; }
+QDialog#topicDetailsDialog QFrame#topicMetricCard { background-color:{{color:modal_topic.metric_card_surface}}; border:1px solid {{color:modal_topic.metric_card_border}}; }
+QDialog#topicDetailsDialog QFrame#topicMetricCard[metricRole="domain"] { background-color:{{color:modal_topic.metric_card_domain_surface}}; border-color:{{color:modal_topic.metric_card_domain_border}}; }
 QDialog#topicDetailsDialog QLabel#topicMetricLabel,
-QDialog#topicDetailsDialog QLabel#topicCompactMetricLabel { color:#78A2BC; }
-QDialog#topicDetailsDialog QLabel#topicMetricValue { color:#E7F7FF; }
-QDialog#topicDetailsDialog QFrame#topicMetricCard[metricRole="domain"] QLabel#topicMetricValue { color:#A8DFFF; }
-QDialog#topicDetailsDialog QFrame#topicCompactMetric { background-color:#0C1D2D; border-color:#294C63; }
-QDialog#topicDetailsDialog QLabel#topicCompactMetricValue { color:#B9DAEC; }
-QDialog#topicDetailsDialog QLabel#topicLegacyNotice { color:#E1BB67; background-color:rgba(57,43,20,220); border-color:#755F34; }
-QDialog#topicDetailsDialog QTabWidget#topicDetailsTabs QTabBar::tab { color:#7396AC; }
-QDialog#topicDetailsDialog QTabWidget#topicDetailsTabs QTabBar::tab:selected { color:#C8F5FF; border-bottom-color:#55D4E6; }
-QDialog#topicDetailsDialog QFrame#topicDomainCardModern { background-color:#0E2234; border-color:#326783; }
+QDialog#topicDetailsDialog QLabel#topicCompactMetricLabel { color:{{color:modal_topic.metric_label_text}}; }
+QDialog#topicDetailsDialog QLabel#topicMetricValue { color:{{color:modal_topic.metric_value_text}}; }
+QDialog#topicDetailsDialog QFrame#topicMetricCard[metricRole="domain"] QLabel#topicMetricValue { color:{{color:modal_topic.metric_card_metric_value_domain_text}}; }
+QDialog#topicDetailsDialog QFrame#topicCompactMetric { background-color:{{color:modal_topic.compact_metric_surface}}; border-color:{{color:modal_topic.compact_metric_border}}; }
+QDialog#topicDetailsDialog QLabel#topicCompactMetricValue { color:{{color:modal_topic.compact_metric_value_text}}; }
+QDialog#topicDetailsDialog QLabel#topicLegacyNotice { color:{{color:modal_topic.legacy_notice_text}}; background-color:{{color:modal_topic.legacy_notice_surface}}; border-color:{{color:modal_topic.legacy_notice_border}}; }
+QDialog#topicDetailsDialog QTabWidget#topicDetailsTabs QTabBar::tab { color:{{color:modal_topic.details_tabs_text}}; }
+QDialog#topicDetailsDialog QTabWidget#topicDetailsTabs QTabBar::tab:selected { color:{{color:modal_topic.details_tabs_selected_text}}; border-bottom-color:{{color:modal_topic.details_tabs_selected_bottom_border}}; }
+QDialog#topicDetailsDialog QFrame#topicDomainCardModern { background-color:{{color:modal_topic.domain_card_modern_surface}}; border-color:{{color:modal_topic.domain_card_modern_border}}; }
 QDialog#topicDetailsDialog QLabel#topicDomainTitleModern,
-QDialog#topicDetailsDialog QLabel#topicSectionTitle { color:#E6F8FF; }
+QDialog#topicDetailsDialog QLabel#topicSectionTitle { color:{{color:modal_topic.domain_title_modern_text}}; }
 QDialog#topicDetailsDialog QLabel#topicDomainSubtitleModern,
 QDialog#topicDetailsDialog QLabel#topicEvolutionSummary,
-QDialog#topicDetailsDialog QLabel#topicHistoryHint { color:#7FA6BD; }
-QDialog#topicDetailsDialog QLabel#topicDomainScoreModern { color:#A9E4FF; }
-QDialog#topicDetailsDialog QLabel#topicDomainLevelModern { background-color:#173047; color:#BBDDF0; }
-QDialog#topicDetailsDialog QProgressBar#topicDomainBarModern { background-color:#173046; }
-QDialog#topicDetailsDialog QProgressBar#topicDomainBarModern::chunk { background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #4F6EF0,stop:0.55 #62BFE7,stop:1 #62DCC0); }
-QDialog#topicDetailsDialog QFrame#topicDomainComponentModern { background-color:rgba(10,30,46,225); border-color:#2D5269; }
+QDialog#topicDetailsDialog QLabel#topicHistoryHint { color:{{color:modal_topic.domain_subtitle_modern_text}}; }
+QDialog#topicDetailsDialog QLabel#topicDomainScoreModern { color:{{color:modal_topic.domain_score_modern_text}}; }
+QDialog#topicDetailsDialog QLabel#topicDomainLevelModern { background-color:{{color:modal_topic.domain_level_modern_surface}}; color:{{color:modal_topic.domain_level_modern_text}}; }
+QDialog#topicDetailsDialog QProgressBar#topicDomainBarModern { background-color:{{color:modal_topic.domain_bar_modern_surface}}; }
+QDialog#topicDetailsDialog QProgressBar#topicDomainBarModern::chunk { background:{{gradient:modal_topic.domain_bar_modern_chunk_surface_gradient}}; }
+QDialog#topicDetailsDialog QFrame#topicDomainComponentModern { background-color:{{color:modal_topic.domain_component_modern_surface}}; border-color:{{color:modal_topic.domain_component_modern_border}}; }
 QDialog#topicDetailsDialog QLabel#topicDomainComponentLabelModern,
-QDialog#topicDetailsDialog QLabel#topicDomainEvidenceLabel { color:#759DB5; }
-QDialog#topicDetailsDialog QLabel#topicDomainComponentValueModern { color:#DDF5FF; }
-QDialog#topicDetailsDialog QFrame#topicDomainInsight { background-color:#0D2031; border-color:#2A4E65; }
-QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="strength"] { background-color:rgba(18,55,42,220); border-color:#36745A; }
-QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="attention"] { background-color:rgba(57,43,20,220); border-color:#755F34; }
-QDialog#topicDetailsDialog QLabel#topicDomainEvidenceModern { color:#8FB4C8; }
-QDialog#topicDetailsDialog QFrame#topicNextStepCard { background:qlineargradient(x1:0,y1:0,x2:1,y2:1,stop:0 #102A3D,stop:1 #0D2032); border-color:#356C8C; }
-QDialog#topicDetailsDialog QLabel#topicNextEyebrow { color:#7FAAC3; }
-QDialog#topicDetailsDialog QLabel#topicNextStatus { background-color:#173047; color:#A9D6EC; }
-QDialog#topicDetailsDialog QLabel#topicNextDate { color:#EAF9FF; }
+QDialog#topicDetailsDialog QLabel#topicDomainEvidenceLabel { color:{{color:modal_topic.domain_component_label_modern_text}}; }
+QDialog#topicDetailsDialog QLabel#topicDomainComponentValueModern { color:{{color:modal_topic.domain_component_value_modern_text}}; }
+QDialog#topicDetailsDialog QFrame#topicDomainInsight { background-color:{{color:modal_topic.domain_insight_surface}}; border-color:{{color:modal_topic.domain_insight_border}}; }
+QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="strength"] { background-color:{{color:modal_topic.domain_insight_strength_surface}}; border-color:{{color:modal_topic.domain_insight_strength_border}}; }
+QDialog#topicDetailsDialog QFrame#topicDomainInsight[insightRole="attention"] { background-color:{{color:modal_topic.domain_insight_attention_surface}}; border-color:{{color:modal_topic.domain_insight_attention_border}}; }
+QDialog#topicDetailsDialog QLabel#topicDomainEvidenceModern { color:{{color:modal_topic.domain_evidence_modern_text}}; }
+QDialog#topicDetailsDialog QFrame#topicNextStepCard { background:{{gradient:modal_topic.next_step_card_surface_gradient}}; border-color:{{color:modal_topic.next_step_card_border}}; }
+QDialog#topicDetailsDialog QLabel#topicNextEyebrow { color:{{color:modal_topic.next_eyebrow_text}}; }
+QDialog#topicDetailsDialog QLabel#topicNextStatus { background-color:{{color:modal_topic.next_status_surface}}; color:{{color:modal_topic.next_status_text}}; }
+QDialog#topicDetailsDialog QLabel#topicNextDate { color:{{color:modal_topic.next_date_text}}; }
 QDialog#topicDetailsDialog QLabel#topicNextDescription,
-QDialog#topicDetailsDialog QLabel#topicNextMeta { color:#82A9BE; }
-QDialog#topicDetailsDialog QFrame#topicEvolutionEmpty { background-color:#0B1C2B; border-color:#31556D; }
-QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyIcon { color:#5FC8E7; }
-QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyTitle { color:#DDF7FF; }
-QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyText { color:#789CB0; }
-QDialog#topicDetailsDialog QTableWidget#topicHistoryTable { background-color:#0B1B2A; alternate-background-color:#0E2234; border-color:#2C536B; }
+QDialog#topicDetailsDialog QLabel#topicNextMeta { color:{{color:modal_topic.next_description_text}}; }
+QDialog#topicDetailsDialog QFrame#topicEvolutionEmpty { background-color:{{color:modal_topic.evolution_empty_surface}}; border-color:{{color:modal_topic.evolution_empty_border}}; }
+QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyIcon { color:{{color:modal_topic.evolution_empty_icon_text}}; }
+QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyTitle { color:{{color:modal_topic.evolution_empty_title_text}}; }
+QDialog#topicDetailsDialog QLabel#topicEvolutionEmptyText { color:{{color:modal_topic.evolution_empty_text_text}}; }
+QDialog#topicDetailsDialog QTableWidget#topicHistoryTable { background-color:{{color:modal_topic.history_table_surface}}; alternate-background-color:{{color:modal_topic.history_table_alternate_surface}}; border-color:{{color:modal_topic.history_table_border}}; }
 """
 
 
@@ -7006,13 +7006,13 @@ def stylesheet_claro():
 
     QLabel#contextLabel {
         background: transparent;
-        color: #475569;
+        color: {{color:admin_shared.context_label_text}};
         font-weight: 700;
     }
 
     QLabel#queueCount {
         background: transparent;
-        color: #64748b;
+        color: {{color:card.metric_label_text}};
         font-size: 9pt;
         font-weight: 600;
     }
@@ -7078,27 +7078,27 @@ def stylesheet_claro():
     }
 
     QFrame#miniStat {
-        background-color: #fbfdff;
-        border: 1px solid #d9e5f0;
+        background-color: {{color:card.mini_stat_surface}};
+        border: 1px solid {{color:card.mini_stat_border}};
         border-radius: 10px;
     }
 
     QLabel#miniStatLabel {
         background: transparent;
-        color: #64748b;
+        color: {{color:card.metric_label_text}};
         font-size: 9pt;
     }
 
     QLabel#miniStatValue {
         background: transparent;
-        color: #111827;
+        color: {{color:card.metric_value_text}};
         font-size: 17px;
         font-weight: 700;
     }
 
     QFrame#filterBar {
-        background-color: #fbfdff;
-        border: 1px solid #d6e2ef;
+        background-color: {{color:admin_shared.filter_bar_surface}};
+        border: 1px solid {{color:admin_shared.filter_bar_border}};
         border-radius: 10px;
     }
 
@@ -7131,42 +7131,42 @@ def stylesheet_claro():
         min-height: 0px;
         padding: 1px 6px;
         background: transparent;
-        color: #475569;
-        border: 1px solid #cbd5e1;
+        color: {{color:modal_compact_actions.row_text}};
+        border: 1px solid {{color:modal_compact_actions.row_border}};
         border-radius: 5px;
         font-size: 9pt;
         font-weight: 400;
     }
 
     QPushButton#rowActionButton:hover {
-        background-color: #f1f5f9;
-        border-color: #94a3b8;
+        background-color: {{color:modal_compact_actions.row_hover_surface}};
+        border-color: {{color:modal_compact_actions.row_hover_border}};
     }
 QPushButton#sectionEditButton {
         min-height: 0px;
         padding: 5px 13px;
-        background-color: #eaf2ff;
-        color: #1d4ed8;
-        border: 1px solid #93c5fd;
+        background-color: {{color:modal_compact_actions.edit_surface}};
+        color: {{color:modal_compact_actions.edit_text}};
+        border: 1px solid {{color:modal_compact_actions.edit_border}};
         border-radius: 8px;
         font-size: 9.5pt;
         font-weight: 700;
     }
 QPushButton#sectionEditButton:hover {
-        background-color: #dbeafe;
-        border-color: #60a5fa;
-        color: #1e40af;
+        background-color: {{color:modal_compact_actions.edit_hover_surface}};
+        border-color: {{color:modal_compact_actions.edit_hover_border}};
+        color: {{color:modal_compact_actions.edit_hover_text}};
     }
 
     QPushButton#sectionEditButton:pressed {
-        background-color: #bfdbfe;
-        border-color: #3b82f6;
+        background-color: {{color:modal_compact_actions.edit_pressed_surface}};
+        border-color: {{color:modal_compact_actions.edit_pressed_border}};
     }
 
 
     QFrame#dialogCard {
-        background-color: #ffffff;
-        border: 1px solid #dbe3ed;
+        background-color: {{color:modal_study.dialog_card_surface}};
+        border: 1px solid {{color:modal_study.dialog_card_border}};
         border-radius: 11px;
     }
 
@@ -7175,8 +7175,8 @@ QPushButton#sectionEditButton:hover {
     }
 
     QFrame#topicDomainCard {
-        background-color: #f8fbff;
-        border: 1px solid #bfdbfe;
+        background-color: {{color:modal_study.domain_card_surface}};
+        border: 1px solid {{color:modal_study.domain_card_border}};
         border-radius: 10px;
     }
 
@@ -7185,25 +7185,25 @@ QPushButton#sectionEditButton:hover {
     }
 
     QLabel#topicDomainTitle {
-        color: #111827;
+        color: {{color:modal_study.domain_title_text}};
         font-size: 10.5pt;
         font-weight: 800;
     }
 
     QLabel#topicDomainSubtitle {
-        color: #64748b;
+        color: {{color:modal_study.domain_subtitle_text}};
         font-size: 8.5pt;
     }
 
     QLabel#topicDomainScore {
-        color: #1d4ed8;
+        color: {{color:modal_study.domain_score_text}};
         font-size: 18px;
         font-weight: 900;
     }
 
     QLabel#topicDomainLevel {
-        background-color: #e2e8f0;
-        color: #475569;
+        background-color: {{color:modal_study.domain_level_surface}};
+        color: {{color:modal_study.domain_level_text}};
         border-radius: 7px;
         padding: 5px 8px;
         font-size: 8.5pt;
@@ -7212,91 +7212,91 @@ QPushButton#sectionEditButton:hover {
 
     QLabel#topicDomainLevel[domainLevel="critico"],
     QLabel#topicDomainLevel[domainLevel="fragil"] {
-        background-color: #fee2e2;
-        color: #b91c1c;
+        background-color: {{color:modal_study.domain_level_critico_surface}};
+        color: {{color:modal_study.domain_level_critico_text}};
     }
 
     QLabel#topicDomainLevel[domainLevel="desenvolvimento"],
     QLabel#topicDomainLevel[domainLevel="consolidando"] {
-        background-color: #fef3c7;
-        color: #92400e;
+        background-color: {{color:modal_study.domain_level_desenvolvimento_surface}};
+        color: {{color:modal_study.domain_level_desenvolvimento_text}};
     }
 
     QLabel#topicDomainLevel[domainLevel="dominado"],
     QLabel#topicDomainLevel[domainLevel="forte"] {
-        background-color: #dcfce7;
-        color: #166534;
+        background-color: {{color:modal_study.domain_level_dominado_surface}};
+        color: {{color:modal_study.domain_level_dominado_text}};
     }
 
     QProgressBar#topicDomainBar {
-        background-color: #e2e8f0;
+        background-color: {{color:modal_study.domain_bar_surface}};
         border: none;
         border-radius: 4px;
     }
 
     QProgressBar#topicDomainBar::chunk {
-        background-color: #2563eb;
+        background-color: {{color:modal_study.domain_bar_chunk_surface}};
         border-radius: 4px;
     }
 
     QFrame#topicDomainComponent {
-        background-color: #ffffff;
-        border: 1px solid #e2e8f0;
+        background-color: {{color:modal_study.domain_component_surface}};
+        border: 1px solid {{color:modal_study.domain_component_border}};
         border-radius: 7px;
     }
 
     QLabel#topicDomainComponentLabel {
-        color: #64748b;
+        color: {{color:modal_study.domain_component_label_text}};
         font-size: 7.8pt;
     }
 
     QLabel#topicDomainComponentValue {
-        color: #111827;
+        color: {{color:modal_study.domain_component_value_text}};
         font-size: 11pt;
         font-weight: 800;
     }
 
     QLabel#topicDomainEvidence {
-        color: #334155;
+        color: {{color:modal_study.domain_evidence_text}};
         font-size: 8.4pt;
         font-weight: 600;
     }
 
     QLabel#topicDomainReasons {
-        color: #64748b;
+        color: {{color:modal_study.domain_reasons_text}};
         font-size: 8.2pt;
     }
 
     QFrame#metricCard {
-        background-color: #ffffff;
-        border: 1px solid #e2e8f0;
+        background-color: {{color:card.metric_surface}};
+        border: 1px solid {{color:card.metric_border}};
         border-radius: 10px;
     }
 
     QLabel#metricLabel {
         background: transparent;
-        color: #64748b;
+        color: {{color:card.metric_label_text}};
         font-size: 9pt;
     }
 
     QLabel#metricValue {
         background: transparent;
-        color: #111827;
+        color: {{color:card.metric_value_text}};
         font-size: 15px;
         font-weight: 700;
     }
 
     QLabel#fieldLabel {
         background: transparent;
-        color: #64748b;
+        color: {{color:modal_revision.field_label_text}};
         font-size: 9pt;
         font-weight: 600;
     }
 
     QLabel#sessionBadge {
-        background-color: #eff6ff;
-        color: #1d4ed8;
-        border: 1px solid #bfdbfe;
+        background-color: {{color:modal_revision.badge_surface}};
+        color: {{color:modal_revision.badge_text}};
+        border: 1px solid {{color:modal_revision.badge_border}};
         border-radius: 8px;
         padding: 5px 9px;
         font-size: 9pt;
@@ -7304,9 +7304,9 @@ QPushButton#sectionEditButton:hover {
     }
 
     QLabel#resultValue {
-        background-color: #eff6ff;
-        color: #1d4ed8;
-        border: 1px solid #bfdbfe;
+        background-color: {{color:modal_revision.result_surface}};
+        color: {{color:modal_revision.result_text}};
+        border: 1px solid {{color:modal_revision.result_border}};
         border-radius: 8px;
         font-size: 17px;
         font-weight: 800;
@@ -7314,8 +7314,8 @@ QPushButton#sectionEditButton:hover {
     }
 
     QFrame#suggestionCard {
-        background-color: #f8fbff;
-        border: 1px solid #bfdbfe;
+        background-color: {{color:modal_revision.suggestion_surface}};
+        border: 1px solid {{color:modal_revision.suggestion_border}};
         border-radius: 11px;
     }
 
@@ -7325,23 +7325,23 @@ QPushButton#sectionEditButton:hover {
 
     QLabel#suggestionStrong {
         background: transparent;
-        color: #1d4ed8;
+        color: {{color:modal_revision.suggestion_text}};
         font-size: 12pt;
         font-weight: 700;
     }
 
     QLabel#infoNotice {
-        background-color: #fffbeb;
-        color: #92400e;
-        border: 1px solid #fde68a;
+        background-color: {{color:modal_notice.info_surface}};
+        color: {{color:modal_notice.info_text}};
+        border: 1px solid {{color:modal_notice.info_border}};
         border-radius: 9px;
         padding: 8px 10px;
         font-size: 9pt;
     }
 
     QTextEdit#detailsReadOnly {
-        background-color: #f8fafc;
-        border: 1px solid #e2e8f0;
+        background-color: {{color:modal_details.readonly_surface}};
+        border: 1px solid {{color:modal_details.readonly_border}};
     }
 
 
@@ -7886,24 +7886,24 @@ QPushButton#sectionEditButton:hover {
     }
 
     QFrame#effectivenessFilterBar {
-        background-color: #f8fafc;
-        border: 1px solid #e2e8f0;
+        background-color: {{color:effectiveness.filter_bar_surface}};
+        border: 1px solid {{color:effectiveness.filter_bar_border}};
         border-radius: 9px;
     }
 
     QFrame#effectivenessFilterBar QLabel {
         background: transparent;
-        color: #475569;
+        color: {{color:effectiveness.filter_bar_label_text}};
     }
 
     QLabel#effectivenessTrackingNotice {
-        color: #64748b;
+        color: {{color:effectiveness.tracking_notice_text}};
         font-size: 8.2pt;
     }
 
     QFrame#effectivenessStatCard {
-        background-color: #ffffff;
-        border: 1px solid #dbe3ed;
+        background-color: {{color:summary.metric_surface}};
+        border: 1px solid {{color:summary.metric_border}};
         border-radius: 9px;
     }
 
@@ -7912,25 +7912,25 @@ QPushButton#sectionEditButton:hover {
     }
 
     QLabel#effectivenessStatLabel {
-        color: #64748b;
+        color: {{color:card.metric_label_text}};
         font-size: 8.6pt;
         font-weight: 700;
     }
 
     QLabel#effectivenessStatValue {
-        color: #111827;
+        color: {{color:card.metric_value_text}};
         font-size: 16px;
         font-weight: 900;
     }
 
     QLabel#effectivenessStatHint {
-        color: #94a3b8;
+        color: {{color:effectiveness.stat_hint_text}};
         font-size: 8pt;
     }
 
     QFrame#effectivenessCalibrationCard {
-        background-color: #f8fbff;
-        border: 1px solid #bfdbfe;
+        background-color: {{color:effectiveness.calibration_card_surface}};
+        border: 1px solid {{color:effectiveness.calibration_card_border}};
         border-radius: 9px;
     }
 
@@ -7939,15 +7939,15 @@ QPushButton#sectionEditButton:hover {
     }
 
     QLabel#effectivenessCalibrationTitle {
-        color: #1e3a8a;
+        color: {{color:effectiveness.calibration_title_text}};
         font-size: 10pt;
         font-weight: 800;
     }
 
     QLabel#effectivenessCalibrationBadge {
-        background-color: #f1f5f9;
-        color: #475569;
-        border: 1px solid #cbd5e1;
+        background-color: {{color:effectiveness.calibration_badge_surface}};
+        color: {{color:effectiveness.calibration_badge_text}};
+        border: 1px solid {{color:effectiveness.calibration_badge_border}};
         border-radius: 7px;
         padding: 4px 8px;
         font-size: 8.3pt;
@@ -7956,36 +7956,36 @@ QPushButton#sectionEditButton:hover {
 
     QLabel#effectivenessCalibrationBadge[calibrationLevel="inicial"],
     QLabel#effectivenessCalibrationBadge[calibrationLevel="moderada"] {
-        background-color: #fffbeb;
-        color: #92400e;
-        border-color: #fde68a;
+        background-color: {{color:effectiveness.calibration_badge_caution_surface}};
+        color: {{color:effectiveness.calibration_badge_caution_text}};
+        border-color: {{color:effectiveness.calibration_badge_caution_border}};
     }
 
     QLabel#effectivenessCalibrationBadge[calibrationLevel="forte"] {
-        background-color: #f0fdf4;
-        color: #166534;
-        border-color: #86efac;
+        background-color: {{color:effectiveness.calibration_badge_strong_surface}};
+        color: {{color:effectiveness.calibration_badge_strong_text}};
+        border-color: {{color:effectiveness.calibration_badge_strong_border}};
     }
 
     QLabel#effectivenessCalibrationText {
-        color: #334155;
+        color: {{color:effectiveness.calibration_body_text}};
         font-size: 8.6pt;
     }
 
     QLabel#effectivenessWeights {
-        color: #1e40af;
+        color: {{color:effectiveness.calibration_weights_text}};
         font-size: 8.4pt;
         font-weight: 700;
     }
 
     QLabel#effectivenessObservations {
-        color: #64748b;
+        color: {{color:effectiveness.calibration_observations_text}};
         font-size: 8.4pt;
     }
 
     QFrame#effectivenessImpactCard {
-        background-color: #f8fbff;
-        border: 1px solid #bfdbfe;
+        background-color: {{color:effectiveness.impact_card_surface}};
+        border: 1px solid {{color:effectiveness.impact_card_border}};
         border-radius: 9px;
     }
 
@@ -7994,38 +7994,38 @@ QPushButton#sectionEditButton:hover {
     }
 
     QLabel#effectivenessImpactTitle {
-        color: #1e3a8a;
+        color: {{color:effectiveness.impact_title_text}};
         font-size: 9.5pt;
         font-weight: 800;
     }
 
     QFrame#effectivenessImpactMetric {
-        background-color: #ffffff;
-        border: 1px solid #dbeafe;
+        background-color: {{color:effectiveness.impact_metric_surface}};
+        border: 1px solid {{color:effectiveness.impact_metric_border}};
         border-radius: 7px;
     }
 
     QLabel#effectivenessImpactLabel {
-        color: #64748b;
+        color: {{color:effectiveness.impact_metric_label_text}};
         font-size: 8pt;
     }
 
     QLabel#effectivenessImpactValue {
-        color: #111827;
+        color: {{color:effectiveness.impact_metric_value_text}};
         font-size: 9.5pt;
         font-weight: 800;
     }
 
     QLabel#effectivenessImpactFooter {
-        color: #64748b;
+        color: {{color:effectiveness.impact_metric_footer_text}};
         font-size: 8.2pt;
     }
 
     QPushButton#effectivenessOpenButton,
     QPushButton#questionsEffectivenessButton {
-        background-color: #ffffff;
-        color: #1d4ed8;
-        border: 1px solid #93c5fd;
+        background-color: {{color:effectiveness.open_button_surface}};
+        color: {{color:effectiveness.open_button_text}};
+        border: 1px solid {{color:effectiveness.open_button_border}};
         border-radius: 7px;
         padding: 6px 10px;
         font-weight: 700;
@@ -8033,25 +8033,25 @@ QPushButton#sectionEditButton:hover {
 
     QPushButton#effectivenessOpenButton:hover,
     QPushButton#questionsEffectivenessButton:hover {
-        background-color: #eff6ff;
-        border-color: #60a5fa;
+        background-color: {{color:effectiveness.open_button_hover_surface}};
+        border-color: {{color:effectiveness.open_button_hover_border}};
     }
 
     QFrame#mockExamConfigCard {
-        background-color: #ffffff;
-        border: 1px solid #dbe3ed;
+        background-color: {{color:mock_exam.config_card_surface}};
+        border: 1px solid {{color:mock_exam.config_card_border}};
         border-radius: 10px;
     }
 
     QFrame#mockExamConfigCard QLabel {
         background: transparent;
-        color: #334155;
+        color: {{color:mock_exam.config_card_label_text}};
     }
 
     QLabel#mockExamRuleNotice {
-        background-color: #fffbeb;
-        color: #92400e;
-        border: 1px solid #fde68a;
+        background-color: {{color:mock_exam.rule_notice_surface}};
+        color: {{color:mock_exam.rule_notice_text}};
+        border: 1px solid {{color:mock_exam.rule_notice_border}};
         border-radius: 8px;
         padding: 7px 9px;
         font-size: 8.4pt;
@@ -8059,27 +8059,27 @@ QPushButton#sectionEditButton:hover {
     }
 
     QLabel#mockExamSectionTitle {
-        color: #111827;
+        color: {{color:mock_exam.section_title_text}};
         font-size: 10pt;
         font-weight: 800;
     }
 
     QLabel#mockExamPreviewSummary {
-        color: #1d4ed8;
+        color: {{color:mock_exam.preview_summary_text}};
         font-size: 9pt;
         font-weight: 800;
     }
 
     QLabel#mockExamVighnaExplanation {
-        color: #64748b;
+        color: {{color:mock_exam.explanation_text}};
         font-size: 8.4pt;
     }
 
     QPushButton#mockExamStartButton,
     QPushButton#mockExamDashboardButton {
-        background-color: #7c3aed;
-        color: #ffffff;
-        border: 1px solid #6d28d9;
+        background-color: {{color:mock_exam.primary_button_surface}};
+        color: {{color:mock_exam.primary_button_text}};
+        border: 1px solid {{color:mock_exam.primary_button_border}};
         border-radius: 8px;
         padding: 7px 12px;
         font-weight: 800;
@@ -8087,22 +8087,22 @@ QPushButton#sectionEditButton:hover {
 
     QPushButton#mockExamStartButton:hover,
     QPushButton#mockExamDashboardButton:hover {
-        background-color: #6d28d9;
-        border-color: #5b21b6;
+        background-color: {{color:mock_exam.primary_button_hover_surface}};
+        border-color: {{color:mock_exam.primary_button_hover_border}};
     }
 
     QPushButton#questionsMockExamButton {
-        background-color: #ffffff;
-        color: #6d28d9;
-        border: 1px solid #c4b5fd;
+        background-color: {{color:mock_exam.questions_button_surface}};
+        color: {{color:mock_exam.questions_button_text}};
+        border: 1px solid {{color:mock_exam.questions_button_border}};
         border-radius: 7px;
         padding: 6px 10px;
         font-weight: 800;
     }
 
     QPushButton#questionsMockExamButton:hover {
-        background-color: #f5f3ff;
-        border-color: #a78bfa;
+        background-color: {{color:mock_exam.questions_button_hover_surface}};
+        border-color: {{color:mock_exam.questions_button_hover_border}};
     }
 
     QLabel#mockExamTimer {
@@ -8116,15 +8116,15 @@ QPushButton#sectionEditButton:hover {
     }
 
     QLabel#mockExamResultSectionTitle {
-        color: #111827;
+        color: {{color:mock_exam.result_section_title_text}};
         font-size: 9.5pt;
         font-weight: 800;
     }
 
     QLabel#mockExamCorrectionNotice {
-        background-color: #f5f3ff;
-        color: #5b21b6;
-        border: 1px solid #c4b5fd;
+        background-color: {{color:mock_exam.correction_notice_surface}};
+        color: {{color:mock_exam.correction_notice_text}};
+        border: 1px solid {{color:mock_exam.correction_notice_border}};
         border-radius: 8px;
         padding: 7px 9px;
         font-size: 8.4pt;
@@ -8133,8 +8133,8 @@ QPushButton#sectionEditButton:hover {
 
     QFrame#questionSessionConfigCard,
     QFrame#questionSessionSummaryCard {
-        background-color: #ffffff;
-        border: 1px solid #dbe3ed;
+        background-color: {{color:session_modal.cards_surface}};
+        border: 1px solid {{color:session_modal.cards_border}};
         border-radius: 9px;
     }
 
@@ -8146,56 +8146,56 @@ QPushButton#sectionEditButton:hover {
 
     QLabel#questionSessionProfile,
     QLabel#questionSessionAvailability {
-        background-color: #f8fafc;
-        color: #475569;
-        border: 1px solid #e2e8f0;
+        background-color: {{color:modal_session_availability.default_surface}};
+        color: {{color:modal_session_availability.default_text}};
+        border: 1px solid {{color:modal_session_availability.default_border}};
         border-radius: 7px;
         padding: 7px 9px;
         font-weight: 700;
     }
 
     QLabel#questionSessionAvailability[availabilityState="ok"] {
-        background-color: #f0fdf4;
-        color: #15803d;
-        border-color: #bbf7d0;
+        background-color: {{color:modal_session_availability.available_surface}};
+        color: {{color:modal_session_availability.available_text}};
+        border-color: {{color:modal_session_availability.available_border}};
     }
 
     QLabel#questionSessionAvailability[availabilityState="empty"] {
-        background-color: #fff7ed;
-        color: #c2410c;
-        border-color: #fed7aa;
+        background-color: {{color:modal_session_availability.empty_surface}};
+        color: {{color:modal_session_availability.empty_text}};
+        border-color: {{color:modal_session_availability.empty_border}};
     }
 
     QLabel#questionSessionProgressText {
-        color: #334155;
+        color: {{color:session_modal.progress_text}};
         font-weight: 800;
     }
 
     QProgressBar#questionSessionProgress {
-        background-color: #e2e8f0;
+        background-color: {{color:session_modal.progress_track}};
         border: none;
         border-radius: 3px;
     }
 
     QProgressBar#questionSessionProgress::chunk {
-        background-color: #3b82f6;
+        background-color: {{color:session_modal.progress_fill}};
         border-radius: 3px;
     }
 
     QFrame#questionSessionMiniStat {
-        background-color: #f8fafc;
-        border: 1px solid #e2e8f0;
+        background-color: {{color:session_modal.mini_stat_surface}};
+        border: 1px solid {{color:session_modal.mini_stat_border}};
         border-radius: 7px;
     }
 
     QLabel#questionSessionMiniLabel {
-        color: #64748b;
+        color: {{color:session_modal.mini_stat_label}};
         font-size: 8.5pt;
         font-weight: 700;
     }
 
     QLabel#questionSessionMiniValue {
-        color: #111827;
+        color: {{color:session_modal.mini_stat_value}};
         font-size: 10pt;
         font-weight: 800;
     }
@@ -8415,9 +8415,9 @@ QPushButton#sectionEditButton:hover {
     }
 
     QLabel#questionSessionSummaryDetail {
-        background-color: #eff6ff;
-        color: #1e3a8a;
-        border: 1px solid #bfdbfe;
+        background-color: {{color:summary.detail_surface}};
+        color: {{color:summary.detail_text}};
+        border: 1px solid {{color:summary.detail_border}};
         border-radius: 7px;
         padding: 7px 9px;
         font-weight: 700;
@@ -8433,8 +8433,8 @@ QPushButton#sectionEditButton:hover {
     }
 
     QTableWidget#questionSessionSummaryTable {
-        background-color: #ffffff;
-        border: 1px solid #dbe3ed;
+        background-color: {{color:summary.table_surface}};
+        border: 1px solid {{color:summary.table_border}};
         border-radius: 8px;
         gridline-color: transparent;
     }
@@ -9486,9 +9486,9 @@ QPushButton#sectionEditButton:hover {
 
 
     QLabel#reportPeriodLabel {
-        background-color: #f1f5f9;
-        color: #475569;
-        border: 1px solid #e2e8f0;
+        background-color: {{color:reports.period_surface}};
+        color: {{color:reports.period_text}};
+        border: 1px solid {{color:reports.period_border}};
         border-radius: 7px;
         padding: 5px 9px;
         font-size: 9pt;
@@ -9496,8 +9496,8 @@ QPushButton#sectionEditButton:hover {
     }
 
     QFrame#comparisonPanel {
-        background-color: #f8fafc;
-        border: 1px solid #dbe3ed;
+        background-color: {{color:reports.comparison_surface}};
+        border: 1px solid {{color:reports.comparison_border}};
         border-radius: 11px;
     }
 
@@ -9506,34 +9506,34 @@ QPushButton#sectionEditButton:hover {
     }
 
     QFrame#comparisonMetric {
-        background-color: #ffffff;
-        border: 1px solid #e2e8f0;
+        background-color: {{color:reports.metric_surface}};
+        border: 1px solid {{color:reports.metric_border}};
         border-radius: 9px;
     }
 
     QLabel#comparisonValue {
         background: transparent;
-        color: #475569;
+        color: {{color:reports.value_text}};
         font-size: 13pt;
         font-weight: 800;
     }
 
     QLabel#comparisonValue[reportTrend="positive"] {
-        color: #15803d;
+        color: {{color:reports.trend_positive_text}};
     }
 
     QLabel#comparisonValue[reportTrend="negative"] {
-        color: #b91c1c;
+        color: {{color:reports.trend_negative_text}};
     }
 
     QLabel#comparisonValue[reportTrend="neutral"] {
-        color: #64748b;
+        color: {{color:reports.trend_neutral_text}};
     }
 
     QTabWidget#reportTabs::pane {
-        border: 1px solid #dbe3ed;
+        border: 1px solid {{color:statistics_tabs.pane_border}};
         border-radius: 10px;
-        background-color: #ffffff;
+        background-color: {{color:statistics_tabs.pane_surface}};
         top: -1px;
     }
 
@@ -9687,9 +9687,9 @@ QPushButton#sectionEditButton:hover {
 
     QPushButton#planningSummaryButton {
         min-height: 0px;
-        background-color: #f8fafc;
-        color: #334155;
-        border: 1px solid #cbd5e1;
+        background-color: {{color:planning.summary_button_surface}};
+        color: {{color:planning.summary_button_text}};
+        border: 1px solid {{color:planning.summary_button_border}};
         border-radius: 7px;
         padding: 4px 10px;
         font-size: 9pt;
@@ -9697,16 +9697,16 @@ QPushButton#sectionEditButton:hover {
     }
 
     QPushButton#planningSummaryButton:hover {
-        background-color: #f1f5f9;
-        border-color: #94a3b8;
-        color: #0f172a;
+        background-color: {{color:planning.summary_button_hover_surface}};
+        border-color: {{color:planning.summary_button_hover_border}};
+        color: {{color:planning.summary_button_hover_text}};
     }
 
     QFrame#dailySummaryGoal,
     QFrame#dailySummaryComparison,
     QFrame#dailySummaryTopics {
-        background-color: #ffffff;
-        border: 1px solid #dbe3ed;
+        background-color: {{color:modal_daily.panel_surface}};
+        border: 1px solid {{color:modal_daily.panel_border}};
         border-radius: 11px;
     }
 
@@ -9717,84 +9717,84 @@ QPushButton#sectionEditButton:hover {
     }
 
     QLabel#dailySummarySectionTitle {
-        color: #111827;
+        color: {{color:modal_daily.section_title_text}};
         font-size: 15px;
         font-weight: 700;
     }
 
     QLabel#dailySummaryGoalValue {
-        color: #111827;
+        color: {{color:modal_daily.goal_value_text}};
         font-size: 11pt;
         font-weight: 700;
     }
 
     QLabel#dailySummaryHint {
-        color: #64748b;
+        color: {{color:modal_daily.hint_text}};
         font-size: 9pt;
     }
 
     QLabel#dailySummaryHint[goalState="concluida"] {
-        color: #15803d;
+        color: {{color:modal_daily.hint_completed_text}};
         font-weight: 700;
     }
 
     QProgressBar#dailySummaryProgress {
-        background-color: #e2e8f0;
+        background-color: {{color:modal_daily.progress_track_surface}};
         border: none;
         border-radius: 4px;
     }
 
     QProgressBar#dailySummaryProgress::chunk {
-        background-color: #3b82f6;
+        background-color: {{color:modal_daily.progress_fill_surface}};
         border-radius: 4px;
     }
 
     QProgressBar#dailySummaryProgress[goalState="concluida"]::chunk {
-        background-color: #22c55e;
+        background-color: {{color:modal_daily.progress_completed_surface}};
     }
 
     QFrame#dailySummaryCompareCard {
-        background-color: #f8fafc;
-        border: 1px solid #e2e8f0;
+        background-color: {{color:modal_daily.compare_surface}};
+        border: 1px solid {{color:modal_daily.compare_border}};
         border-radius: 9px;
     }
 
     QLabel#dailySummaryCompareValue {
-        color: #111827;
+        color: {{color:modal_daily.compare_value_text}};
         font-size: 13px;
         font-weight: 700;
     }
 
     QLabel#dailySummaryCompareAverage {
-        color: #64748b;
+        color: {{color:modal_daily.compare_average_text}};
         font-size: 9pt;
     }
 
     QLabel#dailySummaryTrend {
-        color: #64748b;
+        color: {{color:modal_daily.trend_text}};
         font-size: 9pt;
         font-weight: 700;
     }
 
     QLabel#dailySummaryTrend[trendState="positiva"] {
-        color: #15803d;
+        color: {{color:modal_daily.trend_positive_text}};
     }
 
     QLabel#dailySummaryTrend[trendState="negativa"] {
-        color: #b91c1c;
+        color: {{color:modal_daily.trend_negative_text}};
     }
 
     QTableWidget#dailySummaryTable {
-        background-color: #ffffff;
-        border: 1px solid #e2e8f0;
+        background-color: {{color:modal_daily.table_surface}};
+        border: 1px solid {{color:modal_daily.table_border}};
         border-radius: 8px;
         gridline-color: transparent;
     }
 
     QFrame#studySessionStartCard,
     QFrame#sessionSummaryStat {
-        background-color: #ffffff;
-        border: 1px solid #dbe3ed;
+        background-color: {{color:modal_session_cards.card_surface}};
+        border: 1px solid {{color:modal_session_cards.card_border}};
         border-radius: 10px;
     }
 
@@ -9804,9 +9804,9 @@ QPushButton#sectionEditButton:hover {
     }
 
     QLabel#sessionSummaryObjective {
-        background-color: #eff6ff;
-        color: #1d4ed8;
-        border: 1px solid #bfdbfe;
+        background-color: {{color:modal_session_cards.objective_surface}};
+        color: {{color:modal_session_cards.objective_text}};
+        border: 1px solid {{color:modal_session_cards.objective_border}};
         border-radius: 8px;
         padding: 7px 10px;
         font-size: 9.5pt;
@@ -9814,58 +9814,58 @@ QPushButton#sectionEditButton:hover {
     }
 
     QTableWidget#sessionSummaryTable {
-        background-color: #ffffff;
-        border: 1px solid #e2e8f0;
+        background-color: {{color:modal_session_cards.table_surface}};
+        border: 1px solid {{color:modal_session_cards.table_border}};
         border-radius: 8px;
         gridline-color: transparent;
     }
 
     QPushButton#studySessionPauseButton {
-        background-color: #f8fafc;
-        color: #475569;
-        border: 1px solid #cbd5e1;
+        background-color: {{color:study_session.pause_button_surface}};
+        color: {{color:study_session.pause_button_text}};
+        border: 1px solid {{color:study_session.pause_button_border}};
         border-radius: 7px;
         padding: 6px 12px;
         font-weight: 700;
     }
 
     QPushButton#studySessionPauseButton:hover {
-        background-color: #eef2f7;
-        color: #1f2937;
+        background-color: {{color:study_session.pause_button_hover_surface}};
+        color: {{color:study_session.pause_button_hover_emphasis}};
     }
 
     QPushButton#studySessionEndButton {
-        background-color: #fff1f2;
-        color: #be123c;
-        border: 1px solid #fecdd3;
+        background-color: {{color:study_session.end_button_surface}};
+        color: {{color:study_session.end_button_text}};
+        border: 1px solid {{color:study_session.end_button_border}};
         border-radius: 7px;
         padding: 6px 12px;
         font-weight: 700;
     }
 
     QPushButton#studySessionEndButton:hover {
-        background-color: #ffe4e6;
-        border-color: #fda4af;
+        background-color: {{color:study_session.end_button_hover_surface}};
+        border-color: {{color:study_session.end_button_hover_emphasis}};
     }
 
     QPushButton#studySessionSkipButton {
-        background-color: #fff7ed;
-        color: #c2410c;
-        border: 1px solid #fed7aa;
+        background-color: {{color:study_session.skip_button_surface}};
+        color: {{color:study_session.skip_button_text}};
+        border: 1px solid {{color:study_session.skip_button_border}};
         border-radius: 7px;
         padding: 7px 12px;
         font-weight: 700;
     }
 
     QPushButton#studySessionSkipButton:hover {
-        background-color: #ffedd5;
-        border-color: #fdba74;
+        background-color: {{color:study_session.skip_button_hover_surface}};
+        border-color: {{color:study_session.skip_button_hover_emphasis}};
     }
 
     QFrame#studySessionCurrentCard,
     QFrame#studySessionQueueCard {
-        background-color: #ffffff;
-        border: 1px solid #dbe3ed;
+        background-color: {{color:study_session.queue_card_surface}};
+        border: 1px solid {{color:study_session.queue_card_border}};
         border-radius: 11px;
     }
 
@@ -9875,56 +9875,56 @@ QPushButton#sectionEditButton:hover {
     }
 
     QFrame#studySessionCurrentCard {
-        border: 1px solid #bfdbfe;
-        background-color: #f8fbff;
+        border: 1px solid {{color:study_session.current_card_border}};
+        background-color: {{color:study_session.current_card_surface}};
     }
 
     QLabel#studySessionEyebrow {
-        color: #2563eb;
+        color: {{color:study_session.eyebrow_text}};
         font-size: 8.5pt;
         font-weight: 800;
     }
 
     QLabel#studySessionPosition {
-        color: #64748b;
+        color: {{color:study_session.position_text}};
         font-size: 9pt;
         font-weight: 700;
     }
 
     QLabel#studySessionDiscipline {
-        color: #475569;
+        color: {{color:study_session.discipline_text}};
         font-size: 10pt;
         font-weight: 700;
     }
 
     QLabel#studySessionTopic {
-        color: #111827;
+        color: {{color:study_session.topic_text}};
         font-size: 20px;
         font-weight: 700;
     }
 
     QLabel#studySessionDetailValue {
-        color: #1f2937;
+        color: {{color:study_session.detail_value_text}};
         font-size: 10pt;
         font-weight: 700;
     }
 
     QLabel#studySessionSectionTitle {
-        color: #111827;
+        color: {{color:study_session.section_title_text}};
         font-size: 15px;
         font-weight: 700;
     }
 
     QTableWidget#studySessionTable {
-        background-color: #ffffff;
-        border: 1px solid #e2e8f0;
+        background-color: {{color:study_session.table_surface}};
+        border: 1px solid {{color:study_session.table_border}};
         border-radius: 8px;
         gridline-color: transparent;
     }
 
     QFrame#planningPanel {
-        background-color: #ffffff;
-        border: 1px solid #dbe3ed;
+        background-color: {{color:planning.panel_surface}};
+        border: 1px solid {{color:planning.panel_border}};
         border-radius: 11px;
     }
 
@@ -9934,9 +9934,9 @@ QPushButton#sectionEditButton:hover {
 
     QPushButton#planningGoalButton {
         min-height: 0px;
-        background-color: #eff6ff;
-        color: #1d4ed8;
-        border: 1px solid #bfdbfe;
+        background-color: {{color:planning.goal_surface}};
+        color: {{color:planning.goal_text}};
+        border: 1px solid {{color:planning.goal_border}};
         border-radius: 7px;
         padding: 4px 10px;
         font-size: 9pt;
@@ -9944,9 +9944,9 @@ QPushButton#sectionEditButton:hover {
     }
 
     QPushButton#planningGoalButton:hover {
-        background-color: #dbeafe;
-        border-color: #93c5fd;
-        color: #1e40af;
+        background-color: {{color:planning.goal_hover_surface}};
+        border-color: {{color:planning.goal_hover_border}};
+        color: {{color:planning.goal_hover_text}};
     }
 
     QScrollArea#planningSettingsScroll {
@@ -9959,8 +9959,8 @@ QPushButton#sectionEditButton:hover {
     }
 
     QFrame#planningSettingsCard {
-        background-color: #ffffff;
-        border: 1px solid #dbe3ed;
+        background-color: {{color:planning.settings_surface}};
+        border: 1px solid {{color:planning.settings_border}};
         border-radius: 10px;
     }
 
@@ -9969,28 +9969,28 @@ QPushButton#sectionEditButton:hover {
     }
 
     QLabel#planningSettingsTitle {
-        color: #111827;
+        color: {{color:planning.settings_title}};
         font-size: 11pt;
         font-weight: 700;
     }
 
     QLabel#planningLoadLight {
-        color: #15803d;
+        color: {{color:planning.load_light}};
         font-weight: 700;
     }
 
     QLabel#planningLoadModerate {
-        color: #a16207;
+        color: {{color:planning.load_moderate}};
         font-weight: 700;
     }
 
     QLabel#planningLoadHigh {
-        color: #b91c1c;
+        color: {{color:planning.load_high}};
         font-weight: 700;
     }
 
     QLabel#planningTitle {
-        color: #111827;
+        color: {{color:planning.main_title}};
         font-size: 15px;
         font-weight: 700;
     }
@@ -13125,94 +13125,94 @@ QPushButton#sectionEditButton:hover {
     }
 
     QLabel#strategicReportTitle {
-        color: #172033;
+        color: {{color:strategic_report.title_text}};
         font-size: 12pt;
         font-weight: 800;
     }
 
     QLabel#strategicReportSubtitle,
     QLabel#strategicReportMuted {
-        color: #64748b;
+        color: {{color:strategic_report.subtitle_text}};
         font-size: 8.7pt;
     }
 
     QFrame#strategicMetricCard {
-        background-color: #f8fbff;
-        border: 1px solid #d6e3f0;
+        background-color: {{color:strategic_report.metric_surface}};
+        border: 1px solid {{color:strategic_report.metric_border}};
         border-radius: 10px;
     }
 
     QLabel#strategicMetricTitle {
-        color: #64748b;
+        color: {{color:strategic_report.metric_label_text}};
         font-size: 8.4pt;
         font-weight: 700;
     }
 
     QLabel#strategicMetricValue {
-        color: #172033;
+        color: {{color:strategic_report.metric_value_text}};
         font-size: 15pt;
         font-weight: 800;
     }
 
     QLabel#strategicMetricValue[prepState="attention"] {
-        color: #b45309;
+        color: {{color:strategic_report.prep_attention_text}};
     }
 
     QLabel#strategicMetricValue[prepState="building"] {
-        color: #9a6a1b;
+        color: {{color:strategic_report.prep_building_text}};
     }
 
     QLabel#strategicMetricValue[prepState="good"] {
-        color: #326fd3;
+        color: {{color:strategic_report.prep_good_text}};
     }
 
     QLabel#strategicMetricValue[prepState="strong"] {
-        color: #27816f;
+        color: {{color:strategic_report.prep_strong_text}};
     }
 
     QLabel#strategicMetricValue[prepState="insufficient"] {
-        color: #64748b;
+        color: {{color:strategic_report.prep_insufficient_text}};
     }
 
     QLabel#strategicMetricDetail {
-        color: #738196;
+        color: {{color:strategic_report.metric_detail_text}};
         font-size: 8.1pt;
     }
 
     QFrame#strategicReportPanel {
-        background-color: #f8fafc;
-        border: 1px solid #dbe3ed;
+        background-color: {{color:strategic_report.panel_surface}};
+        border: 1px solid {{color:strategic_report.panel_border}};
         border-radius: 11px;
     }
 
     QLabel#strategicReportSectionTitle {
-        color: #263044;
+        color: {{color:strategic_report.section_title_text}};
         font-size: 9.5pt;
         font-weight: 800;
     }
 
     QFrame#strategicEvolutionItem {
-        background-color: #ffffff;
-        border: 1px solid #e2e8f0;
+        background-color: {{color:strategic_report.evolution_surface}};
+        border: 1px solid {{color:strategic_report.evolution_border}};
         border-radius: 8px;
     }
 
     QLabel#strategicEvolutionValue {
-        color: #334155;
+        color: {{color:strategic_report.evolution_value_text}};
         font-size: 10pt;
         font-weight: 800;
     }
 
     QLabel#strategicEvolutionValue[trend="positive"] {
-        color: #27816f;
+        color: {{color:strategic_report.trend_positive_text}};
     }
 
     QLabel#strategicEvolutionValue[trend="negative"] {
-        color: #b45309;
+        color: {{color:strategic_report.trend_negative_text}};
     }
 
     QLabel#strategicEvolutionValue[trend="neutral"] {
-        color: #64748b;
+        color: {{color:strategic_report.trend_neutral_text}};
     }
 
     QLabel#strategicRiskItem,
@@ -13223,32 +13223,32 @@ QPushButton#sectionEditButton:hover {
     }
 
     QLabel#strategicRiskItem[riskLevel="alto"] {
-        background-color: #fff2ec;
-        color: #8a3f21;
-        border: 1px solid #f0c1aa;
+        background-color: {{color:strategic_report.risk_high_surface}};
+        color: {{color:strategic_report.risk_high_text}};
+        border: 1px solid {{color:strategic_report.risk_high_border}};
     }
 
     QLabel#strategicRiskItem[riskLevel="medio"] {
-        background-color: #fff8e8;
-        color: #7a571d;
-        border: 1px solid #e7cd8b;
+        background-color: {{color:strategic_report.risk_medium_surface}};
+        color: {{color:strategic_report.risk_medium_text}};
+        border: 1px solid {{color:strategic_report.risk_medium_border}};
     }
 
     QLabel#strategicRiskItem[riskLevel="baixo"] {
-        background-color: #eef8f4;
-        color: #326f61;
-        border: 1px solid #badccf;
+        background-color: {{color:strategic_report.risk_low_surface}};
+        color: {{color:strategic_report.risk_low_text}};
+        border: 1px solid {{color:strategic_report.risk_low_border}};
     }
 
     QLabel#strategicActionItem {
-        background-color: #f2f7ff;
-        color: #31577f;
-        border: 1px solid #c5d8f1;
+        background-color: {{color:strategic_report.action_surface}};
+        color: {{color:strategic_report.action_text}};
+        border: 1px solid {{color:strategic_report.action_border}};
     }
 
     QTableWidget#strategicReportTable {
-        background-color: #ffffff;
-        border: 1px solid #dbe3ed;
+        background-color: {{color:strategic_report.table_surface}};
+        border: 1px solid {{color:strategic_report.table_border}};
         border-radius: 8px;
     }
 
@@ -14001,7 +14001,7 @@ QPushButton#sectionEditButton:hover {
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_CLARO + ESTILO_DASHBOARD_MODERNO_CLARO + ESTILO_FOCO_DASHBOARD_CLARO + ESTILO_ALGORITMO_DASHBOARD_CLARO + ESTILO_BUSCA_GLOBAL_CLARO + ESTILO_PALETA_HARMONICA_DASHBOARD_CLARO + ESTILO_DESIGN_SYSTEM_DASHBOARD_CLARO + ESTILO_INTELIGENCIA_RESUMO_CLARO + ESTILO_TOPICOS_DISCIPLINA_CLARO + ESTILO_RESOLVEDOR_CLARO + ESTILO_TOPICO_DETALHES_CLARO + ESTILO_RESOLVEDOR_ELIMINADAS_CLARO + ESTILO_RESOLVEDOR_TECLADO_CLARO + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_CLARO + ESTILO_CALENDARIO_PREVISAO_CLARO + ESTILO_DASHBOARD_SHELL_CLARO + render_qss("claro", ESTILO_DASHBOARD_BLOCO_B_CLARO) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_C) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_D) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_E) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_F) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_G) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_H) + render_qss("claro", ESTILO_NAVEGACAO_BUSCA_GLOBAL) + render_qss("claro", ESTILO_NAVEGACAO_RETORNOS_DASHBOARD) + render_qss("claro", ESTILO_CARDS_GLOBAIS_BLOCO_A) + render_qss("claro", ESTILO_CARDS_GLOBAIS_BLOCO_B) + render_qss("claro", ESTILO_CARDS_GLOBAIS_BLOCO_C) + render_qss("claro", ESTILO_MODO_FOCO_INTEGRACAO_RESOLVEDOR))
+""" + ESTILO_JORNADA_CLARO + ESTILO_DASHBOARD_MODERNO_CLARO + ESTILO_FOCO_DASHBOARD_CLARO + ESTILO_ALGORITMO_DASHBOARD_CLARO + ESTILO_BUSCA_GLOBAL_CLARO + ESTILO_PALETA_HARMONICA_DASHBOARD_CLARO + ESTILO_DESIGN_SYSTEM_DASHBOARD_CLARO + ESTILO_INTELIGENCIA_RESUMO_CLARO + ESTILO_TOPICOS_DISCIPLINA_CLARO + ESTILO_RESOLVEDOR_CLARO + render_qss("claro", ESTILO_TOPICO_DETALHES_CLARO) + ESTILO_RESOLVEDOR_ELIMINADAS_CLARO + ESTILO_RESOLVEDOR_TECLADO_CLARO + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_CLARO + ESTILO_CALENDARIO_PREVISAO_CLARO + ESTILO_DASHBOARD_SHELL_CLARO + render_qss("claro", ESTILO_DASHBOARD_BLOCO_B_CLARO) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_C) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_D) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_E) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_F) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_G) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_H) + render_qss("claro", ESTILO_NAVEGACAO_BUSCA_GLOBAL) + render_qss("claro", ESTILO_NAVEGACAO_RETORNOS_DASHBOARD) + render_qss("claro", ESTILO_CARDS_GLOBAIS_BLOCO_A) + render_qss("claro", ESTILO_CARDS_GLOBAIS_BLOCO_B) + render_qss("claro", ESTILO_CARDS_GLOBAIS_BLOCO_C) + render_qss("claro", ESTILO_MODO_FOCO_INTEGRACAO_RESOLVEDOR))
 
 
 def stylesheet_escuro():
@@ -14164,13 +14164,13 @@ def stylesheet_escuro():
 
     QLabel#contextLabel {
         background: transparent;
-        color: #cbd5e1;
+        color: {{color:admin_shared.context_label_text}};
         font-weight: 700;
     }
 
     QLabel#queueCount {
         background: transparent;
-        color: #94a3b8;
+        color: {{color:card.metric_label_text}};
         font-size: 9pt;
         font-weight: 600;
     }
@@ -14202,27 +14202,27 @@ def stylesheet_escuro():
     }
 
     QFrame#miniStat {
-        background-color: #182235;
-        border: 1px solid #334155;
+        background-color: {{color:card.mini_stat_surface}};
+        border: 1px solid {{color:card.mini_stat_border}};
         border-radius: 10px;
     }
 
     QLabel#miniStatLabel {
         background: transparent;
-        color: #94a3b8;
+        color: {{color:card.metric_label_text}};
         font-size: 9pt;
     }
 
     QLabel#miniStatValue {
         background: transparent;
-        color: #f8fafc;
+        color: {{color:card.metric_value_text}};
         font-size: 17px;
         font-weight: 700;
     }
 
     QFrame#filterBar {
-        background-color: #182235;
-        border: 1px solid #334155;
+        background-color: {{color:admin_shared.filter_bar_surface}};
+        border: 1px solid {{color:admin_shared.filter_bar_border}};
         border-radius: 10px;
     }
 
@@ -14255,45 +14255,45 @@ def stylesheet_escuro():
         min-height: 0px;
         padding: 1px 6px;
         background: transparent;
-        color: #cbd5e1;
-        border: 1px solid #475569;
+        color: {{color:modal_compact_actions.row_text}};
+        border: 1px solid {{color:modal_compact_actions.row_border}};
         border-radius: 5px;
         font-size: 9pt;
         font-weight: 400;
     }
 
     QPushButton#rowActionButton:hover {
-        background-color: #273449;
-        border-color: #64748b;
+        background-color: {{color:modal_compact_actions.row_hover_surface}};
+        border-color: {{color:modal_compact_actions.row_hover_border}};
     }
 
 
     QPushButton#sectionEditButton {
         min-height: 0px;
         padding: 5px 13px;
-        background-color: #172554;
-        color: #bfdbfe;
-        border: 1px solid #3b82f6;
+        background-color: {{color:modal_compact_actions.edit_surface}};
+        color: {{color:modal_compact_actions.edit_text}};
+        border: 1px solid {{color:modal_compact_actions.edit_border}};
         border-radius: 8px;
         font-size: 9.5pt;
         font-weight: 700;
     }
 
     QPushButton#sectionEditButton:hover {
-        background-color: #1e3a8a;
-        border-color: #60a5fa;
-        color: #dbeafe;
+        background-color: {{color:modal_compact_actions.edit_hover_surface}};
+        border-color: {{color:modal_compact_actions.edit_hover_border}};
+        color: {{color:modal_compact_actions.edit_hover_text}};
     }
 
     QPushButton#sectionEditButton:pressed {
-        background-color: #1e40af;
-        border-color: #93c5fd;
+        background-color: {{color:modal_compact_actions.edit_pressed_surface}};
+        border-color: {{color:modal_compact_actions.edit_pressed_border}};
     }
 
 
     QFrame#dialogCard {
-        background-color: #182235;
-        border: 1px solid #334155;
+        background-color: {{color:modal_study.dialog_card_surface}};
+        border: 1px solid {{color:modal_study.dialog_card_border}};
         border-radius: 11px;
     }
 
@@ -14302,8 +14302,8 @@ def stylesheet_escuro():
     }
 
     QFrame#topicDomainCard {
-        background-color: #172033;
-        border: 1px solid #1e3a8a;
+        background-color: {{color:modal_study.domain_card_surface}};
+        border: 1px solid {{color:modal_study.domain_card_border}};
         border-radius: 10px;
     }
 
@@ -14312,25 +14312,25 @@ def stylesheet_escuro():
     }
 
     QLabel#topicDomainTitle {
-        color: #f8fafc;
+        color: {{color:modal_study.domain_title_text}};
         font-size: 10.5pt;
         font-weight: 800;
     }
 
     QLabel#topicDomainSubtitle {
-        color: #94a3b8;
+        color: {{color:modal_study.domain_subtitle_text}};
         font-size: 8.5pt;
     }
 
     QLabel#topicDomainScore {
-        color: #93c5fd;
+        color: {{color:modal_study.domain_score_text}};
         font-size: 18px;
         font-weight: 900;
     }
 
     QLabel#topicDomainLevel {
-        background-color: #334155;
-        color: #cbd5e1;
+        background-color: {{color:modal_study.domain_level_surface}};
+        color: {{color:modal_study.domain_level_text}};
         border-radius: 7px;
         padding: 5px 8px;
         font-size: 8.5pt;
@@ -14339,91 +14339,91 @@ def stylesheet_escuro():
 
     QLabel#topicDomainLevel[domainLevel="critico"],
     QLabel#topicDomainLevel[domainLevel="fragil"] {
-        background-color: #450a0a;
-        color: #fca5a5;
+        background-color: {{color:modal_study.domain_level_critico_surface}};
+        color: {{color:modal_study.domain_level_critico_text}};
     }
 
     QLabel#topicDomainLevel[domainLevel="desenvolvimento"],
     QLabel#topicDomainLevel[domainLevel="consolidando"] {
-        background-color: #422006;
-        color: #fde68a;
+        background-color: {{color:modal_study.domain_level_desenvolvimento_surface}};
+        color: {{color:modal_study.domain_level_desenvolvimento_text}};
     }
 
     QLabel#topicDomainLevel[domainLevel="dominado"],
     QLabel#topicDomainLevel[domainLevel="forte"] {
-        background-color: #052e16;
-        color: #86efac;
+        background-color: {{color:modal_study.domain_level_dominado_surface}};
+        color: {{color:modal_study.domain_level_dominado_text}};
     }
 
     QProgressBar#topicDomainBar {
-        background-color: #334155;
+        background-color: {{color:modal_study.domain_bar_surface}};
         border: none;
         border-radius: 4px;
     }
 
     QProgressBar#topicDomainBar::chunk {
-        background-color: #3b82f6;
+        background-color: {{color:modal_study.domain_bar_chunk_surface}};
         border-radius: 4px;
     }
 
     QFrame#topicDomainComponent {
-        background-color: #182235;
-        border: 1px solid #334155;
+        background-color: {{color:modal_study.domain_component_surface}};
+        border: 1px solid {{color:modal_study.domain_component_border}};
         border-radius: 7px;
     }
 
     QLabel#topicDomainComponentLabel {
-        color: #94a3b8;
+        color: {{color:modal_study.domain_component_label_text}};
         font-size: 7.8pt;
     }
 
     QLabel#topicDomainComponentValue {
-        color: #f8fafc;
+        color: {{color:modal_study.domain_component_value_text}};
         font-size: 11pt;
         font-weight: 800;
     }
 
     QLabel#topicDomainEvidence {
-        color: #cbd5e1;
+        color: {{color:modal_study.domain_evidence_text}};
         font-size: 8.4pt;
         font-weight: 600;
     }
 
     QLabel#topicDomainReasons {
-        color: #94a3b8;
+        color: {{color:modal_study.domain_reasons_text}};
         font-size: 8.2pt;
     }
 
     QFrame#metricCard {
-        background-color: #182235;
-        border: 1px solid #334155;
+        background-color: {{color:card.metric_surface}};
+        border: 1px solid {{color:card.metric_border}};
         border-radius: 10px;
     }
 
     QLabel#metricLabel {
         background: transparent;
-        color: #94a3b8;
+        color: {{color:card.metric_label_text}};
         font-size: 9pt;
     }
 
     QLabel#metricValue {
         background: transparent;
-        color: #f8fafc;
+        color: {{color:card.metric_value_text}};
         font-size: 15px;
         font-weight: 700;
     }
 
     QLabel#fieldLabel {
         background: transparent;
-        color: #94a3b8;
+        color: {{color:modal_revision.field_label_text}};
         font-size: 9pt;
         font-weight: 600;
     }
 
     QLabel#sessionBadge {
-        background-color: #172554;
-        color: #93c5fd;
-        border: 1px solid #1e3a8a;
+        background-color: {{color:modal_revision.badge_surface}};
+        color: {{color:modal_revision.badge_text}};
+        border: 1px solid {{color:modal_revision.badge_border}};
         border-radius: 8px;
         padding: 5px 9px;
         font-size: 9pt;
@@ -14431,9 +14431,9 @@ def stylesheet_escuro():
     }
 
     QLabel#resultValue {
-        background-color: #172554;
-        color: #93c5fd;
-        border: 1px solid #1e3a8a;
+        background-color: {{color:modal_revision.result_surface}};
+        color: {{color:modal_revision.result_text}};
+        border: 1px solid {{color:modal_revision.result_border}};
         border-radius: 8px;
         font-size: 17px;
         font-weight: 800;
@@ -14441,8 +14441,8 @@ def stylesheet_escuro():
     }
 
     QFrame#suggestionCard {
-        background-color: #172033;
-        border: 1px solid #1e3a8a;
+        background-color: {{color:modal_revision.suggestion_surface}};
+        border: 1px solid {{color:modal_revision.suggestion_border}};
         border-radius: 11px;
     }
 
@@ -14452,23 +14452,23 @@ def stylesheet_escuro():
 
     QLabel#suggestionStrong {
         background: transparent;
-        color: #93c5fd;
+        color: {{color:modal_revision.suggestion_text}};
         font-size: 12pt;
         font-weight: 700;
     }
 
     QLabel#infoNotice {
-        background-color: #422006;
-        color: #fde68a;
-        border: 1px solid #854d0e;
+        background-color: {{color:modal_notice.info_surface}};
+        color: {{color:modal_notice.info_text}};
+        border: 1px solid {{color:modal_notice.info_border}};
         border-radius: 9px;
         padding: 8px 10px;
         font-size: 9pt;
     }
 
     QTextEdit#detailsReadOnly {
-        background-color: #172033;
-        border: 1px solid #334155;
+        background-color: {{color:modal_details.readonly_surface}};
+        border: 1px solid {{color:modal_details.readonly_border}};
     }
 
 
@@ -15049,24 +15049,24 @@ def stylesheet_escuro():
     }
 
     QFrame#effectivenessFilterBar {
-        background-color: #172033;
-        border: 1px solid #334155;
+        background-color: {{color:effectiveness.filter_bar_surface}};
+        border: 1px solid {{color:effectiveness.filter_bar_border}};
         border-radius: 9px;
     }
 
     QFrame#effectivenessFilterBar QLabel {
         background: transparent;
-        color: #cbd5e1;
+        color: {{color:effectiveness.filter_bar_label_text}};
     }
 
     QLabel#effectivenessTrackingNotice {
-        color: #94a3b8;
+        color: {{color:effectiveness.tracking_notice_text}};
         font-size: 8.2pt;
     }
 
     QFrame#effectivenessStatCard {
-        background-color: #182235;
-        border: 1px solid #334155;
+        background-color: {{color:summary.metric_surface}};
+        border: 1px solid {{color:summary.metric_border}};
         border-radius: 9px;
     }
 
@@ -15075,25 +15075,25 @@ def stylesheet_escuro():
     }
 
     QLabel#effectivenessStatLabel {
-        color: #94a3b8;
+        color: {{color:card.metric_label_text}};
         font-size: 8.6pt;
         font-weight: 700;
     }
 
     QLabel#effectivenessStatValue {
-        color: #f8fafc;
+        color: {{color:card.metric_value_text}};
         font-size: 16px;
         font-weight: 900;
     }
 
     QLabel#effectivenessStatHint {
-        color: #64748b;
+        color: {{color:effectiveness.stat_hint_text}};
         font-size: 8pt;
     }
 
     QFrame#effectivenessCalibrationCard {
-        background-color: #172033;
-        border: 1px solid #1e3a8a;
+        background-color: {{color:effectiveness.calibration_card_surface}};
+        border: 1px solid {{color:effectiveness.calibration_card_border}};
         border-radius: 9px;
     }
 
@@ -15102,15 +15102,15 @@ def stylesheet_escuro():
     }
 
     QLabel#effectivenessCalibrationTitle {
-        color: #93c5fd;
+        color: {{color:effectiveness.calibration_title_text}};
         font-size: 10pt;
         font-weight: 800;
     }
 
     QLabel#effectivenessCalibrationBadge {
-        background-color: #1f2937;
-        color: #cbd5e1;
-        border: 1px solid #475569;
+        background-color: {{color:effectiveness.calibration_badge_surface}};
+        color: {{color:effectiveness.calibration_badge_text}};
+        border: 1px solid {{color:effectiveness.calibration_badge_border}};
         border-radius: 7px;
         padding: 4px 8px;
         font-size: 8.3pt;
@@ -15119,36 +15119,36 @@ def stylesheet_escuro():
 
     QLabel#effectivenessCalibrationBadge[calibrationLevel="inicial"],
     QLabel#effectivenessCalibrationBadge[calibrationLevel="moderada"] {
-        background-color: #422006;
-        color: #fde68a;
-        border-color: #a16207;
+        background-color: {{color:effectiveness.calibration_badge_caution_surface}};
+        color: {{color:effectiveness.calibration_badge_caution_text}};
+        border-color: {{color:effectiveness.calibration_badge_caution_border}};
     }
 
     QLabel#effectivenessCalibrationBadge[calibrationLevel="forte"] {
-        background-color: #052e16;
-        color: #86efac;
-        border-color: #15803d;
+        background-color: {{color:effectiveness.calibration_badge_strong_surface}};
+        color: {{color:effectiveness.calibration_badge_strong_text}};
+        border-color: {{color:effectiveness.calibration_badge_strong_border}};
     }
 
     QLabel#effectivenessCalibrationText {
-        color: #cbd5e1;
+        color: {{color:effectiveness.calibration_body_text}};
         font-size: 8.6pt;
     }
 
     QLabel#effectivenessWeights {
-        color: #93c5fd;
+        color: {{color:effectiveness.calibration_weights_text}};
         font-size: 8.4pt;
         font-weight: 700;
     }
 
     QLabel#effectivenessObservations {
-        color: #94a3b8;
+        color: {{color:effectiveness.calibration_observations_text}};
         font-size: 8.4pt;
     }
 
     QFrame#effectivenessImpactCard {
-        background-color: #172033;
-        border: 1px solid #1e3a8a;
+        background-color: {{color:effectiveness.impact_card_surface}};
+        border: 1px solid {{color:effectiveness.impact_card_border}};
         border-radius: 9px;
     }
 
@@ -15157,38 +15157,38 @@ def stylesheet_escuro():
     }
 
     QLabel#effectivenessImpactTitle {
-        color: #93c5fd;
+        color: {{color:effectiveness.impact_title_text}};
         font-size: 9.5pt;
         font-weight: 800;
     }
 
     QFrame#effectivenessImpactMetric {
-        background-color: #182235;
-        border: 1px solid #334155;
+        background-color: {{color:effectiveness.impact_metric_surface}};
+        border: 1px solid {{color:effectiveness.impact_metric_border}};
         border-radius: 7px;
     }
 
     QLabel#effectivenessImpactLabel {
-        color: #94a3b8;
+        color: {{color:effectiveness.impact_metric_label_text}};
         font-size: 8pt;
     }
 
     QLabel#effectivenessImpactValue {
-        color: #f8fafc;
+        color: {{color:effectiveness.impact_metric_value_text}};
         font-size: 9.5pt;
         font-weight: 800;
     }
 
     QLabel#effectivenessImpactFooter {
-        color: #94a3b8;
+        color: {{color:effectiveness.impact_metric_footer_text}};
         font-size: 8.2pt;
     }
 
     QPushButton#effectivenessOpenButton,
     QPushButton#questionsEffectivenessButton {
-        background-color: #1f2937;
-        color: #bfdbfe;
-        border: 1px solid #3b82f6;
+        background-color: {{color:effectiveness.open_button_surface}};
+        color: {{color:effectiveness.open_button_text}};
+        border: 1px solid {{color:effectiveness.open_button_border}};
         border-radius: 7px;
         padding: 6px 10px;
         font-weight: 700;
@@ -15196,25 +15196,25 @@ def stylesheet_escuro():
 
     QPushButton#effectivenessOpenButton:hover,
     QPushButton#questionsEffectivenessButton:hover {
-        background-color: #172554;
-        border-color: #60a5fa;
+        background-color: {{color:effectiveness.open_button_hover_surface}};
+        border-color: {{color:effectiveness.open_button_hover_border}};
     }
 
     QFrame#mockExamConfigCard {
-        background-color: #182235;
-        border: 1px solid #334155;
+        background-color: {{color:mock_exam.config_card_surface}};
+        border: 1px solid {{color:mock_exam.config_card_border}};
         border-radius: 10px;
     }
 
     QFrame#mockExamConfigCard QLabel {
         background: transparent;
-        color: #cbd5e1;
+        color: {{color:mock_exam.config_card_label_text}};
     }
 
     QLabel#mockExamRuleNotice {
-        background-color: #422006;
-        color: #fde68a;
-        border: 1px solid #a16207;
+        background-color: {{color:mock_exam.rule_notice_surface}};
+        color: {{color:mock_exam.rule_notice_text}};
+        border: 1px solid {{color:mock_exam.rule_notice_border}};
         border-radius: 8px;
         padding: 7px 9px;
         font-size: 8.4pt;
@@ -15222,27 +15222,27 @@ def stylesheet_escuro():
     }
 
     QLabel#mockExamSectionTitle {
-        color: #f8fafc;
+        color: {{color:mock_exam.section_title_text}};
         font-size: 10pt;
         font-weight: 800;
     }
 
     QLabel#mockExamPreviewSummary {
-        color: #c4b5fd;
+        color: {{color:mock_exam.preview_summary_text}};
         font-size: 9pt;
         font-weight: 800;
     }
 
     QLabel#mockExamVighnaExplanation {
-        color: #94a3b8;
+        color: {{color:mock_exam.explanation_text}};
         font-size: 8.4pt;
     }
 
     QPushButton#mockExamStartButton,
     QPushButton#mockExamDashboardButton {
-        background-color: #7c3aed;
-        color: #ffffff;
-        border: 1px solid #a78bfa;
+        background-color: {{color:mock_exam.primary_button_surface}};
+        color: {{color:mock_exam.primary_button_text}};
+        border: 1px solid {{color:mock_exam.primary_button_border}};
         border-radius: 8px;
         padding: 7px 12px;
         font-weight: 800;
@@ -15250,22 +15250,22 @@ def stylesheet_escuro():
 
     QPushButton#mockExamStartButton:hover,
     QPushButton#mockExamDashboardButton:hover {
-        background-color: #6d28d9;
-        border-color: #c4b5fd;
+        background-color: {{color:mock_exam.primary_button_hover_surface}};
+        border-color: {{color:mock_exam.primary_button_hover_border}};
     }
 
     QPushButton#questionsMockExamButton {
-        background-color: #1f2937;
-        color: #ddd6fe;
-        border: 1px solid #8b5cf6;
+        background-color: {{color:mock_exam.questions_button_surface}};
+        color: {{color:mock_exam.questions_button_text}};
+        border: 1px solid {{color:mock_exam.questions_button_border}};
         border-radius: 7px;
         padding: 6px 10px;
         font-weight: 800;
     }
 
     QPushButton#questionsMockExamButton:hover {
-        background-color: #2e1065;
-        border-color: #a78bfa;
+        background-color: {{color:mock_exam.questions_button_hover_surface}};
+        border-color: {{color:mock_exam.questions_button_hover_border}};
     }
 
     QLabel#mockExamTimer {
@@ -15279,15 +15279,15 @@ def stylesheet_escuro():
     }
 
     QLabel#mockExamResultSectionTitle {
-        color: #f8fafc;
+        color: {{color:mock_exam.result_section_title_text}};
         font-size: 9.5pt;
         font-weight: 800;
     }
 
     QLabel#mockExamCorrectionNotice {
-        background-color: #2e1065;
-        color: #ddd6fe;
-        border: 1px solid #7c3aed;
+        background-color: {{color:mock_exam.correction_notice_surface}};
+        color: {{color:mock_exam.correction_notice_text}};
+        border: 1px solid {{color:mock_exam.correction_notice_border}};
         border-radius: 8px;
         padding: 7px 9px;
         font-size: 8.4pt;
@@ -15296,8 +15296,8 @@ def stylesheet_escuro():
 
     QFrame#questionSessionConfigCard,
     QFrame#questionSessionSummaryCard {
-        background-color: #182235;
-        border: 1px solid #334155;
+        background-color: {{color:session_modal.cards_surface}};
+        border: 1px solid {{color:session_modal.cards_border}};
         border-radius: 9px;
     }
 
@@ -15309,56 +15309,56 @@ def stylesheet_escuro():
 
     QLabel#questionSessionProfile,
     QLabel#questionSessionAvailability {
-        background-color: #1f2937;
-        color: #cbd5e1;
-        border: 1px solid #334155;
+        background-color: {{color:modal_session_availability.default_surface}};
+        color: {{color:modal_session_availability.default_text}};
+        border: 1px solid {{color:modal_session_availability.default_border}};
         border-radius: 7px;
         padding: 7px 9px;
         font-weight: 700;
     }
 
     QLabel#questionSessionAvailability[availabilityState="ok"] {
-        background-color: #163523;
-        color: #86efac;
-        border-color: #166534;
+        background-color: {{color:modal_session_availability.available_surface}};
+        color: {{color:modal_session_availability.available_text}};
+        border-color: {{color:modal_session_availability.available_border}};
     }
 
     QLabel#questionSessionAvailability[availabilityState="empty"] {
-        background-color: #431407;
-        color: #fdba74;
-        border-color: #9a3412;
+        background-color: {{color:modal_session_availability.empty_surface}};
+        color: {{color:modal_session_availability.empty_text}};
+        border-color: {{color:modal_session_availability.empty_border}};
     }
 
     QLabel#questionSessionProgressText {
-        color: #cbd5e1;
+        color: {{color:session_modal.progress_text}};
         font-weight: 800;
     }
 
     QProgressBar#questionSessionProgress {
-        background-color: #334155;
+        background-color: {{color:session_modal.progress_track}};
         border: none;
         border-radius: 3px;
     }
 
     QProgressBar#questionSessionProgress::chunk {
-        background-color: #60a5fa;
+        background-color: {{color:session_modal.progress_fill}};
         border-radius: 3px;
     }
 
     QFrame#questionSessionMiniStat {
-        background-color: #1f2937;
-        border: 1px solid #334155;
+        background-color: {{color:session_modal.mini_stat_surface}};
+        border: 1px solid {{color:session_modal.mini_stat_border}};
         border-radius: 7px;
     }
 
     QLabel#questionSessionMiniLabel {
-        color: #94a3b8;
+        color: {{color:session_modal.mini_stat_label}};
         font-size: 8.5pt;
         font-weight: 700;
     }
 
     QLabel#questionSessionMiniValue {
-        color: #f8fafc;
+        color: {{color:session_modal.mini_stat_value}};
         font-size: 10pt;
         font-weight: 800;
     }
@@ -15578,9 +15578,9 @@ def stylesheet_escuro():
     }
 
     QLabel#questionSessionSummaryDetail {
-        background-color: #172554;
-        color: #bfdbfe;
-        border: 1px solid #1d4ed8;
+        background-color: {{color:summary.detail_surface}};
+        color: {{color:summary.detail_text}};
+        border: 1px solid {{color:summary.detail_border}};
         border-radius: 7px;
         padding: 7px 9px;
         font-weight: 700;
@@ -15596,8 +15596,8 @@ def stylesheet_escuro():
     }
 
     QTableWidget#questionSessionSummaryTable {
-        background-color: #182235;
-        border: 1px solid #334155;
+        background-color: {{color:summary.table_surface}};
+        border: 1px solid {{color:summary.table_border}};
         border-radius: 8px;
         gridline-color: transparent;
     }
@@ -16648,9 +16648,9 @@ def stylesheet_escuro():
 
 
     QLabel#reportPeriodLabel {
-        background-color: #273449;
-        color: #cbd5e1;
-        border: 1px solid #334155;
+        background-color: {{color:reports.period_surface}};
+        color: {{color:reports.period_text}};
+        border: 1px solid {{color:reports.period_border}};
         border-radius: 7px;
         padding: 5px 9px;
         font-size: 9pt;
@@ -16658,8 +16658,8 @@ def stylesheet_escuro():
     }
 
     QFrame#comparisonPanel {
-        background-color: #172033;
-        border: 1px solid #334155;
+        background-color: {{color:reports.comparison_surface}};
+        border: 1px solid {{color:reports.comparison_border}};
         border-radius: 11px;
     }
 
@@ -16668,34 +16668,34 @@ def stylesheet_escuro():
     }
 
     QFrame#comparisonMetric {
-        background-color: #182235;
-        border: 1px solid #334155;
+        background-color: {{color:reports.metric_surface}};
+        border: 1px solid {{color:reports.metric_border}};
         border-radius: 9px;
     }
 
     QLabel#comparisonValue {
         background: transparent;
-        color: #cbd5e1;
+        color: {{color:reports.value_text}};
         font-size: 13pt;
         font-weight: 800;
     }
 
     QLabel#comparisonValue[reportTrend="positive"] {
-        color: #86efac;
+        color: {{color:reports.trend_positive_text}};
     }
 
     QLabel#comparisonValue[reportTrend="negative"] {
-        color: #fca5a5;
+        color: {{color:reports.trend_negative_text}};
     }
 
     QLabel#comparisonValue[reportTrend="neutral"] {
-        color: #94a3b8;
+        color: {{color:reports.trend_neutral_text}};
     }
 
     QTabWidget#reportTabs::pane {
-        border: 1px solid #334155;
+        border: 1px solid {{color:statistics_tabs.pane_border}};
         border-radius: 10px;
-        background-color: #182235;
+        background-color: {{color:statistics_tabs.pane_surface}};
         top: -1px;
     }
 
@@ -16849,9 +16849,9 @@ def stylesheet_escuro():
 
     QPushButton#planningSummaryButton {
         min-height: 0px;
-        background-color: #273449;
-        color: #cbd5e1;
-        border: 1px solid #475569;
+        background-color: {{color:planning.summary_button_surface}};
+        color: {{color:planning.summary_button_text}};
+        border: 1px solid {{color:planning.summary_button_border}};
         border-radius: 7px;
         padding: 4px 10px;
         font-size: 9pt;
@@ -16859,16 +16859,16 @@ def stylesheet_escuro():
     }
 
     QPushButton#planningSummaryButton:hover {
-        background-color: #334155;
-        border-color: #64748b;
-        color: #f8fafc;
+        background-color: {{color:planning.summary_button_hover_surface}};
+        border-color: {{color:planning.summary_button_hover_border}};
+        color: {{color:planning.summary_button_hover_text}};
     }
 
     QFrame#dailySummaryGoal,
     QFrame#dailySummaryComparison,
     QFrame#dailySummaryTopics {
-        background-color: #1f2937;
-        border: 1px solid #334155;
+        background-color: {{color:modal_daily.panel_surface}};
+        border: 1px solid {{color:modal_daily.panel_border}};
         border-radius: 11px;
     }
 
@@ -16879,84 +16879,84 @@ def stylesheet_escuro():
     }
 
     QLabel#dailySummarySectionTitle {
-        color: #f8fafc;
+        color: {{color:modal_daily.section_title_text}};
         font-size: 15px;
         font-weight: 700;
     }
 
     QLabel#dailySummaryGoalValue {
-        color: #f8fafc;
+        color: {{color:modal_daily.goal_value_text}};
         font-size: 11pt;
         font-weight: 700;
     }
 
     QLabel#dailySummaryHint {
-        color: #94a3b8;
+        color: {{color:modal_daily.hint_text}};
         font-size: 9pt;
     }
 
     QLabel#dailySummaryHint[goalState="concluida"] {
-        color: #86efac;
+        color: {{color:modal_daily.hint_completed_text}};
         font-weight: 700;
     }
 
     QProgressBar#dailySummaryProgress {
-        background-color: #334155;
+        background-color: {{color:modal_daily.progress_track_surface}};
         border: none;
         border-radius: 4px;
     }
 
     QProgressBar#dailySummaryProgress::chunk {
-        background-color: #60a5fa;
+        background-color: {{color:modal_daily.progress_fill_surface}};
         border-radius: 4px;
     }
 
     QProgressBar#dailySummaryProgress[goalState="concluida"]::chunk {
-        background-color: #4ade80;
+        background-color: {{color:modal_daily.progress_completed_surface}};
     }
 
     QFrame#dailySummaryCompareCard {
-        background-color: #182235;
-        border: 1px solid #334155;
+        background-color: {{color:modal_daily.compare_surface}};
+        border: 1px solid {{color:modal_daily.compare_border}};
         border-radius: 9px;
     }
 
     QLabel#dailySummaryCompareValue {
-        color: #f8fafc;
+        color: {{color:modal_daily.compare_value_text}};
         font-size: 13px;
         font-weight: 700;
     }
 
     QLabel#dailySummaryCompareAverage {
-        color: #94a3b8;
+        color: {{color:modal_daily.compare_average_text}};
         font-size: 9pt;
     }
 
     QLabel#dailySummaryTrend {
-        color: #94a3b8;
+        color: {{color:modal_daily.trend_text}};
         font-size: 9pt;
         font-weight: 700;
     }
 
     QLabel#dailySummaryTrend[trendState="positiva"] {
-        color: #86efac;
+        color: {{color:modal_daily.trend_positive_text}};
     }
 
     QLabel#dailySummaryTrend[trendState="negativa"] {
-        color: #fca5a5;
+        color: {{color:modal_daily.trend_negative_text}};
     }
 
     QTableWidget#dailySummaryTable {
-        background-color: #182235;
-        border: 1px solid #334155;
+        background-color: {{color:modal_daily.table_surface}};
+        border: 1px solid {{color:modal_daily.table_border}};
         border-radius: 8px;
         gridline-color: transparent;
     }
 
     QFrame#studySessionStartCard,
     QFrame#sessionSummaryStat {
-        background-color: #1f2937;
-        border: 1px solid #334155;
+        background-color: {{color:modal_session_cards.card_surface}};
+        border: 1px solid {{color:modal_session_cards.card_border}};
         border-radius: 10px;
     }
 
@@ -16966,9 +16966,9 @@ def stylesheet_escuro():
     }
 
     QLabel#sessionSummaryObjective {
-        background-color: #172554;
-        color: #bfdbfe;
-        border: 1px solid #1d4ed8;
+        background-color: {{color:modal_session_cards.objective_surface}};
+        color: {{color:modal_session_cards.objective_text}};
+        border: 1px solid {{color:modal_session_cards.objective_border}};
         border-radius: 8px;
         padding: 7px 10px;
         font-size: 9.5pt;
@@ -16976,58 +16976,58 @@ def stylesheet_escuro():
     }
 
     QTableWidget#sessionSummaryTable {
-        background-color: #182235;
-        border: 1px solid #334155;
+        background-color: {{color:modal_session_cards.table_surface}};
+        border: 1px solid {{color:modal_session_cards.table_border}};
         border-radius: 8px;
         gridline-color: transparent;
     }
 
     QPushButton#studySessionPauseButton {
-        background-color: #273449;
-        color: #cbd5e1;
-        border: 1px solid #475569;
+        background-color: {{color:study_session.pause_button_surface}};
+        color: {{color:study_session.pause_button_text}};
+        border: 1px solid {{color:study_session.pause_button_border}};
         border-radius: 7px;
         padding: 6px 12px;
         font-weight: 700;
     }
 
     QPushButton#studySessionPauseButton:hover {
-        background-color: #334155;
-        color: #f8fafc;
+        background-color: {{color:study_session.pause_button_hover_surface}};
+        color: {{color:study_session.pause_button_hover_emphasis}};
     }
 
     QPushButton#studySessionEndButton {
-        background-color: #4c0519;
-        color: #fda4af;
-        border: 1px solid #9f1239;
+        background-color: {{color:study_session.end_button_surface}};
+        color: {{color:study_session.end_button_text}};
+        border: 1px solid {{color:study_session.end_button_border}};
         border-radius: 7px;
         padding: 6px 12px;
         font-weight: 700;
     }
 
     QPushButton#studySessionEndButton:hover {
-        background-color: #881337;
-        color: #ffe4e6;
+        background-color: {{color:study_session.end_button_hover_surface}};
+        color: {{color:study_session.end_button_hover_emphasis}};
     }
 
     QPushButton#studySessionSkipButton {
-        background-color: #431407;
-        color: #fdba74;
-        border: 1px solid #9a3412;
+        background-color: {{color:study_session.skip_button_surface}};
+        color: {{color:study_session.skip_button_text}};
+        border: 1px solid {{color:study_session.skip_button_border}};
         border-radius: 7px;
         padding: 7px 12px;
         font-weight: 700;
     }
 
     QPushButton#studySessionSkipButton:hover {
-        background-color: #7c2d12;
-        color: #ffedd5;
+        background-color: {{color:study_session.skip_button_hover_surface}};
+        color: {{color:study_session.skip_button_hover_emphasis}};
     }
 
     QFrame#studySessionCurrentCard,
     QFrame#studySessionQueueCard {
-        background-color: #1f2937;
-        border: 1px solid #334155;
+        background-color: {{color:study_session.queue_card_surface}};
+        border: 1px solid {{color:study_session.queue_card_border}};
         border-radius: 11px;
     }
 
@@ -17037,56 +17037,56 @@ def stylesheet_escuro():
     }
 
     QFrame#studySessionCurrentCard {
-        border: 1px solid #1d4ed8;
-        background-color: #172033;
+        border: 1px solid {{color:study_session.current_card_border}};
+        background-color: {{color:study_session.current_card_surface}};
     }
 
     QLabel#studySessionEyebrow {
-        color: #93c5fd;
+        color: {{color:study_session.eyebrow_text}};
         font-size: 8.5pt;
         font-weight: 800;
     }
 
     QLabel#studySessionPosition {
-        color: #94a3b8;
+        color: {{color:study_session.position_text}};
         font-size: 9pt;
         font-weight: 700;
     }
 
     QLabel#studySessionDiscipline {
-        color: #cbd5e1;
+        color: {{color:study_session.discipline_text}};
         font-size: 10pt;
         font-weight: 700;
     }
 
     QLabel#studySessionTopic {
-        color: #f8fafc;
+        color: {{color:study_session.topic_text}};
         font-size: 20px;
         font-weight: 700;
     }
 
     QLabel#studySessionDetailValue {
-        color: #e5e7eb;
+        color: {{color:study_session.detail_value_text}};
         font-size: 10pt;
         font-weight: 700;
     }
 
     QLabel#studySessionSectionTitle {
-        color: #f8fafc;
+        color: {{color:study_session.section_title_text}};
         font-size: 15px;
         font-weight: 700;
     }
 
     QTableWidget#studySessionTable {
-        background-color: #182235;
-        border: 1px solid #334155;
+        background-color: {{color:study_session.table_surface}};
+        border: 1px solid {{color:study_session.table_border}};
         border-radius: 8px;
         gridline-color: transparent;
     }
 
     QFrame#planningPanel {
-        background-color: #1f2937;
-        border: 1px solid #334155;
+        background-color: {{color:planning.panel_surface}};
+        border: 1px solid {{color:planning.panel_border}};
         border-radius: 11px;
     }
 
@@ -17096,9 +17096,9 @@ def stylesheet_escuro():
 
     QPushButton#planningGoalButton {
         min-height: 0px;
-        background-color: #172554;
-        color: #bfdbfe;
-        border: 1px solid #3b82f6;
+        background-color: {{color:planning.goal_surface}};
+        color: {{color:planning.goal_text}};
+        border: 1px solid {{color:planning.goal_border}};
         border-radius: 7px;
         padding: 4px 10px;
         font-size: 9pt;
@@ -17106,9 +17106,9 @@ def stylesheet_escuro():
     }
 
     QPushButton#planningGoalButton:hover {
-        background-color: #1e3a8a;
-        border-color: #60a5fa;
-        color: #dbeafe;
+        background-color: {{color:planning.goal_hover_surface}};
+        border-color: {{color:planning.goal_hover_border}};
+        color: {{color:planning.goal_hover_text}};
     }
 
     QScrollArea#planningSettingsScroll {
@@ -17121,8 +17121,8 @@ def stylesheet_escuro():
     }
 
     QFrame#planningSettingsCard {
-        background-color: #182235;
-        border: 1px solid #334155;
+        background-color: {{color:planning.settings_surface}};
+        border: 1px solid {{color:planning.settings_border}};
         border-radius: 10px;
     }
 
@@ -17131,28 +17131,28 @@ def stylesheet_escuro():
     }
 
     QLabel#planningSettingsTitle {
-        color: #f8fafc;
+        color: {{color:planning.settings_title}};
         font-size: 11pt;
         font-weight: 700;
     }
 
     QLabel#planningLoadLight {
-        color: #86efac;
+        color: {{color:planning.load_light}};
         font-weight: 700;
     }
 
     QLabel#planningLoadModerate {
-        color: #fde68a;
+        color: {{color:planning.load_moderate}};
         font-weight: 700;
     }
 
     QLabel#planningLoadHigh {
-        color: #fca5a5;
+        color: {{color:planning.load_high}};
         font-weight: 700;
     }
 
     QLabel#planningTitle {
-        color: #f8fafc;
+        color: {{color:planning.main_title}};
         font-size: 15px;
         font-weight: 700;
     }
@@ -19884,94 +19884,94 @@ def stylesheet_escuro():
     }
 
     QLabel#strategicReportTitle {
-        color: #e7edf5;
+        color: {{color:strategic_report.title_text}};
         font-size: 12pt;
         font-weight: 800;
     }
 
     QLabel#strategicReportSubtitle,
     QLabel#strategicReportMuted {
-        color: #91a1b4;
+        color: {{color:strategic_report.subtitle_text}};
         font-size: 8.7pt;
     }
 
     QFrame#strategicMetricCard {
-        background-color: #162333;
-        border: 1px solid #33475d;
+        background-color: {{color:strategic_report.metric_surface}};
+        border: 1px solid {{color:strategic_report.metric_border}};
         border-radius: 10px;
     }
 
     QLabel#strategicMetricTitle {
-        color: #93a4b8;
+        color: {{color:strategic_report.metric_label_text}};
         font-size: 8.4pt;
         font-weight: 700;
     }
 
     QLabel#strategicMetricValue {
-        color: #edf4fb;
+        color: {{color:strategic_report.metric_value_text}};
         font-size: 15pt;
         font-weight: 800;
     }
 
     QLabel#strategicMetricValue[prepState="attention"] {
-        color: #e2ad55;
+        color: {{color:strategic_report.prep_attention_text}};
     }
 
     QLabel#strategicMetricValue[prepState="building"] {
-        color: #d7b46a;
+        color: {{color:strategic_report.prep_building_text}};
     }
 
     QLabel#strategicMetricValue[prepState="good"] {
-        color: #86b3ff;
+        color: {{color:strategic_report.prep_good_text}};
     }
 
     QLabel#strategicMetricValue[prepState="strong"] {
-        color: #6cc9b3;
+        color: {{color:strategic_report.prep_strong_text}};
     }
 
     QLabel#strategicMetricValue[prepState="insufficient"] {
-        color: #91a1b4;
+        color: {{color:strategic_report.prep_insufficient_text}};
     }
 
     QLabel#strategicMetricDetail {
-        color: #8394a8;
+        color: {{color:strategic_report.metric_detail_text}};
         font-size: 8.1pt;
     }
 
     QFrame#strategicReportPanel {
-        background-color: #142131;
-        border: 1px solid #33475d;
+        background-color: {{color:strategic_report.panel_surface}};
+        border: 1px solid {{color:strategic_report.panel_border}};
         border-radius: 11px;
     }
 
     QLabel#strategicReportSectionTitle {
-        color: #dce6f0;
+        color: {{color:strategic_report.section_title_text}};
         font-size: 9.5pt;
         font-weight: 800;
     }
 
     QFrame#strategicEvolutionItem {
-        background-color: #182638;
-        border: 1px solid #35495f;
+        background-color: {{color:strategic_report.evolution_surface}};
+        border: 1px solid {{color:strategic_report.evolution_border}};
         border-radius: 8px;
     }
 
     QLabel#strategicEvolutionValue {
-        color: #d6e0eb;
+        color: {{color:strategic_report.evolution_value_text}};
         font-size: 10pt;
         font-weight: 800;
     }
 
     QLabel#strategicEvolutionValue[trend="positive"] {
-        color: #6cc9b3;
+        color: {{color:strategic_report.trend_positive_text}};
     }
 
     QLabel#strategicEvolutionValue[trend="negative"] {
-        color: #e2ad55;
+        color: {{color:strategic_report.trend_negative_text}};
     }
 
     QLabel#strategicEvolutionValue[trend="neutral"] {
-        color: #91a1b4;
+        color: {{color:strategic_report.trend_neutral_text}};
     }
 
     QLabel#strategicRiskItem,
@@ -19982,32 +19982,32 @@ def stylesheet_escuro():
     }
 
     QLabel#strategicRiskItem[riskLevel="alto"] {
-        background-color: #3a241e;
-        color: #efb49b;
-        border: 1px solid #704636;
+        background-color: {{color:strategic_report.risk_high_surface}};
+        color: {{color:strategic_report.risk_high_text}};
+        border: 1px solid {{color:strategic_report.risk_high_border}};
     }
 
     QLabel#strategicRiskItem[riskLevel="medio"] {
-        background-color: #352d1d;
-        color: #e5c783;
-        border: 1px solid #665536;
+        background-color: {{color:strategic_report.risk_medium_surface}};
+        color: {{color:strategic_report.risk_medium_text}};
+        border: 1px solid {{color:strategic_report.risk_medium_border}};
     }
 
     QLabel#strategicRiskItem[riskLevel="baixo"] {
-        background-color: #17342e;
-        color: #8fd7c5;
-        border: 1px solid #315f55;
+        background-color: {{color:strategic_report.risk_low_surface}};
+        color: {{color:strategic_report.risk_low_text}};
+        border: 1px solid {{color:strategic_report.risk_low_border}};
     }
 
     QLabel#strategicActionItem {
-        background-color: #172a42;
-        color: #a9cbf6;
-        border: 1px solid #365b85;
+        background-color: {{color:strategic_report.action_surface}};
+        color: {{color:strategic_report.action_text}};
+        border: 1px solid {{color:strategic_report.action_border}};
     }
 
     QTableWidget#strategicReportTable {
-        background-color: #142131;
-        border: 1px solid #33475d;
+        background-color: {{color:strategic_report.table_surface}};
+        border: 1px solid {{color:strategic_report.table_border}};
         border-radius: 8px;
     }
 
@@ -20601,7 +20601,7 @@ def stylesheet_escuro():
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_ESCURO + ESTILO_DASHBOARD_MODERNO_ESCURO + ESTILO_FOCO_DASHBOARD_ESCURO + ESTILO_ALGORITMO_DASHBOARD_ESCURO + ESTILO_BUSCA_GLOBAL_ESCURO + ESTILO_INTELIGENCIA_RESUMO_ESCURO + ESTILO_TOPICOS_DISCIPLINA_ESCURO + ESTILO_RESOLVEDOR_ESCURO + ESTILO_TOPICO_DETALHES_ESCURO + ESTILO_RESOLVEDOR_ELIMINADAS_ESCURO + ESTILO_RESOLVEDOR_TECLADO_ESCURO + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_ESCURO + ESTILO_CALENDARIO_PREVISAO_ESCURO + ESTILO_DASHBOARD_SHELL_ESCURO + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_B_ESCURO) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_C) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_D) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_E) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_F) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_G) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_H) + render_qss("escuro", ESTILO_NAVEGACAO_BUSCA_GLOBAL) + render_qss("escuro", ESTILO_NAVEGACAO_RETORNOS_DASHBOARD) + render_qss("escuro", ESTILO_CARDS_GLOBAIS_BLOCO_A) + render_qss("escuro", ESTILO_CARDS_GLOBAIS_BLOCO_B) + render_qss("escuro", ESTILO_CARDS_GLOBAIS_BLOCO_C) + render_qss("escuro", ESTILO_MODO_FOCO_INTEGRACAO_RESOLVEDOR))
+""" + ESTILO_JORNADA_ESCURO + ESTILO_DASHBOARD_MODERNO_ESCURO + ESTILO_FOCO_DASHBOARD_ESCURO + ESTILO_ALGORITMO_DASHBOARD_ESCURO + ESTILO_BUSCA_GLOBAL_ESCURO + ESTILO_INTELIGENCIA_RESUMO_ESCURO + ESTILO_TOPICOS_DISCIPLINA_ESCURO + ESTILO_RESOLVEDOR_ESCURO + render_qss("escuro", ESTILO_TOPICO_DETALHES_ESCURO) + ESTILO_RESOLVEDOR_ELIMINADAS_ESCURO + ESTILO_RESOLVEDOR_TECLADO_ESCURO + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_ESCURO + ESTILO_CALENDARIO_PREVISAO_ESCURO + ESTILO_DASHBOARD_SHELL_ESCURO + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_B_ESCURO) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_C) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_D) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_E) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_F) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_G) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_H) + render_qss("escuro", ESTILO_NAVEGACAO_BUSCA_GLOBAL) + render_qss("escuro", ESTILO_NAVEGACAO_RETORNOS_DASHBOARD) + render_qss("escuro", ESTILO_CARDS_GLOBAIS_BLOCO_A) + render_qss("escuro", ESTILO_CARDS_GLOBAIS_BLOCO_B) + render_qss("escuro", ESTILO_CARDS_GLOBAIS_BLOCO_C) + render_qss("escuro", ESTILO_MODO_FOCO_INTEGRACAO_RESOLVEDOR))
 
 
 
@@ -23488,59 +23488,55 @@ def stylesheet_futurista():
 
     QFrame#strategicMetricCard,
     QFrame#strategicReportPanel {
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-            stop:0 #132b40,
-            stop:1 #102237);
-        border: 1px solid #315b76;
+        background: {{gradient:strategic_report.frame_gradient}};
+        border: 1px solid {{color:strategic_report.frame_emphasis_border}};
         border-radius: 11px;
     }
 
     QLabel#strategicReportTitle {
-        color: #dff8ff;
+        color: {{color:strategic_report.title_text}};
     }
 
     QLabel#strategicMetricValue[prepState="good"] {
-        color: #7fc7ff;
+        color: {{color:strategic_report.prep_good_text}};
     }
 
     QLabel#strategicMetricValue[prepState="strong"] {
-        color: #73e0c8;
+        color: {{color:strategic_report.prep_strong_text}};
     }
 
     QLabel#strategicMetricValue[prepState="attention"],
     QLabel#strategicMetricValue[prepState="building"] {
-        color: #f1c874;
+        color: {{color:strategic_report.prep_shared_warning_text}};
     }
 
     QFrame#strategicEvolutionItem {
-        background-color: #11263a;
-        border: 1px solid #2f5872;
+        background-color: {{color:strategic_report.evolution_surface}};
+        border: 1px solid {{color:strategic_report.evolution_border}};
     }
 
     QLabel#strategicActionItem {
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-            stop:0 #17334b,
-            stop:1 #173b52);
-        color: #b7e8ff;
-        border: 1px solid #3f7797;
+        background: {{gradient:strategic_report.action_gradient}};
+        color: {{color:strategic_report.action_text}};
+        border: 1px solid {{color:strategic_report.action_border}};
     }
 
     QLabel#strategicRiskItem[riskLevel="alto"] {
-        background-color: #3b2723;
-        color: #ffc1a9;
-        border: 1px solid #7c5141;
+        background-color: {{color:strategic_report.risk_high_surface}};
+        color: {{color:strategic_report.risk_high_text}};
+        border: 1px solid {{color:strategic_report.risk_high_border}};
     }
 
     QLabel#strategicRiskItem[riskLevel="medio"] {
-        background-color: #39321f;
-        color: #f2d48b;
-        border: 1px solid #74623a;
+        background-color: {{color:strategic_report.risk_medium_surface}};
+        color: {{color:strategic_report.risk_medium_text}};
+        border: 1px solid {{color:strategic_report.risk_medium_border}};
     }
 
     QLabel#strategicRiskItem[riskLevel="baixo"] {
-        background-color: #153832;
-        color: #91edd6;
-        border: 1px solid #367365;
+        background-color: {{color:strategic_report.risk_low_surface}};
+        color: {{color:strategic_report.risk_low_text}};
+        border: 1px solid {{color:strategic_report.risk_low_border}};
     }
 
 
@@ -24082,7 +24078,7 @@ def stylesheet_futurista():
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_FUTURISTA + ESTILO_DASHBOARD_MODERNO_FUTURISTA + ESTILO_FOCO_DASHBOARD_FUTURISTA + ESTILO_ALGORITMO_DASHBOARD_FUTURISTA + ESTILO_BUSCA_GLOBAL_FUTURISTA + ESTILO_INTELIGENCIA_RESUMO_FUTURISTA + ESTILO_TOPICOS_DISCIPLINA_FUTURISTA + ESTILO_DASHBOARD_NEO_FUTURISTA + ESTILO_RESOLVEDOR_FUTURISTA + ESTILO_TOPICO_DETALHES_FUTURISTA + ESTILO_RESOLVEDOR_ELIMINADAS_FUTURISTA + ESTILO_RESOLVEDOR_TECLADO_FUTURISTA + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_FUTURISTA + ESTILO_CALENDARIO_PREVISAO_FUTURISTA + ESTILO_DASHBOARD_SHELL_FUTURISTA + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_B_FUTURISTA) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_C) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_D) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_E) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_F) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_G) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_H) + render_qss("futurista", ESTILO_NAVEGACAO_BUSCA_GLOBAL) + render_qss("futurista", ESTILO_NAVEGACAO_RETORNOS_DASHBOARD) + render_qss("futurista", ESTILO_CARDS_GLOBAIS_BLOCO_A) + render_qss("futurista", ESTILO_CARDS_GLOBAIS_BLOCO_B) + render_qss("futurista", ESTILO_CARDS_GLOBAIS_BLOCO_C) + render_qss("futurista", ESTILO_MODO_FOCO_INTEGRACAO_RESOLVEDOR))
+""" + ESTILO_JORNADA_FUTURISTA + ESTILO_DASHBOARD_MODERNO_FUTURISTA + ESTILO_FOCO_DASHBOARD_FUTURISTA + ESTILO_ALGORITMO_DASHBOARD_FUTURISTA + ESTILO_BUSCA_GLOBAL_FUTURISTA + ESTILO_INTELIGENCIA_RESUMO_FUTURISTA + ESTILO_TOPICOS_DISCIPLINA_FUTURISTA + ESTILO_DASHBOARD_NEO_FUTURISTA + ESTILO_RESOLVEDOR_FUTURISTA + render_qss("futurista", ESTILO_TOPICO_DETALHES_FUTURISTA) + ESTILO_RESOLVEDOR_ELIMINADAS_FUTURISTA + ESTILO_RESOLVEDOR_TECLADO_FUTURISTA + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_FUTURISTA + ESTILO_CALENDARIO_PREVISAO_FUTURISTA + ESTILO_DASHBOARD_SHELL_FUTURISTA + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_B_FUTURISTA) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_C) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_D) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_E) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_F) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_G) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_H) + render_qss("futurista", ESTILO_NAVEGACAO_BUSCA_GLOBAL) + render_qss("futurista", ESTILO_NAVEGACAO_RETORNOS_DASHBOARD) + render_qss("futurista", ESTILO_CARDS_GLOBAIS_BLOCO_A) + render_qss("futurista", ESTILO_CARDS_GLOBAIS_BLOCO_B) + render_qss("futurista", ESTILO_CARDS_GLOBAIS_BLOCO_C) + render_qss("futurista", ESTILO_MODO_FOCO_INTEGRACAO_RESOLVEDOR))
 
 def aplicar_tema(
     app,
