@@ -9629,9 +9629,9 @@ QPushButton#sectionEditButton:hover {
 
     QPushButton#planningRedistributeButton {
         min-height: 0px;
-        background-color: #fff7ed;
-        color: #9a3412;
-        border: 1px solid #fed7aa;
+        background-color: {{color:planning.redistribute_button_surface}};
+        color: {{color:planning.redistribute_button_text}};
+        border: 1px solid {{color:planning.redistribute_button_border}};
         border-radius: 7px;
         padding: 4px 10px;
         font-size: 9pt;
@@ -9639,9 +9639,9 @@ QPushButton#sectionEditButton:hover {
     }
 
     QPushButton#planningRedistributeButton:hover {
-        background-color: #ffedd5;
-        border-color: #fdba74;
-        color: #7c2d12;
+        background-color: {{color:planning.redistribute_button_hover_surface}};
+        border-color: {{color:planning.redistribute_button_hover_border}};
+        color: {{color:planning.redistribute_button_hover_text}};
     }
 
     QPushButton#planningRedistributeButton[hasSuggestion="true"] {
@@ -10029,9 +10029,9 @@ QPushButton#sectionEditButton:hover {
     }
 
     QLabel#weeklyGoalStatus {
-        background-color: #f1f5f9;
-        color: #475569;
-        border: 1px solid #e2e8f0;
+        background-color: {{color:planning.weekly_status_surface}};
+        color: {{color:planning.weekly_status_text}};
+        border: 1px solid {{color:planning.weekly_status_border}};
         border-radius: 7px;
         padding: 4px 8px;
         font-size: 8.5pt;
@@ -10039,15 +10039,15 @@ QPushButton#sectionEditButton:hover {
     }
 
     QLabel#weeklyGoalStatus[weekState="concluida"] {
-        background-color: #dcfce7;
-        color: #15803d;
-        border-color: #bbf7d0;
+        background-color: {{color:planning.weekly_status_completed_surface}};
+        color: {{color:planning.weekly_status_completed_text}};
+        border-color: {{color:planning.weekly_status_completed_border}};
     }
 
     QLabel#weeklyGoalStatus[weekState="atencao"] {
-        background-color: #fff7ed;
-        color: #c2410c;
-        border-color: #fed7aa;
+        background-color: {{color:planning.weekly_status_attention_surface}};
+        color: {{color:planning.weekly_status_attention_text}};
+        border-color: {{color:planning.weekly_status_attention_border}};
     }
 
     QFrame#weeklyGoalMetric {
@@ -10074,23 +10074,23 @@ QPushButton#sectionEditButton:hover {
     }
 
     QLabel#weeklyGoalHint[goalState="concluida"] {
-        color: #15803d;
+        color: {{color:planning.weekly_completed_hint_text}};
         font-weight: 700;
     }
 
     QProgressBar#weeklyGoalProgress {
-        background-color: #e2e8f0;
+        background-color: {{color:planning.weekly_progress_track}};
         border: none;
         border-radius: 4px;
     }
 
     QProgressBar#weeklyGoalProgress::chunk {
-        background-color: #3b82f6;
+        background-color: {{color:planning.weekly_progress_fill}};
         border-radius: 4px;
     }
 
     QProgressBar#weeklyGoalProgress[goalState="concluida"]::chunk {
-        background-color: #22c55e;
+        background-color: {{color:planning.weekly_progress_completed_fill}};
     }
 
     QFrame#dailyGoalBox,
@@ -12193,31 +12193,31 @@ QPushButton#sectionEditButton:hover {
        ====================================================== */
 
     QFrame#planningPanel {
-        background-color: #ffffff;
-        border: 1px solid #d4dce7;
+        background-color: {{color:planning.reorganized_panel_surface}};
+        border: 1px solid {{color:planning.reorganized_panel_border}};
         border-radius: 11px;
     }
 
     QLabel#planningSectionSubtitle {
-        color: #7c899a;
+        color: {{color:planning.section_subtitle_text}};
         font-size: 8pt;
         font-weight: 400;
     }
 
     QLabel#planningSubsectionTitle {
-        color: #273246;
+        color: {{color:planning.subsection_title_text}};
         font-size: 9pt;
         font-weight: 700;
     }
 
     QLabel#planningSubsectionHint {
-        color: #8994a4;
+        color: {{color:planning.subsection_hint_text}};
         font-size: 7.5pt;
         font-weight: 400;
     }
 
     QLabel#planningMicroLabel {
-        color: #929dac;
+        color: {{color:planning.micro_label_text}};
         font-size: 7pt;
         font-weight: 400;
     }
@@ -12225,28 +12225,28 @@ QPushButton#sectionEditButton:hover {
     QFrame#dailyGoalBox,
     QFrame#weeklyLoadBox,
     QFrame#weeklyGoalBox {
-        background-color: #f9fbfd;
-        border: 1px solid #dfe5ed;
+        background-color: {{color:planning.goal_card_surface}};
+        border: 1px solid {{color:planning.goal_card_border}};
         border-radius: 9px;
     }
 
     QLabel#planningItemTitle,
     QLabel#weeklyGoalTitle {
-        color: #344055;
+        color: {{color:planning.goal_card_title_text}};
         font-size: 8.7pt;
         font-weight: 700;
     }
 
     QLabel#dailyGoalValue {
-        color: #202b3d;
+        color: {{color:planning.daily_goal_value_text}};
         font-size: 13pt;
         font-weight: 700;
     }
 
     QLabel#planningTotalBadge {
-        background-color: #f2f5f9;
-        color: #657286;
-        border: 1px solid #dbe2ea;
+        background-color: {{color:planning.total_badge_surface}};
+        color: {{color:planning.total_badge_text}};
+        border: 1px solid {{color:planning.total_badge_border}};
         border-radius: 6px;
         padding: 3px 7px;
         font-size: 7.3pt;
@@ -12254,68 +12254,68 @@ QPushButton#sectionEditButton:hover {
     }
 
     QProgressBar#dailyGoalProgress {
-        background-color: #e5eaf0;
+        background-color: {{color:planning.daily_progress_track}};
         border: none;
         border-radius: 4px;
     }
 
     QProgressBar#dailyGoalProgress::chunk {
-        background-color: #3976d5;
+        background-color: {{color:planning.daily_progress_fill}};
         border-radius: 4px;
     }
 
     QLabel#planningHint {
-        color: #778497;
+        color: {{color:planning.daily_goal_hint_text}};
         font-size: 7.4pt;
     }
 
     QFrame#weekDayLoad {
-        background-color: #ffffff;
-        border: 1px solid #e0e6ed;
+        background-color: {{color:planning.weekday_card_surface}};
+        border: 1px solid {{color:planning.weekday_card_border}};
         border-radius: 8px;
         min-height: 62px;
     }
 
     QFrame#weekDayLoad[today="true"] {
-        background-color: #f2f6ff;
-        border-color: #7fa4ea;
+        background-color: {{color:planning.weekday_today_surface}};
+        border-color: {{color:planning.weekday_today_border}};
     }
 
     QFrame#weekDayLoad[loadLevel="leve"][today="false"] {
-        background-color: #f6fbf8;
-        border-color: #d6e9dd;
+        background-color: {{color:planning.weekday_light_surface}};
+        border-color: {{color:planning.weekday_light_border}};
     }
 
     QFrame#weekDayLoad[loadLevel="moderada"][today="false"] {
-        background-color: #fffaf1;
-        border-color: #ead9b7;
+        background-color: {{color:planning.weekday_moderate_surface}};
+        border-color: {{color:planning.weekday_moderate_border}};
     }
 
     QFrame#weekDayLoad[loadLevel="alta"][today="false"] {
-        background-color: #fff3f1;
-        border-color: #e8c6c1;
+        background-color: {{color:planning.weekday_high_surface}};
+        border-color: {{color:planning.weekday_high_border}};
     }
 
     QLabel#weekDayName {
-        color: #526176;
+        color: {{color:planning.weekday_name_text}};
         font-size: 7.5pt;
         font-weight: 600;
     }
 
     QLabel#weekDayDate {
-        color: #9aa4b1;
+        color: {{color:planning.weekday_date_text}};
         font-size: 6.8pt;
     }
 
     QLabel#weekDayCount {
-        color: #273246;
+        color: {{color:planning.weekday_count_text}};
         font-size: 10pt;
         font-weight: 700;
     }
 
     QFrame#weekDayLoad[today="true"] QLabel#weekDayName,
     QFrame#weekDayLoad[today="true"] QLabel#weekDayCount {
-        color: #3b61b4;
+        color: {{color:planning.weekday_today_label_text}};
     }
 
     QPushButton#planningGoalButton,
@@ -12354,30 +12354,30 @@ QPushButton#sectionEditButton:hover {
     }
 
     QPushButton#weeklyGoalSetupButton {
-        background-color: #ffffff;
-        color: #3268b3;
-        border: 1px solid #bfd0e4;
+        background-color: {{color:planning.weekly_setup_button_surface}};
+        color: {{color:planning.weekly_setup_button_text}};
+        border: 1px solid {{color:planning.weekly_setup_button_border}};
     }
 
     QFrame#weeklyGoalEmptyState {
-        background-color: #ffffff;
-        border: 1px dashed #d6dee8;
+        background-color: {{color:planning.weekly_empty_surface}};
+        border: 1px dashed {{color:planning.weekly_empty_border}};
         border-radius: 8px;
     }
 
     QLabel#weeklyGoalEmptyTitle {
-        color: #455368;
+        color: {{color:planning.weekly_empty_title_text}};
         font-size: 8.3pt;
         font-weight: 600;
     }
 
     QLabel#weeklyGoalEmptyDescription {
-        color: #8793a3;
+        color: {{color:planning.weekly_empty_description_text}};
         font-size: 7.4pt;
     }
 
     QLabel#weeklyGoalPeriod {
-        color: #8490a1;
+        color: {{color:planning.weekly_period_text}};
         font-size: 7.4pt;
     }
 
@@ -12389,25 +12389,25 @@ QPushButton#sectionEditButton:hover {
     }
 
     QFrame#weeklyGoalMetric {
-        background-color: #ffffff;
-        border: 1px solid #e0e6ed;
+        background-color: {{color:planning.weekly_metric_surface}};
+        border: 1px solid {{color:planning.weekly_metric_border}};
         border-radius: 7px;
     }
 
     QLabel#weeklyGoalMetricTitle {
-        color: #748195;
+        color: {{color:planning.weekly_metric_title_text}};
         font-size: 7.3pt;
         font-weight: 600;
     }
 
     QLabel#weeklyGoalValue {
-        color: #293548;
+        color: {{color:planning.weekly_metric_value_text}};
         font-size: 9.5pt;
         font-weight: 700;
     }
 
     QLabel#weeklyGoalHint {
-        color: #8c97a6;
+        color: {{color:planning.weekly_metric_hint_text}};
         font-size: 7pt;
     }
 
@@ -16791,9 +16791,9 @@ def stylesheet_escuro():
 
     QPushButton#planningRedistributeButton {
         min-height: 0px;
-        background-color: #431407;
-        color: #fed7aa;
-        border: 1px solid #c2410c;
+        background-color: {{color:planning.redistribute_button_surface}};
+        color: {{color:planning.redistribute_button_text}};
+        border: 1px solid {{color:planning.redistribute_button_border}};
         border-radius: 7px;
         padding: 4px 10px;
         font-size: 9pt;
@@ -16801,9 +16801,9 @@ def stylesheet_escuro():
     }
 
     QPushButton#planningRedistributeButton:hover {
-        background-color: #7c2d12;
-        border-color: #fb923c;
-        color: #ffedd5;
+        background-color: {{color:planning.redistribute_button_hover_surface}};
+        border-color: {{color:planning.redistribute_button_hover_border}};
+        color: {{color:planning.redistribute_button_hover_text}};
     }
 
     QPushButton#planningRedistributeButton[hasSuggestion="true"] {
@@ -17191,9 +17191,9 @@ def stylesheet_escuro():
     }
 
     QLabel#weeklyGoalStatus {
-        background-color: #273449;
-        color: #cbd5e1;
-        border: 1px solid #334155;
+        background-color: {{color:planning.weekly_status_surface}};
+        color: {{color:planning.weekly_status_text}};
+        border: 1px solid {{color:planning.weekly_status_border}};
         border-radius: 7px;
         padding: 4px 8px;
         font-size: 8.5pt;
@@ -17201,15 +17201,15 @@ def stylesheet_escuro():
     }
 
     QLabel#weeklyGoalStatus[weekState="concluida"] {
-        background-color: #163523;
-        color: #86efac;
-        border-color: #166534;
+        background-color: {{color:planning.weekly_status_completed_surface}};
+        color: {{color:planning.weekly_status_completed_text}};
+        border-color: {{color:planning.weekly_status_completed_border}};
     }
 
     QLabel#weeklyGoalStatus[weekState="atencao"] {
-        background-color: #431407;
-        color: #fdba74;
-        border-color: #9a3412;
+        background-color: {{color:planning.weekly_status_attention_surface}};
+        color: {{color:planning.weekly_status_attention_text}};
+        border-color: {{color:planning.weekly_status_attention_border}};
     }
 
     QFrame#weeklyGoalMetric {
@@ -17236,23 +17236,23 @@ def stylesheet_escuro():
     }
 
     QLabel#weeklyGoalHint[goalState="concluida"] {
-        color: #86efac;
+        color: {{color:planning.weekly_completed_hint_text}};
         font-weight: 700;
     }
 
     QProgressBar#weeklyGoalProgress {
-        background-color: #334155;
+        background-color: {{color:planning.weekly_progress_track}};
         border: none;
         border-radius: 4px;
     }
 
     QProgressBar#weeklyGoalProgress::chunk {
-        background-color: #60a5fa;
+        background-color: {{color:planning.weekly_progress_fill}};
         border-radius: 4px;
     }
 
     QProgressBar#weeklyGoalProgress[goalState="concluida"]::chunk {
-        background-color: #4ade80;
+        background-color: {{color:planning.weekly_progress_completed_fill}};
     }
 
     QFrame#dailyGoalBox,
@@ -19216,53 +19216,53 @@ def stylesheet_escuro():
        ====================================================== */
 
     QFrame#planningPanel {
-        background-color: #111d2b;
-        border: 1px solid #33475d;
+        background-color: {{color:planning.reorganized_panel_surface}};
+        border: 1px solid {{color:planning.reorganized_panel_border}};
         border-radius: 11px;
     }
 
     QLabel#planningSectionSubtitle {
-        color: #8999aa;
+        color: {{color:planning.section_subtitle_text}};
         font-size: 8pt;
     }
 
     QLabel#planningSubsectionTitle {
-        color: #d6dfe8;
+        color: {{color:planning.subsection_title_text}};
         font-size: 9pt;
         font-weight: 700;
     }
 
     QLabel#planningSubsectionHint,
     QLabel#planningMicroLabel {
-        color: #78899d;
+        color: {{color:planning.subsection_hint_text}};
         font-size: 7.4pt;
     }
 
     QFrame#dailyGoalBox,
     QFrame#weeklyLoadBox,
     QFrame#weeklyGoalBox {
-        background-color: #142131;
-        border: 1px solid #2e4054;
+        background-color: {{color:planning.goal_card_surface}};
+        border: 1px solid {{color:planning.goal_card_border}};
         border-radius: 9px;
     }
 
     QLabel#planningItemTitle,
     QLabel#weeklyGoalTitle {
-        color: #cbd6e0;
+        color: {{color:planning.goal_card_title_text}};
         font-size: 8.7pt;
         font-weight: 700;
     }
 
     QLabel#dailyGoalValue {
-        color: #e1e8f0;
+        color: {{color:planning.daily_goal_value_text}};
         font-size: 13pt;
         font-weight: 700;
     }
 
     QLabel#planningTotalBadge {
-        background-color: #182536;
-        color: #91a1b4;
-        border: 1px solid #33465b;
+        background-color: {{color:planning.total_badge_surface}};
+        color: {{color:planning.total_badge_text}};
+        border: 1px solid {{color:planning.total_badge_border}};
         border-radius: 6px;
         padding: 3px 7px;
         font-size: 7.3pt;
@@ -19270,68 +19270,68 @@ def stylesheet_escuro():
     }
 
     QProgressBar#dailyGoalProgress {
-        background-color: #263646;
+        background-color: {{color:planning.daily_progress_track}};
         border: none;
         border-radius: 4px;
     }
 
     QProgressBar#dailyGoalProgress::chunk {
-        background-color: #4779c7;
+        background-color: {{color:planning.daily_progress_fill}};
         border-radius: 4px;
     }
 
     QLabel#planningHint {
-        color: #8796a8;
+        color: {{color:planning.daily_goal_hint_text}};
         font-size: 7.4pt;
     }
 
     QFrame#weekDayLoad {
-        background-color: #111e2d;
-        border: 1px solid #2d4054;
+        background-color: {{color:planning.weekday_card_surface}};
+        border: 1px solid {{color:planning.weekday_card_border}};
         border-radius: 8px;
         min-height: 62px;
     }
 
     QFrame#weekDayLoad[today="true"] {
-        background-color: #172944;
-        border-color: #5078b9;
+        background-color: {{color:planning.weekday_today_surface}};
+        border-color: {{color:planning.weekday_today_border}};
     }
 
     QFrame#weekDayLoad[loadLevel="leve"][today="false"] {
-        background-color: #15271f;
-        border-color: #2d4a3d;
+        background-color: {{color:planning.weekday_light_surface}};
+        border-color: {{color:planning.weekday_light_border}};
     }
 
     QFrame#weekDayLoad[loadLevel="moderada"][today="false"] {
-        background-color: #292317;
-        border-color: #55482b;
+        background-color: {{color:planning.weekday_moderate_surface}};
+        border-color: {{color:planning.weekday_moderate_border}};
     }
 
     QFrame#weekDayLoad[loadLevel="alta"][today="false"] {
-        background-color: #2d1d1d;
-        border-color: #5e3737;
+        background-color: {{color:planning.weekday_high_surface}};
+        border-color: {{color:planning.weekday_high_border}};
     }
 
     QLabel#weekDayName {
-        color: #95a4b6;
+        color: {{color:planning.weekday_name_text}};
         font-size: 7.5pt;
         font-weight: 600;
     }
 
     QLabel#weekDayDate {
-        color: #687b91;
+        color: {{color:planning.weekday_date_text}};
         font-size: 6.8pt;
     }
 
     QLabel#weekDayCount {
-        color: #dce5ee;
+        color: {{color:planning.weekday_count_text}};
         font-size: 10pt;
         font-weight: 700;
     }
 
     QFrame#weekDayLoad[today="true"] QLabel#weekDayName,
     QFrame#weekDayLoad[today="true"] QLabel#weekDayCount {
-        color: #a9c8f5;
+        color: {{color:planning.weekday_today_label_text}};
     }
 
     QPushButton#planningGoalButton,
@@ -19354,9 +19354,9 @@ def stylesheet_escuro():
     QPushButton#planningSummaryButton,
     QPushButton#planningRedistributeButton,
     QPushButton#weeklyGoalSetupButton {
-        background-color: #162435;
-        color: #b9c8d7;
-        border: 1px solid #34495f;
+        background-color: {{color:planning.weekly_setup_button_surface}};
+        color: {{color:planning.weekly_setup_button_text}};
+        border: 1px solid {{color:planning.weekly_setup_button_border}};
     }
 
     QPushButton#planningRedistributeButton[hasSuggestion="true"] {
@@ -19366,47 +19366,47 @@ def stylesheet_escuro():
     }
 
     QFrame#weeklyGoalEmptyState {
-        background-color: #111e2d;
-        border: 1px dashed #34475a;
+        background-color: {{color:planning.weekly_empty_surface}};
+        border: 1px dashed {{color:planning.weekly_empty_border}};
         border-radius: 8px;
     }
 
     QLabel#weeklyGoalEmptyTitle {
-        color: #c0ccd8;
+        color: {{color:planning.weekly_empty_title_text}};
         font-size: 8.3pt;
         font-weight: 600;
     }
 
     QLabel#weeklyGoalEmptyDescription {
-        color: #8191a4;
+        color: {{color:planning.weekly_empty_description_text}};
         font-size: 7.4pt;
     }
 
     QLabel#weeklyGoalPeriod {
-        color: #8393a6;
+        color: {{color:planning.weekly_period_text}};
         font-size: 7.4pt;
     }
 
     QFrame#weeklyGoalMetric {
-        background-color: #111e2d;
-        border: 1px solid #2d4054;
+        background-color: {{color:planning.weekly_metric_surface}};
+        border: 1px solid {{color:planning.weekly_metric_border}};
         border-radius: 7px;
     }
 
     QLabel#weeklyGoalMetricTitle {
-        color: #8192a5;
+        color: {{color:planning.weekly_metric_title_text}};
         font-size: 7.3pt;
         font-weight: 600;
     }
 
     QLabel#weeklyGoalValue {
-        color: #dce5ee;
+        color: {{color:planning.weekly_metric_value_text}};
         font-size: 9.5pt;
         font-weight: 700;
     }
 
     QLabel#weeklyGoalHint {
-        color: #788a9e;
+        color: {{color:planning.weekly_metric_hint_text}};
         font-size: 7pt;
     }
 

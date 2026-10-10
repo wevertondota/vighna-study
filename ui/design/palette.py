@@ -86,6 +86,17 @@ class PhysicalPalette(Mapping[str, ColorValue]):
 # Recorte representativo e literal da paleta existente. A lista não pretende
 # absorver as 3.310 cores inventariadas antes da migração dos componentes.
 _CURRENT_PHYSICAL_VALUES = (
+    # Planejamento — Borda existente do painel reorganizado
+    "#D4DCE7",
+    # Planejamento — Estado vazio da meta: textos (cores físicas legadas)
+    "#8191A4",
+    "#8793A3",
+    # Planejamento — Botão de configuração da meta semanal: estado normal
+    "#162435",
+    "#3268B3",
+    "#BFD0E4",
+    # Planejamento — Planejamento: indicador de total
+    "#182536",
     # Estudo — Botões B — cores físicas pré-existentes no QSS
     "#4C0519",
     "#881337",
@@ -1984,6 +1995,8 @@ _CURRENT_PHYSICAL_VALUES = (
     # Tabelas — nivel inativo (fundos especificos dos temas Escuro e Futurista)
     "#263241",
     "#132B39",
+    # Planejamento botoes D — cores originais
+    "#FB923C",
     # Planejamento compartilhado — subtleButton / botoes de resumo
     "#476076",
     "#B9C8D7",

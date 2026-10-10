@@ -503,6 +503,47 @@ _LIGHT_COMPONENT_OVERRIDES = {
     "study_session.topic_text": "#111827",
     "study_session.detail_value_text": "#1F2937",
     "study_session.section_title_text": "#111827",
+    # Planejamento — Rótulos de Seções do Planejamento
+    "planning.section_subtitle_text": "#7C899A",
+    "planning.subsection_title_text": "#273246",
+
+    # Planejamento — Estrutura dos Cartões de Metas
+    "planning.goal_card_surface": "#F9FBFD",
+    "planning.goal_card_border": "#DFE5ED",
+
+    # Planejamento — Títulos dos Cartões de Metas
+    "planning.goal_card_title_text": "#344055",
+
+    # Planejamento — Cartão de Carga Diária — Estrutura
+    "planning.weekday_card_surface": "#FFFFFF",
+    "planning.weekday_card_border": "#E0E6ED",
+
+    # Planejamento — Cartão de Hoje — Destaque
+    "planning.weekday_today_surface": "#F2F6FF",
+    "planning.weekday_today_border": "#7FA4EA",
+
+    # Planejamento — Carga por Dia — Estados Leve, Moderada e Alta
+    "planning.weekday_light_surface": "#F6FBF8",
+    "planning.weekday_light_border": "#D6E9DD",
+    "planning.weekday_moderate_surface": "#FFFAF1",
+    "planning.weekday_moderate_border": "#EAD9B7",
+    "planning.weekday_high_surface": "#FFF3F1",
+    "planning.weekday_high_border": "#E8C6C1",
+
+    # Planejamento — Carga por Dia — Nome, Data, Contagem e Destaque de Hoje
+    "planning.weekday_name_text": "#526176",
+    "planning.weekday_date_text": "#9AA4B1",
+    "planning.weekday_count_text": "#273246",
+    "planning.weekday_today_label_text": "#3B61B4",
+
+    # Planejamento — Painel Reorganizado — Fundo e Borda
+    "planning.reorganized_panel_surface": "#FFFFFF",
+    "planning.reorganized_panel_border": "#D4DCE7",
+
+    # Planejamento — Subseções — Textos Auxiliares
+    "planning.subsection_hint_text": "#8994A4",
+    "planning.micro_label_text": "#929DAC",
+
     "planning.panel_surface": "#FFFFFF",
     "planning.panel_border": "#DBE3ED",
     "planning.settings_surface": "#FFFFFF",
@@ -523,6 +564,45 @@ _LIGHT_COMPONENT_OVERRIDES = {
     "planning.summary_button_hover_surface": "#F1F5F9",
     "planning.summary_button_hover_border": "#94A3B8",
     "planning.summary_button_hover_text": "#0F172A",
+    "planning.redistribute_button_surface": "#FFF7ED",
+    "planning.redistribute_button_text": "#9A3412",
+    "planning.redistribute_button_border": "#FED7AA",
+    "planning.redistribute_button_hover_surface": "#FFEDD5",
+    "planning.redistribute_button_hover_border": "#FDBA74",
+    "planning.redistribute_button_hover_text": "#7C2D12",
+    "planning.weekly_empty_surface": "#FFFFFF",
+    "planning.weekly_empty_border": "#D6DEE8",
+    "planning.weekly_empty_title_text": "#455368",
+    "planning.weekly_empty_description_text": "#8793A3",
+    "planning.weekly_period_text": "#8490A1",
+    "planning.weekly_metric_surface": "#FFFFFF",
+    "planning.weekly_metric_border": "#E0E6ED",
+    "planning.weekly_metric_title_text": "#748195",
+    "planning.weekly_metric_value_text": "#293548",
+    "planning.weekly_metric_hint_text": "#8C97A6",
+    "planning.weekly_progress_track": "#E2E8F0",
+    "planning.weekly_progress_fill": "#3B82F6",
+    "planning.weekly_progress_completed_fill": "#22C55E",
+    "planning.weekly_completed_hint_text": "#15803D",
+    "planning.weekly_setup_button_surface": "#FFFFFF",
+    "planning.weekly_setup_button_text": "#3268B3",
+    "planning.weekly_setup_button_border": "#BFD0E4",
+    "planning.daily_progress_track": "#E5EAF0",
+    "planning.daily_progress_fill": "#3976D5",
+    "planning.daily_goal_value_text": "#202B3D",
+    "planning.daily_goal_hint_text": "#778497",
+    "planning.total_badge_surface": "#F2F5F9",
+    "planning.total_badge_text": "#657286",
+    "planning.total_badge_border": "#DBE2EA",
+    "planning.weekly_status_surface": "#F1F5F9",
+    "planning.weekly_status_text": "#475569",
+    "planning.weekly_status_border": "#E2E8F0",
+    "planning.weekly_status_completed_surface": "#DCFCE7",
+    "planning.weekly_status_completed_text": "#15803D",
+    "planning.weekly_status_completed_border": "#BBF7D0",
+    "planning.weekly_status_attention_surface": "#FFF7ED",
+    "planning.weekly_status_attention_text": "#C2410C",
+    "planning.weekly_status_attention_border": "#FED7AA",
     "planning.goal_hover_text": "#1E40AF",
     "study_session.pause_button_surface": "#F8FAFC",
     "study_session.pause_button_text": "#475569",
@@ -1862,6 +1942,47 @@ _DARK_COMPONENT_OVERRIDES = {
     "study_session.topic_text": "#F8FAFC",
     "study_session.detail_value_text": "#E5E7EB",
     "study_session.section_title_text": "#F8FAFC",
+    # Planejamento — Rótulos de Seções do Planejamento
+    "planning.section_subtitle_text": "#8999AA",
+    "planning.subsection_title_text": "#D6DFE8",
+
+    # Planejamento — Estrutura dos Cartões de Metas
+    "planning.goal_card_surface": "#142131",
+    "planning.goal_card_border": "#2E4054",
+
+    # Planejamento — Títulos dos Cartões de Metas
+    "planning.goal_card_title_text": "#CBD6E0",
+
+    # Planejamento — Cartão de Carga Diária — Estrutura
+    "planning.weekday_card_surface": "#111E2D",
+    "planning.weekday_card_border": "#2D4054",
+
+    # Planejamento — Cartão de Hoje — Destaque
+    "planning.weekday_today_surface": "#172944",
+    "planning.weekday_today_border": "#5078B9",
+
+    # Planejamento — Carga por Dia — Estados Leve, Moderada e Alta
+    "planning.weekday_light_surface": "#15271F",
+    "planning.weekday_light_border": "#2D4A3D",
+    "planning.weekday_moderate_surface": "#292317",
+    "planning.weekday_moderate_border": "#55482B",
+    "planning.weekday_high_surface": "#2D1D1D",
+    "planning.weekday_high_border": "#5E3737",
+
+    # Planejamento — Carga por Dia — Nome, Data, Contagem e Destaque de Hoje
+    "planning.weekday_name_text": "#95A4B6",
+    "planning.weekday_date_text": "#687B91",
+    "planning.weekday_count_text": "#DCE5EE",
+    "planning.weekday_today_label_text": "#A9C8F5",
+
+    # Planejamento — Painel Reorganizado — Fundo e Borda
+    "planning.reorganized_panel_surface": "#111D2B",
+    "planning.reorganized_panel_border": "#33475D",
+
+    # Planejamento — Subseções — Textos Auxiliares
+    "planning.subsection_hint_text": "#78899D",
+    "planning.micro_label_text": "#78899D",
+
     "planning.panel_surface": "#1F2937",
     "planning.panel_border": "#334155",
     "planning.settings_surface": "#182235",
@@ -1882,6 +2003,45 @@ _DARK_COMPONENT_OVERRIDES = {
     "planning.summary_button_hover_surface": "#334155",
     "planning.summary_button_hover_border": "#64748B",
     "planning.summary_button_hover_text": "#F8FAFC",
+    "planning.redistribute_button_surface": "#431407",
+    "planning.redistribute_button_text": "#FED7AA",
+    "planning.redistribute_button_border": "#C2410C",
+    "planning.redistribute_button_hover_surface": "#7C2D12",
+    "planning.redistribute_button_hover_border": "#FB923C",
+    "planning.redistribute_button_hover_text": "#FFEDD5",
+    "planning.weekly_empty_surface": "#111E2D",
+    "planning.weekly_empty_border": "#34475A",
+    "planning.weekly_empty_title_text": "#C0CCD8",
+    "planning.weekly_empty_description_text": "#8191A4",
+    "planning.weekly_period_text": "#8393A6",
+    "planning.weekly_metric_surface": "#111E2D",
+    "planning.weekly_metric_border": "#2D4054",
+    "planning.weekly_metric_title_text": "#8192A5",
+    "planning.weekly_metric_value_text": "#DCE5EE",
+    "planning.weekly_metric_hint_text": "#788A9E",
+    "planning.weekly_progress_track": "#334155",
+    "planning.weekly_progress_fill": "#60A5FA",
+    "planning.weekly_progress_completed_fill": "#4ADE80",
+    "planning.weekly_completed_hint_text": "#86EFAC",
+    "planning.weekly_setup_button_surface": "#162435",
+    "planning.weekly_setup_button_text": "#B9C8D7",
+    "planning.weekly_setup_button_border": "#34495F",
+    "planning.daily_progress_track": "#263646",
+    "planning.daily_progress_fill": "#4779C7",
+    "planning.daily_goal_value_text": "#E1E8F0",
+    "planning.daily_goal_hint_text": "#8796A8",
+    "planning.total_badge_surface": "#182536",
+    "planning.total_badge_text": "#91A1B4",
+    "planning.total_badge_border": "#33465B",
+    "planning.weekly_status_surface": "#273449",
+    "planning.weekly_status_text": "#CBD5E1",
+    "planning.weekly_status_border": "#334155",
+    "planning.weekly_status_completed_surface": "#163523",
+    "planning.weekly_status_completed_text": "#86EFAC",
+    "planning.weekly_status_completed_border": "#166534",
+    "planning.weekly_status_attention_surface": "#431407",
+    "planning.weekly_status_attention_text": "#FDBA74",
+    "planning.weekly_status_attention_border": "#9A3412",
     "planning.goal_hover_text": "#DBEAFE",
     "study_session.pause_button_surface": "#273449",
     "study_session.pause_button_text": "#CBD5E1",
@@ -3222,6 +3382,47 @@ _FUTURISTIC_COMPONENT_OVERRIDES = {
     "study_session.topic_text": "#F8FAFC",
     "study_session.detail_value_text": "#E5E7EB",
     "study_session.section_title_text": "#F8FAFC",
+    # Planejamento — Rótulos de Seções do Planejamento
+    "planning.section_subtitle_text": "#8999AA",
+    "planning.subsection_title_text": "#D6DFE8",
+
+    # Planejamento — Estrutura dos Cartões de Metas
+    "planning.goal_card_surface": "#142131",
+    "planning.goal_card_border": "#2E4054",
+
+    # Planejamento — Títulos dos Cartões de Metas
+    "planning.goal_card_title_text": "#CBD6E0",
+
+    # Planejamento — Cartão de Carga Diária — Estrutura
+    "planning.weekday_card_surface": "#111E2D",
+    "planning.weekday_card_border": "#2D4054",
+
+    # Planejamento — Cartão de Hoje — Destaque
+    "planning.weekday_today_surface": "#172944",
+    "planning.weekday_today_border": "#5078B9",
+
+    # Planejamento — Carga por Dia — Estados Leve, Moderada e Alta
+    "planning.weekday_light_surface": "#15271F",
+    "planning.weekday_light_border": "#2D4A3D",
+    "planning.weekday_moderate_surface": "#292317",
+    "planning.weekday_moderate_border": "#55482B",
+    "planning.weekday_high_surface": "#2D1D1D",
+    "planning.weekday_high_border": "#5E3737",
+
+    # Planejamento — Carga por Dia — Nome, Data, Contagem e Destaque de Hoje
+    "planning.weekday_name_text": "#95A4B6",
+    "planning.weekday_date_text": "#687B91",
+    "planning.weekday_count_text": "#DCE5EE",
+    "planning.weekday_today_label_text": "#A9C8F5",
+
+    # Planejamento — Painel Reorganizado — Fundo e Borda
+    "planning.reorganized_panel_surface": "#111D2B",
+    "planning.reorganized_panel_border": "#33475D",
+
+    # Planejamento — Subseções — Textos Auxiliares
+    "planning.subsection_hint_text": "#6F8CA0",
+    "planning.micro_label_text": "#6F8CA0",
+
     "planning.panel_surface": "#1F2937",
     "planning.panel_border": "#334155",
     "planning.settings_surface": "#182235",
@@ -3242,6 +3443,45 @@ _FUTURISTIC_COMPONENT_OVERRIDES = {
     "planning.summary_button_hover_surface": "#334155",
     "planning.summary_button_hover_border": "#64748B",
     "planning.summary_button_hover_text": "#F8FAFC",
+    "planning.redistribute_button_surface": "#431407",
+    "planning.redistribute_button_text": "#FED7AA",
+    "planning.redistribute_button_border": "#C2410C",
+    "planning.redistribute_button_hover_surface": "#7C2D12",
+    "planning.redistribute_button_hover_border": "#FB923C",
+    "planning.redistribute_button_hover_text": "#FFEDD5",
+    "planning.weekly_empty_surface": "#111E2D",
+    "planning.weekly_empty_border": "#34475A",
+    "planning.weekly_empty_title_text": "#C0CCD8",
+    "planning.weekly_empty_description_text": "#8191A4",
+    "planning.weekly_period_text": "#8393A6",
+    "planning.weekly_metric_surface": "#111E2D",
+    "planning.weekly_metric_border": "#2D4054",
+    "planning.weekly_metric_title_text": "#8192A5",
+    "planning.weekly_metric_value_text": "#DCE5EE",
+    "planning.weekly_metric_hint_text": "#788A9E",
+    "planning.weekly_progress_track": "#334155",
+    "planning.weekly_progress_fill": "#60A5FA",
+    "planning.weekly_progress_completed_fill": "#4ADE80",
+    "planning.weekly_completed_hint_text": "#86EFAC",
+    "planning.weekly_setup_button_surface": "#162435",
+    "planning.weekly_setup_button_text": "#B9C8D7",
+    "planning.weekly_setup_button_border": "#34495F",
+    "planning.daily_progress_track": "#263646",
+    "planning.daily_progress_fill": "#4779C7",
+    "planning.daily_goal_value_text": "#E1E8F0",
+    "planning.daily_goal_hint_text": "#8796A8",
+    "planning.total_badge_surface": "#182536",
+    "planning.total_badge_text": "#91A1B4",
+    "planning.total_badge_border": "#33465B",
+    "planning.weekly_status_surface": "#273449",
+    "planning.weekly_status_text": "#CBD5E1",
+    "planning.weekly_status_border": "#334155",
+    "planning.weekly_status_completed_surface": "#163523",
+    "planning.weekly_status_completed_text": "#86EFAC",
+    "planning.weekly_status_completed_border": "#166534",
+    "planning.weekly_status_attention_surface": "#431407",
+    "planning.weekly_status_attention_text": "#FDBA74",
+    "planning.weekly_status_attention_border": "#9A3412",
     "planning.goal_hover_text": "#DBEAFE",
     "study_session.pause_button_surface": "#273449",
     "study_session.pause_button_text": "#CBD5E1",

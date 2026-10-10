@@ -103,6 +103,47 @@ _COMPONENT_COLOR_PATHS = (
     "study_session.detail_value_text",
     "study_session.section_title_text",
 
+    # Planejamento — Rótulos de Seções do Planejamento
+    "planning.section_subtitle_text",
+    "planning.subsection_title_text",
+
+    # Planejamento — Estrutura dos Cartões de Metas
+    "planning.goal_card_surface",
+    "planning.goal_card_border",
+
+    # Planejamento — Títulos dos Cartões de Metas
+    "planning.goal_card_title_text",
+
+    # Planejamento — Cartão de Carga Diária — Estrutura
+    "planning.weekday_card_surface",
+    "planning.weekday_card_border",
+
+    # Planejamento — Cartão de Hoje — Destaque
+    "planning.weekday_today_surface",
+    "planning.weekday_today_border",
+
+    # Planejamento — Carga por Dia — Estados Leve, Moderada e Alta
+    "planning.weekday_light_surface",
+    "planning.weekday_light_border",
+    "planning.weekday_moderate_surface",
+    "planning.weekday_moderate_border",
+    "planning.weekday_high_surface",
+    "planning.weekday_high_border",
+
+    # Planejamento — Carga por Dia — Nome, Data, Contagem e Destaque de Hoje
+    "planning.weekday_name_text",
+    "planning.weekday_date_text",
+    "planning.weekday_count_text",
+    "planning.weekday_today_label_text",
+
+    # Planejamento — Painel Reorganizado — Fundo e Borda
+    "planning.reorganized_panel_surface",
+    "planning.reorganized_panel_border",
+
+    # Planejamento — Subseções — Textos Auxiliares
+    "planning.subsection_hint_text",
+    "planning.micro_label_text",
+
     # Planejamento A — migração cromática
     "planning.panel_surface",
     "planning.panel_border",
@@ -130,6 +171,75 @@ _COMPONENT_COLOR_PATHS = (
     "planning.summary_button_hover_surface",
     "planning.summary_button_hover_border",
     "planning.summary_button_hover_text",
+
+    # Planejamento: PLANEJAMENTO_REDISTRIBUIR_BOTAO_BASE_V1
+    "planning.redistribute_button_surface",
+    "planning.redistribute_button_text",
+    "planning.redistribute_button_border",
+
+    # Planejamento: PLANEJAMENTO_REDISTRIBUIR_BOTAO_HOVER_V1
+    "planning.redistribute_button_hover_surface",
+    "planning.redistribute_button_hover_border",
+    "planning.redistribute_button_hover_text",
+
+    # Planejamento — Estado vazio da meta: estrutura
+    "planning.weekly_empty_surface",
+    "planning.weekly_empty_border",
+
+    # Planejamento — Estado vazio da meta: textos
+    "planning.weekly_empty_title_text",
+    "planning.weekly_empty_description_text",
+    "planning.weekly_period_text",
+
+    # Planejamento — Indicador de meta: estrutura
+    "planning.weekly_metric_surface",
+    "planning.weekly_metric_border",
+
+    # Planejamento — Indicador de meta: textos
+    "planning.weekly_metric_title_text",
+    "planning.weekly_metric_value_text",
+    "planning.weekly_metric_hint_text",
+
+    # Planejamento — Barra da meta semanal: trilho e preenchimento
+    "planning.weekly_progress_track",
+    "planning.weekly_progress_fill",
+
+    # Planejamento — Meta semanal concluída: barra e mensagem
+    "planning.weekly_progress_completed_fill",
+    "planning.weekly_completed_hint_text",
+
+    # Planejamento — Botão de configuração da meta semanal: estado normal
+    "planning.weekly_setup_button_surface",
+    "planning.weekly_setup_button_text",
+    "planning.weekly_setup_button_border",
+
+    # Planejamento — Meta diária: barra de progresso
+    "planning.daily_progress_track",
+    "planning.daily_progress_fill",
+
+    # Planejamento — Meta diária: valor e texto auxiliar
+    "planning.daily_goal_value_text",
+    "planning.daily_goal_hint_text",
+
+    # Planejamento — Planejamento: indicador de total
+    "planning.total_badge_surface",
+    "planning.total_badge_text",
+    "planning.total_badge_border",
+
+    # Planejamento: PLANEJAMENTO_STATUS_SEMANAL_BASE_V1
+    "planning.weekly_status_surface",
+    "planning.weekly_status_text",
+    "planning.weekly_status_border",
+
+    # Planejamento: PLANEJAMENTO_STATUS_SEMANAL_CONCLUIDA_V1
+    "planning.weekly_status_completed_surface",
+    "planning.weekly_status_completed_text",
+    "planning.weekly_status_completed_border",
+
+    # Planejamento: PLANEJAMENTO_STATUS_SEMANAL_ATENCAO_V1
+    "planning.weekly_status_attention_surface",
+    "planning.weekly_status_attention_text",
+    "planning.weekly_status_attention_border",
 
     # Planejamento D — migração cromática
     "planning.goal_hover_surface",
