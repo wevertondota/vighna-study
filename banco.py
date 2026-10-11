@@ -2090,19 +2090,22 @@ def criar_banco():
 
 
 def listar_concursos():
-    with conectar() as conexao:
-        return conexao.execute(
-            """
-            SELECT
-                id,
-                nome,
-                e_padrao
-            FROM concursos
-            ORDER BY
-                e_padrao DESC,
-                nome COLLATE NOCASE
-            """
-        ).fetchall()
+    # M1c piloto: preservar o contexto transacional do SQLite e garantir
+    # o fechamento da conexao mesmo quando a consulta falha.
+    with closing(conectar()) as conexao:
+        with conexao:
+            return conexao.execute(
+                """
+                SELECT
+                    id,
+                    nome,
+                    e_padrao
+                FROM concursos
+                ORDER BY
+                    e_padrao DESC,
+                    nome COLLATE NOCASE
+                """
+            ).fetchall()
 
 
 def obter_concurso_padrao():

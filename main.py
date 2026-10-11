@@ -71,7 +71,9 @@ from PySide6.QtWidgets import (
     QRadioButton,
     QButtonGroup,
     QToolButton,
-    QMenu
+    QMenu,
+    QStyleOption,
+    QStyle,
 )
 
 from tema import (
@@ -80,7 +82,16 @@ from tema import (
 )
 
 from icones import criar_icone
-from ui.design import fixed_qss_color, qcolor, qss_color
+from ui.design import fixed_qcolor, fixed_qss_color, qcolor, qss_color
+from ui.portal_inicio import criar_portal_inicio, aplicar_estilo_portal
+from ui.dashboard_compact_nav import (
+    criar_cabecalho_discreto_dashboard, aplicar_estilo_cabecalho_dashboard,
+)
+from ui.portal_treinos import (
+    criar_portal_treinos, aplicar_estilo_treinos, atualizar_retomada_treinos,
+)
+from ui.portal_recursos import criar_portal_recursos, aplicar_estilo_recursos
+from ui.portal_disciplinas import criar_portal_disciplinas, aplicar_estilo_portal_disciplinas
 
 from backup import (
     fazer_backup,
@@ -1531,12 +1542,12 @@ class SeletorEstrelas(QWidget):
             else self.valor
         )
 
-        cor_ativa = QColor(
-            "#E6A700"
+        cor_ativa = fixed_qcolor(
+            "task_indicator.rating_star_active"
         )
 
-        cor_vazia = QColor(
-            "#94A3B8"
+        cor_vazia = fixed_qcolor(
+            "task_indicator.rating_star_empty"
         )
 
         centro_y = (
@@ -1646,12 +1657,12 @@ class IndicadorEstrelasFila(SeletorEstrelas):
             True
         )
 
-        cor_ativa = QColor(
-            "#E6A700"
+        cor_ativa = fixed_qcolor(
+            "task_indicator.rating_star_active"
         )
 
-        cor_vazia = QColor(
-            "#94A3B8"
+        cor_vazia = fixed_qcolor(
+            "task_indicator.rating_star_empty"
         )
 
         centro_y = (
@@ -1835,12 +1846,12 @@ class IndicadorChamasPrioridade(QWidget):
             True
         )
 
-        cor_externa = QColor(
-            "#F97316"
+        cor_externa = fixed_qcolor(
+            "task_indicator.streak_flame_outer"
         )
 
-        cor_interna = QColor(
-            "#FBBF24"
+        cor_interna = fixed_qcolor(
+            "task_indicator.streak_flame_inner"
         )
 
         espacamento = 16
@@ -32634,6 +32645,226 @@ class JanelaRedistribuicao(QDialog):
         self.accept()
 
 
+class SidebarNavigationDots(QWidget):
+    """Três pontos discretos para a rolagem da navegação lateral Futurista.
+
+    Usa a QScrollBar verdadeira como fonte de posição. Não substitui sua
+    lógica, nem remove a rolagem por roda, touchpad ou teclado. O indicador
+    fica sobreposto à margem da navegação para não estreitar os ícones.
+    """
+
+    def __init__(self, barra, viewport):
+        super().__init__(viewport)
+        self._barra = barra
+        self.setFixedSize(11, 76)
+        self.setAttribute(Qt.WA_TranslucentBackground, True)
+        self.setCursor(Qt.PointingHandCursor)
+        self.setAccessibleName("Posição da rolagem da barra lateral")
+        viewport.installEventFilter(self)
+        barra.valueChanged.connect(self._atualizar)
+        barra.rangeChanged.connect(self._atualizar)
+        self._reposicionar()
+        self._atualizar()
+
+    def eventFilter(self, obj, evento):
+        if obj is self.parentWidget() and evento.type() in (QEvent.Resize, QEvent.Show):
+            self._reposicionar()
+        return super().eventFilter(obj, evento)
+
+    def _reposicionar(self):
+        viewport = self.parentWidget()
+        if viewport is None:
+            return
+        x = max(0, viewport.width() - self.width())
+        y = max(0, (viewport.height() - self.height()) // 2)
+        self.move(x, y)
+        self.raise_()
+
+    def _atualizar(self, *_args):
+        minimo, maximo = self._barra.minimum(), self._barra.maximum()
+        # Não sugerir conteúdo oculto se a navegação inteira já é visível.
+        disponivel = maximo > minimo
+        if self.isVisible() != disponivel:
+            self.setVisible(disponivel)
+        if disponivel:
+            self.setToolTip(
+                "Mais opções abaixo — role ou selecione um ponto"
+                if self._barra.value() < maximo else
+                "Fim das opções — role para cima"
+            )
+        self.update()
+
+    def _indice_ativo(self):
+        faixa = self._barra.maximum() - self._barra.minimum()
+        if faixa <= 0:
+            return 0
+        proporcao = (self._barra.value() - self._barra.minimum()) / faixa
+        return 0 if proporcao < 1 / 3 else (1 if proporcao < 2 / 3 else 2)
+
+    def paintEvent(self, _evento):
+        if self._barra.maximum() <= self._barra.minimum():
+            return
+        pintor = QPainter(self)
+        pintor.setRenderHint(QPainter.Antialiasing, True)
+        pintor.setPen(Qt.NoPen)
+        cor_primaria = QColor(qcolor("futurista", "dashboard.nav_border"))
+        indice_ativo = self._indice_ativo()
+        cx = self.width() / 2.0
+        # O tamanho é fixo e discreto; apenas o ponto da posição atual acende.
+        for indice, cy in enumerate((20.0, 38.0, 56.0)):
+            selecionado = indice == indice_ativo
+            cor = QColor(cor_primaria)
+            cor.setAlpha(240 if selecionado else 75)
+            raio = 3.2 if selecionado else 2.35
+            pintor.setBrush(cor)
+            pintor.drawEllipse(QPointF(cx, cy), raio, raio)
+        pintor.end()
+
+    def mousePressEvent(self, evento):
+        if evento.button() != Qt.LeftButton:
+            return super().mousePressEvent(evento)
+        # Clique direto: início, meio ou fim, sem restringir o scroll manual.
+        y = evento.position().y()
+        indice = min(range(3), key=lambda i: abs(y - (20.0 + i * 18.0)))
+        minimo = self._barra.minimum()
+        faixa = self._barra.maximum() - minimo
+        self._barra.setValue(minimo + round(faixa * indice / 2))
+        evento.accept()
+
+    def wheelEvent(self, evento):
+        pixel = evento.pixelDelta().y()
+        angulo = evento.angleDelta().y()
+        if pixel:
+            passo = pixel
+        elif angulo:
+            passo = round(angulo / 120 * max(1, self._barra.singleStep()) * 3)
+        else:
+            evento.ignore()
+            return
+        self._barra.setValue(self._barra.value() - passo)
+        evento.accept()
+
+
+class DashboardAmbientCanvas(QWidget):
+    """Ornamentos estaticos e nao interativos nas margens do Dashboard.
+
+    Desenha apenas quando o tema Futurista esta ativo. Sem timers, sem efeitos
+    graficos nos cards e sem novas cores literais: reutiliza tokens existentes.
+    O QSS continua sendo responsavel pelo canvas e pela superficie dos cards.
+    """
+
+    def paintEvent(self, event):
+        # A pintura do fundo pelo QStyle preserva o contrato QSS em subclasses.
+        painter = QPainter(self)
+        option = QStyleOption()
+        option.initFrom(self)
+        self.style().drawPrimitive(QStyle.PE_Widget, option, painter, self)
+
+        if normalizar_tema(getattr(self.window(), "tema_atual", "claro")) != "futurista":
+            painter.end()
+            return
+
+        width = float(self.width())
+        height = float(self.height())
+        if width < 300 or height < 200:
+            painter.end()
+            return
+
+        painter.setRenderHint(QPainter.Antialiasing, True)
+        painter.setClipRect(self.rect())
+        self._paint_card_ambient_halos(painter)
+        violet = qcolor("futurista", "dashboard.nav_border")
+        soft = qcolor("futurista", "dashboard.topbar_border")
+        # Nenhum estado animado: a ornamentacao e calculada so nos repaints.
+        for side in (0, 1):
+            sign = 1 if side == 0 else -1
+            edge = 0.0 if side == 0 else width
+            path = QPainterPath(QPointF(edge, 24.0))
+            path.cubicTo(QPointF(edge + sign * 51, 112),
+                         QPointF(edge + sign * 42, 222),
+                         QPointF(edge + sign * 12, min(height * 0.56, 460.0)))
+            path.cubicTo(QPointF(edge - sign * 25, min(height * 0.75, 650.0)),
+                         QPointF(edge + sign * 67, max(height - 90.0, 200.0)),
+                         QPointF(edge + sign * 4, height - 12.0))
+            for alpha, thickness in ((18, 2.1), (60, 0.75)):
+                color = QColor(violet)
+                color.setAlpha(alpha)
+                pen = QPen(color)
+                pen.setWidthF(thickness)
+                painter.setPen(pen)
+                painter.setBrush(Qt.NoBrush)
+                painter.drawPath(path)
+
+            # Trilhas verticais segmentadas ocupam as margens, sem encobrir texto.
+            color = QColor(soft)
+            color.setAlpha(78)
+            pen = QPen(color)
+            pen.setWidthF(0.8)
+            painter.setPen(pen)
+            x = edge + sign * 16.0
+            painter.drawLine(QPointF(x, 18), QPointF(x, 83))
+            painter.drawLine(QPointF(x, min(height * 0.59, 510.0)),
+                             QPointF(x, min(height * 0.68, 590.0)))
+            painter.drawLine(QPointF(x, max(height - 85.0, 150.0)),
+                             QPointF(x, height - 17.0))
+
+        # Pontos e pequenas cruzes discretas. Posicoes deterministicas.
+        points = (
+            (14, 102, True), (22, 278, False), (12, 448, True),
+            (26, 584, False), (18, height - 60, True),
+            (width - 14, 116, True), (width - 24, 260, False),
+            (width - 14, 436, True), (width - 20, 612, False),
+            (width - 12, height - 48, True),
+        )
+        for x, y, cross in points:
+            if not 10 < y < height - 10:
+                continue
+            color = QColor(violet if cross else soft)
+            color.setAlpha(122 if cross else 83)
+            pen = QPen(color)
+            pen.setWidthF(0.95)
+            painter.setPen(pen)
+            if cross:
+                painter.drawLine(QPointF(x - 3.5, y), QPointF(x + 3.5, y))
+                painter.drawLine(QPointF(x, y - 3.5), QPointF(x, y + 3.5))
+            else:
+                painter.drawPoint(QPointF(x, y))
+        painter.end()
+
+    def _paint_card_ambient_halos(self, painter):
+        """Realce passivo atras dos cards, somente no Futurista.
+
+        Pintura leve: 4 molduras x 3 linhas por repaint, sem animacoes e
+        sem QGraphicsEffect. Os widgets filhos permanecem acima do halo.
+        """
+        roles = (
+            ("focusDashboardMainCard", "dashboard.focus_card_border"),
+            ("dashboardInsightSummary", "dashboard.planning_card_border"),
+            ("dashboardTodayAction", "dashboard.recommendation_card_border"),
+            ("focusQuickCard", "dashboard.progress_card_border"),
+        )
+        painter.setBrush(Qt.NoBrush)
+        for name, color_role in roles:
+            card = self.findChild(QFrame, name)
+            if card is None or not card.isVisible() or card.width() < 40 or card.height() < 40:
+                continue
+            top_left = card.mapTo(self, card.rect().topLeft())
+            rect = QRectF(
+                float(top_left.x()), float(top_left.y()),
+                float(card.width()), float(card.height()),
+            )
+            # Uma borda luminosa suave fora do card. Bordas reais e
+            # conteudo continuam controlados pelo QSS e por seus widgets.
+            for expansion, thickness, opacity in ((8.0, 9.0, 9), (4.5, 5.0, 15), (1.5, 2.0, 24)):
+                glow = QColor(qcolor("futurista", color_role))
+                glow.setAlpha(opacity)
+                pen = QPen(glow)
+                pen.setWidthF(thickness)
+                painter.setPen(pen)
+                outer = rect.adjusted(-expansion, -expansion, expansion, expansion)
+                painter.drawRoundedRect(outer, 15.0 + expansion, 15.0 + expansion)
+
+
 class DashboardPlanningArcWidget(QWidget):
     """Indicador em arco para a meta diária do card Planejamento."""
 
@@ -33182,8 +33413,75 @@ class SistemaEstudos(QMainWindow):
         # permanecem vivas no QStackedWidget pelo restante da execução.
         self.tela_inicial = self.criar_tela_inicial()
         self.telas.addWidget(self.tela_inicial)
+        # L05d: transfere o cabeçalho ORIGINAL (perfil, gerir, central e ajustes)
+        # para o Início. Não duplica QComboBox nem seus sinais/conexões.
+        # Dashboard histórico conserva os mesmos cards e fica sem cabeçalho.
+        self._dashboard_root_layout.removeWidget(self._dashboard_top_container)
+        self.tela_portal_inicio = criar_portal_inicio(
+            self.voltar_inicio, self.abrir_busca_global, self.abrir_questoes,
+            self.abrir_portal_treinos, self.abrir_portal_recursos,
+            cabecalho_compartilhado=self._dashboard_top_container,
+        )
+        self.telas.addWidget(self.tela_portal_inicio)
+        aplicar_estilo_portal(self.tela_portal_inicio, self.tema_atual)
+        # L03: pagina separada, sem modificar o Dashboard ou os motores.
+        self.tela_portal_treinos = criar_portal_treinos(
+            abrir_inicio=self.abrir_portal_inicio,
+            abrir_dashboard=self.voltar_inicio,
+            abrir_simulado=lambda: self._abrir_treino_pelo_portal("simulado"),
+            abrir_adaptativo=lambda: self._abrir_treino_pelo_portal("adaptativo"),
+            abrir_bateria=lambda: self._abrir_treino_pelo_portal("bateria"),
+            abrir_revisao=lambda: self._abrir_treino_pelo_portal("revisao"),
+            abrir_erros=self.abrir_banco_erros,
+            abrir_historico=self.abrir_historico_questoes,
+            retomar_sessao=self.abrir_ou_trazer_resolvedor_questoes,
+        )
+        self.telas.addWidget(self.tela_portal_treinos)
+        aplicar_estilo_treinos(self.tela_portal_treinos, self.tema_atual)
+        # L05: catálogo de destinos reais, totalmente independente do banco.
+        self.tela_portal_recursos = criar_portal_recursos(
+            abrir_inicio=self.abrir_portal_inicio,
+            abrir_dashboard=self.voltar_inicio,
+            abrir_destinos=self._destinos_portal_recursos(),
+        )
+        self.telas.addWidget(self.tela_portal_recursos)
+        aplicar_estilo_recursos(self.tela_portal_recursos, self.tema_atual)
+        # L05h: tela exclusiva de disciplinas, sem replicar o editor de tópicos.
+        self.tela_portal_disciplinas = criar_portal_disciplinas(
+            listar_disciplinas=listar_disciplinas_gerenciamento,
+            listar_topicos=listar_topicos_gerenciamento,
+            abrir_disciplina=self.abrir_disciplina,
+            editar_disciplinas=self.abrir_disciplinas,
+            voltar_inicio=self.abrir_portal_inicio,
+        )
+        self.telas.addWidget(self.tela_portal_disciplinas)
+        aplicar_estilo_portal_disciplinas(self.tela_portal_disciplinas, self.tema_atual)
+        self._origem_tela_disciplina = None
+        self.telas.setCurrentWidget(self.tela_portal_inicio)
+        self.combo_concurso.currentIndexChanged.connect(self._atualizar_perfil_portal)
+        self._atualizar_perfil_portal()
 
-        self.setCentralWidget(self.telas)
+        # Shell de navegacao: preserva o QStackedWidget e seus controladores.
+        # A barra lateral aparece somente no Futurista; Claro/Escuro seguem
+        # visualmente como antes. A estrutura e reversivel por build.
+        # O shell passa a compartilhar a mesma ambientação do Dashboard para que
+        # as trilhas/ornamentos do tema Futurista também apareçam por trás da
+        # barra lateral translúcida.
+        self.dashboard_shell = DashboardAmbientCanvas()
+        self.dashboard_shell.setObjectName("dashboardAppShell")
+        shell_layout = QHBoxLayout(self.dashboard_shell)
+        shell_layout.setContentsMargins(0, 0, 0, 0)
+        shell_layout.setSpacing(0)
+        self.dashboard_sidebar = self._criar_sidebar_dashboard()
+        shell_layout.addWidget(self.dashboard_sidebar, 0)
+        shell_layout.addWidget(self.telas, 1)
+        self.setCentralWidget(self.dashboard_shell)
+        self.telas.currentChanged.connect(self._atualizar_selecao_sidebar)
+        self.combo_concurso.currentIndexChanged.connect(
+            self._atualizar_perfil_sidebar
+        )
+        self._atualizar_perfil_sidebar()
+        self._atualizar_layout_sidebar()
 
         # Aplicar o tema uma única vez sobre a árvore inicial pronta é mais
         # barato do que manter o QSS ativo enquanto milhares de widgets das
@@ -33201,6 +33499,425 @@ class SistemaEstudos(QMainWindow):
             # Modo legado/rápido: mostra o Dashboard e atualiza no event loop.
             self._agendar_atualizacao_dashboard(forcar=True)
             self._agendar_backup_abertura()
+
+    # DASHBOARD ALVO — NAVEGACAO LATERAL, LOTE ESTRUTURAL B1
+    def _criar_sidebar_dashboard(self):
+        """Menu persistente que reutiliza os destinos existentes.
+
+        Prioriza os rótulos em desktops de 1366 px e oferece colapso manual.
+        """
+        lateral = QFrame()
+        lateral.setObjectName("dashboardSidebar")
+        lateral.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        coluna = QVBoxLayout(lateral)
+        coluna.setContentsMargins(9, 13, 9, 13)
+        coluna.setSpacing(5)
+
+        topo = QHBoxLayout()
+        self.dashboard_sidebar_marca = QLabel("VighnaStudy")
+        self.dashboard_sidebar_marca.setObjectName("dashboardSidebarBrand")
+        topo.addWidget(self.dashboard_sidebar_marca, 1)
+        self.dashboard_sidebar_toggle = QPushButton("☰")
+        self.dashboard_sidebar_toggle.setObjectName("dashboardSidebarToggle")
+        self.dashboard_sidebar_toggle.setFixedSize(34, 34)
+        self.dashboard_sidebar_toggle.setToolTip("Recolher ou expandir a navegacao lateral")
+        self.dashboard_sidebar_toggle.clicked.connect(self._alternar_sidebar_dashboard)
+        topo.addWidget(self.dashboard_sidebar_toggle, 0, Qt.AlignRight)
+        coluna.addLayout(topo)
+
+        self.dashboard_sidebar_perfil = QLabel("Perfil ativo")
+        self.dashboard_sidebar_perfil.setObjectName("dashboardSidebarProfile")
+        self.dashboard_sidebar_perfil.setWordWrap(True)
+        coluna.addWidget(self.dashboard_sidebar_perfil)
+
+        separador = QFrame()
+        separador.setObjectName("dashboardSidebarDivider")
+        separador.setFixedHeight(1)
+        coluna.addWidget(separador)
+        coluna.addSpacing(9)
+
+        # Navegacao consolidada L05f: quatro destinos principais e cinco
+        # ferramentas de estudo. As rotas secundarias continuam nas centrais.
+        # Icones usam o recurso existente; caracteres sao fallback.
+        grupos_navegacao = (
+            ("ÁREAS PRINCIPAIS", (
+                ("inicio", "Início", "fa6s.house", "⌂", self.abrir_portal_inicio),
+                ("dashboard", "Dashboard", "fa6s.chart-column", "▥", self.voltar_inicio),
+                ("simulados", "Simulados e Treinos", "fa6s.clipboard-check", "▣", self.abrir_portal_treinos),
+                ("recursos", "Central de Recursos", "fa6s.grip", "▦", self.abrir_portal_recursos),
+            )),
+            ("FERRAMENTAS DE ESTUDO", (
+                ("disciplinas", "Disciplinas", "fa6s.book-open", "▣", self.abrir_disciplinas_topicos_perfil),
+                ("planejamento", "Planejamento", "fa6s.calendar-days", "▦", self.abrir_calendario),
+                ("estatisticas", "Estatísticas", "fa6s.chart-column", "▥", self.abrir_estatisticas),
+                ("relatorios", "Relatórios", "fa6s.chart-pie", "▥", self.abrir_relatorios),
+                ("pausa", "Pausa e Desafios", "fa6s.trophy", "☆", self.abrir_pausa_desafios),
+            )),
+        )
+        # Os atalhos centrais rolam apenas quando a altura e pequena (980x620).
+        # Configurações continua ancorado ao rodape e acessivel em toda altura.
+        nav_scroll = QScrollArea()
+        nav_scroll.setObjectName("dashboardSidebarNavigationScroll")
+        nav_scroll.setFrameShape(QFrame.NoFrame)
+        nav_scroll.setWidgetResizable(True)
+        nav_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # Preserva a rolagem por mouse/touchpad e os tres pontos indicadores.
+        nav_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        nav_scroll.setStyleSheet(
+            "QScrollArea#dashboardSidebarNavigationScroll { background: transparent; border: none; }"
+            "QWidget#dashboardSidebarNavigationContent { background: transparent; }"
+        )
+        nav_content = QWidget()
+        nav_content.setObjectName("dashboardSidebarNavigationContent")
+        nav_layout = QVBoxLayout(nav_content)
+        nav_layout.setContentsMargins(0, 0, 0, 0)
+        nav_layout.setSpacing(5)
+        self._sidebar_botoes = {}
+        self._sidebar_rotulos = {}
+        self._sidebar_icones = {}
+        self._sidebar_grupos_rotulos = []
+        for indice_grupo, (titulo_grupo, itens) in enumerate(grupos_navegacao):
+            if indice_grupo:
+                divisoria = QFrame()
+                divisoria.setObjectName("dashboardSidebarDivider")
+                divisoria.setFixedHeight(1)
+                nav_layout.addSpacing(6)
+                nav_layout.addWidget(divisoria)
+                nav_layout.addSpacing(4)
+            rotulo_grupo = QLabel(titulo_grupo)
+            rotulo_grupo.setObjectName("dashboardSidebarGroupLabel")
+            rotulo_grupo.setFixedHeight(19)
+            rotulo_grupo.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            rotulo_grupo.setStyleSheet(
+                "background: transparent; border: none; padding-left: 4px; "
+                "font-size: 8pt; font-weight: 600; "
+                f"color: {qss_color('futurista', 'dashboard.subtitle_text')};"
+            )
+            nav_layout.addWidget(rotulo_grupo)
+            self._sidebar_grupos_rotulos.append(rotulo_grupo)
+            for chave, rotulo, icone, fallback, acao in itens:
+                botao = QPushButton(rotulo)
+                botao.setObjectName("dashboardSidebarNavButton")
+                botao.setProperty("navSelected", chave == "inicio")
+                botao.setFixedHeight(43)
+                botao.setCursor(Qt.PointingHandCursor)
+                botao.setToolTip(rotulo)
+                botao.clicked.connect(lambda _checked=False, fn=acao: fn())
+                nav_layout.addWidget(botao)
+                self._sidebar_botoes[chave] = botao
+                self._sidebar_rotulos[chave] = rotulo
+                self._sidebar_icones[chave] = (icone, fallback)
+        nav_layout.addStretch(1)
+        nav_scroll.setWidget(nav_content)
+        self.dashboard_sidebar_nav_scroll = nav_scroll
+        self.dashboard_sidebar_scroll_dots = SidebarNavigationDots(
+            nav_scroll.verticalScrollBar(), nav_scroll.viewport()
+        )
+        coluna.addWidget(nav_scroll, 1)
+
+        botao_config = QPushButton("Configurações")
+        botao_config.setObjectName("dashboardSidebarNavButton")
+        botao_config.setProperty("navSelected", False)
+        botao_config.setFixedHeight(43)
+        botao_config.setCursor(Qt.PointingHandCursor)
+        botao_config.setToolTip("Configurações")
+        botao_config.clicked.connect(self.abrir_configuracoes)
+        coluna.addWidget(botao_config)
+        self._sidebar_botoes["configuracoes"] = botao_config
+        self._sidebar_rotulos["configuracoes"] = "Configurações"
+        self._sidebar_icones["configuracoes"] = ("fa6s.gear", "⚙")
+        self._sidebar_expandida_manual = None
+        self._sidebar_expandida_efetiva = None
+        return lateral
+
+    def _atualizar_perfil_portal(self, _indice=None):
+        pagina = getattr(self, "tela_portal_inicio", None)
+        if pagina is None:
+            return
+        rotulo = getattr(pagina, "portal_perfil_label", None)
+        if rotulo is not None:
+            rotulo.setText("Perfil ativo: " + (self.combo_concurso.currentText().strip() or "—"))
+
+    def abrir_portal_inicio(self):
+        """Abre somente o portal, sem atualizar ou interromper sessoes existentes."""
+        self.telas.setCurrentWidget(self.tela_portal_inicio)
+        self._atualizar_perfil_portal()
+
+    def abrir_portal_treinos(self):
+        """Abre a Central de Treinos sem interferir em sessoes em andamento."""
+        atualizar_retomada_treinos(
+            self.tela_portal_treinos,
+            self.obter_janela_resolvedor_questoes() is not None,
+        )
+        self.telas.setCurrentWidget(self.tela_portal_treinos)
+
+    def abrir_portal_recursos(self):
+        """Mostra o catálogo sem destruir nem recarregar sessões existentes."""
+        self.telas.setCurrentWidget(self.tela_portal_recursos)
+
+    def abrir_disciplinas_topicos_perfil(self):
+        """Abre a tela exclusiva do perfil com acesso à edição dos tópicos."""
+        pagina = self.tela_portal_disciplinas
+        pagina.atualizar(self.combo_concurso.currentText().strip())
+        self.telas.setCurrentWidget(pagina)
+
+    def _voltar_da_disciplina(self):
+        """Retorna à lista exclusiva se a disciplina foi aberta por ela."""
+        if self._origem_tela_disciplina is getattr(self, "tela_portal_disciplinas", None):
+            self.abrir_disciplinas_topicos_perfil()
+        else:
+            self.voltar_inicio()
+
+    def _destinos_portal_recursos(self):
+        """Mapeia cada item para um controlador já existente, sem novos motores."""
+        return {
+            "inicio": self.abrir_portal_inicio,
+            "dashboard": self.voltar_inicio,
+            "simulados_treinos": self.abrir_portal_treinos,
+            "foco": self.abrir_modo_foco,
+            "disciplinas": self.abrir_disciplinas_topicos_perfil,
+            "algoritmo": lambda: self.ir_para_secao_dashboard(
+                widget=getattr(self, "dashboard_hoje_acao", None)),
+            "jornada": self.abrir_jornada_do_dia,
+            "questoes": self.abrir_questoes,
+            "bateria": lambda: self._abrir_treino_pelo_portal("bateria"),
+            "simulado": lambda: self._abrir_treino_pelo_portal("simulado"),
+            "adaptativo": lambda: self._abrir_treino_pelo_portal("adaptativo"),
+            "revisao": lambda: self._abrir_treino_pelo_portal("revisao"),
+            "banco_erros": self.abrir_banco_erros,
+            "historico": self.abrir_historico_questoes,
+            "calendario": self.abrir_calendario,
+            "plano_acao": self.abrir_plano_acao_automatico,
+            "config_planejamento": self.abrir_configuracao_planejamento,
+            "fechamento": self.abrir_fechamento_semanal,
+            "estatisticas": self.abrir_estatisticas,
+            "relatorios": self.abrir_relatorios,
+            "progresso_edital": self.abrir_progresso_edital,
+            "previsao_edital": self.abrir_previsao_edital,
+            "alertas": self.abrir_alertas_conteudo,
+            "pausa": self.abrir_pausa_desafios,
+            "perfis": self.abrir_concursos,
+            "configuracoes": self.abrir_configuracoes,
+            "diagnostico": self.abrir_diagnostico_vighna,
+        }
+
+    def _abrir_treino_pelo_portal(self, modalidade):
+        """Reutiliza a logica original e evita uma segunda bateria paralela."""
+        if self.obter_janela_resolvedor_questoes() is not None:
+            self.abrir_ou_trazer_resolvedor_questoes()
+            return
+        destinos = {
+            "simulado": self.abrir_simulado,
+            "adaptativo": self.abrir_treino_adaptativo,
+            "bateria": self.resolver_questoes,
+            "revisao": self.abrir_revisao_inteligente_dashboard,
+        }
+        destinos[modalidade]()
+        atualizar_retomada_treinos(
+            self.tela_portal_treinos,
+            self.obter_janela_resolvedor_questoes() is not None,
+        )
+
+    def _atualizar_perfil_sidebar(self, _indice=None):
+        if not hasattr(self, "dashboard_sidebar_perfil"):
+            return
+        nome = self.combo_concurso.currentText().strip()
+        self.dashboard_sidebar_perfil.setText(nome or "Perfil ativo")
+
+    def _alternar_sidebar_dashboard(self):
+        """Alterna a lateral sem forçar ocultação de rótulos em 1366 px."""
+        largura = self.width()
+        # Colapso manual continua disponível; expansão manual requer espaço
+        # real para duas colunas legíveis e rolagem dos módulos.
+        if largura < 1180:
+            return
+        self._sidebar_expandida_manual = not bool(self._sidebar_expandida_efetiva)
+        self._atualizar_layout_sidebar()
+
+    def _ajustar_cabecalho_dashboard(self, compacto):
+        """Usa uma linha no Futurista com sidebar, sem perder o fallback.
+
+        A busca permanece oculta na lateral e continua na posição original
+        no Claro/Escuro ou quando a janela não comporta a sidebar.
+        Não recria widgets nem desconecta os seus sinais.
+        """
+        grade = getattr(self, "_dashboard_top_grid", None)
+        perfil = getattr(self, "_dashboard_top_profile", None)
+        busca = getattr(self, "botao_busca_global", None)
+        if grade is None or perfil is None or busca is None:
+            return
+        if getattr(self, "_dashboard_cabecalho_compacto", None) == compacto:
+            return
+        self._dashboard_cabecalho_compacto = compacto
+        grade.removeWidget(busca)
+        grade.removeWidget(perfil)
+        if compacto:
+            # A busca agora esta na sidebar. Perfil e acoes globais
+            # dividem uma unica linha, reduzindo a altura do cabecalho.
+            grade.addWidget(busca, 1, 1, Qt.AlignVCenter)
+            grade.addWidget(perfil, 0, 1, Qt.AlignLeft | Qt.AlignVCenter)
+            grade.setVerticalSpacing(0)
+        else:
+            # Restaurar a distribuicao original dos temas Claro/Escuro
+            # e do Futurista em janelas estreitas.
+            grade.addWidget(busca, 0, 1, Qt.AlignVCenter)
+            grade.addWidget(perfil, 1, 1, Qt.AlignLeft | Qt.AlignVCenter)
+            grade.setVerticalSpacing(4)
+        grade.invalidate()
+        self._dashboard_top_container.updateGeometry()
+
+    def _ajustar_densidade_dashboard_lateral(self, futurista, visivel, expandida):
+        """Controla apenas geometria visual, sem alterar dados ou ações.
+
+        Referências à árvore de widgets são guardadas depois da construção
+        inicial. Restaurar valores originais protege Claro/Escuro.
+        """
+        if not hasattr(self, "_dashboard_root_layout"):
+            return
+        compacto = futurista and visivel and expandida and self.width() < 1600
+        assinatura = (futurista, compacto, visivel, expandida)
+        if getattr(self, "_dashboard_densidade_estado", None) == assinatura:
+            return
+        self._dashboard_densidade_estado = assinatura
+        if compacto:
+            self._dashboard_root_layout.setContentsMargins(17, 10, 17, 17)
+            self._dashboard_root_layout.setSpacing(8)
+            self._dashboard_foco_painel_layout.setContentsMargins(6, 5, 6, 5)
+            self._dashboard_foco_card_layout.setContentsMargins(11, 8, 11, 8)
+            self._dashboard_planejamento_layout.setContentsMargins(9, 5, 9, 6)
+            self._dashboard_primeira_linha.setSpacing(7)
+            self._dashboard_primeira_linha.setStretch(0, 11)
+            self._dashboard_primeira_linha.setStretch(1, 10)
+            self._dashboard_recomendacao_linha.setSpacing(8)
+            self._dashboard_recomendacao_linha.setStretch(0, 2)
+            self._dashboard_recomendacao_linha.setStretch(1, 1)
+        else:
+            # O Futurista com sidebar dispensa parte do respiro antes
+            # do cabecalho; os outros temas preservam a geometria.
+            self._dashboard_root_layout.setContentsMargins(
+                28, 10 if futurista and visivel else 16, 28, 20
+            )
+            self._dashboard_root_layout.setSpacing(10)
+            self._dashboard_foco_painel_layout.setContentsMargins(12, 8, 12, 8)
+            self._dashboard_foco_card_layout.setContentsMargins(14, 10, 14, 10)
+            self._dashboard_planejamento_layout.setContentsMargins(12, 5, 12, 6)
+            self._dashboard_primeira_linha.setSpacing(8)
+            self._dashboard_primeira_linha.setStretch(0, 1)
+            self._dashboard_primeira_linha.setStretch(1, 1)
+            self._dashboard_recomendacao_linha.setSpacing(10)
+            self._dashboard_recomendacao_linha.setStretch(0, 3)
+            self._dashboard_recomendacao_linha.setStretch(1, 1)
+
+    def _atualizar_layout_sidebar(self):
+        if not hasattr(self, "dashboard_sidebar"):
+            return
+        futurista = normalizar_tema(getattr(self, "tema_atual", "claro")) == "futurista"
+        largura = self.width()
+        visivel = futurista and largura >= 1080
+        # Em 1366 px a lateral textual tem prioridade. A versão compacta
+        # continua acessível pelo botão e é o padrão só abaixo de 1240 px.
+        expandida = visivel and largura >= 1240
+        if self._sidebar_expandida_manual is not None:
+            expandida = visivel and bool(self._sidebar_expandida_manual) and largura >= 1180
+        self.dashboard_sidebar.setVisible(visivel)
+        # O acesso ao portal na barra superior e necessario quando a lateral
+        # nao existe (Claro/Escuro ou janela estreita).
+        acesso_inicio = getattr(self, "botao_portal_inicio_topo", None)
+        if acesso_inicio is not None:
+            acesso_inicio.setVisible(not visivel)
+        # Reestiliza apenas na troca de tema; resize nao repinta o QSS inteiro.
+        if getattr(self, "_portal_tema_estilizado", None) != self.tema_atual:
+            aplicar_estilo_portal(self.tela_portal_inicio, self.tema_atual)
+            aplicar_estilo_treinos(self.tela_portal_treinos, self.tema_atual)
+            aplicar_estilo_recursos(self.tela_portal_recursos, self.tema_atual)
+            aplicar_estilo_portal_disciplinas(self.tela_portal_disciplinas, self.tema_atual)
+            aplicar_estilo_cabecalho_dashboard(self.dashboard_quick_nav, self.tema_atual)
+            self._portal_tema_estilizado = self.tema_atual
+        # A busca do portal Início permanece visível no Futurista: ela compõe
+        # o cabeçalho da tela inicial independentemente da lateral textual.
+        busca_superior = getattr(self, "botao_busca_global", None)
+        if busca_superior is not None:
+            busca_superior.setVisible(True)
+        # Ações duplicadas no rodapé não ocupam mais o Dashboard Futurista.
+        # Nos temas sem lateral e em janelas onde a lateral não aparece,
+        # o rodapé original permanece funcional e acessível.
+        atalhos = getattr(self, "dashboard_atalhos_rapidos", None)
+        if atalhos is not None:
+            atalhos.setVisible(not visivel)
+        if visivel:
+            # B1.4: proporcao real da referencia (228 px em 1716 px).
+            # Com 1366 px: 182 px; em 1716 px: 228 px.
+            # Limites protegem nomes em janelas menores e cards nas maiores.
+            largura_lateral = (min(230, max(178, round(largura * 0.133)))
+                               if expandida else 66)
+            self.dashboard_sidebar.setFixedWidth(largura_lateral)
+            self.dashboard_sidebar_marca.setVisible(expandida)
+            self.dashboard_sidebar_perfil.setVisible(expandida)
+            for rotulo_grupo in self._sidebar_grupos_rotulos:
+                rotulo_grupo.setVisible(expandida)
+            self.dashboard_sidebar_toggle.setToolTip(
+                "Recolher navegação" if expandida else "Expandir navegação com nomes"
+            )
+            # Recriar icones quando muda a geometria OU o tema: Qt guarda
+            # QIcon em cache; mudar apenas o QSS deixa a cor antiga do icone.
+            # Nada e refeito nos demais eventos de resize.
+            tema = normalizar_tema(getattr(self, "tema_atual", "claro"))
+            assinatura_icones = (expandida, tema)
+            if getattr(self, "_sidebar_assinatura_icones", None) != assinatura_icones:
+                self._sidebar_expandida_efetiva = expandida
+                self._sidebar_assinatura_icones = assinatura_icones
+                for chave, botao in self._sidebar_botoes.items():
+                    nome_icone, fallback = self._sidebar_icones[chave]
+                    icone = criar_icone(nome_icone, tema=tema, papel="acao")
+                    botao.setIcon(icone)
+                    botao.setIconSize(QSize(18, 18))
+                    botao.setText(
+                        self._sidebar_rotulos[chave] if expandida
+                        else ("" if not icone.isNull() else fallback)
+                    )
+                    botao.setToolTip(self._sidebar_rotulos[chave])
+        else:
+            self._sidebar_expandida_efetiva = None
+            self._sidebar_assinatura_icones = None
+
+        # L05d: o cabeçalho pertence somente ao portal Início. Preservar sua
+        # marca em ambos os estados da lateral; não há mais cabeçalho no
+        # Dashboard a ser reduzido ou ocultado.
+        for widget in getattr(self, "_dashboard_marca_superior", ()):
+            widget.setVisible(True)
+        self._ajustar_cabecalho_dashboard(futurista and visivel)
+        self._ajustar_densidade_dashboard_lateral(futurista, visivel, expandida)
+
+    def _atualizar_selecao_sidebar(self, _indice=None):
+        if not hasattr(self, "_sidebar_botoes"):
+            return
+        atual = self.telas.currentWidget()
+        chave = ("inicio" if atual is getattr(self, "tela_portal_inicio", None)
+                 else "recursos" if atual is getattr(self, "tela_portal_recursos", None)
+                 else "simulados" if atual is getattr(self, "tela_portal_treinos", None)
+                 else "dashboard" if atual is self.tela_inicial else None)
+        for nome_widget, destino in (
+            ("tela_portal_disciplinas", "disciplinas"),
+            ("tela_calendario", "planejamento"),
+            ("tela_estatisticas", "estatisticas"),
+            ("tela_relatorios", "relatorios"),
+        ):
+            if getattr(self, nome_widget, None) is atual:
+                chave = destino
+                break
+        for nome, botao in self._sidebar_botoes.items():
+            selecionado = nome == chave
+            if bool(botao.property("navSelected")) == selecionado:
+                continue
+            botao.setProperty("navSelected", selecionado)
+            # Qt nao recalcula seletores de propriedades dinamicas sem repolish.
+            botao.style().unpolish(botao)
+            botao.style().polish(botao)
+            botao.update()
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self._atualizar_layout_sidebar()
 
     def _precarregar_topicos_disciplinas(self):
         """Aquece a primeira abertura de cada disciplina do perfil ativo."""
@@ -33327,8 +34044,8 @@ class SistemaEstudos(QMainWindow):
             )
         self._precarregar_relatorios_todas_abas(progresso_relatorio)
 
-        etapa("Finalizando a interface...", 98, "Consolidando caches e retornando ao Dashboard.")
-        self.telas.setCurrentWidget(self.tela_inicial)
+        etapa("Finalizando a interface...", 98, "Consolidando caches e preparando o Início.")
+        self.telas.setCurrentWidget(self.tela_portal_inicio)
         self._dashboard_sujo = False
         try:
             concurso_id = int(obter_concurso_ativo()[0])
@@ -33339,7 +34056,7 @@ class SistemaEstudos(QMainWindow):
         self._startup_precarregado = True
         self._pre_carregar_startup = False
         self._agendar_backup_abertura()
-        etapa("Tudo pronto.", 100, "O Vighna foi carregado antes da entrada no Dashboard.")
+        etapa("Tudo pronto.", 100, "O Vighna está pronto na nova tela Início.")
 
     def _garantir_tela_secundaria(self, atributo, construtor):
         """Cria uma tela pesada somente no primeiro acesso."""
@@ -34260,6 +34977,7 @@ class SistemaEstudos(QMainWindow):
             ("Ctrl+Q", self.abrir_questoes),
             ("Ctrl+Shift+C", self.atalho_checkpoint),
             ("Ctrl+H", self.voltar_inicio),
+            ("Ctrl+Shift+H", self.abrir_portal_inicio),
         ]
         for sequencia, acao in atalhos:
             atalho = QShortcut(QKeySequence(sequencia), self)
@@ -34301,13 +35019,40 @@ class SistemaEstudos(QMainWindow):
         """Catálogo enxuto de destinos e ações para a busca global."""
         return [
             {
+                "id": "inicio",
+                "categoria": "NAVEGAÇÃO",
+                "titulo": "Início",
+                "descricao": "Abrir o portal de entrada com as três áreas do Vighna",
+                "termos": "inicio início home portal principal escolher área",
+                "atalho": "Ctrl+Shift+H",
+                "prioridade": 101,
+            },
+            {
                 "id": "dashboard",
                 "categoria": "NAVEGAÇÃO",
-                "titulo": "Dashboard",
-                "descricao": "Voltar à visão geral do estudo",
-                "termos": "inicio início home principal visão geral",
+                "titulo": "Dashboard de Estudos",
+                "descricao": "Ver foco, recomendações, metas e progresso",
+                "termos": "dashboard estudo foco metas progresso visão geral",
                 "atalho": "Ctrl+H",
                 "prioridade": 100,
+            },
+            {
+                "id": "simulados_treinos",
+                "categoria": "NAVEGAÇÃO",
+                "titulo": "Simulados e Treinos",
+                "descricao": "Abrir a central de modalidades de prática",
+                "termos": "simulados treinos provas adaptativo bateria pratica prática central",
+                "atalho": "",
+                "prioridade": 97,
+            },
+            {
+                "id": "recursos",
+                "categoria": "NAVEGAÇÃO",
+                "titulo": "Central de Recursos",
+                "descricao": "Encontrar as ferramentas, telas e configurações do Vighna",
+                "termos": "recursos ferramentas todas as opções catalogo catálogo",
+                "atalho": "",
+                "prioridade": 96,
             },
             {
                 "id": "foco",
@@ -34491,8 +35236,14 @@ class SistemaEstudos(QMainWindow):
 
     def executar_comando_busca_global(self, comando_id):
         comando_id = str(comando_id or "")
-        if comando_id == "dashboard":
+        if comando_id == "inicio":
+            self.abrir_portal_inicio()
+        elif comando_id == "dashboard":
             self.voltar_inicio()
+        elif comando_id == "simulados_treinos":
+            self.abrir_portal_treinos()
+        elif comando_id == "recursos":
+            self.abrir_portal_recursos()
         elif comando_id == "foco":
             self.abrir_modo_foco()
         elif comando_id == "sessao_rapida":
@@ -34687,7 +35438,7 @@ class SistemaEstudos(QMainWindow):
             QFrame.NoFrame
         )
 
-        conteudo = QWidget()
+        conteudo = DashboardAmbientCanvas()
         conteudo.setObjectName("dashboardRoot")
 
         layout = QVBoxLayout(
@@ -34706,9 +35457,11 @@ class SistemaEstudos(QMainWindow):
         layout.setSpacing(
             10
         )
+        self._dashboard_root_layout = layout
 
         # ====================================================
-        # CABEÇALHO — MARCA + NAVEGAÇÃO
+        # CABEÇALHO COMPARTILHADO — CONSTRUÍDO AQUI POR DEPENDER DO PERFIL,
+        # MAS TRANSFERIDO AO PORTAL INÍCIO NO CONSTRUTOR PRINCIPAL (L05d).
         # ====================================================
 
         titulo = QLabel("VighnaStudy")
@@ -34742,111 +35495,23 @@ class SistemaEstudos(QMainWindow):
         marca.setSpacing(10)
         marca.addWidget(logo_marca)
         marca.addLayout(texto_marca)
+        self._dashboard_marca_superior = (titulo, subtitulo, logo_marca)
 
-        # Cabeçalho assimétrico em duas linhas:
-        # marca (ocupando as duas linhas) | busca/ações | perfil/XP.
-        # Isso preserva largura útil mesmo em janelas próximas de 1366 px.
+        # Cabeçalho do portal Início (Futurista):
+        # marca à esquerda, perfil/gerenciar ao lado e busca discreta à direita.
+        # Mantemos os mesmos controladores já existentes, sem recriar estado.
         topo_container = QFrame()
         topo_container.setObjectName("dashboardTopBar")
 
-        topo = QGridLayout(topo_container)
-        topo.setContentsMargins(14, 7, 14, 7)
-        topo.setHorizontalSpacing(14)
-        topo.setVerticalSpacing(4)
-        topo.setColumnStretch(0, 0)
-        topo.setColumnStretch(1, 1)
-        topo.setColumnStretch(2, 0)
-
-        topo.addLayout(
-            marca,
-            0,
-            0,
-            2,
-            1,
-            Qt.AlignLeft | Qt.AlignVCenter,
-        )
+        topo = QHBoxLayout(topo_container)
+        self._dashboard_top_grid = None
+        self._dashboard_top_container = topo_container
+        topo.setContentsMargins(14, 8, 14, 8)
+        topo.setSpacing(12)
+        topo.addLayout(marca, 0)
 
         # ----------------------------------------------------
-        # Linha superior — busca global + ações
-        # ----------------------------------------------------
-        self.botao_busca_global = QPushButton(
-            "⌕  Buscar no Vighna...                                      Ctrl+K"
-        )
-        self.botao_busca_global.setObjectName("globalSearchTrigger")
-        self.botao_busca_global.setMinimumWidth(360)
-        self.botao_busca_global.setMaximumWidth(560)
-        self.botao_busca_global.setFixedHeight(36)
-        self.botao_busca_global.setSizePolicy(
-            QSizePolicy.Expanding,
-            QSizePolicy.Fixed,
-        )
-        self.botao_busca_global.setCursor(Qt.PointingHandCursor)
-        self.botao_busca_global.setToolTip(
-            "Buscar telas, ferramentas, ações e tópicos do perfil ativo. Atalho: Ctrl+K."
-        )
-        self.botao_busca_global.clicked.connect(self.abrir_busca_global)
-        topo.addWidget(
-            self.botao_busca_global,
-            0,
-            1,
-            Qt.AlignVCenter,
-        )
-
-        acoes_topo = QHBoxLayout()
-        acoes_topo.setContentsMargins(0, 0, 0, 0)
-        acoes_topo.setSpacing(8)
-
-        botao_questoes = QPushButton("Central de Questões")
-        botao_questoes.setObjectName("questionsNavButton")
-        botao_questoes.setMinimumWidth(148)
-        botao_questoes.setFixedHeight(36)
-        botao_questoes.setToolTip(
-            "Abrir a Central de Questões para cadastrar, importar, editar, desativar, organizar e remover questões do banco."
-        )
-        botao_questoes.clicked.connect(self.abrir_questoes)
-        acoes_topo.addWidget(botao_questoes, 0, Qt.AlignVCenter)
-
-        self.botao_retomar_questoes_topo = QPushButton("Retomar bateria")
-        self.botao_retomar_questoes_topo.setObjectName("subtleButton")
-        self.botao_retomar_questoes_topo.setFixedHeight(36)
-        self.botao_retomar_questoes_topo.setToolTip(
-            "Restaurar a bateria de questões em andamento (Ctrl+Shift+Q)."
-        )
-        self.botao_retomar_questoes_topo.clicked.connect(
-            self.abrir_ou_trazer_resolvedor_questoes
-        )
-        self.botao_retomar_questoes_topo.setVisible(False)
-        acoes_topo.addWidget(
-            self.botao_retomar_questoes_topo,
-            0,
-            Qt.AlignVCenter,
-        )
-
-        self.botao_configuracoes_topo = QPushButton("")
-        self.botao_configuracoes_topo.setObjectName("topAccentButton")
-        self.botao_configuracoes_topo.setFixedSize(42, 36)
-        self.botao_configuracoes_topo.setToolTip(
-            "Abrir as configurações gerais do VighnaStudy."
-        )
-        self.botao_configuracoes_topo.setAccessibleName("Configurações")
-        self.botao_configuracoes_topo.clicked.connect(
-            self.abrir_configuracoes
-        )
-        acoes_topo.addWidget(
-            self.botao_configuracoes_topo,
-            0,
-            Qt.AlignVCenter,
-        )
-
-        topo.addLayout(
-            acoes_topo,
-            0,
-            2,
-            Qt.AlignRight | Qt.AlignVCenter,
-        )
-
-        # ----------------------------------------------------
-        # Linha inferior — perfil ativo + progressão
+        # Perfil ativo — integrado ao lado da marca
         # ----------------------------------------------------
         perfil_central = QFrame()
         perfil_central.setObjectName("topProfileBar")
@@ -34890,15 +35555,78 @@ class SistemaEstudos(QMainWindow):
             0,
             Qt.AlignVCenter,
         )
+        topo.addWidget(perfil_central, 0, Qt.AlignVCenter)
 
-        topo.addWidget(
-            perfil_central,
-            1,
-            1,
-            Qt.AlignLeft | Qt.AlignVCenter,
+        topo.addStretch(1)
+
+        # ----------------------------------------------------
+        # Busca global — discreta e alinhada à direita no portal Início
+        # ----------------------------------------------------
+        self.botao_busca_global = QPushButton(
+            "⌕  Buscar no Vighna...     Ctrl+K"
         )
+        self.botao_busca_global.setObjectName("globalSearchTrigger")
+        self.botao_busca_global.setMinimumWidth(260)
+        self.botao_busca_global.setMaximumWidth(360)
+        self.botao_busca_global.setFixedHeight(36)
+        self.botao_busca_global.setSizePolicy(
+            QSizePolicy.Fixed,
+            QSizePolicy.Fixed,
+        )
+        self.botao_busca_global.setCursor(Qt.PointingHandCursor)
+        self.botao_busca_global.setToolTip(
+            "Buscar telas, ferramentas, ações e tópicos do perfil ativo. Atalho: Ctrl+K."
+        )
+        self.botao_busca_global.clicked.connect(self.abrir_busca_global)
+        topo.addWidget(self.botao_busca_global, 0, Qt.AlignRight | Qt.AlignVCenter)
 
+        # Referências mantidas para compatibilidade com rotinas existentes,
+        # mesmo sem exposição visual no cabeçalho do portal.
+        self.botao_portal_inicio_topo = QPushButton("Início")
+        self.botao_portal_inicio_topo.setObjectName("subtleButton")
+        self.botao_portal_inicio_topo.setFixedHeight(36)
+        self.botao_portal_inicio_topo.setToolTip("Abrir a nova tela inicial do VighnaStudy.")
+        self.botao_portal_inicio_topo.clicked.connect(self.abrir_portal_inicio)
+        self.botao_portal_inicio_topo.setVisible(False)
+
+        self.botao_retomar_questoes_topo = QPushButton("Retomar bateria")
+        self.botao_retomar_questoes_topo.setObjectName("subtleButton")
+        self.botao_retomar_questoes_topo.setFixedHeight(36)
+        self.botao_retomar_questoes_topo.setToolTip(
+            "Restaurar a bateria de questões em andamento (Ctrl+Shift+Q)."
+        )
+        self.botao_retomar_questoes_topo.clicked.connect(
+            self.abrir_ou_trazer_resolvedor_questoes
+        )
+        self.botao_retomar_questoes_topo.setVisible(False)
+
+        self.botao_configuracoes_topo = QPushButton("")
+        self.botao_configuracoes_topo.setObjectName("topAccentButton")
+        self.botao_configuracoes_topo.setFixedSize(42, 36)
+        self.botao_configuracoes_topo.setToolTip(
+            "Abrir as configurações gerais do VighnaStudy."
+        )
+        self.botao_configuracoes_topo.setAccessibleName("Configurações")
+        self.botao_configuracoes_topo.clicked.connect(
+            self.abrir_configuracoes
+        )
+        self.botao_configuracoes_topo.setVisible(False)
+
+        self._dashboard_top_profile = perfil_central
+        self._dashboard_cabecalho_compacto = True
+
+        # O widget do cabeçalho será realocado, sem recriação, ao portal Início.
+        # Inserção provisória aqui preserva a criação e ligação dos controladores.
         layout.addWidget(topo_container)
+
+        # L05e: somente a identidade do Vighna e uma busca discreta.
+        # O cabecalho com perfil e acoes permanece no portal Inicio (L05d).
+        # Nao acrescentar abas ou rotas adicionais nesta etapa.
+        self.dashboard_quick_nav = criar_cabecalho_discreto_dashboard(
+            self.abrir_busca_global, carregar_logo_vighnastudy(),
+        )
+        aplicar_estilo_cabecalho_dashboard(self.dashboard_quick_nav, self.tema_atual)
+        layout.addWidget(self.dashboard_quick_nav)
 
         # ====================================================
         # FOCO — gestão do tempo de concentração
@@ -34919,6 +35647,7 @@ class SistemaEstudos(QMainWindow):
             12, 8, 12, 8
         )
         foco_painel_layout.setSpacing(5)
+        self._dashboard_foco_painel_layout = foco_painel_layout
 
         # O cabeçalho externo "Foco" foi removido para eliminar redundância
         # visual. O próprio card esquerdo passa a ser a identidade do módulo.
@@ -34983,6 +35712,7 @@ class SistemaEstudos(QMainWindow):
 
         foco_cards = QHBoxLayout()
         foco_cards.setSpacing(8)
+        self._dashboard_primeira_linha = foco_cards
 
         # ----------------------------------------------------
         # Modo Foco — protagonista
@@ -35001,6 +35731,7 @@ class SistemaEstudos(QMainWindow):
             14, 10, 14, 10
         )
         foco_hoje_layout.setSpacing(5)
+        self._dashboard_foco_card_layout = foco_hoje_layout
 
         foco_cabecalho = QHBoxLayout()
         foco_cabecalho.setSpacing(8)
@@ -35253,6 +35984,7 @@ class SistemaEstudos(QMainWindow):
         # Estudo por questões; o separador extra deixaria a composição pesada.
 
         atalhos_rapidos = QFrame()
+        self.dashboard_atalhos_rapidos = atalhos_rapidos
         atalhos_rapidos.setObjectName("dashboardQuickAccess")
         atalhos_rapidos.setProperty("embedded", False)
         atalhos_layout = QHBoxLayout(atalhos_rapidos)
@@ -35635,6 +36367,7 @@ class SistemaEstudos(QMainWindow):
         resumo_ia_layout.setContentsMargins(12, 5, 12, 6)
         resumo_ia_layout.setSpacing(4)
         resumo_ia_layout.setAlignment(Qt.AlignTop)
+        self._dashboard_planejamento_layout = resumo_ia_layout
 
         resumo_ia_header = QHBoxLayout()
         resumo_ia_header.setSpacing(6)
@@ -35810,13 +36543,14 @@ class SistemaEstudos(QMainWindow):
         inteligencia_linha = QHBoxLayout()
         inteligencia_linha.setContentsMargins(0, 0, 0, 0)
         inteligencia_linha.setSpacing(10)
+        self._dashboard_recomendacao_linha = inteligencia_linha
         inteligencia_linha.addWidget(self.dashboard_hoje_acao, 3)
         inteligencia_linha.addWidget(progresso_card, 1)
         layout.addLayout(inteligencia_linha)
 
-        # Os acessos rápidos ficam depois da recomendação: primeiro o usuário
-        # vê seu estado e a próxima ação sugerida; depois, as ferramentas
-        # auxiliares. Esta ordem também melhora a primeira dobra em 1366×768.
+        # A barra lateral substitui os quatro atalhos no Futurista.
+        # Mantemos a faixa construída para Claro/Escuro e larguras sem sidebar;
+        # sua visibilidade será sincronizada por _atualizar_layout_sidebar().
         layout.addWidget(atalhos_rapidos)
 
         # ====================================================
@@ -39244,6 +39978,8 @@ class SistemaEstudos(QMainWindow):
         if definir_concurso_ativo(
             concurso_id
         ):
+            if hasattr(self, "tela_portal_disciplinas"):
+                self.tela_portal_disciplinas.atualizar(self.combo_concurso.currentText().strip())
             self.carregar_botoes_disciplinas()
             self.atualizar_dashboard()
 
@@ -39294,6 +40030,8 @@ class SistemaEstudos(QMainWindow):
 
         self.carregar_botoes_disciplinas()
         self.carregar_concursos()
+        if hasattr(self, "tela_portal_disciplinas"):
+            self.tela_portal_disciplinas.atualizar(self.combo_concurso.currentText().strip())
         self.atualizar_dashboard()
 
         disciplinas_ativas = {
@@ -39326,6 +40064,8 @@ class SistemaEstudos(QMainWindow):
 
         self.carregar_concursos()
         self.carregar_botoes_disciplinas()
+        if hasattr(self, "tela_portal_disciplinas"):
+            self.tela_portal_disciplinas.atualizar(self.combo_concurso.currentText().strip())
 
         disciplinas_ativas = {
             nome
@@ -43163,10 +43903,13 @@ class SistemaEstudos(QMainWindow):
         QTimer.singleShot(0, self._atualizar_atalho_visual_resolvedor)
 
     def _atualizar_atalho_visual_resolvedor(self):
+        existe_sessao = self.obter_janela_resolvedor_questoes() is not None
         botao = getattr(self, "botao_retomar_questoes_topo", None)
-        if botao is None:
-            return
-        botao.setVisible(self.obter_janela_resolvedor_questoes() is not None)
+        if botao is not None:
+            botao.setVisible(existe_sessao)
+        portal = getattr(self, "tela_portal_treinos", None)
+        if portal is not None:
+            atualizar_retomada_treinos(portal, existe_sessao)
 
     def obter_janela_resolvedor_questoes(self):
         janela = getattr(self, "_janela_resolvedor_questoes", None)
@@ -60828,6 +61571,7 @@ class SistemaEstudos(QMainWindow):
                 )
             )
             self.atualizar_icones_interface()
+            self._atualizar_layout_sidebar()
             self.atualizar_estilos_disciplinas_desligadas_dashboard()
             self.cache_analitico.invalidar("regularidade:")
             self.cache_analitico.invalidar("estatisticas:regularidade:")
@@ -61709,7 +62453,7 @@ class SistemaEstudos(QMainWindow):
             88
         )
         voltar.clicked.connect(
-            self.voltar_inicio
+            self._voltar_da_disciplina
         )
 
         cabecalho.addWidget(
@@ -62307,6 +63051,8 @@ class SistemaEstudos(QMainWindow):
         self,
         nome_disciplina
     ):
+        if self.telas.currentWidget() is not getattr(self, "tela_disciplina", None):
+            self._origem_tela_disciplina = self.telas.currentWidget()
         self._garantir_tela_disciplina()
         self.disciplina_atual = (
             nome_disciplina

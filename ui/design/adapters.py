@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 ThemeInput = ThemeDefinition | ThemeName | str
 
 _QSS_TOKEN_RE = re.compile(
-    r"\{\{(?P<kind>color|gradient):(?P<token>[a-z_][a-z0-9_]*(?:\.[a-z_][a-z0-9_]*)+)\}\}"
+    r"\{\{(?P<kind>color|gradient|rgba):(?P<token>[a-z_][a-z0-9_]*(?:\.[a-z_][a-z0-9_]*)+)\}\}"
 )
 
 
@@ -53,11 +53,17 @@ def qss_gradient(theme: ThemeInput, token: str) -> str:
     return gradient_to_qss(_theme(theme).gradient(token))
 
 
+def qss_rgba(theme: ThemeInput, token: str) -> str:
+    """Emite rgba em formato Qt para preservar a equivalência de QSS legado."""
+    alpha, red, green, blue = _theme(theme).color(token).argb
+    return f"rgba({red},{green},{blue},{alpha})"
+
+
 def render_qss(theme: ThemeInput, template: str) -> str:
     """Resolve marcadores de token sem transformar o QSS em f-string.
 
-    Os formatos aceitos são ``{{color:caminho.do_token}}`` e
-    ``{{gradient:caminho.do_token}}``. Um caminho inválido falha pelos mesmos
+    Aceita ``{{color:...}}``, ``{{gradient:...}}`` e ``{{rgba:...}}``.
+    O modo rgba mantém a serialização dos overlays legados. Um caminho inválido falha pelos mesmos
     contratos explícitos usados pelos demais adaptadores.
     """
 
@@ -65,10 +71,12 @@ def render_qss(theme: ThemeInput, template: str) -> str:
         token = match.group("token")
         if match.group("kind") == "color":
             return qss_color(theme, token)
+        if match.group("kind") == "rgba":
+            return qss_rgba(theme, token)
         return qss_gradient(theme, token)
 
     rendered = _QSS_TOKEN_RE.sub(resolve, template)
-    if "{{color:" in rendered or "{{gradient:" in rendered:
+    if "{{color:" in rendered or "{{gradient:" in rendered or "{{rgba:" in rendered:
         raise ValueError("Marcador de token QSS inválido ou não resolvido.")
     return rendered
 

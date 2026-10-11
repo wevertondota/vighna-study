@@ -16,6 +16,7 @@ from .adapters import (
     qpen,
     qss_color,
     qss_gradient,
+    qss_rgba,
     render_qss,
     qtawesome_color,
 )
@@ -104,6 +105,7 @@ __all__ = (
     "qpen",
     "qss_color",
     "qss_gradient",
+    "qss_rgba",
     "render_qss",
     "qtawesome_color",
     "token_spec",
