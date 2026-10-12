@@ -1,5 +1,12 @@
 import sys
 
+# M1c-R1b: o EXE do Vighna pode atuar como worker de restauração sem iniciar
+# o splash, widgets Qt ou qualquer acesso acadêmico ao banco de produção.
+# O backup.py mantém os bloqueios de PID/arquivo e a validação do pedido.
+if len(sys.argv) > 1 and sys.argv[1] == "--vighna-restore-offline":
+    from backup import _cli_restauracao_offline
+    raise SystemExit(_cli_restauracao_offline(["--restaurar-offline", *sys.argv[2:]]))
+
 from startup_splash import (
     ARG_SPLASH_WORKER,
     ControladorSplashInicializacao,
@@ -98,7 +105,7 @@ from backup import (
     PASTA_BACKUPS,
     listar_backups,
     validar_backup,
-    restaurar_backup,
+    iniciar_restauracao_offline,
     verificar_integridade_banco,
 )
 
@@ -27815,6 +27822,28 @@ class JanelaBackups(QDialog):
         )
 
         self.carregar_backups()
+        # Mostra o resultado do último pedido ao abrir a janela após o restart.
+        try:
+            import json as _json
+            resultado_arquivo = PASTA_BACKUPS / "restauracoes_offline" / "ultimo_resultado.json"
+            if resultado_arquivo.is_file():
+                ultimo = _json.loads(resultado_arquivo.read_text(encoding="utf-8"))
+                if ultimo.get("situacao") == "concluida":
+                    QMessageBox.information(
+                        self, "Restauração offline concluída",
+                        "O backup foi restaurado com o aplicativo fechado.\n\n"
+                        "Estado anterior preservado em:\n" + str(ultimo.get("salvaguarda", ""))
+                    )
+                else:
+                    QMessageBox.warning(
+                        self, "Restauração offline não concluída",
+                        "O procedimento foi interrompido. Consulte o registro "
+                        "em backups/restauracoes_offline.\n\n"
+                        + str(ultimo.get("erro", "Erro não detalhado."))
+                    )
+                resultado_arquivo.unlink()
+        except Exception:
+            pass
 
     def formatar_tamanho(self, bytes_total):
         valor = float(bytes_total)
@@ -27883,109 +27912,54 @@ class JanelaBackups(QDialog):
 
     def restaurar_selecionado(self):
         linha = self.tabela.currentRow()
-
         if linha < 0:
             return
-
-        item = self.tabela.item(
-            linha,
-            0
-        )
-
+        item = self.tabela.item(linha, 0)
         if item is None:
             return
-
-        caminho = item.data(
-            Qt.UserRole
-        )
-
-        valido, mensagem = validar_backup(
-            caminho
-        )
-
+        caminho = item.data(Qt.UserRole)
+        valido, mensagem = validar_backup(caminho)
         if not valido:
-            QMessageBox.critical(
-                self,
-                "Backup inválido",
-                (
-                    "Este arquivo não pode ser restaurado.\n\n"
-                    f"{mensagem}"
-                )
-            )
+            QMessageBox.critical(self, "Backup inválido", mensagem)
             return
-
-        data_backup = self.tabela.item(
-            linha,
-            0
-        ).text()
-
-        arquivo_backup = self.tabela.item(
-            linha,
-            3
-        ).text()
-
+        data_backup = self.tabela.item(linha, 0).text()
+        arquivo_backup = self.tabela.item(linha, 3).text()
         resposta = QMessageBox.warning(
-            self,
-            "Confirmar restauração",
-            (
-                "Você está prestes a substituir o estado atual "
-                "do VighnaStudy pelo backup:\n\n"
-                f"{data_backup}\n"
-                f"{arquivo_backup}\n\n"
-                "O estado atual será salvo automaticamente antes "
-                "da substituição.\n\n"
-                "Depois da restauração, o programa será fechado "
-                "para que o banco restaurado seja reaberto de forma "
-                "segura.\n\n"
-                "Deseja continuar?"
-            ),
-            QMessageBox.Yes |
-            QMessageBox.No,
-            QMessageBox.No
+            self, "Restauração offline — confirmar",
+            "O Vighna precisa estar completamente fechado antes de restaurar.\n\n"
+            f"Backup selecionado: {data_backup} — {arquivo_backup}\n\n"
+            "Ao confirmar, será iniciado um processo externo que aguardará "
+            "o fechamento do programa, criará uma salvaguarda do estado atual "
+            "e só então substituirá o banco.\n\n"
+            "A restauração pode levar algum tempo. Não reinicie o Vighna até "
+            "a operação terminar. O resultado estará disponível ao retornar "
+            "à janela de Backups.\n\n"
+            "Deseja encerrar o Vighna e iniciar a restauração offline?",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No,
         )
-
         if resposta != QMessageBox.Yes:
             return
-
+        if self.parentWidget() is None:
+            QMessageBox.critical(self, "Restauração não iniciada",
+                                 "A janela principal do Vighna não foi encontrada.")
+            return
         try:
-            seguranca = restaurar_backup(
-                caminho
-            )
-
-            # Aplica possíveis migrações de esquema ao banco antigo.
-            criar_banco()
-
-            texto_segurança = (
-                str(seguranca)
-                if seguranca is not None
-                else "não foi necessário"
-            )
-
-            QMessageBox.information(
-                self,
-                "Restauração concluída",
-                (
-                    "O backup foi restaurado com sucesso.\n\n"
-                    "Cópia de segurança do estado anterior:\n"
-                    f"{texto_segurança}\n\n"
-                    "O programa será fechado agora. "
-                    "Abra-o novamente pelo mesmo atalho."
-                )
-            )
-
-            QApplication.instance().quit()
-
+            iniciar_restauracao_offline(caminho)
         except Exception as erro:
             QMessageBox.critical(
-                self,
-                "Falha na restauração",
-                (
-                    "Não foi possível restaurar o backup.\n\n"
-                    f"{erro}\n\n"
-                    "O banco atual não foi substituído quando "
-                    "a validação falhou."
-                )
+                self, "Restauração não iniciada",
+                f"O banco não foi alterado.\n\n{erro}"
             )
+            return
+        self.restaurar.setEnabled(False)
+        # Acione o fechamento NORMAL do SistemaEstudos (cache, backup e
+        # verificações de sessões). QApplication.quit() pula esse fluxo.
+        # Se o fechamento for cancelado, o worker espera 90 s e abandona o
+        # pedido SEM substituir o banco de dados.
+        principal = self.parentWidget()
+        self.accept()
+        if principal is not None:
+            QTimer.singleShot(0, principal.close)
 
 
 class JanelaMatrizEspacamento(QDialog):
