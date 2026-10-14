@@ -33478,7 +33478,7 @@ class SistemaEstudos(QMainWindow):
     def _criar_sidebar_dashboard(self):
         """Menu persistente que reutiliza os destinos existentes.
 
-        Prioriza os rótulos em desktops de 1366 px e oferece colapso manual.
+        Inicia recolhido no Futurista e permite expansão manual pelo botão.
         """
         lateral = QFrame()
         lateral.setObjectName("dashboardSidebar")
@@ -33600,7 +33600,9 @@ class SistemaEstudos(QMainWindow):
         self._sidebar_botoes["configuracoes"] = botao_config
         self._sidebar_rotulos["configuracoes"] = "Configurações"
         self._sidebar_icones["configuracoes"] = ("fa6s.gear", "⚙")
-        self._sidebar_expandida_manual = None
+        # A navegação Futurista inicia recolhida a cada abertura. O botão
+        # continua permitindo alternar entre os estados durante a sessão.
+        self._sidebar_expandida_manual = False
         self._sidebar_expandida_efetiva = None
         return lateral
 
@@ -33788,8 +33790,8 @@ class SistemaEstudos(QMainWindow):
         futurista = normalizar_tema(getattr(self, "tema_atual", "claro")) == "futurista"
         largura = self.width()
         visivel = futurista and largura >= 1080
-        # Em 1366 px a lateral textual tem prioridade. A versão compacta
-        # continua acessível pelo botão e é o padrão só abaixo de 1240 px.
+        # Fallback responsivo para casos sem preferência manual. Na abertura,
+        # _sidebar_expandida_manual=False mantém a lateral compacta.
         expandida = visivel and largura >= 1240
         if self._sidebar_expandida_manual is not None:
             expandida = visivel and bool(self._sidebar_expandida_manual) and largura >= 1180
@@ -65087,7 +65089,9 @@ else:
         100,
         "O núcleo está disponível; a etapa que falhou será carregada quando necessária.",
     )
-janela.show()
+# A janela principal inicia maximizada, preservando bordas, barra de tarefas
+# e os controles normais de minimizar/restaurar do sistema operacional.
+janela.showMaximized()
 janela.raise_()
 janela.activateWindow()
 splash.close()
