@@ -1,0 +1,10 @@
+{
+  "painel": "V2-B",
+  "etapas": ["V2-A: navegação e planejamento", "V2-B: histórico persistente, filtros, comparações e backup"],
+  "m2": "RC2 em homologação; não instalar",
+  "m3": "R35 experimental, não integrado",
+  "execucao_windows_v2b": "pendente",
+  "motor_homologacao_modificado": false,
+  "armazenamento_historico": "LOCALAPPDATA/VighnaStudy_Homologador_V2B",
+  "proximo": "V2-C importação verificada de checkpoints do planejamento"
+}

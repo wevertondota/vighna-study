@@ -1,0 +1,21 @@
+VIGHNASTUDY — CENTRAL DE DESENVOLVIMENTO E HOMOLOGACAO V2-A
+
+1. Extraia ESTE ZIP inteiro em uma pasta NOVA (nao dentro do VighnaStudy).
+2. Execute por duplo clique ABRIR_PAINEL_HOMOLOGACAO.cmd.
+3. A tela inicial apresenta a visao geral do ultimo checkpoint registrado.
+4. Use "Planejamento M1-M9" para consultar escopos, situacoes e proximos passos.
+5. Use "Executar testes" para continuar a homologacao Qt/SQLite ou build QA.
+6. Em "Configuracoes", confirme o python.exe que possui PySide6.
+7. Em "Resultados", consulte o ultimo ZIP ou selecione um arquivo gerado.
+
+O planejamento mostra um SNAPSHOT LOCAL documentado, NAO sincronizacao
+em tempo real com o ChatGPT. O arquivo estado_planejamento_v2a.json e
+uma fotografia do projeto; so deve ser atualizado em checkpoints futuros.
+
+ATENCAO: NAO INSTALE O M2 RC2 OU O M3.
+O painel NAO altera o banco, nem o VighnaStudy principal. Ele nao faz
+upload automaticamente para o ChatGPT. Anexe manualmente o ZIP de resultados.
+
+Se estiver testando a compilacao com PyInstaller, a configuracao do
+ambiente precisa fornecer as dependencias requeridas; o EXE produzido
+em laboratorio NAO e aberto nem instalado.

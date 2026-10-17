@@ -1,0 +1,23 @@
+test_01_hash_identidade_fonte (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_01_hash_identidade_fonte) ... ok
+test_02_identidade_frozen_autentica_hash (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_02_identidade_frozen_autentica_hash) ... ok
+test_03_negativo_versao_maliciosa (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_03_negativo_versao_maliciosa) ... ok
+test_04_negativo_json_reordenado (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_04_negativo_json_reordenado) ... ok
+test_05_recurso_ausente (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_05_recurso_ausente) ... ok
+test_06_sem_meipass_falha_fechado (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_06_sem_meipass_falha_fechado) ... ok
+test_07_redirecionamento_falha_fechado (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_07_redirecionamento_falha_fechado) ... skipped 'symlink indisponivel'
+test_08_recursos_planejamento_triplo (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_08_recursos_planejamento_triplo) ... ok
+test_09_config_salva_fora_recursos (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_09_config_salva_fora_recursos) ... ok
+test_10_config_link_nao_sobrescrito (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_10_config_link_nao_sobrescrito) ... skipped 'symlink indisponivel'
+test_11_diagnosticos_nao_usam_app_root (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_11_diagnosticos_nao_usam_app_root) ... ok
+test_11a_dossie_persistente_fora_recursos (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_11a_dossie_persistente_fora_recursos) ... ok
+test_12_guardas_gui_antes_de_subprocessos (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_12_guardas_gui_antes_de_subprocessos) ... ok
+test_13_guardas_workers (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_13_guardas_workers) ... ok
+test_14_spec_tem_tres_recursos (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_14_spec_tem_tres_recursos) ... ok
+test_15_protocolo_rejeita_argumentos_extras (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_15_protocolo_rejeita_argumentos_extras) ... {"status": "REJEITADO", "motivo": "Protocolo interno não autorizado"}
+{"status": "REJEITADO", "motivo": "Protocolo interno não autorizado"}
+ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.155s
+
+OK (skipped=2)

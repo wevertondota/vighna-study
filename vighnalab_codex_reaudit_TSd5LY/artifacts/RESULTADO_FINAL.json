@@ -1,0 +1,70 @@
+{
+  "formato": "vighnalab-codex-reauditoria-v3153-r1",
+  "data": "2026-10-15",
+  "versao": "3.1.53-R1",
+  "decisao": "NAO_HOMOLOGADO_NAO_INSTALAR",
+  "manifesto_externo": {
+    "status": "PASSOU",
+    "arquivos": 60,
+    "ausentes": 0,
+    "extras": 0,
+    "hashes_divergentes": 0
+  },
+  "fontes_preservadas": true,
+  "reconciliacao": {
+    "total": 16,
+    "aprovados": 14,
+    "pulados": 2,
+    "falhas": 0,
+    "erros": 0
+  },
+  "regressoes": {
+    "total": 413,
+    "aprovados": 370,
+    "erros_por_insumos_ausentes": 26,
+    "erros_por_gui_indisponivel": 1,
+    "pulados": 16,
+    "falhas_de_assercao": 0,
+    "timeouts_reais": 0
+  },
+  "entradas_internas": {
+    "declaradas": 21,
+    "presentes": 8,
+    "ausentes": 13,
+    "divergencia_com_expectativa_da_ordem_de_trabalho": "A ordem mencionava 11; o manifesto e a árvore recebida demonstram 13."
+  },
+  "frozen": {
+    "entradas_gui_bloqueadas_antes_de_subprocesso": true,
+    "workers_diretos_bloqueados_antes_de_subprocesso": true,
+    "saida_no_meipass": false
+  },
+  "persistencia": {
+    "config_localappdata": "PASSOU",
+    "pasta_sem_escrita_simulada": "PASSOU",
+    "legado_somente_leitura_preservado": "PASSOU",
+    "junction_real": "PASSOU",
+    "symlink_real": "NAO_TESTADO_WINERROR_1314",
+    "diagnosticos_temp": "PASSOU",
+    "dossie_g7_persistente": "PASSOU"
+  },
+  "spec": {
+    "inspecao_estatica": "PASSOU",
+    "tres_recursos_presentes": true,
+    "build_pyinstaller": "PENDENTE_NAO_TESTADO",
+    "motivo": "Sem venv isolado e sem PyInstaller; nenhuma instalacao executada."
+  },
+  "achados": {
+    "F-01": "CORRIGIDO",
+    "F-02": "CORRIGIDO",
+    "F-03": "PARCIAL",
+    "F-04": "CORRIGIDO",
+    "F-05": "MITIGADO_POR_BLOQUEIO",
+    "F-06": "MITIGADO_POR_BLOQUEIO",
+    "F-07": "PARCIAL",
+    "F-08": "CORRIGIDO",
+    "F-09": "NAO_RESOLVIDO"
+  },
+  "instalacao_autorizada": false,
+  "g7_aprovado": false,
+  "hash_nao_e_assinatura_digital": true
+}

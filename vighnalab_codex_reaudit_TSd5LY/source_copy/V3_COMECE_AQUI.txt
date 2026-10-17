@@ -1,0 +1,20 @@
+VIGHNASTUDY — PAINEL DE HOMOLOGAÇÃO V3 (INDEPENDENTE)
+
+1) Extraia TODO o ZIP PORTÁTIL numa pasta nova do Windows, fora do VighnaStudy.
+2) Execute ABRIR_PAINEL_HOMOLOGACAO.cmd com dois cliques, SEM administrador.
+3) Abra "Gates de liberação". Se o histórico anterior foi importado na V2-B,
+   o painel reconhecerá as evidências e mostrará o que já foi testado.
+4) Abra "Sincronização" para importar checkpoints fornecidos pelo ChatGPT.
+   O exemplo CHECKPOINT_EXEMPLO\CHECKPOINT_PLANEJAMENTO_V3.zip pode ser
+   importado para testar o procedimento, caso deseje. Não instala código.
+5) Para gerar evidências novas, use "Executar testes" e aguarde o ZIP.
+6) Para enviar o contexto à conversa, abra "Sincronização" e clique
+   "Exportar status para ChatGPT (.zip)". Anexe o ZIP à conversa manualmente.
+
+IMPORTANTE:
+- O painel NÃO autoriza instalar M2 RC2 ou integrar M3 experimental.
+- Gates G1–G4 apenas mostram evidências, não são aceite automático.
+- Gates G5–G7 exigem testes/avaliação separados.
+- O histórico da V2-B permanece em %LOCALAPPDATA%\VighnaStudy_Homologador_V2B.
+- O homologador só usa código em laboratório, não seus bancos pessoais.
+- Nunca use este ZIP como pacote de atualização do VighnaStudy principal.

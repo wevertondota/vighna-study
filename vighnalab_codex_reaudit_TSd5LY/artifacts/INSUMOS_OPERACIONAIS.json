@@ -1,0 +1,21 @@
+{
+  "declarados": 21,
+  "presentes": 8,
+  "ausentes": 13,
+  "lista_ausentes": [
+    "EVIDENCIAS_PREPARACAO/TESTES_ATUALIZADOR_82_82.txt",
+    "EVIDENCIAS_PREPARACAO/TESTES_ATUALIZADOR_V1_1_82_82.txt",
+    "EVIDENCIAS_PREPARACAO/TESTES_INTERNOS_18_18.txt",
+    "EVIDENCIAS_PREPARACAO/TESTES_INTERNOS_V1_1_19_19.txt",
+    "insumos/BASE_R1D_SOMENTE_FONTES_QA.zip",
+    "insumos/CANDIDATO_QA_R1D_PARA_M2_RC2_NAO_INSTALAR.zip",
+    "insumos/M2_RC2_FONTE_REFERENCIA_NAO_INSTALAR.zip",
+    "qt/validador_qt_rc2_isolado.py",
+    "testes/test_gate6_casos_borda.py",
+    "testes/test_gate6_spec_compat_estatica.py",
+    "testes/test_gate_direto_r1d_rc2.py",
+    "testes/test_vighna_atualizador.py",
+    "testes/vighna_update_engine.py"
+  ],
+  "status": "BLOQUEADO_INSUMOS_AUSENTES"
+}

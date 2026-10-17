@@ -1,0 +1,25 @@
+{
+  "entrega": "VighnaStudy Homologador Windows V1.1",
+  "data": "2026-10-12",
+  "tipo": "ferramenta de homologacao autocontida nao instalavel",
+  "base_build": "structural-m1c-readpilot-restore-offline-r1d-v1",
+  "candidato_m2": "structural-m2-int1-settings-r1d-rc2",
+  "m3": "laboratorio ate R35, nao integrado",
+  "instalacao_autorizada": false,
+  "execucao_windows_nesta_entrega": false,
+  "executa_exe_real": false,
+  "consome_banco_pessoal": false,
+  "modos": [
+    "testes",
+    "build"
+  ],
+  "pendencias": [
+    "Executar Windows V1 e revisar evidencias",
+    "Auditar Qt backend Windows e simulacao de escalas",
+    "Auditar PyInstaller usando .spec R1D",
+    "Teste smoke EXE real somente em perfil descartavel independente",
+    "Teste final pacote de instalacao/rollback sob Windows isolado"
+  ],
+  "versao_homologador": "1.1",
+  "mudanca_v1_1": "diagnostico de emergencia mesmo quando preflight falha; PowerShell fallback; progresso visivel"
+}

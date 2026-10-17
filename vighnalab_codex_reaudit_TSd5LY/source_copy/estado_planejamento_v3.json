@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "projeto": "VighnaStudy",
+  "data_referencia": "12/10/2026",
+  "checkpoint": "M2 Gate 6 / M3 R35 / Painel V3 (Gates e Sincronização)",
+  "origem": "Checkpoint local V3 preparado no ChatGPT; importação manual, sem ligação com serviços externos",
+  "instalacao_autorizada": false,
+  "sincronizacao_online": false,
+  "trabalho_registrado": {
+    "titulo": "Painel V3: gates de homologação e sincronização manual",
+    "detalhe": "O painel importa estados validados sem alterar o programa principal. Gates dependem de evidências locais do histórico. O build PyInstaller e smoke do EXE real continuam pendentes.",
+    "situacao": "V3 pronta para testes no Windows; instalação M2 bloqueada"
+  },
+  "proximas_atividades": [
+    {
+      "nome": "Executar modo build PyInstaller RC2 em cópia Windows",
+      "situacao": "Pendente"
+    },
+    {
+      "nome": "Auditar smoke do EXE real com perfil descartável",
+      "situacao": "Pendente"
+    },
+    {
+      "nome": "Testar instalação final R1D→RC2 e rollback em laboratório Windows",
+      "situacao": "Pendente"
+    },
+    {
+      "nome": "Auditar gates e solicitar autorização humana específica antes de instalar",
+      "situacao": "Futuro"
+    },
+    {
+      "nome": "Preparar gate Qt de integração M3 sem tocar no M2 instalado",
+      "situacao": "Futuro"
+    }
+  ],
+  "marcos": {
+    "qt_m2": "99/99 verificações Qt aprovadas em Windows (3 escalas simuladas)",
+    "atualizador": "82/82 testes sintéticos aprovados no último painel",
+    "seguranca": "19/19 testes de segurança do homologador aprovados",
+    "build": "PyInstaller com spec R1D ainda pendente em execução nativa independente",
+    "m3": "R35 experimental; não integrado ao Resolvedor",
+    "instalacao": "Nenhuma autorização para instalar M2 ou M3. Painel V3 não concede autorização."
+  },
+  "macrolotes": [
+    {
+      "id": "M1",
+      "nome": "Baseline, testes e diagnóstico",
+      "situacao": "referencia",
+      "resumo": "Base M1C R1D preservada; caracterização, baseline e testes documentados.",
+      "proxima_acao": "Manter o checkpoint de referência e suas evidências."
+    },
+    {
+      "id": "M2",
+      "nome": "Configurações e componentes Qt",
+      "situacao": "homologacao",
+      "resumo": "Código RC2 preparado. Qt/SQLite em laboratório aprovados; build com o .spec R1D e atualização final ainda pendentes.",
+      "proxima_acao": "Executar e auditar o build Windows sem alterar a instalação principal."
+    },
+    {
+      "id": "M3",
+      "nome": "Estado explícito da sessão",
+      "situacao": "laboratorio",
+      "resumo": "Protótipos experimentais do Resolvedor até R35, sem integração ou instalação.",
+      "proxima_acao": "Validar Qt real e contratos de integração antes de qualquer atualização."
+    },
+    {
+      "id": "M4",
+      "nome": "Teclado e comandos canônicos",
+      "situacao": "planejado",
+      "resumo": "Centralizar comandos de teclado, botões e permissões por contexto.",
+      "proxima_acao": "Caracterizar o comportamento vigente quando o macrolote iniciar."
+    },
+    {
+      "id": "M5",
+      "nome": "Serviços acadêmicos e modelos tipados",
+      "situacao": "planejado",
+      "resumo": "Separar regras acadêmicas da interface e padronizar contratos de dados.",
+      "proxima_acao": "Auditar os casos de uso antes de definir extrações."
+    },
+    {
+      "id": "M6",
+      "nome": "Acesso estruturado ao SQLite",
+      "situacao": "planejado",
+      "resumo": "Introduzir repositórios por domínio mantendo resultados equivalentes.",
+      "proxima_acao": "Caracterizar SQL e transações em cópias sintéticas."
+    },
+    {
+      "id": "M7",
+      "nome": "Migrações e proteção de dados",
+      "situacao": "planejado",
+      "resumo": "Formalizar migrações, restauração e compatibilidade do schema.",
+      "proxima_acao": "Exigir backup, recovery e rollback verificados antes de mudanças."
+    },
+    {
+      "id": "M8",
+      "nome": "Responsividade e eventos justificados",
+      "situacao": "planejado",
+      "resumo": "Auditar tarefas demoradas, workers Qt e uso de eventos locais.",
+      "proxima_acao": "Medir gargalos e introduzir mudanças apenas se justificadas."
+    },
+    {
+      "id": "M9",
+      "nome": "Atualização, release e consolidação",
+      "situacao": "planejado",
+      "resumo": "Consolidar builds reproduzíveis, manifestos, atualização e rollback.",
+      "proxima_acao": "Executar homologação de release completa em ambiente isolado."
+    }
+  ]
+}

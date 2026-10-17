@@ -1,0 +1,27 @@
+{
+  "versao": "1.1",
+  "tipo": "integridade SHA256; não é assinatura digital",
+  "arquivos": {
+    "1_INICIAR_TESTES_WINDOWS.cmd": "cf831925bce37843604fba466229ff1d62e794d59b657c5c169422e4bfdb04cf",
+    "2_COMPILAR_APENAS_EM_LABORATORIO.cmd": "fe5453456d64df3febd12429c2133ec2aba4ae3e5e52e5ba892df8a92b8693d8",
+    "ESTADO_ATUAL.json": "10a46af92f8a3b8646e440399c9822f53ca85b853f9acdd7e979cf85adb03d83",
+    "EVIDENCIAS_PREPARACAO/TESTES_ATUALIZADOR_82_82.txt": "8cca3017f2a80dad56f4ebf29798ac77270d09db40d2386797f7c3ccf7e50bf2",
+    "EVIDENCIAS_PREPARACAO/TESTES_ATUALIZADOR_V1_1_82_82.txt": "7a6e600fd503497e34aa879e51ba012ba36a3b43a904a7f0bffdd5193ee8fe23",
+    "EVIDENCIAS_PREPARACAO/TESTES_INTERNOS_18_18.txt": "e08ee4d2eef909c8241d2c95f4f29dcb7317284b80956ee39639b1f55d54346d",
+    "EVIDENCIAS_PREPARACAO/TESTES_INTERNOS_V1_1_19_19.txt": "57f4df87e67646ba904ba0ea82d26be99492b57d26b704a8a0e8775f5848dab6",
+    "LEIA_PRIMEIRO.txt": "9a28eb6f9ce5eeb9962b3b624172f63e8c7e0eda812377cbffe9e9432bbd5ed1",
+    "README_PRIMEIRO.md": "62ebe368a56a4b9a53fdd67c1c435234efc8d1032852a48ff4ef4f17211db4f0",
+    "executar_homologacao.ps1": "aab7832db058b42275218393a5bbadb56541a609fa0c33fa8c6d7b5060b5d363",
+    "homologador_windows.py": "ae8dbf5fb0bdec405f6b1fc1b30612913c5396bbe2f8a990de94f8b43c8d4821",
+    "insumos/BASE_R1D_SOMENTE_FONTES_QA.zip": "f2027b5b089b87e63fa14b9ad52effda27341721ea6d69c6d4f359bfb0720a53",
+    "insumos/CANDIDATO_QA_R1D_PARA_M2_RC2_NAO_INSTALAR.zip": "efea1b343151cc3a6b4d84b74676e045b07bc758d1fe9989d442eb4d3eb03e6c",
+    "insumos/M2_RC2_FONTE_REFERENCIA_NAO_INSTALAR.zip": "a3613317c65e3a76ce97c0feb10c1853992f347b054854af4eb09908862f4985",
+    "qt/validador_qt_rc2_isolado.py": "1cfba251e914bf9c2563a88082281b8a463b7c11822b5929ad3f0f1a586a8446",
+    "test_protecao_homologador.py": "f9f1e5fc09de63c30f17fca9b17e5d6344f690efe9da689343e0ef40142fc7b0",
+    "testes/test_gate6_casos_borda.py": "98eab96d24b888ce7137417075e0468f89efef87ed02f525b6003fd8813b67bd",
+    "testes/test_gate6_spec_compat_estatica.py": "79dabe444b03ce7ea9bad653956605d746f21d2385cdb116e27bff07139f3a9c",
+    "testes/test_gate_direto_r1d_rc2.py": "7ffaec26e56f154344c1bcd62ca2c4bcb06bdb300cecabe8acb4d6b94f1a0fa0",
+    "testes/test_vighna_atualizador.py": "bd7698a12b5451c16a71cef5c68a9b77b78a7e64b3a35585b0f50069613e8fae",
+    "testes/vighna_update_engine.py": "279bda9decc717cc41316b985c3a1450248c46827120c2cb5eb44d5230be674c"
+  }
+}

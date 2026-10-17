@@ -1,0 +1,807 @@
+test_gui_v3_smoke (unittest.loader._FailedTest.test_gui_v3_smoke) ... ERROR
+test_01_validates_realistic_zip (test_historico_v2b.HistoryV2BTests.test_01_validates_realistic_zip) ... ok
+test_02_creates_persistent_db_outside_evidence (test_historico_v2b.HistoryV2BTests.test_02_creates_persistent_db_outside_evidence) ... ok
+test_03_import_and_read (test_historico_v2b.HistoryV2BTests.test_03_import_and_read) ... ok
+test_04_deduplicate_by_content_not_filename (test_historico_v2b.HistoryV2BTests.test_04_deduplicate_by_content_not_filename) ... ok
+test_05_restart_without_losing_history (test_historico_v2b.HistoryV2BTests.test_05_restart_without_losing_history) ... ok
+test_06_category_filter (test_historico_v2b.HistoryV2BTests.test_06_category_filter) ... ok
+test_07_status_filter (test_historico_v2b.HistoryV2BTests.test_07_status_filter) ... ok
+test_08_blocked_is_not_approved (test_historico_v2b.HistoryV2BTests.test_08_blocked_is_not_approved) ... ok
+test_09_filename_search (test_historico_v2b.HistoryV2BTests.test_09_filename_search) ... ok
+test_10_comparison_detects_regression (test_historico_v2b.HistoryV2BTests.test_10_comparison_detects_regression) ... ok
+test_11_comparison_detects_improvement (test_historico_v2b.HistoryV2BTests.test_11_comparison_detects_improvement) ... ok
+test_12_comparison_fails_same_id (test_historico_v2b.HistoryV2BTests.test_12_comparison_fails_same_id) ... ok
+test_13_comparison_detects_check_count (test_historico_v2b.HistoryV2BTests.test_13_comparison_detects_check_count) ... ok
+test_14_export_with_index_and_evidence (test_historico_v2b.HistoryV2BTests.test_14_export_with_index_and_evidence) ... ok
+test_15_export_rejects_overwrite (test_historico_v2b.HistoryV2BTests.test_15_export_rejects_overwrite) ... ok
+test_16_export_rejects_inside_store (test_historico_v2b.HistoryV2BTests.test_16_export_rejects_inside_store) ... ok
+test_17_immutable_evidence_verified (test_historico_v2b.HistoryV2BTests.test_17_immutable_evidence_verified) ... ok
+test_18_tampered_member_rejected (test_historico_v2b.HistoryV2BTests.test_18_tampered_member_rejected) ... ok
+test_19_missing_summary_rejected (test_historico_v2b.HistoryV2BTests.test_19_missing_summary_rejected) ... ok
+test_20_invalid_json_rejected (test_historico_v2b.HistoryV2BTests.test_20_invalid_json_rejected) ... ok
+test_21_duplicate_archive_names_rejected (test_historico_v2b.HistoryV2BTests.test_21_duplicate_archive_names_rejected) ... C:\Users\TD-PC\AppData\Local\Programs\Python\Python313\Lib\zipfile\__init__.py:1661: UserWarning: Duplicate name: 'RESUMO_HOMOLOGACAO.json'
+  return self._open_to_write(zinfo, force_zip64=force_zip64)
+ok
+test_22_no_personal_db_access (test_historico_v2b.HistoryV2BTests.test_22_no_personal_db_access) ... ok
+test_23_export_valid_index (test_historico_v2b.HistoryV2BTests.test_23_export_valid_index) ... ok
+test_24_import_from_actual_user_evidence_when_available (test_historico_v2b.HistoryV2BTests.test_24_import_from_actual_user_evidence_when_available) ... skipped 'Somente laboratório com evidência real'
+test_frozen_g5a_does_not_spawn (test_painel_atualizador.FrozenG5AGuardTests.test_frozen_g5a_does_not_spawn) ... ok
+test_frozen_prepare_qt_does_not_spawn (test_painel_atualizador.FrozenGUIGuardTests.test_frozen_prepare_qt_does_not_spawn) ... ok
+test_frozen_update_does_not_close_panel_or_spawn (test_painel_atualizador.FrozenGUIGuardTests.test_frozen_update_does_not_close_panel_or_spawn) ... ok
+test_frozen_g5a_nao_usa_exe_como_python (test_painel_atualizador.FrozenPanelSafetyTests.test_frozen_g5a_nao_usa_exe_como_python) ... ok
+test_frozen_reabertura_bloqueada_antes_de_subprocesso (test_painel_atualizador.FrozenPanelSafetyTests.test_frozen_reabertura_bloqueada_antes_de_subprocesso) ... ok
+test_marker_symlink_atomic_write_refused (test_painel_atualizador.G7SymlinkWriteDefenseTests.test_marker_symlink_atomic_write_refused) ... skipped "Windows symlink requires Sandbox: [WinError 1314] O cliente não tem o privilégio necessário: 'C:\\\\Users\\\\TD-PC\\\\AppData\\\\Local\\\\Temp\\\\vighna_g7_status_aotomptm\\\\outside.txt' -> 'C:\\\\Users\\\\TD-PC\\\\AppData\\\\Local\\\\Temp\\\\vighna_g7_status_aotomptm\\\\panel\\\\.painel_updates\\\\ultima_atualizacao.json'"
+test_mocked_reparse_status_fails_closed (test_painel_atualizador.G7SymlinkWriteDefenseTests.test_mocked_reparse_status_fails_closed) ... ok
+test_normal_status_is_atomic_and_correct (test_painel_atualizador.G7SymlinkWriteDefenseTests.test_normal_status_is_atomic_and_correct) ... ok
+test_status_destination_symlink_does_not_modify_target (test_painel_atualizador.G7SymlinkWriteDefenseTests.test_status_destination_symlink_does_not_modify_target) ... skipped "Windows symlink requires Sandbox: [WinError 1314] O cliente não tem o privilégio necessário: 'C:\\\\Users\\\\TD-PC\\\\AppData\\\\Local\\\\Temp\\\\vighna_g7_status_k8inpyve\\\\outside.txt' -> 'C:\\\\Users\\\\TD-PC\\\\AppData\\\\Local\\\\Temp\\\\vighna_g7_status_k8inpyve\\\\panel\\\\.painel_updates\\\\ultima_execucao.json'"
+test_status_tmp_symlink_does_not_modify_target (test_painel_atualizador.G7SymlinkWriteDefenseTests.test_status_tmp_symlink_does_not_modify_target) ... skipped "Windows symlink requires Sandbox: [WinError 1314] O cliente não tem o privilégio necessário: 'C:\\\\Users\\\\TD-PC\\\\AppData\\\\Local\\\\Temp\\\\vighna_g7_status_qx4qyab8\\\\outside.txt' -> 'C:\\\\Users\\\\TD-PC\\\\AppData\\\\Local\\\\Temp\\\\vighna_g7_status_qx4qyab8\\\\panel\\\\.painel_updates\\\\ultima_execucao.tmp'"
+test_20_rejeita_junction_sintetica_no_armazenamento (test_painel_atualizador.JunctionDefenseTests.test_20_rejeita_junction_sintetica_no_armazenamento) ... ok
+test_21_rejeita_junction_sintetica_no_backup_do_checkpoint (test_painel_atualizador.JunctionDefenseTests.test_21_rejeita_junction_sintetica_no_backup_do_checkpoint) ... ok
+test_22_rejeita_junction_sintetica_na_recuperacao (test_painel_atualizador.JunctionDefenseTests.test_22_rejeita_junction_sintetica_na_recuperacao) ... ok
+test_23_rejeita_junction_real_windows_sem_instalar (test_painel_atualizador.JunctionDefenseTests.test_23_rejeita_junction_real_windows_sem_instalar) ... ok
+test_24_rejeita_junction_real_windows_no_checkpoint (test_painel_atualizador.JunctionDefenseTests.test_24_rejeita_junction_real_windows_no_checkpoint) ... ok
+test_01_recusa_pasta_incompleta (test_painel_atualizador.PanelUpdateTests.test_01_recusa_pasta_incompleta) ... ok
+test_02_recusa_zip_que_nao_e_update (test_painel_atualizador.PanelUpdateTests.test_02_recusa_zip_que_nao_e_update) ... ok
+test_03_inspecao_sem_mutacao (test_painel_atualizador.PanelUpdateTests.test_03_inspecao_sem_mutacao) ... ok
+test_04_atualiza_e_persiste_versao (test_painel_atualizador.PanelUpdateTests.test_04_atualiza_e_persiste_versao) ... ok
+test_05_reversao_manual (test_painel_atualizador.PanelUpdateTests.test_05_reversao_manual) ... ok
+test_06_rejeita_version_incompativel (test_painel_atualizador.PanelUpdateTests.test_06_rejeita_version_incompativel) ... ok
+test_07_rejeita_codigo_origem_divergente (test_painel_atualizador.PanelUpdateTests.test_07_rejeita_codigo_origem_divergente) ... ok
+test_08_rejeita_hash_de_conteudo (test_painel_atualizador.PanelUpdateTests.test_08_rejeita_hash_de_conteudo) ... ok
+test_09_rejeita_arquivo_fora_da_lista (test_painel_atualizador.PanelUpdateTests.test_09_rejeita_arquivo_fora_da_lista) ... ok
+test_10_rejeita_zip_slip (test_painel_atualizador.PanelUpdateTests.test_10_rejeita_zip_slip) ... ok
+test_11_rejeita_duplicata (test_painel_atualizador.PanelUpdateTests.test_11_rejeita_duplicata) ... C:\Users\TD-PC\AppData\Local\Programs\Python\Python313\Lib\zipfile\__init__.py:1661: UserWarning: Duplicate name: 'painel_homologacao.py'
+  return self._open_to_write(zinfo, force_zip64=force_zip64)
+ok
+test_12_rejeita_symlink_de_destino (test_painel_atualizador.PanelUpdateTests.test_12_rejeita_symlink_de_destino) ... skipped 'Windows sem privilégio para criar symlink real; verificação pendente'
+test_12a_rejeita_symlink_sintetico_sem_privilegio (test_painel_atualizador.PanelUpdateTests.test_12a_rejeita_symlink_sintetico_sem_privilegio) ... ok
+test_13_falha_injetada_faz_rollback (test_painel_atualizador.PanelUpdateTests.test_13_falha_injetada_faz_rollback) ... ok
+test_14_rejeita_rollback_se_alterado (test_painel_atualizador.PanelUpdateTests.test_14_rejeita_rollback_se_alterado) ... ok
+test_15_rejeita_pasta_de_vighna (test_painel_atualizador.PanelUpdateTests.test_15_rejeita_pasta_de_vighna) ... ok
+test_16_nao_toca_outros_arquivos (test_painel_atualizador.PanelUpdateTests.test_16_nao_toca_outros_arquivos) ... ok
+test_17_recupera_atualizacao_interrompida (test_painel_atualizador.PanelUpdateTests.test_17_recupera_atualizacao_interrompida) ... ok
+test_18_recuperacao_rejeita_alteracao_inesperada (test_painel_atualizador.PanelUpdateTests.test_18_recuperacao_rejeita_alteracao_inesperada) ... ok
+test_19_reverte_falha_depois_de_duas_trocas (test_painel_atualizador.PanelUpdateTests.test_19_reverte_falha_depois_de_duas_trocas) ... ok
+test_janela_gui_nao_reabre_apos_falha (test_painel_atualizador.PanelV317ProgressTests.test_janela_gui_nao_reabre_apos_falha) ... skipped 'Tela Xvfb necessária para widget'
+test_janela_gui_reabre_so_apos_aprovacao (test_painel_atualizador.PanelV317ProgressTests.test_janela_gui_reabre_so_apos_aprovacao) ... skipped 'Tela Xvfb necessária para widget'
+test_progress_reportado_durante_backup_e_troca (test_painel_atualizador.PanelV317ProgressTests.test_progress_reportado_durante_backup_e_troca) ... ok
+test_reabertura_bloqueada_proxima_do_banco_real (test_painel_atualizador.PanelV317ProgressTests.test_reabertura_bloqueada_proxima_do_banco_real) ... ok
+test_reabre_apenas_painel_na_pasta_validada (test_painel_atualizador.PanelV317ProgressTests.test_reabre_apenas_painel_na_pasta_validada) ... ok
+test_rollback_apos_falha_com_progresso (test_painel_atualizador.PanelV317ProgressTests.test_rollback_apos_falha_com_progresso) ... ok
+test_status_local_sem_autorizacao_de_instalacao (test_painel_atualizador.PanelV317ProgressTests.test_status_local_sem_autorizacao_de_instalacao) ... ok
+test_01_perfis_invalidos_bloqueados (test_painel_central_qa.CentralQATests.test_01_perfis_invalidos_bloqueados) ... ok
+test_02_geracao_zip_sha256 (test_painel_central_qa.CentralQATests.test_02_geracao_zip_sha256) ... ok
+test_03_nao_copia_banco_pessoal (test_painel_central_qa.CentralQATests.test_03_nao_copia_banco_pessoal) ... ok
+test_04_recusa_pasta_com_vighnastudy (test_painel_central_qa.CentralQATests.test_04_recusa_pasta_com_vighnastudy) ... ok
+test_05_rejeita_symlink_de_fonte (test_painel_central_qa.CentralQATests.test_05_rejeita_symlink_de_fonte) ... skipped 'SO não permite symlink'
+test_06_arquivo_originais_intactos (test_painel_central_qa.CentralQATests.test_06_arquivo_originais_intactos) ... ok
+test_07_pendente_dpi_fora_windows (test_painel_central_qa.CentralQATests.test_07_pendente_dpi_fora_windows) ... skipped 'Teste somente fora Windows'
+test_08_saida_dentro_fonte_bloqueada (test_painel_central_qa.CentralQATests.test_08_saida_dentro_fonte_bloqueada) ... ok
+test_09_sintetico_nao_e_formal_g7 (test_painel_central_qa.CentralQATests.test_09_sintetico_nao_e_formal_g7) ... ok
+test_10_fonte_alterada_durante_testes_bloqueia (test_painel_central_qa.CentralQATests.test_10_fonte_alterada_durante_testes_bloqueia) ... ok
+test_11_nove_perfis_e_estados_validos (test_painel_central_qa.CentralQATests.test_11_nove_perfis_e_estados_validos) ... ok
+test_12_dpi_e_ntfs_linux_pendentes_sem_falso_sucesso (test_painel_central_qa.CentralQATests.test_12_dpi_e_ntfs_linux_pendentes_sem_falso_sucesso) ... skipped 'Ensaio específico do Windows no kit integrado'
+test_13_g7_sintetico_nao_concede_aprovacao_formal (test_painel_central_qa.CentralQATests.test_13_g7_sintetico_nao_concede_aprovacao_formal) ... ok
+test_14_arquivo_de_origem_nao_pode_virar_escopo_de_saida (test_painel_central_qa.CentralQATests.test_14_arquivo_de_origem_nao_pode_virar_escopo_de_saida) ... ok
+test_15_resultados_nao_homologam_instalacao (test_painel_central_qa.CentralQATests.test_15_resultados_nao_homologam_instalacao) ... ok
+test_16_regressoes_incluem_central (test_painel_central_qa.CentralQATests.test_16_regressoes_incluem_central) ... ok
+test_17_ntfs_nao_aprova_rejeicao_generica (test_painel_central_qa.CentralQATests.test_17_ntfs_nao_aprova_rejeicao_generica) ... ok
+test_18_g7_prontidao_somente_requisitos (test_painel_central_qa.CentralQATests.test_18_g7_prontidao_somente_requisitos) ... ok
+test_19_g7_referencia_invalida_falha_fechada (test_painel_central_qa.CentralQATests.test_19_g7_referencia_invalida_falha_fechada) ... ok
+test_20_pyinstaller_faltante_nao_instala_automaticamente (test_painel_central_qa.CentralQATests.test_20_pyinstaller_faltante_nao_instala_automaticamente) ... ok
+test_21_frozen_regressoes_nao_lancam_exe (test_painel_central_qa.CentralQATests.test_21_frozen_regressoes_nao_lancam_exe) ... ok
+test_22_frozen_pyinstaller_nao_lanca_exe (test_painel_central_qa.CentralQATests.test_22_frozen_pyinstaller_nao_lanca_exe) ... ok
+test_23_modo_python_regressoes_preservado (test_painel_central_qa.CentralQATests.test_23_modo_python_regressoes_preservado) ... ok
+test_45_central_tem_dez_perfis_com_diagnosticos (test_painel_central_qa.FrozenCentralReadOnlyV3152Tests.test_45_central_tem_dez_perfis_com_diagnosticos) ... ok
+test_46_python_quatro_diagnosticos_e_zip_manifesto (test_painel_central_qa.FrozenCentralReadOnlyV3152Tests.test_46_python_quatro_diagnosticos_e_zip_manifesto) ... ok
+test_47_frozen_nao_copia_fontes_e_marca_outros_pendentes (test_painel_central_qa.FrozenCentralReadOnlyV3152Tests.test_47_frozen_nao_copia_fontes_e_marca_outros_pendentes) ... ok
+test_48_frozen_rejeita_resposta_com_operacao_trocada (test_painel_central_qa.FrozenCentralReadOnlyV3152Tests.test_48_frozen_rejeita_resposta_com_operacao_trocada) ... ok
+test_49_timeout_e_pendente_nao_vira_aprovado (test_painel_central_qa.FrozenCentralReadOnlyV3152Tests.test_49_timeout_e_pendente_nao_vira_aprovado) ... ok
+test_50_operacao_central_nao_aceita_argumentos_extras (test_painel_central_qa.FrozenCentralReadOnlyV3152Tests.test_50_operacao_central_nao_aceita_argumentos_extras) ... ok
+test_51_central_leitura_so_diagnosticos_e_sem_gui (test_painel_central_qa.FrozenCentralReadOnlyV3152Tests.test_51_central_leitura_so_diagnosticos_e_sem_gui) ... ok
+test_52_nao_usa_endereco_ou_banco_externo (test_painel_central_qa.FrozenCentralReadOnlyV3152Tests.test_52_nao_usa_endereco_ou_banco_externo) ... ok
+test_24_ping_posicional_exato (test_painel_central_qa.FrozenEntrypointV3150Tests.test_24_ping_posicional_exato) ... ok
+test_25_frozen_exibe_estado_sem_iniciar_gui (test_painel_central_qa.FrozenEntrypointV3150Tests.test_25_frozen_exibe_estado_sem_iniciar_gui) ... ok
+test_26_rejeita_marcador_errado (test_painel_central_qa.FrozenEntrypointV3150Tests.test_26_rejeita_marcador_errado) ... ok
+test_27_rejeita_versao_desconhecida (test_painel_central_qa.FrozenEntrypointV3150Tests.test_27_rejeita_versao_desconhecida) ... ok
+test_28_rejeita_verbo_nao_autorizado (test_painel_central_qa.FrozenEntrypointV3150Tests.test_28_rejeita_verbo_nao_autorizado) ... ok
+test_29_rejeita_argumento_extra (test_painel_central_qa.FrozenEntrypointV3150Tests.test_29_rejeita_argumento_extra) ... ok
+test_30_rejeita_python_c (test_painel_central_qa.FrozenEntrypointV3150Tests.test_30_rejeita_python_c) ... ok
+test_31_rejeita_python_m (test_painel_central_qa.FrozenEntrypointV3150Tests.test_31_rejeita_python_m) ... ok
+test_32_rejeita_caminho (test_painel_central_qa.FrozenEntrypointV3150Tests.test_32_rejeita_caminho) ... ok
+test_33_ping_subprocesso_python_real (test_painel_central_qa.FrozenEntrypointV3150Tests.test_33_ping_subprocesso_python_real) ... ok
+test_34_rejeicao_subprocesso_real (test_painel_central_qa.FrozenEntrypointV3150Tests.test_34_rejeicao_subprocesso_real) ... ok
+test_53_integridade_embutida_correspondente (test_painel_central_qa.FrozenIntegritySQLiteV3153Tests.test_53_integridade_embutida_correspondente) ... ok
+test_54_recurso_adulterado_falha_fechada (test_painel_central_qa.FrozenIntegritySQLiteV3153Tests.test_54_recurso_adulterado_falha_fechada) ... ok
+test_55_recurso_ausente_rejeitado (test_painel_central_qa.FrozenIntegritySQLiteV3153Tests.test_55_recurso_ausente_rejeitado) ... ok
+test_56_recurso_redirecionado_rejeitado (test_painel_central_qa.FrozenIntegritySQLiteV3153Tests.test_56_recurso_redirecionado_rejeitado) ... skipped 'Windows não permite symlink'
+test_57_nao_le_diretorio_atual (test_painel_central_qa.FrozenIntegritySQLiteV3153Tests.test_57_nao_le_diretorio_atual) ... ok
+test_58_sqlite_frozen_somente_sintetico (test_painel_central_qa.FrozenIntegritySQLiteV3153Tests.test_58_sqlite_frozen_somente_sintetico) ... ok
+test_59_sqlite_frozen_falha_controlada (test_painel_central_qa.FrozenIntegritySQLiteV3153Tests.test_59_sqlite_frozen_falha_controlada) ... ok
+test_60_central_segura_nao_aceita_argumentos_extras (test_painel_central_qa.FrozenIntegritySQLiteV3153Tests.test_60_central_segura_nao_aceita_argumentos_extras) ... ok
+test_61_central_segura_python_zip_tres_perfis (test_painel_central_qa.FrozenIntegritySQLiteV3153Tests.test_61_central_segura_python_zip_tres_perfis) ... ok
+test_62_frozen_execucao_somente_perfis_permitidos (test_painel_central_qa.FrozenIntegritySQLiteV3153Tests.test_62_frozen_execucao_somente_perfis_permitidos) ... ok
+test_35_ambiente_leitura_sem_abrir_gui (test_painel_central_qa.FrozenReadOnlyV3151Tests.test_35_ambiente_leitura_sem_abrir_gui) ... ok
+test_36_identidade_interna_verificada (test_painel_central_qa.FrozenReadOnlyV3151Tests.test_36_identidade_interna_verificada) ... ok
+test_37_componentes_precarregados_sem_importacao_extra (test_painel_central_qa.FrozenReadOnlyV3151Tests.test_37_componentes_precarregados_sem_importacao_extra) ... ok
+test_38_identidade_ignora_arquivo_no_cwd (test_painel_central_qa.FrozenReadOnlyV3151Tests.test_38_identidade_ignora_arquivo_no_cwd) ... ok
+test_39_identidade_sem_recurso_falha_fechada (test_painel_central_qa.FrozenReadOnlyV3151Tests.test_39_identidade_sem_recurso_falha_fechada) ... ok
+test_40_identidade_arquivo_falso_falha_fechada (test_painel_central_qa.FrozenReadOnlyV3151Tests.test_40_identidade_arquivo_falso_falha_fechada) ... ok
+test_41_componentes_ausentes_ficam_pendentes (test_painel_central_qa.FrozenReadOnlyV3151Tests.test_41_componentes_ausentes_ficam_pendentes) ... ok
+test_42_extra_em_diagnostico_rejeitado (test_painel_central_qa.FrozenReadOnlyV3151Tests.test_42_extra_em_diagnostico_rejeitado) ... ok
+test_43_leitura_proibida_e_python_c_rejeitados (test_painel_central_qa.FrozenReadOnlyV3151Tests.test_43_leitura_proibida_e_python_c_rejeitados) ... ok
+test_44_subprocessos_reais_leitura_e_rejeicao (test_painel_central_qa.FrozenReadOnlyV3151Tests.test_44_subprocessos_reais_leitura_e_rejeicao) ... ok
+test_01_parseia_zip_de_evidencias (test_painel_core.PainelCoreTests.test_01_parseia_zip_de_evidencias) ... ok
+test_02_parseia_zip_de_diagnostico (test_painel_core.PainelCoreTests.test_02_parseia_zip_de_diagnostico) ... ok
+test_03_nao_inventa_caminho (test_painel_core.PainelCoreTests.test_03_nao_inventa_caminho) ... ok
+test_04_config_salva_reutiliza (test_painel_core.PainelCoreTests.test_04_config_salva_reutiliza) ... ok
+test_05_config_invalida_ignorada (test_painel_core.PainelCoreTests.test_05_config_invalida_ignorada) ... ok
+test_06_buscador_encontra_arquivo_recente (test_painel_core.PainelCoreTests.test_06_buscador_encontra_arquivo_recente) ... ok
+test_06a_desempate_de_timestamps_iguais (test_painel_core.PainelCoreTests.test_06a_desempate_de_timestamps_iguais) ... ok
+test_07_nao_considera_zip_antigo (test_painel_core.PainelCoreTests.test_07_nao_considera_zip_antigo) ... ok
+test_08_ler_resultado_aprovado (test_painel_core.PainelCoreTests.test_08_ler_resultado_aprovado) ... ok
+test_09_bloqueio_nao_aprovado (test_painel_core.PainelCoreTests.test_09_bloqueio_nao_aprovado) ... ok
+test_10_gera_diagnostico_de_falha (test_painel_core.PainelCoreTests.test_10_gera_diagnostico_de_falha) ... ok
+test_11_sanitiza_caminho_de_perfil_no_diagnostico (test_painel_core.PainelCoreTests.test_11_sanitiza_caminho_de_perfil_no_diagnostico) ... ok
+test_12_sugere_ambiente_qt_conhecido_quando_existir (test_painel_core.PainelCoreTests.test_12_sugere_ambiente_qt_conhecido_quando_existir) ... ok
+test_13_zip_sem_resumo_e_rejeitado (test_painel_core.PainelCoreTests.test_13_zip_sem_resumo_e_rejeitado) ... ok
+test_codigo_nao_mistura_path_e_string_no_nome_da_evidencia (test_painel_g5.G5BHostStagingRegressionTests.test_codigo_nao_mistura_path_e_string_no_nome_da_evidencia) ... ok
+test_host_staging_emite_zip_apos_falha_de_build_sintetica (test_painel_g5.G5BHostStagingRegressionTests.test_host_staging_emite_zip_apos_falha_de_build_sintetica)
+Cobre a sequência real até preparar o nome do ZIP e interrompe ... ERROR
+test_g5c_usa_utf8_bom_no_script_guest (test_painel_g5.G5C316SafetyTests.test_g5c_usa_utf8_bom_no_script_guest) ... ok
+test_sem_clique_cego_fora_da_area_util (test_painel_g5.G5C316SafetyTests.test_sem_clique_cego_fora_da_area_util) ... ok
+test_sem_execucao_do_exe_no_host (test_painel_g5.G5C316SafetyTests.test_sem_execucao_do_exe_no_host) ... ok
+test_aprovacao_exige_retorno_ao_dashboard (test_painel_g5.G5C317NavigationContracts.test_aprovacao_exige_retorno_ao_dashboard) ... ok
+test_arquivo_retorno_evidencia_zip (test_painel_g5.G5C317NavigationContracts.test_arquivo_retorno_evidencia_zip) ... ok
+test_busca_oficial_rc2_nao_clique_por_coordenada (test_painel_g5.G5C317NavigationContracts.test_busca_oficial_rc2_nao_clique_por_coordenada) ... ok
+test_captura_falha_mas_reinicio_sqlite_continuam (test_painel_g5.G5C318CaptureResilienceTests.test_captura_falha_mas_reinicio_sqlite_continuam) ... ok
+test_captura_tem_retry_e_alternativa_restrita (test_painel_g5.G5C318CaptureResilienceTests.test_captura_tem_retry_e_alternativa_restrita) ... ok
+test_diagnostico_da_sessao_persistido (test_painel_g5.G5C318CaptureResilienceTests.test_diagnostico_da_sessao_persistido) ... ok
+test_falha_de_captura_nao_gera_throw_ao_chamador (test_painel_g5.G5C318CaptureResilienceTests.test_falha_de_captura_nao_gera_throw_ao_chamador) ... ok
+test_foco_comprovado_antes_de_teclas (test_painel_g5.G5C318CaptureResilienceTests.test_foco_comprovado_antes_de_teclas) ... ok
+test_janela_por_pid_sem_dependencia_do_foreground (test_painel_g5.G5C318CaptureResilienceTests.test_janela_por_pid_sem_dependencia_do_foreground) ... ok
+test_nunca_executa_qa_no_host_ou_autoriza_instalacao (test_painel_g5.G5C318CaptureResilienceTests.test_nunca_executa_qa_no_host_ou_autoriza_instalacao) ... ok
+test_sem_aprovacao_de_navegacao_sem_capturas (test_painel_g5.G5C318CaptureResilienceTests.test_sem_aprovacao_de_navegacao_sem_capturas) ... ok
+test_snapshot_de_erro_real_nao_e_aprovacao (test_painel_g5.G5C318CaptureResilienceTests.test_snapshot_de_erro_real_nao_e_aprovacao) ... skipped 'Evidência anterior não disponível'
+test_status_e_versao_reais_no_host (test_painel_g5.G5C318CaptureResilienceTests.test_status_e_versao_reais_no_host) ... ok
+test_sucesso_exige_identidade_janela_e_sessao (test_painel_g5.G5C318CaptureResilienceTests.test_sucesso_exige_identidade_janela_e_sessao) ... ok
+test_emite_zip_se_compilacao_for_bloqueada (test_painel_g5.G5CHostStagingTests.test_emite_zip_se_compilacao_for_bloqueada) ... ERROR
+test_01_protecao_sandbox (test_painel_g5.G5CValidationTests.test_01_protecao_sandbox) ... ok
+test_02_exe_so_guest (test_painel_g5.G5CValidationTests.test_02_exe_so_guest) ... ok
+test_03_relatorio_confirmado (test_painel_g5.G5CValidationTests.test_03_relatorio_confirmado) ... ok
+test_04_nao_aceita_autorizacao (test_painel_g5.G5CValidationTests.test_04_nao_aceita_autorizacao) ... ok
+test_05_nao_aceita_sucesso_sem_navegacao (test_painel_g5.G5CValidationTests.test_05_nao_aceita_sucesso_sem_navegacao) ... ok
+test_06_nao_aceita_sucesso_sem_sqlite (test_painel_g5.G5CValidationTests.test_06_nao_aceita_sucesso_sem_sqlite) ... ok
+test_07_relatorio_parcial_honesto (test_painel_g5.G5CValidationTests.test_07_relatorio_parcial_honesto) ... ok
+test_08_relatorio_malformado (test_painel_g5.G5CValidationTests.test_08_relatorio_malformado) ... ok
+test_09_sqlite_sintetico_passou (test_painel_g5.G5CValidationTests.test_09_sqlite_sintetico_passou) ... ok
+test_10_sqlite_hash_modificado (test_painel_g5.G5CValidationTests.test_10_sqlite_hash_modificado) ... ok
+test_11_sqlite_ausente (test_painel_g5.G5CValidationTests.test_11_sqlite_ausente) ... ok
+test_12_zip_sem_banco_ou_exe (test_painel_g5.G5CValidationTests.test_12_zip_sem_banco_ou_exe) ... ok
+test_13_bloqueia_linux (test_painel_g5.G5CValidationTests.test_13_bloqueia_linux) ... ok
+test_14_ui_nao_autoriza_g5 (test_painel_g5.G5CValidationTests.test_14_ui_nao_autoriza_g5) ... ok
+test_15_configuracao_do_guest_sem_shutdown (test_painel_g5.G5CValidationTests.test_15_configuracao_do_guest_sem_shutdown) ... ok
+test_g5c_claim_without_screenshots_rejected (test_painel_g5.G6ATests.test_g5c_claim_without_screenshots_rejected) ... ok
+test_g5c_import_structural_fixture (test_painel_g5.G6ATests.test_g5c_import_structural_fixture) ... ok
+test_g5c_tampered_image_rejected (test_painel_g5.G6ATests.test_g5c_tampered_image_rejected) ... ok
+test_g6a_all_sqlite_connections_explicitly_closed (test_painel_g5.G6ATests.test_g6a_all_sqlite_connections_explicitly_closed)
+Detecta a regressão real: context manager SQLite não fecha o handle. ... ERROR
+test_g6a_blocks_existing_personal_db (test_painel_g5.G6ATests.test_g6a_blocks_existing_personal_db) ... ok
+test_g6a_engine_code_static_does_not_use_real_installed_files (test_painel_g5.G6ATests.test_g6a_engine_code_static_does_not_use_real_installed_files) ... ok
+test_g6a_original_exception_survives_failed_cleanup (test_painel_g5.G6ATests.test_g6a_original_exception_survives_failed_cleanup) ... ERROR
+test_g6a_report_zip_sha_and_no_db (test_painel_g5.G6ATests.test_g6a_report_zip_sha_and_no_db) ... ERROR
+test_g6a_rollbacks_and_db (test_painel_g5.G6ATests.test_g6a_rollbacks_and_db) ... ERROR
+test_g6a_safe_root (test_painel_g5.G6ATests.test_g6a_safe_root) ... ok
+test_g6a_success_uses_original_engine (test_painel_g5.G6ATests.test_g6a_success_uses_original_engine) ... ERROR
+test_3_capturas_zip_e_hash_sem_banco (test_painel_g5.GateV316ContractTests.test_3_capturas_zip_e_hash_sem_banco) ... ok
+test_inicial_nao_pode_confirmar_dashboard (test_painel_g5.GateV316ContractTests.test_inicial_nao_pode_confirmar_dashboard) ... ok
+test_relatorio_parcial_permite_auditoria_de_captura (test_painel_g5.GateV316ContractTests.test_relatorio_parcial_permite_auditoria_de_captura) ... ok
+test_relatorio_sucesso_precisa_captura_configuracoes (test_painel_g5.GateV316ContractTests.test_relatorio_sucesso_precisa_captura_configuracoes) ... ok
+test_relatorio_sucesso_precisa_capturas_de_ambos_estados (test_painel_g5.GateV316ContractTests.test_relatorio_sucesso_precisa_capturas_de_ambos_estados) ... ok
+test_relatorio_sucesso_precisa_identificador_dashboard (test_painel_g5.GateV316ContractTests.test_relatorio_sucesso_precisa_identificador_dashboard) ... ok
+test_relatorio_sucesso_precisa_titulo_modal (test_painel_g5.GateV316ContractTests.test_relatorio_sucesso_precisa_titulo_modal) ... ok
+test_01_sintetico (test_painel_g5.PreflightTests.test_01_sintetico) ... ERROR
+test_02_nao_autoriza_g5 (test_painel_g5.PreflightTests.test_02_nao_autoriza_g5) ... ERROR
+test_03_ensaios_completos (test_painel_g5.PreflightTests.test_03_ensaios_completos) ... ERROR
+test_04_hash_fonte (test_painel_g5.PreflightTests.test_04_hash_fonte) ... ERROR
+test_05_sem_exe_real (test_painel_g5.PreflightTests.test_05_sem_exe_real) ... ok
+test_06_zips_com_ambos_separadores (test_painel_g5.PreflightTests.test_06_zips_com_ambos_separadores) ... ok
+test_07_zip_ambiguo_rejeitado (test_painel_g5.PreflightTests.test_07_zip_ambiguo_rejeitado) ... C:\Users\TD-PC\AppData\Local\Programs\Python\Python313\Lib\zipfile\__init__.py:1661: UserWarning: Duplicate name: 'codigo/caminhos.py'
+  return self._open_to_write(zinfo, force_zip64=force_zip64)
+ok
+test_08_zip_sem_arquivo_rejeitado (test_painel_g5.PreflightTests.test_08_zip_sem_arquivo_rejeitado) ... ok
+test_09_zip_original_pode_ser_lido_com_separador_normalizado (test_painel_g5.PreflightTests.test_09_zip_original_pode_ser_lido_com_separador_normalizado) ... ERROR
+test_10_simulacao_de_normalizacao_do_windows (test_painel_g5.PreflightTests.test_10_simulacao_de_normalizacao_do_windows) ... ERROR
+test_11_estrutura_zip_original_nao_muda (test_painel_g5.PreflightTests.test_11_estrutura_zip_original_nao_muda) ... ERROR
+test_12_execucao_integral_zip_normalizado (test_painel_g5.PreflightTests.test_12_execucao_integral_zip_normalizado) ... ERROR
+test_01_destino_estavel (test_painel_g5.QtEnvironmentTests.test_01_destino_estavel) ... ok
+test_02_nunca_usa_programa_principal (test_painel_g5.QtEnvironmentTests.test_02_nunca_usa_programa_principal) ... ok
+test_03_rejeita_destino_arbitrario (test_painel_g5.QtEnvironmentTests.test_03_rejeita_destino_arbitrario) ... ok
+test_04_rejeita_pasta_existente_nao_gerenciada (test_painel_g5.QtEnvironmentTests.test_04_rejeita_pasta_existente_nao_gerenciada) ... ok
+test_05_rejeita_pasta_do_programa (test_painel_g5.QtEnvironmentTests.test_05_rejeita_pasta_do_programa) ... ok
+test_06_rejeita_symlink (test_painel_g5.QtEnvironmentTests.test_06_rejeita_symlink) ... skipped 'Windows sem privilégio para symlink real; gate não comprovado'
+test_06a_rejeita_symlink_simulado_sem_privilegio (test_painel_g5.QtEnvironmentTests.test_06a_rejeita_symlink_simulado_sem_privilegio) ... ok
+test_07_ambiente_novo_nao_muda_python_principal (test_painel_g5.QtEnvironmentTests.test_07_ambiente_novo_nao_muda_python_principal) ... ok
+test_08_reutilizar_sem_reinstalar (test_painel_g5.QtEnvironmentTests.test_08_reutilizar_sem_reinstalar) ... ok
+test_09_sem_python_3_13_nao_cria_pasta (test_painel_g5.QtEnvironmentTests.test_09_sem_python_3_13_nao_cria_pasta) ... ok
+test_10_rejeita_executavel_ausente (test_painel_g5.QtEnvironmentTests.test_10_rejeita_executavel_ausente) ... ok
+test_11_limpa_variaveis_perigosas (test_painel_g5.QtEnvironmentTests.test_11_limpa_variaveis_perigosas) ... ok
+test_12_nao_seleciona_em_falha_de_pip (test_painel_g5.QtEnvironmentTests.test_12_nao_seleciona_em_falha_de_pip) ... ok
+test_13_pasta_gerenciada_incompleta_rejeitada (test_painel_g5.QtEnvironmentTests.test_13_pasta_gerenciada_incompleta_rejeitada) ... ok
+test_14_pins_explicitos_e_sem_python_global (test_painel_g5.QtEnvironmentTests.test_14_pins_explicitos_e_sem_python_global) ... ok
+test_15_proibido_rodar_exe_vighna (test_painel_g5.QtEnvironmentTests.test_15_proibido_rodar_exe_vighna) ... ok
+test_16_importacao_nao_cria_pasta (test_painel_g5.QtEnvironmentTests.test_16_importacao_nao_cria_pasta) ... ok
+test_01_configuracao_duas_pastas_somente_qa (test_painel_g5.SandboxG5BTests.test_01_configuracao_duas_pastas_somente_qa) ... ok
+test_02_guest_script_limita_execucao (test_painel_g5.SandboxG5BTests.test_02_guest_script_limita_execucao) ... ok
+test_03_guest_nao_pode_forjar_aprovacao (test_painel_g5.SandboxG5BTests.test_03_guest_nao_pode_forjar_aprovacao) ... ok
+test_04_guest_sucesso_somente_condicionado (test_painel_g5.SandboxG5BTests.test_04_guest_sucesso_somente_condicionado) ... ok
+test_05_guest_nao_autoriza_instalacao (test_painel_g5.SandboxG5BTests.test_05_guest_nao_autoriza_instalacao) ... ok
+test_06_relatorio_invalido_bloqueado (test_painel_g5.SandboxG5BTests.test_06_relatorio_invalido_bloqueado) ... ok
+test_07_laboratorio_existente_bloqueado (test_painel_g5.SandboxG5BTests.test_07_laboratorio_existente_bloqueado) ... ok
+test_08_laboratorio_com_banco_real_bloqueado (test_painel_g5.SandboxG5BTests.test_08_laboratorio_com_banco_real_bloqueado) ... ok
+test_09_laboratorio_fora_do_destino_bloqueado (test_painel_g5.SandboxG5BTests.test_09_laboratorio_fora_do_destino_bloqueado) ... ok
+test_10_evidencia_hash_validado (test_painel_g5.SandboxG5BTests.test_10_evidencia_hash_validado) ... ok
+test_11_bloqueia_execucao_linux (test_painel_g5.SandboxG5BTests.test_11_bloqueia_execucao_linux) ... ok
+test_12_nao_toca_codigo_principal_ou_gate (test_painel_g5.SandboxG5BTests.test_12_nao_toca_codigo_principal_ou_gate) ... ok
+setUpClass (test_painel_g5.ScrollingTests) ... skipped 'Tk depende de servidor de tela (Xvfb em laboratório)'
+test_actual_qa_engine_transactions_with_stub_binaries (test_painel_g6b.G6B1Tests.test_actual_qa_engine_transactions_with_stub_binaries) ... ERROR
+test_dynamic_engine_dependency_capture_includes_uuid (test_painel_g6b.G6B1Tests.test_dynamic_engine_dependency_capture_includes_uuid) ... ERROR
+test_dynamic_engine_dependency_capture_rejects_nonstdlib (test_painel_g6b.G6B1Tests.test_dynamic_engine_dependency_capture_rejects_nonstdlib) ... ok
+test_frozen_guest_import_preflight_pass_and_reject (test_painel_g6b.G6B1Tests.test_frozen_guest_import_preflight_pass_and_reject) ... ok
+test_guest_does_not_run_on_linux (test_painel_g6b.G6B1Tests.test_guest_does_not_run_on_linux) ... ok
+test_guest_hash_reject_tampered_input (test_painel_g6b.G6B1Tests.test_guest_hash_reject_tampered_input) ... ok
+test_guest_preserves_partial_scenario_evidence_on_exception (test_painel_g6b.G6B1Tests.test_guest_preserves_partial_scenario_evidence_on_exception) ... ok
+test_guest_real_builder_not_claimed (test_painel_g6b.G6B1Tests.test_guest_real_builder_not_claimed) ... ok
+test_guest_reject_traversal_and_db_from_source (test_painel_g6b.G6B1Tests.test_guest_reject_traversal_and_db_from_source) ... ok
+test_guest_synthetic_control_flow_does_not_use_any_real_exe (test_painel_g6b.G6B1Tests.test_guest_synthetic_control_flow_does_not_use_any_real_exe) ... ok
+test_guest_workspace_windows_path_avoids_path_plus_string (test_painel_g6b.G6B1Tests.test_guest_workspace_windows_path_avoids_path_plus_string) ... ok
+test_host_preflight_not_available_on_linux (test_painel_g6b.G6B1Tests.test_host_preflight_not_available_on_linux) ... ok
+test_pyinstaller_guest_command_contains_hidden_imports (test_painel_g6b.G6B1Tests.test_pyinstaller_guest_command_contains_hidden_imports) ... ETAPA_G6B1: compilando GUEST em laboratório isolado...
+ok
+test_r1d_initialization_becomes_transaction_baseline (test_painel_g6b.G6B1Tests.test_r1d_initialization_becomes_transaction_baseline)
+Regression: first R1D start may initialize schema before the update. ... ERROR
+test_reject_foreign_root (test_painel_g6b.G6B1Tests.test_reject_foreign_root) ... ok
+test_reject_personal_database_by_parent (test_painel_g6b.G6B1Tests.test_reject_personal_database_by_parent) ... ok
+test_sandbox_close_does_not_probe_unowned_pid (test_painel_g6b.G6B1Tests.test_sandbox_close_does_not_probe_unowned_pid) ... ok
+test_sandbox_closure_graceful_and_pid_scoped (test_painel_g6b.G6B1Tests.test_sandbox_closure_graceful_and_pid_scoped) ... ok
+test_sandbox_offline_and_limited_mounts (test_painel_g6b.G6B1Tests.test_sandbox_offline_and_limited_mounts) ... ok
+test_sqlite_divergence_names_first_changed_table (test_painel_g6b.G6B1Tests.test_sqlite_divergence_names_first_changed_table) ... ok
+test_sqlite_sequence_is_physical_but_still_strict_during_transaction (test_painel_g6b.G6B1Tests.test_sqlite_sequence_is_physical_but_still_strict_during_transaction) ... ok
+test_sqlite_snapshot_records_physical_logical_and_auxiliary_state (test_painel_g6b.G6B1Tests.test_sqlite_snapshot_records_physical_logical_and_auxiliary_state) ... ok
+test_accepts_documented_ptbr_native_message (test_painel_g6b.G7AutoConfirmSandboxDialogTests.test_accepts_documented_ptbr_native_message) ... ok
+test_english_requires_all_native_warning_terms (test_painel_g6b.G7AutoConfirmSandboxDialogTests.test_english_requires_all_native_warning_terms) ... ok
+test_off_windows_never_displays_dialog (test_painel_g6b.G7AutoConfirmSandboxDialogTests.test_off_windows_never_displays_dialog) ... ok
+test_rejects_partial_or_different_text (test_painel_g6b.G7AutoConfirmSandboxDialogTests.test_rejects_partial_or_different_text) ... ok
+test_rejects_substituted_title (test_painel_g6b.G7AutoConfirmSandboxDialogTests.test_rejects_substituted_title) ... ok
+test_rejects_unrelated_warning_even_with_same_title (test_painel_g6b.G7AutoConfirmSandboxDialogTests.test_rejects_unrelated_warning_even_with_same_title) ... ok
+test_rejects_unsafe_buttons (test_painel_g6b.G7AutoConfirmSandboxDialogTests.test_rejects_unsafe_buttons) ... ok
+test_simulated_native_dialog_confirmed_after_wmclose (test_painel_g6b.G7AutoConfirmSandboxDialogTests.test_simulated_native_dialog_confirmed_after_wmclose) ... ok
+test_simulated_unknown_dialog_is_manual (test_painel_g6b.G7AutoConfirmSandboxDialogTests.test_simulated_unknown_dialog_is_manual) ... ok
+test_without_evidence_confirmation_does_not_enter_automatic_path (test_painel_g6b.G7AutoConfirmSandboxDialogTests.test_without_evidence_confirmation_does_not_enter_automatic_path) ... ok
+test_client_revalidation_race_prevents_close (test_painel_g6b.G7SandboxVerifiedCloseTests.test_client_revalidation_race_prevents_close) ... ok
+test_documented_windows_pattern_selects_only_new_client (test_painel_g6b.G7SandboxVerifiedCloseTests.test_documented_windows_pattern_selects_only_new_client) ... ok
+test_extra_client_prevents_close (test_painel_g6b.G7SandboxVerifiedCloseTests.test_extra_client_prevents_close) ... ok
+test_multiple_windows_prevents_close (test_painel_g6b.G7SandboxVerifiedCloseTests.test_multiple_windows_prevents_close) ... ok
+test_no_guest_evidence_does_not_send_wm_close (test_painel_g6b.G7SandboxVerifiedCloseTests.test_no_guest_evidence_does_not_send_wm_close) ... ok
+test_one_wm_close_and_both_processes_required (test_painel_g6b.G7SandboxVerifiedCloseTests.test_one_wm_close_and_both_processes_required) ... ok
+test_ownership_snapshot_never_calls_legacy_pid_closer (test_painel_g6b.G7SandboxVerifiedCloseTests.test_ownership_snapshot_never_calls_legacy_pid_closer) ... ok
+test_preexisting_process_prevents_close (test_painel_g6b.G7SandboxVerifiedCloseTests.test_preexisting_process_prevents_close) ... ok
+test_window_api_not_called_off_windows (test_painel_g6b.G7SandboxVerifiedCloseTests.test_window_api_not_called_off_windows) ... ok
+test_wrong_launcher_prevents_close (test_painel_g6b.G7SandboxVerifiedCloseTests.test_wrong_launcher_prevents_close) ... ok
+test_duplicate_hwnd_is_rejected (test_painel_g6b.G7UnownedDiscardDialogWindowsTests.test_duplicate_hwnd_is_rejected) ... ok
+test_expected_ownership_of_dialog_also_valid (test_painel_g6b.G7UnownedDiscardDialogWindowsTests.test_expected_ownership_of_dialog_also_valid) ... ok
+test_invalid_main_or_handle_is_rejected (test_painel_g6b.G7UnownedDiscardDialogWindowsTests.test_invalid_main_or_handle_is_rejected) ... ok
+test_main_must_be_top_level_and_unowned (test_painel_g6b.G7UnownedDiscardDialogWindowsTests.test_main_must_be_top_level_and_unowned) ... ok
+test_main_window_missing_is_rejected (test_painel_g6b.G7UnownedDiscardDialogWindowsTests.test_main_window_missing_is_rejected) ... ok
+test_order_does_not_change_selection (test_painel_g6b.G7UnownedDiscardDialogWindowsTests.test_order_does_not_change_selection) ... ok
+test_real_observed_independent_dialog_is_selected (test_painel_g6b.G7UnownedDiscardDialogWindowsTests.test_real_observed_independent_dialog_is_selected) ... ok
+test_text_and_buttons_still_mandatory (test_painel_g6b.G7UnownedDiscardDialogWindowsTests.test_text_and_buttons_still_mandatory) ... ok
+test_third_same_process_dialog_is_ambiguous (test_painel_g6b.G7UnownedDiscardDialogWindowsTests.test_third_same_process_dialog_is_ambiguous) ... ok
+test_unknown_parent_or_owner_fails_closed (test_painel_g6b.G7UnownedDiscardDialogWindowsTests.test_unknown_parent_or_owner_fails_closed) ... ok
+test_checked_qa_runtime_rejects_arbitrary_python (test_painel_g6b2.G6B2Contracts.test_checked_qa_runtime_rejects_arbitrary_python) ... ok
+test_diagnostic_zip_integrity (test_painel_g6b2.G6B2Contracts.test_diagnostic_zip_integrity) ... ok
+test_exact_original_builder_call_has_no_runner_override (test_painel_g6b2.G6B2Contracts.test_exact_original_builder_call_has_no_runner_override) ... ok
+test_g6b2_records_sandbox_closure_without_forced_shutdown (test_painel_g6b2.G6B2Contracts.test_g6b2_records_sandbox_closure_without_forced_shutdown) ... ok
+test_gate_never_declares_release_authorization (test_painel_g6b2.G6B2Contracts.test_gate_never_declares_release_authorization) ... ok
+test_guest_requires_icon_prior_to_engine_execution (test_painel_g6b2.G6B2Contracts.test_guest_requires_icon_prior_to_engine_execution) ... ok
+test_host_denies_linux (test_painel_g6b2.G6B2Contracts.test_host_denies_linux) ... ok
+test_input_manifest_hash_tamper (test_painel_g6b2.G6B2Contracts.test_input_manifest_hash_tamper) ... ok
+test_input_traversal_rejected (test_painel_g6b2.G6B2Contracts.test_input_traversal_rejected) ... ok
+test_no_approval_even_when_guest_reports_status (test_painel_g6b2.G6B2Contracts.test_no_approval_even_when_guest_reports_status) ... ok
+test_qa_icon_is_supplied_by_verified_rc2_reference (test_painel_g6b2.G6B2Contracts.test_qa_icon_is_supplied_by_verified_rc2_reference) ... ERROR
+test_qa_icon_missing_or_tampered_is_blocked (test_painel_g6b2.G6B2Contracts.test_qa_icon_missing_or_tampered_is_blocked) ... ok
+test_runtime_does_not_fallback_to_system_python (test_painel_g6b2.G6B2Contracts.test_runtime_does_not_fallback_to_system_python) ... ok
+test_sandbox_network_off_and_readonly_inputs (test_painel_g6b2.G6B2Contracts.test_sandbox_network_off_and_readonly_inputs) ... ok
+test_success_report_requires_all_three_scenarios (test_painel_g6b2.G6B2Contracts.test_success_report_requires_all_three_scenarios) ... ok
+test_01_vazio_bloqueia (test_painel_g7.G7Tests.test_01_vazio_bloqueia) ... ok
+test_02_gates_nao_aprovam_g7 (test_painel_g7.G7Tests.test_02_gates_nao_aprovam_g7) ... ok
+test_03_sem_g1_g5 (test_painel_g7.G7Tests.test_03_sem_g1_g5) ... ok
+test_04_zip_corrompido (test_painel_g7.G7Tests.test_04_zip_corrompido) ... ok
+test_05_zip_sem_manifesto (test_painel_g7.G7Tests.test_05_zip_sem_manifesto) ... ok
+test_06_zip_com_entrada_insegura (test_painel_g7.G7Tests.test_06_zip_com_entrada_insegura) ... ok
+test_07_hash_interno_trocado (test_painel_g7.G7Tests.test_07_hash_interno_trocado) ... ok
+test_08_cenario_duplicado_rejeitado (test_painel_g7.G7Tests.test_08_cenario_duplicado_rejeitado) ... ok
+test_09_build_false_rejeitado (test_painel_g7.G7Tests.test_09_build_false_rejeitado) ... ok
+test_10_dossie_sem_exes (test_painel_g7.G7Tests.test_10_dossie_sem_exes) ... ok
+test_11_nao_aceita_parecer_que_autoriza (test_painel_g7.G7Tests.test_11_nao_aceita_parecer_que_autoriza) ... ok
+test_12_nome_arquivo_importa (test_painel_g7.G7Tests.test_12_nome_arquivo_importa) ... ok
+test_13_b2_nao_aceita_wal_mutado (test_painel_g7.G7Tests.test_13_b2_nao_aceita_wal_mutado) ... ok
+test_build_ambiguo_bloqueado (test_painel_reconciliacao.TestarReconciliacao.test_build_ambiguo_bloqueado) ... ok
+test_caminho_inseguro_bloqueado (test_painel_reconciliacao.TestarReconciliacao.test_caminho_inseguro_bloqueado) ... ok
+test_codigo_fonte_invalido_bloqueado (test_painel_reconciliacao.TestarReconciliacao.test_codigo_fonte_invalido_bloqueado) ... ok
+test_documentacao_divergente_bloqueada (test_painel_reconciliacao.TestarReconciliacao.test_documentacao_divergente_bloqueada) ... ok
+test_duplicidade_de_hash_bloqueada (test_painel_reconciliacao.TestarReconciliacao.test_duplicidade_de_hash_bloqueada) ... ok
+test_estado_ja_false_bloqueado (test_painel_reconciliacao.TestarReconciliacao.test_estado_ja_false_bloqueado) ... ok
+test_estado_true_bloqueado (test_painel_reconciliacao.TestarReconciliacao.test_estado_true_bloqueado) ... ok
+test_fusao_valida (test_painel_reconciliacao.TestarReconciliacao.test_fusao_valida) ... ok
+test_identificador_build (test_painel_reconciliacao.TestarReconciliacao.test_identificador_build) ... ok
+test_lateral_inicia_false (test_painel_reconciliacao.TestarReconciliacao.test_lateral_inicia_false) ... ok
+test_limite_de_3mb_preservado (test_painel_reconciliacao.TestarReconciliacao.test_limite_de_3mb_preservado) ... ok
+test_main_maior_que_2mb_aceito_com_hash (test_painel_reconciliacao.TestarReconciliacao.test_main_maior_que_2mb_aceito_com_hash) ... ok
+test_patch_adicional_bloqueado (test_painel_reconciliacao.TestarReconciliacao.test_patch_adicional_bloqueado) ... ok
+test_primeira_janela_modificada_bloqueada (test_painel_reconciliacao.TestarReconciliacao.test_primeira_janela_modificada_bloqueada) ... ok
+test_somente_segunda_janela_maximizada (test_painel_reconciliacao.TestarReconciliacao.test_somente_segunda_janela_maximizada) ... ok
+test_terceira_janela_bloqueada (test_painel_reconciliacao.TestarReconciliacao.test_terceira_janela_bloqueada) ... ok
+test_09_checkpoint_valido (test_painel_v3.V3CheckpointTests.test_09_checkpoint_valido) ... ok
+test_10_manifesto_modificado_bloqueado (test_painel_v3.V3CheckpointTests.test_10_manifesto_modificado_bloqueado) ... ok
+test_11_instalacao_true_bloqueada (test_painel_v3.V3CheckpointTests.test_11_instalacao_true_bloqueada) ... ok
+test_12_synconline_true_bloqueada (test_painel_v3.V3CheckpointTests.test_12_synconline_true_bloqueada) ... ok
+test_13_zip_com_codigo_rejeitado (test_painel_v3.V3CheckpointTests.test_13_zip_com_codigo_rejeitado) ... ok
+test_14_zip_com_arquivo_extra_rejeitado (test_painel_v3.V3CheckpointTests.test_14_zip_com_arquivo_extra_rejeitado) ... ok
+test_15_versao_desconhecida_rejeitada (test_painel_v3.V3CheckpointTests.test_15_versao_desconhecida_rejeitada) ... ok
+test_16_confirma_importacao_e_persistencia (test_painel_v3.V3CheckpointTests.test_16_confirma_importacao_e_persistencia) ... ok
+test_17_segunda_importacao_preserva_anterior (test_painel_v3.V3CheckpointTests.test_17_segunda_importacao_preserva_anterior) ... ok
+test_18_nao_altera_estado_em_erro (test_painel_v3.V3CheckpointTests.test_18_nao_altera_estado_em_erro) ... ok
+test_19_rejeita_json_gigante (test_painel_v3.V3CheckpointTests.test_19_rejeita_json_gigante) ... ok
+test_20_nao_executa_codigo_externo (test_painel_v3.V3CheckpointTests.test_20_nao_executa_codigo_externo) ... ok
+test_21_exportacao_apenas_dados (test_painel_v3.V3CheckpointTests.test_21_exportacao_apenas_dados) ... ok
+test_22_definicoes_m1_m9_inalteradas (test_painel_v3.V3CheckpointTests.test_22_definicoes_m1_m9_inalteradas) ... ok
+test_23_m2_rc2_sem_autorizacao (test_painel_v3.V3CheckpointTests.test_23_m2_rc2_sem_autorizacao) ... ok
+test_24_m3_experimental (test_painel_v3.V3CheckpointTests.test_24_m3_experimental) ... ok
+test_25_rejeita_campos_adicionais_ocultos (test_painel_v3.V3CheckpointTests.test_25_rejeita_campos_adicionais_ocultos) ... ok
+test_26_rejeita_campos_extras_em_marcos (test_painel_v3.V3CheckpointTests.test_26_rejeita_campos_extras_em_marcos) ... ok
+test_27_importado_e_independente_do_programa (test_painel_v3.V3CheckpointTests.test_27_importado_e_independente_do_programa) ... ok
+test_01_sem_evidencias_tudo_pendente (test_painel_v3.V3GatesTests.test_01_sem_evidencias_tudo_pendente) ... ok
+test_02_nunca_autoriza_instalacao (test_painel_v3.V3GatesTests.test_02_nunca_autoriza_instalacao) ... ok
+test_03_passos_1_a_4_documentados (test_painel_v3.V3GatesTests.test_03_passos_1_a_4_documentados) ... ok
+test_04_sem_build_gate4_pendente (test_painel_v3.V3GatesTests.test_04_sem_build_gate4_pendente) ... ok
+test_05_qt_falhou (test_painel_v3.V3GatesTests.test_05_qt_falhou) ... ok
+test_06_seguranca_bloqueada (test_painel_v3.V3GatesTests.test_06_seguranca_bloqueada) ... ok
+test_07_falha_mais_recente_prevalece (test_painel_v3.V3GatesTests.test_07_falha_mais_recente_prevalece) ... ok
+test_08_m3_nao_integrado (test_painel_v3.V3GatesTests.test_08_m3_nao_integrado) ... ok
+test_01_nove_macrolotes (test_planejamento_v2a.PlanejamentoV2ATests.test_01_nove_macrolotes) ... ok
+test_02_estado_valido (test_planejamento_v2a.PlanejamentoV2ATests.test_02_estado_valido) ... ok
+test_03_status_agrupados (test_planejamento_v2a.PlanejamentoV2ATests.test_03_status_agrupados) ... ok
+test_04_m2_em_homologacao (test_planejamento_v2a.PlanejamentoV2ATests.test_04_m2_em_homologacao) ... ok
+test_05_m3_nao_integrado (test_planejamento_v2a.PlanejamentoV2ATests.test_05_m3_nao_integrado) ... ok
+test_06_nao_autoriza_instalacao (test_planejamento_v2a.PlanejamentoV2ATests.test_06_nao_autoriza_instalacao) ... ok
+test_07_nao_alega_sincronizacao (test_planejamento_v2a.PlanejamentoV2ATests.test_07_nao_alega_sincronizacao) ... ok
+test_08_rejeita_autorizacao_falsa (test_planejamento_v2a.PlanejamentoV2ATests.test_08_rejeita_autorizacao_falsa) ... ok
+test_09_rejeita_sincronizacao_falsa (test_planejamento_v2a.PlanejamentoV2ATests.test_09_rejeita_sincronizacao_falsa) ... ok
+test_10_rejeita_duplicidade (test_planejamento_v2a.PlanejamentoV2ATests.test_10_rejeita_duplicidade) ... ok
+test_11_rejeita_lista_incompleta (test_planejamento_v2a.PlanejamentoV2ATests.test_11_rejeita_lista_incompleta) ... ok
+test_12_rejeita_status_inventado (test_planejamento_v2a.PlanejamentoV2ATests.test_12_rejeita_status_inventado) ... ok
+test_13_rejeita_schema_novo (test_planejamento_v2a.PlanejamentoV2ATests.test_13_rejeita_schema_novo) ... ok
+test_14_nao_executa_codigo_no_plano (test_planejamento_v2a.PlanejamentoV2ATests.test_14_nao_executa_codigo_no_plano) ... ok
+test_15_callbacks_motor_preservados (test_planejamento_v2a.PlanejamentoV2ATests.test_15_callbacks_motor_preservados) ... ok
+test_16_motor_producao_nao_modificado (test_planejamento_v2a.PlanejamentoV2ATests.test_16_motor_producao_nao_modificado) ... ERROR
+test_17_existe_atividade_de_build_na_lista (test_planejamento_v2a.PlanejamentoV2ATests.test_17_existe_atividade_de_build_na_lista) ... ok
+test_18_os_modulos_nao_importam_codigo_do_vighna (test_planejamento_v2a.PlanejamentoV2ATests.test_18_os_modulos_nao_importam_codigo_do_vighna) ... ok
+test_01_rejeita_percurso_ascendente (test_protecao_homologador.ContratosSegurancaHomologador.test_01_rejeita_percurso_ascendente) ... ok
+test_02_rejeita_caminho_absoluto (test_protecao_homologador.ContratosSegurancaHomologador.test_02_rejeita_caminho_absoluto) ... ok
+test_02a_rejeita_nomes_ambiguos (test_protecao_homologador.ContratosSegurancaHomologador.test_02a_rejeita_nomes_ambiguos) ... ok
+test_03_rejeita_banco_e_exe (test_protecao_homologador.ContratosSegurancaHomologador.test_03_rejeita_banco_e_exe) ... ok
+test_04_aceita_fontes_autorizadas (test_protecao_homologador.ContratosSegurancaHomologador.test_04_aceita_fontes_autorizadas) ... ok
+test_05_rejeita_symlink_em_zip (test_protecao_homologador.ContratosSegurancaHomologador.test_05_rejeita_symlink_em_zip) ... ok
+test_06_rejeita_membro_com_nome_duplicado (test_protecao_homologador.ContratosSegurancaHomologador.test_06_rejeita_membro_com_nome_duplicado) ... ok
+test_07_rejeita_zip_slip (test_protecao_homologador.ContratosSegurancaHomologador.test_07_rejeita_zip_slip) ... ok
+test_08_rejeita_conteudo_executavel (test_protecao_homologador.ContratosSegurancaHomologador.test_08_rejeita_conteudo_executavel) ... ok
+test_09_rejeita_hash_incorreto_do_pacote (test_protecao_homologador.ContratosSegurancaHomologador.test_09_rejeita_hash_incorreto_do_pacote) ... ok
+test_10_hash_real_de_entrada (test_protecao_homologador.ContratosSegurancaHomologador.test_10_hash_real_de_entrada) ... ERROR
+test_11_candidato_m2_exatamente_rc2 (test_protecao_homologador.ContratosSegurancaHomologador.test_11_candidato_m2_exatamente_rc2) ... ERROR
+test_12_rejeita_build_invalido (test_protecao_homologador.ContratosSegurancaHomologador.test_12_rejeita_build_invalido) ... ERROR
+test_13_arquivo_spec_permanece_fora_da_atualizacao (test_protecao_homologador.ContratosSegurancaHomologador.test_13_arquivo_spec_permanece_fora_da_atualizacao) ... ERROR
+test_14_arquivos_pessoais_nao_existem_nos_insumos (test_protecao_homologador.ContratosSegurancaHomologador.test_14_arquivos_pessoais_nao_existem_nos_insumos) ... ERROR
+test_15_saida_zip_com_hashs_verificaveis (test_protecao_homologador.ContratosSegurancaHomologador.test_15_saida_zip_com_hashs_verificaveis) ... ok
+test_16_verificacao_local_reproduzivel (test_protecao_homologador.ContratosSegurancaHomologador.test_16_verificacao_local_reproduzivel) ... ERROR
+test_16a_bloqueia_pasta_do_vighna_real (test_protecao_homologador.ContratosSegurancaHomologador.test_16a_bloqueia_pasta_do_vighna_real) ... ok
+test_16b_falha_preflight_gera_zip_diagnostico (test_protecao_homologador.ContratosSegurancaHomologador.test_16b_falha_preflight_gera_zip_diagnostico) ... ETAPA_HOMOLOGADOR: Verificando arquivos e hashes; a instalacao principal nao sera utilizada.
+BLOQUEADO / ERRO: ValueError falha QA simulada
+ZIP DE DIAGNOSTICO CRIADO: C:\Users\TD-PC\AppData\Local\Temp\vighna_v11_diagnostico_xd0nzxgr\RESULTADOS_HOMOLOGACAO_WINDOWS_20261015_103731_735693.zip
+PASTA DE RESULTADOS: C:\Users\TD-PC\AppData\Local\Temp\vighna_v11_diagnostico_xd0nzxgr
+ok
+test_01_hash_identidade_fonte (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_01_hash_identidade_fonte) ... ok
+test_02_identidade_frozen_autentica_hash (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_02_identidade_frozen_autentica_hash) ... ok
+test_03_negativo_versao_maliciosa (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_03_negativo_versao_maliciosa) ... ok
+test_04_negativo_json_reordenado (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_04_negativo_json_reordenado) ... ok
+test_05_recurso_ausente (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_05_recurso_ausente) ... ok
+test_06_sem_meipass_falha_fechado (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_06_sem_meipass_falha_fechado) ... ok
+test_07_redirecionamento_falha_fechado (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_07_redirecionamento_falha_fechado) ... skipped 'symlink indisponivel'
+test_08_recursos_planejamento_triplo (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_08_recursos_planejamento_triplo) ... ok
+test_09_config_salva_fora_recursos (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_09_config_salva_fora_recursos) ... ok
+test_10_config_link_nao_sobrescrito (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_10_config_link_nao_sobrescrito) ... skipped 'symlink indisponivel'
+test_11_diagnosticos_nao_usam_app_root (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_11_diagnosticos_nao_usam_app_root) ... ok
+test_11a_dossie_persistente_fora_recursos (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_11a_dossie_persistente_fora_recursos) ... ok
+test_12_guardas_gui_antes_de_subprocessos (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_12_guardas_gui_antes_de_subprocessos) ... ok
+test_13_guardas_workers (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_13_guardas_workers) ... ok
+test_14_spec_tem_tres_recursos (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_14_spec_tem_tres_recursos) ... ok
+test_15_protocolo_rejeita_argumentos_extras (test_reconciliacao_v3153_r1.ReconciliacaoR1.test_15_protocolo_rejeita_argumentos_extras) ... {"status": "REJEITADO", "motivo": "Protocolo interno não autorizado"}
+{"status": "REJEITADO", "motivo": "Protocolo interno não autorizado"}
+ok
+
+======================================================================
+ERROR: test_gui_v3_smoke (unittest.loader._FailedTest.test_gui_v3_smoke)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_gui_v3_smoke
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Programs\Python\Python313\Lib\unittest\loader.py", line 403, in _find_test_path
+    module = self._get_module_from_name(name)
+  File "C:\Users\TD-PC\AppData\Local\Programs\Python\Python313\Lib\unittest\loader.py", line 346, in _get_module_from_name
+    __import__(name)
+    ~~~~~~~~~~^^^^^^
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_gui_v3_smoke.py", line 8, in <module>
+    app=m.Painel()
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\painel_homologacao.py", line 40, in __init__
+    super().__init__()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\TD-PC\AppData\Local\Programs\Python\Python313\Lib\tkinter\__init__.py", line 2491, in __init__
+    self.tk = _tkinter.create(screenName, baseName, className, interactive, wantobjects, useTk, sync, use)
+              ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: Can't find a usable init.tcl in the following directories: 
+    {C:\Users\TD-PC\AppData\Local\Programs\Python\Python313\tcl\tcl8.6}
+
+
+
+This probably means that Tcl wasn't installed properly.
+
+
+
+======================================================================
+ERROR: test_host_staging_emite_zip_apos_falha_de_build_sintetica (test_painel_g5.G5BHostStagingRegressionTests.test_host_staging_emite_zip_apos_falha_de_build_sintetica)
+Cobre a sequência real até preparar o nome do ZIP e interrompe
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_painel_g5.py", line 419, in test_host_staging_emite_zip_apos_falha_de_build_sintetica
+    exit_code=e.g5b_run()
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\painel_g5_ui.py", line 380, in g5b_run
+    pre=h.preflight_selftest()
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\homologador_windows.py", line 230, in preflight_selftest
+    meta = verify_inputs()
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\homologador_windows.py", line 109, in verify_inputs
+    raise ValueError("ARQUIVO AUSENTE OU ALTERADO: " + rel)
+ValueError: ARQUIVO AUSENTE OU ALTERADO: EVIDENCIAS_PREPARACAO/TESTES_ATUALIZADOR_82_82.txt
+
+======================================================================
+ERROR: test_emite_zip_se_compilacao_for_bloqueada (test_painel_g5.G5CHostStagingTests.test_emite_zip_se_compilacao_for_bloqueada)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_painel_g5.py", line 307, in test_emite_zip_se_compilacao_for_bloqueada
+    self.assertEqual(e.g5c_run(),1)
+                     ~~~~~~~~~^^
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\painel_g5_ui.py", line 1025, in g5c_run
+    h.preflight_selftest()
+    ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\homologador_windows.py", line 230, in preflight_selftest
+    meta = verify_inputs()
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\homologador_windows.py", line 109, in verify_inputs
+    raise ValueError("ARQUIVO AUSENTE OU ALTERADO: " + rel)
+ValueError: ARQUIVO AUSENTE OU ALTERADO: EVIDENCIAS_PREPARACAO/TESTES_ATUALIZADOR_82_82.txt
+
+======================================================================
+ERROR: test_g6a_all_sqlite_connections_explicitly_closed (test_painel_g5.G6ATests.test_g6a_all_sqlite_connections_explicitly_closed)
+Detecta a regressão real: context manager SQLite não fecha o handle.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_painel_g5.py", line 770, in test_g6a_all_sqlite_connections_explicitly_closed
+    result = e.g6a_run(persist=False)
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\painel_g5_ui.py", line 1358, in g6a_run
+    h.preflight_selftest()
+    ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\homologador_windows.py", line 230, in preflight_selftest
+    meta = verify_inputs()
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\homologador_windows.py", line 109, in verify_inputs
+    raise ValueError("ARQUIVO AUSENTE OU ALTERADO: " + rel)
+ValueError: ARQUIVO AUSENTE OU ALTERADO: EVIDENCIAS_PREPARACAO/TESTES_ATUALIZADOR_82_82.txt
+
+======================================================================
+ERROR: test_g6a_original_exception_survives_failed_cleanup (test_painel_g5.G6ATests.test_g6a_original_exception_survives_failed_cleanup)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_painel_g5.py", line 785, in test_g6a_original_exception_survives_failed_cleanup
+    e.g6a_run(persist=False)
+    ~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\painel_g5_ui.py", line 1358, in g6a_run
+    h.preflight_selftest()
+    ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\homologador_windows.py", line 230, in preflight_selftest
+    meta = verify_inputs()
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\homologador_windows.py", line 109, in verify_inputs
+    raise ValueError("ARQUIVO AUSENTE OU ALTERADO: " + rel)
+ValueError: ARQUIVO AUSENTE OU ALTERADO: EVIDENCIAS_PREPARACAO/TESTES_ATUALIZADOR_82_82.txt
+
+======================================================================
+ERROR: test_g6a_report_zip_sha_and_no_db (test_painel_g5.G6ATests.test_g6a_report_zip_sha_and_no_db)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_painel_g5.py", line 790, in test_g6a_report_zip_sha_and_no_db
+    e.g6a_run(persist=True)
+    ~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\painel_g5_ui.py", line 1358, in g6a_run
+    h.preflight_selftest()
+    ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\homologador_windows.py", line 230, in preflight_selftest
+    meta = verify_inputs()
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\homologador_windows.py", line 109, in verify_inputs
+    raise ValueError("ARQUIVO AUSENTE OU ALTERADO: " + rel)
+ValueError: ARQUIVO AUSENTE OU ALTERADO: EVIDENCIAS_PREPARACAO/TESTES_ATUALIZADOR_82_82.txt
+
+======================================================================
+ERROR: test_g6a_rollbacks_and_db (test_painel_g5.G6ATests.test_g6a_rollbacks_and_db)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_painel_g5.py", line 743, in test_g6a_rollbacks_and_db
+    result=e.g6a_run(persist=False)
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\painel_g5_ui.py", line 1358, in g6a_run
+    h.preflight_selftest()
+    ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\homologador_windows.py", line 230, in preflight_selftest
+    meta = verify_inputs()
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\homologador_windows.py", line 109, in verify_inputs
+    raise ValueError("ARQUIVO AUSENTE OU ALTERADO: " + rel)
+ValueError: ARQUIVO AUSENTE OU ALTERADO: EVIDENCIAS_PREPARACAO/TESTES_ATUALIZADOR_82_82.txt
+
+======================================================================
+ERROR: test_g6a_success_uses_original_engine (test_painel_g5.G6ATests.test_g6a_success_uses_original_engine)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_painel_g5.py", line 732, in test_g6a_success_uses_original_engine
+    result=e.g6a_run(persist=False)
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\painel_g5_ui.py", line 1358, in g6a_run
+    h.preflight_selftest()
+    ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\homologador_windows.py", line 230, in preflight_selftest
+    meta = verify_inputs()
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\homologador_windows.py", line 109, in verify_inputs
+    raise ValueError("ARQUIVO AUSENTE OU ALTERADO: " + rel)
+ValueError: ARQUIVO AUSENTE OU ALTERADO: EVIDENCIAS_PREPARACAO/TESTES_ATUALIZADOR_82_82.txt
+
+======================================================================
+ERROR: test_01_sintetico (test_painel_g5.PreflightTests.test_01_sintetico)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_painel_g5.py", line 17, in test_01_sintetico
+    r=pre.run_g5_a()
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\painel_g5_preflight.py", line 53, in run_g5_a
+    raise ValueError('Fonte RC2 não encontrada')
+ValueError: Fonte RC2 não encontrada
+
+======================================================================
+ERROR: test_02_nao_autoriza_g5 (test_painel_g5.PreflightTests.test_02_nao_autoriza_g5)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_painel_g5.py", line 20, in test_02_nao_autoriza_g5
+    r=pre.run_g5_a();self.assertFalse(r['g5_aprovado'])
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\painel_g5_preflight.py", line 53, in run_g5_a
+    raise ValueError('Fonte RC2 não encontrada')
+ValueError: Fonte RC2 não encontrada
+
+======================================================================
+ERROR: test_03_ensaios_completos (test_painel_g5.PreflightTests.test_03_ensaios_completos)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_painel_g5.py", line 23, in test_03_ensaios_completos
+    r=pre.run_g5_a()
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\painel_g5_preflight.py", line 53, in run_g5_a
+    raise ValueError('Fonte RC2 não encontrada')
+ValueError: Fonte RC2 não encontrada
+
+======================================================================
+ERROR: test_04_hash_fonte (test_painel_g5.PreflightTests.test_04_hash_fonte)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_painel_g5.py", line 27, in test_04_hash_fonte
+    r=pre.run_g5_a();self.assertEqual(len(r['fonte_sha256']),64)
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\painel_g5_preflight.py", line 53, in run_g5_a
+    raise ValueError('Fonte RC2 não encontrada')
+ValueError: Fonte RC2 não encontrada
+
+======================================================================
+ERROR: test_09_zip_original_pode_ser_lido_com_separador_normalizado (test_painel_g5.PreflightTests.test_09_zip_original_pode_ser_lido_com_separador_normalizado)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_painel_g5.py", line 62, in test_09_zip_original_pode_ser_lido_com_separador_normalizado
+    with zipfile.ZipFile(pre.SRC) as z:
+         ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\TD-PC\AppData\Local\Programs\Python\Python313\Lib\zipfile\__init__.py", line 1389, in __init__
+    self.fp = io.open(file, filemode)
+              ~~~~~~~^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\TD-PC\\AppData\\Local\\Temp\\vighnalab_r1_codex_TSd5LY\\source\\insumos\\M2_RC2_FONTE_REFERENCIA_NAO_INSTALAR.zip'
+
+======================================================================
+ERROR: test_10_simulacao_de_normalizacao_do_windows (test_painel_g5.PreflightTests.test_10_simulacao_de_normalizacao_do_windows)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_painel_g5.py", line 70, in test_10_simulacao_de_normalizacao_do_windows
+    with zipfile.ZipFile(pre.SRC) as z:
+         ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\TD-PC\AppData\Local\Programs\Python\Python313\Lib\zipfile\__init__.py", line 1389, in __init__
+    self.fp = io.open(file, filemode)
+              ~~~~~~~^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\TD-PC\\AppData\\Local\\Temp\\vighnalab_r1_codex_TSd5LY\\source\\insumos\\M2_RC2_FONTE_REFERENCIA_NAO_INSTALAR.zip'
+
+======================================================================
+ERROR: test_11_estrutura_zip_original_nao_muda (test_painel_g5.PreflightTests.test_11_estrutura_zip_original_nao_muda)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_painel_g5.py", line 74, in test_11_estrutura_zip_original_nao_muda
+    raw=pre.SRC.read_bytes()
+  File "C:\Users\TD-PC\AppData\Local\Programs\Python\Python313\Lib\pathlib\_abc.py", line 625, in read_bytes
+    with self.open(mode='rb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\TD-PC\AppData\Local\Programs\Python\Python313\Lib\pathlib\_local.py", line 537, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\TD-PC\\AppData\\Local\\Temp\\vighnalab_r1_codex_TSd5LY\\source\\insumos\\M2_RC2_FONTE_REFERENCIA_NAO_INSTALAR.zip'
+
+======================================================================
+ERROR: test_12_execucao_integral_zip_normalizado (test_painel_g5.PreflightTests.test_12_execucao_integral_zip_normalizado)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_painel_g5.py", line 81, in test_12_execucao_integral_zip_normalizado
+    with zipfile.ZipFile(pre.SRC) as source, zipfile.ZipFile(alternate,'w',zipfile.ZIP_DEFLATED) as target:
+         ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\TD-PC\AppData\Local\Programs\Python\Python313\Lib\zipfile\__init__.py", line 1389, in __init__
+    self.fp = io.open(file, filemode)
+              ~~~~~~~^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\TD-PC\\AppData\\Local\\Temp\\vighnalab_r1_codex_TSd5LY\\source\\insumos\\M2_RC2_FONTE_REFERENCIA_NAO_INSTALAR.zip'
+
+======================================================================
+ERROR: test_actual_qa_engine_transactions_with_stub_binaries (test_painel_g6b.G6B1Tests.test_actual_qa_engine_transactions_with_stub_binaries)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_painel_g6b.py", line 285, in test_actual_qa_engine_transactions_with_stub_binaries
+    shutil.copy2(h.KIT/'insumos'/'BASE_R1D_SOMENTE_FONTES_QA.zip',
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 incoming/'BASE_R1D_SOMENTE_FONTES_QA.zip')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\TD-PC\AppData\Local\Programs\Python\Python313\Lib\shutil.py", line 453, in copy2
+    _winapi.CopyFile2(src_, dst_, flags)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [WinError 3] O sistema não pode encontrar o caminho especificado
+
+======================================================================
+ERROR: test_dynamic_engine_dependency_capture_includes_uuid (test_painel_g6b.G6B1Tests.test_dynamic_engine_dependency_capture_includes_uuid)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_painel_g6b.py", line 229, in test_dynamic_engine_dependency_capture_includes_uuid
+    with ZipFile(source) as archive:
+         ~~~~~~~^^^^^^^^
+  File "C:\Users\TD-PC\AppData\Local\Programs\Python\Python313\Lib\zipfile\__init__.py", line 1389, in __init__
+    self.fp = io.open(file, filemode)
+              ~~~~~~~^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\TD-PC\\AppData\\Local\\Temp\\vighnalab_r1_codex_TSd5LY\\source\\insumos\\BASE_R1D_SOMENTE_FONTES_QA.zip'
+
+======================================================================
+ERROR: test_r1d_initialization_becomes_transaction_baseline (test_painel_g6b.G6B1Tests.test_r1d_initialization_becomes_transaction_baseline)
+Regression: first R1D start may initialize schema before the update.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_painel_g6b.py", line 308, in test_r1d_initialization_becomes_transaction_baseline
+    shutil.copy2(h.KIT/'insumos'/'BASE_R1D_SOMENTE_FONTES_QA.zip',
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 incoming/'BASE_R1D_SOMENTE_FONTES_QA.zip')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\TD-PC\AppData\Local\Programs\Python\Python313\Lib\shutil.py", line 453, in copy2
+    _winapi.CopyFile2(src_, dst_, flags)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [WinError 3] O sistema não pode encontrar o caminho especificado
+
+======================================================================
+ERROR: test_qa_icon_is_supplied_by_verified_rc2_reference (test_painel_g6b2.G6B2Contracts.test_qa_icon_is_supplied_by_verified_rc2_reference)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_painel_g6b2.py", line 61, in test_qa_icon_is_supplied_by_verified_rc2_reference
+    rc2=h.checked_archive(h.KIT/'insumos'/h.RC2,prefix='codigo/')
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\homologador_windows.py", line 72, in checked_archive
+    with zipfile.ZipFile(path) as archive:
+         ~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\TD-PC\AppData\Local\Programs\Python\Python313\Lib\zipfile\__init__.py", line 1389, in __init__
+    self.fp = io.open(file, filemode)
+              ~~~~~~~^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\TD-PC\\AppData\\Local\\Temp\\vighnalab_r1_codex_TSd5LY\\source\\insumos\\M2_RC2_FONTE_REFERENCIA_NAO_INSTALAR.zip'
+
+======================================================================
+ERROR: test_16_motor_producao_nao_modificado (test_planejamento_v2a.PlanejamentoV2ATests.test_16_motor_producao_nao_modificado)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_planejamento_v2a.py", line 108, in test_16_motor_producao_nao_modificado
+    with ZipFile(ROOT/'insumos'/'CANDIDATO_QA_R1D_PARA_M2_RC2_NAO_INSTALAR.zip') as z:
+         ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\TD-PC\AppData\Local\Programs\Python\Python313\Lib\zipfile\__init__.py", line 1389, in __init__
+    self.fp = io.open(file, filemode)
+              ~~~~~~~^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\TD-PC\\AppData\\Local\\Temp\\vighnalab_r1_codex_TSd5LY\\source\\insumos\\CANDIDATO_QA_R1D_PARA_M2_RC2_NAO_INSTALAR.zip'
+
+======================================================================
+ERROR: test_10_hash_real_de_entrada (test_protecao_homologador.ContratosSegurancaHomologador.test_10_hash_real_de_entrada)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_protecao_homologador.py", line 81, in test_10_hash_real_de_entrada
+    meta = h.verify_inputs()
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\homologador_windows.py", line 109, in verify_inputs
+    raise ValueError("ARQUIVO AUSENTE OU ALTERADO: " + rel)
+ValueError: ARQUIVO AUSENTE OU ALTERADO: EVIDENCIAS_PREPARACAO/TESTES_ATUALIZADOR_82_82.txt
+
+======================================================================
+ERROR: test_11_candidato_m2_exatamente_rc2 (test_protecao_homologador.ContratosSegurancaHomologador.test_11_candidato_m2_exatamente_rc2)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_protecao_homologador.py", line 85, in test_11_candidato_m2_exatamente_rc2
+    b = h.checked_archive(h.KIT / "insumos" / h.BASE)
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\homologador_windows.py", line 72, in checked_archive
+    with zipfile.ZipFile(path) as archive:
+         ~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\TD-PC\AppData\Local\Programs\Python\Python313\Lib\zipfile\__init__.py", line 1389, in __init__
+    self.fp = io.open(file, filemode)
+              ~~~~~~~^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\TD-PC\\AppData\\Local\\Temp\\vighnalab_r1_codex_TSd5LY\\source\\insumos\\BASE_R1D_SOMENTE_FONTES_QA.zip'
+
+======================================================================
+ERROR: test_12_rejeita_build_invalido (test_protecao_homologador.ContratosSegurancaHomologador.test_12_rejeita_build_invalido)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_protecao_homologador.py", line 91, in test_12_rejeita_build_invalido
+    b = h.checked_archive(h.KIT / "insumos" / h.BASE)
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\homologador_windows.py", line 72, in checked_archive
+    with zipfile.ZipFile(path) as archive:
+         ~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\TD-PC\AppData\Local\Programs\Python\Python313\Lib\zipfile\__init__.py", line 1389, in __init__
+    self.fp = io.open(file, filemode)
+              ~~~~~~~^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\TD-PC\\AppData\\Local\\Temp\\vighnalab_r1_codex_TSd5LY\\source\\insumos\\BASE_R1D_SOMENTE_FONTES_QA.zip'
+
+======================================================================
+ERROR: test_13_arquivo_spec_permanece_fora_da_atualizacao (test_protecao_homologador.ContratosSegurancaHomologador.test_13_arquivo_spec_permanece_fora_da_atualizacao)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_protecao_homologador.py", line 100, in test_13_arquivo_spec_permanece_fora_da_atualizacao
+    p = h.checked_archive(h.KIT / "insumos" / h.PATCH)
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\homologador_windows.py", line 72, in checked_archive
+    with zipfile.ZipFile(path) as archive:
+         ~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\TD-PC\AppData\Local\Programs\Python\Python313\Lib\zipfile\__init__.py", line 1389, in __init__
+    self.fp = io.open(file, filemode)
+              ~~~~~~~^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\TD-PC\\AppData\\Local\\Temp\\vighnalab_r1_codex_TSd5LY\\source\\insumos\\CANDIDATO_QA_R1D_PARA_M2_RC2_NAO_INSTALAR.zip'
+
+======================================================================
+ERROR: test_14_arquivos_pessoais_nao_existem_nos_insumos (test_protecao_homologador.ContratosSegurancaHomologador.test_14_arquivos_pessoais_nao_existem_nos_insumos)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_protecao_homologador.py", line 106, in test_14_arquivos_pessoais_nao_existem_nos_insumos
+    items = h.checked_archive(h.KIT / "insumos" / name, prefix=prefix)
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\homologador_windows.py", line 72, in checked_archive
+    with zipfile.ZipFile(path) as archive:
+         ~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\TD-PC\AppData\Local\Programs\Python\Python313\Lib\zipfile\__init__.py", line 1389, in __init__
+    self.fp = io.open(file, filemode)
+              ~~~~~~~^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\TD-PC\\AppData\\Local\\Temp\\vighnalab_r1_codex_TSd5LY\\source\\insumos\\BASE_R1D_SOMENTE_FONTES_QA.zip'
+
+======================================================================
+ERROR: test_16_verificacao_local_reproduzivel (test_protecao_homologador.ContratosSegurancaHomologador.test_16_verificacao_local_reproduzivel)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\test_protecao_homologador.py", line 152, in test_16_verificacao_local_reproduzivel
+    self.assertEqual(h.preflight_selftest()["status"], "PASSOU")
+                     ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\homologador_windows.py", line 230, in preflight_selftest
+    meta = verify_inputs()
+  File "C:\Users\TD-PC\AppData\Local\Temp\vighnalab_r1_codex_TSd5LY\source\homologador_windows.py", line 109, in verify_inputs
+    raise ValueError("ARQUIVO AUSENTE OU ALTERADO: " + rel)
+ValueError: ARQUIVO AUSENTE OU ALTERADO: EVIDENCIAS_PREPARACAO/TESTES_ATUALIZADOR_82_82.txt
+
+----------------------------------------------------------------------
+Ran 413 tests in 24.001s
+
+FAILED (errors=27, skipped=16)

@@ -1,0 +1,63 @@
+{
+  "formato": "vighnalab-codex-evidencias-sha256-v1",
+  "algoritmo": "SHA-256",
+  "nota": "Integridade por hash; não é assinatura digital do EXE.",
+  "arquivos": {
+    "COMPARACAO_MANIFESTO.json": {
+      "bytes": 182,
+      "sha256": "8d5d177355bf67b58d9aef8f765048f5f6a4268effd22a4c031bf5ca69f3198b"
+    },
+    "HASHES_FONTES_ORIGINAIS_ANTES.json": {
+      "bytes": 8380,
+      "sha256": "54249ad11140cdb189d449aa309c96e7716a2b6d4ea204142f2dad1629490e72"
+    },
+    "HASHES_FONTES_ORIGINAIS_DEPOIS.json": {
+      "bytes": 8380,
+      "sha256": "54249ad11140cdb189d449aa309c96e7716a2b6d4ea204142f2dad1629490e72"
+    },
+    "INSUMOS_OPERACIONAIS.json": {
+      "bytes": 795,
+      "sha256": "b9ee3b8fc2449e276f92accae2aeed7ad0936c838430332e5f5db13ac4486828"
+    },
+    "logs/checks_adicionais.log": {
+      "bytes": 2327,
+      "sha256": "adcd01b930c34fb03ae61917e83931ff726420c5b41edcaccc389dee05c9e25b"
+    },
+    "logs/unittest_reconciliacao_v3153_r1.log": {
+      "bytes": 2333,
+      "sha256": "19084b6e9b798240bc369090902c57c9a218eb2aa100fbe2ccf34947a61f2f46"
+    },
+    "logs/unittest_regressoes_completas.log": {
+      "bytes": 83658,
+      "sha256": "522caca1c22307aa6a11d6c3006aedd437e6c8e6bc2167b2f28ea09d311bb039"
+    },
+    "MATRIZ_ACHADOS_V3153_R1.md": {
+      "bytes": 2260,
+      "sha256": "6bfd7d845c071861c1a1efbac152803239fdbfaab7c716d49ba64a90f5152f0a"
+    },
+    "PRESERVACAO_FONTES.json": {
+      "bytes": 142,
+      "sha256": "aa50a1ede1f9bb83d7a43a45178437009e40aa0cf25c2aa7ba20d2583f9aab35"
+    },
+    "RELATORIO_REAUDITORIA_V3153_R1.md": {
+      "bytes": 7616,
+      "sha256": "a1ee2b2935efad21f65a6484d7524362eba8ed39f3f4b049cbfbdbe16c073fe9"
+    },
+    "RESULTADO_FINAL.json": {
+      "bytes": 1927,
+      "sha256": "3da53536e6885097f506aefb7e2ebe1decb68581c8c012f8f1e121f9d4f61210"
+    },
+    "RESULTADO_GERAL.json": {
+      "bytes": 10847,
+      "sha256": "ecdcfa2f32323555fc8dc2e9ad1c61d1f2b84170f562f0a5e852f7a0922079dc"
+    },
+    "RESULTADOS_TESTES.json": {
+      "bytes": 13337,
+      "sha256": "15a74463dc6019734b4f7bf9798102c6c6f0a2551b0c01a847c8a5a69b623e0a"
+    },
+    "VALIDACAO_SPEC_E_BUNDLE.json": {
+      "bytes": 10054,
+      "sha256": "0558c6c4c73212fc48e724f199056d6e7b23ceba7226dd1a2c5c7ac90fc2452d"
+    }
+  }
+}

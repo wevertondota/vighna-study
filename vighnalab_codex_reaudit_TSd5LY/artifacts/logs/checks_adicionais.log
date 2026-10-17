@@ -1,0 +1,64 @@
+{
+  "status": "PASSOU",
+  "resultados": {
+    "config_localappdata_e_legado_somente_leitura": {
+      "status": "PASSOU",
+      "config_destino": "C:\\Users\\TD-PC\\AppData\\Local\\Temp\\vighnalab_codex_custom_h_gaod68\\localappdata\\VighnaLab\\painel_configuracao_local.json",
+      "legado_preservado": true
+    },
+    "config_pasta_sem_escrita_simulada": {
+      "status": "PASSOU",
+      "metodo": "PermissionError injetado em tempfile.mkstemp"
+    },
+    "destinos_diagnostico_e_dossie": {
+      "status": "PASSOU",
+      "diagnosticos": "C:\\Users\\TD-PC\\AppData\\Local\\Temp\\vighnalab_codex_custom_h_gaod68\\temp\\VighnaLab_Diagnosticos",
+      "dossie": "C:\\Users\\TD-PC\\AppData\\Local\\Temp\\vighnalab_codex_custom_h_gaod68\\localappdata\\VighnaLab\\G7_Dossies",
+      "saida_no_meipass": false
+    },
+    "symlink_real": {
+      "status": "NAO_TESTADO",
+      "motivo": "OSError: [WinError 1314] O cliente não tem o privilégio necessário: 'C:\\\\Users\\\\TD-PC\\\\AppData\\\\Local\\\\Temp\\\\vighnalab_codex_custom_h_gaod68\\\\symlink_target.json' -> 'C:\\\\Users\\\\TD-PC\\\\AppData\\\\Local\\\\Temp\\\\vighnalab_codex_custom_h_gaod68\\\\config_symlink.json'"
+    },
+    "junction_real": {
+      "status": "PASSOU",
+      "junction_detectada": true
+    },
+    "workers_diretos_frozen_bloqueados": {
+      "status": "PASSOU",
+      "workers": {
+        "_worker": true,
+        "_worker_g5a": true,
+        "_worker_g5b": true,
+        "_worker_g5c": true,
+        "_worker_g6a": true,
+        "_worker_g6b": true,
+        "_worker_g6b2": true
+      }
+    },
+    "entradas_gui_frozen_bloqueadas": {
+      "status": "PASSOU",
+      "entradas": {
+        "_start": true,
+        "_start_g5b": true,
+        "_start_g5c": true,
+        "_start_g6a": true,
+        "_start_g6b": true,
+        "_start_g6b2": true
+      }
+    },
+    "nenhuma_saida_no_meipass": {
+      "status": "PASSOU",
+      "arquivos_antes": [
+        "PAINEL_VERSAO.json",
+        "estado_planejamento_v2a.json",
+        "estado_planejamento_v3.json"
+      ],
+      "arquivos_depois": [
+        "PAINEL_VERSAO.json",
+        "estado_planejamento_v2a.json",
+        "estado_planejamento_v3.json"
+      ]
+    }
+  }
+}

@@ -1,0 +1,242 @@
+{
+  "00_LEIA_PRIMEIRO_V3_1.txt": {
+    "bytes": 2096,
+    "sha256": "0be540d647c2c038269acfb8f7bd31fd80ebfc9f70a3e311505a090b720127bf"
+  },
+  "0_COMECE_AQUI.txt": {
+    "bytes": 1154,
+    "sha256": "75db899770dba8cfbcf2f93e0c0c237afa211f8951474d551d4cd27a1ff3a31a"
+  },
+  "1_INICIAR_TESTES_WINDOWS.cmd": {
+    "bytes": 453,
+    "sha256": "cf831925bce37843604fba466229ff1d62e794d59b657c5c169422e4bfdb04cf"
+  },
+  "2_COMPILAR_APENAS_EM_LABORATORIO.cmd": {
+    "bytes": 452,
+    "sha256": "fe5453456d64df3febd12429c2133ec2aba4ae3e5e52e5ba892df8a92b8693d8"
+  },
+  "ABRIR_PAINEL_HOMOLOGACAO.cmd": {
+    "bytes": 371,
+    "sha256": "d919ba96194a2c938fc9997dc44de9cb47bcaa161c3b64b2065355488a89d714"
+  },
+  "ATUALIZACOES_PAINEL_LEIA.md": {
+    "bytes": 13539,
+    "sha256": "e1ea4b6c400573b23e6a6dc573c395284fa4be6f9bf3a1fb934688449dcb2da9"
+  },
+  "ESTADO_ATUAL.json": {
+    "bytes": 957,
+    "sha256": "10a46af92f8a3b8646e440399c9822f53ca85b853f9acdd7e979cf85adb03d83"
+  },
+  "ESTADO_CONTINUIDADE_V2A.json": {
+    "bytes": 511,
+    "sha256": "41e80f3163c72e921d21fd67379202bba1bd0a401a86a1f97c5a379b9bc23d53"
+  },
+  "ESTADO_CONTINUIDADE_V2B.json": {
+    "bytes": 457,
+    "sha256": "71764f5e7c653ce4b4eb7472f552a7d4df45a41a18aa04e48c62249b7e0aba9a"
+  },
+  "estado_planejamento_v2a.json": {
+    "bytes": 3901,
+    "sha256": "773cf404cb84e01bf8fa0b585f1ca38bcfc2990c3e3310347e4f7d9ff4799420"
+  },
+  "estado_planejamento_v3.json": {
+    "bytes": 4562,
+    "sha256": "3eafcf185c08b6762f78f08fe9c64f7dfd5669465ecde1580224bbd9862a989f"
+  },
+  "executar_homologacao.ps1": {
+    "bytes": 4270,
+    "sha256": "aab7832db058b42275218393a5bbadb56541a609fa0c33fa8c6d7b5060b5d363"
+  },
+  "homologador_windows.py": {
+    "bytes": 20168,
+    "sha256": "ae8dbf5fb0bdec405f6b1fc1b30612913c5396bbe2f8a990de94f8b43c8d4821"
+  },
+  "INSTRUCOES_G6B1_V3_1_16.md": {
+    "bytes": 1878,
+    "sha256": "0c2f0cca36d1283befbde7b6f84651251b86559497132952e1e3a423a5a0f40a"
+  },
+  "LEIA_PRIMEIRO.txt": {
+    "bytes": 1135,
+    "sha256": "9a28eb6f9ce5eeb9962b3b624172f63e8c7e0eda812377cbffe9e9432bbd5ed1"
+  },
+  "MANIFESTO_ENTRADAS_SHA256.json": {
+    "bytes": 2430,
+    "sha256": "a9359802e78107cac47acd80c6adb3b5835bf42d464efb6bbf02de303147866a"
+  },
+  "MANIFESTO_ENTREGA_SHA256.csv": {
+    "bytes": 5611,
+    "sha256": "0f333e020659393198564f9c94bc7abf014e264df83e15759f2f2eab0578c8ab"
+  },
+  "MANIFESTO_PACOTE_COMPLETO_V31.json": {
+    "bytes": 8641,
+    "sha256": "fef6be06d2ab13224842c2dd4be9d8002d534f2c6ca059e862ceb9d5f40d97f7"
+  },
+  "painel_atualizador.py": {
+    "bytes": 27719,
+    "sha256": "806a3f004e8734d97ac531a531d067d4c8cf70ee3541b90ec1b5b41850be237a"
+  },
+  "painel_central_qa.py": {
+    "bytes": 36924,
+    "sha256": "c22f1f70ac629adb8aba43f6dd0cd4392649965f09ac312273c95f25222a5c30"
+  },
+  "painel_checkpoints.py": {
+    "bytes": 7244,
+    "sha256": "a6b71c47ba37af7192dc40defaa803cdddba2cb3f7119229fc3581f906ea790a"
+  },
+  "painel_core.py": {
+    "bytes": 9065,
+    "sha256": "7b0fe9f58114931c61dbe18d48f15977cd6b8b7025b14b84d9c74f9a9ead8b1d"
+  },
+  "painel_g5_preflight.py": {
+    "bytes": 7121,
+    "sha256": "ecc9007e2cff95dd1a0d202aa70b93b2f368bc00d212c53e64378c9c43e28579"
+  },
+  "painel_g5_ui.py": {
+    "bytes": 74875,
+    "sha256": "debee5e6a292aa8a5db5a827a28a3d8b4388aaf196b9bd1125b68cb0e173141b"
+  },
+  "painel_g6b.py": {
+    "bytes": 36337,
+    "sha256": "fe5c55181e035f5e94b8e0bd9fa654d38652203c890b376e6448e66ffbacc2ab"
+  },
+  "painel_g6b2.py": {
+    "bytes": 14717,
+    "sha256": "4653da0931203493c86d169b6647940bdf2a56e065513855baf92ad0cfae01f3"
+  },
+  "painel_g6b2_guest.py": {
+    "bytes": 15725,
+    "sha256": "b1f9b8f9e4395bea950fdc17c54acb3e4fdc2f3f3c007c17c2f8226f56ffce9d"
+  },
+  "painel_g6b_guest.py": {
+    "bytes": 27993,
+    "sha256": "cee38593f77f12c9ca54b5be23b0d84b1ee513fbd510f877cc5b35b605aad3d8"
+  },
+  "painel_g7.py": {
+    "bytes": 13026,
+    "sha256": "27f0687e08247e3e002862212f79bd0f260ce11755821c5d20c9307c0fd45fab"
+  },
+  "painel_gates.py": {
+    "bytes": 3320,
+    "sha256": "ff1cc0599ca583701219a8f08ba1236e0f1dde3c2f55e0518bf8bf3cf696299b"
+  },
+  "painel_historico.py": {
+    "bytes": 18186,
+    "sha256": "29edfc0dcf47418afb1960b07268ebf4f8b12d4d9f8b6e94ad78aded0fdbdfec"
+  },
+  "painel_historico_ui.py": {
+    "bytes": 15650,
+    "sha256": "94d7446631658391a025d946010d025051610a68bcb2da9ec4d82b6b905529d6"
+  },
+  "painel_homologacao.py": {
+    "bytes": 116511,
+    "sha256": "d00b3a67ddde00f949826127c5bad73c04fd73b349a6c2873a4360805571a284"
+  },
+  "painel_planejamento.py": {
+    "bytes": 3506,
+    "sha256": "1b1759ab045f7d75a9178e1ab974903b29b1188d18b5a6abdf141429ad2bd8a2"
+  },
+  "painel_reconciliacao.py": {
+    "bytes": 8959,
+    "sha256": "c3ee999e69b8e4912300df96cb492c716efe288e327b4cf83538a9ff01597858"
+  },
+  "PAINEL_VERSAO.json": {
+    "bytes": 57,
+    "sha256": "91f0fbe8ed57f5d92330798e09605a1c0f2fd8d29332247cc33bc648785b8e56"
+  },
+  "README_PRIMEIRO.md": {
+    "bytes": 4396,
+    "sha256": "62ebe368a56a4b9a53fdd67c1c435234efc8d1032852a48ff4ef4f17211db4f0"
+  },
+  "RELATORIO_ENTREGA_V2A.md": {
+    "bytes": 3386,
+    "sha256": "ec6cc3010068bb2597660dae77ace3f494e3b96076b9250d01f2442b0b6fd4b2"
+  },
+  "RELATORIO_ENTREGA_V2B.md": {
+    "bytes": 2286,
+    "sha256": "05e053efc9544854ff5a4e844c5dc88840e9052ddb863f5c5acaf5fa9a8345ad"
+  },
+  "RELATORIO_PAINEL_HOMOLOGACAO_V1.md": {
+    "bytes": 2440,
+    "sha256": "1e58e911e8df687e3ad87b629a8511a957f639d81e02f576a78aa7611d465ac9"
+  },
+  "RELATORIO_TECNICO_V3.md": {
+    "bytes": 2548,
+    "sha256": "2295698251074e8b554a80126146ecc9cc60f2e6cd23b7a881cabc242d8efd41"
+  },
+  "RELATORIO_TECNICO_V3_1_16.md": {
+    "bytes": 5361,
+    "sha256": "706f55e7aa7d9af7a335e444c6649cbda53edadce16f4ced4722de58d1085d2b"
+  },
+  "test_gui_v3_smoke.py": {
+    "bytes": 1225,
+    "sha256": "2f555af0086247b84b25e67c469cf1567a525f36b64581497b70ef3294f84218"
+  },
+  "test_historico_v2b.py": {
+    "bytes": 8928,
+    "sha256": "acabc58cf27d780296236ec3b913f08ad4484605635497f527d665cb7919915e"
+  },
+  "test_painel_atualizador.py": {
+    "bytes": 23838,
+    "sha256": "d255ccf31f3e803f77323e9ef7d50e13f2cae8f782981772ce77aba9da4376af"
+  },
+  "test_painel_central_qa.py": {
+    "bytes": 32501,
+    "sha256": "309fb92a94dbacff808f891c224bd2e366f20c51fb512ada12e3f7b06442e3c3"
+  },
+  "test_painel_core.py": {
+    "bytes": 6611,
+    "sha256": "b32b8a07eeaf43c093659fd9ae596d78204cdfc2d178322d5cef2ac74e427147"
+  },
+  "test_painel_g5.py": {
+    "bytes": 46961,
+    "sha256": "8ab4ea35d29fe5370d1f49076956ee81ca537d739a0c1027c21a98be5f01a486"
+  },
+  "test_painel_g6b.py": {
+    "bytes": 31548,
+    "sha256": "914a028996f4be6ab807b270ea289b5224d7f1265baa162f8f66ab6a1fe2238d"
+  },
+  "test_painel_g6b2.py": {
+    "bytes": 9339,
+    "sha256": "95315e7b55089527e10bf38744990056e87fd21481e85a555def58370efc5a3b"
+  },
+  "test_painel_g7.py": {
+    "bytes": 5311,
+    "sha256": "252c47a9e653b982d088b9d8b38a7484a2705438d2fd55aa065c46bb0a415895"
+  },
+  "test_painel_reconciliacao.py": {
+    "bytes": 5656,
+    "sha256": "e77d63f23f437330b1cf4ed4d11a2510c976361f5d4b624019fd7e10f0b31142"
+  },
+  "test_painel_v3.py": {
+    "bytes": 9043,
+    "sha256": "7e4e86e11f8257a8682c2ed51bdab5573c24bb4cd354d4f9e91854688c7d3f81"
+  },
+  "test_planejamento_v2a.py": {
+    "bytes": 6319,
+    "sha256": "f2a972b83c571ee2001da26f2bc2c0d3e81466c97edbaa67c4888bf0abd70a7c"
+  },
+  "test_protecao_homologador.py": {
+    "bytes": 6686,
+    "sha256": "f9f1e5fc09de63c30f17fca9b17e5d6344f690efe9da689343e0ef40142fc7b0"
+  },
+  "test_reconciliacao_v3153_r1.py": {
+    "bytes": 6696,
+    "sha256": "ed637b76a4c41bdd0dbbb964080d1857c03c2bf18df83ed9c387949b401b2d65"
+  },
+  "V2A_LEIA_PRIMEIRO.md": {
+    "bytes": 2845,
+    "sha256": "b44a5c95953fda64c3b4035acafb379a93b03e78f7124f4e515f3730b7932963"
+  },
+  "V2B_LEIA_PRIMEIRO.md": {
+    "bytes": 2188,
+    "sha256": "fcc7e2615a553797727f96b92131fa9ac275c2a12ce86abcc40518845f31388b"
+  },
+  "V3_COMECE_AQUI.txt": {
+    "bytes": 1261,
+    "sha256": "a0e1e5ae6863ac405200344da85c3f510ec4fa41d77e92e4a3f524e7a604dbc0"
+  },
+  "VighnaLab_QA_V3153_R1.spec": {
+    "bytes": 1014,
+    "sha256": "6d1e1ab22aa4f141d895db6605806c555a761c871012522dabb2e8d29a56fb42"
+  }
+}

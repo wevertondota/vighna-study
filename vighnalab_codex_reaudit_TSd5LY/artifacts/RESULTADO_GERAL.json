@@ -1,0 +1,193 @@
+{
+  "formato": "vighnalab-codex-reauditoria-v3153-r1",
+  "gerado_utc": "2026-10-15T13:37:32.210914+00:00",
+  "fonte_original": "C:\\Projetos\\VighnaLab_V3153_R1_BASE_COMPLETA_PARA_CODEX_NAO_INSTALAR\\VighnaLab_V3153_R1_CODIGO",
+  "python": "3.13.15 (tags/v3.13.15:4061bc4, Aug  5 2026, 13:05:39) [MSC v.1944 64 bit (AMD64)]",
+  "manifesto": "PASSOU",
+  "insumos": "BLOQUEADO_INSUMOS_AUSENTES",
+  "reconciliacao": {
+    "comando": [
+      "C:\\Users\\TD-PC\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "-v",
+      "test_reconciliacao_v3153_r1"
+    ],
+    "codigo": 0,
+    "timeout": false,
+    "duracao_segundos": 0.461,
+    "log": "logs/unittest_reconciliacao_v3153_r1.log",
+    "testes": 16,
+    "tempo_unittest_segundos": 0.155,
+    "pulados": 2,
+    "erros": 0,
+    "falhas": 0,
+    "aprovados": 14,
+    "erros_nomes": []
+  },
+  "regressoes": {
+    "comando": [
+      "C:\\Users\\TD-PC\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-B",
+      "-m",
+      "unittest",
+      "discover",
+      "-v"
+    ],
+    "codigo": 1,
+    "timeout": false,
+    "duracao_segundos": 24.396,
+    "log": "logs/unittest_regressoes_completas.log",
+    "testes": 413,
+    "tempo_unittest_segundos": 24.001,
+    "pulados": 16,
+    "erros": 27,
+    "falhas": 0,
+    "aprovados": 370,
+    "erros_nomes": [
+      "test_gui_v3_smoke (unittest.loader._FailedTest.test_gui_v3_smoke)",
+      "test_host_staging_emite_zip_apos_falha_de_build_sintetica (test_painel_g5.G5BHostStagingRegressionTests.test_host_staging_emite_zip_apos_falha_de_build_sintetica)",
+      "test_emite_zip_se_compilacao_for_bloqueada (test_painel_g5.G5CHostStagingTests.test_emite_zip_se_compilacao_for_bloqueada)",
+      "test_g6a_all_sqlite_connections_explicitly_closed (test_painel_g5.G6ATests.test_g6a_all_sqlite_connections_explicitly_closed)",
+      "test_g6a_original_exception_survives_failed_cleanup (test_painel_g5.G6ATests.test_g6a_original_exception_survives_failed_cleanup)",
+      "test_g6a_report_zip_sha_and_no_db (test_painel_g5.G6ATests.test_g6a_report_zip_sha_and_no_db)",
+      "test_g6a_rollbacks_and_db (test_painel_g5.G6ATests.test_g6a_rollbacks_and_db)",
+      "test_g6a_success_uses_original_engine (test_painel_g5.G6ATests.test_g6a_success_uses_original_engine)",
+      "test_01_sintetico (test_painel_g5.PreflightTests.test_01_sintetico)",
+      "test_02_nao_autoriza_g5 (test_painel_g5.PreflightTests.test_02_nao_autoriza_g5)",
+      "test_03_ensaios_completos (test_painel_g5.PreflightTests.test_03_ensaios_completos)",
+      "test_04_hash_fonte (test_painel_g5.PreflightTests.test_04_hash_fonte)",
+      "test_09_zip_original_pode_ser_lido_com_separador_normalizado (test_painel_g5.PreflightTests.test_09_zip_original_pode_ser_lido_com_separador_normalizado)",
+      "test_10_simulacao_de_normalizacao_do_windows (test_painel_g5.PreflightTests.test_10_simulacao_de_normalizacao_do_windows)",
+      "test_11_estrutura_zip_original_nao_muda (test_painel_g5.PreflightTests.test_11_estrutura_zip_original_nao_muda)",
+      "test_12_execucao_integral_zip_normalizado (test_painel_g5.PreflightTests.test_12_execucao_integral_zip_normalizado)",
+      "test_actual_qa_engine_transactions_with_stub_binaries (test_painel_g6b.G6B1Tests.test_actual_qa_engine_transactions_with_stub_binaries)",
+      "test_dynamic_engine_dependency_capture_includes_uuid (test_painel_g6b.G6B1Tests.test_dynamic_engine_dependency_capture_includes_uuid)",
+      "test_r1d_initialization_becomes_transaction_baseline (test_painel_g6b.G6B1Tests.test_r1d_initialization_becomes_transaction_baseline)",
+      "test_qa_icon_is_supplied_by_verified_rc2_reference (test_painel_g6b2.G6B2Contracts.test_qa_icon_is_supplied_by_verified_rc2_reference)",
+      "test_16_motor_producao_nao_modificado (test_planejamento_v2a.PlanejamentoV2ATests.test_16_motor_producao_nao_modificado)",
+      "test_10_hash_real_de_entrada (test_protecao_homologador.ContratosSegurancaHomologador.test_10_hash_real_de_entrada)",
+      "test_11_candidato_m2_exatamente_rc2 (test_protecao_homologador.ContratosSegurancaHomologador.test_11_candidato_m2_exatamente_rc2)",
+      "test_12_rejeita_build_invalido (test_protecao_homologador.ContratosSegurancaHomologador.test_12_rejeita_build_invalido)",
+      "test_13_arquivo_spec_permanece_fora_da_atualizacao (test_protecao_homologador.ContratosSegurancaHomologador.test_13_arquivo_spec_permanece_fora_da_atualizacao)",
+      "test_14_arquivos_pessoais_nao_existem_nos_insumos (test_protecao_homologador.ContratosSegurancaHomologador.test_14_arquivos_pessoais_nao_existem_nos_insumos)",
+      "test_16_verificacao_local_reproduzivel (test_protecao_homologador.ContratosSegurancaHomologador.test_16_verificacao_local_reproduzivel)"
+    ],
+    "classificacao_erros": [
+      {
+        "teste": "test_gui_v3_smoke (unittest.loader._FailedTest.test_gui_v3_smoke)",
+        "categoria": "DEPENDENCIA_GUI_TK_DISPLAY_AUSENTE"
+      },
+      {
+        "teste": "test_host_staging_emite_zip_apos_falha_de_build_sintetica (test_painel_g5.G5BHostStagingRegressionTests.test_host_staging_emite_zip_apos_falha_de_build_sintetica)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_emite_zip_se_compilacao_for_bloqueada (test_painel_g5.G5CHostStagingTests.test_emite_zip_se_compilacao_for_bloqueada)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_g6a_all_sqlite_connections_explicitly_closed (test_painel_g5.G6ATests.test_g6a_all_sqlite_connections_explicitly_closed)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_g6a_original_exception_survives_failed_cleanup (test_painel_g5.G6ATests.test_g6a_original_exception_survives_failed_cleanup)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_g6a_report_zip_sha_and_no_db (test_painel_g5.G6ATests.test_g6a_report_zip_sha_and_no_db)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_g6a_rollbacks_and_db (test_painel_g5.G6ATests.test_g6a_rollbacks_and_db)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_g6a_success_uses_original_engine (test_painel_g5.G6ATests.test_g6a_success_uses_original_engine)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_01_sintetico (test_painel_g5.PreflightTests.test_01_sintetico)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_02_nao_autoriza_g5 (test_painel_g5.PreflightTests.test_02_nao_autoriza_g5)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_03_ensaios_completos (test_painel_g5.PreflightTests.test_03_ensaios_completos)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_04_hash_fonte (test_painel_g5.PreflightTests.test_04_hash_fonte)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_09_zip_original_pode_ser_lido_com_separador_normalizado (test_painel_g5.PreflightTests.test_09_zip_original_pode_ser_lido_com_separador_normalizado)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_10_simulacao_de_normalizacao_do_windows (test_painel_g5.PreflightTests.test_10_simulacao_de_normalizacao_do_windows)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_11_estrutura_zip_original_nao_muda (test_painel_g5.PreflightTests.test_11_estrutura_zip_original_nao_muda)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_12_execucao_integral_zip_normalizado (test_painel_g5.PreflightTests.test_12_execucao_integral_zip_normalizado)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_actual_qa_engine_transactions_with_stub_binaries (test_painel_g6b.G6B1Tests.test_actual_qa_engine_transactions_with_stub_binaries)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_dynamic_engine_dependency_capture_includes_uuid (test_painel_g6b.G6B1Tests.test_dynamic_engine_dependency_capture_includes_uuid)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_r1d_initialization_becomes_transaction_baseline (test_painel_g6b.G6B1Tests.test_r1d_initialization_becomes_transaction_baseline)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_qa_icon_is_supplied_by_verified_rc2_reference (test_painel_g6b2.G6B2Contracts.test_qa_icon_is_supplied_by_verified_rc2_reference)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_16_motor_producao_nao_modificado (test_planejamento_v2a.PlanejamentoV2ATests.test_16_motor_producao_nao_modificado)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_10_hash_real_de_entrada (test_protecao_homologador.ContratosSegurancaHomologador.test_10_hash_real_de_entrada)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_11_candidato_m2_exatamente_rc2 (test_protecao_homologador.ContratosSegurancaHomologador.test_11_candidato_m2_exatamente_rc2)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_12_rejeita_build_invalido (test_protecao_homologador.ContratosSegurancaHomologador.test_12_rejeita_build_invalido)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_13_arquivo_spec_permanece_fora_da_atualizacao (test_protecao_homologador.ContratosSegurancaHomologador.test_13_arquivo_spec_permanece_fora_da_atualizacao)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_14_arquivos_pessoais_nao_existem_nos_insumos (test_protecao_homologador.ContratosSegurancaHomologador.test_14_arquivos_pessoais_nao_existem_nos_insumos)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      },
+      {
+        "teste": "test_16_verificacao_local_reproduzivel (test_protecao_homologador.ContratosSegurancaHomologador.test_16_verificacao_local_reproduzivel)",
+        "categoria": "INSUMOS_OPERACIONAIS_AUSENTES"
+      }
+    ],
+    "timeouts_na_bateria": 0,
+    "nota_timeouts": "Casos que injetam TimeoutExpired passaram; nenhum timeout real escapou para erro."
+  },
+  "fontes_preservadas": "PASSOU",
+  "instalacao_autorizada": false,
+  "g7_aprovado": false
+}

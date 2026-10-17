@@ -1,0 +1,20 @@
+VIGHNASTUDY — HOMOLOGADOR WINDOWS V1.1 — NAO INSTALAR
+
+1. Extraia ESTE ZIP inteiro em uma pasta, de preferencia em Documentos.
+2. Feche o VighnaStudy principal antes dos testes, apenas para evitar confusao visual.
+   (O homologador nao ira mexer na instalacao principal.)
+3. Clique duas vezes em 1_INICIAR_TESTES_WINDOWS.cmd.
+4. Aguarde. Se faltar Python/PySide6, isso sera apontado como BLOQUEADO; nada
+   sera baixado nem instalado automaticamente.
+5. Envie para o ChatGPT o novo arquivo RESULTADOS_HOMOLOGACAO_WINDOWS_*.zip
+   que aparecera nesta mesma pasta.
+6. O segundo arquivo CMD e opcional e executa testes mais compilacao PyInstaller
+   em copia isolada; nao abre o EXE resultante nem instala o VighnaStudy.
+
+ATENCAO: NAO extraia/instale os pacotes M2 RC2 no Vighna principal.
+Este homologador nao autoriza instalacao ou atualizacao.
+Nao exige administrador. Nunca aponta para pastas reais do Vighna.
+
+Versao 1.1: se os testes falharem, sera gerado um ZIP de DIAGNOSTICO.
+Se nao houver ZIP, envie a foto da tela final e o TXT DIAGNOSTICO_ULTIMA_EXECUCAO.
+Extraia tudo em uma nova pasta. Nao use o CMD como Administrador.

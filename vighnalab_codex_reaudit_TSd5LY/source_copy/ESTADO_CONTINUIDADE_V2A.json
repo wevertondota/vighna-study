@@ -1,0 +1,16 @@
+{
+  "projeto": "VighnaStudy",
+  "etapa": "Painel de Homologacao V2-A",
+  "data_referencia": "2026-10-12",
+  "plano": "M1–M9",
+  "estado": "implementado e validado em laboratorio Linux, Windows pendente",
+  "motor_de_testes": "V1.1 inalterado",
+  "instalacao_autorizada": false,
+  "m2": "RC2 em homologacao",
+  "m3": "R35 experimental",
+  "atualizacao_online": false,
+  "fases_sequentes": {
+    "V2-B": "historico de execucoes",
+    "V2-C": "importacao validada de checkpoints e exportacao de evidencias"
+  }
+}

@@ -1,0 +1,41 @@
+VIGHNASTUDY - PAINEL DE HOMOLOGACAO V3.1 COMPLETO (PORTATIL)
+
+IMPORTANTE: ESTE ZIP E SOMENTE DO PAINEL DE HOMOLOGACAO.
+NAO E UMA ATUALIZACAO DO VIGHNASTUDY PRINCIPAL.
+
+INSTALACAO SIMPLES, SEM ATIVADOR:
+1. Feche a V3 anterior. NAO APAGUE A PASTA ANTERIOR AINDA.
+2. No Windows, crie uma pasta NOVA, por exemplo: Documentos\Painel_V3_1.
+3. Extraia TODO o conteudo deste ZIP diretamente para essa pasta nova.
+4. Nessa pasta, execute ABRIR_PAINEL_HOMOLOGACAO.cmd com dois cliques.
+5. Verifique as abas: Visao geral, Planejamento, Gates, Executar testes,
+   Historico, Sincronizacao, Atualizacoes, Configuracoes.
+6. Veja em Atualizacoes se aparece: Versao do painel: 3.1.0.
+7. Em Executar testes, localize o botao G5-A (diagnostico de isolamento).
+   NAO e necessario executar compilacao, atualizacao ou o EXE real nesse teste inicial.
+
+PARA NAO PERDER SEUS DADOS:
+- Seu historico ja importado esta armazenado separadamente no LOCALAPPDATA,
+  e deve reaparecer ao abrir o painel com a mesma conta do Windows.
+- Checkpoints importados tambem ficam no armazenamento local separado
+  (LOCALAPPDATA) e devem reaparecer com a mesma conta do Windows.
+  Nao apague nenhum arquivo antigo antes de confirmar esse dado.
+- O caminho do Python Qt pode precisar ser selecionado novamente em Configuracoes.
+  NUNCA mova nem apague o ambiente qtvenv so porque trocou o painel.
+- Nao apague o painel antigo ate verificar abertura, gates, historico e
+  configuracao do Python Qt nesta V3.1. Guarde seu backup de historico.
+
+ATUALIZACOES FUTURAS:
+- A aba Atualizacoes ja esta presente, sem ativacao.
+- Apenas ZIP incremental compativel com V3.1.0 ou versao posterior.
+- Nao use o ZIP V3 -> V3.1 nesta copia completa.
+- Se a atualizacao falhar, PARE; nao force a substituicao.
+
+PROTECOES:
+- Nao leia, execute nem instale nenhum arquivo do VighnaStudy principal.
+- M2 RC2 ainda nao esta liberado para instalacao; M3 permanece experimental.
+- O botao G5-A NAO abre o EXE real e NAO aprova o Gate G5.
+- O painel exige Python 3.13 instalado no Windows com Tkinter.
+
+ARQUIVO PRINCIPAL PARA ABRIR:
+ABRIR_PAINEL_HOMOLOGACAO.cmd

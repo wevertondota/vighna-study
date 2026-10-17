@@ -1,0 +1,236 @@
+{
+  "versao": "3.1.0",
+  "escopo": "Painel de Homologacao; NAO instalar VighnaStudy",
+  "algoritmo": "SHA256",
+  "assinatura_digital": false,
+  "arquivos": {
+    ".painel_updates/LEIA.txt": {
+      "bytes": 123,
+      "sha256": "86daeb4c5eb1edb6442884558d89e5c8f5b83075cfbc5128f7e436d90eecec44"
+    },
+    "00_LEIA_PRIMEIRO_V3_1.txt": {
+      "bytes": 2096,
+      "sha256": "0be540d647c2c038269acfb8f7bd31fd80ebfc9f70a3e311505a090b720127bf"
+    },
+    "0_COMECE_AQUI.txt": {
+      "bytes": 1154,
+      "sha256": "75db899770dba8cfbcf2f93e0c0c237afa211f8951474d551d4cd27a1ff3a31a"
+    },
+    "1_INICIAR_TESTES_WINDOWS.cmd": {
+      "bytes": 453,
+      "sha256": "cf831925bce37843604fba466229ff1d62e794d59b657c5c169422e4bfdb04cf"
+    },
+    "2_COMPILAR_APENAS_EM_LABORATORIO.cmd": {
+      "bytes": 452,
+      "sha256": "fe5453456d64df3febd12429c2133ec2aba4ae3e5e52e5ba892df8a92b8693d8"
+    },
+    "ABRIR_PAINEL_HOMOLOGACAO.cmd": {
+      "bytes": 371,
+      "sha256": "d919ba96194a2c938fc9997dc44de9cb47bcaa161c3b64b2065355488a89d714"
+    },
+    "ATUALIZACOES_PAINEL_LEIA.md": {
+      "bytes": 1084,
+      "sha256": "33a788567dcd479b558f6180cf3507437c186db45c0731f97216c0e68696a552"
+    },
+    "CHECKPOINT_EXEMPLO/CHECKPOINT_PLANEJAMENTO_V3.zip": {
+      "bytes": 2059,
+      "sha256": "e514f66e335b9d06291fa19f2741c463bf51a3c7a52abeb958b09562a8564960"
+    },
+    "ESTADO_ATUAL.json": {
+      "bytes": 957,
+      "sha256": "10a46af92f8a3b8646e440399c9822f53ca85b853f9acdd7e979cf85adb03d83"
+    },
+    "ESTADO_CONTINUIDADE_V2A.json": {
+      "bytes": 511,
+      "sha256": "41e80f3163c72e921d21fd67379202bba1bd0a401a86a1f97c5a379b9bc23d53"
+    },
+    "ESTADO_CONTINUIDADE_V2B.json": {
+      "bytes": 457,
+      "sha256": "71764f5e7c653ce4b4eb7472f552a7d4df45a41a18aa04e48c62249b7e0aba9a"
+    },
+    "EVIDENCIAS_PREPARACAO/TESTES_ATUALIZADOR_82_82.txt": {
+      "bytes": 10706,
+      "sha256": "8cca3017f2a80dad56f4ebf29798ac77270d09db40d2386797f7c3ccf7e50bf2"
+    },
+    "EVIDENCIAS_PREPARACAO/TESTES_ATUALIZADOR_V1_1_82_82.txt": {
+      "bytes": 10706,
+      "sha256": "7a6e600fd503497e34aa879e51ba012ba36a3b43a904a7f0bffdd5193ee8fe23"
+    },
+    "EVIDENCIAS_PREPARACAO/TESTES_INTERNOS_18_18.txt": {
+      "bytes": 2577,
+      "sha256": "e08ee4d2eef909c8241d2c95f4f29dcb7317284b80956ee39639b1f55d54346d"
+    },
+    "EVIDENCIAS_PREPARACAO/TESTES_INTERNOS_V1_1_19_19.txt": {
+      "bytes": 2781,
+      "sha256": "57f4df87e67646ba904ba0ea82d26be99492b57d26b704a8a0e8775f5848dab6"
+    },
+    "LEIA_PRIMEIRO.txt": {
+      "bytes": 1135,
+      "sha256": "9a28eb6f9ce5eeb9962b3b624172f63e8c7e0eda812377cbffe9e9432bbd5ed1"
+    },
+    "MANIFESTO_ENTRADAS_SHA256.json": {
+      "bytes": 2430,
+      "sha256": "a9359802e78107cac47acd80c6adb3b5835bf42d464efb6bbf02de303147866a"
+    },
+    "MANIFESTO_ENTREGA_SHA256.csv": {
+      "bytes": 5611,
+      "sha256": "0f333e020659393198564f9c94bc7abf014e264df83e15759f2f2eab0578c8ab"
+    },
+    "PAINEL_VERSAO.json": {
+      "bytes": 56,
+      "sha256": "44cd5ce2b6c06d3b91ed589fbb765bdcde8220c8ec2ccb19d88d0e11b46762e8"
+    },
+    "README_PRIMEIRO.md": {
+      "bytes": 4396,
+      "sha256": "62ebe368a56a4b9a53fdd67c1c435234efc8d1032852a48ff4ef4f17211db4f0"
+    },
+    "RELATORIO_ENTREGA_V2A.md": {
+      "bytes": 3386,
+      "sha256": "ec6cc3010068bb2597660dae77ace3f494e3b96076b9250d01f2442b0b6fd4b2"
+    },
+    "RELATORIO_ENTREGA_V2B.md": {
+      "bytes": 2286,
+      "sha256": "05e053efc9544854ff5a4e844c5dc88840e9052ddb863f5c5acaf5fa9a8345ad"
+    },
+    "RELATORIO_PAINEL_HOMOLOGACAO_V1.md": {
+      "bytes": 2440,
+      "sha256": "1e58e911e8df687e3ad87b629a8511a957f639d81e02f576a78aa7611d465ac9"
+    },
+    "RELATORIO_TECNICO_V3.md": {
+      "bytes": 2548,
+      "sha256": "2295698251074e8b554a80126146ecc9cc60f2e6cd23b7a881cabc242d8efd41"
+    },
+    "V2A_LEIA_PRIMEIRO.md": {
+      "bytes": 2845,
+      "sha256": "b44a5c95953fda64c3b4035acafb379a93b03e78f7124f4e515f3730b7932963"
+    },
+    "V2B_LEIA_PRIMEIRO.md": {
+      "bytes": 2188,
+      "sha256": "fcc7e2615a553797727f96b92131fa9ac275c2a12ce86abcc40518845f31388b"
+    },
+    "V3_COMECE_AQUI.txt": {
+      "bytes": 1261,
+      "sha256": "a0e1e5ae6863ac405200344da85c3f510ec4fa41d77e92e4a3f524e7a604dbc0"
+    },
+    "estado_planejamento_v2a.json": {
+      "bytes": 3901,
+      "sha256": "773cf404cb84e01bf8fa0b585f1ca38bcfc2990c3e3310347e4f7d9ff4799420"
+    },
+    "estado_planejamento_v3.json": {
+      "bytes": 4562,
+      "sha256": "3eafcf185c08b6762f78f08fe9c64f7dfd5669465ecde1580224bbd9862a989f"
+    },
+    "executar_homologacao.ps1": {
+      "bytes": 4270,
+      "sha256": "aab7832db058b42275218393a5bbadb56541a609fa0c33fa8c6d7b5060b5d363"
+    },
+    "homologador_windows.py": {
+      "bytes": 20168,
+      "sha256": "ae8dbf5fb0bdec405f6b1fc1b30612913c5396bbe2f8a990de94f8b43c8d4821"
+    },
+    "insumos/BASE_R1D_SOMENTE_FONTES_QA.zip": {
+      "bytes": 929230,
+      "sha256": "f2027b5b089b87e63fa14b9ad52effda27341721ea6d69c6d4f359bfb0720a53"
+    },
+    "insumos/CANDIDATO_QA_R1D_PARA_M2_RC2_NAO_INSTALAR.zip": {
+      "bytes": 375681,
+      "sha256": "efea1b343151cc3a6b4d84b74676e045b07bc758d1fe9989d442eb4d3eb03e6c"
+    },
+    "insumos/M2_RC2_FONTE_REFERENCIA_NAO_INSTALAR.zip": {
+      "bytes": 1286797,
+      "sha256": "a3613317c65e3a76ce97c0feb10c1853992f347b054854af4eb09908862f4985"
+    },
+    "painel_atualizador.py": {
+      "bytes": 17973,
+      "sha256": "b03c0b973dabe3907eebeb502a006af6c0a873670e7098310254be8fc266c7f7"
+    },
+    "painel_checkpoints.py": {
+      "bytes": 7244,
+      "sha256": "a6b71c47ba37af7192dc40defaa803cdddba2cb3f7119229fc3581f906ea790a"
+    },
+    "painel_core.py": {
+      "bytes": 5720,
+      "sha256": "7abec47fba19c86520597f1099b89bdd2b3df22f60843bb4d7c482d9304756e7"
+    },
+    "painel_g5_preflight.py": {
+      "bytes": 6053,
+      "sha256": "2e93114626513a07bfe196b79972aaa47f4396c91886f3ec31ba710f3e260c7d"
+    },
+    "painel_gates.py": {
+      "bytes": 3320,
+      "sha256": "ff1cc0599ca583701219a8f08ba1236e0f1dde3c2f55e0518bf8bf3cf696299b"
+    },
+    "painel_historico.py": {
+      "bytes": 18186,
+      "sha256": "29edfc0dcf47418afb1960b07268ebf4f8b12d4d9f8b6e94ad78aded0fdbdfec"
+    },
+    "painel_historico_ui.py": {
+      "bytes": 10914,
+      "sha256": "effb5dc295197c5ae9460bbd4a4f34f6ba6a268c57540effc1cc2749e7b853b1"
+    },
+    "painel_homologacao.py": {
+      "bytes": 46161,
+      "sha256": "b9224d68eb55c2797f5055c08e70c58aaf79ff8664b2fcfb3dc6c8db996866bb"
+    },
+    "painel_planejamento.py": {
+      "bytes": 3506,
+      "sha256": "1b1759ab045f7d75a9178e1ab974903b29b1188d18b5a6abdf141429ad2bd8a2"
+    },
+    "qt/validador_qt_rc2_isolado.py": {
+      "bytes": 14331,
+      "sha256": "1cfba251e914bf9c2563a88082281b8a463b7c11822b5929ad3f0f1a586a8446"
+    },
+    "test_gui_v3_smoke.py": {
+      "bytes": 1079,
+      "sha256": "fff1bcf99ea85126554eb8e207a7e5222cba10ca3bb8dc5f8f42501b004e4d9e"
+    },
+    "test_historico_v2b.py": {
+      "bytes": 8879,
+      "sha256": "0190b0925bc401016b0b581916e88d52b134cc74d96d36f65b6e242fd1745ec7"
+    },
+    "test_painel_atualizador.py": {
+      "bytes": 7901,
+      "sha256": "5c56cba358012951860f8b5dfcaeaa78ebb9d373f53598e9cb2c9587d21e7ce9"
+    },
+    "test_painel_core.py": {
+      "bytes": 5628,
+      "sha256": "84034b2d087c7c46f748a7ed63e2f856c371dd3f3710858c4d7601fc98f03488"
+    },
+    "test_painel_g5.py": {
+      "bytes": 1015,
+      "sha256": "79e2cbd65b2ba88ee28b704e3e74dee99071d622939c24c2919c85a627ee6c84"
+    },
+    "test_painel_v3.py": {
+      "bytes": 9027,
+      "sha256": "090e9a8a373a5a9acc490b3b04f4e563af2a1c3167853a43526f302d38ffa4f5"
+    },
+    "test_planejamento_v2a.py": {
+      "bytes": 5646,
+      "sha256": "56e209fe536050c10023f86719b85aee52f9e080067e2e599ce90ccb9ae9fd7b"
+    },
+    "test_protecao_homologador.py": {
+      "bytes": 6686,
+      "sha256": "f9f1e5fc09de63c30f17fca9b17e5d6344f690efe9da689343e0ef40142fc7b0"
+    },
+    "testes/test_gate6_casos_borda.py": {
+      "bytes": 8178,
+      "sha256": "98eab96d24b888ce7137417075e0468f89efef87ed02f525b6003fd8813b67bd"
+    },
+    "testes/test_gate6_spec_compat_estatica.py": {
+      "bytes": 6500,
+      "sha256": "79dabe444b03ce7ea9bad653956605d746f21d2385cdb116e27bff07139f3a9c"
+    },
+    "testes/test_gate_direto_r1d_rc2.py": {
+      "bytes": 13513,
+      "sha256": "7ffaec26e56f154344c1bcd62ca2c4bcb06bdb300cecabe8acb4d6b94f1a0fa0"
+    },
+    "testes/test_vighna_atualizador.py": {
+      "bytes": 9681,
+      "sha256": "bd7698a12b5451c16a71cef5c68a9b77b78a7e64b3a35585b0f50069613e8fae"
+    },
+    "testes/vighna_update_engine.py": {
+      "bytes": 23128,
+      "sha256": "279bda9decc717cc41316b985c3a1450248c46827120c2cb5eb44d5230be674c"
+    }
+  }
+}
