@@ -275,13 +275,23 @@ class FaixaCanetaEstudo(QFrame):
 
     @staticmethod
     def _separador(linha, largura=9):
-        coluna = QWidget()
-        coluna.setFixedSize(largura, 36)
-        sep = QFrame(coluna)
+        """Divisor real de 1 px, sem QWidget de fundo que herde o tema global."""
+        largura = max(1, int(largura))
+        margem_esquerda = (largura - 1) // 2
+        margem_direita = largura - margem_esquerda - 1
+        if margem_esquerda:
+            linha.addSpacing(margem_esquerda)
+        sep = QFrame()
         sep.setObjectName("questionStudyInkDivider")
-        sep.setGeometry(largura // 2, 7, 1, 22)
-        sep.setStyleSheet("background: #414A55; border: 0;")
-        linha.addWidget(coluna)
+        sep.setFixedSize(1, 20)
+        sep.setStyleSheet(
+            "QFrame#questionStudyInkDivider {"
+            "background-color: #52606D; border: none;"
+            "padding: 0; margin: 0; }"
+        )
+        linha.addWidget(sep, 0, Qt.AlignVCenter)
+        if margem_direita:
+            linha.addSpacing(margem_direita)
 
     def atualizar(self, modo, cor, espessura, pode_desfazer, ha_tracos):
         nomes = {None: "leitura", "caneta": "caneta", "marcador": "marcador", "borracha": "borracha"}

@@ -91,7 +91,13 @@ from tema import (
 
 from icones import criar_icone
 from ui.design import fixed_qcolor, fixed_qss_color, qcolor, qss_color
-from ui.portal_inicio import criar_portal_inicio, aplicar_estilo_portal
+from ui.portal_inicio import (
+    criar_portal_inicio, aplicar_estilo_portal, atualizar_perfil_mini_edital,
+)
+from ui.portal_edital import (
+    criar_portal_edital, aplicar_estilo_portal_edital,
+    atualizar_perfil_portal_edital,
+)
 from ui.dashboard_compact_nav import (
     criar_cabecalho_discreto_dashboard, aplicar_estilo_cabecalho_dashboard,
 )
@@ -16173,6 +16179,10 @@ class JanelaResolverQuestoes(QDialog):
         self._pausa_overlay_tempo = None
         self._pausa_overlay_info = None
         self.resposta_confirmada = False
+        self._modo_revisao_historico = False
+        self._indice_revisao_historico = None
+        self._estado_visual_pendente_revisao = None
+        self._frames_pendentes_revisao = None
         # Navegação por teclado usa um foco próprio, separado da alternativa
         # efetivamente marcada. Assim, as setas apenas percorrem as opções;
         # selecionar continua sendo uma ação explícita do usuário.
@@ -16300,15 +16310,14 @@ class JanelaResolverQuestoes(QDialog):
             18,
             16
         )
-        layout.setSpacing(
-            9
-        )
+        layout.setSpacing(7)
 
-        # Cabeçalho.
-        cabecalho = QHBoxLayout()
-        cabecalho.setSpacing(
-            10
-        )
+        # Barra superior moderna: identidade e ações integradas ao mesmo painel.
+        self.cabecalho_sessao = QFrame(self)
+        self.cabecalho_sessao.setObjectName("questionSessionModernHeader")
+        cabecalho = QHBoxLayout(self.cabecalho_sessao)
+        cabecalho.setContentsMargins(4, 3, 4, 6)
+        cabecalho.setSpacing(9)
 
         titulos = QVBoxLayout()
         titulos.setSpacing(
@@ -16328,9 +16337,8 @@ class JanelaResolverQuestoes(QDialog):
                 )
             )
         )
-        titulo.setObjectName(
-            "pageTitle"
-        )
+        titulo.setText("VighnaStudy")
+        titulo.setObjectName("questionSessionBrandTitle")
 
         self.sessao_contexto = QLabel(
             (
@@ -16339,8 +16347,7 @@ class JanelaResolverQuestoes(QDialog):
                 else "Reforço pós-bateria • estas respostas não alteram histórico, revisões, Domínio ou recomendações"
                 if self.sem_impacto_inteligencia
                 else (
-                    f"{configuracao['concurso_nome']} • "
-                    f"{configuracao['modo']}"
+                    f"{configuracao['modo']} • Prioridade Vighna"
                 )
             )
         )
@@ -16348,12 +16355,23 @@ class JanelaResolverQuestoes(QDialog):
             "pageSubtitle"
         )
 
-        titulos.addWidget(
-            titulo
-        )
-        titulos.addWidget(
-            self.sessao_contexto
-        )
+        linha_marca = QHBoxLayout()
+        linha_marca.setSpacing(8)
+        simbolo = QLabel("✦")
+        simbolo.setObjectName("questionSessionBrandMark")
+        simbolo.setAlignment(Qt.AlignCenter)
+        simbolo.setFixedSize(31, 31)
+        simbolo.setToolTip("VighnaStudy")
+        linha_marca.addWidget(simbolo)
+        linha_marca.addWidget(titulo)
+        self.sessao_perfil_ativo = QLabel(str(configuracao.get("concurso_nome") or "Perfil ativo"))
+        self.sessao_perfil_ativo.setObjectName("questionSessionProfilePill")
+        self.sessao_perfil_ativo.setMaximumWidth(190)
+        self.sessao_perfil_ativo.setToolTip(str(configuracao.get("concurso_nome") or ""))
+        linha_marca.addWidget(self.sessao_perfil_ativo)
+        linha_marca.addStretch(1)
+        titulos.addLayout(linha_marca)
+        titulos.addWidget(self.sessao_contexto)
 
         self.sessao_progresso_texto = QLabel(
             "Questão 1"
@@ -16369,6 +16387,17 @@ class JanelaResolverQuestoes(QDialog):
         self.botao_opcoes.setToolTip(
             "Abrir ações rápidas da bateria: Dashboard, editar alternativas e analisar depois."
         )
+
+        # Acesso direto ao Modo Foco existente, sem criar cronômetro paralelo.
+        self.botao_foco_topo = QPushButton("Modo Foco")
+        self.botao_foco_topo.setObjectName("questionSessionFocusButton")
+        self.botao_foco_topo.setFixedHeight(34)
+        self.botao_foco_topo.setMinimumWidth(94)
+        self.botao_foco_topo.setToolTip(
+            "Abrir ou trazer o Modo Foco para frente (Ctrl+Shift+F para restaurar)."
+        )
+        self.botao_foco_topo.clicked.connect(self.abrir_foco_pelo_cabecalho)
+        self._estado_botao_foco_topo = None
 
         self.botao_pausa = QPushButton("Pausa")
         self.botao_pausa.setObjectName("questionSessionPauseButton")
@@ -16418,6 +16447,11 @@ class JanelaResolverQuestoes(QDialog):
             Qt.AlignVCenter
         )
         cabecalho.addWidget(
+            self.botao_foco_topo,
+            0,
+            Qt.AlignVCenter
+        )
+        cabecalho.addWidget(
             self.botao_pausa,
             0,
             Qt.AlignVCenter
@@ -16428,9 +16462,7 @@ class JanelaResolverQuestoes(QDialog):
             Qt.AlignVCenter
         )
 
-        layout.addLayout(
-            cabecalho
-        )
+        layout.addWidget(self.cabecalho_sessao)
 
         # Cabeçalho compacto de progresso: contadores na esquerda, etapa e
         # ciclo na direita, com uma barra de avanço fina e de largura total.
@@ -16443,7 +16475,7 @@ class JanelaResolverQuestoes(QDialog):
         self.sessao_overview = QFrame(self.faixa_estudo_superior)
         self.sessao_overview.setObjectName("questionSessionOverviewCard")
         overview_layout = QVBoxLayout(self.sessao_overview)
-        overview_layout.setContentsMargins(10, 5, 10, 6)
+        overview_layout.setContentsMargins(12, 6, 12, 7)
         overview_layout.setSpacing(5)
 
         self.sessao_resumo_layout = QBoxLayout(QBoxLayout.LeftToRight)
@@ -16459,7 +16491,7 @@ class JanelaResolverQuestoes(QDialog):
             frame = QFrame(self.sessao_indicadores)
             frame.setObjectName("questionSessionMiniStat")
             frame_layout = QHBoxLayout(frame)
-            frame_layout.setContentsMargins(8, 3, 8, 3)
+            frame_layout.setContentsMargins(5, 2, 5, 2)
             frame_layout.setSpacing(4)
             rotulo = QLabel(titulo_texto)
             rotulo.setObjectName("questionSessionMiniLabel")
@@ -16504,7 +16536,7 @@ class JanelaResolverQuestoes(QDialog):
         self.sessao_progresso.setRange(0, len(self.fila))
         self.sessao_progresso.setValue(0)
         self.sessao_progresso.setTextVisible(False)
-        self.sessao_progresso.setFixedHeight(4)
+        self.sessao_progresso.setFixedHeight(3)
         overview_layout.addWidget(self.sessao_progresso)
         faixa_superior_layout.addWidget(self.sessao_overview)
 
@@ -16616,9 +16648,7 @@ class JanelaResolverQuestoes(QDialog):
             8,
             0
         )
-        conteudo_layout.setSpacing(
-            9
-        )
+        conteudo_layout.setSpacing(8)
 
         contexto_questao = QVBoxLayout()
         contexto_questao.setSpacing(2)
@@ -16644,18 +16674,83 @@ class JanelaResolverQuestoes(QDialog):
         enunciado_layout = QVBoxLayout(
             enunciado_card
         )
-        enunciado_layout.setContentsMargins(
-            16,
-            12,
-            16,
-            14
-        )
+        enunciado_layout.setContentsMargins(17, 11, 17, 14)
         enunciado_layout.setSpacing(6)
 
         self.questao_indice = QLabel("QUESTÃO 1")
         self.questao_indice.setObjectName("questionSolverQuestionIndex")
-        # A paleta agora é fixa, abaixo do progresso da sessão.
-        enunciado_layout.addWidget(self.questao_indice)
+
+        self.cabecalho_questao = QWidget(enunciado_card)
+        self.cabecalho_questao.setObjectName("questionSolverQuestionHeader")
+        self.cabecalho_questao.setAttribute(Qt.WA_StyledBackground, True)
+        # Navegação recebe o tema unificado do resolvedor.
+        cabecalho_questao_layout = QHBoxLayout(self.cabecalho_questao)
+        cabecalho_questao_layout.setContentsMargins(0, 0, 0, 0)
+        cabecalho_questao_layout.setSpacing(5)
+        cabecalho_questao_layout.addWidget(self.questao_indice)
+        cabecalho_questao_layout.addStretch(1)
+
+        self.botao_voltar_questao_atual = QPushButton("Voltar à atual", self.cabecalho_questao)
+        self.botao_voltar_questao_atual.setObjectName("questionSolverReturnCurrentButton")
+        self.botao_voltar_questao_atual.setFixedHeight(27)
+        self.botao_voltar_questao_atual.setVisible(False)
+        self.botao_voltar_questao_atual.clicked.connect(self.sair_revisao_questoes)
+        cabecalho_questao_layout.addWidget(self.botao_voltar_questao_atual)
+
+        def _icone_nav_questao(tipo):
+            # Vetores pintados pelo Qt: independem dos glifos da fonte Windows.
+            pixmap = QPixmap(18, 18)
+            pixmap.fill(Qt.transparent)
+            painter = QPainter(pixmap)
+            painter.setRenderHint(QPainter.Antialiasing)
+            painter.setPen(QPen(QColor("#C4E4F7"), 1.8, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
+            if tipo == "anterior":
+                painter.drawLine(11, 4, 6, 9)
+                painter.drawLine(6, 9, 11, 14)
+            elif tipo == "posterior":
+                painter.drawLine(7, 4, 12, 9)
+                painter.drawLine(12, 9, 7, 14)
+            else:
+                for xx in (3, 10):
+                    for yy in (3, 10):
+                        painter.drawRoundedRect(QRectF(xx, yy, 5, 5), 1, 1)
+            painter.end()
+            return QIcon(pixmap)
+
+        def _criar_botao_nav_questao(tipo, dica, nome):
+            botao = QToolButton(self.cabecalho_questao)
+            botao.setObjectName(nome)
+            botao.setIcon(_icone_nav_questao(tipo))
+            botao.setIconSize(QSize(18, 18))
+            botao.setAutoRaise(False)
+            botao.setFixedSize(29, 28)
+            botao.setToolTip(dica)
+            botao.setAccessibleName(dica)
+            botao.setFocusPolicy(Qt.TabFocus)
+            return botao
+
+        self.botao_questao_anterior = _criar_botao_nav_questao(
+            "anterior", "Voltar para uma questão já respondida", "questionSolverHistoryPrevButton"
+        )
+        self.botao_mapa_questoes = _criar_botao_nav_questao(
+            "mapa", "Abrir mapa das questões já respondidas", "questionSolverHistoryMapButton"
+        )
+        self.botao_questao_posterior = _criar_botao_nav_questao(
+            "posterior", "Avançar na revisão ou voltar à questão atual", "questionSolverHistoryNextButton"
+        )
+        self.botao_questao_anterior.clicked.connect(
+            lambda: self.navegar_revisao_questoes(-1)
+        )
+        self.botao_mapa_questoes.clicked.connect(self.abrir_mapa_questoes_respondidas)
+        self.botao_questao_posterior.clicked.connect(
+            lambda: self.navegar_revisao_questoes(1)
+        )
+        cabecalho_questao_layout.addWidget(self.botao_questao_anterior)
+        cabecalho_questao_layout.addWidget(self.botao_mapa_questoes)
+        cabecalho_questao_layout.addWidget(self.botao_questao_posterior)
+
+        # A paleta permanece fixa abaixo do progresso da sessão.
+        enunciado_layout.addWidget(self.cabecalho_questao)
 
         self.questao_enunciado = QLabel(
             ""
@@ -16688,13 +16783,41 @@ class JanelaResolverQuestoes(QDialog):
             0,
             0
         )
-        self.alternativas_layout.setSpacing(
-            7
-        )
+        self.alternativas_layout.setSpacing(7)
 
         conteudo_layout.addWidget(
             self.alternativas_container
         )
+
+        self.revisao_container = QWidget(conteudo)
+        self.revisao_container.setObjectName("questionSolverReviewContainer")
+        self.revisao_container.setStyleSheet(
+            "QWidget#questionSolverReviewContainer { background: transparent; border: 0; }"
+        )
+        self.revisao_layout = QVBoxLayout(self.revisao_container)
+        self.revisao_layout.setContentsMargins(0, 0, 0, 0)
+        self.revisao_layout.setSpacing(7)
+        self.revisao_alternativas_layout = QVBoxLayout()
+        self.revisao_alternativas_layout.setContentsMargins(0, 0, 0, 0)
+        self.revisao_alternativas_layout.setSpacing(7)
+        self.revisao_layout.addLayout(self.revisao_alternativas_layout)
+        self.revisao_feedback = QFrame(self.revisao_container)
+        self.revisao_feedback.setObjectName("questionSolverFeedback")
+        revisao_feedback_layout = QVBoxLayout(self.revisao_feedback)
+        revisao_feedback_layout.setContentsMargins(14, 12, 14, 12)
+        revisao_feedback_layout.setSpacing(6)
+        self.revisao_resultado = QLabel(self.revisao_feedback)
+        self.revisao_resultado.setWordWrap(True)
+        self.revisao_resultado.setObjectName("questionSolverFeedbackTitle")
+        self.revisao_explicacao = QLabel(self.revisao_feedback)
+        self.revisao_explicacao.setObjectName("questionSolverExplanation")
+        self.revisao_explicacao.setWordWrap(True)
+        self.revisao_explicacao.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        revisao_feedback_layout.addWidget(self.revisao_resultado)
+        revisao_feedback_layout.addWidget(self.revisao_explicacao)
+        self.revisao_layout.addWidget(self.revisao_feedback)
+        self.revisao_container.hide()
+        conteudo_layout.addWidget(self.revisao_container)
 
         # Editor na mesma tela da bateria, sem abrir a Central de Questões.
         self.painel_edicao_alternativas = QFrame(conteudo)
@@ -16797,12 +16920,7 @@ class JanelaResolverQuestoes(QDialog):
         acoes = QHBoxLayout(
             painel_acoes
         )
-        acoes.setContentsMargins(
-            12,
-            10,
-            12,
-            10
-        )
+        acoes.setContentsMargins(6, 7, 6, 4)
         acoes.setSpacing(
             9
         )
@@ -17180,7 +17298,8 @@ class JanelaResolverQuestoes(QDialog):
         acoes.addWidget(
             self.botao_proxima
         )
-        painel_acoes.setMinimumHeight(58)
+        painel_acoes.setMinimumHeight(54)
+        self.painel_acoes_bateria = painel_acoes
         layout.addWidget(painel_acoes)
 
         if self.modo_simulado:
@@ -17198,6 +17317,7 @@ class JanelaResolverQuestoes(QDialog):
                 )
                 self.timer_simulado.start()
 
+        self._aplicar_visual_moderno_resolvedor()
         self.carregar_atual()
         self.atualizar_painel_foco()
         self._registrar_no_controlador_principal()
@@ -17209,6 +17329,196 @@ class JanelaResolverQuestoes(QDialog):
         if app is not None:
             app.installEventFilter(self)
             self._filtro_teclado_aplicacao_instalado = True
+
+    def _aplicar_visual_moderno_resolvedor(self):
+        """Aparência moderna, restrita à janela da bateria e aos três temas.
+
+        Não altera índices, timers, avaliação, persistência ou navegação.
+        Aplicada uma vez após construir os widgets para evitar repolimentos
+        globais custosos a cada questão.
+        """
+        tema = normalizar_tema(obter_configuracao_texto("tema_interface", "claro"))
+        cores_por_tema = {
+            "futurista": {
+                "canvas": "#070F19", "surface": "#111E2E", "surface2": "#16283A",
+                "hover": "#1C3347", "border": "#304A60", "muted": "#9BB2C5",
+                "text": "#E9F4FB", "accent": "#27C8EF", "accent_soft": "#1D4559",
+                "badge": "#21364B", "success": "#6DE4B3", "danger": "#F48A9A",
+                "correct": "#164238", "correct_border": "#2FAD7B",
+                "incorrect": "#4A2432", "incorrect_border": "#CE6478",
+                "track": "#294357", "action": "#087FA4", "action_hover": "#0D9FCB",
+            },
+            "escuro": {
+                "canvas": "#0D141D", "surface": "#1A2531", "surface2": "#223241",
+                "hover": "#294052", "border": "#455B6A", "muted": "#B0BFCC",
+                "text": "#F0F5F8", "accent": "#5BC1E9", "accent_soft": "#285369",
+                "badge": "#2E4354", "success": "#8CE2AB", "danger": "#F49CA2",
+                "correct": "#22503D", "correct_border": "#53B284",
+                "incorrect": "#532D39", "incorrect_border": "#DB7A8F",
+                "track": "#405361", "action": "#246F96", "action_hover": "#2E87B3",
+            },
+            "claro": {
+                "canvas": "#F5F8FC", "surface": "#FFFFFF", "surface2": "#EAF1F7",
+                "hover": "#E1EDF6", "border": "#C4D5E4", "muted": "#5A7087",
+                "text": "#1C2F42", "accent": "#0879A7", "accent_soft": "#CFEBF4",
+                "badge": "#DCE9F4", "success": "#197E59", "danger": "#B33D51",
+                "correct": "#D6F3E4", "correct_border": "#3E9874",
+                "incorrect": "#FDE3E7", "incorrect_border": "#C46274",
+                "track": "#D8E6F1", "action": "#0879A7", "action_hover": "#0B96BE",
+            },
+        }
+        c = cores_por_tema.get(tema, cores_por_tema["claro"])
+        qss = r"""
+        QDialog#questionSolverDialog { background-color: __canvas__; color: __text__; }
+        QFrame#questionSessionModernHeader {
+            background-color: transparent; border: 0;
+            border-bottom: 1px solid __border__;
+        }
+        QLabel#questionSessionBrandMark {
+            background-color: __accent_soft__; color: __accent__;
+            border: 1px solid __border__; border-radius: 9px;
+            font-size: 20px; font-weight: 900;
+        }
+        QLabel#questionSessionBrandTitle {
+            color: __text__; font-size: 20px; font-weight: 800;
+        }
+        QLabel#questionSessionProfilePill {
+            color: __muted__; background-color: __badge__;
+            border: 1px solid __border__; border-radius: 6px;
+            padding: 4px 7px; font-size: 11px;
+        }
+        QLabel#pageSubtitle { color: __muted__; font-size: 11px; }
+        QFrame#questionSessionOverviewCard {
+            background-color: __surface__; border: 1px solid __border__;
+            border-radius: 12px;
+        }
+        QFrame#questionSessionMiniStat {
+            background-color: transparent; border: 0; border-radius: 0;
+        }
+        QLabel#questionSessionMiniLabel { color: __muted__; font-size: 11px; }
+        QLabel#questionSessionMiniValue { color: __text__; font-size: 12px; font-weight: 800; }
+        QLabel#questionSessionMiniValue[metricRole="success"] { color: __success__; }
+        QLabel#questionSessionMiniValue[metricRole="danger"] { color: __danger__; }
+        QLabel#questionSessionMiniValue[metricRole="warning"] { color: __muted__; }
+        QLabel#questionSessionProgressText { color: __text__; font-size: 11px; font-weight: 800; }
+        QLabel#questionSessionCycleText { color: __muted__; font-size: 10px; }
+        QProgressBar#questionSessionProgress {
+            background-color: __track__; border: 0; border-radius: 1px;
+            min-height: 3px; max-height: 3px;
+        }
+        QProgressBar#questionSessionProgress::chunk {
+            background-color: __accent__; border-radius: 1px;
+        }
+        QLabel#questionSolverDiscipline { color: __accent__; font-size: 10px; font-weight: 800; }
+        QLabel#questionSolverMeta { color: __muted__; font-size: 11px; }
+        QFrame#questionSolverStatementCard {
+            background-color: __surface__; border: 1px solid __border__;
+            border-radius: 13px;
+        }
+        QWidget#questionSolverQuestionHeader { background: transparent; border: 0; }
+        QLabel#questionSolverQuestionIndex {
+            color: __accent__; font-size: 11px; font-weight: 900;
+            letter-spacing: 0.5px;
+        }
+        QLabel#questionSolverStatement {
+            color: __text__; font-size: 14px;
+        }
+        QToolButton#questionSolverHistoryPrevButton,
+        QToolButton#questionSolverHistoryMapButton,
+        QToolButton#questionSolverHistoryNextButton {
+            background-color: __surface2__; border: 1px solid __border__;
+            border-radius: 7px; padding: 2px;
+        }
+        QToolButton#questionSolverHistoryPrevButton:hover,
+        QToolButton#questionSolverHistoryMapButton:hover,
+        QToolButton#questionSolverHistoryNextButton:hover {
+            background-color: __hover__; border-color: __accent__;
+        }
+        QToolButton#questionSolverHistoryPrevButton:disabled,
+        QToolButton#questionSolverHistoryMapButton:disabled,
+        QToolButton#questionSolverHistoryNextButton:disabled {
+            background-color: __surface__; border-color: __track__;
+        }
+        QPushButton#questionSolverReturnCurrentButton {
+            background-color: __surface2__; color: __accent__;
+            border: 1px solid __border__; border-radius: 7px;
+            padding: 3px 9px; font-size: 11px; font-weight: 700;
+        }
+        QPushButton#questionSolverReturnCurrentButton:hover { background-color: __hover__; }
+        QFrame#questionSolverAlternative {
+            background-color: __surface2__; border: 1px solid __border__;
+            border-radius: 11px;
+        }
+        QFrame#questionSolverAlternative[answerState="normal"]:hover {
+            background-color: __hover__; border-color: __accent__;
+        }
+        QFrame#questionSolverAlternative[selectionState="selected"][answerState="normal"] {
+            background-color: __accent_soft__; border: 1px solid __accent__;
+            border-left: 4px solid __accent__;
+        }
+        QFrame#questionSolverAlternative[keyboardFocus="true"][answerState="normal"] {
+            border: 2px solid __accent__;
+        }
+        QFrame#questionSolverAlternative[answerState="correta"] {
+            background-color: __correct__; border: 1px solid __correct_border__;
+            border-left: 4px solid __correct_border__;
+        }
+        QFrame#questionSolverAlternative[answerState="errada"] {
+            background-color: __incorrect__; border: 1px solid __incorrect_border__;
+            border-left: 4px solid __incorrect_border__;
+        }
+        QLabel#questionSolverAlternativeText {
+            color: __text__; background: transparent; border: 0;
+            font-size: 13px;
+        }
+        QRadioButton#questionSolverRadio {
+            color: __text__; background-color: __badge__;
+            border: 1px solid __border__; border-radius: 12px;
+            font-size: 12px; font-weight: 800;
+            min-height: 24px; max-height: 24px;
+            padding-left: 5px; padding-right: 0px;
+        }
+        QRadioButton#questionSolverRadio::indicator {
+            width: 0px; height: 0px; border: 0; margin: 0; padding: 0;
+        }
+        QRadioButton#questionSolverRadio:checked {
+            background-color: __accent__; color: __canvas__;
+            border-color: __accent__;
+        }
+        QRadioButton#questionSolverRadio:disabled { color: __muted__; }
+        QToolButton#questionSolverEliminateButton {
+            color: __muted__; background-color: transparent;
+            border: 0; border-radius: 5px;
+        }
+        QToolButton#questionSolverEliminateButton:hover {
+            color: __accent__; background-color: __hover__;
+        }
+        QFrame#questionSessionActionPanel { background: transparent; border: 0; }
+        QCheckBox#questionSessionDoubt { color: __muted__; font-size: 12px; }
+        QPushButton#questionSessionSkipButton {
+            background-color: __surface__; color: __accent__;
+            border: 1px solid __border__; border-radius: 10px;
+            padding: 6px 14px; font-size: 12px; font-weight: 700;
+        }
+        QPushButton#questionSessionSkipButton:hover {
+            background-color: __hover__; border-color: __accent__;
+        }
+        QPushButton#primaryButton {
+            background-color: __action__; color: white;
+            border: 1px solid __accent__; border-radius: 10px;
+            padding: 6px 16px; font-size: 12px; font-weight: 800;
+        }
+        QPushButton#primaryButton:hover { background-color: __action_hover__; }
+        QFrame#questionSolverFeedback {
+            background-color: __surface__; border: 1px solid __border__;
+            border-radius: 11px;
+        }
+        QFrame#questionSolverFeedback[resultState="correta"] { border-color: __correct_border__; }
+        QFrame#questionSolverFeedback[resultState="errada"] { border-color: __incorrect_border__; }
+        """
+        for chave, valor in c.items():
+            qss = qss.replace("__" + chave + "__", valor)
+        self.setStyleSheet(qss)
 
     def _localizar_janela_principal(self):
         """Localiza a janela principal sem recriar vínculo Qt de propriedade."""
@@ -17331,10 +17641,13 @@ class JanelaResolverQuestoes(QDialog):
         # Desativa a interceptação do mouse durante a pausa sem apagar rabiscos.
         self.definir_ferramenta_caneta(None)
         controles = (
-            self.duvida, self.botao_opcoes, self.faixa_caneta, self.botao_pular,
+            self.duvida, self.botao_opcoes, self.botao_foco_topo,
+            self.faixa_caneta, self.botao_pular,
             self.botao_confirmar, self.botao_proxima,
             self.alternativas_container, self.feedback_explicacao_editar,
             self.botao_editar_alternativas,
+            self.botao_questao_anterior, self.botao_mapa_questoes,
+            self.botao_questao_posterior, self.botao_voltar_questao_atual,
         )
         self._pausa_botoes_anteriores = {
             widget: widget.isEnabled() for widget in controles
@@ -17430,7 +17743,7 @@ class JanelaResolverQuestoes(QDialog):
             self._questao_pausa_iniciada = datetime.now()
 
     def retomar_cronometro_questao(self):
-        if self._pausa_relogio is not None:
+        if self._modo_revisao_historico or self._pausa_relogio is not None:
             return
         if self._questao_pausa_iniciada is None:
             return
@@ -17484,10 +17797,46 @@ class JanelaResolverQuestoes(QDialog):
             return None
         return controlador.obter_janela_modo_foco(apenas_ativa=True)
 
+    def _atualizar_botao_foco_topo(self, estado):
+        """Atualiza a indicação apenas quando muda o estado, sem repolir a
+        interface a cada segundo do cronômetro.
+        """
+        botao = getattr(self, "botao_foco_topo", None)
+        if botao is None or self._estado_botao_foco_topo == estado:
+            return
+        self._estado_botao_foco_topo = estado
+        if estado == "ativo":
+            botao.setText("Foco ativo")
+            botao.setToolTip("Foco em execução. Clique para abrir o painel existente.")
+            botao.setStyleSheet(
+                "QPushButton#questionSessionFocusButton {"
+                "background: #173B32; color: #DDFBEE;"
+                "border: 1px solid #43C99A; border-radius: 8px;"
+                "padding: 0 10px; font-weight: 600; }"
+                "QPushButton#questionSessionFocusButton:hover {"
+                "background: #205344; }"
+            )
+        elif estado == "pausado":
+            botao.setText("Foco pausado")
+            botao.setToolTip("O Modo Foco está pausado. Clique para abrir o painel existente.")
+            botao.setStyleSheet(
+                "QPushButton#questionSessionFocusButton {"
+                "background: #493715; color: #FFE6AF;"
+                "border: 1px solid #E4AE43; border-radius: 8px;"
+                "padding: 0 10px; font-weight: 600; }"
+                "QPushButton#questionSessionFocusButton:hover {"
+                "background: #5C481E; }"
+            )
+        else:
+            botao.setText("Modo Foco")
+            botao.setToolTip("Abrir ou trazer o Modo Foco para frente.")
+            botao.setStyleSheet("")
+
     def atualizar_painel_foco(self):
         janela = self._janela_foco_ativa()
         if janela is None:
             self.foco_painel.hide()
+            self._atualizar_botao_foco_topo("inativo")
             return
 
         try:
@@ -17495,6 +17844,7 @@ class JanelaResolverQuestoes(QDialog):
             decorrido = janela.tempo_decorrido()
         except RuntimeError:
             self.foco_painel.hide()
+            self._atualizar_botao_foco_topo("inativo")
             return
 
         estado = "FOCO PAUSADO" if pausada else "FOCO ATIVO"
@@ -17503,6 +17853,23 @@ class JanelaResolverQuestoes(QDialog):
         )
         self.foco_pausar.setText("Retomar" if pausada else "Pausar")
         self.foco_painel.show()
+        self._atualizar_botao_foco_topo("pausado" if pausada else "ativo")
+
+    def abrir_foco_pelo_cabecalho(self):
+        """Acessa a janela canônica do Foco, sem iniciar uma nova sessão.
+
+        A janela é criada só se não existir; sessões ativas são reutilizadas.
+        """
+        if self.finalizada or self._pausa_relogio is not None:
+            return
+        controlador = self._localizar_controlador_foco()
+        if controlador is None:
+            QMessageBox.information(
+                self, "Modo Foco", "Não foi possível localizar o painel do Modo Foco."
+            )
+            return
+        controlador.abrir_ou_trazer_modo_foco()
+        self.atualizar_painel_foco()
 
     def alternar_foco_resolvedor(self):
         controlador = self._localizar_controlador_foco()
@@ -17792,7 +18159,9 @@ class JanelaResolverQuestoes(QDialog):
         if acao_analise is not None:
             acao_analise.blockSignals(True)
             acao_analise.setChecked(self.analise_pendente.isChecked())
-            acao_analise.setEnabled(self.analise_pendente.isEnabled())
+            acao_analise.setEnabled(
+                self.analise_pendente.isEnabled() and not self._modo_revisao_historico
+            )
             acao_analise.blockSignals(False)
 
         acao_editar = getattr(self, "acao_menu_editar_alternativas", None)
@@ -17802,6 +18171,7 @@ class JanelaResolverQuestoes(QDialog):
                 tipo_questao == "MULTIPLA_ESCOLHA"
                 and not self._editando_alternativas
                 and not self._editando_explicacao
+                and not self._modo_revisao_historico
             )
 
     def _alternar_analise_pendente_pelo_menu(self, marcada):
@@ -17811,6 +18181,8 @@ class JanelaResolverQuestoes(QDialog):
         self,
         marcada
     ):
+        if self._modo_revisao_historico:
+            return
         if self.questao_atual is None:
             return
 
@@ -18548,7 +18920,289 @@ class JanelaResolverQuestoes(QDialog):
             botao.toolTip()
         )
 
+    def _indices_questoes_revisaveis(self):
+        """Revisar apenas respostas da sessão, não pulos nem a fila futura."""
+        return sorted({
+            registro["indice_fila"]
+            for registro in self.registros
+            if isinstance(registro.get("indice_fila"), int)
+            and 0 <= registro["indice_fila"] < (
+                self.indice + (1 if self.resposta_confirmada else 0)
+            )
+            and registro.get("status") in ("Correta", "Errada")
+            and registro.get("marcada") is not None
+        })
+
+    def _obter_registro_revisao(self, indice_fila):
+        for registro in reversed(self.registros):
+            if registro.get("indice_fila") == indice_fila and registro.get("marcada") is not None:
+                return registro
+        return None
+
+    def atualizar_navegacao_revisao_questoes(self):
+        revisaveis = self._indices_questoes_revisaveis()
+        em_revisao = self._modo_revisao_historico
+        bloqueada = bool(
+            self.finalizada or self._pausa_relogio is not None
+            or self._editando_alternativas or self._editando_explicacao
+        )
+        if em_revisao:
+            try:
+                posicao = revisaveis.index(self._indice_revisao_historico)
+            except ValueError:
+                posicao = -1
+            anterior = posicao > 0
+            posterior = posicao >= 0
+        else:
+            anterior = bool(revisaveis)
+            posterior = False
+
+        self.botao_questao_anterior.setEnabled(not bloqueada and anterior)
+        self.botao_mapa_questoes.setEnabled(not bloqueada)
+        self.botao_questao_posterior.setEnabled(not bloqueada and posterior)
+        self.botao_voltar_questao_atual.setVisible(em_revisao)
+        self.botao_voltar_questao_atual.setEnabled(not bloqueada and em_revisao)
+
+        if em_revisao:
+            self.botao_questao_anterior.setToolTip("Questão respondida anterior")
+            self.botao_questao_posterior.setToolTip(
+                "Próxima resposta revisável; na última, volta à questão atual"
+            )
+        else:
+            self.botao_questao_anterior.setToolTip(
+                "Rever a última questão respondida" if revisaveis
+                else "Nenhuma questão respondida nesta bateria ainda"
+            )
+            self.botao_questao_posterior.setToolTip("Disponível durante a revisão")
+        self.botao_mapa_questoes.setToolTip(
+            "Mapa das questões respondidas" if revisaveis
+            else "Nenhuma questão respondida ainda — clique para verificar"
+        )
+
+    def navegar_revisao_questoes(self, direcao):
+        if self.finalizada or self._pausa_relogio is not None or self._editando_alternativas or self._editando_explicacao:
+            return
+        indices = self._indices_questoes_revisaveis()
+        if not indices:
+            return
+        if not self._modo_revisao_historico:
+            if direcao < 0:
+                self.abrir_revisao_questao(indices[-1])
+            return
+        try:
+            pos = indices.index(self._indice_revisao_historico)
+        except ValueError:
+            self.sair_revisao_questoes()
+            return
+        novo = pos + direcao
+        if 0 <= novo < len(indices):
+            self.abrir_revisao_questao(indices[novo])
+        elif novo >= len(indices):
+            self.sair_revisao_questoes()
+
+    def abrir_mapa_questoes_respondidas(self):
+        if self.finalizada or self._pausa_relogio is not None or self._editando_alternativas or self._editando_explicacao:
+            return
+        indices = self._indices_questoes_revisaveis()
+        if not indices:
+            QMessageBox.information(
+                self, "Mapa da bateria",
+                "Ainda não há questões respondidas nesta bateria. Responda a primeira questão para iniciar o histórico."
+            )
+            return
+        dialogo = QDialog(self)
+        dialogo.setWindowTitle("Mapa da bateria — questões respondidas")
+        dialogo.setMinimumSize(540, 380)
+        layout = QVBoxLayout(dialogo)
+        layout.setContentsMargins(14, 14, 14, 14)
+        layout.setSpacing(9)
+        titulo = QLabel("Histórico da bateria")
+        titulo.setObjectName("pageTitle")
+        layout.addWidget(titulo)
+        subtitulo = QLabel(
+            "Escolha uma questão respondida para consultar. A resolução atual permanece preservada."
+        )
+        subtitulo.setObjectName("pageSubtitle")
+        subtitulo.setWordWrap(True)
+        layout.addWidget(subtitulo)
+        arvore = QTreeWidget(dialogo)
+        arvore.setObjectName("questionReviewMap")
+        arvore.setHeaderLabels(["Questão", "Resultado", "Tópico"])
+        arvore.setRootIsDecorated(False)
+        arvore.setSelectionBehavior(QAbstractItemView.SelectRows)
+        arvore.setSelectionMode(QAbstractItemView.SingleSelection)
+        arvore.header().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        arvore.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        arvore.header().setSectionResizeMode(2, QHeaderView.Stretch)
+        for indice in indices:
+            registro = self._obter_registro_revisao(indice)
+            if registro is None:
+                continue
+            status = "Respondida" if self.modo_simulado and not self.feedback_imediato else registro["status"]
+            item = QTreeWidgetItem([
+                f"Questão {indice + 1}", status,
+                str(registro.get("topico") or registro.get("disciplina") or "")
+            ])
+            item.setData(0, Qt.UserRole, indice)
+            arvore.addTopLevelItem(item)
+            if self._modo_revisao_historico and indice == self._indice_revisao_historico:
+                arvore.setCurrentItem(item)
+        layout.addWidget(arvore, 1)
+        botoes = QDialogButtonBox(QDialogButtonBox.Open | QDialogButtonBox.Cancel, parent=dialogo)
+        botoes.button(QDialogButtonBox.Open).setText("Abrir revisão")
+        botoes.accepted.connect(dialogo.accept)
+        botoes.rejected.connect(dialogo.reject)
+        layout.addWidget(botoes)
+        if arvore.currentItem() is None and arvore.topLevelItemCount():
+            arvore.setCurrentItem(arvore.topLevelItem(0))
+        arvore.itemDoubleClicked.connect(lambda *_: dialogo.accept())
+        if dialogo.exec() == QDialog.Accepted and arvore.currentItem() is not None:
+            self.abrir_revisao_questao(arvore.currentItem().data(0, Qt.UserRole))
+
+    def _limpar_alternativas_revisao(self):
+        while self.revisao_alternativas_layout.count():
+            item = self.revisao_alternativas_layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.hide()
+                widget.deleteLater()
+
+    def abrir_revisao_questao(self, indice_fila):
+        if self.finalizada or self._pausa_relogio is not None or self._editando_alternativas or self._editando_explicacao:
+            return
+        if indice_fila not in self._indices_questoes_revisaveis():
+            return
+        registro = self._obter_registro_revisao(indice_fila)
+        if registro is None or indice_fila >= len(self.fila):
+            return
+        dados = obter_questao(self.fila[indice_fila]["id"])
+        if not dados:
+            QMessageBox.warning(self, "Histórico", "Não foi possível carregar a questão para revisão.")
+            return
+
+        if not self._modo_revisao_historico:
+            self._estado_visual_pendente_revisao = {
+                "indice": self.questao_indice.text(),
+                "disciplina": self.questao_disciplina.text(),
+                "meta": self.questao_meta.text(),
+                "enunciado": self.questao_enunciado.text(),
+                "tooltip_disciplina": self.questao_disciplina.toolTip(),
+                "tooltip_meta": self.questao_meta.toolTip(),
+                "feedback_visivel": self.feedback.isVisible(),
+                "footer_visivel": self.painel_acoes_bateria.isVisible(),
+                "posicao_rolagem": self.scroll_questao.verticalScrollBar().value(),
+            }
+            self._frames_pendentes_revisao = self.frame_por_letra
+            self.pausar_cronometro_questao()
+        self._modo_revisao_historico = True
+        self._indice_revisao_historico = indice_fila
+        self.caneta_estudo.limpar()
+        self._atualizar_botao_caneta_estudo()
+        self.questao_indice.setText(f"QUESTÃO {indice_fila + 1}  •  REVISÃO")
+        self.questao_disciplina.setText(str(dados.get("disciplina") or "Disciplina").upper())
+        self.questao_meta.setText(str(dados.get("topico") or "Tópico não informado"))
+        self.questao_enunciado.setText(str(dados.get("enunciado") or ""))
+        self.questao_disciplina.setToolTip("Questão anterior • somente leitura")
+        self.questao_meta.setToolTip("Questão anterior • somente leitura")
+        self.alternativas_container.hide()
+        self.feedback.hide()
+        self.painel_acoes_bateria.hide()
+        self._limpar_alternativas_revisao()
+        nova_frames = {}
+        simulado_sem_gabarito = self.modo_simulado and not self.feedback_imediato
+        marcada = registro.get("marcada")
+        gabarito = registro.get("gabarito")
+        for alternativa in dados.get("alternativas") or []:
+            letra = alternativa.get("letra")
+            frame = QFrame(self.revisao_container)
+            frame.setObjectName("questionSolverAlternative")
+            frame.setProperty("selectionState", "normal")
+            frame.setProperty("eliminated", False)
+            if simulado_sem_gabarito:
+                estado = "normal"
+            elif letra == gabarito:
+                estado = "correta"
+            elif letra == marcada and letra != gabarito:
+                estado = "errada"
+            else:
+                estado = "normal"
+            frame.setProperty("answerState", estado)
+            linha = QHBoxLayout(frame)
+            linha.setContentsMargins(11, 9, 11, 9)
+            linha.setSpacing(8)
+            rotulo = QLabel(f"{letra}", frame)
+            rotulo.setObjectName("questionSolverRadio")
+            rotulo.setFixedWidth(28)
+            texto = QLabel(str(alternativa.get("texto") or ""), frame)
+            texto.setObjectName("questionSolverAlternativeText")
+            texto.setWordWrap(True)
+            texto.setTextInteractionFlags(Qt.TextSelectableByMouse)
+            linha.addWidget(rotulo, 0, Qt.AlignTop)
+            linha.addWidget(texto, 1)
+            self.revisao_alternativas_layout.addWidget(frame)
+            nova_frames[letra] = frame
+        self.frame_por_letra = nova_frames
+        self.caneta_estudo.atualizar_alvos()
+        if simulado_sem_gabarito:
+            self.revisao_resultado.setText(
+                f"Resposta registrada: {marcada}. O gabarito e a explicação serão exibidos após a entrega do simulado."
+            )
+            self.revisao_feedback.setProperty("resultState", "normal")
+            self.revisao_explicacao.hide()
+        else:
+            status = str(registro.get("status") or "Respondida")
+            self.revisao_resultado.setText(
+                f"{status} • Sua resposta: {marcada} • Gabarito: {gabarito}"
+            )
+            self.revisao_feedback.setProperty(
+                "resultState", "correta" if status == "Correta" else "errada"
+            )
+            explicacao = dados.get("explicacao") or ""
+            html = explicacao_html(explicacao)
+            self.revisao_explicacao.setTextFormat(Qt.RichText if html is not None else Qt.PlainText)
+            self.revisao_explicacao.setText(html if html is not None else (str(explicacao) or "Sem explicação cadastrada."))
+            self.revisao_explicacao.show()
+        self.revisao_feedback.style().unpolish(self.revisao_feedback)
+        self.revisao_feedback.style().polish(self.revisao_feedback)
+        self.revisao_container.show()
+        self.atualizar_navegacao_revisao_questoes()
+        self.atualizar_menu_opcoes_topo()
+        self.scroll_questao.verticalScrollBar().setValue(0)
+
+    def sair_revisao_questoes(self):
+        if not self._modo_revisao_historico:
+            return
+        estado = self._estado_visual_pendente_revisao or {}
+        self._modo_revisao_historico = False
+        self._indice_revisao_historico = None
+        self.revisao_container.hide()
+        self._limpar_alternativas_revisao()
+        if self._frames_pendentes_revisao is not None:
+            self.frame_por_letra = self._frames_pendentes_revisao
+        self._frames_pendentes_revisao = None
+        self.questao_indice.setText(estado.get("indice", self.questao_indice.text()))
+        self.questao_disciplina.setText(estado.get("disciplina", self.questao_disciplina.text()))
+        self.questao_meta.setText(estado.get("meta", self.questao_meta.text()))
+        self.questao_enunciado.setText(estado.get("enunciado", self.questao_enunciado.text()))
+        self.questao_disciplina.setToolTip(estado.get("tooltip_disciplina", ""))
+        self.questao_meta.setToolTip(estado.get("tooltip_meta", ""))
+        self.alternativas_container.show()
+        self.feedback.setVisible(bool(estado.get("feedback_visivel", False)))
+        self.painel_acoes_bateria.setVisible(bool(estado.get("footer_visivel", True)))
+        self._estado_visual_pendente_revisao = None
+        self.caneta_estudo.limpar()
+        self.caneta_estudo.atualizar_alvos()
+        self._atualizar_botao_caneta_estudo()
+        self.retomar_cronometro_questao()
+        self.atualizar_navegacao_revisao_questoes()
+        self.atualizar_menu_opcoes_topo()
+        self.scroll_questao.verticalScrollBar().setValue(
+            int(estado.get("posicao_rolagem", 0))
+        )
+
     def carregar_atual(self):
+        self._modo_revisao_historico = False
+        self._indice_revisao_historico = None
         if self.indice >= len(
             self.fila
         ):
@@ -18788,19 +19442,13 @@ class JanelaResolverQuestoes(QDialog):
                 frame.setFocusPolicy(Qt.StrongFocus)
                 frame.setAttribute(Qt.WA_Hover, True)
                 frame.setCursor(Qt.PointingHandCursor)
+                frame.setMinimumHeight(45)
 
                 linha = QHBoxLayout(
                     frame
                 )
-                linha.setContentsMargins(
-                    11,
-                    9,
-                    11,
-                    9
-                )
-                linha.setSpacing(
-                    8
-                )
+                linha.setContentsMargins(12, 8, 12, 8)
+                linha.setSpacing(8)
 
                 eliminar = QToolButton(frame)
                 eliminar.setObjectName(
@@ -18847,9 +19495,8 @@ class JanelaResolverQuestoes(QDialog):
                     "eliminated",
                     False
                 )
-                radio.setFixedWidth(
-                    100 if tipo_questao == "CERTO_ERRADO" else 36
-                )
+                radio.setFixedWidth(106 if tipo_questao == "CERTO_ERRADO" else 30)
+                radio.setMinimumHeight(24)
 
                 texto = QLabel(
                     alternativa[
@@ -18971,6 +19618,7 @@ class JanelaResolverQuestoes(QDialog):
             False
         )
         self.feedback_fila.setVisible(False)
+        self.botao_pular.setVisible(True)
         self.botao_pular.setEnabled(
             True
         )
@@ -18983,6 +19631,7 @@ class JanelaResolverQuestoes(QDialog):
         self.botao_proxima.setVisible(
             False
         )
+        self.atualizar_navegacao_revisao_questoes()
 
     def atualizar_selecao_visual_alternativas(self, *_args):
         if self.resposta_confirmada:
@@ -19085,6 +19734,8 @@ class JanelaResolverQuestoes(QDialog):
         )
 
     def confirmar_resposta(self):
+        if self._modo_revisao_historico:
+            return
         if self._pausa_relogio is not None or self.resposta_confirmada or self._editando_alternativas:
             return
 
@@ -19214,12 +19865,16 @@ class JanelaResolverQuestoes(QDialog):
             "inedita": self.questao_atual[
                 "inedita"
             ],
+            "indice_fila": self.indice,
             "marcada": marcada,
             "gabarito": gabarito,
             "removida_banco_erros": bool(
                 resultado.get("resultado_banco_erros", {}).get("removida")
             ),
         })
+        # Libera o histórico imediatamente após confirmar, inclusive em
+        # simulados sem feedback imediato (sem revelar o gabarito).
+        self.atualizar_navegacao_revisao_questoes()
 
         for botao in self.botao_eliminar_por_letra.values():
             botao.setEnabled(
@@ -19361,6 +20016,7 @@ class JanelaResolverQuestoes(QDialog):
         )
 
         self.atualizar_metricas()
+        self.atualizar_navegacao_revisao_questoes()
 
         if (
             self.indice
@@ -19378,6 +20034,8 @@ class JanelaResolverQuestoes(QDialog):
             )
 
     def pular(self):
+        if self._modo_revisao_historico:
+            return
         if self._pausa_relogio is not None or self.resposta_confirmada or self._editando_alternativas:
             return
 
@@ -19463,6 +20121,7 @@ class JanelaResolverQuestoes(QDialog):
             "status": status_registro,
             "duvida": self.duvida.isChecked(),
             "inedita": self.questao_atual["inedita"],
+            "indice_fila": self.indice,
             "marcada": None,
             "gabarito": gabarito_pulada,
             "pulo": True,
@@ -19505,6 +20164,7 @@ class JanelaResolverQuestoes(QDialog):
                 )
 
         self.atualizar_metricas()
+        self.atualizar_navegacao_revisao_questoes()
         self.indice += 1
         self.sessao_progresso.setValue(self.indice)
 
@@ -19517,6 +20177,8 @@ class JanelaResolverQuestoes(QDialog):
             self.carregar_atual()
 
     def proxima(self):
+        if self._modo_revisao_historico:
+            return
         if self._pausa_relogio is not None or self._editando_alternativas:
             return
         self.indice += 1
@@ -34343,9 +35005,19 @@ class SistemaEstudos(QMainWindow):
             self.voltar_inicio, self.abrir_busca_global, self.abrir_questoes,
             self.abrir_portal_treinos, self.abrir_portal_recursos,
             cabecalho_compartilhado=self._dashboard_top_container,
+            abrir_edital=self.abrir_portal_edital,
         )
         self.telas.addWidget(self.tela_portal_inicio)
         aplicar_estilo_portal(self.tela_portal_inicio, self.tema_atual)
+        # A Central do Edital pertence sempre ao perfil ativo. A estrutura
+        # inicial disponibiliza atalhos reais e não presume dados de edital.
+        self.tela_portal_edital = criar_portal_edital(
+            voltar_inicio=self.abrir_portal_inicio,
+            abrir_progresso=self.abrir_progresso_edital,
+            abrir_disciplinas=self.abrir_disciplinas_topicos_perfil,
+        )
+        self.telas.addWidget(self.tela_portal_edital)
+        aplicar_estilo_portal_edital(self.tela_portal_edital, self.tema_atual)
         # L03: pagina separada, sem modificar o Dashboard ou os motores.
         self.tela_portal_treinos = criar_portal_treinos(
             abrir_inicio=self.abrir_portal_inicio,
@@ -34561,6 +35233,15 @@ class SistemaEstudos(QMainWindow):
         rotulo = getattr(pagina, "portal_perfil_label", None)
         if rotulo is not None:
             rotulo.setText("Perfil ativo: " + (self.combo_concurso.currentText().strip() or "—"))
+        atualizar_perfil_mini_edital(pagina, self.combo_concurso.currentText())
+        edital = getattr(self, "tela_portal_edital", None)
+        if edital is not None:
+            atualizar_perfil_portal_edital(edital, self.combo_concurso.currentText())
+
+    def abrir_portal_edital(self):
+        """Abre o setor relacionado ao concurso atualmente selecionado."""
+        self._atualizar_perfil_portal()
+        self.telas.setCurrentWidget(self.tela_portal_edital)
 
     def abrir_portal_inicio(self):
         """Abre somente o portal, sem atualizar ou interromper sessoes existentes."""
@@ -34772,6 +35453,157 @@ class SistemaEstudos(QMainWindow):
             self._dashboard_recomendacao_linha.setStretch(0, 3)
             self._dashboard_recomendacao_linha.setStretch(1, 1)
 
+    def _estilizar_cabecalho_premium(self, tema):
+        """Acabamento do cabeçalho do portal Início, sem QSS global.
+
+        Três paletas independentes, pois a barra é transferida do Dashboard
+        para a página Início. Estilos ancorados nos objectNames reais.
+        """
+        painel = getattr(self, "_dashboard_top_container", None)
+        if painel is None:
+            return
+        tema = normalizar_tema(tema)
+        if getattr(self, "_premium_tema_aplicado", None) == tema:
+            return
+        self._premium_tema_aplicado = tema
+        cores = {
+            "futurista": dict(
+                base="#081727", centro="#102b46", fim="#071324", borda="#138cbe",
+                marca="#f0f7ff", acento="#27c8ff", texto="#eaf5ff", secundario="#a8bdd0",
+                perfil="#102b43", perfil_borda="#237daa", campo="#10253a",
+                foco="#32cfff", gerenciar="#0a2b45", busca="#102941",
+                atalho="#29435d", divisao="#315575", hover="#164264",
+            ),
+            "escuro": dict(
+                base="#151e2b", centro="#202f42", fim="#111b29", borda="#49647e",
+                marca="#f3f6fc", acento="#64bde9", texto="#e8f0fa", secundario="#adbbca",
+                perfil="#233448", perfil_borda="#506980", campo="#233548",
+                foco="#75c3ed", gerenciar="#22384e", busca="#213347",
+                atalho="#3a4c60", divisao="#496077", hover="#2a455d",
+            ),
+            "claro": dict(
+                base="#f2f7fe", centro="#e4effb", fim="#eef5ff", borda="#9bbbd9",
+                marca="#122e4b", acento="#1777ae", texto="#143655", secundario="#56718b",
+                perfil="#ffffff", perfil_borda="#a8c5df", campo="#ffffff",
+                foco="#2379ae", gerenciar="#d7eafd", busca="#ffffff",
+                atalho="#e4eef8", divisao="#bfd2e5", hover="#d1e8fa",
+            ),
+        }[tema]
+        self._premium_titulo.setText(
+            f'<span style="color:{cores["marca"]};">Vighna</span>'
+            f'<span style="color:{cores["acento"]};">Study</span>'
+        )
+        # A aplicação pode alternar o tema sem recriar os widgets.
+        gerenciar = getattr(self, "_premium_gerenciar", None)
+        if gerenciar is not None:
+            icone = criar_icone("fa5s.cog", tema=tema, papel="destaque")
+            if not icone.isNull():
+                gerenciar.setIcon(icone)
+                gerenciar.setText("Gerenciar")
+            else:
+                gerenciar.setText("⚙  Gerenciar")
+        escudo = criar_icone("fa5s.shield-alt", tema=tema, papel="destaque")
+        if escudo.isNull():
+            escudo = criar_icone("fa5s.shield", tema=tema, papel="destaque")
+        if not escudo.isNull():
+            self._premium_icone_perfil.setPixmap(escudo.pixmap(25, 25))
+            self._premium_icone_perfil.setText("")
+        else:
+            self._premium_icone_perfil.clear()
+            self._premium_icone_perfil.setText("◆")
+        busca = getattr(self, "botao_busca_global", None)
+        if busca is not None:
+            lupa = criar_icone("fa5s.search", tema=tema, papel="acao")
+            if not lupa.isNull():
+                busca.setIcon(lupa)
+                busca.setIconSize(QSize(18, 18))
+                busca.setText("Buscar no Vighna...")
+            else:
+                busca.setIcon(QIcon())
+                busca.setText("⌕  Buscar no Vighna...")
+
+        qss = """
+        QFrame#dashboardTopBar {
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                stop:0 %(base)s, stop:0.53 %(centro)s, stop:1 %(fim)s);
+            border: 1px solid %(borda)s;
+            border-radius: 16px;
+        }
+        QFrame#dashboardTopBar QLabel#premiumHeaderBrandName {
+            background: transparent; border: none;
+            font-size: 19pt; font-weight: 800;
+        }
+        QFrame#dashboardTopBar QLabel#premiumHeaderSubtitle {
+            background: transparent; border: none;
+            color: %(secundario)s; font-size: 10pt;
+        }
+        QFrame#dashboardTopBar QLabel#premiumHeaderLogo {
+            background: transparent; border: none;
+        }
+        QFrame#dashboardTopBar QFrame#premiumHeaderDivider,
+        QFrame#dashboardTopBar QFrame#premiumHeaderSearchDivider {
+            background-color: %(divisao)s; border: none;
+        }
+        QFrame#dashboardTopBar QFrame#topProfileBar {
+            background-color: %(perfil)s;
+            border: 1px solid %(perfil_borda)s; border-radius: 12px;
+        }
+        QFrame#dashboardTopBar QLabel#premiumHeaderProfileIcon {
+            color: %(acento)s; font-size: 23px; font-weight: bold;
+            background: transparent; border: none;
+        }
+        QFrame#dashboardTopBar QLabel#topProfileLabel {
+            color: %(acento)s; background: transparent; border: none;
+            font-size: 8pt; font-weight: 700;
+        }
+        QFrame#dashboardTopBar QComboBox#topProfileCombo {
+            background-color: %(perfil)s; color: %(texto)s;
+            border: none; border-radius: 5px;
+            padding: 0px 4px 0px 0px;
+            font-size: 10pt; font-weight: 700;
+        }
+        QFrame#dashboardTopBar QComboBox#topProfileCombo:hover,
+        QFrame#dashboardTopBar QComboBox#topProfileCombo:focus {
+            background-color: %(hover)s;
+        }
+        QFrame#dashboardTopBar QComboBox#topProfileCombo::drop-down {
+            border: none; width: 20px;
+        }
+        QFrame#dashboardTopBar QPushButton#premiumHeaderManageButton {
+            background-color: %(gerenciar)s;
+            color: %(texto)s; border: 1px solid %(foco)s;
+            border-radius: 12px; font-weight: 700;
+            font-size: 10pt; padding: 3px 12px;
+        }
+        QFrame#dashboardTopBar QPushButton#premiumHeaderManageButton:hover,
+        QFrame#dashboardTopBar QPushButton#premiumHeaderManageButton:focus {
+            background-color: %(hover)s; border-color: %(acento)s;
+        }
+        QFrame#dashboardTopBar QFrame#premiumHeaderSearchShell {
+            background-color: %(busca)s; border: 1px solid %(perfil_borda)s;
+            border-radius: 23px;
+        }
+        QFrame#dashboardTopBar QPushButton#globalSearchTrigger {
+            background: transparent; border: none; border-radius: 14px;
+            color: %(secundario)s; font-size: 10pt; text-align: left;
+            font-weight: 500; padding: 2px 8px;
+        }
+        QFrame#dashboardTopBar QPushButton#globalSearchTrigger:hover,
+        QFrame#dashboardTopBar QPushButton#globalSearchTrigger:focus {
+            background-color: %(hover)s; color: %(texto)s;
+        }
+        QFrame#dashboardTopBar QPushButton#premiumHeaderShortcut {
+            background-color: %(atalho)s; color: %(texto)s;
+            border: 1px solid %(perfil_borda)s;
+            border-radius: 7px; font-weight: 600;
+            font-size: 9pt; padding: 2px 7px;
+        }
+        QFrame#dashboardTopBar QPushButton#premiumHeaderShortcut:hover {
+            background-color: %(hover)s;
+        }
+        """ % cores
+        painel.setStyleSheet(qss)
+
     def _atualizar_layout_sidebar(self):
         if not hasattr(self, "dashboard_sidebar"):
             return
@@ -34792,16 +35624,26 @@ class SistemaEstudos(QMainWindow):
         # Reestiliza apenas na troca de tema; resize nao repinta o QSS inteiro.
         if getattr(self, "_portal_tema_estilizado", None) != self.tema_atual:
             aplicar_estilo_portal(self.tela_portal_inicio, self.tema_atual)
+            aplicar_estilo_portal_edital(self.tela_portal_edital, self.tema_atual)
             aplicar_estilo_treinos(self.tela_portal_treinos, self.tema_atual)
             aplicar_estilo_recursos(self.tela_portal_recursos, self.tema_atual)
             aplicar_estilo_portal_disciplinas(self.tela_portal_disciplinas, self.tema_atual)
             aplicar_estilo_cabecalho_dashboard(self.dashboard_quick_nav, self.tema_atual)
+            self._estilizar_cabecalho_premium(self.tema_atual)
             self._portal_tema_estilizado = self.tema_atual
         # A busca do portal Início permanece visível no Futurista: ela compõe
         # o cabeçalho da tela inicial independentemente da lateral textual.
         busca_superior = getattr(self, "botao_busca_global", None)
         if busca_superior is not None:
             busca_superior.setVisible(True)
+        # Compactação leve para janelas restauradas: não empurra os cartões
+        # nem cria barra de rolagem horizontal no portal.
+        atalho_busca = getattr(self, "_premium_busca_atalho", None)
+        if atalho_busca is not None:
+            atalho_busca.setVisible(largura >= 1130)
+        divisor_busca = getattr(self, "_premium_busca_divisor", None)
+        if divisor_busca is not None:
+            divisor_busca.setVisible(largura >= 1130)
         # Ações duplicadas no rodapé não ocupam mais o Dashboard Futurista.
         # Nos temas sem lateral e em janelas onde a lateral não aparece,
         # o rodapé original permanece funcional e acessível.
@@ -34856,7 +35698,9 @@ class SistemaEstudos(QMainWindow):
         if not hasattr(self, "_sidebar_botoes"):
             return
         atual = self.telas.currentWidget()
-        chave = ("inicio" if atual is getattr(self, "tela_portal_inicio", None)
+        chave = ("inicio" if atual in (
+                    getattr(self, "tela_portal_inicio", None),
+                    getattr(self, "tela_portal_edital", None))
                  else "recursos" if atual is getattr(self, "tela_portal_recursos", None)
                  else "simulados" if atual is getattr(self, "tela_portal_treinos", None)
                  else "dashboard" if atual is self.tela_inicial else None)
@@ -36429,13 +37273,16 @@ class SistemaEstudos(QMainWindow):
         # ====================================================
 
         titulo = QLabel("VighnaStudy")
-        titulo.setObjectName("pageTitle")
+        titulo.setObjectName("premiumHeaderBrandName")
+        titulo.setTextFormat(Qt.RichText)
+        titulo.setTextInteractionFlags(Qt.NoTextInteraction)
 
         subtitulo = QLabel("Visão geral do estudo")
-        subtitulo.setObjectName("pageSubtitle")
+        subtitulo.setObjectName("premiumHeaderSubtitle")
 
         logo_marca = QLabel()
-        logo_marca.setFixedSize(48, 64)
+        logo_marca.setObjectName("premiumHeaderLogo")
+        logo_marca.setFixedSize(44, 56)
         logo_marca.setAlignment(Qt.AlignCenter)
 
         pixmap_marca = carregar_logo_vighnastudy()
@@ -36457,92 +37304,130 @@ class SistemaEstudos(QMainWindow):
 
         marca = QHBoxLayout()
         marca.setSpacing(10)
-        marca.addWidget(logo_marca)
+        marca.addWidget(logo_marca, 0, Qt.AlignVCenter)
         marca.addLayout(texto_marca)
         self._dashboard_marca_superior = (titulo, subtitulo, logo_marca)
+        self._premium_titulo = titulo
 
-        # Cabeçalho do portal Início (Futurista):
-        # marca à esquerda, perfil/gerenciar ao lado e busca discreta à direita.
-        # Mantemos os mesmos controladores já existentes, sem recriar estado.
+        # Cabeçalho premium do portal Início. Mantém o mesmo QComboBox e os
+        # controladores existentes de perfil, gerenciamento e busca global.
         topo_container = QFrame()
         topo_container.setObjectName("dashboardTopBar")
+        topo_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        topo_container.setMinimumHeight(82)
 
         topo = QHBoxLayout(topo_container)
         self._dashboard_top_grid = None
         self._dashboard_top_container = topo_container
-        topo.setContentsMargins(14, 8, 14, 8)
-        topo.setSpacing(12)
+        topo.setContentsMargins(19, 10, 19, 10)
+        topo.setSpacing(13)
         topo.addLayout(marca, 0)
 
-        # ----------------------------------------------------
-        # Perfil ativo — integrado ao lado da marca
-        # ----------------------------------------------------
-        perfil_central = QFrame()
+        # Separação leve entre identidade e ferramentas do perfil.
+        separador_marca = QFrame(topo_container)
+        separador_marca.setObjectName("premiumHeaderDivider")
+        separador_marca.setFixedSize(1, 45)
+        topo.addWidget(separador_marca, 0, Qt.AlignVCenter)
+
+        # PERFIL ATIVO: título acima do valor; a seleção continua sendo
+        # feita pelo mesmo combo_concurso, com todos os sinais preservados.
+        perfil_central = QFrame(topo_container)
         perfil_central.setObjectName("topProfileBar")
+        perfil_central.setFixedHeight(58)
+        perfil_central.setMinimumWidth(212)
+        perfil_central.setMaximumWidth(285)
+        perfil_central.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
         perfil_central_layout = QHBoxLayout(perfil_central)
-        perfil_central_layout.setContentsMargins(10, 5, 10, 5)
-        perfil_central_layout.setSpacing(7)
+        perfil_central_layout.setContentsMargins(11, 6, 11, 6)
+        perfil_central_layout.setSpacing(9)
 
-        perfil_global_rotulo = QLabel("PERFIL ATIVO")
+        icone_perfil = QLabel("◆", perfil_central)
+        icone_perfil.setObjectName("premiumHeaderProfileIcon")
+        icone_perfil.setFixedSize(29, 33)
+        icone_perfil.setAlignment(Qt.AlignCenter)
+        icone_perfil.setToolTip("Perfil ativo")
+        self._premium_icone_perfil = icone_perfil
+        perfil_central_layout.addWidget(icone_perfil, 0, Qt.AlignVCenter)
+
+        textos_perfil = QVBoxLayout()
+        textos_perfil.setContentsMargins(0, 0, 0, 0)
+        textos_perfil.setSpacing(0)
+        perfil_global_rotulo = QLabel("PERFIL ATIVO", perfil_central)
         perfil_global_rotulo.setObjectName("topProfileLabel")
-        perfil_central_layout.addWidget(
-            perfil_global_rotulo,
-            0,
-            Qt.AlignVCenter,
-        )
+        perfil_global_rotulo.setFixedHeight(17)
+        textos_perfil.addWidget(perfil_global_rotulo)
 
-        self.combo_concurso = QComboBox()
+        self.combo_concurso = QComboBox(perfil_central)
         self.combo_concurso.setObjectName("topProfileCombo")
-        self.combo_concurso.setMinimumSize(185, 34)
-        self.combo_concurso.setMaximumWidth(300)
+        self.combo_concurso.setMinimumWidth(125)
+        self.combo_concurso.setMaximumWidth(225)
+        self.combo_concurso.setFixedHeight(26)
+        self.combo_concurso.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.combo_concurso.setToolTip(
-            "Trocar o concurso/perfil ativo. Todo o Dashboard, recomendações, questões, revisões e estatísticas passam a usar o perfil selecionado."
+            "Trocar o concurso/perfil ativo. Dashboard, questões, revisões e estatísticas utilizam o perfil selecionado."
         )
-        self.combo_concurso.currentIndexChanged.connect(
-            self.alterar_concurso_ativo
-        )
-        perfil_central_layout.addWidget(
-            self.combo_concurso,
-            1,
-            Qt.AlignVCenter,
-        )
+        self.combo_concurso.currentIndexChanged.connect(self.alterar_concurso_ativo)
+        textos_perfil.addWidget(self.combo_concurso)
+        perfil_central_layout.addLayout(textos_perfil, 1)
+        topo.addWidget(perfil_central, 0, Qt.AlignVCenter)
 
-        gerenciar_concursos = QPushButton("Gerenciar")
-        gerenciar_concursos.setObjectName("subtleButton")
-        gerenciar_concursos.setFixedHeight(34)
+        gerenciar_concursos = QPushButton("Gerenciar", topo_container)
+        gerenciar_concursos.setObjectName("premiumHeaderManageButton")
+        gerenciar_concursos.setFixedHeight(49)
+        gerenciar_concursos.setMinimumWidth(116)
+        gerenciar_concursos.setCursor(Qt.PointingHandCursor)
         gerenciar_concursos.setToolTip(
             "Criar, duplicar, renomear, excluir e configurar os conteúdos dos perfis."
         )
         gerenciar_concursos.clicked.connect(self.abrir_concursos)
-        perfil_central_layout.addWidget(
-            gerenciar_concursos,
-            0,
-            Qt.AlignVCenter,
-        )
-        topo.addWidget(perfil_central, 0, Qt.AlignVCenter)
-
+        icone_gerenciar = criar_icone("fa5s.cog", tema=self.tema_atual, papel="destaque")
+        if not icone_gerenciar.isNull():
+            gerenciar_concursos.setIcon(icone_gerenciar)
+            gerenciar_concursos.setIconSize(QSize(17, 17))
+        else:
+            gerenciar_concursos.setText("⚙  Gerenciar")
+        self._premium_gerenciar = gerenciar_concursos
+        topo.addWidget(gerenciar_concursos, 0, Qt.AlignVCenter)
         topo.addStretch(1)
 
-        # ----------------------------------------------------
-        # Busca global — discreta e alinhada à direita no portal Início
-        # ----------------------------------------------------
-        self.botao_busca_global = QPushButton(
-            "⌕  Buscar no Vighna...     Ctrl+K"
-        )
+        # BUSCA GLOBAL: área de clique intacta, com indicador de atalho
+        # independente apenas no visual. O atalho Ctrl+K não é modificado.
+        busca_caixa = QFrame(topo_container)
+        busca_caixa.setObjectName("premiumHeaderSearchShell")
+        busca_caixa.setFixedHeight(49)
+        busca_caixa.setMinimumWidth(230)
+        busca_caixa.setMaximumWidth(410)
+        busca_caixa.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        busca_layout = QHBoxLayout(busca_caixa)
+        busca_layout.setContentsMargins(8, 5, 9, 5)
+        busca_layout.setSpacing(5)
+        self.botao_busca_global = QPushButton("⌕  Buscar no Vighna...", busca_caixa)
         self.botao_busca_global.setObjectName("globalSearchTrigger")
-        self.botao_busca_global.setMinimumWidth(260)
-        self.botao_busca_global.setMaximumWidth(360)
         self.botao_busca_global.setFixedHeight(36)
-        self.botao_busca_global.setSizePolicy(
-            QSizePolicy.Fixed,
-            QSizePolicy.Fixed,
-        )
+        self.botao_busca_global.setMinimumWidth(138)
+        self.botao_busca_global.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.botao_busca_global.setCursor(Qt.PointingHandCursor)
         self.botao_busca_global.setToolTip(
             "Buscar telas, ferramentas, ações e tópicos do perfil ativo. Atalho: Ctrl+K."
         )
         self.botao_busca_global.clicked.connect(self.abrir_busca_global)
-        topo.addWidget(self.botao_busca_global, 0, Qt.AlignRight | Qt.AlignVCenter)
+        busca_layout.addWidget(self.botao_busca_global, 1)
+
+        self._premium_busca_divisor = QFrame(busca_caixa)
+        self._premium_busca_divisor.setObjectName("premiumHeaderSearchDivider")
+        self._premium_busca_divisor.setFixedSize(1, 23)
+        busca_layout.addWidget(self._premium_busca_divisor, 0, Qt.AlignVCenter)
+        self._premium_busca_atalho = QPushButton("Ctrl + K", busca_caixa)
+        self._premium_busca_atalho.setObjectName("premiumHeaderShortcut")
+        self._premium_busca_atalho.setFixedHeight(30)
+        self._premium_busca_atalho.setCursor(Qt.PointingHandCursor)
+        self._premium_busca_atalho.setToolTip("Abrir a busca global (Ctrl+K)")
+        self._premium_busca_atalho.clicked.connect(self.abrir_busca_global)
+        busca_layout.addWidget(self._premium_busca_atalho, 0, Qt.AlignVCenter)
+        self._premium_busca_caixa = busca_caixa
+        topo.addWidget(busca_caixa, 0, Qt.AlignRight | Qt.AlignVCenter)
+
+        self._estilizar_cabecalho_premium(self.tema_atual)
 
         # Referências mantidas para compatibilidade com rotinas existentes,
         # mesmo sem exposição visual no cabeçalho do portal.
