@@ -5,8 +5,11 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from PySide6.QtCore import QTimer
-from PySide6.QtWidgets import QFileDialog, QMessageBox
+from PySide6.QtCore import QTimer, Qt
+from PySide6.QtWidgets import (
+    QApplication, QDialog, QDialogButtonBox, QFileDialog, QHBoxLayout, QLabel,
+    QMessageBox, QPlainTextEdit, QPushButton, QVBoxLayout,
+)
 from caminhos import PASTA_DADOS
 from vighna_update_engine import UpdateError, inspect_package, package_usage
 
@@ -37,6 +40,132 @@ def _status_text(usage):
     }[state]
     return f'{label}{when} • SHA-256: {fingerprint}…'
 
+
+
+def _texto_resumido(valor, limite=180):
+    """Exibe apenas um resumo; o texto integral permanece nos detalhes."""
+    valor = " ".join(str(valor or "").split())
+    if len(valor) <= limite:
+        return valor
+    return valor[:limite - 1].rstrip() + "…"
+
+
+def _confirmar_instalacao(parent, info, status_text, pacote):
+    """Autorização explícita, sem depender da altura de um QMessageBox.
+
+    O identificador técnico nunca é apresentado inteiro em um QLabel:
+    toda a informação integral permanece copiável no painel rolável.
+    """
+    dialogo = QDialog(parent)
+    dialogo.setObjectName("vighnaUpdateAuthorizationDialog")
+    dialogo.setWindowTitle("Autorizar atualização — VighnaStudy")
+    dialogo.setSizeGripEnabled(True)
+    # Limite relativo ao monitor: nenhuma linha longa pode deslocar o rodapé.
+    tela = parent.screen() if parent is not None and hasattr(parent, "screen") else None
+    if tela is None:
+        tela = QApplication.primaryScreen()
+    area = tela.availableGeometry() if tela is not None else None
+    largura = min(720, max(340, area.width() - 60)) if area is not None else 720
+    altura = min(490, max(320, area.height() - 70)) if area is not None else 490
+    dialogo.resize(largura, altura)
+
+    layout = QVBoxLayout(dialogo)
+    layout.setContentsMargins(20, 17, 20, 16)
+    layout.setSpacing(11)
+
+    titulo = QLabel("Confirmar atualização do VighnaStudy", dialogo)
+    titulo.setObjectName("updateAuthorizationTitle")
+    fonte = titulo.font()
+    fonte.setPointSize(max(12, fonte.pointSize() + 2))
+    fonte.setBold(True)
+    titulo.setFont(fonte)
+    layout.addWidget(titulo)
+
+    status = QLabel(_texto_resumido(status_text, 140), dialogo)
+    status.setWordWrap(True)
+    status.setToolTip(status_text)
+    layout.addWidget(status)
+
+    nome_pacote = QLabel("Pacote: " + _texto_resumido(Path(pacote).name, 110), dialogo)
+    nome_pacote.setWordWrap(True)
+    nome_pacote.setToolTip(str(pacote))
+    layout.addWidget(nome_pacote)
+
+    versoes = QLabel(
+        f"Versão instalada: {info['base_version']}    →    "
+        f"Versão proposta: {info['target_version']}", dialogo,
+    )
+    versoes.setWordWrap(True)
+    layout.addWidget(versoes)
+
+    descricao = QLabel(_texto_resumido(info.get('description', ''), 240), dialogo)
+    descricao.setWordWrap(True)
+    layout.addWidget(descricao)
+
+    detalhes_texto = (
+        f"Pacote: {Path(pacote).name}\n"
+        f"Situação do ZIP: {status_text}\n\n"
+        f"Versão instalada: {info['base_version']}\n"
+        f"Build instalado: {info['base_build']}\n\n"
+        f"Versão proposta: {info['target_version']}\n"
+        f"Build proposto: {info['target_build']}\n\n"
+        f"Alterações: {info.get('description', '')}\n\n"
+        "Arquivos de código:\n" +
+        "\n".join("  • " + caminho for caminho in sorted(info['files']))
+        + "\n\n"
+        "Proteção obrigatória: backup SQLite, conferência de integridade "
+        "e bloqueio de mudanças no schema.\n"
+    )
+
+    linha = QHBoxLayout()
+    expandir = QPushButton("Mostrar detalhes técnicos ▾", dialogo)
+    expandir.setCheckable(True)
+    expandir.setToolTip("Consultar o build completo, os arquivos e a origem da atualização")
+    linha.addWidget(expandir)
+    copiar = QPushButton("Copiar informações", dialogo)
+    copiar.setToolTip("Copiar os identificadores e a lista completa de arquivos")
+    copiar.clicked.connect(lambda: QApplication.clipboard().setText(detalhes_texto))
+    linha.addWidget(copiar)
+    linha.addStretch(1)
+    layout.addLayout(linha)
+
+    detalhes = QPlainTextEdit(dialogo)
+    detalhes.setObjectName("updateAuthorizationDetails")
+    detalhes.setReadOnly(True)
+    detalhes.setLineWrapMode(QPlainTextEdit.WidgetWidth)
+    detalhes.setPlainText(detalhes_texto)
+    detalhes.setMinimumHeight(120)
+    detalhes.setVisible(False)
+    layout.addWidget(detalhes, 1)
+
+    def alternar_detalhes(ativo):
+        detalhes.setVisible(ativo)
+        expandir.setText("Ocultar detalhes técnicos ▴" if ativo else "Mostrar detalhes técnicos ▾")
+
+    expandir.toggled.connect(alternar_detalhes)
+    layout.addStretch(1)
+
+    aviso = QLabel(
+        "Proteções: backup SQLite, verificação de integridade e esquema preservado. "
+        "A instalação fechará o aplicativo após sua autorização. "
+        "O SHA-256 verifica os arquivos do ZIP, mas não a identidade de quem o criou. "
+        "Instale apenas pacotes de origem confiável.", dialogo,
+    )
+    aviso.setWordWrap(True)
+    aviso.setObjectName("updateAuthorizationSafetyNote")
+    layout.addWidget(aviso)
+
+    botoes = QDialogButtonBox(dialogo)
+    autorizar = botoes.addButton("Autorizar instalação", QDialogButtonBox.YesRole)
+    cancelar = botoes.addButton("Cancelar", QDialogButtonBox.RejectRole)
+    autorizar.setObjectName("updateAuthorizationConfirmButton")
+    cancelar.setObjectName("updateAuthorizationCancelButton")
+    autorizar.setAutoDefault(False)
+    cancelar.setDefault(True)
+    autorizar.clicked.connect(dialogo.accept)
+    cancelar.clicked.connect(dialogo.reject)
+    layout.addWidget(botoes)
+    return dialogo.exec() == QDialog.Accepted
 
 
 def selecionar_e_autorizar(parent):
@@ -74,22 +203,7 @@ def selecionar_e_autorizar(parent):
         _show_package_status(parent, status_text + ' • NÃO COMPATÍVEL COM O BUILD ATUAL')
         QMessageBox.warning(parent, 'Pacote não aceito', str(error))
         return False
-    files = '\n'.join('  • ' + path for path in sorted(info['files']))
-    summary = (f"Situação do ZIP: {status_text}\n\n"
-               f"Versão instalada: {info['base_version']} ({info['base_build']})\n"
-               f"Versão proposta: {info['target_version']} ({info['target_build']})\n\n"
-               f"Alterações: {info.get('description', '')}\n\n"
-               f"Arquivos de código: \n{files}\n\n"
-               "Proteção obrigatória: backup SQLite, conferência de integridade e "
-               "bloqueio de mudanças no schema.\n\n"
-               "ATENÇÃO: o SHA-256 verifica os arquivos do ZIP, mas NÃO comprova "
-               "quem criou o pacote. Importe apenas pacotes de origem confiável.\n\n"
-               "O aplicativo será fechado para compilar e instalar. Você poderá "
-               "minimizar a janela de atualização.\n\n"
-               "Deseja AUTORIZAR a instalação deste pacote?")
-    answer = QMessageBox.question(parent, 'Autorizar atualização — VighnaStudy', summary,
-                                  QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-    if answer != QMessageBox.Yes:
+    if not _confirmar_instalacao(parent, info, status_text, selected):
         return False
     updater_script = root / 'vighna_updater.py'
     venv = root / '.venv' / 'Scripts'

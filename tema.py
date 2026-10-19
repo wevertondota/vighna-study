@@ -4858,6 +4858,87 @@ QDialog#questionSolverDialog QFrame#questionSolverAlternative[keyboardFocus="tru
 }
 """
 
+ESTILO_RESOLVEDOR_ALTERNATIVAS_INLINE_CLARO = r"""
+QDialog#questionSolverDialog QPushButton#questionSolverAlternativesEditButton {
+    background-color: {{color:answer.cancel_action_surface}};
+    color: {{color:icon.default}};
+    border: 1px solid {{color:answer.editor_border}};
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-weight: 700;
+}
+QDialog#questionSolverDialog QPushButton#questionSolverAlternativesEditButton:hover {
+    background-color: {{color:answer.edit_action_hover_surface}};
+    color: {{color:answer.edit_action_hover_text}};
+    border-color: {{color:answer.edit_action_hover_border}};
+}
+QDialog#questionSolverDialog QFrame#questionSolverAlternativesEditPanel {
+    background-color: {{color:answer.editor_surface}};
+    border: 1px solid {{color:answer.editor_border}};
+    border-radius: 10px;
+}
+QDialog#questionSolverDialog QLabel#questionSolverAlternativesEditTitle {
+    color: {{color:answer.explanation_title_text}};
+    font-weight: 800;
+    font-size: 10pt;
+    border: none;
+}
+QDialog#questionSolverDialog QLabel#questionSolverAlternativesEditHint,
+QDialog#questionSolverDialog QLabel#questionSolverAlternativesEditLetter {
+    color: {{color:answer.editor_text}};
+    background: transparent;
+    border: none;
+}
+QDialog#questionSolverDialog QTextEdit#questionSolverAlternativesEditField {
+    background-color: {{color:answer.editor_surface}};
+    color: {{color:answer.editor_text}};
+    border: 1px solid {{color:answer.editor_border}};
+    border-radius: 8px;
+    padding: 7px;
+}
+QDialog#questionSolverDialog QPushButton#questionSolverAlternativesEditSave {
+    background-color: {{color:answer.save_action_surface}};
+    color: {{color:answer.save_action_text}};
+    border: 1px solid {{color:answer.save_action_border}};
+    border-radius: 8px;
+    font-weight: 800;
+    padding: 6px 12px;
+}
+QDialog#questionSolverDialog QPushButton#questionSolverAlternativesEditCancel {
+    background-color: {{color:answer.cancel_action_surface}};
+    color: {{color:icon.default}};
+    border: 1px solid {{color:answer.editor_border}};
+    border-radius: 8px;
+    padding: 6px 12px;
+}
+"""
+
+
+ESTILO_BARRA_EXPLICACAO_RICA = r"""
+QDialog#questionSolverDialog QWidget#questionExplanationFormatToolbar {
+    background-color: {{color:answer.editor_surface}};
+    border: 1px solid {{color:answer.editor_border}};
+    border-radius: 8px;
+}
+QDialog#questionSolverDialog QWidget#questionExplanationFormatToolbar QToolButton {
+    color: {{color:answer.editor_text}};
+    background-color: {{color:answer.cancel_action_surface}};
+    border: 1px solid {{color:answer.editor_border}};
+    border-radius: 5px;
+    padding: 3px 6px;
+    font-size: 9pt;
+}
+QDialog#questionSolverDialog QWidget#questionExplanationFormatToolbar QToolButton:hover,
+QDialog#questionSolverDialog QWidget#questionExplanationFormatToolbar QToolButton:checked {
+    background-color: {{color:answer.edit_action_hover_surface}};
+    border-color: {{color:answer.edit_action_hover_border}};
+    color: {{color:answer.edit_action_hover_text}};
+}
+QDialog#questionSolverDialog QWidget#questionExplanationFormatToolbar QToolButton:disabled {
+    color: {{color:text.disabled}};
+}
+"""
+
 ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_CLARO = r"""
 QDialog#questionSolverDialog QLabel#questionSolverExplanationTitle {
     color: {{color:answer.explanation_title_text}};
@@ -4899,6 +4980,62 @@ QDialog#questionSolverDialog QPushButton#questionSolverExplanationCancelButton {
     border-radius: 8px;
     font-weight: 700;
     padding: 6px 14px;
+}
+
+"""
+
+ESTILO_RESOLVEDOR_ALTERNATIVAS_INLINE_ESCURO = r"""
+QDialog#questionSolverDialog QPushButton#questionSolverAlternativesEditButton {
+    background-color: {{color:answer.cancel_action_surface}};
+    color: {{color:icon.default}};
+    border: 1px solid {{color:answer.editor_border}};
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-weight: 700;
+}
+QDialog#questionSolverDialog QPushButton#questionSolverAlternativesEditButton:hover {
+    background-color: {{color:answer.edit_action_hover_surface}};
+    color: {{color:answer.edit_action_hover_text}};
+    border-color: {{color:answer.edit_action_hover_border}};
+}
+QDialog#questionSolverDialog QFrame#questionSolverAlternativesEditPanel {
+    background-color: {{color:answer.editor_surface}};
+    border: 1px solid {{color:answer.editor_border}};
+    border-radius: 10px;
+}
+QDialog#questionSolverDialog QLabel#questionSolverAlternativesEditTitle {
+    color: {{color:answer.explanation_title_text}};
+    font-weight: 800;
+    font-size: 10pt;
+    border: none;
+}
+QDialog#questionSolverDialog QLabel#questionSolverAlternativesEditHint,
+QDialog#questionSolverDialog QLabel#questionSolverAlternativesEditLetter {
+    color: {{color:answer.editor_text}};
+    background: transparent;
+    border: none;
+}
+QDialog#questionSolverDialog QTextEdit#questionSolverAlternativesEditField {
+    background-color: {{color:answer.editor_surface}};
+    color: {{color:answer.editor_text}};
+    border: 1px solid {{color:answer.editor_border}};
+    border-radius: 8px;
+    padding: 7px;
+}
+QDialog#questionSolverDialog QPushButton#questionSolverAlternativesEditSave {
+    background-color: {{color:answer.save_action_surface}};
+    color: {{color:answer.save_action_text}};
+    border: 1px solid {{color:answer.save_action_border}};
+    border-radius: 8px;
+    font-weight: 800;
+    padding: 6px 12px;
+}
+QDialog#questionSolverDialog QPushButton#questionSolverAlternativesEditCancel {
+    background-color: {{color:answer.cancel_action_surface}};
+    color: {{color:icon.default}};
+    border: 1px solid {{color:answer.editor_border}};
+    border-radius: 8px;
+    padding: 6px 12px;
 }
 """
 
@@ -4943,6 +5080,62 @@ QDialog#questionSolverDialog QPushButton#questionSolverExplanationCancelButton {
     border-radius: 8px;
     font-weight: 700;
     padding: 6px 14px;
+}
+
+"""
+
+ESTILO_RESOLVEDOR_ALTERNATIVAS_INLINE_FUTURISTA = r"""
+QDialog#questionSolverDialog QPushButton#questionSolverAlternativesEditButton {
+    background-color: {{color:answer.cancel_action_surface}};
+    color: {{color:icon.default}};
+    border: 1px solid {{color:answer.editor_border}};
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-weight: 700;
+}
+QDialog#questionSolverDialog QPushButton#questionSolverAlternativesEditButton:hover {
+    background-color: {{color:answer.edit_action_hover_surface}};
+    color: {{color:answer.edit_action_hover_text}};
+    border-color: {{color:answer.edit_action_hover_border}};
+}
+QDialog#questionSolverDialog QFrame#questionSolverAlternativesEditPanel {
+    background-color: {{color:answer.editor_surface}};
+    border: 1px solid {{color:answer.editor_border}};
+    border-radius: 10px;
+}
+QDialog#questionSolverDialog QLabel#questionSolverAlternativesEditTitle {
+    color: {{color:answer.explanation_title_text}};
+    font-weight: 800;
+    font-size: 10pt;
+    border: none;
+}
+QDialog#questionSolverDialog QLabel#questionSolverAlternativesEditHint,
+QDialog#questionSolverDialog QLabel#questionSolverAlternativesEditLetter {
+    color: {{color:answer.editor_text}};
+    background: transparent;
+    border: none;
+}
+QDialog#questionSolverDialog QTextEdit#questionSolverAlternativesEditField {
+    background-color: {{color:answer.editor_surface}};
+    color: {{color:answer.editor_text}};
+    border: 1px solid {{color:answer.editor_border}};
+    border-radius: 8px;
+    padding: 7px;
+}
+QDialog#questionSolverDialog QPushButton#questionSolverAlternativesEditSave {
+    background-color: {{color:answer.save_action_surface}};
+    color: {{color:answer.save_action_text}};
+    border: 1px solid {{color:answer.save_action_border}};
+    border-radius: 8px;
+    font-weight: 800;
+    padding: 6px 12px;
+}
+QDialog#questionSolverDialog QPushButton#questionSolverAlternativesEditCancel {
+    background-color: {{color:answer.cancel_action_surface}};
+    color: {{color:icon.default}};
+    border: 1px solid {{color:answer.editor_border}};
+    border-radius: 8px;
+    padding: 6px 12px;
 }
 """
 
@@ -4990,6 +5183,7 @@ QDialog#questionSolverDialog QPushButton#questionSolverExplanationCancelButton {
     font-weight: 700;
     padding: 6px 14px;
 }
+
 """
 
 
@@ -13524,7 +13718,7 @@ QPushButton#sectionEditButton:hover {
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_CLARO + render_qss("claro", ESTILO_DASHBOARD_MODERNO_CLARO) + ESTILO_FOCO_DASHBOARD_CLARO + render_qss("claro", ESTILO_ALGORITMO_DASHBOARD_CLARO) + render_qss("claro", ESTILO_BUSCA_GLOBAL_CLARO) + render_qss("claro", ESTILO_PALETA_HARMONICA_DASHBOARD_CLARO) + render_qss("claro", ESTILO_DESIGN_SYSTEM_DASHBOARD_CLARO) + render_qss("claro", ESTILO_INTELIGENCIA_RESUMO_CLARO) + ESTILO_TOPICOS_DISCIPLINA_CLARO + ESTILO_RESOLVEDOR_CLARO + render_qss("claro", ESTILO_TOPICO_DETALHES_CLARO) + ESTILO_RESOLVEDOR_ELIMINADAS_CLARO + ESTILO_RESOLVEDOR_TECLADO_CLARO + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_CLARO + ESTILO_CALENDARIO_PREVISAO_CLARO + ESTILO_DASHBOARD_SHELL_CLARO + render_qss("claro", ESTILO_DASHBOARD_BLOCO_B_CLARO) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_C) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_D) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_E) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_F) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_G) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_H) + render_qss("claro", ESTILO_NAVEGACAO_BUSCA_GLOBAL) + render_qss("claro", ESTILO_NAVEGACAO_RETORNOS_DASHBOARD) + render_qss("claro", ESTILO_CARDS_GLOBAIS_BLOCO_A) + render_qss("claro", ESTILO_CARDS_GLOBAIS_BLOCO_B) + render_qss("claro", ESTILO_CARDS_GLOBAIS_BLOCO_C) + render_qss("claro", ESTILO_MODO_FOCO_INTEGRACAO_RESOLVEDOR))
+""" + ESTILO_JORNADA_CLARO + render_qss("claro", ESTILO_DASHBOARD_MODERNO_CLARO) + ESTILO_FOCO_DASHBOARD_CLARO + render_qss("claro", ESTILO_ALGORITMO_DASHBOARD_CLARO) + render_qss("claro", ESTILO_BUSCA_GLOBAL_CLARO) + render_qss("claro", ESTILO_PALETA_HARMONICA_DASHBOARD_CLARO) + render_qss("claro", ESTILO_DESIGN_SYSTEM_DASHBOARD_CLARO) + render_qss("claro", ESTILO_INTELIGENCIA_RESUMO_CLARO) + ESTILO_TOPICOS_DISCIPLINA_CLARO + ESTILO_RESOLVEDOR_CLARO + render_qss("claro", ESTILO_TOPICO_DETALHES_CLARO) + ESTILO_RESOLVEDOR_ELIMINADAS_CLARO + ESTILO_RESOLVEDOR_TECLADO_CLARO + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_CLARO + render_qss("claro", ESTILO_BARRA_EXPLICACAO_RICA) + render_qss("claro", ESTILO_RESOLVEDOR_ALTERNATIVAS_INLINE_CLARO) + ESTILO_CALENDARIO_PREVISAO_CLARO + ESTILO_DASHBOARD_SHELL_CLARO + render_qss("claro", ESTILO_DASHBOARD_BLOCO_B_CLARO) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_C) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_D) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_E) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_F) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_G) + render_qss("claro", ESTILO_DASHBOARD_BLOCO_H) + render_qss("claro", ESTILO_NAVEGACAO_BUSCA_GLOBAL) + render_qss("claro", ESTILO_NAVEGACAO_RETORNOS_DASHBOARD) + render_qss("claro", ESTILO_CARDS_GLOBAIS_BLOCO_A) + render_qss("claro", ESTILO_CARDS_GLOBAIS_BLOCO_B) + render_qss("claro", ESTILO_CARDS_GLOBAIS_BLOCO_C) + render_qss("claro", ESTILO_MODO_FOCO_INTEGRACAO_RESOLVEDOR))
 
 
 def stylesheet_escuro():
@@ -19691,7 +19885,7 @@ def stylesheet_escuro():
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_ESCURO + render_qss("escuro", ESTILO_DASHBOARD_MODERNO_ESCURO) + render_qss("escuro", ESTILO_FOCO_DASHBOARD_ESCURO) + render_qss("escuro", ESTILO_ALGORITMO_DASHBOARD_ESCURO) + render_qss("escuro", ESTILO_BUSCA_GLOBAL_ESCURO) + render_qss("escuro", ESTILO_INTELIGENCIA_RESUMO_ESCURO) + ESTILO_TOPICOS_DISCIPLINA_ESCURO + ESTILO_RESOLVEDOR_ESCURO + render_qss("escuro", ESTILO_TOPICO_DETALHES_ESCURO) + ESTILO_RESOLVEDOR_ELIMINADAS_ESCURO + ESTILO_RESOLVEDOR_TECLADO_ESCURO + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_ESCURO + ESTILO_CALENDARIO_PREVISAO_ESCURO + ESTILO_DASHBOARD_SHELL_ESCURO + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_B_ESCURO) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_C) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_D) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_E) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_F) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_G) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_H) + render_qss("escuro", ESTILO_NAVEGACAO_BUSCA_GLOBAL) + render_qss("escuro", ESTILO_NAVEGACAO_RETORNOS_DASHBOARD) + render_qss("escuro", ESTILO_CARDS_GLOBAIS_BLOCO_A) + render_qss("escuro", ESTILO_CARDS_GLOBAIS_BLOCO_B) + render_qss("escuro", ESTILO_CARDS_GLOBAIS_BLOCO_C) + render_qss("escuro", ESTILO_MODO_FOCO_INTEGRACAO_RESOLVEDOR))
+""" + ESTILO_JORNADA_ESCURO + render_qss("escuro", ESTILO_DASHBOARD_MODERNO_ESCURO) + render_qss("escuro", ESTILO_FOCO_DASHBOARD_ESCURO) + render_qss("escuro", ESTILO_ALGORITMO_DASHBOARD_ESCURO) + render_qss("escuro", ESTILO_BUSCA_GLOBAL_ESCURO) + render_qss("escuro", ESTILO_INTELIGENCIA_RESUMO_ESCURO) + ESTILO_TOPICOS_DISCIPLINA_ESCURO + ESTILO_RESOLVEDOR_ESCURO + render_qss("escuro", ESTILO_TOPICO_DETALHES_ESCURO) + ESTILO_RESOLVEDOR_ELIMINADAS_ESCURO + ESTILO_RESOLVEDOR_TECLADO_ESCURO + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_ESCURO + render_qss("escuro", ESTILO_BARRA_EXPLICACAO_RICA) + render_qss("escuro", ESTILO_RESOLVEDOR_ALTERNATIVAS_INLINE_ESCURO) + ESTILO_CALENDARIO_PREVISAO_ESCURO + ESTILO_DASHBOARD_SHELL_ESCURO + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_B_ESCURO) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_C) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_D) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_E) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_F) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_G) + render_qss("escuro", ESTILO_DASHBOARD_BLOCO_H) + render_qss("escuro", ESTILO_NAVEGACAO_BUSCA_GLOBAL) + render_qss("escuro", ESTILO_NAVEGACAO_RETORNOS_DASHBOARD) + render_qss("escuro", ESTILO_CARDS_GLOBAIS_BLOCO_A) + render_qss("escuro", ESTILO_CARDS_GLOBAIS_BLOCO_B) + render_qss("escuro", ESTILO_CARDS_GLOBAIS_BLOCO_C) + render_qss("escuro", ESTILO_MODO_FOCO_INTEGRACAO_RESOLVEDOR))
 
 
 
@@ -22872,7 +23066,7 @@ def stylesheet_futurista():
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_FUTURISTA + render_qss("futurista", ESTILO_DASHBOARD_MODERNO_FUTURISTA) + render_qss("futurista", ESTILO_FOCO_DASHBOARD_FUTURISTA) + render_qss("futurista", ESTILO_ALGORITMO_DASHBOARD_FUTURISTA) + render_qss("futurista", ESTILO_BUSCA_GLOBAL_FUTURISTA) + render_qss("futurista", ESTILO_INTELIGENCIA_RESUMO_FUTURISTA) + ESTILO_TOPICOS_DISCIPLINA_FUTURISTA + render_qss("futurista", ESTILO_DASHBOARD_NEO_FUTURISTA) + ESTILO_RESOLVEDOR_FUTURISTA + render_qss("futurista", ESTILO_TOPICO_DETALHES_FUTURISTA) + ESTILO_RESOLVEDOR_ELIMINADAS_FUTURISTA + ESTILO_RESOLVEDOR_TECLADO_FUTURISTA + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_FUTURISTA + ESTILO_CALENDARIO_PREVISAO_FUTURISTA + ESTILO_DASHBOARD_SHELL_FUTURISTA + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_B_FUTURISTA) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_C) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_D) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_E) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_F) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_G) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_H) + render_qss("futurista", ESTILO_NAVEGACAO_BUSCA_GLOBAL) + render_qss("futurista", ESTILO_NAVEGACAO_RETORNOS_DASHBOARD) + render_qss("futurista", ESTILO_CARDS_GLOBAIS_BLOCO_A) + render_qss("futurista", ESTILO_CARDS_GLOBAIS_BLOCO_B) + render_qss("futurista", ESTILO_CARDS_GLOBAIS_BLOCO_C) + render_qss("futurista", ESTILO_MODO_FOCO_INTEGRACAO_RESOLVEDOR) + ESTILO_DASHBOARD_ALVO_5B_FUTURISTA + render_qss("futurista", ESTILO_DASHBOARD_SIDEBAR_FUTURISTA))
+""" + ESTILO_JORNADA_FUTURISTA + render_qss("futurista", ESTILO_DASHBOARD_MODERNO_FUTURISTA) + render_qss("futurista", ESTILO_FOCO_DASHBOARD_FUTURISTA) + render_qss("futurista", ESTILO_ALGORITMO_DASHBOARD_FUTURISTA) + render_qss("futurista", ESTILO_BUSCA_GLOBAL_FUTURISTA) + render_qss("futurista", ESTILO_INTELIGENCIA_RESUMO_FUTURISTA) + ESTILO_TOPICOS_DISCIPLINA_FUTURISTA + render_qss("futurista", ESTILO_DASHBOARD_NEO_FUTURISTA) + ESTILO_RESOLVEDOR_FUTURISTA + render_qss("futurista", ESTILO_TOPICO_DETALHES_FUTURISTA) + ESTILO_RESOLVEDOR_ELIMINADAS_FUTURISTA + ESTILO_RESOLVEDOR_TECLADO_FUTURISTA + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_FUTURISTA + render_qss("futurista", ESTILO_BARRA_EXPLICACAO_RICA) + render_qss("futurista", ESTILO_RESOLVEDOR_ALTERNATIVAS_INLINE_FUTURISTA) + ESTILO_CALENDARIO_PREVISAO_FUTURISTA + ESTILO_DASHBOARD_SHELL_FUTURISTA + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_B_FUTURISTA) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_C) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_D) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_E) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_F) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_G) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_H) + render_qss("futurista", ESTILO_NAVEGACAO_BUSCA_GLOBAL) + render_qss("futurista", ESTILO_NAVEGACAO_RETORNOS_DASHBOARD) + render_qss("futurista", ESTILO_CARDS_GLOBAIS_BLOCO_A) + render_qss("futurista", ESTILO_CARDS_GLOBAIS_BLOCO_B) + render_qss("futurista", ESTILO_CARDS_GLOBAIS_BLOCO_C) + render_qss("futurista", ESTILO_MODO_FOCO_INTEGRACAO_RESOLVEDOR) + ESTILO_DASHBOARD_ALVO_5B_FUTURISTA + render_qss("futurista", ESTILO_DASHBOARD_SIDEBAR_FUTURISTA))
 
 def aplicar_tema(
     app,

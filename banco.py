@@ -6924,6 +6924,74 @@ def obter_questao(
     }
 
 
+
+def atualizar_textos_alternativas_questao(questao_id, textos_por_letra):
+    """Edita somente os textos existentes, sem alterar letras ou gabarito.
+
+    Atualiza em uma única transação; preserva IDs, ordem, histórico das
+    tentativas e registra a nova versão para a taxonomia de microtemas.
+    """
+    if not isinstance(textos_por_letra, dict):
+        raise ValueError("As alternativas devem ser enviadas por letra.")
+
+    textos = {}
+    for letra, texto in textos_por_letra.items():
+        chave = str(letra).strip().upper()
+        if chave not in "ABCDE" or chave in textos:
+            raise ValueError("Identificação de alternativa inválida ou repetida.")
+        valor = str(texto or "").strip()
+        if not valor:
+            raise ValueError(f"A alternativa {chave} não pode ficar vazia.")
+        textos[chave] = valor
+
+    with conectar() as conexao:
+        questao = conexao.execute(
+            """SELECT COALESCE(tipo_questao, 'MULTIPLA_ESCOLHA')
+               FROM questoes WHERE id = ? AND COALESCE(excluida, 0) = 0""",
+            (int(questao_id),),
+        ).fetchone()
+        if questao is None:
+            return False
+        if normalizar_tipo_questao(questao[0]) != "MULTIPLA_ESCOLHA":
+            raise ValueError("A edição rápida atende questões de múltipla escolha.")
+
+        originais = conexao.execute(
+            """SELECT letra, texto FROM alternativas_questoes
+               WHERE questao_id = ? ORDER BY ordem, letra""",
+            (int(questao_id),),
+        ).fetchall()
+        atuais = {str(letra).upper(): texto for letra, texto in originais}
+        if not atuais or set(textos) != set(atuais):
+            raise ValueError(
+                "Edite somente as alternativas existentes, sem incluir ou remover letras."
+            )
+        if textos == atuais:
+            return True
+
+        estado_microtemas = microtemas_engine.capturar_estado_pre_edicao(
+            conexao, int(questao_id)
+        )
+        for letra, novo_texto in textos.items():
+            if novo_texto == atuais[letra]:
+                continue
+            cursor = conexao.execute(
+                """UPDATE alternativas_questoes SET texto = ?
+                   WHERE questao_id = ? AND letra = ? AND texto = ?""",
+                (novo_texto, int(questao_id), letra, atuais[letra]),
+            )
+            if cursor.rowcount != 1:
+                raise RuntimeError(
+                    "A alternativa foi alterada por outra operação. Reabra a questão."
+                )
+        conexao.execute(
+            """UPDATE questoes SET atualizado_em = datetime('now', 'localtime')
+               WHERE id = ?""", (int(questao_id),)
+        )
+        microtemas_engine.finalizar_edicao_questao(
+            conexao, int(questao_id), estado_microtemas, motivo="edicao_alternativas_inline"
+        )
+        return True
+
 def atualizar_explicacao_questao(questao_id, explicacao=""):
     """Atualiza apenas a explicação de uma questão sem reconstruir o item."""
     with conectar() as conexao:
@@ -12383,6 +12451,18 @@ def obter_disponibilidade_simulado_disciplinas(
     with conectar() as conexao:
         linhas = conexao.execute(
             """
+            -- Pré-calcula apenas uma vez as questões já respondidas no
+            -- concurso. A subconsulta correlacionada anterior pesquisava
+            -- tentativas repetidamente para CADA questão ativa e sua
+            -- expressão COALESCE dificultava o uso do índice de questao_id.
+            -- Uma chave distinta mantém a cardinalidade das agregações.
+            WITH questoes_respondidas AS (
+                SELECT DISTINCT
+                    COALESCE(questao_id_snapshot, questao_id) AS id
+                FROM tentativas_questoes
+                WHERE concurso_id = ? AND correta IS NOT NULL
+                  AND COALESCE(questao_id_snapshot, questao_id) IS NOT NULL
+            )
             SELECT
                 d.id,
                 d.nome,
@@ -12400,19 +12480,9 @@ def obter_disponibilidade_simulado_disciplinas(
                 ) AS questoes_ativas,
                 COUNT(
                     CASE
-                        WHEN
-                            q.ativa = 1
-                            AND NOT EXISTS (
-                                SELECT 1
-                                FROM tentativas_questoes tq
-                                WHERE
-                                    tq.concurso_id = ?
-                                    AND tq.correta IS NOT NULL
-                                    AND COALESCE(
-                                        tq.questao_id_snapshot,
-                                        tq.questao_id
-                                    ) = q.id
-                            )
+                        WHEN q.ativa = 1 AND q.id NOT IN (
+                            SELECT id FROM questoes_respondidas
+                        )
                         THEN q.id
                     END
                 ) AS ineditas,

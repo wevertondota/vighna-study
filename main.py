@@ -40,13 +40,14 @@ from pathlib import Path
 
 
 from PySide6.QtCore import Qt, QDate, QPointF, QRectF, QTimer, Signal, QEventLoop, QSize, QEvent
-from PySide6.QtGui import QColor, QPainter, QPen, QFont, QPainterPath, QBrush, QPixmap, QIcon, QTextCharFormat, QKeySequence, QShortcut
+from PySide6.QtGui import QColor, QPainter, QPen, QFont, QPainterPath, QBrush, QPixmap, QIcon, QTextCharFormat, QTextListFormat, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
     QWidget,
     QVBoxLayout,
     QHBoxLayout,
+    QBoxLayout,
     QGridLayout,
     QFormLayout,
     QLabel,
@@ -98,6 +99,16 @@ from ui.portal_treinos import (
     criar_portal_treinos, aplicar_estilo_treinos, atualizar_retomada_treinos,
 )
 from ui.portal_recursos import criar_portal_recursos, aplicar_estilo_recursos
+from ui.caneta_estudo import CanetaEstudo
+from ui.paleta_caneta import FaixaCanetaEstudo
+from ui.pausa_bateria import (
+    RelogioPausa, ConfiguracaoPausa, GerenciarPausa,
+    AvisoPausaFinalizada, texto_contagem,
+)
+from ui.explanation_rich import (
+    explicacao_eh_rica, explicacao_html, explicacao_serializada,
+    explicacao_texto_simples,
+)
 from ui.portal_disciplinas import criar_portal_disciplinas, aplicar_estilo_portal_disciplinas
 
 from backup import (
@@ -254,6 +265,7 @@ from banco import (
     obter_questao,
     definir_questao_analise_pendente,
     atualizar_explicacao_questao,
+    atualizar_textos_alternativas_questao,
     atualizar_questao,
     excluir_questao,
     obter_integridade_questao,
@@ -8018,6 +8030,8 @@ class JanelaQuestaoEditor(QDialog):
         )
 
         self.questao_explicacao = QTextEdit()
+        self._questao_explicacao_rica = False
+        self.questao_explicacao.setAcceptRichText(False)
         self.questao_explicacao.setPlaceholderText(
             (
                 "Opcional. Pode conter fundamento legal, comentário "
@@ -8304,11 +8318,11 @@ class JanelaQuestaoEditor(QDialog):
                 "enunciado"
             ]
         )
-        self.questao_explicacao.setPlainText(
-            dados[
-                "explicacao"
-            ]
-        )
+        self._questao_explicacao_rica = explicacao_eh_rica(dados["explicacao"])
+        if self._questao_explicacao_rica:
+            self.questao_explicacao.setHtml(explicacao_html(dados["explicacao"]))
+        else:
+            self.questao_explicacao.setPlainText(dados["explicacao"])
         self.questao_banca.setText(
             dados[
                 "banca"
@@ -8512,9 +8526,10 @@ class JanelaQuestaoEditor(QDialog):
                     topico_id,
                     enunciado,
                     alternativas,
-                    self.questao_explicacao
-                    .toPlainText()
-                    .strip(),
+                    explicacao_serializada(
+                        self.questao_explicacao,
+                        formatada=self._questao_explicacao_rica,
+                    ),
                     self.questao_banca
                     .text()
                     .strip(),
@@ -8534,9 +8549,10 @@ class JanelaQuestaoEditor(QDialog):
                     topico_id,
                     enunciado,
                     alternativas,
-                    self.questao_explicacao
-                    .toPlainText()
-                    .strip(),
+                    explicacao_serializada(
+                        self.questao_explicacao,
+                        formatada=self._questao_explicacao_rica,
+                    ),
                     self.questao_banca
                     .text()
                     .strip(),
@@ -8994,11 +9010,14 @@ class JanelaVisualizarQuestao(QDialog):
                 "questionEditorSectionTitle"
             )
 
-            explicacao = QLabel(
-                dados[
-                    "explicacao"
-                ]
-            )
+            explicacao = QLabel()
+            valor_explicacao = dados["explicacao"]
+            if explicacao_eh_rica(valor_explicacao):
+                explicacao.setTextFormat(Qt.RichText)
+                explicacao.setText(explicacao_html(valor_explicacao))
+            else:
+                explicacao.setTextFormat(Qt.PlainText)
+                explicacao.setText(str(valor_explicacao))
             explicacao.setWordWrap(
                 True
             )
@@ -13983,7 +14002,7 @@ class JanelaRevisaoBateria(QDialog):
             f"Resposta marcada: {_rotulo_resposta_questao(marcada, tipo_questao)}",
             f"Gabarito: {_rotulo_resposta_questao(gabarito, tipo_questao)}",
         ])
-        explicacao = str(questao.get("explicacao") or "").strip()
+        explicacao = explicacao_texto_simples(questao.get("explicacao")).strip()
         linhas.extend([
             "",
             "EXPLICAÇÃO",
@@ -16139,6 +16158,20 @@ class JanelaResolverQuestoes(QDialog):
         self.inicio_questao = None
         self._questao_pausa_iniciada = None
         self._questao_tempo_pausado = 0.0
+        self._pausa_relogio = None
+        self._pausa_aviso = None
+        self._pausa_foco_iniciada = None
+        self._pausa_minimizou = False
+        self._pausa_config = {"minutos": 10, "minimizar": False, "som": True}
+        self._pausa_botoes_anteriores = {}
+        self._pausa_timer = QTimer(self)
+        self._pausa_timer.setInterval(1000)
+        self._pausa_timer.timeout.connect(self.verificar_pausa_programada)
+        self._pausa_visual_ativa = False
+        self._pausa_overlay = None
+        self._pausa_overlay_titulo = None
+        self._pausa_overlay_tempo = None
+        self._pausa_overlay_info = None
         self.resposta_confirmada = False
         # Navegação por teclado usa um foco próprio, separado da alternativa
         # efetivamente marcada. Assim, as setas apenas percorrem as opções;
@@ -16146,6 +16179,7 @@ class JanelaResolverQuestoes(QDialog):
         self._alternativa_foco_teclado = None
         self._filtro_teclado_aplicacao_instalado = False
         self._editando_explicacao = False
+        self._editando_alternativas = False
         self.finalizada = False
         self.resultados_integracao = []
         self.resumo_final = None
@@ -16328,14 +16362,19 @@ class JanelaResolverQuestoes(QDialog):
             "questionSessionProgressText"
         )
 
-        self.botao_dashboard = QPushButton("Dashboard")
-        self.botao_dashboard.setObjectName("subtleButton")
-        self.botao_dashboard.setProperty("sessionNavigation", True)
-        self.botao_dashboard.setFixedHeight(34)
-        self.botao_dashboard.setToolTip(
-            "Minimizar a bateria e voltar ao Dashboard sem encerrar a sessão."
+        self.botao_opcoes = QPushButton("Opções")
+        self.botao_opcoes.setObjectName("subtleButton")
+        self.botao_opcoes.setProperty("sessionNavigation", True)
+        self.botao_opcoes.setFixedHeight(34)
+        self.botao_opcoes.setToolTip(
+            "Abrir ações rápidas da bateria: Dashboard, editar alternativas e analisar depois."
         )
-        self.botao_dashboard.clicked.connect(self.ir_ao_dashboard)
+
+        self.botao_pausa = QPushButton("Pausa")
+        self.botao_pausa.setObjectName("questionSessionPauseButton")
+        self.botao_pausa.setFixedHeight(34)
+        self.botao_pausa.setToolTip("Programar um descanso e receber um aviso sobre as demais janelas.")
+        self.botao_pausa.clicked.connect(self.abrir_pausa_programada)
 
         encerrar = QPushButton(
             (
@@ -16374,7 +16413,12 @@ class JanelaResolverQuestoes(QDialog):
             Qt.AlignVCenter
         )
         cabecalho.addWidget(
-            self.botao_dashboard,
+            self.botao_opcoes,
+            0,
+            Qt.AlignVCenter
+        )
+        cabecalho.addWidget(
+            self.botao_pausa,
             0,
             Qt.AlignVCenter
         )
@@ -16388,100 +16432,109 @@ class JanelaResolverQuestoes(QDialog):
             cabecalho
         )
 
-        # Painel de sessão: concentra progresso, ciclo e métricas sem competir
-        # visualmente com o conteúdo pedagógico.
-        self.sessao_overview = QFrame()
+        # Cabeçalho compacto de progresso: contadores na esquerda, etapa e
+        # ciclo na direita, com uma barra de avanço fina e de largura total.
+        # A paleta permanece na linha seguinte, centralizada e sempre visível.
+        self.faixa_estudo_superior = QWidget(self)
+        faixa_superior_layout = QVBoxLayout(self.faixa_estudo_superior)
+        faixa_superior_layout.setContentsMargins(0, 0, 0, 0)
+        faixa_superior_layout.setSpacing(2)
+
+        self.sessao_overview = QFrame(self.faixa_estudo_superior)
         self.sessao_overview.setObjectName("questionSessionOverviewCard")
         overview_layout = QVBoxLayout(self.sessao_overview)
-        overview_layout.setContentsMargins(14, 10, 14, 10)
-        overview_layout.setSpacing(7)
+        overview_layout.setContentsMargins(10, 5, 10, 6)
+        overview_layout.setSpacing(5)
 
-        overview_topo = QHBoxLayout()
-        overview_topo.setSpacing(10)
+        self.sessao_resumo_layout = QBoxLayout(QBoxLayout.LeftToRight)
+        self.sessao_resumo_layout.setSpacing(12)
+        self._sessao_resumo_empilhado = None
 
-        overview_eyebrow = QLabel("PROGRESSO DA SESSÃO")
-        overview_eyebrow.setObjectName("questionSessionEyebrow")
-        overview_topo.addWidget(overview_eyebrow)
-        overview_topo.addStretch()
-        overview_topo.addWidget(
-            self.sessao_progresso_texto,
-            0,
-            Qt.AlignVCenter
-        )
-
-        self.sessao_ciclo_texto = QLabel("")
-        self.sessao_ciclo_texto.setObjectName("questionSessionCycleText")
-        self.sessao_ciclo_texto.hide()
-        overview_topo.addWidget(
-            self.sessao_ciclo_texto,
-            0,
-            Qt.AlignVCenter
-        )
-        overview_layout.addLayout(overview_topo)
-
-        self.sessao_progresso = QProgressBar()
-        self.sessao_progresso.setObjectName(
-            "questionSessionProgress"
-        )
-        self.sessao_progresso.setRange(
-            0,
-            len(
-                self.fila
-            )
-        )
-        self.sessao_progresso.setValue(
-            0
-        )
-        self.sessao_progresso.setTextVisible(
-            False
-        )
-        self.sessao_progresso.setFixedHeight(
-            7
-        )
-        overview_layout.addWidget(self.sessao_progresso)
-
-        metricas = QHBoxLayout()
-        metricas.setSpacing(8)
+        self.sessao_indicadores = QWidget(self.sessao_overview)
+        metricas = QHBoxLayout(self.sessao_indicadores)
+        metricas.setContentsMargins(0, 0, 0, 0)
+        metricas.setSpacing(6)
 
         def metrica(titulo_texto, papel="neutral"):
-            frame = QFrame()
+            frame = QFrame(self.sessao_indicadores)
             frame.setObjectName("questionSessionMiniStat")
-            frame.setProperty("metricRole", papel)
-
             frame_layout = QHBoxLayout(frame)
-            frame_layout.setContentsMargins(9, 5, 9, 5)
-            frame_layout.setSpacing(6)
-
+            frame_layout.setContentsMargins(8, 3, 8, 3)
+            frame_layout.setSpacing(4)
             rotulo = QLabel(titulo_texto)
             rotulo.setObjectName("questionSessionMiniLabel")
-
             valor = QLabel("0")
             valor.setObjectName("questionSessionMiniValue")
             valor.setProperty("metricRole", papel)
-
             frame_layout.addWidget(rotulo)
             frame_layout.addWidget(valor)
             return frame, valor
 
         frame, self.stat_respondidas = metrica("Respondidas")
         metricas.addWidget(frame)
-
         frame, self.stat_acertos = metrica("Acertos", "success")
         metricas.addWidget(frame)
-
         frame, self.stat_erros = metrica("Erros", "danger")
         metricas.addWidget(frame)
-
         frame, self.stat_puladas = metrica("Puladas", "warning")
         metricas.addWidget(frame)
-        metricas.addStretch()
 
         if self.modo_simulado:
             self.stat_acertos.setText("—")
             self.stat_erros.setText("—")
 
-        overview_layout.addLayout(metricas)
-        layout.addWidget(self.sessao_overview)
+        self.sessao_status_widget = QWidget(self.sessao_overview)
+        status_layout = QHBoxLayout(self.sessao_status_widget)
+        status_layout.setContentsMargins(0, 0, 0, 0)
+        status_layout.setSpacing(10)
+        self.sessao_progresso_texto.setToolTip("Progresso da sessão de questões")
+        status_layout.addWidget(self.sessao_progresso_texto)
+        self.sessao_ciclo_texto = QLabel("")
+        self.sessao_ciclo_texto.setObjectName("questionSessionCycleText")
+        self.sessao_ciclo_texto.hide()
+        status_layout.addWidget(self.sessao_ciclo_texto)
+
+        self.sessao_resumo_layout.addWidget(self.sessao_indicadores)
+        self.sessao_resumo_layout.addStretch(1)
+        self.sessao_resumo_layout.addWidget(self.sessao_status_widget)
+        overview_layout.addLayout(self.sessao_resumo_layout)
+
+        self.sessao_progresso = QProgressBar()
+        self.sessao_progresso.setObjectName("questionSessionProgress")
+        self.sessao_progresso.setRange(0, len(self.fila))
+        self.sessao_progresso.setValue(0)
+        self.sessao_progresso.setTextVisible(False)
+        self.sessao_progresso.setFixedHeight(4)
+        overview_layout.addWidget(self.sessao_progresso)
+        faixa_superior_layout.addWidget(self.sessao_overview)
+
+        # A paleta compacta não se sobrepõe à questão nem à faixa de progresso.
+        # O olho permanece isolado e devolve o cursor normal imediatamente.
+        paleta_linha = QHBoxLayout()
+        paleta_linha.setContentsMargins(0, 0, 0, 0)
+        paleta_linha.setSpacing(0)
+        paleta_linha.addStretch(1)
+        self.faixa_caneta = FaixaCanetaEstudo(
+            on_modo=self.definir_ferramenta_caneta,
+            on_cor=self._definir_cor_caneta,
+            on_espessura=self._definir_espessura_caneta,
+            on_desfazer=self.desfazer_caneta_estudo,
+            on_limpar=self.limpar_caneta_estudo,
+            parent=self.faixa_estudo_superior,
+        )
+        self.faixa_caneta.setMinimumWidth(0)
+        self.faixa_caneta.setMaximumWidth(540)
+        self.faixa_caneta.setSizePolicy(
+            QSizePolicy.Preferred, QSizePolicy.Fixed
+        )
+        self.botao_caneta = self.faixa_caneta.botao_recolher
+        paleta_linha.addWidget(self.faixa_caneta, 0, Qt.AlignVCenter)
+        paleta_linha.addStretch(1)
+        faixa_superior_layout.addLayout(paleta_linha)
+        layout.addWidget(self.faixa_estudo_superior)
+        self._ajustar_layout_progresso_caneta(self.width())
+
+        self._construir_overlay_pausa_visual()
 
         # Faixa contextual do Modo Foco: baixa altura e baixa saliência para
         # não disputar atenção com a questão.
@@ -16583,6 +16636,7 @@ class JanelaResolverQuestoes(QDialog):
         conteudo_layout.addLayout(contexto_questao)
 
         enunciado_card = QFrame()
+        self._caneta_enunciado_card = enunciado_card
         enunciado_card.setObjectName(
             "questionSolverStatementCard"
         )
@@ -16600,6 +16654,7 @@ class JanelaResolverQuestoes(QDialog):
 
         self.questao_indice = QLabel("QUESTÃO 1")
         self.questao_indice.setObjectName("questionSolverQuestionIndex")
+        # A paleta agora é fixa, abaixo do progresso da sessão.
         enunciado_layout.addWidget(self.questao_indice)
 
         self.questao_enunciado = QLabel(
@@ -16640,6 +16695,67 @@ class JanelaResolverQuestoes(QDialog):
         conteudo_layout.addWidget(
             self.alternativas_container
         )
+
+        # Editor na mesma tela da bateria, sem abrir a Central de Questões.
+        self.painel_edicao_alternativas = QFrame(conteudo)
+        self.painel_edicao_alternativas.setObjectName(
+            "questionSolverAlternativesEditPanel"
+        )
+        painel_edicao_layout = QVBoxLayout(self.painel_edicao_alternativas)
+        painel_edicao_layout.setContentsMargins(14, 12, 14, 12)
+        painel_edicao_layout.setSpacing(8)
+
+        titulo_edicao = QLabel("Editar alternativas desta questão")
+        titulo_edicao.setObjectName("questionSolverAlternativesEditTitle")
+        painel_edicao_layout.addWidget(titulo_edicao)
+        aviso_edicao = QLabel(
+            "Altere os textos e salve. Letras e gabarito permanecem iguais; "
+            "o histórico das respostas anteriores é preservado."
+        )
+        aviso_edicao.setObjectName("questionSolverAlternativesEditHint")
+        aviso_edicao.setWordWrap(True)
+        painel_edicao_layout.addWidget(aviso_edicao)
+
+        self.campos_edicao_alternativas = {}
+        for letra in "ABCDE":
+            linha_edicao = QHBoxLayout()
+            linha_edicao.setSpacing(9)
+            rotulo = QLabel(f"{letra})")
+            rotulo.setObjectName("questionSolverAlternativesEditLetter")
+            rotulo.setFixedWidth(28)
+            campo = QTextEdit(self.painel_edicao_alternativas)
+            campo.setObjectName("questionSolverAlternativesEditField")
+            campo.setAcceptRichText(False)
+            campo.setTabChangesFocus(True)
+            campo.setMinimumHeight(54)
+            campo.setMaximumHeight(110)
+            campo.setPlaceholderText(f"Texto da alternativa {letra}")
+            self.campos_edicao_alternativas[letra] = (rotulo, campo)
+            linha_edicao.addWidget(rotulo, 0, Qt.AlignTop)
+            linha_edicao.addWidget(campo, 1)
+            painel_edicao_layout.addLayout(linha_edicao)
+
+        edicao_acoes = QHBoxLayout()
+        edicao_acoes.addStretch()
+        self.edicao_alternativas_cancelar = QPushButton("Cancelar")
+        self.edicao_alternativas_cancelar.setObjectName(
+            "questionSolverAlternativesEditCancel"
+        )
+        self.edicao_alternativas_cancelar.clicked.connect(
+            self.cancelar_edicao_alternativas
+        )
+        self.edicao_alternativas_salvar = QPushButton("Salvar alternativas")
+        self.edicao_alternativas_salvar.setObjectName(
+            "questionSolverAlternativesEditSave"
+        )
+        self.edicao_alternativas_salvar.clicked.connect(
+            self.salvar_edicao_alternativas
+        )
+        edicao_acoes.addWidget(self.edicao_alternativas_cancelar)
+        edicao_acoes.addWidget(self.edicao_alternativas_salvar)
+        painel_edicao_layout.addLayout(edicao_acoes)
+        self.painel_edicao_alternativas.hide()
+        conteudo_layout.addWidget(self.painel_edicao_alternativas)
 
         self.duvida = QCheckBox(
             "Marcar como dúvida"
@@ -16695,11 +16811,39 @@ class JanelaResolverQuestoes(QDialog):
             0,
             Qt.AlignVCenter
         )
-        acoes.addWidget(
-            self.analise_pendente,
-            0,
-            Qt.AlignVCenter
+        self.botao_editar_alternativas = QPushButton("Editar alternativas")
+        self.botao_editar_alternativas.setObjectName(
+            "questionSolverAlternativesEditButton"
         )
+        self.botao_editar_alternativas.setMinimumHeight(32)
+        self.botao_editar_alternativas.setToolTip(
+            "Corrigir os textos A–E nesta bateria, sem sair da questão."
+        )
+        self.botao_editar_alternativas.clicked.connect(
+            self.iniciar_edicao_alternativas
+        )
+
+        self.menu_opcoes_topo = QMenu(self)
+        self.menu_opcoes_topo.setObjectName("questionSessionOptionsMenu")
+        self.acao_menu_dashboard = self.menu_opcoes_topo.addAction("Dashboard")
+        self.acao_menu_dashboard.triggered.connect(self.ir_ao_dashboard)
+        self.acao_menu_editar_alternativas = self.menu_opcoes_topo.addAction(
+            "Editar alternativas"
+        )
+        self.acao_menu_editar_alternativas.triggered.connect(
+            self.iniciar_edicao_alternativas
+        )
+        self.menu_opcoes_topo.addSeparator()
+        self.acao_menu_analise_pendente = self.menu_opcoes_topo.addAction(
+            "Analisar depois"
+        )
+        self.acao_menu_analise_pendente.setCheckable(True)
+        self.acao_menu_analise_pendente.toggled.connect(
+            self._alternar_analise_pendente_pelo_menu
+        )
+        self.menu_opcoes_topo.aboutToShow.connect(self.atualizar_menu_opcoes_topo)
+        self.botao_opcoes.setMenu(self.menu_opcoes_topo)
+
         acoes.addStretch()
 
         self.feedback = QFrame()
@@ -16785,6 +16929,8 @@ class JanelaResolverQuestoes(QDialog):
         self.feedback_explicacao_editor.setObjectName(
             "questionSolverExplanationEditor"
         )
+        # O conteúdo rico é produzido somente por comandos do editor.
+        # HTML colado de fora é inserido como texto, sem links/imagens externas.
         self.feedback_explicacao_editor.setAcceptRichText(False)
         self.feedback_explicacao_editor.setTabChangesFocus(True)
         self.feedback_explicacao_editor.setMinimumHeight(110)
@@ -16792,6 +16938,98 @@ class JanelaResolverQuestoes(QDialog):
             "Corrija a explicação ou acrescente uma anotação."
         )
         self.feedback_explicacao_editor.setVisible(False)
+
+        # Barra compacta só aparece ao editar a explicação da bateria.
+        self.feedback_explicacao_barra = QWidget(self.feedback)
+        self.feedback_explicacao_barra.setObjectName("questionExplanationFormatToolbar")
+        formato_layout = QHBoxLayout(self.feedback_explicacao_barra)
+        formato_layout.setContentsMargins(5, 4, 5, 4)
+        formato_layout.setSpacing(3)
+
+        def ferramenta(rotulo, ajuda, acao, *, alternavel=False):
+            botao = QToolButton(self.feedback_explicacao_barra)
+            botao.setObjectName("questionExplanationFormatButton")
+            botao.setText(rotulo)
+            botao.setToolTip(ajuda)
+            botao.setAccessibleName(ajuda)
+            botao.setCheckable(alternavel)
+            botao.setMinimumHeight(28)
+            botao.clicked.connect(acao)
+            formato_layout.addWidget(botao)
+            return botao
+
+        self.explicacao_negrito = ferramenta(
+            "B", "Negrito (Ctrl+B)", lambda: self.formatar_explicacao_caracter("negrito"),
+            alternavel=True,
+        )
+        self.explicacao_negrito.setStyleSheet("font-weight: bold;")
+        self.explicacao_italico = ferramenta(
+            "I", "Itálico (Ctrl+I)", lambda: self.formatar_explicacao_caracter("italico"),
+            alternavel=True,
+        )
+        self.explicacao_italico.setStyleSheet("font-style: italic;")
+        self.explicacao_sublinhado = ferramenta(
+            "U̲", "Sublinhado (Ctrl+U)", lambda: self.formatar_explicacao_caracter("sublinhado"),
+            alternavel=True,
+        )
+
+        def menu_cores(rotulo, objeto, ajuda, cores, funcao):
+            botao = QToolButton(self.feedback_explicacao_barra)
+            botao.setObjectName(objeto)
+            botao.setText(rotulo)
+            botao.setToolTip(ajuda)
+            botao.setAccessibleName(ajuda)
+            botao.setPopupMode(QToolButton.InstantPopup)
+            botao.setMinimumHeight(28)
+            menu = QMenu(botao)
+            for nome, hexa in cores:
+                menu.addAction(nome).triggered.connect(
+                    lambda _checked=False, cor=hexa: funcao(cor)
+                )
+            botao.setMenu(menu)
+            formato_layout.addWidget(botao)
+            return botao
+
+        paleta_texto = [
+            ("Padrão", None), ("Vermelho", "#DC3545"),
+            ("Verde", "#16845B"), ("Azul", "#3284D6"),
+            ("Laranja", "#D17B18"), ("Roxo", "#9864C5"),
+        ]
+        paleta_destaque = [
+            ("Sem destaque", None), ("Amarelo", "#FFF0A6"),
+            ("Verde claro", "#BDF0D2"), ("Azul claro", "#BFDFFF"),
+            ("Rosa", "#FFD4E2"), ("Lilás", "#E4D6FF"),
+        ]
+        menu_cores("Cor ▾", "questionExplanationColorButton", "Cor do texto selecionado",
+                   paleta_texto, lambda cor: self.colorir_explicacao(cor, fundo=False))
+        menu_cores("Destaque ▾", "questionExplanationHighlightButton", "Marca-texto",
+                   paleta_destaque, lambda cor: self.colorir_explicacao(cor, fundo=True))
+        ferramenta("• Lista", "Criar lista com marcadores", self.lista_explicacao)
+        self.explicacao_desfazer = ferramenta("↶", "Desfazer (Ctrl+Z)",
+                                              self.feedback_explicacao_editor.undo)
+        self.explicacao_refazer = ferramenta("↷", "Refazer (Ctrl+Y)",
+                                            self.feedback_explicacao_editor.redo)
+        ferramenta("Limpar", "Remover formatação do trecho selecionado",
+                   self.limpar_formato_explicacao)
+        formato_layout.addStretch(1)
+        self.explicacao_previa_botao = ferramenta(
+            "Visualizar", "Alternar pré-visualização da explicação",
+            self.alternar_previa_explicacao, alternavel=True,
+        )
+        self.feedback_explicacao_barra.hide()
+        self.feedback_explicacao_editor.currentCharFormatChanged.connect(
+            self.sincronizar_botoes_formato_explicacao
+        )
+        self.feedback_explicacao_editor.undoAvailable.connect(
+            self.explicacao_desfazer.setEnabled
+        )
+        self.feedback_explicacao_editor.redoAvailable.connect(
+            self.explicacao_refazer.setEnabled
+        )
+        self.explicacao_desfazer.setEnabled(False)
+        self.explicacao_refazer.setEnabled(False)
+        self._explicacao_original_rica = False
+        self._explicacao_formato_usado = False
 
         self.feedback_explicacao_acoes = QWidget(self.feedback)
         self.feedback_explicacao_acoes.setObjectName(
@@ -16842,6 +17080,7 @@ class JanelaResolverQuestoes(QDialog):
         feedback_layout.addWidget(
             self.feedback_explicacao
         )
+        feedback_layout.addWidget(self.feedback_explicacao_barra)
         feedback_layout.addWidget(
             self.feedback_explicacao_editor
         )
@@ -16860,6 +17099,13 @@ class JanelaResolverQuestoes(QDialog):
         scroll.setWidget(
             conteudo
         )
+        self.scroll_questao = scroll
+        self.caneta_estudo = CanetaEstudo(
+            scroll,
+            self.questao_enunciado,
+            lambda: dict(getattr(self, "frame_por_letra", {})),
+        )
+        self._inicializar_faixa_caneta_estudo()
 
         layout.addWidget(
             scroll,
@@ -17027,6 +17273,155 @@ class JanelaResolverQuestoes(QDialog):
         principal.raise_()
         principal.activateWindow()
 
+    def abrir_pausa_programada(self):
+        """Configura ou administra uma pausa sem sair da bateria atual."""
+        if self.finalizada:
+            return
+        if self._pausa_relogio is None and (
+            self._editando_alternativas or self._editando_explicacao
+        ):
+            QMessageBox.information(
+                self, "Programar pausa",
+                "Salve ou cancele a edição em andamento antes de iniciar a pausa."
+            )
+            return
+        if self._pausa_relogio is not None:
+            if self._pausa_relogio.expirou():
+                if self._pausa_aviso is not None:
+                    self._pausa_aviso.exibir_prioritario()
+                return
+            janela = GerenciarPausa(self._pausa_relogio.segundos_restantes(), self)
+            janela.exec()
+            if janela.escolha == "retomar":
+                self.encerrar_pausa_programada(trazer_bateria=True)
+            elif janela.escolha == "adiar":
+                self.adiar_pausa_programada()
+            return
+
+        anterior = self._pausa_config
+        dialogo = ConfiguracaoPausa(
+            minutos=anterior["minutos"], minimizar=anterior["minimizar"],
+            som=anterior["som"], simulado=self.modo_simulado, parent=self,
+        )
+        if dialogo.exec() != QDialog.Accepted:
+            return
+        minutos = dialogo.duracao.value()
+        minimizar = dialogo.minimizar.isChecked()
+        som = dialogo.som.isChecked()
+        self._pausa_config = {"minutos": minutos, "minimizar": minimizar, "som": som}
+        self.iniciar_pausa_programada(minutos, minimizar=minimizar)
+
+    def iniciar_pausa_programada(self, minutos, minimizar=False):
+        if self.finalizada or self._pausa_relogio is not None:
+            return
+        self._pausa_relogio = RelogioPausa(minutos)
+        self._pausa_minimizou = bool(minimizar)
+        self.pausar_cronometro_questao()
+        # Suspende o Modo Foco somente se estava em execução. Se já estava
+        # pausado pelo usuário, não deve ser retomado por este recurso.
+        self._pausa_foco_iniciada = None
+        foco = self._janela_foco_ativa()
+        if foco is not None:
+            try:
+                if foco.sessao_ativa and not foco.pausada:
+                    foco.alternar_pausa()
+                    self._pausa_foco_iniciada = foco
+            except RuntimeError:
+                pass
+        # Desativa a interceptação do mouse durante a pausa sem apagar rabiscos.
+        self.definir_ferramenta_caneta(None)
+        controles = (
+            self.duvida, self.botao_opcoes, self.faixa_caneta, self.botao_pular,
+            self.botao_confirmar, self.botao_proxima,
+            self.alternativas_container, self.feedback_explicacao_editar,
+            self.botao_editar_alternativas,
+        )
+        self._pausa_botoes_anteriores = {
+            widget: widget.isEnabled() for widget in controles
+        }
+        for widget in controles:
+            widget.setEnabled(False)
+        self._aplicar_visual_pausa_programada(True)
+        self._atualizar_visual_pausa_programada()
+        self._pausa_timer.start()
+        self.verificar_pausa_programada()
+        if minimizar:
+            self.showMinimized()
+
+    def verificar_pausa_programada(self):
+        relogio = self._pausa_relogio
+        if relogio is None or self.finalizada:
+            return
+        restantes = relogio.segundos_restantes()
+        self.botao_pausa.setText(
+            "Pausa · " + texto_contagem(restantes) if restantes else "Pausa encerrada!"
+        )
+        self.botao_pausa.setToolTip("Clique para administrar a pausa em andamento.")
+        self._atualizar_visual_pausa_programada()
+        if restantes or self._pausa_aviso is not None:
+            return
+        self._pausa_timer.stop()
+        aviso = AvisoPausaFinalizada()
+        self._pausa_aviso = aviso
+        aviso.retornar.connect(lambda: self.encerrar_pausa_programada(trazer_bateria=True))
+        aviso.adiar.connect(self.adiar_pausa_programada)
+        aviso.exibir_prioritario()
+        if self._pausa_config["som"]:
+            QApplication.beep()
+
+    def _fechar_aviso_pausa(self):
+        aviso = self._pausa_aviso
+        self._pausa_aviso = None
+        if aviso is not None:
+            aviso.hide()
+            aviso.deleteLater()
+
+    def adiar_pausa_programada(self):
+        if self._pausa_relogio is None:
+            return
+        self._fechar_aviso_pausa()
+        self._pausa_relogio.adiar(5)
+        self._pausa_timer.start()
+        self._aplicar_visual_pausa_programada(True)
+        self.verificar_pausa_programada()
+
+    def encerrar_pausa_programada(self, trazer_bateria=False):
+        if self._pausa_relogio is None:
+            return
+        self._pausa_timer.stop()
+        self._fechar_aviso_pausa()
+        self._pausa_relogio = None
+        for widget, habilitado in self._pausa_botoes_anteriores.items():
+            try:
+                widget.setEnabled(habilitado)
+            except RuntimeError:
+                pass
+        self._pausa_botoes_anteriores.clear()
+        foco = self._pausa_foco_iniciada
+        self._pausa_foco_iniciada = None
+        if foco is not None:
+            try:
+                if foco.sessao_ativa and foco.pausada:
+                    foco.alternar_pausa()
+            except RuntimeError:
+                pass
+        self.atualizar_painel_foco()
+        self._aplicar_visual_pausa_programada(False)
+        self.botao_pausa.setText("Pausa")
+        self.botao_pausa.setToolTip("Programar um descanso e receber um aviso sobre as demais janelas.")
+        self._pausa_minimizou = False
+        if trazer_bateria:
+            if self.isMinimized():
+                self.showNormal()
+            elif not self.isVisible():
+                self.show()
+            self.raise_()
+            self.activateWindow()
+        # A janela pode ainda estar minimizada pelo usuário. Nesse caso,
+        # somente a restauração normal retomará a medição.
+        if not self.isMinimized():
+            self.retomar_cronometro_questao()
+
     def pausar_cronometro_questao(self):
         """Pausa só o tempo da questão; simulados cronometrados continuam correndo."""
         if self.modo_simulado or self.inicio_questao is None:
@@ -17035,6 +17430,8 @@ class JanelaResolverQuestoes(QDialog):
             self._questao_pausa_iniciada = datetime.now()
 
     def retomar_cronometro_questao(self):
+        if self._pausa_relogio is not None:
+            return
         if self._questao_pausa_iniciada is None:
             return
         self._questao_tempo_pausado += max(
@@ -17123,6 +17520,158 @@ class JanelaResolverQuestoes(QDialog):
             controlador.abrir_ou_trazer_modo_foco()
         self.atualizar_painel_foco()
 
+    def _ajustar_layout_progresso_caneta(self, largura):
+        """Acomoda os indicadores e o estado em telas estreitas sem
+        aumentar a largura da janela nem introduzir rolagem horizontal.
+        """
+        if not hasattr(self, "sessao_resumo_layout"):
+            return
+        empilhar = largura < 950
+        if self._sessao_resumo_empilhado == empilhar:
+            return
+        self._sessao_resumo_empilhado = empilhar
+        self.sessao_resumo_layout.setDirection(
+            QBoxLayout.TopToBottom if empilhar else QBoxLayout.LeftToRight
+        )
+        self.sessao_resumo_layout.setAlignment(
+            self.sessao_status_widget, Qt.AlignRight | Qt.AlignVCenter
+        )
+        self.sessao_resumo_layout.setSpacing(3 if empilhar else 12)
+        self.sessao_resumo_layout.setStretch(1, 0 if empilhar else 1)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self._ajustar_layout_progresso_caneta(event.size().width())
+        self._atualizar_geometria_overlay_pausa()
+
+    def _construir_overlay_pausa_visual(self):
+        """Camada visual da pausa: escurece a área de estudo e
+        exibe um resumo central sem bloquear o botão de Pausa no topo.
+        """
+        if self._pausa_overlay is not None:
+            return
+        overlay = QFrame(self)
+        overlay.setObjectName("questionPauseVisualOverlay")
+        overlay.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+        overlay.hide()
+        overlay.setStyleSheet(
+            """
+            QFrame#questionPauseVisualOverlay {
+                background: rgba(10, 12, 15, 176);
+            }
+            QFrame#questionPauseVisualCard {
+                background: rgba(30, 36, 44, 242);
+                border: 1px solid rgba(255, 188, 120, 0.55);
+                border-radius: 16px;
+            }
+            QLabel#questionPauseVisualTitle {
+                color: #F4F7FA;
+                font-size: 18px;
+                font-weight: 700;
+            }
+            QLabel#questionPauseVisualTime {
+                color: #FFCC7A;
+                font-size: 28px;
+                font-weight: 800;
+            }
+            QLabel#questionPauseVisualInfo {
+                color: #B6C3D1;
+                font-size: 12px;
+            }
+            """
+        )
+        base = QVBoxLayout(overlay)
+        base.setContentsMargins(24, 18, 24, 22)
+        base.addStretch(1)
+        linha = QHBoxLayout()
+        linha.addStretch(1)
+        card = QFrame(overlay)
+        card.setObjectName("questionPauseVisualCard")
+        card.setMinimumWidth(380)
+        card_layout = QVBoxLayout(card)
+        card_layout.setContentsMargins(20, 18, 20, 18)
+        card_layout.setSpacing(6)
+        titulo = QLabel("Pausa em andamento", card)
+        titulo.setObjectName("questionPauseVisualTitle")
+        tempo = QLabel("10:00", card)
+        tempo.setObjectName("questionPauseVisualTime")
+        info = QLabel(
+            "A bateria está temporariamente suspensa. Use o botão Pausa no topo para retomar, adiar ou administrar o descanso.",
+            card,
+        )
+        info.setObjectName("questionPauseVisualInfo")
+        info.setWordWrap(True)
+        card_layout.addWidget(titulo, 0, Qt.AlignHCenter)
+        card_layout.addWidget(tempo, 0, Qt.AlignHCenter)
+        card_layout.addWidget(info, 0, Qt.AlignHCenter)
+        linha.addWidget(card, 0, Qt.AlignHCenter)
+        linha.addStretch(1)
+        base.addLayout(linha)
+        base.addStretch(1)
+        self._pausa_overlay = overlay
+        self._pausa_overlay_titulo = titulo
+        self._pausa_overlay_tempo = tempo
+        self._pausa_overlay_info = info
+        self._atualizar_geometria_overlay_pausa()
+
+    def _atualizar_geometria_overlay_pausa(self):
+        overlay = self._pausa_overlay
+        if overlay is None:
+            return
+        topo = 0
+        if hasattr(self, "faixa_estudo_superior"):
+            try:
+                topo = max(0, self.faixa_estudo_superior.geometry().top())
+            except RuntimeError:
+                topo = 0
+        overlay.setGeometry(0, topo, self.width(), max(0, self.height() - topo))
+        if overlay.isVisible():
+            overlay.raise_()
+
+    def _atualizar_visual_pausa_programada(self):
+        if self._pausa_overlay is None or self._pausa_relogio is None:
+            return
+        restantes = self._pausa_relogio.segundos_restantes()
+        encerrada = restantes <= 0
+        self._pausa_overlay_titulo.setText(
+            "Pausa encerrada" if encerrada else "Pausa em andamento"
+        )
+        self._pausa_overlay_tempo.setText(
+            "Tempo encerrado" if encerrada else texto_contagem(restantes)
+        )
+        self._pausa_overlay_info.setText(
+            "O descanso terminou. Use o botão Pausa no topo para voltar agora ou adiar alguns minutos."
+            if encerrada
+            else "A bateria está temporariamente suspensa. Use o botão Pausa no topo para retomar, adiar ou administrar o descanso."
+        )
+
+    def _aplicar_visual_pausa_programada(self, ativo):
+        self._pausa_visual_ativa = bool(ativo)
+        if self._pausa_overlay is None:
+            self._construir_overlay_pausa_visual()
+        if self._pausa_overlay is not None:
+            self._atualizar_geometria_overlay_pausa()
+            self._pausa_overlay.setVisible(bool(ativo))
+            if ativo:
+                self._pausa_overlay.raise_()
+        if bool(ativo):
+            self.botao_pausa.setStyleSheet(
+                """
+                QPushButton#questionSessionPauseButton {
+                    background: #8E3218;
+                    color: #FFF8F0;
+                    border: 1px solid #FFBF87;
+                    border-radius: 10px;
+                    padding: 0 14px;
+                    font-weight: 700;
+                }
+                QPushButton#questionSessionPauseButton:hover { background: #A93D1D; }
+                QPushButton#questionSessionPauseButton:pressed { background: #7A2A13; }
+                """
+            )
+        else:
+            self.botao_pausa.setStyleSheet("")
+
     def exec_nao_modal(self):
         """Exibe a sessão sem bloquear as demais janelas do aplicativo."""
         ciclo = QEventLoop()
@@ -17174,6 +17723,52 @@ class JanelaResolverQuestoes(QDialog):
             texto
         )
 
+    def _inicializar_faixa_caneta_estudo(self):
+        """A paleta é visual; o controlador de rabiscos permanece independente."""
+        self.caneta_estudo.ao_alterar = self._atualizar_botao_caneta_estudo
+        self._atualizar_botao_caneta_estudo()
+
+    def _atualizar_botao_caneta_estudo(self):
+        if not hasattr(self, "caneta_estudo"):
+            return
+        self.faixa_caneta.atualizar(
+            modo=self.caneta_estudo.modo,
+            cor=self.caneta_estudo.cor,
+            espessura=self.caneta_estudo.espessura,
+            pode_desfazer=bool(self.caneta_estudo.historico),
+            ha_tracos=bool(self.caneta_estudo.tracos),
+        )
+
+    def definir_ferramenta_caneta(self, modo):
+        if modo is not None and (
+            self.finalizada or self._pausa_relogio is not None
+            or self._editando_alternativas or self._editando_explicacao
+        ):
+            self._atualizar_botao_caneta_estudo()
+            return
+        self.caneta_estudo.definir_modo(modo)
+        self._atualizar_botao_caneta_estudo()
+
+    def _definir_cor_caneta(self, cor):
+        self.caneta_estudo.definir_cor(cor)
+        if self.caneta_estudo.modo is None:
+            self.definir_ferramenta_caneta("caneta")
+        self._atualizar_botao_caneta_estudo()
+
+    def _definir_espessura_caneta(self, espessura):
+        self.caneta_estudo.definir_espessura(espessura)
+        if self.caneta_estudo.modo is None:
+            self.definir_ferramenta_caneta("caneta")
+        self._atualizar_botao_caneta_estudo()
+
+    def desfazer_caneta_estudo(self):
+        self.caneta_estudo.desfazer()
+        self._atualizar_botao_caneta_estudo()
+
+    def limpar_caneta_estudo(self):
+        self.caneta_estudo.limpar_marcacoes()
+        self._atualizar_botao_caneta_estudo()
+
     def atualizar_rotulo_analise_pendente(
         self,
         marcada
@@ -17190,6 +17785,27 @@ class JanelaResolverQuestoes(QDialog):
         self.analise_pendente.setAccessibleName(
             texto
         )
+        self.atualizar_menu_opcoes_topo()
+
+    def atualizar_menu_opcoes_topo(self):
+        acao_analise = getattr(self, "acao_menu_analise_pendente", None)
+        if acao_analise is not None:
+            acao_analise.blockSignals(True)
+            acao_analise.setChecked(self.analise_pendente.isChecked())
+            acao_analise.setEnabled(self.analise_pendente.isEnabled())
+            acao_analise.blockSignals(False)
+
+        acao_editar = getattr(self, "acao_menu_editar_alternativas", None)
+        if acao_editar is not None:
+            tipo_questao = _questao_tipo(self.questao_atual) if self.questao_atual else None
+            acao_editar.setEnabled(
+                tipo_questao == "MULTIPLA_ESCOLHA"
+                and not self._editando_alternativas
+                and not self._editando_explicacao
+            )
+
+    def _alternar_analise_pendente_pelo_menu(self, marcada):
+        self.analise_pendente.setChecked(marcada)
 
     def alternar_analise_pendente(
         self,
@@ -17361,38 +17977,150 @@ class JanelaResolverQuestoes(QDialog):
 
         return None
 
+    def definir_texto_label_explicacao(self, valor):
+        if explicacao_eh_rica(valor):
+            self.feedback_explicacao.setTextFormat(Qt.RichText)
+            self.feedback_explicacao.setText(explicacao_html(valor))
+        else:
+            self.feedback_explicacao.setTextFormat(Qt.PlainText)
+            self.feedback_explicacao.setText(
+                str(valor or "").strip() or "Esta questão não possui explicação cadastrada."
+            )
+
     def atualizar_texto_feedback_explicacao(self):
-        explicacao = str(
+        self.definir_texto_label_explicacao(
             (self.questao_atual or {}).get("explicacao") or ""
-        ).strip()
-        self.feedback_explicacao.setText(
-            explicacao
-            if explicacao
-            else "Esta questão não possui explicação cadastrada."
         )
+
+    def sincronizar_botoes_formato_explicacao(self, formato):
+        # Captura também os atalhos nativos Ctrl+B/I/U do QTextEdit.
+        if self._editando_explicacao and getattr(self, "_explicacao_carregada", False):
+            self._explicacao_formato_usado = True
+        controles = (
+            (self.explicacao_negrito, formato.fontWeight() >= QFont.Bold),
+            (self.explicacao_italico, formato.fontItalic()),
+            (self.explicacao_sublinhado, formato.fontUnderline()),
+        )
+        for botao, estado in controles:
+            botao.blockSignals(True)
+            botao.setChecked(estado)
+            botao.blockSignals(False)
+
+    def aplicar_formato_explicacao(self, formato):
+        if not self._editando_explicacao or self.explicacao_previa_botao.isChecked():
+            return
+        self.feedback_explicacao_editor.mergeCurrentCharFormat(formato)
+        self._explicacao_formato_usado = True
+        self.feedback_explicacao_editor.setFocus(Qt.OtherFocusReason)
+
+    def formatar_explicacao_caracter(self, tipo):
+        editor = self.feedback_explicacao_editor
+        atual = editor.currentCharFormat()
+        formato = QTextCharFormat()
+        if tipo == "negrito":
+            formato.setFontWeight(QFont.Normal if atual.fontWeight() >= QFont.Bold else QFont.Bold)
+        elif tipo == "italico":
+            formato.setFontItalic(not atual.fontItalic())
+        elif tipo == "sublinhado":
+            formato.setFontUnderline(not atual.fontUnderline())
+        self.aplicar_formato_explicacao(formato)
+
+    def colorir_explicacao(self, cor, *, fundo):
+        if not self._editando_explicacao or self.explicacao_previa_botao.isChecked():
+            return
+        fmt = QTextCharFormat()
+        if fundo:
+            if cor:
+                fmt.setBackground(QColor(cor))
+            else:
+                fmt.clearBackground()
+        elif cor:
+            fmt.setForeground(QColor(cor))
+        else:
+            fmt.clearForeground()
+        self.aplicar_formato_explicacao(fmt)
+
+    def lista_explicacao(self):
+        if not self._editando_explicacao or self.explicacao_previa_botao.isChecked():
+            return
+        cursor = self.feedback_explicacao_editor.textCursor()
+        fmt = QTextListFormat()
+        fmt.setStyle(QTextListFormat.ListDisc)
+        cursor.createList(fmt)
+        self._explicacao_formato_usado = True
+        self.feedback_explicacao_editor.setFocus(Qt.OtherFocusReason)
+
+    def limpar_formato_explicacao(self):
+        if not self._editando_explicacao or self.explicacao_previa_botao.isChecked():
+            return
+        editor = self.feedback_explicacao_editor
+        cursor = editor.textCursor()
+        if cursor.hasSelection():
+            cursor.setCharFormat(QTextCharFormat())
+            editor.setTextCursor(cursor)
+        else:
+            editor.setCurrentCharFormat(QTextCharFormat())
+        self._explicacao_formato_usado = True
+        editor.setFocus(Qt.OtherFocusReason)
+
+    def alternar_previa_explicacao(self):
+        if not self._editando_explicacao:
+            return
+        previa = self.explicacao_previa_botao.isChecked()
+        self.explicacao_previa_botao.setText("Voltar à edição" if previa else "Visualizar")
+        self.feedback_explicacao_editor.setVisible(not previa)
+        for item in self.feedback_explicacao_barra.findChildren(QToolButton):
+            if item is not self.explicacao_previa_botao:
+                item.setEnabled(not previa)
+        if previa:
+            valor = explicacao_serializada(
+                self.feedback_explicacao_editor,
+                formatada=self._explicacao_original_rica or self._explicacao_formato_usado,
+            )
+            self.definir_texto_label_explicacao(valor)
+            self.feedback_explicacao.show()
+        else:
+            self.feedback_explicacao.hide()
+            self.feedback_explicacao_editor.setFocus(Qt.OtherFocusReason)
 
     def iniciar_edicao_explicacao(self):
         if (
-            not self.resposta_confirmada
+            self._editando_alternativas
+            or not self.resposta_confirmada
             or not self.questao_atual
             or not self.feedback.isVisible()
         ):
             return
 
+        self.definir_ferramenta_caneta(None)
         self._editando_explicacao = True
-        self.feedback_explicacao_editor.setPlainText(
-            str(self.questao_atual.get("explicacao") or "")
-        )
+        self._explicacao_formato_usado = False
+        self._explicacao_carregada = False
+        valor = str(self.questao_atual.get("explicacao") or "")
+        self._explicacao_original_rica = explicacao_eh_rica(valor)
+        if self._explicacao_original_rica:
+            self.feedback_explicacao_editor.setHtml(explicacao_html(valor))
+        else:
+            self.feedback_explicacao_editor.setPlainText(valor)
+        self._explicacao_formato_usado = False
+        self._explicacao_carregada = True
+        self.explicacao_previa_botao.setChecked(False)
+        self.explicacao_previa_botao.setText("Visualizar")
         self.feedback_explicacao.setVisible(False)
         self.feedback_explicacao_editar.setVisible(False)
         self.feedback_explicacao_editor.setVisible(True)
+        self.feedback_explicacao_barra.setVisible(True)
         self.feedback_explicacao_acoes.setVisible(True)
         self.botao_proxima.setEnabled(False)
         self.feedback_explicacao_editor.setFocus(Qt.MouseFocusReason)
 
     def finalizar_edicao_explicacao(self):
         self._editando_explicacao = False
+        self._explicacao_carregada = False
+        self.explicacao_previa_botao.setChecked(False)
+        self.explicacao_previa_botao.setText("Visualizar")
         self.feedback_explicacao_editor.setVisible(False)
+        self.feedback_explicacao_barra.setVisible(False)
         self.feedback_explicacao_acoes.setVisible(False)
         self.feedback_explicacao.setVisible(True)
         self.feedback_explicacao_editar.setVisible(
@@ -17412,31 +18140,174 @@ class JanelaResolverQuestoes(QDialog):
         if not self._editando_explicacao or not self.questao_atual:
             return
 
-        nova_explicacao = self.feedback_explicacao_editor.toPlainText().strip()
+        nova_explicacao = explicacao_serializada(
+            self.feedback_explicacao_editor,
+            formatada=self._explicacao_original_rica or self._explicacao_formato_usado,
+        )
         try:
             atualizada = atualizar_explicacao_questao(
-                self.questao_atual["id"],
-                nova_explicacao,
+                self.questao_atual["id"], nova_explicacao,
             )
         except Exception as erro:
             QMessageBox.critical(
-                self,
-                "Editar explicação",
+                self, "Editar explicação",
                 "Não foi possível salvar a explicação.\n\n" + str(erro),
             )
             return
-
         if not atualizada:
             QMessageBox.warning(
-                self,
-                "Editar explicação",
+                self, "Editar explicação",
                 "A questão não está mais disponível para edição.",
             )
             return
-
         self.questao_atual["explicacao"] = nova_explicacao
         self.atualizar_texto_feedback_explicacao()
         self.finalizar_edicao_explicacao()
+        try:
+            _notificar_dados_alterados_raiz(self, "questoes")
+        except Exception:
+            pass
+
+    def iniciar_edicao_alternativas(self):
+        if (
+            self.questao_atual is None
+            or self._editando_alternativas
+            or self._editando_explicacao
+            or _questao_tipo(self.questao_atual) != "MULTIPLA_ESCOLHA"
+        ):
+            return
+
+        alternativas = self.questao_atual.get("alternativas", [])
+        letras_atuais = {item["letra"] for item in alternativas}
+        for letra, (rotulo, campo) in self.campos_edicao_alternativas.items():
+            existente = letra in letras_atuais
+            rotulo.setVisible(existente)
+            campo.setVisible(existente)
+            if existente:
+                texto = next(
+                    item["texto"] for item in alternativas if item["letra"] == letra
+                )
+                campo.setPlainText(str(texto or ""))
+
+        self.definir_ferramenta_caneta(None)
+        self._editando_alternativas = True
+        self.botao_editar_alternativas.setEnabled(False)
+        self.botao_pular.setEnabled(False)
+        self.botao_confirmar.setEnabled(False)
+        self.botao_proxima.setEnabled(False)
+        self.painel_edicao_alternativas.show()
+        self.atualizar_menu_opcoes_topo()
+        self.scroll_questao.ensureWidgetVisible(self.painel_edicao_alternativas, 0, 12)
+        for letra in "ABCDE":
+            if letra in letras_atuais:
+                self.campos_edicao_alternativas[letra][1].setFocus(Qt.MouseFocusReason)
+                break
+
+    def finalizar_edicao_alternativas(self):
+        self._editando_alternativas = False
+        self.painel_edicao_alternativas.hide()
+        self.botao_editar_alternativas.setEnabled(
+            _questao_tipo(self.questao_atual) == "MULTIPLA_ESCOLHA"
+        )
+        self.botao_pular.setEnabled(not self.resposta_confirmada)
+        self.botao_confirmar.setEnabled(not self.resposta_confirmada)
+        self.botao_proxima.setEnabled(self.resposta_confirmada)
+        self.atualizar_menu_opcoes_topo()
+        self.botao_opcoes.setFocus(Qt.OtherFocusReason)
+
+    def cancelar_edicao_alternativas(self):
+        if not self._editando_alternativas:
+            return
+        self.finalizar_edicao_alternativas()
+
+    def salvar_edicao_alternativas(self):
+        if not self._editando_alternativas or not self.questao_atual:
+            return
+        textos = {
+            item["letra"]: self.campos_edicao_alternativas[item["letra"]][1]
+            .toPlainText().strip()
+            for item in self.questao_atual.get("alternativas", [])
+        }
+        vazias = [letra for letra, texto in textos.items() if not texto]
+        if vazias:
+            QMessageBox.warning(
+                self, "Editar alternativas",
+                "Preencha o texto das alternativas: " + ", ".join(vazias) + "."
+            )
+            self.campos_edicao_alternativas[vazias[0]][1].setFocus()
+            return
+
+        try:
+            atualizada = atualizar_textos_alternativas_questao(
+                self.questao_atual["id"], textos
+            )
+        except Exception as erro:
+            QMessageBox.critical(
+                self, "Editar alternativas",
+                "Não foi possível salvar as alternativas.\n\n" + str(erro)
+            )
+            return
+        if not atualizada:
+            QMessageBox.warning(
+                self, "Editar alternativas",
+                "A questão não está mais disponível para edição."
+            )
+            return
+
+        # Atualiza os textos sem reconstruir a questão, trocar o gabarito,
+        # perder a seleção ou reiniciar o cronômetro e as métricas da bateria.
+        for item in self.questao_atual["alternativas"]:
+            letra = item["letra"]
+            item["texto"] = textos[letra]
+            rotulo = self.texto_por_letra.get(letra)
+            if rotulo is not None:
+                rotulo.setText(textos[letra])
+        self.finalizar_edicao_alternativas()
+        # A Central e os relatórios devem ler a nova versão quando reabertos.
+        try:
+            _notificar_dados_alterados_raiz(self, "questoes")
+        except Exception:
+            # A invalidação de telas não pode desfazer a gravação já concluída.
+            pass
+
+    def confirmar_saida_com_edicao_alternativas(self):
+        if self._editando_explicacao and self.questao_atual:
+            atual = explicacao_serializada(
+                self.feedback_explicacao_editor,
+                formatada=self._explicacao_original_rica or self._explicacao_formato_usado,
+            )
+            anterior = str(self.questao_atual.get("explicacao") or "")
+            # HTML Qt pode ser normalizado ao carregar; compare texto e estado de edição.
+            if (self.feedback_explicacao_editor.toPlainText().strip() !=
+                    explicacao_texto_simples(anterior).strip() or
+                    (self._explicacao_formato_usado and atual != anterior)):
+                if QMessageBox.question(
+                    self, "Explicação não salva",
+                    "Existem mudanças não salvas na explicação.\n\n"
+                    "Deseja sair da bateria e descartar as alterações?",
+                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No,
+                ) != QMessageBox.Yes:
+                    return False
+        if not self._editando_alternativas or not self.questao_atual:
+            return True
+        originais = {
+            item["letra"]: str(item.get("texto") or "").strip()
+            for item in self.questao_atual.get("alternativas", [])
+        }
+        editados = {
+            letra: self.campos_edicao_alternativas[letra][1].toPlainText().strip()
+            for letra in originais
+        }
+        if originais == editados:
+            return True
+        return QMessageBox.question(
+            self,
+            "Alternativas não salvas",
+            "Existem alterações não salvas nas alternativas.\n\n"
+            "Deseja sair da bateria e descartar essas alterações?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        ) == QMessageBox.Yes
 
     def definir_foco_teclado_alternativa(self, letra, mover_foco_qt=True):
         if self.resposta_confirmada or letra not in self.frame_por_letra:
@@ -17524,6 +18395,8 @@ class JanelaResolverQuestoes(QDialog):
         radio.setFocus()
 
     def eventFilter(self, objeto, evento):
+        if self._pausa_relogio is not None:
+            return super().eventFilter(objeto, evento)
         if (
             evento.type() == QEvent.KeyPress
             and self.isActiveWindow()
@@ -17533,7 +18406,7 @@ class JanelaResolverQuestoes(QDialog):
             # Enquanto a explicação está sendo editada, o QTextEdit e os
             # botões Salvar/Cancelar recebem o teclado normalmente. Isso evita
             # que Enter avance a bateria ou que as setas mudem de alternativa.
-            if self._editando_explicacao:
+            if self._editando_explicacao or self._editando_alternativas:
                 return super().eventFilter(objeto, evento)
 
             # Um Enter mantido pressionado não pode atravessar várias etapas
@@ -17709,6 +18582,11 @@ class JanelaResolverQuestoes(QDialog):
             self.carregar_atual()
             return
 
+        # Cada questão começa sem rabiscos ou histórico de desfazer, mas
+        # conserva a ferramenta, a cor e a espessura escolhidas na paleta.
+        # O modo leitura só é ativado quando o usuário escolhe o olho.
+        self.caneta_estudo.limpar()
+        self._atualizar_botao_caneta_estudo()
         self.questao_atual = {
             **resumo_item,
             **dados,
@@ -17723,8 +18601,13 @@ class JanelaResolverQuestoes(QDialog):
             )
         self.resposta_confirmada = False
         self._editando_explicacao = False
+        self._editando_alternativas = False
+        self.painel_edicao_alternativas.hide()
         self.feedback_explicacao_editor.setVisible(False)
+        self.feedback_explicacao_barra.setVisible(False)
         self.feedback_explicacao_acoes.setVisible(False)
+        self.explicacao_previa_botao.setChecked(False)
+        self.explicacao_previa_botao.setText("Visualizar")
         self.feedback_explicacao.setVisible(True)
         self.feedback_explicacao_editar.setVisible(False)
         self.inicio_questao = datetime.now()
@@ -18044,6 +18927,10 @@ class JanelaResolverQuestoes(QDialog):
             self.alternativas_container.setUpdatesEnabled(True)
             self.alternativas_container.update()
 
+        # As superfícies locais acompanham os novos cartões; nenhuma camada
+        # cobre o menu Rabiscar nem os controles fora das alternativas.
+        self.caneta_estudo.atualizar_alvos()
+
         self.duvida.setChecked(
             False
         )
@@ -18068,6 +18955,15 @@ class JanelaResolverQuestoes(QDialog):
         self.analise_pendente.setEnabled(
             not self.sem_impacto_inteligencia
         )
+        self.botao_editar_alternativas.setEnabled(
+            tipo_questao == "MULTIPLA_ESCOLHA"
+        )
+        self.botao_editar_alternativas.setToolTip(
+            "Edite os textos A–E sem sair da bateria."
+            if tipo_questao == "MULTIPLA_ESCOLHA"
+            else "Os rótulos Certo/Errado são fixos; esta edição é apenas para múltipla escolha."
+        )
+        self.atualizar_menu_opcoes_topo()
         self.atualizar_rotulo_analise_pendente(
             analise_pendente
         )
@@ -18189,7 +19085,7 @@ class JanelaResolverQuestoes(QDialog):
         )
 
     def confirmar_resposta(self):
-        if self.resposta_confirmada:
+        if self._pausa_relogio is not None or self.resposta_confirmada or self._editando_alternativas:
             return
 
         marcada = (
@@ -18482,7 +19378,7 @@ class JanelaResolverQuestoes(QDialog):
             )
 
     def pular(self):
-        if self.resposta_confirmada:
+        if self._pausa_relogio is not None or self.resposta_confirmada or self._editando_alternativas:
             return
 
         questao_id = int(self.questao_atual["id"])
@@ -18621,6 +19517,8 @@ class JanelaResolverQuestoes(QDialog):
             self.carregar_atual()
 
     def proxima(self):
+        if self._pausa_relogio is not None or self._editando_alternativas:
+            return
         self.indice += 1
         self.sessao_progresso.setValue(
             self.indice
@@ -18638,6 +19536,8 @@ class JanelaResolverQuestoes(QDialog):
 
     def encerrar_manual(self):
         if self.finalizada:
+            return
+        if not self.confirmar_saida_com_edicao_alternativas():
             return
 
         resposta = QMessageBox.question(
@@ -18694,6 +19594,7 @@ class JanelaResolverQuestoes(QDialog):
         if self.finalizada:
             return
 
+        self.encerrar_pausa_programada(trazer_bateria=False)
         self.finalizada = True
 
         if self.timer_simulado is not None:
@@ -18866,6 +19767,9 @@ class JanelaResolverQuestoes(QDialog):
         self.accept()
 
     def done(self, resultado):
+        self.caneta_estudo.definir_modo(None)
+        self.caneta_estudo.limpar()
+        self.encerrar_pausa_programada(trazer_bateria=False)
         if self._filtro_teclado_aplicacao_instalado:
             app = QApplication.instance()
             if app is not None:
@@ -18882,6 +19786,9 @@ class JanelaResolverQuestoes(QDialog):
     ):
         if self.finalizada:
             event.accept()
+            return
+        if not self.confirmar_saida_com_edicao_alternativas():
+            event.ignore()
             return
 
         resposta = QMessageBox.question(
@@ -28427,15 +29334,12 @@ class JanelaConfiguracoes(QDialog):
             "Configurações — VighnaStudy"
         )
 
-        self.resize(
-            820,
-            700
-        )
-
-        self.setMinimumSize(
-            700,
-            590
-        )
+        # Conserva os controles nativos da janela, inclusive restaurar/maximizar.
+        # A abertura maximizada é feita no controlador, sem esconder a barra de tarefas.
+        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
+        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
+        self.resize(900, 700)
+        self.setMinimumSize(720, 560)
 
         self.opcoes_pesquisa = []
         self.secoes_pesquisa = []
@@ -28556,6 +29460,8 @@ class JanelaConfiguracoes(QDialog):
         scroll.setFrameShape(
             QFrame.NoFrame
         )
+        # A largura é responsabilidade do layout; rolagem apenas vertical.
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         conteudo = QWidget()
 
@@ -29352,10 +30258,11 @@ class JanelaConfiguracoes(QDialog):
             self.incluir_banco_checkpoint
         )
 
-        linha_checkpoint_acoes = QHBoxLayout()
-        linha_checkpoint_acoes.setSpacing(
-            8
-        )
+        # Duas linhas de ações: a seção funciona também ao restaurar a
+        # janela, sem forçar uma largura mínima de quatro botões lado a lado.
+        linha_checkpoint_acoes = QGridLayout()
+        linha_checkpoint_acoes.setHorizontalSpacing(8)
+        linha_checkpoint_acoes.setVerticalSpacing(8)
 
         gerar_checkpoint_agora = QPushButton(
             "Gerar checkpoint completo"
@@ -29403,19 +30310,28 @@ class JanelaConfiguracoes(QDialog):
             self.abrir_pasta_checkpoints_config
         )
 
+        for botao_checkpoint in (
+            gerar_checkpoint_agora,
+            restaurar_checkpoint_botao,
+            verificar_checkpoint_botao,
+            abrir_pasta_checkpoint,
+        ):
+            botao_checkpoint.setSizePolicy(
+                QSizePolicy.Maximum, QSizePolicy.Fixed
+            )
         linha_checkpoint_acoes.addWidget(
-            gerar_checkpoint_agora
+            gerar_checkpoint_agora, 0, 0, Qt.AlignLeft
         )
         linha_checkpoint_acoes.addWidget(
-            restaurar_checkpoint_botao
+            restaurar_checkpoint_botao, 0, 1, Qt.AlignLeft
         )
         linha_checkpoint_acoes.addWidget(
-            verificar_checkpoint_botao
+            verificar_checkpoint_botao, 1, 0, Qt.AlignLeft
         )
         linha_checkpoint_acoes.addWidget(
-            abrir_pasta_checkpoint
+            abrir_pasta_checkpoint, 1, 1, Qt.AlignLeft
         )
-        linha_checkpoint_acoes.addStretch()
+        linha_checkpoint_acoes.setColumnStretch(2, 1)
 
         checkpoint_layout.addLayout(
             linha_checkpoint_acoes
@@ -29462,8 +30378,31 @@ class JanelaConfiguracoes(QDialog):
         conteudo_atualizacao = QVBoxLayout(opcao_atualizacao)
         conteudo_atualizacao.setContentsMargins(14, 11, 14, 12)
         conteudo_atualizacao.setSpacing(8)
-        titulo_atualizacao = QLabel(f"Versão instalada • {VIGHNA_VERSION} ({VIGHNA_BUILD})")
+        # Não incluir o identificador longo no título: isso força a largura
+        # mínima do conteúdo do QScrollArea e estica os botões da seção.
+        titulo_atualizacao = QLabel(f"Versão instalada • {VIGHNA_VERSION}")
         titulo_atualizacao.setObjectName("configOptionTitle")
+        identificador_resumido = (
+            VIGHNA_BUILD if len(VIGHNA_BUILD) <= 58
+            else VIGHNA_BUILD[:38] + "…" + VIGHNA_BUILD[-16:]
+        )
+        rotulo_build = QLabel("Build: " + identificador_resumido)
+        rotulo_build.setObjectName("mutedLabel")
+        rotulo_build.setWordWrap(True)
+        rotulo_build.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
+        rotulo_build.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        rotulo_build.setToolTip("Identificador completo: " + VIGHNA_BUILD)
+        copiar_build = QPushButton("Copiar build")
+        copiar_build.setObjectName("subtleButton")
+        copiar_build.setToolTip("Copiar o identificador completo da versão")
+        copiar_build.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Fixed)
+        copiar_build.clicked.connect(
+            lambda: QApplication.clipboard().setText(VIGHNA_BUILD)
+        )
+        linha_build = QHBoxLayout()
+        linha_build.setSpacing(8)
+        linha_build.addWidget(rotulo_build, 1)
+        linha_build.addWidget(copiar_build, 0, Qt.AlignRight)
         texto_atualizacao = QLabel(
             "Nenhuma atualização é automática. Antes de instalar, o Vighna "
             "confere o pacote, faz backup consistente e bloqueia alterações "
@@ -29474,10 +30413,16 @@ class JanelaConfiguracoes(QDialog):
         texto_atualizacao.setWordWrap(True)
         botao_importar_atualizacao = QPushButton("Selecionar pacote ZIP e verificar")
         botao_importar_atualizacao.setObjectName("toolbarButton")
+        botao_importar_atualizacao.setSizePolicy(
+            QSizePolicy.Maximum, QSizePolicy.Fixed
+        )
         botao_importar_atualizacao.clicked.connect(self.iniciar_atualizacao_segura)
         conteudo_atualizacao.addWidget(titulo_atualizacao)
+        conteudo_atualizacao.addLayout(linha_build)
         conteudo_atualizacao.addWidget(texto_atualizacao)
-        conteudo_atualizacao.addWidget(botao_importar_atualizacao)
+        conteudo_atualizacao.addWidget(
+            botao_importar_atualizacao, 0, Qt.AlignLeft
+        )
         self.status_verificacao_zip = QLabel(
             "ZIP: nenhum pacote selecionado nesta sessão.\n"
             "O Vighna avisará se o arquivo ou build já tiver sido instalado."
@@ -29487,8 +30432,11 @@ class JanelaConfiguracoes(QDialog):
         conteudo_atualizacao.addWidget(self.status_verificacao_zip)
         botao_historico = QPushButton("Consultar histórico de atualizações")
         botao_historico.setObjectName("subtleButton")
+        botao_historico.setSizePolicy(
+            QSizePolicy.Maximum, QSizePolicy.Fixed
+        )
         botao_historico.clicked.connect(self.abrir_historico_atualizacoes)
-        conteudo_atualizacao.addWidget(botao_historico)
+        conteudo_atualizacao.addWidget(botao_historico, 0, Qt.AlignLeft)
         layout_atualizacao.addWidget(opcao_atualizacao)
         self.registrar_opcao_pesquisa(
             secao_atualizacao, opcao_atualizacao,
@@ -33619,13 +34567,56 @@ class SistemaEstudos(QMainWindow):
         self.telas.setCurrentWidget(self.tela_portal_inicio)
         self._atualizar_perfil_portal()
 
+    def _atualizar_retomada_no_portal_treinos(self):
+        """Atualiza o acesso somente para uma bateria ainda aberta e ativa."""
+        portal = getattr(self, "tela_portal_treinos", None)
+        if portal is None:
+            return
+        janela = self.obter_janela_resolvedor_questoes()
+        existe_sessao = janela is not None and not bool(getattr(janela, "finalizada", False))
+        detalhes = ""
+        if existe_sessao:
+            configuracao = getattr(janela, "configuracao", {}) or {}
+            modalidade = str(configuracao.get("modo") or janela.windowTitle()).strip()
+            indice = max(0, int(getattr(janela, "indice", 0)))
+            quantidade = len(getattr(janela, "fila", []) or [])
+            if quantidade:
+                detalhes = f"{modalidade}  •  Questão {min(indice + 1, quantidade)} de {quantidade}"
+            else:
+                detalhes = modalidade
+        atualizar_retomada_treinos(portal, existe_sessao, detalhes)
+
     def abrir_portal_treinos(self):
-        """Abre a Central de Treinos sem interferir em sessoes em andamento."""
-        atualizar_retomada_treinos(
-            self.tela_portal_treinos,
-            self.obter_janela_resolvedor_questoes() is not None,
-        )
+        """Mostra a Central imediatamente; sincroniza retomada no próximo ciclo."""
+        # Monitor leve, temporário: quando o Windows deixa de receber eventos,
+        # registra a pilha Python sem consultar nem alterar o banco de estudos.
+        from ui.diagnostico_treinos import MonitorNavegacaoTreinos
+        anterior = getattr(self, "_monitor_navegacao_treinos", None)
+        if anterior is not None:
+            anterior.encerrar()
+        monitor = MonitorNavegacaoTreinos()
+        self._monitor_navegacao_treinos = monitor
+        monitor.marcar("antes_de_abrir_pagina")
         self.telas.setCurrentWidget(self.tela_portal_treinos)
+        monitor.marcar("pagina_aberta")
+
+        def primeiro_ciclo():
+            if getattr(self, "_monitor_navegacao_treinos", None) is not monitor:
+                return
+            monitor.marcar("antes_de_atualizar_retomada")
+            self._atualizar_retomada_no_portal_treinos()
+            monitor.marcar("retomada_atualizada")
+
+        def pulso_gui():
+            if getattr(self, "_monitor_navegacao_treinos", None) is not monitor:
+                return
+            if not monitor.ativo:
+                return
+            monitor.pulso()
+            QTimer.singleShot(250, pulso_gui)
+
+        QTimer.singleShot(0, primeiro_ciclo)
+        QTimer.singleShot(0, pulso_gui)
 
     def abrir_portal_recursos(self):
         """Mostra o catálogo sem destruir nem recarregar sessões existentes."""
@@ -33689,10 +34680,7 @@ class SistemaEstudos(QMainWindow):
             "revisao": self.abrir_revisao_inteligente_dashboard,
         }
         destinos[modalidade]()
-        atualizar_retomada_treinos(
-            self.tela_portal_treinos,
-            self.obter_janela_resolvedor_questoes() is not None,
-        )
+        self._atualizar_retomada_no_portal_treinos()
 
     def _atualizar_perfil_sidebar(self, _indice=None):
         if not hasattr(self, "dashboard_sidebar_perfil"):
@@ -43883,9 +44871,7 @@ class SistemaEstudos(QMainWindow):
         botao = getattr(self, "botao_retomar_questoes_topo", None)
         if botao is not None:
             botao.setVisible(existe_sessao)
-        portal = getattr(self, "tela_portal_treinos", None)
-        if portal is not None:
-            atualizar_retomada_treinos(portal, existe_sessao)
+        self._atualizar_retomada_no_portal_treinos()
 
     def obter_janela_resolvedor_questoes(self):
         janela = getattr(self, "_janela_resolvedor_questoes", None)
@@ -61538,6 +62524,9 @@ class SistemaEstudos(QMainWindow):
         janela = JanelaConfiguracoes(
             self
         )
+        # showMaximized respeita a área de trabalho do Windows e permite
+        # restaurar a janela pelo controle nativo no canto superior direito.
+        janela.showMaximized()
 
         if janela.exec() == QDialog.Accepted:
             self.tema_atual = normalizar_tema(
