@@ -40,7 +40,7 @@ from pathlib import Path
 
 
 from PySide6.QtCore import Qt, QDate, QPointF, QRectF, QTimer, Signal, QEventLoop, QSize, QEvent
-from PySide6.QtGui import QColor, QPainter, QPen, QFont, QPainterPath, QBrush, QPixmap, QIcon, QTextCharFormat, QTextListFormat, QKeySequence, QShortcut
+from PySide6.QtGui import QColor, QPainter, QPen, QFont, QPainterPath, QBrush, QPixmap, QIcon, QLinearGradient, QTextCharFormat, QTextListFormat, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -98,6 +98,7 @@ from ui.portal_edital import (
     criar_portal_edital, aplicar_estilo_portal_edital,
     atualizar_perfil_portal_edital,
 )
+from ui.dashboard_visual_premium import dashboard_fundo_bytes, dashboard_visual_styles
 from ui.dashboard_compact_nav import (
     criar_cabecalho_discreto_dashboard, aplicar_estilo_cabecalho_dashboard,
 )
@@ -107,6 +108,9 @@ from ui.portal_treinos import (
 from ui.portal_recursos import criar_portal_recursos, aplicar_estilo_recursos
 from ui.caneta_estudo import CanetaEstudo
 from ui.paleta_caneta import FaixaCanetaEstudo
+from ui.statistics_premium import (
+    FundoEstatisticasPremium, PainelEstatisticasPremium, aplicar_estilo_estatisticas_premium,
+)
 from ui.pausa_bateria import (
     RelogioPausa, ConfiguracaoPausa, GerenciarPausa,
     AvisoPausaFinalizada, texto_contagem,
@@ -34329,6 +34333,65 @@ class SidebarNavigationDots(QWidget):
         evento.accept()
 
 
+class DashboardRecommendationHeroFrame(QFrame):
+    """Card convencional fora do Futurista; arte integrada e sem vidro simulado
+    quando ele é a coluna protagonista do Dashboard.
+    """
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._hero_enabled = False
+        self._hero_pixmap = QPixmap()
+
+    def set_hero_enabled(self, enabled):
+        self._hero_enabled = bool(enabled)
+        if enabled and self._hero_pixmap.isNull():
+            try:
+                from ui.dashboard_hero_art import imagem_recomendacao_bytes
+                self._hero_pixmap.loadFromData(imagem_recomendacao_bytes(), "JPG")
+            except (ImportError, OSError, ValueError):
+                # Fallback visual seguro se o recurso não estiver disponível.
+                pass
+        self.update()
+
+    def paintEvent(self, event):
+        if not self._hero_enabled:
+            return super().paintEvent(event)
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing, True)
+        rect = QRectF(self.rect()).adjusted(0.6, 0.6, -0.6, -0.6)
+        path = QPainterPath()
+        path.addRoundedRect(rect, 16, 16)
+        painter.setClipPath(path)
+        painter.fillRect(self.rect(), QColor(3, 18, 32, 248))
+        if not self._hero_pixmap.isNull() and self.width() > 0 and self.height() > 0:
+            top_h = max(rect.height() * 0.50, min(rect.height() * 0.58, rect.height() - 165.0))
+            top_rect = QRectF(rect.left(), rect.top(), rect.width(), top_h)
+            pix_w = float(self._hero_pixmap.width())
+            pix_h = float(self._hero_pixmap.height())
+            target_ratio = top_rect.width() / max(top_rect.height(), 1.0)
+            source_ratio = pix_w / max(pix_h, 1.0)
+            if source_ratio > target_ratio:
+                crop_w = pix_h * target_ratio
+                src = QRectF(0.0, 0.0, crop_w, pix_h)
+            else:
+                crop_h = pix_w / target_ratio
+                src = QRectF(0.0, max(0.0, (pix_h - crop_h) / 2.0), pix_w, crop_h)
+            painter.drawPixmap(top_rect, self._hero_pixmap, src)
+            painter.fillRect(top_rect, QColor(3, 12, 22, 8))
+            fade_top = top_rect.bottom() - 42.0
+            fade = QLinearGradient(0, fade_top, 0, rect.bottom())
+            fade.setColorAt(0.0, QColor(3, 14, 26, 0))
+            fade.setColorAt(0.34, QColor(3, 14, 26, 172))
+            fade.setColorAt(1.0, QColor(3, 14, 26, 244))
+            painter.fillRect(QRectF(rect.left(), fade_top, rect.width(), rect.bottom() - fade_top), QBrush(fade))
+        painter.fillRect(QRectF(rect.left(), rect.bottom() - 176.0, rect.width(), 176.0), QColor(3, 14, 26, 96))
+        painter.setClipping(False)
+        painter.setPen(QPen(QColor(0, 181, 220, 220), 1.4))
+        painter.setBrush(Qt.NoBrush)
+        painter.drawRoundedRect(rect, 16, 16)
+        painter.end()
+
+
 class DashboardAmbientCanvas(QWidget):
     """Ornamentos estaticos e nao interativos nas margens do Dashboard.
 
@@ -34344,7 +34407,45 @@ class DashboardAmbientCanvas(QWidget):
         option.initFrom(self)
         self.style().drawPrimitive(QStyle.PE_Widget, option, painter, self)
 
-        if normalizar_tema(getattr(self.window(), "tema_atual", "claro")) != "futurista":
+        _tema = normalizar_tema(getattr(self.window(), "tema_atual", "claro"))
+        if self.objectName() == "dashboardRoot" and _tema in ("futurista", "escuro"):
+            # Foto fornecida pelo usuário, somente no Dashboard: imagem ancorada
+            # ao topo. A página longa rola, mas não estica o planeta verticalmente.
+            painter.fillRect(self.rect(), QColor(3, 9, 18))
+            if getattr(self, "_dashboard_fundo_original", None) is None:
+                _original = QPixmap()
+                if _original.loadFromData(dashboard_fundo_bytes(), "JPG"):
+                    self._dashboard_fundo_original = _original
+            _original = getattr(self, "_dashboard_fundo_original", None)
+            if _original is not None and self.width() > 0 and self.height() > 0:
+                _altura_painel = min(self.height(), max(690, int(self.width() * 0.56)))
+                _tamanho = (self.width(), _altura_painel)
+                if getattr(self, "_dashboard_fundo_cache_size", None) != _tamanho:
+                    self._dashboard_fundo_cache = _original.scaled(
+                        QSize(*_tamanho), Qt.KeepAspectRatioByExpanding,
+                        Qt.SmoothTransformation,
+                    )
+                    self._dashboard_fundo_cache_size = _tamanho
+                _pixmap = self._dashboard_fundo_cache
+                painter.save()
+                painter.setClipRect(QRectF(0, 0, self.width(), _altura_painel))
+                painter.drawPixmap((self.width()-_pixmap.width())//2, 0, _pixmap)
+                painter.fillRect(
+                    QRectF(0, 0, self.width(), _altura_painel),
+                    QColor(2, 8, 18, 111),
+                )
+                # Transição gradual para o canvas escuro da parte inferior.
+                from PySide6.QtGui import QLinearGradient
+                gradiente = QLinearGradient(0, _altura_painel*0.68, 0, _altura_painel)
+                gradiente.setColorAt(0.0, QColor(3, 9, 18, 0))
+                gradiente.setColorAt(1.0, QColor(3, 9, 18, 255))
+                painter.fillRect(
+                    QRectF(0, _altura_painel*0.68, self.width(), _altura_painel*0.32),
+                    QBrush(gradiente),
+                )
+                painter.restore()
+
+        if _tema != "futurista":
             painter.end()
             return
 
@@ -34449,79 +34550,167 @@ class DashboardAmbientCanvas(QWidget):
                 painter.drawRoundedRect(outer, 15.0 + expansion, 15.0 + expansion)
 
 
+class DashboardLevelArcWidget(QLabel):
+    """Anel circular de progresso do nível, alinhado à referência visual.
+
+    O texto permanece no próprio QLabel para manter os métodos externos de
+    atualização. O anel usa o mesmo percentual já calculado para a barra XP.
+    """
+
+    def __init__(self, texto="1", parent=None):
+        super().__init__(texto, parent)
+        self._percentual = 0
+        self.setAlignment(Qt.AlignCenter)
+        self.setFixedSize(52, 52)
+
+    def setProgress(self, percentual):
+        try:
+            self._percentual = max(0.0, min(100.0, float(percentual)))
+        except (TypeError, ValueError):
+            self._percentual = 0.0
+        self.update()
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing, True)
+        tema = normalizar_tema(getattr(self.window(), "tema_atual", "claro"))
+        claro = tema == "claro"
+        borda = QRectF(4.5, 4.5, self.width() - 9, self.height() - 9)
+        trilha = QPen(QColor("#BCCBDD" if claro else "#285070"), 4.2)
+        trilha.setCapStyle(Qt.RoundCap)
+        painter.setPen(trilha)
+        painter.drawArc(borda, 90 * 16, -360 * 16)
+        if self._percentual > 0:
+            progresso = QPen(QColor("#087DB4" if claro else "#00C9EE"), 4.2)
+            progresso.setCapStyle(Qt.RoundCap)
+            painter.setPen(progresso)
+            painter.drawArc(
+                borda, 90 * 16, int(-360 * 16 * (self._percentual / 100))
+            )
+        fonte = QFont("Segoe UI")
+        fonte.setPointSize(17)
+        fonte.setBold(True)
+        painter.setFont(fonte)
+        painter.setPen(QColor("#1C2C3C" if claro else "#F3F7FF"))
+        painter.drawText(self.rect(), Qt.AlignCenter, self.text())
+        painter.end()
+
+
+def _estilo_metricas_rapidas_planejamento(tema):
+    """Estilo local dos dois indicadores operacionais; funciona nos três temas."""
+    tema = normalizar_tema(tema)
+    if tema == "claro":
+        fundo = "rgba(239, 247, 253, 245)"
+        borda = "rgba(69, 119, 160, 140)"
+        titulo = "#2C5872"
+        valor = "#142D45"
+        detalhe = "#516A80"
+        acento = "#087FB4"
+    else:
+        fundo = "rgba(3, 21, 38, 210)" if tema == "futurista" else "rgba(10, 27, 44, 226)"
+        borda = "rgba(53, 142, 180, 128)" if tema == "futurista" else "rgba(83, 131, 164, 115)"
+        titulo = "#BCDDEE"
+        valor = "#F3FAFF"
+        detalhe = "#AFC8DD"
+        acento = "#00C6E5" if tema == "futurista" else "#2CA4D5"
+    return f"""
+    QWidget#dashboardRoot QFrame#dashboardPlanningMetricTile {{
+        background-color: {fundo};
+        border: 1px solid {borda};
+        border-radius: 9px;
+    }}
+    QWidget#dashboardRoot QFrame#dashboardPlanningMetricAccent {{
+        background-color: {acento}; border: none; border-radius: 1px;
+    }}
+    QWidget#dashboardRoot QLabel#dashboardPlanningMetricHeading {{
+        color: {titulo}; background: transparent; border: none;
+        font-size: 7.5pt; font-weight: 700;
+    }}
+    QWidget#dashboardRoot QLabel#dashboardPlanningMetricValue,
+    QWidget#dashboardRoot QLabel#dashboardPlanningRemainingValue {{
+        color: {valor}; background: transparent; border: none;
+        font-size: 13pt; font-weight: 750;
+    }}
+    QWidget#dashboardRoot QLabel#dashboardPlanningRemainingValue {{
+        font-size: 10pt; font-weight: 700;
+    }}
+    QWidget#dashboardRoot QLabel#dashboardPlanningMetricDetail {{
+        color: {detalhe}; background: transparent; border: none;
+        font-size: 8pt;
+    }}
+    """
+
+
 class DashboardPlanningArcWidget(QWidget):
-    """Indicador em arco para a meta diária do card Planejamento."""
+    """Semicírculo do Planejamento, na proporção da referência visual.
+
+    Mantém a interface de dados setProgress(atual, meta) já existente e
+    desenha a meta real + o percentual sem adicionar campos editáveis.
+    """
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self._atual = 0
         self._meta = 0
-        self.setMinimumSize(196, 90)
-        self.setMaximumHeight(100)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.setFixedSize(202, 99)
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.setAccessibleName("Indicador semicircular da meta diária")
 
     def setProgress(self, atual, meta):
         try:
             self._atual = max(0, int(atual or 0))
-        except Exception:
+        except (TypeError, ValueError):
             self._atual = 0
-
         try:
             self._meta = max(0, int(meta or 0))
-        except Exception:
+        except (TypeError, ValueError):
             self._meta = 0
-
+        self.setToolTip(
+            f"Meta diária: {self._atual} de {self._meta} questões"
+            if self._meta > 0 else f"{self._atual} questões hoje; meta desativada"
+        )
         self.update()
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-
-        largura = max(96, self.width() - 52)
-        altura = min(self.height() - 24, 68)
-        x = (self.width() - largura) / 2
-        y = 8
-        rect = QRectF(x, y, largura, altura * 2)
-
-        tema_atual = normalizar_tema(
-            getattr(self.window(), "tema_atual", "claro")
+        painter.setRenderHint(QPainter.Antialiasing, True)
+        tema = normalizar_tema(getattr(self.window(), "tema_atual", "claro"))
+        proporcao = (
+            max(0.0, min(1.0, self._atual / float(self._meta)))
+            if self._meta > 0 else 0.0
         )
-
-        trilha = QPen(
-            qcolor(tema_atual, "dashboard.planning_arc_track"),
-            8
-        )
+        # Elipse intencionalmente mais alta que o widget: só a metade
+        # superior aparece, com extremidades na base do velocímetro.
+        raio = QRectF(14, 8, self.width() - 28, 160)
+        trilha = QPen(qcolor(tema, "dashboard.planning_arc_track"), 7)
         trilha.setCapStyle(Qt.RoundCap)
         painter.setPen(trilha)
-        painter.drawArc(rect, 180 * 16, -180 * 16)
-
-        if self._meta > 0:
-            proporcao = max(0.0, min(1.0, self._atual / float(self._meta)))
-        else:
-            proporcao = 0.0
-
+        painter.drawArc(raio, 0, 180 * 16)
         if proporcao > 0:
-            valor = QPen(
-                qcolor(tema_atual, "dashboard.planning_arc_fill"),
-                8
-            )
-            valor.setCapStyle(Qt.RoundCap)
-            painter.setPen(valor)
-            painter.drawArc(rect, 180 * 16, int(-180 * 16 * proporcao))
+            progresso = QPen(qcolor(tema, "dashboard.planning_arc_fill"), 7)
+            progresso.setCapStyle(Qt.RoundCap)
+            painter.setPen(progresso)
+            # Inicia à esquerda e avança em direção à direita pelo topo.
+            painter.drawArc(raio, 180 * 16, -int(180 * 16 * proporcao))
 
-        fonte = QFont('Segoe UI')
-        fonte.setPointSize(16)
+        fonte = QFont("Segoe UI")
+        fonte.setPointSize(14)
         fonte.setBold(True)
         painter.setFont(fonte)
-        painter.setPen(
-            qcolor(tema_atual, "dashboard.planning_arc_text")
+        painter.setPen(qcolor(tema, "dashboard.planning_arc_text"))
+        titulo = (
+            f"{self._atual} / {self._meta}"
+            if self._meta > 0 else f"{self._atual} hoje"
         )
-        texto = f"{self._atual} / {self._meta}" if self._meta > 0 else f"{self._atual}"
-        painter.drawText(
-            QRectF(0, 18, self.width(), 56),
-            Qt.AlignHCenter | Qt.AlignVCenter,
-            texto,
-        )
+        painter.drawText(QRectF(13, 35, self.width()-26, 28), Qt.AlignCenter, titulo)
+
+        fonte.setPointSize(11)
+        fonte.setBold(True)
+        painter.setFont(fonte)
+        painter.setPen(qcolor(tema, "dashboard.planning_arc_fill"))
+        detalhe = f"{int(round(proporcao*100))}%" if self._meta > 0 else "Sem meta"
+        painter.drawText(QRectF(13, 64, self.width()-26, 23), Qt.AlignCenter, detalhe)
+        painter.end()
 
 
 class DashboardDonutWidget(QWidget):
@@ -35420,38 +35609,464 @@ class SistemaEstudos(QMainWindow):
         if not hasattr(self, "_dashboard_root_layout"):
             return
         compacto = futurista and visivel and expandida and self.width() < 1600
-        assinatura = (futurista, compacto, visivel, expandida)
+        assinatura = (futurista, compacto, visivel, expandida, bool(futurista and self.width() >= 1200))
         if getattr(self, "_dashboard_densidade_estado", None) == assinatura:
             return
         self._dashboard_densidade_estado = assinatura
         if compacto:
             self._dashboard_root_layout.setContentsMargins(17, 10, 17, 17)
-            self._dashboard_root_layout.setSpacing(8)
-            self._dashboard_foco_painel_layout.setContentsMargins(6, 5, 6, 5)
-            self._dashboard_foco_card_layout.setContentsMargins(11, 8, 11, 8)
-            self._dashboard_planejamento_layout.setContentsMargins(9, 5, 9, 6)
-            self._dashboard_primeira_linha.setSpacing(7)
-            self._dashboard_primeira_linha.setStretch(0, 11)
-            self._dashboard_primeira_linha.setStretch(1, 10)
-            self._dashboard_recomendacao_linha.setSpacing(8)
-            self._dashboard_recomendacao_linha.setStretch(0, 2)
-            self._dashboard_recomendacao_linha.setStretch(1, 1)
+            self._dashboard_root_layout.setSpacing(12)
+            self._dashboard_foco_painel_layout.setContentsMargins(0, 0, 0, 0)
+            # Modo compacto: preservar proporções, reduzir apenas respiro.
+            self._dashboard_foco_card_layout.setContentsMargins(15, 11, 15, 11)
+            self._dashboard_planejamento_layout.setContentsMargins(12, 9, 12, 9)
+            self._dashboard_primeira_linha.setSpacing(12)
+            self._dashboard_primeira_linha.setStretch(0, 13)
+            self._dashboard_primeira_linha.setStretch(1, 12)
+            self._dashboard_recomendacao_linha.setSpacing(12)
+            self._dashboard_recomendacao_linha.setStretch(0, 17)
+            self._dashboard_recomendacao_linha.setStretch(1, 8)
         else:
             # O Futurista com sidebar dispensa parte do respiro antes
             # do cabecalho; os outros temas preservam a geometria.
             self._dashboard_root_layout.setContentsMargins(
                 28, 10 if futurista and visivel else 16, 28, 20
             )
-            self._dashboard_root_layout.setSpacing(10)
-            self._dashboard_foco_painel_layout.setContentsMargins(12, 8, 12, 8)
-            self._dashboard_foco_card_layout.setContentsMargins(14, 10, 14, 10)
-            self._dashboard_planejamento_layout.setContentsMargins(12, 5, 12, 6)
-            self._dashboard_primeira_linha.setSpacing(8)
-            self._dashboard_primeira_linha.setStretch(0, 1)
-            self._dashboard_primeira_linha.setStretch(1, 1)
-            self._dashboard_recomendacao_linha.setSpacing(10)
-            self._dashboard_recomendacao_linha.setStretch(0, 3)
-            self._dashboard_recomendacao_linha.setStretch(1, 1)
+            self._dashboard_root_layout.setSpacing(14)
+            self._dashboard_foco_painel_layout.setContentsMargins(0, 0, 0, 0)
+            self._dashboard_foco_card_layout.setContentsMargins(22, 17, 22, 17)
+            self._dashboard_planejamento_layout.setContentsMargins(18, 13, 18, 13)
+            self._dashboard_primeira_linha.setSpacing(14)
+            self._dashboard_primeira_linha.setStretch(0, 13)
+            self._dashboard_primeira_linha.setStretch(1, 12)
+            self._dashboard_recomendacao_linha.setSpacing(14)
+            self._dashboard_recomendacao_linha.setStretch(0, 17)
+            self._dashboard_recomendacao_linha.setStretch(1, 8)
+
+        self._ajustar_composicao_dashboard_futurista(futurista)
+        self._ajustar_altura_independente_recomendacao(futurista)
+
+    def _ajustar_composicao_dashboard_futurista(self, futurista):
+        """R7: hero da Recomendação à esquerda; à direita Foco/XP/Plano.
+
+        Move as MESMAS instâncias Qt e preserva todos os sinais, cálculos,
+        acessos ao banco e ações. Restaura integralmente o layout histórico
+        nos outros temas e em larguras inferiores a 1200px.
+        """
+        refs = getattr(self, "_dashboard_modelo_refs", None)
+        if not refs:
+            return
+        usar = bool(futurista and self.width() >= 1200)
+        if usar == getattr(self, "_dashboard_hero_reordenado", False):
+            return
+        raiz = refs["raiz"]
+        topo = refs["topo"]
+        antiga_inferior = refs["inferior"]
+        foco = refs["foco"]
+        plano = refs["planejamento_container"]
+        plano_card = self.dashboard_resumo_ia
+        recomendacao = self.dashboard_hoje_acao
+        progresso = refs["progresso"]
+        progresso_layout = refs["progresso_layout"]
+        plan_layout = self._dashboard_planejamento_layout
+        corpo_metas = refs["operacao"]
+        acao_layout = recomendacao.layout()
+
+        if usar:
+            # Guardar as margens uma única vez para reversão segura de tema.
+            if not hasattr(self, "_dashboard_hero_original_foco"):
+                l = self._dashboard_foco_card_layout
+                m = l.contentsMargins()
+                self._dashboard_hero_original_foco = (
+                    (m.left(), m.top(), m.right(), m.bottom()), l.spacing()
+                )
+
+            # Novo arranjo em duas colunas inspirado no esquema simplificado:
+            # recomendação em destaque à esquerda, foco no topo direito e,
+            # abaixo, progresso e planejamento lado a lado.
+            topo.removeWidget(plano)
+            topo.removeWidget(foco)
+            antiga_inferior.removeWidget(recomendacao)
+            antiga_inferior.removeWidget(progresso)
+            if not hasattr(self, "_dashboard_hero_direita"):
+                direita = QWidget(self.dashboard_hoje_painel)
+                direita.setObjectName("dashboardHeroRightColumn")
+                coluna = QVBoxLayout(direita)
+                coluna.setContentsMargins(0, 0, 0, 0)
+                coluna.setSpacing(8)
+                self._dashboard_hero_direita = direita
+                self._dashboard_hero_coluna = coluna
+            if not hasattr(self, "_dashboard_hero_bottom_row"):
+                faixa = QWidget(self.dashboard_hoje_painel)
+                faixa.setObjectName("dashboardHeroBottomRow")
+                linha = QHBoxLayout(faixa)
+                linha.setContentsMargins(0, 0, 0, 0)
+                linha.setSpacing(8)
+                self._dashboard_hero_bottom_row = faixa
+                self._dashboard_hero_bottom_layout = linha
+            direita = self._dashboard_hero_direita
+            coluna = self._dashboard_hero_coluna
+            faixa = self._dashboard_hero_bottom_row
+            linha = self._dashboard_hero_bottom_layout
+            coluna.addWidget(foco)
+            coluna.addWidget(faixa)
+            # Mantém a dupla de baixo logo após o Foco. Sem este alinhamento,
+            # a coluna distribui o excesso de altura em um vazio central.
+            coluna.setAlignment(Qt.AlignTop)
+            direita.setFixedHeight(382)
+            linha.addWidget(progresso, 1)
+            linha.addWidget(plano, 1)
+            topo.addWidget(recomendacao, 56)
+            topo.addWidget(direita, 44)
+            topo.setAlignment(recomendacao, Qt.AlignTop)
+            topo.setAlignment(direita, Qt.AlignTop)
+            topo.setStretch(0, 56)
+            topo.setStretch(1, 44)
+            topo.setSpacing(12)
+            raiz.setSpacing(0)
+            direita.show()
+            faixa.show()
+
+            # Hero: a arte recebe o conteúdo, não substitui widgets funcionais.
+            recomendacao.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+            recomendacao.setMinimumHeight(382)
+            recomendacao.setMaximumHeight(382)
+            recomendacao.set_hero_enabled(True)
+            if getattr(self, "_dashboard_hero_cabecalho", None) is not None:
+                self._dashboard_hero_cabecalho.hide()
+            for widget in self._dashboard_algo_header_widgets:
+                widget.hide()
+            acao_layout.setContentsMargins(20, 10, 20, 14)
+            acao_layout.setSpacing(1)
+            # Sem cabeçalho adicional: a faixa superior já vem pronta na arte.
+            # O bloco funcional permanece na metade inferior do card.
+            acao_layout.setStretch(1, 1)
+            acao_layout.setStretch(3, 0)
+            corpo = recomendacao.findChild(QFrame, "algorithmRecommendationBody")
+            if corpo is not None:
+                corpo.setStyleSheet(
+                    "QFrame#algorithmRecommendationBody {background:transparent;"
+                    "border:none;border-radius:0px;}"
+                )
+                corpo.setMaximumHeight(126)
+                corpo.setMinimumHeight(108)
+                corpo.layout().setContentsMargins(0, 0, 0, 0)
+                corpo.layout().setVerticalSpacing(5)
+            self.dashboard_algoritmo_pronto.setStyleSheet(
+                "font-size:16px;font-weight:700;color:#F2F9FF;"
+                "background:transparent;border:none;"
+            )
+            self.dashboard_hoje_um_clique.setMinimumWidth(0)
+            self.dashboard_hoje_um_clique.setMaximumWidth(16777215)
+            self.dashboard_hoje_um_clique.setFixedHeight(42)
+            self.dashboard_hoje_um_clique.setStyleSheet(
+                "QPushButton#dashboardTodayPrimaryButton {"
+                "color:#FFFFFF;font-size:17px;font-weight:700;"
+                "background:qlineargradient(x1:0,y1:0,x2:1,y2:0,"
+                "stop:0 #048cc6,stop:0.5 #04aff4,stop:1 #088ac6);"
+                "border:2px solid #00DDF5;border-radius:12px;padding:4px 12px;}"
+                "QPushButton#dashboardTodayPrimaryButton:hover {"
+                "background:#15B5E7;border-color:#61EDFF;}"
+            )
+            self.dashboard_hoje_botao.setStyleSheet(
+                "QPushButton#dashboardTodayButton {background:transparent;"
+                "border:none;color:#DBEAF9;font-size:13px;text-decoration:underline;}"
+            )
+
+            # Coluna Foco: eliminar duplicações visuais, sem eliminar registros.
+            foco.setMinimumHeight(158)
+            foco.setMaximumHeight(170)
+            self._dashboard_foco_card_layout.setContentsMargins(14, 9, 14, 9)
+            self._dashboard_foco_card_layout.setSpacing(3)
+            self._dashboard_foco_descricao_widget.hide()
+            self.dashboard_focus_best_week.hide()
+            self.dashboard_iniciar_foco.setFixedHeight(38)
+            # Progresso conserva o layout vertical e XP/conquistas dinamicos.
+            progresso.setMinimumHeight(186)
+            progresso.setMaximumHeight(198)
+            progresso_layout.setDirection(QBoxLayout.TopToBottom)
+            progresso_layout.setContentsMargins(13, 9, 13, 9)
+            progresso_layout.setSpacing(4)
+            refs["progresso_botao"].setMinimumWidth(0)
+            refs["progresso_botao"].setMaximumWidth(16777215)
+            refs["progresso_botao"].setFixedHeight(34)
+
+            # Planejamento: meta acima dos indicadores, não estreitada em coluna.
+            if not hasattr(self, "_dashboard_planejamento_compacto_widget"):
+                wrapper = QWidget(plano_card)
+                wrapper.setObjectName("dashboardPlanningCompactBody")
+                h = QHBoxLayout(wrapper)
+                h.setContentsMargins(0, 0, 0, 0)
+                h.setSpacing(6)
+                compat = self._dashboard_planejamento_compat
+                compat.setObjectName("dashboardPlanningInlineMetric")
+                cv = QVBoxLayout(compat)
+                cv.setContentsMargins(0, 0, 0, 0)
+                cv.setSpacing(3)
+                subt = QLabel("META DE QUESTÕES", compat)
+                subt.setStyleSheet("color:#00CDEA;font-size:11px;")
+                self.dashboard_planejamento_resumo_meta_diaria.setStyleSheet(
+                    "color:#F3FAFF;font-size:19px;font-weight:700;"
+                )
+                self.dashboard_resumo_meta_barra.setFixedHeight(7)
+                cv.addWidget(subt)
+                cv.addWidget(self.dashboard_planejamento_resumo_meta_diaria)
+                cv.addWidget(self.dashboard_resumo_meta_barra)
+                cv.addWidget(self.dashboard_planejamento_resumo_meta_diaria_detalhe)
+                h.addWidget(compat, 1)
+                self._dashboard_planejamento_compacto_widget = wrapper
+                self._dashboard_planejamento_compacto_layout = h
+            wrapper = self._dashboard_planejamento_compacto_widget
+            plan_layout.removeWidget(corpo_metas)
+            self._dashboard_planejamento_compacto_layout.addWidget(corpo_metas, 2)
+            self._dashboard_planejamento_compacto_layout.setDirection(QBoxLayout.TopToBottom)
+            plan_layout.insertWidget(2, wrapper)
+            self._dashboard_planejamento_meta_titulo.hide()
+            self.dashboard_planejamento_meta_gauge.hide()
+            self._dashboard_planejamento_compat.show()
+            wrapper.show()
+            plan_layout.setContentsMargins(12, 8, 12, 8)
+            plan_layout.setSpacing(2)
+            plano.setMinimumHeight(186)
+            plano.setMaximumHeight(198)
+            plano_card.setMinimumHeight(186)
+            plano_card.setMaximumHeight(198)
+            self.dashboard_planejamento_resumo_botao.setFixedHeight(31)
+            self.dashboard_planejamento_resumo_botao.setMaximumWidth(16777215)
+
+            # O portal inicial continua com o proprio cabeçalho. No Dashboard,
+            # a referencia R7 inclui a faixa discreta e a busca.
+            self.dashboard_quick_nav.setVisible(True)
+        else:
+            # Reversão para Claro/Escuro ou largura estreita sem recriar cards.
+            topo.removeWidget(recomendacao)
+            topo.removeWidget(self._dashboard_hero_direita)
+            coluna = self._dashboard_hero_coluna
+            coluna.removeWidget(foco)
+            if hasattr(self, "_dashboard_hero_bottom_layout"):
+                self._dashboard_hero_bottom_layout.removeWidget(progresso)
+                self._dashboard_hero_bottom_layout.removeWidget(plano)
+            if hasattr(self, "_dashboard_hero_bottom_row"):
+                coluna.removeWidget(self._dashboard_hero_bottom_row)
+                self._dashboard_hero_bottom_row.hide()
+            self._dashboard_hero_direita.setMinimumHeight(0)
+            self._dashboard_hero_direita.setMaximumHeight(16777215)
+            self._dashboard_hero_direita.hide()
+            topo.addWidget(foco, 13)
+            topo.addWidget(plano, 12)
+            topo.setStretch(0, 13)
+            topo.setStretch(1, 12)
+            topo.setSpacing(14)
+            antiga_inferior.addWidget(recomendacao, 17)
+            antiga_inferior.addWidget(progresso, 8)
+            antiga_inferior.setStretch(0, 17)
+            antiga_inferior.setStretch(1, 8)
+            raiz.setSpacing(6)
+            recomendacao.set_hero_enabled(False)
+            if getattr(self, "_dashboard_hero_cabecalho", None) is not None:
+                self._dashboard_hero_cabecalho.hide()
+            for widget in self._dashboard_algo_header_widgets:
+                widget.show()
+            acao_layout.setContentsMargins(17, 13, 17, 13)
+            acao_layout.setSpacing(6)
+            acao_layout.setStretch(1, 1)
+            acao_layout.setStretch(3, 1)
+            self.dashboard_algoritmo_pronto.setStyleSheet("")
+            self.dashboard_hoje_um_clique.setStyleSheet("")
+            self.dashboard_hoje_botao.setStyleSheet("")
+            corpo = recomendacao.findChild(QFrame, "algorithmRecommendationBody")
+            if corpo is not None:
+                corpo.setMinimumHeight(96)
+                corpo.setMaximumHeight(16777215)
+                corpo.layout().setContentsMargins(12, 7, 12, 7)
+                corpo.layout().setVerticalSpacing(4)
+            foco.setMinimumHeight(320)
+            foco.setMaximumHeight(16777215)
+            margens, spacing = self._dashboard_hero_original_foco
+            self._dashboard_foco_card_layout.setContentsMargins(*margens)
+            self._dashboard_foco_card_layout.setSpacing(spacing)
+            self._dashboard_foco_descricao_widget.show()
+            self.dashboard_focus_best_week.show()
+            progresso_layout.setDirection(QBoxLayout.TopToBottom)
+            progresso_layout.setContentsMargins(14, 11, 14, 10)
+            progresso_layout.setSpacing(7)
+            progresso.setMinimumHeight(211)
+            progresso.setMaximumHeight(16777215)
+            refs["progresso_botao"].setMinimumWidth(0)
+            refs["progresso_botao"].setMaximumWidth(16777215)
+            refs["progresso_botao"].setFixedHeight(37 if futurista else 32)
+            plan_layout.removeWidget(wrapper)
+            self._dashboard_planejamento_compacto_layout.removeWidget(corpo_metas)
+            plan_layout.insertWidget(2, corpo_metas)
+            wrapper.hide()
+            self._dashboard_planejamento_compat.hide()
+            self._dashboard_planejamento_meta_titulo.show()
+            self.dashboard_planejamento_meta_gauge.show()
+            plan_layout.setContentsMargins(18, 13, 18, 13)
+            plan_layout.setSpacing(5)
+            plano.setMinimumHeight(320)
+            plano.setMaximumHeight(16777215)
+            plano_card.setMinimumHeight(320)
+            plano_card.setMaximumHeight(16777215)
+            self.dashboard_quick_nav.setVisible(not futurista)
+
+        self._dashboard_modelo_reordenado = usar
+        self._dashboard_hero_reordenado = usar
+        raiz.invalidate()
+        topo.invalidate()
+        antiga_inferior.invalidate()
+        progresso_layout.invalidate()
+        plan_layout.invalidate()
+
+    def _ajustar_altura_independente_recomendacao(self, futurista):
+        """Encurta somente a Recomendação; preserva geometria do Progresso.
+
+        Os cards continuam irmãos da mesma linha. O Progresso define a altura
+        da linha e a Recomendação ocupa apenas a faixa superior dela. O ajuste
+        compacto aplica-se ao Futurista com largura >= 1200 px; em janelas
+        menores e nos demais temas restauramos os parâmetros de origem.
+        """
+        # O Hero tem altura independente definida em _ajustar_composicao_
+        # dashboard_futurista(). A antiga regra abaixo força 640 px e
+        # desfaz a compactação, gerando uma faixa vazia à direita.
+        if getattr(self, "_dashboard_hero_reordenado", False):
+            return
+        card = getattr(self, "dashboard_hoje_acao", None)
+        linha = getattr(self, "_dashboard_recomendacao_linha", None)
+        if card is None or linha is None:
+            return
+        corpo = card.findChild(QFrame, "algorithmRecommendationBody")
+        if corpo is None:
+            return
+        externo = card.layout()
+        interno = corpo.layout()
+        if externo is None or interno is None:
+            return
+
+        def margens(layout):
+            m = layout.contentsMargins()
+            return (m.left(), m.top(), m.right(), m.bottom())
+
+        if not hasattr(self, "_dashboard_recomendacao_altura_base"):
+            self._dashboard_recomendacao_altura_base = {
+                "margens_externas": margens(externo),
+                "espacamento_externo": externo.spacing(),
+                "margens_internas": margens(interno),
+                "espacamento_interno": interno.spacing(),
+                "min_corpo": corpo.minimumHeight(),
+                "min_card": card.minimumHeight(),
+                "min_link": self.dashboard_hoje_botao.minimumHeight(),
+                "altura_cta": self.dashboard_hoje_um_clique.minimumHeight(),
+                "min_largura_cta": self.dashboard_hoje_um_clique.minimumWidth(),
+                "max_largura_cta": self.dashboard_hoje_um_clique.maximumWidth(),
+                "max_corpo": corpo.maximumHeight(),
+                "max_largura_corpo": corpo.maximumWidth(),
+                "estilo_corpo": corpo.styleSheet(),
+                "alinhamento_pronto": self.dashboard_algoritmo_pronto.alignment(),
+            }
+        reduzida = bool(futurista and self.width() >= 1200 and not getattr(
+            self, "_dashboard_modelo_reordenado", False
+        ))
+        pronto = self.dashboard_algoritmo_pronto
+        link = self.dashboard_hoje_botao
+        cta = self.dashboard_hoje_um_clique
+        grade = self._dashboard_recomendacao_grade
+        # A troca de posicoes ocorre so quando muda o modo. Nao recria
+        # botoes, nao altera sinais e nao toca no card "Seu progresso".
+        if reduzida != self._dashboard_recomendacao_horizontal:
+            for item in (pronto, link, cta):
+                grade.removeWidget(item)
+            if reduzida:
+                # Esquerda: indicacao e link. Direita: acao principal.
+                grade.addWidget(pronto, 0, 0, 1, 1, Qt.AlignLeft | Qt.AlignVCenter)
+                grade.addWidget(link, 1, 0, 1, 1, Qt.AlignLeft | Qt.AlignVCenter)
+                grade.addWidget(cta, 0, 1, 2, 1, Qt.AlignRight | Qt.AlignVCenter)
+            else:
+                grade.addWidget(pronto, 0, 0, 1, 2, Qt.AlignCenter)
+                grade.addWidget(cta, 1, 0, 1, 2, Qt.AlignHCenter)
+                grade.addWidget(link, 2, 0, 1, 2, Qt.AlignCenter)
+            self._dashboard_recomendacao_horizontal = reduzida
+
+        if reduzida:
+            externo.setContentsMargins(14, 9, 14, 9)
+            externo.setSpacing(3)
+            grade.setContentsMargins(6, 0, 6, 0)
+            grade.setHorizontalSpacing(12)
+            grade.setVerticalSpacing(2)
+            corpo.setMinimumHeight(0)
+            corpo.setMaximumHeight(78)
+            corpo.setMaximumWidth(16777215)
+            # O QFrame continua existindo para o layout, mas sem quadrante
+            # visivel. Textos e CTA ficam diretamente sobre o card externo.
+            corpo.setStyleSheet(
+                "QFrame#algorithmRecommendationBody {"
+                "background: transparent; border: none; border-radius: 0px; }"
+            )
+            externo.setAlignment(corpo, Qt.AlignmentFlag(0))
+            pronto.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            link.setMinimumHeight(22)
+            cta.setMinimumWidth(220)
+            cta.setMaximumWidth(250)
+            cta.setFixedHeight(42)
+            card.setFixedHeight(185)
+            linha.setAlignment(card, Qt.AlignTop)
+        else:
+            base = self._dashboard_recomendacao_altura_base
+            externo.setContentsMargins(*base["margens_externas"])
+            externo.setSpacing(base["espacamento_externo"])
+            grade.setContentsMargins(*base["margens_internas"])
+            grade.setSpacing(base["espacamento_interno"])
+            corpo.setMinimumHeight(base["min_corpo"])
+            corpo.setMaximumHeight(base["max_corpo"])
+            corpo.setMaximumWidth(base["max_largura_corpo"])
+            corpo.setStyleSheet(base["estilo_corpo"])
+            externo.setAlignment(corpo, Qt.AlignmentFlag(0))
+            pronto.setAlignment(base["alinhamento_pronto"])
+            link.setMinimumHeight(base["min_link"])
+            cta.setMinimumWidth(base["min_largura_cta"])
+            cta.setMaximumWidth(base["max_largura_cta"])
+            cta.setFixedHeight(base["altura_cta"])
+            card.setMinimumHeight(base["min_card"])
+            card.setMaximumHeight(16777215)
+            card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+            linha.setAlignment(card, Qt.AlignmentFlag(0))
+        if getattr(self, "_dashboard_modelo_reordenado", False):
+            # Hero R7: tamanho responsivo ao cartão alto, sem comprometer o
+            # Foco e sem recriar a instância conectada ao algoritmo.
+            if getattr(self, "_dashboard_hero_reordenado", False):
+                grade.removeWidget(cta)
+                grade.addWidget(cta, 1, 0, 1, 2, Qt.AlignVCenter)
+                externo.setContentsMargins(35, 29, 35, 32)
+                externo.setSpacing(8)
+                interno.setContentsMargins(0, 0, 0, 0)
+                interno.setVerticalSpacing(11)
+                corpo.setStyleSheet(
+                    "QFrame#algorithmRecommendationBody {background:transparent;"
+                    "border:none;border-radius:0px;}"
+                )
+                corpo.setMinimumHeight(136)
+                corpo.setMaximumHeight(166)
+                cta.setMinimumWidth(0)
+                cta.setMaximumWidth(16777215)
+                cta.setFixedHeight(50)
+                card.setMinimumHeight(640)
+                card.setMaximumHeight(16777215)
+                externo.invalidate()
+                grade.invalidate()
+                return
+            # Modelo novo: botão largo no rodapé interno, como Iniciar Foco.
+            if self._dashboard_recomendacao_horizontal:
+                raise RuntimeError("O Dashboard reordenado deve estar em modo vertical")
+            grade.removeWidget(cta)
+            grade.addWidget(cta, 1, 0, 1, 2, Qt.AlignVCenter)
+            cta.setMinimumWidth(0)
+            cta.setMaximumWidth(16777215)
+            cta.setFixedHeight(42)
+            card.setMinimumHeight(285)
+            card.setMaximumHeight(16777215)
+        externo.invalidate()
+        grade.invalidate()
+        linha.invalidate()
 
     def _estilizar_cabecalho_premium(self, tema):
         """Acabamento do cabeçalho do portal Início, sem QSS global.
@@ -35630,6 +36245,11 @@ class SistemaEstudos(QMainWindow):
             aplicar_estilo_portal_disciplinas(self.tela_portal_disciplinas, self.tema_atual)
             aplicar_estilo_cabecalho_dashboard(self.dashboard_quick_nav, self.tema_atual)
             self._estilizar_cabecalho_premium(self.tema_atual)
+            if hasattr(self, "tela_estatisticas"):
+                aplicar_estilo_estatisticas_premium(
+                    self.tela_estatisticas, self.tema_atual
+                )
+                self.tela_estatisticas.update()
             self._portal_tema_estilizado = self.tema_atual
         # A busca do portal Início permanece visível no Futurista: ela compõe
         # o cabeçalho da tela inicial independentemente da lateral textual.
@@ -35644,6 +36264,13 @@ class SistemaEstudos(QMainWindow):
         divisor_busca = getattr(self, "_premium_busca_divisor", None)
         if divisor_busca is not None:
             divisor_busca.setVisible(largura >= 1130)
+        # A faixa de marca/busca do Dashboard (diferente do cabeçalho
+        # completo do portal Inicio) fica oculta somente no Futurista.
+        # Ao alterar de tema, restaurar o comportamento anterior dos demais
+        # temas. O Qt retira um widget oculto do cálculo de altura do layout.
+        cabecalho_auxiliar = getattr(self, "dashboard_quick_nav", None)
+        if cabecalho_auxiliar is not None:
+            cabecalho_auxiliar.setVisible((not futurista) or bool(getattr(self, "_dashboard_hero_reordenado", False)))
         # Ações duplicadas no rodapé não ocupam mais o Dashboard Futurista.
         # Nos temas sem lateral e em janelas onde a lateral não aparece,
         # o rodapé original permanece funcional e acessível.
@@ -36674,6 +37301,7 @@ class SistemaEstudos(QMainWindow):
         requerido = int(snapshot.get("level_required_xp") or 250)
         if hasattr(self, "dashboard_progress_badge"):
             self.dashboard_progress_badge.setText(str(nivel))
+            self.dashboard_progress_badge.setProgress(taxa)
         if hasattr(self, "dashboard_progress_nivel"):
             self.dashboard_progress_nivel.setText(f"Nível {nivel}")
         if hasattr(self, "dashboard_progress_xp"):
@@ -37248,6 +37876,11 @@ class SistemaEstudos(QMainWindow):
 
         conteudo = DashboardAmbientCanvas()
         conteudo.setObjectName("dashboardRoot")
+        self.dashboard_visual_root = conteudo
+        conteudo.setStyleSheet(
+            dashboard_visual_styles(self.tema_atual)
+            + _estilo_metricas_rapidas_planejamento(self.tema_atual)
+        )
 
         layout = QVBoxLayout(
             conteudo
@@ -37256,14 +37889,14 @@ class SistemaEstudos(QMainWindow):
         # Compactação vertical do Dashboard: preserva a mesma hierarquia visual,
         # mas mantém a ação principal visível em telas com menor altura útil.
         layout.setContentsMargins(
-            28,
+            20,
             16,
-            28,
+            20,
             20
         )
 
         layout.setSpacing(
-            10
+            14
         )
         self._dashboard_root_layout = layout
 
@@ -37476,6 +38109,12 @@ class SistemaEstudos(QMainWindow):
         )
         aplicar_estilo_cabecalho_dashboard(self.dashboard_quick_nav, self.tema_atual)
         layout.addWidget(self.dashboard_quick_nav)
+        # Futurista: a navegacao lateral ja oferece acesso as telas e a
+        # busca global permanece no Ctrl+K. Esconder este widget faz o
+        # QVBoxLayout recolher automaticamente a altura da faixa superior.
+        self.dashboard_quick_nav.setVisible(
+            normalizar_tema(self.tema_atual) != "futurista"
+        )
 
         # ====================================================
         # FOCO — gestão do tempo de concentração
@@ -37492,10 +38131,10 @@ class SistemaEstudos(QMainWindow):
         foco_painel_layout = QVBoxLayout(
             self.dashboard_hoje_painel
         )
-        foco_painel_layout.setContentsMargins(
-            12, 8, 12, 8
-        )
-        foco_painel_layout.setSpacing(5)
+        # A linha superior e a inferior devem começar/terminar nas
+        # mesmas colunas. O wrapper estrutural não deve adicionar bordas.
+        foco_painel_layout.setContentsMargins(0, 0, 0, 0)
+        foco_painel_layout.setSpacing(0)
         self._dashboard_foco_painel_layout = foco_painel_layout
 
         # O cabeçalho externo "Foco" foi removido para eliminar redundância
@@ -37559,8 +38198,33 @@ class SistemaEstudos(QMainWindow):
         )
         self.dashboard_focus_metric_goal.setVisible(False)
 
+        # Os ícones da referência são pictogramas ciano em pastilhas iguais.
+        # Recolorir somente os ícones do Dashboard impede que o branco do
+        # pacote FontAwesome contraste com os outros títulos no Futurista.
+        def _icone_card_dashboard(rotulo, identificador, tamanho=22):
+            icone = criar_icone(
+                identificador, tema=self.tema_atual, papel="destaque"
+            )
+            if icone.isNull():
+                return
+            pixmap = icone.pixmap(QSize(tamanho, tamanho))
+            if pixmap.isNull():
+                return
+            if normalizar_tema(self.tema_atual) in ("futurista", "escuro"):
+                resultado = QPixmap(pixmap.size())
+                resultado.fill(Qt.transparent)
+                pintor = QPainter(resultado)
+                pintor.drawPixmap(0, 0, pixmap)
+                pintor.setCompositionMode(QPainter.CompositionMode_SourceIn)
+                pintor.fillRect(resultado.rect(), QColor("#00CDEA"))
+                pintor.end()
+                pixmap = resultado
+            rotulo.setText("")
+            rotulo.setPixmap(pixmap)
+
         foco_cards = QHBoxLayout()
-        foco_cards.setSpacing(8)
+        foco_cards.setContentsMargins(0, 0, 0, 0)
+        foco_cards.setSpacing(14)
         self._dashboard_primeira_linha = foco_cards
 
         # ----------------------------------------------------
@@ -37570,16 +38234,16 @@ class SistemaEstudos(QMainWindow):
         foco_hoje.setObjectName(
             "focusDashboardMainCard"
         )
-        foco_hoje.setMinimumHeight(174)
+        foco_hoje.setMinimumHeight(320)
         foco_hoje.setSizePolicy(
             QSizePolicy.Expanding,
             QSizePolicy.Expanding,
         )
         foco_hoje_layout = QVBoxLayout(foco_hoje)
         foco_hoje_layout.setContentsMargins(
-            14, 10, 14, 10
+            22, 17, 22, 17
         )
-        foco_hoje_layout.setSpacing(5)
+        foco_hoje_layout.setSpacing(6)
         self._dashboard_foco_card_layout = foco_hoje_layout
 
         foco_cabecalho = QHBoxLayout()
@@ -37588,7 +38252,8 @@ class SistemaEstudos(QMainWindow):
         foco_card_icone = QLabel("◉")
         foco_card_icone.setObjectName("focusDashboardCardIcon")
         foco_card_icone.setAlignment(Qt.AlignCenter)
-        foco_card_icone.setFixedSize(34, 34)
+        foco_card_icone.setFixedSize(42, 42)
+        _icone_card_dashboard(foco_card_icone, "fa5s.bullseye", 22)
 
         foco_card_titulos = QHBoxLayout()
         foco_card_titulos.setSpacing(7)
@@ -37659,12 +38324,12 @@ class SistemaEstudos(QMainWindow):
         self.dashboard_hoje_foco_barra.setVisible(False)
 
         self.dashboard_iniciar_foco = QPushButton(
-            "▶  Iniciar Foco"
+            "▶  Iniciar Foco  →"
         )
         self.dashboard_iniciar_foco.setObjectName(
             "dashboardFocusPrimaryButton"
         )
-        self.dashboard_iniciar_foco.setMinimumHeight(36)
+        self.dashboard_iniciar_foco.setMinimumHeight(42)
         self.dashboard_iniciar_foco.setCursor(
             Qt.PointingHandCursor
         )
@@ -37676,15 +38341,19 @@ class SistemaEstudos(QMainWindow):
         )
 
         foco_hoje_layout.addLayout(foco_cabecalho)
-        foco_hoje_layout.addWidget(foco_descricao)
+        foco_descricao_linha = QHBoxLayout()
+        foco_descricao_linha.setContentsMargins(0, 0, 0, 0)
+        foco_descricao_linha.addSpacing(51)
+        foco_descricao_linha.addWidget(foco_descricao, 1)
+        foco_hoje_layout.addLayout(foco_descricao_linha)
         foco_hoje_layout.addLayout(foco_valor_linha)
         # Objetivo diário + histórico recente de foco.
         foco_objetivo_box = QFrame()
         foco_objetivo_box.setObjectName("dashboardQuickAccess")
         foco_objetivo_box.setProperty("embedded", True)
         foco_objetivo_layout = QVBoxLayout(foco_objetivo_box)
-        foco_objetivo_layout.setContentsMargins(10, 6, 10, 6)
-        foco_objetivo_layout.setSpacing(3)
+        foco_objetivo_layout.setContentsMargins(15, 12, 15, 12)
+        foco_objetivo_layout.setSpacing(6)
 
         objetivo_topo = QHBoxLayout()
         objetivo_topo.setSpacing(8)
@@ -37709,6 +38378,7 @@ class SistemaEstudos(QMainWindow):
         foco_objetivo_layout.addWidget(self.dashboard_focus_last_session)
         foco_objetivo_layout.addWidget(self.dashboard_focus_best_week)
 
+        self._dashboard_foco_descricao_widget = foco_descricao
         foco_hoje_layout.addWidget(foco_objetivo_box)
         foco_hoje_layout.addStretch(1)
         foco_hoje_layout.addWidget(
@@ -37716,87 +38386,112 @@ class SistemaEstudos(QMainWindow):
         )
 
         # ----------------------------------------------------
-        # Seu progresso — gamificação compacta e útil
+        # Seu progresso — bloco visual em quatro faixas:
+        # cabeçalho, nível/XP, conquistas e ação. Mantém todos os
+        # indicadores dinâmicos e o funcionamento originais.
         # ----------------------------------------------------
         progresso_card = QFrame()
         progresso_card.setObjectName("focusQuickCard")
         progresso_card.setProperty("cardRole", "progress")
-        progresso_card.setMinimumHeight(174)
+        progresso_card.setMinimumHeight(208)
         progresso_card.setSizePolicy(
             QSizePolicy.Expanding,
             QSizePolicy.Expanding,
         )
         progresso_layout = QVBoxLayout(progresso_card)
-        progresso_layout.setContentsMargins(14, 10, 14, 10)
-        progresso_layout.setSpacing(5)
+        progresso_layout.setContentsMargins(14, 11, 14, 10)
+        progresso_layout.setSpacing(7)
 
+        # Faixa 1: título e subtítulo sem cruzar com o conteúdo de XP.
         progresso_topo = QHBoxLayout()
-        progresso_topo.setSpacing(8)
+        progresso_topo.setContentsMargins(0, 0, 0, 0)
+        progresso_topo.setSpacing(10)
         progresso_icone = QLabel("✦")
         progresso_icone.setObjectName("focusQuickIcon")
         progresso_icone.setAlignment(Qt.AlignCenter)
-        progresso_icone.setFixedSize(34, 34)
+        progresso_icone.setFixedSize(38, 38)
+        _icone_card_dashboard(progresso_icone, "fa5s.chart-bar", 20)
+
+        progresso_titulos = QVBoxLayout()
+        progresso_titulos.setContentsMargins(0, 0, 0, 0)
+        progresso_titulos.setSpacing(2)
         progresso_titulo = QLabel("Seu progresso")
         progresso_titulo.setObjectName("focusDashboardCardTitle")
-        progresso_topo.addWidget(progresso_icone)
-        progresso_topo.addWidget(progresso_titulo, 1)
-        progresso_layout.addLayout(progresso_topo)
-
-        progresso_descricao = QLabel(
-            "Nível, XP, conquistas e próximo marco."
-        )
+        progresso_descricao = QLabel("Nível, XP, conquistas e próximo marco.")
         progresso_descricao.setObjectName("focusDashboardDescription")
         progresso_descricao.setWordWrap(True)
-        progresso_layout.addWidget(progresso_descricao)
+        progresso_titulos.addWidget(progresso_titulo)
+        progresso_titulos.addWidget(progresso_descricao)
+        progresso_topo.addWidget(progresso_icone, 0, Qt.AlignTop)
+        progresso_topo.addLayout(progresso_titulos, 1)
+        progresso_layout.addLayout(progresso_topo)
 
-        nivel_linha = QHBoxLayout()
-        nivel_linha.setSpacing(10)
-        self.dashboard_progress_badge = QLabel("1")
+        # Faixa 2: círculo + nível/XP à esquerda, progresso de XP à direita.
+        # Nunca comprimir as conquistas dentro desta mesma linha.
+        progresso_corpo = QHBoxLayout()
+        progresso_corpo.setContentsMargins(0, 0, 0, 0)
+        progresso_corpo.setSpacing(12)
+
+        progresso_identidade = QHBoxLayout()
+        progresso_identidade.setContentsMargins(0, 0, 0, 0)
+        progresso_identidade.setSpacing(8)
+        self.dashboard_progress_badge = DashboardLevelArcWidget("1")
         self.dashboard_progress_badge.setObjectName("dashboardProgressBadge")
-        self.dashboard_progress_badge.setAlignment(Qt.AlignCenter)
-        self.dashboard_progress_badge.setFixedSize(40, 40)
-        nivel_linha.addWidget(self.dashboard_progress_badge, 0, Qt.AlignVCenter)
+        self.dashboard_progress_badge.setFixedSize(46, 46)
+        progresso_identidade.addWidget(
+            self.dashboard_progress_badge, 0, Qt.AlignVCenter
+        )
 
-        nivel_textos = QVBoxLayout()
-        nivel_textos.setSpacing(0)
+        progresso_nivel_coluna = QVBoxLayout()
+        progresso_nivel_coluna.setContentsMargins(0, 0, 0, 0)
+        progresso_nivel_coluna.setSpacing(2)
         self.dashboard_progress_nivel = QLabel("Nível 1")
         self.dashboard_progress_nivel.setObjectName("focusDashboardCardTitle")
+        self.dashboard_progress_nivel.setMinimumWidth(65)
         self.dashboard_progress_xp = QLabel("0 XP")
         self.dashboard_progress_xp.setObjectName("focusDashboardDetail")
-        nivel_textos.addWidget(self.dashboard_progress_nivel)
-        nivel_textos.addWidget(self.dashboard_progress_xp)
-        nivel_linha.addLayout(nivel_textos, 1)
-        progresso_layout.addLayout(nivel_linha)
+        progresso_nivel_coluna.addWidget(self.dashboard_progress_nivel)
+        progresso_nivel_coluna.addWidget(self.dashboard_progress_xp)
+        progresso_identidade.addLayout(progresso_nivel_coluna)
+        progresso_corpo.addLayout(progresso_identidade, 0)
 
+        progresso_xp_coluna = QVBoxLayout()
+        progresso_xp_coluna.setContentsMargins(0, 7, 0, 0)
+        progresso_xp_coluna.setSpacing(5)
         self.dashboard_progress_barra = QProgressBar()
         self.dashboard_progress_barra.setObjectName("dashboardTodayProgress")
         self.dashboard_progress_barra.setRange(0, 100)
         self.dashboard_progress_barra.setValue(0)
         self.dashboard_progress_barra.setTextVisible(False)
         self.dashboard_progress_barra.setFixedHeight(8)
-        progresso_layout.addWidget(self.dashboard_progress_barra)
-
+        self.dashboard_progress_barra.setMinimumWidth(80)
         self.dashboard_progress_detalhe = QLabel("0 / 250 XP para o nível 2")
         self.dashboard_progress_detalhe.setObjectName("focusQuickHint")
-        progresso_layout.addWidget(self.dashboard_progress_detalhe)
+        self.dashboard_progress_detalhe.setWordWrap(True)
+        progresso_xp_coluna.addWidget(self.dashboard_progress_barra)
+        progresso_xp_coluna.addWidget(self.dashboard_progress_detalhe)
+        progresso_corpo.addLayout(progresso_xp_coluna, 1)
+        progresso_layout.addLayout(progresso_corpo)
 
-        progresso_marcos_linha = QHBoxLayout()
-        progresso_marcos_linha.setSpacing(10)
+        # Faixa 3: conquistas têm a largura completa do cartão, para que
+        # títulos variáveis não fiquem apertados junto à barra de XP.
+        progresso_conquistas_linha = QVBoxLayout()
+        progresso_conquistas_linha.setContentsMargins(0, 0, 0, 0)
+        progresso_conquistas_linha.setSpacing(3)
         self.dashboard_progress_conquistas = QLabel("🏆 0/0 conquistas")
         self.dashboard_progress_conquistas.setObjectName("focusDashboardDetail")
-        progresso_marcos_linha.addWidget(self.dashboard_progress_conquistas, 0)
-        progresso_marcos_linha.addStretch(1)
-        progresso_layout.addLayout(progresso_marcos_linha)
-
         self.dashboard_progress_proxima = QLabel("Próxima conquista: —")
         self.dashboard_progress_proxima.setObjectName("focusDashboardDetail")
         self.dashboard_progress_proxima.setWordWrap(True)
-        progresso_layout.addWidget(self.dashboard_progress_proxima)
-        progresso_layout.addStretch(1)
+        progresso_conquistas_linha.addWidget(self.dashboard_progress_conquistas)
+        progresso_conquistas_linha.addWidget(self.dashboard_progress_proxima)
+        progresso_layout.addLayout(progresso_conquistas_linha)
 
+        # Faixa 4: ação ancorada ao rodapé, independente da altura do texto.
+        progresso_layout.addStretch(1)
         botao_ver_conquistas = QPushButton("Ver conquistas  →")
         botao_ver_conquistas.setObjectName("subtleButton")
-        botao_ver_conquistas.setMinimumHeight(32)
+        botao_ver_conquistas.setFixedHeight(32)
         botao_ver_conquistas.setCursor(Qt.PointingHandCursor)
         botao_ver_conquistas.clicked.connect(
             lambda: self.abrir_estatisticas("Conquistas")
@@ -37810,15 +38505,25 @@ class SistemaEstudos(QMainWindow):
         self.dashboard_planejamento_top_container.setObjectName(
             "dashboardPlanningTopContainer"
         )
+        self.dashboard_planejamento_top_container.setMinimumHeight(320)
+        self.dashboard_planejamento_top_container.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Expanding
+        )
         self.dashboard_planejamento_top_layout = QVBoxLayout(
             self.dashboard_planejamento_top_container
         )
         self.dashboard_planejamento_top_layout.setContentsMargins(0, 0, 0, 0)
         self.dashboard_planejamento_top_layout.setSpacing(0)
 
-        foco_cards.addWidget(foco_hoje, 1)
-        foco_cards.addWidget(self.dashboard_planejamento_top_container, 1)
+        # Proporções de largura no desktop: 52%/48% (13:12).
+        # O QHBoxLayout dá a ambos a mesma altura em cada resolução.
+        foco_cards.addWidget(foco_hoje, 13)
+        foco_cards.addWidget(self.dashboard_planejamento_top_container, 12)
         dashboard_hoje_conteudo_layout.addLayout(foco_cards)
+        self._dashboard_foco_widget = foco_hoje
+        self._dashboard_progresso_widget = progresso_card
+        self._dashboard_progresso_layout = progresso_layout
+        self._dashboard_progresso_botao = botao_ver_conquistas
 
         # ----------------------------------------------------
         # Acessos rápidos — construídos aqui, mas posicionados depois da
@@ -37934,6 +38639,11 @@ class SistemaEstudos(QMainWindow):
 
         foco_painel_layout.addWidget(
             self.dashboard_hoje_conteudo
+        )
+        # Não reservar espaço lateral adicional: a mesma grade das
+        # linhas inferiores usa as margens do layout raiz.
+        self.dashboard_hoje_painel.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Preferred
         )
         layout.addWidget(
             self.dashboard_hoje_painel
@@ -38077,28 +38787,34 @@ class SistemaEstudos(QMainWindow):
         # Recomendação inteligente — decisão operacional do Dashboard.
         # A interface mostra a conclusão útil da inteligência; os detalhes
         # técnicos continuam disponíveis nas telas analíticas.
-        self.dashboard_hoje_acao = QFrame()
+        self.dashboard_hoje_acao = DashboardRecommendationHeroFrame()
         self.dashboard_hoje_acao.setObjectName("dashboardTodayAction")
+        self.dashboard_hoje_acao.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Expanding
+        )
         self.dashboard_hoje_acao.setProperty("actionRole", "neutral")
         self.dashboard_hoje_acao.setProperty("simpleHero", True)
 
         acao_layout = QVBoxLayout(self.dashboard_hoje_acao)
-        acao_layout.setContentsMargins(16, 8, 16, 10)
-        acao_layout.setSpacing(5)
+        acao_layout.setContentsMargins(22, 17, 22, 17)
+        acao_layout.setSpacing(8)
         # O cabeçalho permanece no topo. O corpo da recomendação recebe
         # stretches simétricos acima e abaixo, centralizando-o no espaço
         # vertical restante quando o card de Planejamento define a altura
         # da linha.
 
         algoritmo_header = QHBoxLayout()
+        self._dashboard_algo_header_layout = algoritmo_header
         algoritmo_header.setSpacing(9)
 
         algoritmo_icone = QLabel("✦")
         algoritmo_icone.setObjectName("algorithmDashboardIcon")
         algoritmo_icone.setAlignment(Qt.AlignCenter)
-        algoritmo_icone.setFixedSize(34, 34)
+        algoritmo_icone.setFixedSize(42, 42)
+        _icone_card_dashboard(algoritmo_icone, "fa5s.brain", 22)
 
         algoritmo_titulos = QVBoxLayout()
+        self._dashboard_algo_titulos_layout = algoritmo_titulos
         algoritmo_titulos.setSpacing(1)
         algoritmo_titulos.setAlignment(Qt.AlignTop)
 
@@ -38143,23 +38859,26 @@ class SistemaEstudos(QMainWindow):
             Qt.AlignTop | Qt.AlignRight,
         )
         acao_layout.addLayout(algoritmo_header)
+        self._dashboard_algo_icone_widget = algoritmo_icone
+        self._dashboard_algo_header_widgets = (
+            algoritmo_icone, algoritmo_titulo,
+            self.dashboard_algoritmo_subtitulo, self.dashboard_hoje_acao_ajuda
+        )
 
         inteligencia_conteudo = QFrame()
         inteligencia_conteudo.setObjectName("algorithmRecommendationBody")
-        inteligencia_conteudo_layout = QVBoxLayout(inteligencia_conteudo)
-        inteligencia_conteudo_layout.setContentsMargins(14, 7, 14, 8)
-        inteligencia_conteudo_layout.setSpacing(4)
+        inteligencia_conteudo_layout = QGridLayout(inteligencia_conteudo)
+        self._dashboard_recomendacao_grade = inteligencia_conteudo_layout
+        self._dashboard_recomendacao_horizontal = False
+        inteligencia_conteudo_layout.setContentsMargins(17, 12, 17, 12)
+        inteligencia_conteudo_layout.setSpacing(6)
+        inteligencia_conteudo.setMinimumHeight(112)
 
         self.dashboard_algoritmo_pronto = QLabel("PRÓXIMA SESSÃO PRONTA")
         self.dashboard_algoritmo_pronto.setObjectName("algorithmDashboardReady")
         self.dashboard_algoritmo_pronto.setAlignment(Qt.AlignCenter)
 
-        inteligencia_conteudo_layout.addWidget(self.dashboard_algoritmo_pronto)
-        inteligencia_conteudo_layout.addSpacing(2)
-
-        botoes_ia = QVBoxLayout()
-        botoes_ia.setSpacing(4)
-        self.dashboard_hoje_um_clique = QPushButton("▶  COMEÇAR AGORA")
+        self.dashboard_hoje_um_clique = QPushButton("▶  Começar agora  →")
         self.dashboard_hoje_um_clique.setObjectName("dashboardTodayPrimaryButton")
         # CTA principal proporcional ao card: mantém destaque sem assumir
         # aparência de banner. A largura acompanha a janela e é limitada.
@@ -38189,15 +38908,19 @@ class SistemaEstudos(QMainWindow):
         self.dashboard_hoje_botao.clicked.connect(
             self.explicar_recomendacao_dashboard
         )
-        botao_principal_linha = QHBoxLayout()
-        botao_principal_linha.setContentsMargins(0, 0, 0, 0)
-        botao_principal_linha.setSpacing(0)
-        botao_principal_linha.addStretch(1)
-        botao_principal_linha.addWidget(self.dashboard_hoje_um_clique, 3)
-        botao_principal_linha.addStretch(1)
-        botoes_ia.addLayout(botao_principal_linha)
-        botoes_ia.addWidget(self.dashboard_hoje_botao, 0, Qt.AlignCenter)
-        inteligencia_conteudo_layout.addLayout(botoes_ia)
+        # Grade padrao visualmente vertical; no Futurista largo a mesma grade
+        # assume a composicao horizontal sem recriar botoes ou sinais.
+        inteligencia_conteudo_layout.addWidget(
+            self.dashboard_algoritmo_pronto, 0, 0, 1, 2, Qt.AlignCenter
+        )
+        inteligencia_conteudo_layout.addWidget(
+            self.dashboard_hoje_um_clique, 1, 0, 1, 2, Qt.AlignHCenter
+        )
+        inteligencia_conteudo_layout.addWidget(
+            self.dashboard_hoje_botao, 2, 0, 1, 2, Qt.AlignCenter
+        )
+        inteligencia_conteudo_layout.setColumnStretch(0, 1)
+        inteligencia_conteudo_layout.setColumnStretch(1, 0)
         acao_layout.addStretch(1)
         acao_layout.addWidget(inteligencia_conteudo)
         acao_layout.addStretch(1)
@@ -38207,14 +38930,14 @@ class SistemaEstudos(QMainWindow):
         # execução do dia: meta, pendências, carga restante e ritmo semanal.
         self.dashboard_resumo_ia = QFrame()
         self.dashboard_resumo_ia.setObjectName("dashboardInsightSummary")
-        self.dashboard_resumo_ia.setMinimumHeight(160)
+        self.dashboard_resumo_ia.setMinimumHeight(320)
         self.dashboard_resumo_ia.setSizePolicy(
             QSizePolicy.Expanding,
             QSizePolicy.Expanding,
         )
         resumo_ia_layout = QVBoxLayout(self.dashboard_resumo_ia)
-        resumo_ia_layout.setContentsMargins(12, 5, 12, 6)
-        resumo_ia_layout.setSpacing(4)
+        resumo_ia_layout.setContentsMargins(15, 11, 15, 11)
+        resumo_ia_layout.setSpacing(5)
         resumo_ia_layout.setAlignment(Qt.AlignTop)
         self._dashboard_planejamento_layout = resumo_ia_layout
 
@@ -38223,7 +38946,8 @@ class SistemaEstudos(QMainWindow):
         resumo_ia_icone = QLabel("◈")
         resumo_ia_icone.setObjectName("dashboardInsightSummaryIcon")
         resumo_ia_icone.setAlignment(Qt.AlignCenter)
-        resumo_ia_icone.setFixedSize(30, 30)
+        resumo_ia_icone.setFixedSize(38, 38)
+        _icone_card_dashboard(resumo_ia_icone, "fa5s.calendar-check", 20)
         resumo_ia_titulos = QVBoxLayout()
         resumo_ia_titulos.setSpacing(0)
         resumo_ia_titulo = QLabel("Planejamento de hoje")
@@ -38245,107 +38969,121 @@ class SistemaEstudos(QMainWindow):
         )
         resumo_ia_layout.addLayout(resumo_ia_header)
 
-        # Meta diária — protagonista visual do Planejamento.
-        # A referência agora usa um arco semicircular com o valor central.
-        meta_dia_layout = QVBoxLayout()
-        meta_dia_layout.setContentsMargins(2, 0, 2, 2)
-        meta_dia_layout.setSpacing(0)
-
+        # Referência aprovada: título central acima do semicírculo,
+        # valor absoluto no centro do arco e percentual logo abaixo.
+        # As antigas labels de meta/barra permanecem presentes (ocultas)
+        # porque outras rotinas do planejamento as atualizam diretamente.
+        planejamento_hero = QVBoxLayout()
+        planejamento_hero.setContentsMargins(0, 0, 0, 0)
+        planejamento_hero.setSpacing(0)
         meta_dia_titulo = QLabel("META DE QUESTÕES")
+        self._dashboard_planejamento_meta_titulo = meta_dia_titulo
         meta_dia_titulo.setObjectName("dashboardPlanningHeroTitle")
         meta_dia_titulo.setAlignment(Qt.AlignCenter)
-        meta_dia_layout.addWidget(meta_dia_titulo)
+        meta_dia_titulo.setFixedHeight(19)
+        planejamento_hero.addWidget(meta_dia_titulo, 0, Qt.AlignHCenter)
 
-        self.dashboard_planejamento_meta_gauge = DashboardPlanningArcWidget()
-        meta_dia_layout.addWidget(
-            self.dashboard_planejamento_meta_gauge,
-            0,
-            Qt.AlignHCenter,
+        self.dashboard_planejamento_meta_gauge = DashboardPlanningArcWidget(
+            self.dashboard_resumo_ia
         )
-
-        # Campos mantidos para reaproveitar a lógica existente de atualização,
-        # mas ocultados da composição final em favor do gauge da referência.
-        self.dashboard_planejamento_resumo_meta_diaria = QLabel("—")
-        self.dashboard_planejamento_resumo_meta_diaria.setObjectName(
-            "dashboardPlanningHeroValue"
+        planejamento_hero.addWidget(
+            self.dashboard_planejamento_meta_gauge, 0, Qt.AlignHCenter
         )
-        self.dashboard_planejamento_resumo_meta_diaria.setVisible(False)
+        resumo_ia_layout.addLayout(planejamento_hero)
 
+        self._dashboard_planejamento_compat = QWidget(self.dashboard_resumo_ia)
+        self._dashboard_planejamento_compat.hide()
+        self.dashboard_planejamento_resumo_meta_diaria = QLabel(
+            "—", self._dashboard_planejamento_compat
+        )
         self.dashboard_planejamento_resumo_meta_diaria_detalhe = QLabel(
-            "Questões resolvidas hoje"
+            "Questões resolvidas hoje", self._dashboard_planejamento_compat
         )
-        self.dashboard_planejamento_resumo_meta_diaria_detalhe.setObjectName(
-            "dashboardPlanningHeroDetail"
-        )
-        self.dashboard_planejamento_resumo_meta_diaria_detalhe.setVisible(False)
-
-        self.dashboard_resumo_meta_barra = QProgressBar()
-        self.dashboard_resumo_meta_barra.setObjectName(
-            "dashboardInsightSummaryProgress"
+        self.dashboard_resumo_meta_barra = QProgressBar(
+            self._dashboard_planejamento_compat
         )
         self.dashboard_resumo_meta_barra.setRange(0, 100)
         self.dashboard_resumo_meta_barra.setValue(0)
         self.dashboard_resumo_meta_barra.setTextVisible(False)
-        self.dashboard_resumo_meta_barra.setFixedHeight(8)
-        self.dashboard_resumo_meta_barra.setVisible(False)
-        resumo_ia_layout.addLayout(meta_dia_layout)
 
-        # Operação do dia em um único bloco: menos bordas e leitura mais direta.
-        operacao_box = QFrame()
-        operacao_box.setObjectName("dashboardPlanningOperational")
+        # Dois indicadores do planejamento com hierarquia própria: título,
+        # valor e complemento. As labels existentes continuam as mesmas para
+        # preservar a atualização de dados e os cálculos do módulo.
+        operacao_box = QWidget(self.dashboard_resumo_ia)
+        operacao_box.setObjectName("dashboardPlanningMetricsStrip")
         operacao_linha = QHBoxLayout(operacao_box)
-        operacao_linha.setContentsMargins(10, 3, 10, 3)
-        operacao_linha.setSpacing(10)
+        operacao_linha.setContentsMargins(0, 0, 0, 0)
+        operacao_linha.setSpacing(8)
+        operacao_box.setFixedHeight(62)
+        operacao_box.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        revisoes_layout = QVBoxLayout()
-        revisoes_layout.setSpacing(0)
-        revisoes_titulo = QLabel("REVISÕES PENDENTES")
-        revisoes_titulo.setObjectName("dashboardInsightSummaryRowTitle")
+        def _criar_celula_metrica(titulo_texto, valor_label, detalhe_label):
+            celula = QFrame(operacao_box)
+            celula.setObjectName("dashboardPlanningMetricTile")
+            celula.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+            conteudo = QVBoxLayout(celula)
+            conteudo.setContentsMargins(10, 4, 10, 4)
+            conteudo.setSpacing(0)
+
+            cabecalho = QHBoxLayout()
+            cabecalho.setContentsMargins(0, 0, 0, 0)
+            cabecalho.setSpacing(6)
+            acento = QFrame(celula)
+            acento.setObjectName("dashboardPlanningMetricAccent")
+            acento.setFixedSize(3, 11)
+            titulo = QLabel(titulo_texto, celula)
+            titulo.setObjectName("dashboardPlanningMetricHeading")
+            titulo.setWordWrap(False)
+            cabecalho.addWidget(acento, 0, Qt.AlignVCenter)
+            cabecalho.addWidget(titulo, 1)
+            conteudo.addLayout(cabecalho)
+
+            valor_label.setParent(celula)
+            valor_label.setObjectName(
+                "dashboardPlanningRemainingValue"
+                if titulo_texto == "PARA CONCLUIR O DIA"
+                else "dashboardPlanningMetricValue"
+            )
+            valor_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            valor_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+            detalhe_label.setParent(celula)
+            detalhe_label.setObjectName("dashboardPlanningMetricDetail")
+            detalhe_label.setWordWrap(True)
+            detalhe_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+            conteudo.addWidget(valor_label)
+            conteudo.addWidget(detalhe_label)
+            return celula
+
         self.dashboard_planejamento_resumo_pendencias = QLabel("—")
-        self.dashboard_planejamento_resumo_pendencias.setObjectName(
-            "dashboardPlanningOperationalValue"
-        )
         self.dashboard_planejamento_resumo_pendencias_detalhe = QLabel(
             "Fila de revisões que pede atenção"
         )
-        self.dashboard_planejamento_resumo_pendencias_detalhe.setObjectName(
-            "dashboardInsightSummaryRowDetail"
-        )
-        revisoes_layout.addWidget(revisoes_titulo)
-        revisoes_layout.addWidget(self.dashboard_planejamento_resumo_pendencias)
-        revisoes_layout.addWidget(
-            self.dashboard_planejamento_resumo_pendencias_detalhe
-        )
-        operacao_linha.addLayout(revisoes_layout, 1)
-
-        divisor_operacional = QFrame()
-        divisor_operacional.setObjectName("dashboardPlanningDivider")
-        divisor_operacional.setFrameShape(QFrame.Shape.VLine)
-        divisor_operacional.setFrameShadow(QFrame.Shadow.Plain)
-        operacao_linha.addWidget(divisor_operacional)
-
-        carga_resumo_layout = QVBoxLayout()
-        carga_resumo_layout.setSpacing(0)
-        carga_titulo = QLabel("PARA CONCLUIR O DIA")
-        carga_titulo.setObjectName("dashboardInsightSummaryRowTitle")
         self.dashboard_planejamento_carga_valor = QLabel("—")
-        self.dashboard_planejamento_carga_valor.setObjectName(
-            "dashboardPlanningOperationalValue"
-        )
         self.dashboard_planejamento_carga_detalhe = QLabel("—")
-        self.dashboard_planejamento_carga_detalhe.setObjectName(
-            "dashboardInsightSummaryRowDetail"
+
+        operacao_linha.addWidget(
+            _criar_celula_metrica(
+                "REVISÕES PENDENTES",
+                self.dashboard_planejamento_resumo_pendencias,
+                self.dashboard_planejamento_resumo_pendencias_detalhe,
+            ),
+            1,
         )
-        carga_resumo_layout.addWidget(carga_titulo)
-        carga_resumo_layout.addWidget(self.dashboard_planejamento_carga_valor)
-        carga_resumo_layout.addWidget(self.dashboard_planejamento_carga_detalhe)
-        operacao_linha.addLayout(carga_resumo_layout, 1)
+        operacao_linha.addWidget(
+            _criar_celula_metrica(
+                "PARA CONCLUIR O DIA",
+                self.dashboard_planejamento_carga_valor,
+                self.dashboard_planejamento_carga_detalhe,
+            ),
+            1,
+        )
         resumo_ia_layout.addWidget(operacao_box)
 
-        # Semana em uma única faixa, sem três mini-cards concorrentes.
+        # Status semanal sem sobrepor os valores do corpo. Este conjunto
+        # mantém as três variáveis dinâmicas usadas pelo serviço existente.
         semana_linha = QHBoxLayout()
         semana_linha.setContentsMargins(0, 0, 0, 0)
-        semana_linha.setSpacing(5)
+        semana_linha.setSpacing(4)
         semana_titulo = QLabel("SEMANA")
         semana_titulo.setObjectName("dashboardInsightSummaryRowTitle")
         semana_linha.addWidget(semana_titulo)
@@ -38367,13 +39105,14 @@ class SistemaEstudos(QMainWindow):
         adicionar_status_semana("dias", "Dias")
         resumo_ia_layout.addLayout(semana_linha)
 
+        resumo_ia_layout.addStretch(1)
         self.dashboard_planejamento_resumo_botao = QPushButton(
-            "VER PLANEJAMENTO COMPLETO  →"
+            "Ver planejamento completo  →"
         )
         self.dashboard_planejamento_resumo_botao.setObjectName(
             "planningSummaryButton"
         )
-        self.dashboard_planejamento_resumo_botao.setFixedHeight(34)
+        self.dashboard_planejamento_resumo_botao.setFixedHeight(32)
         self.dashboard_planejamento_resumo_botao.setCursor(
             Qt.PointingHandCursor
         )
@@ -38388,14 +39127,41 @@ class SistemaEstudos(QMainWindow):
         # Insere o novo Planejamento exatamente ao lado do Foco.
         self.dashboard_planejamento_top_layout.addWidget(self.dashboard_resumo_ia)
 
+        self.dashboard_hoje_acao.setMinimumHeight(224)
+        progresso_card.setMinimumHeight(224)
+        # A segunda linha segue a proporção 2:1 da referência. A altura
+        # mínima admite os textos reais e evita cortar conquistas.
         self.dashboard_hoje_acao.setProperty("heroCentral", True)
         inteligencia_linha = QHBoxLayout()
         inteligencia_linha.setContentsMargins(0, 0, 0, 0)
-        inteligencia_linha.setSpacing(10)
+        inteligencia_linha.setSpacing(14)
         self._dashboard_recomendacao_linha = inteligencia_linha
-        inteligencia_linha.addWidget(self.dashboard_hoje_acao, 3)
-        inteligencia_linha.addWidget(progresso_card, 1)
+        # Proporção 68%/32% (17:8), mantendo o card de progresso legível.
+        # Ambos preenchem exatamente a altura atribuída pelo QHBoxLayout.
+        inteligencia_linha.addWidget(self.dashboard_hoje_acao, 17)
+        inteligencia_linha.addWidget(progresso_card, 8)
         layout.addLayout(inteligencia_linha)
+        self._dashboard_modelo_refs = {
+            "raiz": dashboard_hoje_conteudo_layout,
+            "topo": foco_cards,
+            "inferior": inteligencia_linha,
+            "foco": foco_hoje,
+            "planejamento_container": self.dashboard_planejamento_top_container,
+            "progresso": progresso_card,
+            "progresso_layout": progresso_layout,
+            "progresso_botao": botao_ver_conquistas,
+            "operacao": operacao_box,
+        }
+        self._dashboard_modelo_reordenado = False
+        # Guarda a geometria antiga antes da primeira troca de posição.
+        self._ajustar_altura_independente_recomendacao(False)
+        # Posiciona os mesmos widgets na composição selecionada na abertura.
+        self._ajustar_composicao_dashboard_futurista(
+            normalizar_tema(self.tema_atual) == "futurista"
+        )
+        self._ajustar_altura_independente_recomendacao(
+            normalizar_tema(self.tema_atual) == "futurista"
+        )
 
         # A barra lateral substitui os quatro atalhos no Futurista.
         # Mantemos a faixa construída para Claro/Escuro e larguras sem sidebar;
@@ -57041,17 +57807,17 @@ class SistemaEstudos(QMainWindow):
 
 
     def criar_tela_estatisticas(self):
-        tela = QWidget()
+        tela = FundoEstatisticasPremium()
 
         layout = QVBoxLayout(
             tela
         )
 
         layout.setContentsMargins(
-            28,
-            20,
-            28,
-            24
+            21,
+            15,
+            21,
+            16
         )
 
         layout.setSpacing(
@@ -57207,6 +57973,11 @@ class SistemaEstudos(QMainWindow):
                 "Tópicos"
             )
         )
+        quadro.setObjectName("statsTopIndicator")
+        # Ícone discreto sem dependência de fontes externas.
+        icone = QLabel("▱", quadro)
+        icone.setObjectName("statsTopIndicatorIcon")
+        quadro.layout().insertWidget(0, icone)
         resumo.addWidget(
             quadro,
             0,
@@ -57218,6 +57989,11 @@ class SistemaEstudos(QMainWindow):
                 "Revisões"
             )
         )
+        quadro.setObjectName("statsTopIndicator")
+        # Ícone discreto sem dependência de fontes externas.
+        icone = QLabel("▤", quadro)
+        icone.setObjectName("statsTopIndicatorIcon")
+        quadro.layout().insertWidget(0, icone)
         resumo.addWidget(
             quadro,
             0,
@@ -57229,6 +58005,11 @@ class SistemaEstudos(QMainWindow):
                 "Questões"
             )
         )
+        quadro.setObjectName("statsTopIndicator")
+        # Ícone discreto sem dependência de fontes externas.
+        icone = QLabel("?", quadro)
+        icone.setObjectName("statsTopIndicatorIcon")
+        quadro.layout().insertWidget(0, icone)
         resumo.addWidget(
             quadro,
             0,
@@ -57240,6 +58021,11 @@ class SistemaEstudos(QMainWindow):
                 "Desempenho"
             )
         )
+        quadro.setObjectName("statsTopIndicator")
+        # Ícone discreto sem dependência de fontes externas.
+        icone = QLabel("◎", quadro)
+        icone.setObjectName("statsTopIndicatorIcon")
+        quadro.layout().insertWidget(0, icone)
         resumo.addWidget(
             quadro,
             0,
@@ -57251,6 +58037,11 @@ class SistemaEstudos(QMainWindow):
                 "Atrasadas"
             )
         )
+        quadro.setObjectName("statsTopIndicator")
+        # Ícone discreto sem dependência de fontes externas.
+        icone = QLabel("◷", quadro)
+        icone.setObjectName("statsTopIndicatorIcon")
+        quadro.layout().insertWidget(0, icone)
         resumo.addWidget(
             quadro,
             0,
@@ -57262,6 +58053,11 @@ class SistemaEstudos(QMainWindow):
                 "Hoje"
             )
         )
+        quadro.setObjectName("statsTopIndicator")
+        # Ícone discreto sem dependência de fontes externas.
+        icone = QLabel("▦", quadro)
+        icone.setObjectName("statsTopIndicatorIcon")
+        quadro.layout().insertWidget(0, icone)
         resumo.addWidget(
             quadro,
             0,
@@ -57286,6 +58082,7 @@ class SistemaEstudos(QMainWindow):
         # ----------------------------------------------------
 
         self.aba_minha_evolucao = QWidget()
+        self.aba_minha_evolucao.setObjectName("statisticsHistoryTab")
 
         minha_raiz = QVBoxLayout(
             self.aba_minha_evolucao
@@ -57328,6 +58125,11 @@ class SistemaEstudos(QMainWindow):
         minha_layout.setSpacing(
             10
         )
+
+        voltar_ao_painel = QPushButton("← Voltar ao painel visual")
+        voltar_ao_painel.setObjectName("statLinkButton")
+        voltar_ao_painel.clicked.connect(self.alternar_detalhes_estatisticas)
+        minha_layout.addWidget(voltar_ao_painel, 0, Qt.AlignRight)
 
         # Filtro de período.
         minha_filtro = QFrame()
@@ -57939,6 +58741,16 @@ class SistemaEstudos(QMainWindow):
         minha_raiz.addWidget(
             minha_scroll
         )
+        self.painel_estatisticas_premium = PainelEstatisticasPremium(
+            ao_periodo=self.combo_periodo_minha_evolucao.setCurrentText,
+            abrir_aba=self._selecionar_aba_estatisticas,
+            detalhes=self.alternar_detalhes_estatisticas,
+            parent=self.aba_minha_evolucao,
+        )
+        minha_raiz.insertWidget(0, self.painel_estatisticas_premium, 1)
+        minha_scroll.hide()
+        self._estatisticas_detalhes_visiveis = False
+        aplicar_estilo_estatisticas_premium(tela, self.tema_atual)
 
         self.abas_estatisticas.addTab(
             self.aba_minha_evolucao,
@@ -60545,6 +61357,17 @@ class SistemaEstudos(QMainWindow):
         )
 
         return tela
+
+    def alternar_detalhes_estatisticas(self):
+        """Conserva a aba antiga de histórico disponível para inspeção completa."""
+        if not hasattr(self, "painel_estatisticas_premium"):
+            return
+        mostrar = not getattr(self, "_estatisticas_detalhes_visiveis", False)
+        self._estatisticas_detalhes_visiveis = mostrar
+        self.painel_estatisticas_premium.setVisible(not mostrar)
+        # O gráfico e tabelas originais continuam sendo atualizados, apenas
+        # não ficam visíveis simultaneamente para preservar espaço de leitura.
+        self.aba_minha_evolucao.findChild(QScrollArea, "myEvolutionScroll").setVisible(mostrar)
 
     def descricoes_abas_estatisticas(self):
         return {
@@ -63336,6 +64159,12 @@ class SistemaEstudos(QMainWindow):
         tema = normalizar_tema(
             getattr(self, "tema_atual", "claro")
         )
+        visual_dashboard = getattr(self, "dashboard_visual_root", None)
+        if visual_dashboard is not None:
+            estilo = dashboard_visual_styles(tema) + _estilo_metricas_rapidas_planejamento(tema)
+            if visual_dashboard.styleSheet() != estilo:
+                visual_dashboard.setStyleSheet(estilo)
+            visual_dashboard.update()
 
         if hasattr(self, "botao_configuracoes_topo"):
             fallback_config = (
@@ -63850,6 +64679,25 @@ class SistemaEstudos(QMainWindow):
                 self.tabela_minha_evolucao_topicos.setRowHeight(linha, 31)
 
         self.atualizar_grafico_minha_evolucao()
+        if hasattr(self, "painel_estatisticas_premium"):
+            self.painel_estatisticas_premium.definir_periodo(
+                self.combo_periodo_minha_evolucao.currentText()
+            )
+            # O quadro inferior usa o MESMO ranking oficial da aba Pontos fracos.
+            # TTL impede consultas extras em navegações normais entre telas.
+            chave_fracos = f"estatisticas:fracos:{int(concurso[0])}"
+            try:
+                pontos_fracos = self.cache_analitico.obter(
+                    chave_fracos,
+                    lambda: listar_ranking_topicos(limite=25, ordem="asc"),
+                    ttl=12,
+                )
+            except Exception:
+                # Falhas na lista resumida não bloqueiam o histórico principal.
+                pontos_fracos = []
+            self.painel_estatisticas_premium.atualizar(
+                dados, pontos_fracos=pontos_fracos
+            )
         if hasattr(self, "_estado_estatisticas"):
             self._estado_estatisticas.marcar_limpa("Histórico")
 
