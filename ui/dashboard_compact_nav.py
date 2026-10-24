@@ -7,7 +7,7 @@ estudo e não inclui abas adicionais. A busca reutiliza a ação global atual.
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QSizePolicy
 
-from ui.design import render_qss
+from ui.design import render_native_qss, render_qss
 
 
 QSS_CABECALHO_DASHBOARD = r"""
@@ -87,4 +87,5 @@ def criar_cabecalho_discreto_dashboard(abrir_busca, logo_pixmap=None) -> QFrame:
 
 def aplicar_estilo_cabecalho_dashboard(painel: QFrame, tema: str) -> None:
     """Usa tokens do Design System sem modificar cores globais."""
-    painel.setStyleSheet(render_qss(tema, QSS_CABECALHO_DASHBOARD))
+    painel.setStyleSheet((render_native_qss(QSS_CABECALHO_DASHBOARD) if tema == "futurista"
+                        else render_qss(tema, QSS_CABECALHO_DASHBOARD)))

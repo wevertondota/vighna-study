@@ -18,6 +18,17 @@ from PySide6.QtWidgets import (
 )
 
 from tema import normalizar_tema
+
+
+def _tema_visual_estatisticas(tema):
+    """Prefer the native Futurista identity; retain old theme contracts only for rollback.
+
+    In the official visual mode, the runtime does not consult the three-theme
+    normalizer. Other values continue through the legacy path until U3-U5.
+    """
+    if isinstance(tema, str) and tema.strip().lower() == 'futurista':
+        return 'futurista'
+    return normalizar_tema(tema)
 from ui.portal_background_image import imagem_fundo_inicio_bytes
 
 CYAN = '#00c9f2'
@@ -79,7 +90,7 @@ class FundoEstatisticasPremium(QWidget):
 
     def paintEvent(self, event):
         super().paintEvent(event)
-        tema = normalizar_tema(getattr(self.window(), 'tema_atual', 'claro'))
+        tema = _tema_visual_estatisticas(getattr(self.window(), 'tema_atual', 'claro'))
         if tema not in ('escuro', 'futurista'):
             return
         if self._origem is None:
@@ -118,7 +129,7 @@ class GraficoHistoricoPremium(QWidget):
     def paintEvent(self, event):
         p = QPainter(self)
         p.setRenderHint(QPainter.Antialiasing)
-        is_light = normalizar_tema(getattr(self.window(), 'tema_atual', 'claro')) == 'claro'
+        is_light = _tema_visual_estatisticas(getattr(self.window(), 'tema_atual', 'claro')) == 'claro'
         fg = QColor('#41576e') if is_light else QColor('#a7c2db')
         grid = QColor(116, 159, 195, 42)
         area_left, area_right, area_top, area_bottom = 43, 10, 17, 27
@@ -202,7 +213,7 @@ class CircularIndicadorPremium(QWidget):
         if self.valor is not None:
             painter.setPen(QPen(QColor('#00d0f4'), 10, Qt.SolidLine, Qt.RoundCap))
             painter.drawArc(box, 90 * 16, int(-360 * 16 * max(0, min(100, float(self.valor))) / 100))
-        light = normalizar_tema(getattr(self.window(), 'tema_atual', 'claro')) == 'claro'
+        light = _tema_visual_estatisticas(getattr(self.window(), 'tema_atual', 'claro')) == 'claro'
         painter.setPen(QColor('#203c53') if light else QColor('#f4fbff'))
         font = QFont('Segoe UI', 17, QFont.Bold)
         painter.setFont(font)
@@ -540,7 +551,7 @@ class PainelEstatisticasPremium(QWidget):
 
 
 def aplicar_estilo_estatisticas_premium(pagina: QWidget, tema='futurista'):
-    claro = normalizar_tema(tema) == 'claro'
+    claro = _tema_visual_estatisticas(tema) == 'claro'
     bg = 'rgba(248,251,255,235)' if claro else 'rgba(6,23,39,206)'
     inner = 'rgba(234,244,254,219)' if claro else 'rgba(8,29,48,211)'
     border = '#b9cfde' if claro else 'rgba(52,149,192,153)'

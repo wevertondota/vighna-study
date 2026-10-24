@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout, QWidget,
 )
 
-from ui.design import render_qss
+from ui.design import render_native_qss, render_qss
 
 
 ESTILO_PORTAL_EDITAL = r"""
@@ -141,4 +141,5 @@ def atualizar_perfil_portal_edital(pagina, nome):
 
 
 def aplicar_estilo_portal_edital(pagina, tema):
-    pagina.setStyleSheet(render_qss(tema, ESTILO_PORTAL_EDITAL))
+    pagina.setStyleSheet((render_native_qss(ESTILO_PORTAL_EDITAL) if tema == "futurista"
+                        else render_qss(tema, ESTILO_PORTAL_EDITAL)))

@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
 )
 
 from icones import criar_icone
-from ui.design import render_qss
+from ui.design import render_native_qss, render_qss
 
 
 # Identificadores, categorias, titulos e descricoes preservados do L05.
@@ -411,6 +411,7 @@ def criar_portal_recursos(*, abrir_inicio, abrir_dashboard, abrir_destinos):
 
 
 def aplicar_estilo_recursos(pagina, tema):
-    pagina.setStyleSheet(render_qss(tema, ESTILO_PORTAL_RECURSOS))
+    pagina.setStyleSheet((render_native_qss(ESTILO_PORTAL_RECURSOS) if tema == "futurista"
+                        else render_qss(tema, ESTILO_PORTAL_RECURSOS)))
     for rotulo, ident in getattr(pagina, "portal_recursos_icones", ()):
         _pintar_icone(rotulo, ident, tema)

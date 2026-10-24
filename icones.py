@@ -10,7 +10,7 @@ from pathlib import Path
 from PySide6.QtGui import QIcon
 
 from tema import normalizar_tema
-from ui.design import qtawesome_color
+from ui.design import native_qss_color, qtawesome_color
 
 try:
     import qtawesome as qta
@@ -42,11 +42,19 @@ def qtawesome_disponivel():
 
 
 def cor_icone(tema="claro", papel="acao"):
+    # A identidade Futurista segue a API nativa, sem normalizador triplo.
+    if tema == "futurista":
+        tokens_nativos = CORES_ICONES["futurista"]
+        return native_qss_color(tokens_nativos.get(papel, tokens_nativos["acao"]))
+
+    # Compatibilidade temporária para instalações/consumidores legados.
     tema = normalizar_tema(tema)
     token = CORES_ICONES.get(tema, CORES_ICONES["claro"]).get(
         papel,
         CORES_ICONES[tema]["acao"],
     )
+    if tema == "futurista":
+        return native_qss_color(token)
     return qtawesome_color(tema, token)
 
 

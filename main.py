@@ -1,4 +1,5 @@
 import sys
+import os
 
 # M1c-R1b: o EXE do Vighna pode atuar como worker de restauração sem iniciar
 # o splash, widgets Qt ou qualquer acesso acadêmico ao banco de produção.
@@ -39,7 +40,7 @@ from datetime import datetime
 from pathlib import Path
 
 
-from PySide6.QtCore import Qt, QDate, QPointF, QRectF, QTimer, Signal, QEventLoop, QSize, QEvent
+from PySide6.QtCore import Qt, QDate, QPointF, QRectF, QTimer, Signal, QEventLoop, QSize, QEvent, QSettings
 from PySide6.QtGui import QColor, QPainter, QPen, QFont, QPainterPath, QBrush, QPixmap, QIcon, QLinearGradient, QTextCharFormat, QTextListFormat, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
@@ -16637,11 +16638,17 @@ class JanelaResolverQuestoes(QDialog):
         scroll.setHorizontalScrollBarPolicy(
             Qt.ScrollBarAlwaysOff
         )
+        # A imagem fica atrás da área rolável; viewport não deve ocultá-la.
+        scroll.setAutoFillBackground(False)
+        scroll.viewport().setAutoFillBackground(False)
+        scroll.viewport().setAttribute(Qt.WA_TranslucentBackground, True)
 
         conteudo = QWidget()
         conteudo.setObjectName(
             "questionSolverContent"
         )
+        conteudo.setAutoFillBackground(False)
+        conteudo.setAttribute(Qt.WA_TranslucentBackground, True)
 
         conteudo_layout = QVBoxLayout(
             conteudo
@@ -17322,6 +17329,15 @@ class JanelaResolverQuestoes(QDialog):
                 self.timer_simulado.start()
 
         self._aplicar_visual_moderno_resolvedor()
+        # Fundo decorativo exclusivo da bateria; nao afeta sessao/questoes.
+        self._fundo_justica_resolvedor = None
+        try:
+            from ui.resolver_justica_background import aplicar_fundo_justica
+            if normalizar_tema(obter_configuracao_texto("tema_interface", "claro")) == "futurista":
+                self._fundo_justica_resolvedor = aplicar_fundo_justica(self)
+        except Exception as erro:
+            # Falha de imagem nunca impede responder questoes.
+            print("Fundo do resolvedor indisponivel:", erro, file=sys.stderr)
         self.carregar_atual()
         self.atualizar_painel_foco()
         self._registrar_no_controlador_principal()
@@ -17371,9 +17387,15 @@ class JanelaResolverQuestoes(QDialog):
                 "track": "#D8E6F1", "action": "#0879A7", "action_hover": "#0B96BE",
             },
         }
-        c = cores_por_tema.get(tema, cores_por_tema["claro"])
+        c = dict(cores_por_tema.get(tema, cores_por_tema["claro"]))
+        # Alternativas permanecem opacas o suficiente para alta legibilidade.
+        if tema == "futurista":
+            c["surface"] = "rgba(14, 28, 45, 236)"
+            c["surface2"] = "rgba(21, 39, 59, 243)"
         qss = r"""
         QDialog#questionSolverDialog { background-color: __canvas__; color: __text__; }
+        QScrollArea#questionSolverScroll { background: transparent; border: 0px; }
+        QWidget#questionSolverContent { background: transparent; border: 0px; }
         QFrame#questionSessionModernHeader {
             background-color: transparent; border: 0;
             border-bottom: 1px solid __border__;
@@ -17913,6 +17935,10 @@ class JanelaResolverQuestoes(QDialog):
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self._ajustar_layout_progresso_caneta(event.size().width())
+        fundo = getattr(self, "_fundo_justica_resolvedor", None)
+        if fundo is not None:
+            fundo.setGeometry(self.rect())
+            fundo.lower()
         self._atualizar_geometria_overlay_pausa()
 
     def _construir_overlay_pausa_visual(self):
@@ -26247,322 +26273,278 @@ class JanelaTopico(QDialog):
         self.resize(1120, 720)
         self.setMinimumSize(900, 620)
 
+        # Topic Premium: header independent from the analysis and operational metrics.
+        # All source data and actions retain their original contracts.
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(22, 18, 22, 20)
-        layout.setSpacing(12)
+        layout.setContentsMargins(17, 13, 17, 13)
+        layout.setSpacing(8)
 
-        # ====================================================
-        # HERO — contexto + ação + resumo executivo
-        # ====================================================
-        hero_card = QFrame()
+        hero_card = QFrame(self)
         hero_card.setObjectName("topicHeroCard")
         hero_layout = QVBoxLayout(hero_card)
-        hero_layout.setContentsMargins(18, 16, 18, 16)
-        hero_layout.setSpacing(12)
-
+        hero_layout.setContentsMargins(9, 6, 9, 8)
+        hero_layout.setSpacing(3)
         hero_topo = QHBoxLayout()
-        hero_topo.setSpacing(18)
-
+        hero_topo.setSpacing(12)
         bloco_titulo = QVBoxLayout()
-        bloco_titulo.setSpacing(3)
-
+        bloco_titulo.setSpacing(2)
         self.topico_breadcrumb = QLabel("Conteúdo de estudo")
         self.topico_breadcrumb.setObjectName("topicBreadcrumb")
         self.topico_breadcrumb.setWordWrap(True)
-
         titulo = QLabel(nome_topico)
         titulo.setObjectName("topicHeroTitle")
         titulo.setWordWrap(True)
-
-        self.topico_contexto_label = QLabel(
-            "Importância, revisões e contexto deste conteúdo."
-        )
+        self.topico_contexto_label = QLabel("Importância e revisões registradas")
         self.topico_contexto_label.setObjectName("topicHeroSubtitle")
         self.topico_contexto_label.setWordWrap(True)
-
         bloco_titulo.addWidget(self.topico_breadcrumb)
         bloco_titulo.addWidget(titulo)
         bloco_titulo.addWidget(self.topico_contexto_label)
         hero_topo.addLayout(bloco_titulo, 1)
-
         acoes_topo = QHBoxLayout()
-        acoes_topo.setSpacing(9)
-
-        self.botao_estudar_topico = QPushButton("▶  Estudar")
-        self.botao_estudar_topico.setObjectName("topicStudyButton")
-        self.botao_estudar_topico.setFixedHeight(42)
-        self.botao_estudar_topico.setMinimumWidth(128)
-        self.botao_estudar_topico.setToolTip(
-            "Montar uma sessão inteligente com questões deste tópico."
-        )
-        self.botao_estudar_topico.clicked.connect(self.estudar_topico)
-
+        acoes_topo.setSpacing(7)
         self.botao_ver_questoes_topico = QPushButton("Ver questões")
         self.botao_ver_questoes_topico.setObjectName("topicQuestionsButton")
-        self.botao_ver_questoes_topico.setFixedHeight(42)
-        self.botao_ver_questoes_topico.setMinimumWidth(132)
-        self.botao_ver_questoes_topico.setToolTip(
-            "Abrir o banco de questões já filtrado neste tópico."
-        )
+        self.botao_ver_questoes_topico.setFixedHeight(36)
+        self.botao_ver_questoes_topico.setMinimumWidth(106)
         self.botao_ver_questoes_topico.clicked.connect(self.ver_questoes_topico)
-
-        acoes_topo.addWidget(self.botao_estudar_topico)
+        self.botao_ver_questoes_topico.setToolTip("Abrir o banco filtrado neste tópico.")
+        self.botao_estudar_topico = QPushButton("▶  Estudar  →")
+        self.botao_estudar_topico.setObjectName("topicStudyButton")
+        self.botao_estudar_topico.setFixedHeight(36)
+        self.botao_estudar_topico.setMinimumWidth(116)
+        self.botao_estudar_topico.clicked.connect(self.estudar_topico)
+        self.botao_estudar_topico.setToolTip("Montar uma sessão com as questões deste tópico.")
         acoes_topo.addWidget(self.botao_ver_questoes_topico)
-        hero_topo.addLayout(acoes_topo, 0)
+        acoes_topo.addWidget(self.botao_estudar_topico)
+        hero_topo.addLayout(acoes_topo)
         hero_layout.addLayout(hero_topo)
-
-        # Três indicadores estratégicos. Os números operacionais restantes
-        # ficam em uma faixa compacta para não disputar atenção com o título.
-        def criar_metrica_principal(rotulo_texto, papel):
-            card = QFrame()
-            card.setObjectName("topicMetricCard")
-            card.setProperty("metricRole", papel)
-            box = QVBoxLayout(card)
-            box.setContentsMargins(14, 10, 14, 10)
-            box.setSpacing(2)
-
-            rotulo = QLabel(rotulo_texto)
-            rotulo.setObjectName("topicMetricLabel")
-            valor = QLabel("—")
-            valor.setObjectName("topicMetricValue")
-            valor.setWordWrap(True)
-
-            box.addWidget(rotulo)
-            box.addWidget(valor)
-            return card, valor
-
-        metricas_principais = QHBoxLayout()
-        metricas_principais.setSpacing(9)
-
-        card, self.valor_dominio_resumo = criar_metrica_principal(
-            "Domínio", "domain"
-        )
-        metricas_principais.addWidget(card, 1)
-
-        card, self.valor_proxima_topico = criar_metrica_principal(
-            "Próxima revisão", "review"
-        )
-        metricas_principais.addWidget(card, 1)
-
-        card, self.valor_ultima_pratica_topico = criar_metrica_principal(
-            "Última prática", "practice"
-        )
-        metricas_principais.addWidget(card, 1)
-
-        hero_layout.addLayout(metricas_principais)
-
-        faixa_operacional = QHBoxLayout()
-        faixa_operacional.setSpacing(8)
-
-        def criar_metrica_compacta(rotulo_texto):
-            card = QFrame()
-            card.setObjectName("topicCompactMetric")
-            box = QHBoxLayout(card)
-            box.setContentsMargins(11, 6, 11, 6)
-            box.setSpacing(7)
-            rotulo = QLabel(rotulo_texto)
-            rotulo.setObjectName("topicCompactMetricLabel")
-            valor = QLabel("—")
-            valor.setObjectName("topicCompactMetricValue")
-            box.addWidget(rotulo)
-            box.addWidget(valor)
-            return card, valor
-
-        card, self.valor_questoes_topico = criar_metrica_compacta("Questões")
-        faixa_operacional.addWidget(card)
-        card, self.valor_erros_topico = criar_metrica_compacta("Erros em atenção")
-        faixa_operacional.addWidget(card)
-        faixa_operacional.addStretch(1)
-        hero_layout.addLayout(faixa_operacional)
-
-        self.aviso_legado = QLabel()
-        self.aviso_legado.setObjectName("topicLegacyNotice")
-        self.aviso_legado.setWordWrap(True)
-        self.aviso_legado.setVisible(False)
-        hero_layout.addWidget(self.aviso_legado)
-
         layout.addWidget(hero_card)
 
-        # ====================================================
-        # DOMÍNIO — leitura detalhada e hierarquizada
-        # ====================================================
-        self.dominio_card = QFrame()
-        self.dominio_card.setObjectName("topicDomainCardModern")
-        dominio_layout = QVBoxLayout(self.dominio_card)
-        dominio_layout.setContentsMargins(17, 15, 17, 15)
-        dominio_layout.setSpacing(9)
+        # TOP: one horizontal focus panel with domain on left and schedule on right.
+        topo_resumo = QFrame(self)
+        topo_resumo.setObjectName("topicSummaryCard")
+        resumo_h = QHBoxLayout(topo_resumo)
+        resumo_h.setContentsMargins(14, 12, 14, 12)
+        resumo_h.setSpacing(14)
 
-        dominio_header = QHBoxLayout()
-        dominio_header.setSpacing(12)
-
-        dominio_titulos = QVBoxLayout()
-        dominio_titulos.setSpacing(1)
-        dominio_titulo = QLabel("Domínio do tópico")
-        dominio_titulo.setObjectName("topicDomainTitleModern")
-        dominio_subtitulo = QLabel(
-            "Leitura V2 por desempenho, variedade, estabilidade, recência, recuperação de erros e robustez da evidência."
-        )
-        dominio_subtitulo.setObjectName("topicDomainSubtitleModern")
-        dominio_subtitulo.setWordWrap(True)
-        dominio_titulos.addWidget(dominio_titulo)
-        dominio_titulos.addWidget(dominio_subtitulo)
-
-        placar_dominio = QHBoxLayout()
-        placar_dominio.setSpacing(8)
+        dominio_resumo = QFrame()
+        dominio_resumo.setObjectName("topicSummaryHalf")
+        dominio_resumo_layout = QVBoxLayout(dominio_resumo)
+        dominio_resumo_layout.setContentsMargins(0, 0, 0, 0)
+        dominio_resumo_layout.setSpacing(6)
+        dominio_eyebrow = QLabel("◎  Seu domínio atual")
+        dominio_eyebrow.setObjectName("topicSummaryEyebrow")
+        dominio_resumo_layout.addWidget(dominio_eyebrow)
         self.dominio_valor = QLabel("0 / 100")
         self.dominio_valor.setObjectName("topicDomainScoreModern")
-        self.dominio_nivel = QLabel("Sem evidência")
-        self.dominio_nivel.setObjectName("topicDomainLevelModern")
-        self.dominio_nivel.setProperty("domainLevel", "sem")
-        placar_dominio.addWidget(self.dominio_valor, 0, Qt.AlignVCenter)
-        placar_dominio.addWidget(self.dominio_nivel, 0, Qt.AlignVCenter)
-
-        dominio_header.addLayout(dominio_titulos, 1)
-        dominio_header.addLayout(placar_dominio, 0)
-        dominio_layout.addLayout(dominio_header)
-
+        dominio_resumo_layout.addWidget(self.dominio_valor)
         self.dominio_barra = QProgressBar()
         self.dominio_barra.setObjectName("topicDomainBarModern")
         self.dominio_barra.setRange(0, 100)
-        self.dominio_barra.setValue(0)
         self.dominio_barra.setTextVisible(False)
         self.dominio_barra.setFixedHeight(8)
-        dominio_layout.addWidget(self.dominio_barra)
+        dominio_resumo_layout.addWidget(self.dominio_barra)
+        self.dominio_nivel = QLabel("Sem evidência")
+        self.dominio_nivel.setObjectName("topicDomainLevelModern")
+        self.dominio_nivel.setProperty("domainLevel", "sem")
+        dominio_resumo_layout.addWidget(self.dominio_nivel, 0, Qt.AlignLeft)
+        resumo_h.addWidget(dominio_resumo, 1)
 
-        componentes = QGridLayout()
-        componentes.setHorizontalSpacing(8)
-        componentes.setVerticalSpacing(8)
-
-        def criar_componente_dominio(titulo_componente):
-            bloco = QFrame()
-            bloco.setObjectName("topicDomainComponentModern")
-            bloco_layout = QVBoxLayout(bloco)
-            bloco_layout.setContentsMargins(10, 7, 10, 7)
-            bloco_layout.setSpacing(1)
-            rotulo = QLabel(titulo_componente)
-            rotulo.setObjectName("topicDomainComponentLabelModern")
-            rotulo.setWordWrap(True)
-            valor = QLabel("—")
-            valor.setObjectName("topicDomainComponentValueModern")
-            bloco_layout.addWidget(rotulo)
-            bloco_layout.addWidget(valor)
-            return bloco, valor
-
-        componentes_dominio = (
-            ("Desempenho · 30%", "dominio_desempenho"),
-            ("Variedade · 20%", "dominio_variedade"),
-            ("Estabilidade · 15%", "dominio_estabilidade"),
-            ("Recência · 10%", "dominio_recencia"),
-            ("Erros / recuperação · 15%", "dominio_erros"),
-            ("Evidência · 10%", "dominio_evidencia_score"),
-        )
-        for indice_componente, (titulo_componente, atributo) in enumerate(componentes_dominio):
-            bloco, valor = criar_componente_dominio(titulo_componente)
-            setattr(self, atributo, valor)
-            componentes.addWidget(
-                bloco,
-                indice_componente // 3,
-                indice_componente % 3,
-            )
-        dominio_layout.addLayout(componentes)
-
-        insights = QHBoxLayout()
-        insights.setSpacing(8)
-
-        fortalezas_card = QFrame()
-        fortalezas_card.setObjectName("topicDomainInsight")
-        fortalezas_card.setProperty("insightRole", "strength")
-        fortalezas_layout = QVBoxLayout(fortalezas_card)
-        fortalezas_layout.setContentsMargins(11, 8, 11, 8)
-        fortalezas_layout.setSpacing(3)
-        fortalezas_titulo = QLabel("FORTALEZAS")
-        fortalezas_titulo.setObjectName("topicDomainInsightTitle")
-        self.dominio_pontos_fortes = QLabel("")
-        self.dominio_pontos_fortes.setObjectName("topicDomainInsightText")
-        self.dominio_pontos_fortes.setWordWrap(True)
-        fortalezas_layout.addWidget(fortalezas_titulo)
-        fortalezas_layout.addWidget(self.dominio_pontos_fortes)
-        insights.addWidget(fortalezas_card, 1)
-
-        atencao_card = QFrame()
-        atencao_card.setObjectName("topicDomainInsight")
-        atencao_card.setProperty("insightRole", "attention")
-        atencao_layout = QVBoxLayout(atencao_card)
-        atencao_layout.setContentsMargins(11, 8, 11, 8)
-        atencao_layout.setSpacing(3)
-        atencao_titulo = QLabel("PONTOS DE ATENÇÃO")
-        atencao_titulo.setObjectName("topicDomainInsightTitle")
-        self.dominio_motivos = QLabel("")
-        self.dominio_motivos.setObjectName("topicDomainInsightText")
-        self.dominio_motivos.setWordWrap(True)
-        atencao_layout.addWidget(atencao_titulo)
-        atencao_layout.addWidget(self.dominio_motivos)
-        insights.addWidget(atencao_card, 1)
-        dominio_layout.addLayout(insights)
-
-        evidencia_rotulo = QLabel("BASE DE EVIDÊNCIA")
-        evidencia_rotulo.setObjectName("topicDomainEvidenceLabel")
-        self.dominio_evidencia = QLabel("Sem respostas internas efetivas.")
-        self.dominio_evidencia.setObjectName("topicDomainEvidenceModern")
-        self.dominio_evidencia.setWordWrap(True)
-        dominio_layout.addWidget(evidencia_rotulo)
-        dominio_layout.addWidget(self.dominio_evidencia)
-
-        # ====================================================
-        # PRÓXIMO PASSO — ação prática ao lado do domínio
-        # ====================================================
         self.proximo_card = QFrame()
-        self.proximo_card.setObjectName("topicNextStepCard")
+        self.proximo_card.setObjectName("topicSummaryHalf")
         proximo_layout = QVBoxLayout(self.proximo_card)
-        proximo_layout.setContentsMargins(16, 15, 16, 15)
-        proximo_layout.setSpacing(8)
-
-        proximo_eyebrow = QLabel("PRÓXIMO PASSO")
-        proximo_eyebrow.setObjectName("topicNextEyebrow")
-        proximo_layout.addWidget(proximo_eyebrow)
-
+        proximo_layout.setContentsMargins(0, 0, 0, 0)
+        proximo_layout.setSpacing(5)
+        aviso_titulo = QLabel("◷  Revisão programada")
+        aviso_titulo.setObjectName("topicSummaryEyebrow")
+        proximo_layout.addWidget(aviso_titulo)
         self.proximo_status = QLabel("Aguardando agenda")
         self.proximo_status.setObjectName("topicNextStatus")
         self.proximo_status.setProperty("scheduleState", "none")
         proximo_layout.addWidget(self.proximo_status, 0, Qt.AlignLeft)
-
         self.proximo_data = QLabel("—")
         self.proximo_data.setObjectName("topicNextDate")
         proximo_layout.addWidget(self.proximo_data)
-
-        self.proximo_texto = QLabel(
-            "O Vighna usará a agenda, o domínio e os erros recentes para orientar a próxima ação."
-        )
+        self.proximo_texto = QLabel("A revisão deste tópico será orientada pela agenda.")
         self.proximo_texto.setObjectName("topicNextDescription")
         self.proximo_texto.setWordWrap(True)
         proximo_layout.addWidget(self.proximo_texto)
-
         self.proximo_atencao = QLabel("")
         self.proximo_atencao.setObjectName("topicNextMeta")
         self.proximo_atencao.setWordWrap(True)
+        self.proximo_atencao.setVisible(False)
         proximo_layout.addWidget(self.proximo_atencao)
         proximo_layout.addStretch(1)
-
-        self.proximo_revisar_btn = QPushButton("Revisar agora")
+        self.proximo_revisar_btn = QPushButton("◈  Revisar agora")
         self.proximo_revisar_btn.setObjectName("topicNextPrimaryButton")
-        self.proximo_revisar_btn.setMinimumHeight(40)
+        self.proximo_revisar_btn.setFixedHeight(38)
         self.proximo_revisar_btn.clicked.connect(self.revisar_topico)
         proximo_layout.addWidget(self.proximo_revisar_btn)
+        resumo_h.addWidget(self.proximo_card, 1)
+        layout.addWidget(topo_resumo)
 
-        proximo_estudar = QPushButton("Estudar tópico")
-        proximo_estudar.setObjectName("topicNextSecondaryButton")
-        proximo_estudar.setMinimumHeight(37)
-        proximo_estudar.clicked.connect(self.estudar_topico)
-        proximo_layout.addWidget(proximo_estudar)
+        # MAIN: compact diagnostics instead of six stacked metric boxes.
+        pagina_visao_geral = QScrollArea()
+        pagina_visao_geral.setObjectName("topicOverviewScroll")
+        pagina_visao_geral.setWidgetResizable(True)
+        pagina_visao_geral.setFrameShape(QFrame.NoFrame)
+        pagina_visao_geral.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        visao_conteudo = QWidget()
+        visao_conteudo.setObjectName("topicOverviewContent")
+        pagina_visao_geral.setWidget(visao_conteudo)
+        visao_layout = QVBoxLayout(visao_conteudo)
+        visao_layout.setContentsMargins(0, 2, 0, 4)
+        visao_layout.setSpacing(9)
+        diagnosticos_linha = QHBoxLayout()
+        diagnosticos_linha.setSpacing(10)
 
-        self.proximo_historico_btn = QPushButton("Ver histórico")
-        self.proximo_historico_btn.setObjectName("topicNextGhostButton")
-        self.proximo_historico_btn.setMinimumHeight(35)
-        proximo_layout.addWidget(self.proximo_historico_btn)
+        self.dominio_card = QFrame()
+        self.dominio_card.setObjectName("topicDomainCardModern")
+        dominio_layout = QVBoxLayout(self.dominio_card)
+        dominio_layout.setContentsMargins(15, 13, 15, 13)
+        dominio_layout.setSpacing(7)
+        titulo_analise = QLabel("◧  Análise de domínio")
+        titulo_analise.setObjectName("topicDomainTitleModern")
+        dominio_layout.addWidget(titulo_analise)
+        self._topic_metric_bars = {}
+        for titulo_metrica, atributo in (
+            ("Desempenho", "dominio_desempenho"),
+            ("Variedade", "dominio_variedade"),
+            ("Estabilidade", "dominio_estabilidade"),
+            ("Recência", "dominio_recencia"),
+            ("Erros / recuperação", "dominio_erros"),
+            ("Evidência", "dominio_evidencia_score"),
+        ):
+            rotulo_linha = QHBoxLayout()
+            rotulo_linha.setSpacing(5)
+            rotulo = QLabel(titulo_metrica)
+            rotulo.setObjectName("topicDomainComponentLabelModern")
+            valor = QLabel("—")
+            valor.setObjectName("topicDomainComponentValueModern")
+            valor.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            setattr(self, atributo, valor)
+            rotulo_linha.addWidget(rotulo, 1)
+            rotulo_linha.addWidget(valor)
+            dominio_layout.addLayout(rotulo_linha)
+            barra = QProgressBar()
+            barra.setObjectName("topicDiagnosticBar")
+            barra.setProperty("metric", atributo)
+            barra.setRange(0, 100)
+            barra.setValue(0)
+            barra.setTextVisible(False)
+            barra.setFixedHeight(6)
+            self._topic_metric_bars[atributo] = barra
+            dominio_layout.addWidget(barra)
+        dominio_layout.addStretch(1)
+        diagnosticos_linha.addWidget(self.dominio_card, 1)
 
-        # ====================================================
-        # EVOLUÇÃO — gráfico quando existe evidência; estado vazio quando não
-        # ====================================================
+        diagnostico_card = QFrame()
+        diagnostico_card.setObjectName("topicDiagnosticCard")
+        diagnostico_layout = QVBoxLayout(diagnostico_card)
+        diagnostico_layout.setContentsMargins(15, 13, 15, 13)
+        diagnostico_layout.setSpacing(7)
+        titulo_diag = QLabel("✧  Diagnóstico Vighna")
+        titulo_diag.setObjectName("topicDomainTitleModern")
+        diagnostico_layout.addWidget(titulo_diag)
+        titulo_fortaleza = QLabel("◈  Pontos fortes")
+        titulo_fortaleza.setObjectName("topicDiagnosticPositive")
+        diagnostico_layout.addWidget(titulo_fortaleza)
+        self.dominio_pontos_fortes = QLabel("")
+        self.dominio_pontos_fortes.setObjectName("topicDomainInsightText")
+        self.dominio_pontos_fortes.setWordWrap(True)
+        diagnostico_layout.addWidget(self.dominio_pontos_fortes)
+        divisor = QFrame()
+        divisor.setObjectName("topicDiagnosticDivider")
+        divisor.setFixedHeight(1)
+        diagnostico_layout.addWidget(divisor)
+        titulo_alerta = QLabel("⚠  Precisa de atenção")
+        titulo_alerta.setObjectName("topicDiagnosticAttention")
+        diagnostico_layout.addWidget(titulo_alerta)
+        self.dominio_motivos = QLabel("")
+        self.dominio_motivos.setObjectName("topicDomainInsightText")
+        self.dominio_motivos.setWordWrap(True)
+        diagnostico_layout.addWidget(self.dominio_motivos)
+        diagnostico_layout.addStretch(1)
+        self.topic_last_practice = QLabel("—")
+        self.topic_last_practice.setObjectName("topicLastPractice")
+        diagnostico_layout.addWidget(self.topic_last_practice)
+        diagnosticos_linha.addWidget(diagnostico_card, 1)
+        visao_layout.addLayout(diagnosticos_linha)
+
+        # EVIDENCE: one horizontal band with four values, not another card grid.
+        evidencia_card = QFrame()
+        evidencia_card.setObjectName("topicEvidenceCard")
+        evidencia_layout = QVBoxLayout(evidencia_card)
+        evidencia_layout.setContentsMargins(14, 11, 14, 11)
+        evidencia_layout.setSpacing(6)
+        evidencia_titulo_linha = QHBoxLayout()
+        titulo_evidencia = QLabel("♧  Base de evidências")
+        titulo_evidencia.setObjectName("topicDomainTitleModern")
+        evidencia_titulo_linha.addWidget(titulo_evidencia)
+        evidencia_titulo_linha.addStretch(1)
+        self.proximo_historico_btn = QPushButton("Ver histórico  →")
+        self.proximo_historico_btn.setObjectName("topicEvidenceLink")
+        self.proximo_historico_btn.setCursor(Qt.PointingHandCursor)
+        evidencia_titulo_linha.addWidget(self.proximo_historico_btn)
+        evidencia_layout.addLayout(evidencia_titulo_linha)
+        evidencia_metrica_linha = QHBoxLayout()
+        evidencia_metrica_linha.setSpacing(8)
+        self._topic_evidence_values = {}
+        for titulo_metrica, atributo in (
+            ("Respostas históricas", "tentativas_historicas"),
+            ("Questões diferentes", "questoes_unicas"),
+            ("Dias de prática", "dias_ativos_historicos"),
+            ("Revisões registradas", "revisoes"),
+        ):
+            quadro = QFrame()
+            quadro.setObjectName("topicEvidenceMetric")
+            quadro_box = QVBoxLayout(quadro)
+            quadro_box.setContentsMargins(10, 6, 10, 7)
+            quadro_box.setSpacing(2)
+            valor = QLabel("—")
+            valor.setObjectName("topicEvidenceValue")
+            descricao = QLabel(titulo_metrica)
+            descricao.setObjectName("topicEvidenceCaption")
+            descricao.setWordWrap(True)
+            quadro_box.addWidget(valor)
+            quadro_box.addWidget(descricao)
+            evidencia_metrica_linha.addWidget(quadro, 1)
+            self._topic_evidence_values[atributo] = valor
+        evidencia_layout.addLayout(evidencia_metrica_linha)
+        self.aviso_legado = QLabel()
+        self.aviso_legado.setObjectName("topicLegacyNotice")
+        self.aviso_legado.setWordWrap(True)
+        self.aviso_legado.hide()
+        evidencia_layout.addWidget(self.aviso_legado)
+        visao_layout.addWidget(evidencia_card)
+        visao_layout.addStretch(1)
+
+        # Historical metrics remain available on the History tab.
+        metricas_anteriores = QFrame()
+        metricas_anteriores.setObjectName("topicHistorySummary")
+        extras_grid = QGridLayout(metricas_anteriores)
+        extras_grid.setContentsMargins(12, 10, 12, 10)
+        extras_grid.setHorizontalSpacing(10)
+        extras_grid.setVerticalSpacing(6)
+        for idx, (rotulo, atributo) in enumerate((
+            ("Domínio", "valor_dominio_resumo"),
+            ("Próxima revisão", "valor_proxima_topico"),
+            ("Última prática", "valor_ultima_pratica_topico"),
+            ("Questões ativas", "valor_questoes_topico"),
+            ("Erros em atenção", "valor_erros_topico"),
+        )):
+            titulo_resumo = QLabel(rotulo)
+            titulo_resumo.setObjectName("topicEvidenceCaption")
+            valor_resumo = QLabel("—")
+            valor_resumo.setObjectName("topicHistoryStatValue")
+            setattr(self, atributo, valor_resumo)
+            extras_grid.addWidget(titulo_resumo, idx // 3 * 2, idx % 3)
+            extras_grid.addWidget(valor_resumo, idx // 3 * 2 + 1, idx % 3)
+        self.dominio_evidencia = QLabel("Sem respostas internas efetivas.")
+        self.dominio_evidencia.setObjectName("topicDomainEvidenceModern")
+        self.dominio_evidencia.setWordWrap(True)
+        extras_grid.addWidget(self.dominio_evidencia, 4, 0, 1, 3)
         card_evolucao = QFrame()
         card_evolucao.setObjectName("topicEvolutionCard")
         evolucao_layout = QVBoxLayout(card_evolucao)
@@ -26699,45 +26681,42 @@ class JanelaTopico(QDialog):
         detalhes_layout.addWidget(explicacao_detalhes)
         detalhes_layout.addWidget(self.detalhes, 1)
 
-        # ====================================================
-        # ABAS
-        # ====================================================
+
+        # History uses existing table, edit/delete, notes and evolution without losing data.
+        pagina_historico = QScrollArea()
+        pagina_historico.setObjectName("topicHistoryScroll")
+        pagina_historico.setWidgetResizable(True)
+        pagina_historico.setFrameShape(QFrame.NoFrame)
+        pagina_historico.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        conteudo_historico = QWidget()
+        conteudo_historico.setObjectName("topicHistoryContent")
+        pagina_historico.setWidget(conteudo_historico)
+        historico_pagina_layout = QVBoxLayout(conteudo_historico)
+        historico_pagina_layout.setContentsMargins(0, 5, 0, 5)
+        historico_pagina_layout.setSpacing(9)
+        voltar_geral = QPushButton("←  Voltar à visão geral")
+        voltar_geral.setObjectName("topicEvidenceLink")
+        historico_pagina_layout.addWidget(voltar_geral, 0, Qt.AlignLeft)
+        historico_principal = QHBoxLayout()
+        historico_principal.setSpacing(10)
+        historico_principal.addWidget(card_historico, 3)
+        historico_principal.addWidget(card_detalhes, 2)
+        historico_pagina_layout.addLayout(historico_principal)
+        historico_pagina_layout.addWidget(card_evolucao)
+        historico_pagina_layout.addWidget(metricas_anteriores)
+
         self.topico_tabs = QTabWidget()
         self.topico_tabs.setObjectName("topicDetailsTabs")
-
-        pagina_visao_geral = QScrollArea()
-        pagina_visao_geral.setObjectName("topicOverviewScroll")
-        pagina_visao_geral.setWidgetResizable(True)
-        pagina_visao_geral.setFrameShape(QFrame.NoFrame)
-        pagina_visao_geral.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        visao_conteudo = QWidget()
-        visao_conteudo.setObjectName("topicOverviewContent")
-        pagina_visao_geral.setWidget(visao_conteudo)
-        visao_layout = QVBoxLayout(visao_conteudo)
-        visao_layout.setContentsMargins(0, 10, 0, 0)
-        visao_layout.setSpacing(12)
-
-        leitura_principal = QHBoxLayout()
-        leitura_principal.setSpacing(12)
-        leitura_principal.addWidget(self.dominio_card, 3)
-        leitura_principal.addWidget(self.proximo_card, 2)
-        visao_layout.addLayout(leitura_principal)
-        visao_layout.addWidget(card_evolucao, 1)
-
-        pagina_historico = QWidget()
-        historico_pagina_layout = QHBoxLayout(pagina_historico)
-        historico_pagina_layout.setContentsMargins(0, 10, 0, 0)
-        historico_pagina_layout.setSpacing(12)
-        historico_pagina_layout.addWidget(card_historico, 3)
-        historico_pagina_layout.addWidget(card_detalhes, 2)
-
         self.topico_tabs.addTab(pagina_visao_geral, "Visão geral")
         self.topico_tabs.addTab(pagina_historico, "Histórico")
-        self.proximo_historico_btn.clicked.connect(
-            lambda: self.topico_tabs.setCurrentIndex(1)
-        )
-
+        self.topico_tabs.tabBar().hide()
+        self.proximo_historico_btn.clicked.connect(lambda: self.topico_tabs.setCurrentIndex(1))
+        voltar_geral.clicked.connect(lambda: self.topico_tabs.setCurrentIndex(0))
         layout.addWidget(self.topico_tabs, 1)
+
+        # Scoped QSS avoids altering global theme or unrelated dialogs.
+        from ui.topic_details_futurista import TOPIC_PREMIUM_QSS
+        self.setStyleSheet(TOPIC_PREMIUM_QSS)
 
         self.tabela.itemSelectionChanged.connect(self.mostrar_detalhes)
         self.carregar_historico()
@@ -26823,6 +26802,16 @@ class JanelaTopico(QDialog):
         self.dominio_evidencia_score.setText(
             f"{dominio['evidencia']:.0f}"
         )
+
+        # Premium view mirrors existing numerical results; no recalculation.
+        for campo, barra in self._topic_metric_bars.items():
+            try:
+                valor_exibido = float(getattr(self, campo).text().replace(",", "."))
+            except (TypeError, ValueError):
+                valor_exibido = 0.0
+            barra.setValue(max(0, min(100, int(round(valor_exibido)))))
+        for campo, label in self._topic_evidence_values.items():
+            label.setText(str(int(dominio.get(campo, 0) or 0)))
 
         if dominio[
             "tentativas"
@@ -26979,6 +26968,7 @@ class JanelaTopico(QDialog):
         self.valor_ultima_pratica_topico.setText(
             texto_ultima
         )
+        self.topic_last_practice.setText("Última prática\n" + texto_ultima)
 
         self.valor_proxima_topico.setText(
             formatar_data(
@@ -30275,6 +30265,61 @@ class JanelaConfiguracoes(QDialog):
             )
         )
 
+        # H09-R1: controle de movimento fica somente em Configurações > Aparência.
+        opcao_animacao_home = QFrame()
+        opcao_animacao_home.setObjectName("settingsOption")
+        linha_animacao_home = QHBoxLayout(opcao_animacao_home)
+        linha_animacao_home.setContentsMargins(14, 11, 14, 12)
+        linha_animacao_home.setSpacing(12)
+        textos_animacao_home = QVBoxLayout()
+        textos_animacao_home.setSpacing(4)
+        titulo_animacao_home = QLabel("Animação da tela inicial")
+        titulo_animacao_home.setObjectName("configOptionTitle")
+        descricao_animacao_home = QLabel(
+            "Controle o movimento das partículas e da energia que saem do livro "
+            "na tela inicial. Sua escolha será lembrada ao reiniciar o programa."
+        )
+        descricao_animacao_home.setObjectName("mutedLabel")
+        descricao_animacao_home.setWordWrap(True)
+        textos_animacao_home.addWidget(titulo_animacao_home)
+        textos_animacao_home.addWidget(descricao_animacao_home)
+        self.pausar_animacao_home = QCheckBox("Pausar animação da tela inicial")
+        self.pausar_animacao_home.setObjectName("settingsPauseHomeAnimation")
+        self.pausar_animacao_home.setToolTip(
+            "Marcado: o fundo fica estático. Desmarcado: a animação continua."
+        )
+        self.pausar_animacao_home.setAccessibleName(
+            "Pausar animação da tela inicial"
+        )
+        self.pausar_animacao_home.setFocusPolicy(Qt.StrongFocus)
+        self._preferencias_animacao_home = QSettings("VighnaStudy", "Home")
+        self.pausar_animacao_home.setChecked(
+            self._preferencias_animacao_home.value(
+                "acessibilidade/reduzir_movimento", False, type=bool
+            )
+        )
+        self._pausa_animacao_home_bloqueada = (
+            os.environ.get("VIGHNA_HOME_REDUZIR_MOVIMENTO", "").strip().lower()
+            in ("1", "true", "sim", "yes", "on")
+        )
+        if self._pausa_animacao_home_bloqueada:
+            self.pausar_animacao_home.setChecked(True)
+            self.pausar_animacao_home.setEnabled(False)
+            self.pausar_animacao_home.setToolTip(
+                "Pausa exigida por VIGHNA_HOME_REDUZIR_MOVIMENTO."
+            )
+        linha_animacao_home.addLayout(textos_animacao_home, 1)
+        linha_animacao_home.addWidget(
+            self.pausar_animacao_home, 0, Qt.AlignRight | Qt.AlignVCenter
+        )
+        layout_aparencia.addWidget(opcao_animacao_home)
+        self.registrar_opcao_pesquisa(
+            secao_aparencia, opcao_animacao_home,
+            "Pausar animação da tela inicial",
+            "reduzir movimento parar frear gif fundo home partículas energia livro "
+            "acessibilidade tela inicial animação animacao"
+        )
+
         # ====================================================
         # METAS DE ESTUDO
         # ====================================================
@@ -31841,6 +31886,14 @@ class JanelaConfiguracoes(QDialog):
             )
 
     def salvar(self):
+        # A preferência somente é persistida quando o usuário clica em Salvar.
+        if not self._pausa_animacao_home_bloqueada:
+            self._preferencias_animacao_home.setValue(
+                "acessibilidade/reduzir_movimento",
+                self.pausar_animacao_home.isChecked(),
+            )
+            self._preferencias_animacao_home.sync()
+
         tema_escolhido = normalizar_tema(
             self.combo_tema.currentData()
         )
@@ -35653,6 +35706,15 @@ class SistemaEstudos(QMainWindow):
         acessos ao banco e ações. Restaura integralmente o layout histórico
         nos outros temas e em larguras inferiores a 1200px.
         """
+        # M2-D1C: geometria externa do Futurista pertence ao controlador Qt.
+        # Os layouts legados continuam disponíveis exclusivamente para rollback
+        # e mudança de tema, até a unificação visual definitiva.
+        controller = getattr(self, "_dashboard_m2d1c_controller", None)
+        if controller is not None and controller.active:
+            if futurista:
+                controller.request_update()
+                return
+            controller.deactivate()
         refs = getattr(self, "_dashboard_modelo_refs", None)
         if not refs:
             return
@@ -35912,6 +35974,14 @@ class SistemaEstudos(QMainWindow):
 
         self._dashboard_modelo_reordenado = usar
         self._dashboard_hero_reordenado = usar
+        # Ao retornar ao Futurista, o legado apenas restaura a preparacao
+        # interna do Hero; o controlador reassume os quatro widgets.
+        if usar and getattr(self, "_dashboard_m2d1c_initialized", False):
+            if controller is None:
+                from ui.dashboard_layout_m2d1c import DashboardQtLayoutController
+                controller = DashboardQtLayoutController(self)
+                self._dashboard_m2d1c_controller = controller
+            controller.activate()
         raiz.invalidate()
         topo.invalidate()
         antiga_inferior.invalidate()
@@ -36083,11 +36153,23 @@ class SistemaEstudos(QMainWindow):
         self._premium_tema_aplicado = tema
         cores = {
             "futurista": dict(
-                base="#081727", centro="#102b46", fim="#071324", borda="#138cbe",
-                marca="#f0f7ff", acento="#27c8ff", texto="#eaf5ff", secundario="#a8bdd0",
-                perfil="#102b43", perfil_borda="#237daa", campo="#10253a",
-                foco="#32cfff", gerenciar="#0a2b45", busca="#102941",
-                atalho="#29435d", divisao="#315575", hover="#164264",
+                # H04: tinta com alfa SOMENTE nas superfícies. Tipografia,
+                # pictogramas, marca e controles preservam opacidade integral.
+                base="rgba(3, 13, 27, 222)",
+                centro="rgba(6, 30, 56, 188)",
+                fim="rgba(3, 15, 33, 210)",
+                borda="rgba(13, 181, 228, 195)",
+                marca="#f0f7ff", acento="#27c8ff",
+                texto="#eaf5ff", secundario="#c7d8e7",
+                perfil="rgba(7, 30, 55, 212)",
+                perfil_borda="rgba(54, 172, 228, 178)",
+                campo="rgba(8, 31, 56, 200)",
+                foco="#32cfff",
+                gerenciar="rgba(10, 41, 72, 196)",
+                busca="rgba(7, 29, 53, 190)",
+                atalho="rgba(29, 67, 96, 207)",
+                divisao="rgba(58, 136, 174, 127)",
+                hover="rgba(17, 67, 105, 228)",
             ),
             "escuro": dict(
                 base="#151e2b", centro="#202f42", fim="#111b29", borda="#49647e",
@@ -36213,8 +36295,9 @@ class SistemaEstudos(QMainWindow):
             border-radius: 7px; font-weight: 600;
             font-size: 9pt; padding: 2px 7px;
         }
-        QFrame#dashboardTopBar QPushButton#premiumHeaderShortcut:hover {
-            background-color: %(hover)s;
+        QFrame#dashboardTopBar QPushButton#premiumHeaderShortcut:hover,
+        QFrame#dashboardTopBar QPushButton#premiumHeaderShortcut:focus {
+            background-color: %(hover)s; border-color: %(foco)s;
         }
         """ % cores
         painel.setStyleSheet(qss)
@@ -36320,6 +36403,9 @@ class SistemaEstudos(QMainWindow):
             widget.setVisible(True)
         self._ajustar_cabecalho_dashboard(futurista and visivel)
         self._ajustar_densidade_dashboard_lateral(futurista, visivel, expandida)
+        controller = getattr(self, "_dashboard_m2d1c_controller", None)
+        if controller is not None and controller.active:
+            controller.request_update()
 
     def _atualizar_selecao_sidebar(self, _indice=None):
         if not hasattr(self, "_sidebar_botoes"):
@@ -39162,6 +39248,24 @@ class SistemaEstudos(QMainWindow):
         self._ajustar_altura_independente_recomendacao(
             normalizar_tema(self.tema_atual) == "futurista"
         )
+
+        # M2-D1C — Inicializar a composicao calibrada apos a montagem Hero.
+        # Nenhum widget ou sinal e recriado; o escopo e apenas o Dashboard.
+        self._dashboard_m2d1c_initialized = True
+        self._dashboard_m2d1c_controller = None
+        if (normalizar_tema(self.tema_atual) == "futurista"
+                and getattr(self, "_dashboard_hero_reordenado", False)):
+            from ui.dashboard_layout_m2d1c import DashboardQtLayoutController
+            self._dashboard_m2d1c_controller = DashboardQtLayoutController(self)
+            self._dashboard_m2d1c_controller.activate()
+
+        # M2-D1A — Atalho de MEDIÇÃO opcional, sem modificar os cards.
+        # Executa somente sob comando explícito do usuário (Ctrl+Shift+F12).
+        try:
+            from ui.dashboard_geometry_runtime import attach_dashboard_geometry_shortcut
+            attach_dashboard_geometry_shortcut(self)
+        except (ImportError, RuntimeError) as exc:
+            print(f"[Dashboard M2-D1A] Sonda opcional indisponível: {exc}")
 
         # A barra lateral substitui os quatro atalhos no Futurista.
         # Mantemos a faixa construída para Claro/Escuro e larguras sem sidebar;
@@ -46777,6 +46881,13 @@ class SistemaEstudos(QMainWindow):
     def abrir_pausa_desafios(self):
         from jogos import JanelaPausaDesafios
         janela = JanelaPausaDesafios(self)
+        # Diagnóstico opcional, apenas leitura: Ctrl+Shift+F11 dentro da janela.
+        # Não modifica o módulo de jogos, as geometrias, nem o banco de dados.
+        try:
+            from ui.pausa_geometry_runtime import attach_pause_geometry_shortcut
+            attach_pause_geometry_shortcut(janela)
+        except (ImportError, RuntimeError, AttributeError):
+            pass  # A tela permanece funcional mesmo se o diagnóstico estiver indisponível.
         janela.exec()
 
     def abrir_questoes_topico_contextual(self, topico_id):
@@ -64256,6 +64367,19 @@ class SistemaEstudos(QMainWindow):
             self.cache_analitico.invalidar("estatisticas:regularidade:")
             self._estado_estatisticas.marcar_sujas(("Regularidade",), resumo=False)
             self.atualizar_dashboard()
+
+            # Aplica imediatamente a mesma preferência ao fundo já existente.
+            # Não reconstrói a Home e não altera os quadros, cards ou timer.
+            fundo_home = self.tela_portal_inicio.findChild(
+                QWidget, "portalInicioConteudo"
+            )
+            if fundo_home is not None and hasattr(
+                fundo_home, "definir_reducao_movimento"
+            ):
+                preferencia = QSettings("VighnaStudy", "Home")
+                fundo_home.definir_reducao_movimento(preferencia.value(
+                    "acessibilidade/reduzir_movimento", False, type=bool
+                ))
 
             QMessageBox.information(
                 self,

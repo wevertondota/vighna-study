@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QApplication
-from ui.design import render_qss
+from ui.design import render_qss, render_native_qss
 
 
 TEMAS_VALIDOS = {
@@ -19891,14 +19891,15 @@ def stylesheet_escuro():
 
 def stylesheet_futurista():
     """
-    Terceira opção visual do VighnaStudy.
+    Aparência Futurista nativa do VighnaStudy.
 
-    O tema Futurista herda toda a cobertura de componentes do tema escuro
-    e aplica uma camada final de overrides. Isso mantém compatibilidade com
-    telas antigas e novas sem alterar os estilos Claro/Escuro existentes.
+    A base QSS herdada foi isolada na U1. A U2A resolve os tokens
+    diretamente pela identidade nativa, sem selecionar um tema por nome.
+    Rotas legadas continuam disponíveis até as etapas U3 a U5.
     """
 
-    return stylesheet_escuro() + render_qss("futurista", r"""
+    from ui.design.futurista_qss_base import stylesheet_base_futurista
+    return stylesheet_base_futurista() + render_native_qss( r"""
 
     /* ======================================================
        VIGHNA FUTURISTA — TERCEIRO TEMA
@@ -23066,7 +23067,7 @@ def stylesheet_futurista():
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_FUTURISTA + render_qss("futurista", ESTILO_DASHBOARD_MODERNO_FUTURISTA) + render_qss("futurista", ESTILO_FOCO_DASHBOARD_FUTURISTA) + render_qss("futurista", ESTILO_ALGORITMO_DASHBOARD_FUTURISTA) + render_qss("futurista", ESTILO_BUSCA_GLOBAL_FUTURISTA) + render_qss("futurista", ESTILO_INTELIGENCIA_RESUMO_FUTURISTA) + ESTILO_TOPICOS_DISCIPLINA_FUTURISTA + render_qss("futurista", ESTILO_DASHBOARD_NEO_FUTURISTA) + ESTILO_RESOLVEDOR_FUTURISTA + render_qss("futurista", ESTILO_TOPICO_DETALHES_FUTURISTA) + ESTILO_RESOLVEDOR_ELIMINADAS_FUTURISTA + ESTILO_RESOLVEDOR_TECLADO_FUTURISTA + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_FUTURISTA + render_qss("futurista", ESTILO_BARRA_EXPLICACAO_RICA) + render_qss("futurista", ESTILO_RESOLVEDOR_ALTERNATIVAS_INLINE_FUTURISTA) + ESTILO_CALENDARIO_PREVISAO_FUTURISTA + ESTILO_DASHBOARD_SHELL_FUTURISTA + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_B_FUTURISTA) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_C) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_D) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_E) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_F) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_G) + render_qss("futurista", ESTILO_DASHBOARD_BLOCO_H) + render_qss("futurista", ESTILO_NAVEGACAO_BUSCA_GLOBAL) + render_qss("futurista", ESTILO_NAVEGACAO_RETORNOS_DASHBOARD) + render_qss("futurista", ESTILO_CARDS_GLOBAIS_BLOCO_A) + render_qss("futurista", ESTILO_CARDS_GLOBAIS_BLOCO_B) + render_qss("futurista", ESTILO_CARDS_GLOBAIS_BLOCO_C) + render_qss("futurista", ESTILO_MODO_FOCO_INTEGRACAO_RESOLVEDOR) + ESTILO_DASHBOARD_ALVO_5B_FUTURISTA + render_qss("futurista", ESTILO_DASHBOARD_SIDEBAR_FUTURISTA))
+""" + ESTILO_JORNADA_FUTURISTA + render_native_qss( ESTILO_DASHBOARD_MODERNO_FUTURISTA) + render_native_qss( ESTILO_FOCO_DASHBOARD_FUTURISTA) + render_native_qss( ESTILO_ALGORITMO_DASHBOARD_FUTURISTA) + render_native_qss( ESTILO_BUSCA_GLOBAL_FUTURISTA) + render_native_qss( ESTILO_INTELIGENCIA_RESUMO_FUTURISTA) + ESTILO_TOPICOS_DISCIPLINA_FUTURISTA + render_native_qss( ESTILO_DASHBOARD_NEO_FUTURISTA) + ESTILO_RESOLVEDOR_FUTURISTA + render_native_qss( ESTILO_TOPICO_DETALHES_FUTURISTA) + ESTILO_RESOLVEDOR_ELIMINADAS_FUTURISTA + ESTILO_RESOLVEDOR_TECLADO_FUTURISTA + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_FUTURISTA + render_native_qss( ESTILO_BARRA_EXPLICACAO_RICA) + render_native_qss( ESTILO_RESOLVEDOR_ALTERNATIVAS_INLINE_FUTURISTA) + ESTILO_CALENDARIO_PREVISAO_FUTURISTA + ESTILO_DASHBOARD_SHELL_FUTURISTA + render_native_qss( ESTILO_DASHBOARD_BLOCO_B_FUTURISTA) + render_native_qss( ESTILO_DASHBOARD_BLOCO_C) + render_native_qss( ESTILO_DASHBOARD_BLOCO_D) + render_native_qss( ESTILO_DASHBOARD_BLOCO_E) + render_native_qss( ESTILO_DASHBOARD_BLOCO_F) + render_native_qss( ESTILO_DASHBOARD_BLOCO_G) + render_native_qss( ESTILO_DASHBOARD_BLOCO_H) + render_native_qss( ESTILO_NAVEGACAO_BUSCA_GLOBAL) + render_native_qss( ESTILO_NAVEGACAO_RETORNOS_DASHBOARD) + render_native_qss( ESTILO_CARDS_GLOBAIS_BLOCO_A) + render_native_qss( ESTILO_CARDS_GLOBAIS_BLOCO_B) + render_native_qss( ESTILO_CARDS_GLOBAIS_BLOCO_C) + render_native_qss( ESTILO_MODO_FOCO_INTEGRACAO_RESOLVEDOR) + ESTILO_DASHBOARD_ALVO_5B_FUTURISTA + render_native_qss( ESTILO_DASHBOARD_SIDEBAR_FUTURISTA))
 
 def aplicar_tema(
     app,

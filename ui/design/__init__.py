@@ -43,6 +43,15 @@ from .themes import (
     fixed_gradient,
     get_theme,
 )
+from .native import (
+    NATIVE_THEME,
+    native_color,
+    native_gradient,
+    native_qss_color,
+    native_qss_gradient,
+    native_qss_rgba,
+    render_native_qss,
+)
 from .tokens import (
     ALL_TOKENS,
     COMPONENT_TOKEN_COUNT,
@@ -74,6 +83,7 @@ __all__ = (
     "HORIZONTAL",
     "LIGHT_THEME",
     "PALETTE",
+    "NATIVE_THEME",
     "PhysicalPalette",
     "SEMANTIC_TOKEN_COUNT",
     "SEMANTIC_TOKENS",
@@ -107,6 +117,12 @@ __all__ = (
     "qss_gradient",
     "qss_rgba",
     "render_qss",
+    "native_color",
+    "native_gradient",
+    "native_qss_color",
+    "native_qss_gradient",
+    "native_qss_rgba",
+    "render_native_qss",
     "qtawesome_color",
     "token_spec",
 )

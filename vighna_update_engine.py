@@ -26,7 +26,7 @@ MAX_UNCOMPRESSED = 100 * 1024 * 1024
 MAX_FILE = 15 * 1024 * 1024
 MAX_MEMBERS = 80
 EXCLUDED_NAMES = {'estudos.db', 'VighnaStudy.exe', 'VighnaUpdater.exe'}
-ROOT_MODULES = {"main.py", "versao.py", "tema.py", "foco.py", "icones.py", "caminhos.py",
+ROOT_MODULES = {"main.py", "jogos.py", "versao.py", "tema.py", "foco.py", "icones.py", "caminhos.py",
                 "backup.py", "checkpoint.py", "startup_splash.py", "navegacao.py",
                 "banco.py", "importador_pdf.py", "importador_txt.py", "relatorios_lazy.py",
                 "estatisticas_lazy.py", "inteligencia.py", "fila_candidata.py",

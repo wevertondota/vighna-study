@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
     QFrame, QGridLayout, QHBoxLayout, QLabel, QPushButton,
     QScrollArea, QSizePolicy, QVBoxLayout, QWidget,
 )
-from ui.design import render_qss
+from ui.design import render_native_qss, render_qss
 
 
 ESTILO_PORTAL_TREINOS = r"""
@@ -247,4 +247,5 @@ def atualizar_retomada_treinos(pagina: QWidget, existe_sessao: bool,
 
 
 def aplicar_estilo_treinos(pagina: QWidget, tema: str) -> None:
-    pagina.setStyleSheet(render_qss(tema, ESTILO_PORTAL_TREINOS))
+    pagina.setStyleSheet((render_native_qss(ESTILO_PORTAL_TREINOS) if tema == "futurista"
+                        else render_qss(tema, ESTILO_PORTAL_TREINOS)))
