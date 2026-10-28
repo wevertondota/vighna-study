@@ -25,6 +25,7 @@ from ui.portal_head_foreground import (
 )
 import logging
 import os
+from ui.vighnastudy_brand_home import assinatura_cabecalho_png
 
 
 # Todas as cores provêm de tokens já registrados nos três temas.
@@ -1021,6 +1022,45 @@ def atualizar_perfil_mini_edital(pagina: QWidget, nome_perfil: str) -> None:
     cartao.setToolTip("Abrir a Central do Edital do perfil: " + nome)
 
 
+
+def _instalar_logo_oficial_vighnastudy_home(cabecalho: QWidget) -> bool:
+    """Troca só a apresentação da marca, sem tocar perfil/busca/navegação.
+
+    O header é criado em main.py e compartilhado com o portal; reutilizamos
+    seu QLabel original para evitar duplicação de widgets ou sinais.
+    """
+    if cabecalho.property("vighnastudy_home_brand_r1"):
+        return True
+    logo = cabecalho.findChild(QLabel, "premiumHeaderLogo")
+    titulo = cabecalho.findChild(QLabel, "premiumHeaderBrandName")
+    subtitulo = cabecalho.findChild(QLabel, "premiumHeaderSubtitle")
+    if logo is None or titulo is None or subtitulo is None:
+        return False  # Fallback 100% original em builds com header diferente.
+
+    marca_pn = QPixmap()
+    if not marca_pn.loadFromData(assinatura_cabecalho_png(), "PNG"):
+        return False
+    marca_pn = marca_pn.scaled(211, 58, Qt.KeepAspectRatio,
+                               Qt.SmoothTransformation)
+    logo.setFixedSize(215, 61)
+    logo.setAlignment(Qt.AlignCenter)
+    logo.setPixmap(marca_pn)
+    logo.setAccessibleName("VighnaStudy — marca oficial")
+    logo.setAccessibleDescription("Produto da marca Vighna. Visão geral do estudo.")
+    logo.setToolTip("VighnaStudy — visão geral do estudo")
+    # main.py altera o título conforme o tema e força 'visible=True' na lateral.
+    # Mantemos os QLabel originais com tamanho zero, assim esses comportamentos
+    # não reexibem texto duplicado nem deixam blocos de largura residual.
+    titulo.setFixedSize(0, 0)
+    subtitulo.setFixedSize(0, 0)
+    topo = cabecalho.layout()
+    if topo is not None and topo.count() > 0:
+        marca_item = topo.itemAt(0)
+        if marca_item is not None and marca_item.layout() is not None:
+            marca_item.layout().setSpacing(0)
+    cabecalho.setProperty("vighnastudy_home_brand_r1", True)
+    return True
+
 def criar_portal_inicio(abrir_dashboard, abrir_busca, abrir_questoes,
                         abrir_simulados=None, abrir_recursos=None,
                         cabecalho_compartilhado=None, abrir_edital=None) -> QWidget:
@@ -1042,6 +1082,9 @@ def criar_portal_inicio(abrir_dashboard, abrir_busca, abrir_questoes,
     coluna.setSpacing(17)
 
     if cabecalho_compartilhado is not None:
+        # Assinatura T3 oficial apenas na apresentação; widgets de perfil,
+        # busca e suas conexões de sinal permanecem absolutamente intactos.
+        _instalar_logo_oficial_vighnastudy_home(cabecalho_compartilhado)
         # Move o MESMO cabeçalho do Dashboard: seletor de perfil, Gerenciar,
         # Central de Questões e Configurações mantêm suas conexões originais.
         # Um único widget possui o seletor: não há duplicação de estado.

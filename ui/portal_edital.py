@@ -127,6 +127,11 @@ def criar_portal_edital(voltar_inicio, abrir_progresso, abrir_disciplinas):
         "estrutura reservada para implementação futura.", "portalEditalEstado"
     ))
     coluna.addWidget(painel)
+    # API explícita para inserir os três cards existentes antes do painel de
+    # acompanhamento futuro, sem adivinhar qual QVBoxLayout pertence à tela.
+    pagina.portal_edital_conteudo_layout = coluna
+    pagina.portal_edital_cards_anchor = painel
+    pagina.portal_edital_scroll = area
     coluna.addStretch(1)
     area.setWidget(conteudo)
     raiz.addWidget(area)

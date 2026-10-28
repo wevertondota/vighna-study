@@ -2505,4 +2505,44 @@ def dashboard_visual_styles(tema: str) -> str:
     QWidget#dashboardRoot QFrame#focusQuickCard QLabel#focusDashboardDetail {
         font-size: 9pt;
     }
+
+    /* Foco Premium E1: regras EXCLUSIVAS do card, sem afetar Home ou Hero. */
+    QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardTodayPill {
+        color: #E5F8FF; background-color: rgba(4, 39, 66, 190);
+        border: 1px solid rgba(0, 190, 235, 200);
+        border-radius: 11px; font-size: 9pt; font-weight: 700;
+    }
+    QWidget#dashboardRoot QFrame#focusDashboardMainCard QFrame#focusDashboardMetricDivider {
+        background-color: rgba(19, 158, 207, 150); border: none;
+    }
+    QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardGoalIcon {
+        background: transparent; border: none; color: #079EFE;
+    }
+    QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardGoalTitle {
+        background: transparent; border: none;
+        color: #D9E9F6; font-size: 10pt;
+    }
+    QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardGoalValue {
+        background: transparent; border: none;
+        color: #F6FAFF; font-size: 11pt; font-weight: 700;
+    }
+    QWidget#dashboardRoot QFrame#focusDashboardMainCard QWidget#focusDashboardArtSlot {
+        background: transparent; border: none;
+    }
+    QWidget#dashboardRoot QFrame#focusDashboardMainCard QLabel#focusDashboardCaption {
+        color: #D6E7F3; font-size: 11pt;
+    }
+    QWidget#dashboardRoot QFrame#focusDashboardMainCard QProgressBar#dashboardTodayProgress {
+        background: rgba(3, 31, 71, 224); border: 1px solid rgba(23, 97, 190, 170);
+        border-radius: 6px; min-height: 11px; max-height: 11px;
+    }
+    QWidget#dashboardRoot QFrame#focusDashboardMainCard QProgressBar#dashboardTodayProgress::chunk {
+        background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
+            stop:0 #0473DB, stop:1 #00DDF2);
+        border-radius: 5px;
+    }
+    QWidget#dashboardRoot QFrame#focusDashboardMainCard QPushButton#dashboardFocusPrimaryButton {
+        border: 1px solid rgba(0, 205, 241, 225); border-radius: 12px;
+        font-size: 11pt; padding: 7px 12px;
+    }
     """

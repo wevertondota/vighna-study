@@ -41,7 +41,7 @@ from pathlib import Path
 
 
 from PySide6.QtCore import Qt, QDate, QPointF, QRectF, QTimer, Signal, QEventLoop, QSize, QEvent, QSettings
-from PySide6.QtGui import QColor, QPainter, QPen, QFont, QPainterPath, QBrush, QPixmap, QIcon, QLinearGradient, QTextCharFormat, QTextListFormat, QKeySequence, QShortcut
+from PySide6.QtGui import QColor, QPainter, QPen, QFont, QPainterPath, QBrush, QPixmap, QIcon, QLinearGradient, QRadialGradient, QTextCharFormat, QTextListFormat, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -34398,12 +34398,24 @@ class DashboardRecommendationHeroFrame(QFrame):
     def set_hero_enabled(self, enabled):
         self._hero_enabled = bool(enabled)
         if enabled and self._hero_pixmap.isNull():
+            self._hero_vighna_fullframe = False
             try:
-                from ui.dashboard_hero_art import imagem_recomendacao_bytes
-                self._hero_pixmap.loadFromData(imagem_recomendacao_bytes(), "JPG")
+                from ui.dashboard_recommendation_new_art import (
+                    imagem_recomendacao_vighna_bytes,
+                )
+                if self._hero_pixmap.loadFromData(
+                    imagem_recomendacao_vighna_bytes(), "PNG"
+                ):
+                    self._hero_vighna_fullframe = True
             except (ImportError, OSError, ValueError):
-                # Fallback visual seguro se o recurso não estiver disponível.
                 pass
+            if self._hero_pixmap.isNull():
+                # Fallback para o banner original se o PNG não for decodificado.
+                try:
+                    from ui.dashboard_hero_art import imagem_recomendacao_bytes
+                    self._hero_pixmap.loadFromData(imagem_recomendacao_bytes(), "JPG")
+                except (ImportError, OSError, ValueError):
+                    pass
         self.update()
 
     def paintEvent(self, event):
@@ -34416,14 +34428,53 @@ class DashboardRecommendationHeroFrame(QFrame):
         path.addRoundedRect(rect, 16, 16)
         painter.setClipPath(path)
         painter.fillRect(self.rect(), QColor(3, 18, 32, 248))
+        if (getattr(self, "_hero_vighna_fullframe", False)
+                and not self._hero_pixmap.isNull()
+                and self.width() > 0 and self.height() > 0):
+            # A nova arte 1956x804 tem quase a mesma proporção do card
+            # 665x273: renderizar a imagem INTEIRA, sem crop vertical do legado.
+            painter.setRenderHint(QPainter.SmoothPixmapTransform, True)
+            painter.drawPixmap(
+                rect, self._hero_pixmap,
+                QRectF(self._hero_pixmap.rect()),
+            )
+            # Transparência gradual apenas no rodapé para dar contraste
+            # ao botão 'Começar agora', ao status e ao link dinâmicos.
+            rodape_y = rect.top() + rect.height() * 0.63
+            rodape_gradiente = QLinearGradient(0, rodape_y, 0, rect.bottom())
+            rodape_gradiente.setColorAt(0.0, QColor(3, 12, 23, 0))
+            rodape_gradiente.setColorAt(0.55, QColor(3, 12, 23, 102))
+            rodape_gradiente.setColorAt(1.0, QColor(3, 12, 23, 205))
+            painter.fillRect(
+                QRectF(rect.left(), rodape_y, rect.width(),
+                       rect.bottom() - rodape_y), QBrush(rodape_gradiente)
+            )
+            painter.setClipping(False)
+            painter.setPen(QPen(QColor(0, 181, 220, 220), 1.4))
+            painter.setBrush(Qt.NoBrush)
+            painter.drawRoundedRect(rect, 16, 16)
+            painter.end()
+            return
         if not self._hero_pixmap.isNull() and self.width() > 0 and self.height() > 0:
-            top_h = max(rect.height() * 0.50, min(rect.height() * 0.58, rect.height() - 165.0))
+            compacto = rect.height() <= 325.0
+            if compacto:
+                # Arte original tem texto embutido. A janela vertical foi
+                # recalibrada para nao cortar o subtitulo ao reduzir o Hero.
+                top_h = min(192.0, rect.height() * 0.62)
+            else:
+                top_h = max(rect.height() * 0.50, min(rect.height() * 0.58, rect.height() - 165.0))
             top_rect = QRectF(rect.left(), rect.top(), rect.width(), top_h)
             pix_w = float(self._hero_pixmap.width())
             pix_h = float(self._hero_pixmap.height())
             target_ratio = top_rect.width() / max(top_rect.height(), 1.0)
             source_ratio = pix_w / max(pix_h, 1.0)
-            if source_ratio > target_ratio:
+            if compacto:
+                # Recorta apenas as bordas verticais do JPEG fornecido pelo
+                # projeto: titulo, subtitulo e cerebro ficam visiveis.
+                crop_h = min(pix_h, pix_w / max(target_ratio, 0.001))
+                source_y = min(max(0.0, 175.0), max(0.0, pix_h - crop_h))
+                src = QRectF(0.0, source_y, pix_w, crop_h)
+            elif source_ratio > target_ratio:
                 crop_w = pix_h * target_ratio
                 src = QRectF(0.0, 0.0, crop_w, pix_h)
             else:
@@ -34437,7 +34488,7 @@ class DashboardRecommendationHeroFrame(QFrame):
             fade.setColorAt(0.34, QColor(3, 14, 26, 172))
             fade.setColorAt(1.0, QColor(3, 14, 26, 244))
             painter.fillRect(QRectF(rect.left(), fade_top, rect.width(), rect.bottom() - fade_top), QBrush(fade))
-        painter.fillRect(QRectF(rect.left(), rect.bottom() - 176.0, rect.width(), 176.0), QColor(3, 14, 26, 96))
+        painter.fillRect(QRectF(rect.left(), rect.bottom() - min(135.0, rect.height()*0.45), rect.width(), min(135.0, rect.height()*0.45)), QColor(3, 14, 26, 96))
         painter.setClipping(False)
         painter.setPen(QPen(QColor(0, 181, 220, 220), 1.4))
         painter.setBrush(Qt.NoBrush)
@@ -34453,6 +34504,21 @@ class DashboardAmbientCanvas(QWidget):
     O QSS continua sendo responsavel pelo canvas e pela superficie dos cards.
     """
 
+    def sincronizar_gif_dashboard(self, visivel, tema):
+        """Inicialização sob demanda, fora da Home e sem afetar os cards."""
+        if self.objectName() != "dashboardRoot":
+            return
+        controlador = getattr(self, "_dashboard_gif_animado", None)
+        if controlador is None and visivel and tema in ("futurista", "escuro"):
+            try:
+                from ui.dashboard_gif_background import FundoGifDashboard
+                controlador = FundoGifDashboard(self)
+                self._dashboard_gif_animado = controlador
+            except Exception:
+                return
+        if controlador is not None:
+            controlador.sincronizar(visivel, tema)
+
     def paintEvent(self, event):
         # A pintura do fundo pelo QStyle preserva o contrato QSS em subclasses.
         painter = QPainter(self)
@@ -34462,40 +34528,50 @@ class DashboardAmbientCanvas(QWidget):
 
         _tema = normalizar_tema(getattr(self.window(), "tema_atual", "claro"))
         if self.objectName() == "dashboardRoot" and _tema in ("futurista", "escuro"):
-            # Foto fornecida pelo usuário, somente no Dashboard: imagem ancorada
-            # ao topo. A página longa rola, mas não estica o planeta verticalmente.
+            # Fundo animado em memoria. Só este DashboardAmbientCanvas recebe
+            # o QMovie; Home/Simulados/Meu Edital não recriam animações.
             painter.fillRect(self.rect(), QColor(3, 9, 18))
-            if getattr(self, "_dashboard_fundo_original", None) is None:
-                _original = QPixmap()
-                if _original.loadFromData(dashboard_fundo_bytes(), "JPG"):
-                    self._dashboard_fundo_original = _original
-            _original = getattr(self, "_dashboard_fundo_original", None)
-            if _original is not None and self.width() > 0 and self.height() > 0:
-                _altura_painel = min(self.height(), max(690, int(self.width() * 0.56)))
-                _tamanho = (self.width(), _altura_painel)
-                if getattr(self, "_dashboard_fundo_cache_size", None) != _tamanho:
-                    self._dashboard_fundo_cache = _original.scaled(
-                        QSize(*_tamanho), Qt.KeepAspectRatioByExpanding,
-                        Qt.SmoothTransformation,
-                    )
-                    self._dashboard_fundo_cache_size = _tamanho
-                _pixmap = self._dashboard_fundo_cache
+            controlador = getattr(self, "_dashboard_gif_animado", None)
+            _quadro = controlador.quadro() if controlador is not None else None
+            _animado = _quadro is not None
+            if not _animado:
+                # Fallback seguro: preserva a imagem estática já homologada.
+                if getattr(self, "_dashboard_fundo_original", None) is None:
+                    _original = QPixmap()
+                    if _original.loadFromData(dashboard_fundo_bytes(), "JPG"):
+                        self._dashboard_fundo_original = _original
+                _quadro = getattr(self, "_dashboard_fundo_original", None)
+            if _quadro is not None and self.width() > 0 and self.height() > 0:
+                _altura_painel = min(self.height(), max(690, int(self.width() * 0.55)))
+                _pix_w = max(1, _quadro.width())
+                _pix_h = max(1, _quadro.height())
+                _destino = QRectF(0, 0, self.width(), _altura_painel)
+                # 'Cover' com corte central; não distorce a proporção do GIF.
+                _ratio_destino = self.width() / max(1, _altura_painel)
+                _ratio_origem = _pix_w / _pix_h
+                if _ratio_origem > _ratio_destino:
+                    _cw = _pix_h * _ratio_destino
+                    _recorte = QRectF((_pix_w - _cw) / 2.0, 0, _cw, _pix_h)
+                else:
+                    _ch = _pix_w / _ratio_destino
+                    _recorte = QRectF(0, (_pix_h - _ch) / 2.0, _pix_w, _ch)
                 painter.save()
-                painter.setClipRect(QRectF(0, 0, self.width(), _altura_painel))
-                painter.drawPixmap((self.width()-_pixmap.width())//2, 0, _pixmap)
-                painter.fillRect(
-                    QRectF(0, 0, self.width(), _altura_painel),
-                    QColor(2, 8, 18, 111),
-                )
-                # Transição gradual para o canvas escuro da parte inferior.
-                from PySide6.QtGui import QLinearGradient
-                gradiente = QLinearGradient(0, _altura_painel*0.68, 0, _altura_painel)
-                gradiente.setColorAt(0.0, QColor(3, 9, 18, 0))
-                gradiente.setColorAt(1.0, QColor(3, 9, 18, 255))
-                painter.fillRect(
-                    QRectF(0, _altura_painel*0.68, self.width(), _altura_painel*0.32),
-                    QBrush(gradiente),
-                )
+                painter.setClipRect(_destino)
+                painter.setRenderHint(QPainter.SmoothPixmapTransform, True)
+                painter.drawPixmap(_destino, _quadro, _recorte)
+                # Legibilidade dos widgets com brilho preservado na arte.
+                painter.fillRect(_destino, QColor(2, 8, 18, 55 if _animado else 111))
+                if self.height() > _altura_painel + 60 or not _animado:
+                    # Gradiente só para páginas longas ou fallback legado.
+                    _inicio = 0.81 if _animado else 0.68
+                    gradiente = QLinearGradient(0, _altura_painel * _inicio,
+                                                 0, _altura_painel)
+                    gradiente.setColorAt(0.0, QColor(3, 9, 18, 0))
+                    gradiente.setColorAt(1.0, QColor(3, 9, 18, 255))
+                    painter.fillRect(
+                        QRectF(0, _altura_painel * _inicio, self.width(),
+                               _altura_painel * (1 - _inicio)), QBrush(gradiente)
+                    )
                 painter.restore()
 
         if _tema != "futurista":
@@ -34628,6 +34704,33 @@ class DashboardLevelArcWidget(QLabel):
         painter.setRenderHint(QPainter.Antialiasing, True)
         tema = normalizar_tema(getattr(self.window(), "tema_atual", "claro"))
         claro = tema == "claro"
+        if (tema == "futurista"
+                and bool(self.property("dashboard_reference_ring"))):
+            # Apenas a circunferencia do resumo do Dashboard. A versao
+            # original continua intacta para o indicador do card legado.
+            # Bicolor de referencia: metade azul, metade ciano, com pequenas
+            # divisorias nas posicoes das 12h e 6h. XP real fica na barra.
+            circulo = QRectF(5.0, 5.0, self.width() - 10.0, self.height() - 10.0)
+            trilha = QPen(QColor("#11315A"), 7.0)
+            trilha.setCapStyle(Qt.FlatCap)
+            painter.setPen(trilha)
+            painter.drawEllipse(circulo)
+            metade_direita = QPen(QColor("#00D9F1"), 7.0)
+            metade_direita.setCapStyle(Qt.FlatCap)
+            painter.setPen(metade_direita)
+            painter.drawArc(circulo, 89 * 16, -178 * 16)
+            metade_esquerda = QPen(QColor("#126DFF"), 7.0)
+            metade_esquerda.setCapStyle(Qt.FlatCap)
+            painter.setPen(metade_esquerda)
+            painter.drawArc(circulo, 269 * 16, -178 * 16)
+            fonte = QFont("Segoe UI")
+            fonte.setPointSize(18)
+            fonte.setBold(True)
+            painter.setFont(fonte)
+            painter.setPen(QColor("#FFFFFF"))
+            painter.drawText(self.rect(), Qt.AlignCenter, self.text())
+            painter.end()
+            return
         borda = QRectF(4.5, 4.5, self.width() - 9, self.height() - 9)
         trilha = QPen(QColor("#BCCBDD" if claro else "#285070"), 4.2)
         trilha.setCapStyle(Qt.RoundCap)
@@ -35239,6 +35342,20 @@ class SistemaEstudos(QMainWindow):
         # permanecem vivas no QStackedWidget pelo restante da execução.
         self.tela_inicial = self.criar_tela_inicial()
         self.telas.addWidget(self.tela_inicial)
+        # O03: regiões transparentes sobre as esferas já presentes no GIF.
+        # Mantém cards e motores; a abertura dos painéis começa no O04.
+        from ui.dashboard_orb_overlay import DashboardOrbOverlay
+        self._dashboard_orb_overlay = DashboardOrbOverlay(
+            self, self.dashboard_visual_root, self.dashboard_scroll
+        )
+        self._dashboard_orb_overlay.orbActivated.connect(
+            self._dashboard_orb_activated_o03
+        )
+        # O04: painel flutuante de apresentação, independente dos cards.
+        from ui.dashboard_orb_panels import DashboardOrbPanels
+        self._dashboard_orb_panels = DashboardOrbPanels(
+            self, self.dashboard_visual_root, self.dashboard_scroll
+        )
         # L05d: transfere o cabeçalho ORIGINAL (perfil, gerir, central e ajustes)
         # para o Início. Não duplica QComboBox nem seus sinais/conexões.
         # Dashboard histórico conserva os mesmos cards e fica sem cabeçalho.
@@ -35260,6 +35377,9 @@ class SistemaEstudos(QMainWindow):
         )
         self.telas.addWidget(self.tela_portal_edital)
         aplicar_estilo_portal_edital(self.tela_portal_edital, self.tema_atual)
+        # Migra os três cards executivos originais para Meu Edital.
+        # O Planejamento compacto do topo do Dashboard NÃO faz parte.
+        self._transferir_cards_dashboard_para_portal_edital()
         # L03: pagina separada, sem modificar o Dashboard ou os motores.
         self.tela_portal_treinos = criar_portal_treinos(
             abrir_inicio=self.abrir_portal_inicio,
@@ -35274,6 +35394,9 @@ class SistemaEstudos(QMainWindow):
         )
         self.telas.addWidget(self.tela_portal_treinos)
         aplicar_estilo_treinos(self.tela_portal_treinos, self.tema_atual)
+        # Transferência real do quadro-mãe; NÃO cria uma segunda instância.
+        # A Home e os seis acessos já existentes do portal permanecem intactos.
+        self._transferir_quadro_estudo_questoes_para_simulados()
         # L05: catálogo de destinos reais, totalmente independente do banco.
         self.tela_portal_recursos = criar_portal_recursos(
             abrir_inicio=self.abrir_portal_inicio,
@@ -35313,6 +35436,8 @@ class SistemaEstudos(QMainWindow):
         shell_layout.addWidget(self.telas, 1)
         self.setCentralWidget(self.dashboard_shell)
         self.telas.currentChanged.connect(self._atualizar_selecao_sidebar)
+        # GIF do Dashboard avança apenas com a página visível, sem CPU na Home.
+        self.telas.currentChanged.connect(self._sincronizar_animacao_dashboard)
         self.combo_concurso.currentIndexChanged.connect(
             self._atualizar_perfil_sidebar
         )
@@ -35451,6 +35576,22 @@ class SistemaEstudos(QMainWindow):
         )
         coluna.addWidget(nav_scroll, 1)
 
+        # Busca global fixa no rodape, acima das configuracoes.
+        # Compartilha o mesmo controlador de pesquisa do atalho Ctrl+K
+        # e acompanha o estado expandido/recolhido da barra lateral.
+        botao_pesquisa = QPushButton("Pesquisar")
+        botao_pesquisa.setObjectName("dashboardSidebarNavButton")
+        botao_pesquisa.setProperty("navSelected", False)
+        botao_pesquisa.setFixedHeight(43)
+        botao_pesquisa.setCursor(Qt.PointingHandCursor)
+        botao_pesquisa.setToolTip("Pesquisar (Ctrl+K)")
+        botao_pesquisa.setAccessibleName("Abrir busca global (Ctrl+K)")
+        botao_pesquisa.clicked.connect(self.abrir_busca_global)
+        coluna.addWidget(botao_pesquisa)
+        self._sidebar_botoes["pesquisa"] = botao_pesquisa
+        self._sidebar_rotulos["pesquisa"] = "Pesquisar"
+        self._sidebar_icones["pesquisa"] = ("fa5s.search", "⌕")
+
         botao_config = QPushButton("Configurações")
         botao_config.setObjectName("dashboardSidebarNavButton")
         botao_config.setProperty("navSelected", False)
@@ -35508,6 +35649,85 @@ class SistemaEstudos(QMainWindow):
             else:
                 detalhes = modalidade
         atualizar_retomada_treinos(portal, existe_sessao, detalhes)
+
+    def _transferir_quadro_estudo_questoes_para_simulados(self):
+        """Move o QFrame original e os quatro subcards do Dashboard ao portal.
+
+        O próprio QWidget, os layouts e os sinais dos botões são reaproveitados.
+        O wrapper visual mantém o seletor #dashboardRoot para que os tokens
+        originais do quadro permaneçam idênticos à origem, sem clonar widgets.
+        """
+        painel = self.dashboard_estudo_questoes_painel
+        origem = self.dashboard_estrategias_slot
+        destino = self.tela_portal_treinos.portal_treinos_conteudo_layout
+        assert origem.indexOf(painel) >= 0, "Quadro original fora do Dashboard"
+        assert destino is not None, "Portal de Simulados sem layout de destino"
+
+        # Retirar também o layout vazio do Dashboard: sem quadro residual,
+        # placeholder ou espaçamento extra entre as outras seções.
+        origem.removeWidget(painel)
+        self._dashboard_root_layout.removeItem(origem)
+
+        raiz_visual = QWidget(self.tela_portal_treinos)
+        raiz_visual.setObjectName("dashboardRoot")
+        raiz_visual.setAttribute(Qt.WA_StyledBackground, True)
+        raiz_visual.setStyleSheet(self.dashboard_visual_root.styleSheet())
+        raiz_visual.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        coluna = QVBoxLayout(raiz_visual)
+        coluna.setContentsMargins(0, 0, 0, 0)
+        coluna.setSpacing(0)
+        coluna.addWidget(painel)
+        # Logo após o cabeçalho; nenhuma modalidade pré-existente é removida.
+        destino.insertWidget(1, raiz_visual)
+        self._portal_estudo_questoes_raiz = raiz_visual
+
+        # A seção veio recolhida do Dashboard Executivo? Exibir os quatro
+        # cards na Central sem sobrescrever a preferência salva do Dashboard.
+        self.definir_estado_secao_dashboard("estudar", True, salvar=False)
+
+    def _transferir_cards_dashboard_para_portal_edital(self):
+        """Move os widgets reais do Dashboard para Meu Edital, sem copiá-los.
+
+        Só procede se os três painéis e o layout de destino existirem. Em
+        caso de incompatibilidade, mantém os cards no Dashboard em vez de
+        inserir em um layout aleatório ou interromper a inicialização.
+        """
+        if getattr(self, "_portal_edital_dashboard_raiz", None) is not None:
+            return True
+        portal = getattr(self, "tela_portal_edital", None)
+        origem = getattr(self, "_dashboard_root_layout", None)
+        destino = getattr(portal, "portal_edital_conteudo_layout", None)
+        ancora = getattr(portal, "portal_edital_cards_anchor", None)
+        cards = [
+            getattr(self, "dashboard_resumo_painel", None),
+            getattr(self, "dashboard_notificacoes_painel", None),
+            getattr(self, "dashboard_planejamento_painel", None),
+        ]
+        if (origem is None or destino is None or ancora is None
+                or any(card is None or origem.indexOf(card) < 0 for card in cards)
+                or destino.indexOf(ancora) < 0):
+            return False
+
+        raiz = QWidget(portal)
+        raiz.setObjectName("dashboardRoot")
+        raiz.setAttribute(Qt.WA_StyledBackground, True)
+        raiz.setStyleSheet(self.dashboard_visual_root.styleSheet())
+        raiz.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        coluna = QVBoxLayout(raiz)
+        coluna.setContentsMargins(0, 0, 0, 0)
+        coluna.setSpacing(14)
+
+        for card in cards:
+            origem.removeWidget(card)
+            coluna.addWidget(card)
+        destino.insertWidget(destino.indexOf(ancora), raiz)
+        self._portal_edital_dashboard_raiz = raiz
+
+        # Apenas os painéis transferidos: o Planejamento do topo conserva
+        # seus widgets e sua posição no Dashboard.
+        for chave in ("resumo", "notificacoes", "planejamento"):
+            self.definir_estado_secao_dashboard(chave, True, salvar=False)
+        return True
 
     def abrir_portal_treinos(self):
         """Mostra a Central imediatamente; sincroniza retomada no próximo ciclo."""
@@ -35709,6 +35929,12 @@ class SistemaEstudos(QMainWindow):
         # M2-D1C: geometria externa do Futurista pertence ao controlador Qt.
         # Os layouts legados continuam disponíveis exclusivamente para rollback
         # e mudança de tema, até a unificação visual definitiva.
+        # Se o tema sair do Futurista, devolver o widget ativo ao seu
+        # layout antes do controlador Qt restaurar a composicao anterior.
+        if not futurista:
+            orb_panels = getattr(self, "_dashboard_orb_panels", None)
+            if orb_panels is not None:
+                orb_panels.close()
         controller = getattr(self, "_dashboard_m2d1c_controller", None)
         if controller is not None and controller.active:
             if futurista:
@@ -35798,7 +36024,7 @@ class SistemaEstudos(QMainWindow):
                 self._dashboard_hero_cabecalho.hide()
             for widget in self._dashboard_algo_header_widgets:
                 widget.hide()
-            acao_layout.setContentsMargins(20, 10, 20, 14)
+            acao_layout.setContentsMargins(20, 8, 20, 10)
             acao_layout.setSpacing(1)
             # Sem cabeçalho adicional: a faixa superior já vem pronta na arte.
             # O bloco funcional permanece na metade inferior do card.
@@ -35810,29 +36036,29 @@ class SistemaEstudos(QMainWindow):
                     "QFrame#algorithmRecommendationBody {background:transparent;"
                     "border:none;border-radius:0px;}"
                 )
-                corpo.setMaximumHeight(126)
-                corpo.setMinimumHeight(108)
+                corpo.setMaximumHeight(92)
+                corpo.setMinimumHeight(84)
                 corpo.layout().setContentsMargins(0, 0, 0, 0)
-                corpo.layout().setVerticalSpacing(5)
+                corpo.layout().setVerticalSpacing(2)
             self.dashboard_algoritmo_pronto.setStyleSheet(
-                "font-size:16px;font-weight:700;color:#F2F9FF;"
+                "font-size:13px;font-weight:700;color:#F2F9FF;"
                 "background:transparent;border:none;"
             )
             self.dashboard_hoje_um_clique.setMinimumWidth(0)
             self.dashboard_hoje_um_clique.setMaximumWidth(16777215)
-            self.dashboard_hoje_um_clique.setFixedHeight(42)
+            self.dashboard_hoje_um_clique.setFixedHeight(35)
             self.dashboard_hoje_um_clique.setStyleSheet(
                 "QPushButton#dashboardTodayPrimaryButton {"
-                "color:#FFFFFF;font-size:17px;font-weight:700;"
+                "color:#FFFFFF;font-size:14px;font-weight:700;"
                 "background:qlineargradient(x1:0,y1:0,x2:1,y2:0,"
                 "stop:0 #048cc6,stop:0.5 #04aff4,stop:1 #088ac6);"
-                "border:2px solid #00DDF5;border-radius:12px;padding:4px 12px;}"
+                "border:2px solid #00DDF5;border-radius:11px;padding:3px 11px;}"
                 "QPushButton#dashboardTodayPrimaryButton:hover {"
                 "background:#15B5E7;border-color:#61EDFF;}"
             )
             self.dashboard_hoje_botao.setStyleSheet(
                 "QPushButton#dashboardTodayButton {background:transparent;"
-                "border:none;color:#DBEAF9;font-size:13px;text-decoration:underline;}"
+                "border:none;color:#DBEAF9;font-size:11px;text-decoration:underline;}"
             )
 
             # Coluna Foco: eliminar duplicações visuais, sem eliminar registros.
@@ -35841,8 +36067,9 @@ class SistemaEstudos(QMainWindow):
             self._dashboard_foco_card_layout.setContentsMargins(14, 9, 14, 9)
             self._dashboard_foco_card_layout.setSpacing(3)
             self._dashboard_foco_descricao_widget.hide()
+            self.dashboard_focus_last_session.hide()
             self.dashboard_focus_best_week.hide()
-            self.dashboard_iniciar_foco.setFixedHeight(38)
+            self.dashboard_iniciar_foco.setFixedHeight(48)
             # Progresso conserva o layout vertical e XP/conquistas dinamicos.
             progresso.setMinimumHeight(186)
             progresso.setMaximumHeight(198)
@@ -35948,6 +36175,7 @@ class SistemaEstudos(QMainWindow):
             self._dashboard_foco_card_layout.setContentsMargins(*margens)
             self._dashboard_foco_card_layout.setSpacing(spacing)
             self._dashboard_foco_descricao_widget.show()
+            self.dashboard_focus_last_session.show()
             self.dashboard_focus_best_week.show()
             progresso_layout.setDirection(QBoxLayout.TopToBottom)
             progresso_layout.setContentsMargins(14, 11, 14, 10)
@@ -36406,6 +36634,24 @@ class SistemaEstudos(QMainWindow):
         controller = getattr(self, "_dashboard_m2d1c_controller", None)
         if controller is not None and controller.active:
             controller.request_update()
+
+    def _sincronizar_animacao_dashboard(self, _indice=None):
+        canvas = getattr(self, "dashboard_visual_root", None)
+        telas = getattr(self, "telas", None)
+        if canvas is not None and telas is not None:
+            canvas.sincronizar_gif_dashboard(
+                telas.currentWidget() is getattr(self, "tela_inicial", None),
+                normalizar_tema(getattr(self, "tema_atual", "claro")),
+            )
+        orb_overlay = getattr(self, "_dashboard_orb_overlay", None)
+        if orb_overlay is not None:
+            orb_overlay.schedule_sync()
+
+    def _dashboard_orb_activated_o03(self, key):
+        """O04: alterna painéis visuais sem alterar motores nem dados."""
+        panels = getattr(self, '_dashboard_orb_panels', None)
+        if panels is not None:
+            panels.open(key)
 
     def _atualizar_selecao_sidebar(self, _indice=None):
         if not hasattr(self, "_sidebar_botoes"):
@@ -37404,6 +37650,22 @@ class SistemaEstudos(QMainWindow):
             self.dashboard_progress_conquistas.setText(
                 f"🏆 {ganhas}/{total} conquistas"
             )
+        # Barra compacta ao lado da logo, sem acessar banco nem criar métricas
+        # paralelas. O mesmo snapshot alimenta ambos os componentes.
+        topo_progresso = getattr(self, "dashboard_quick_nav", None)
+        if topo_progresso is not None and hasattr(topo_progresso, "progresso_nivel"):
+            topo_progresso.progresso_badge.setText(str(nivel))
+            topo_progresso.progresso_badge.setProgress(taxa)
+            topo_progresso.progresso_nivel.setText(f"Nível {nivel}")
+            topo_progresso.progresso_xp.setText(
+                f"{progresso_xp} / {requerido} XP"
+            )
+            topo_progresso.progresso_barra.setValue(
+                max(0, min(100, int(round(taxa))))
+            )
+            topo_progresso.progresso_conquistas.setText(
+                f"{ganhas}/{total}\nconquistas"
+            )
         if hasattr(self, "dashboard_progress_proxima"):
             conquistas = list(snapshot.get("achievements") or [])
             bloqueadas = [item for item in conquistas if not item.get("earned")]
@@ -37732,7 +37994,58 @@ class SistemaEstudos(QMainWindow):
         ]
 
     def ir_para_secao_dashboard(self, chave=None, widget=None):
-        """Volta ao Dashboard, expande a seção desejada e a traz para a tela."""
+        """Navega à seção no seu destino real após as transferências."""
+        # Atalhos antigos dos três blocos devem abrir Meu Edital, nunca o
+        # Dashboard do qual os widgets foram removidos.
+        secoes_edital = ("resumo", "notificacoes", "planejamento", "progresso")
+        alvo_edital = {
+            "resumo": getattr(self, "dashboard_resumo_painel", None),
+            "notificacoes": getattr(self, "dashboard_notificacoes_painel", None),
+            "planejamento": getattr(self, "dashboard_planejamento_painel", None),
+            "progresso": getattr(self, "dashboard_resumo_painel", None),
+        }
+        if getattr(self, "_portal_edital_dashboard_raiz", None) is not None and (
+            chave in secoes_edital or widget in tuple(alvo_edital.values())
+        ):
+            self.abrir_portal_edital()
+            if chave in secoes_edital:
+                self.definir_estado_secao_dashboard(chave, True, salvar=False)
+            alvo = widget if widget is not None else alvo_edital.get(chave)
+            scroll = getattr(self.tela_portal_edital, "portal_edital_scroll", None)
+            if scroll is not None and alvo is not None:
+                QTimer.singleShot(
+                    0, lambda alvo=alvo, scroll=scroll:
+                    scroll.ensureWidgetVisible(alvo, 0, 24)
+                )
+            return
+        # O Estudo por questões já não reside no Dashboard. Links antigos,
+        # incluindo a Busca Global, devem abrir seu novo destino único.
+        if chave == "estudar" or (widget is not None and widget is getattr(self, "dashboard_estudo_questoes_painel", None)):
+            self.abrir_portal_treinos()
+            portal = self.tela_portal_treinos
+            rolador = getattr(portal, "portal_treinos_scroll", None)
+            if rolador is not None:
+                QTimer.singleShot(0, lambda: rolador.ensureWidgetVisible(
+                    self.dashboard_estudo_questoes_painel, 0, 24
+                ))
+            return
+        # O04-R1: rotas antigas de busca/portal continuam alcançando os
+        # mesmos cards funcionais, agora abertos pelas esferas do GIF.
+        orbs = getattr(self, "_dashboard_orb_panels", None)
+        if (orbs is not None and normalizar_tema(self.tema_atual) == "futurista"):
+            alvo_orb = None
+            if widget is getattr(self, "dashboard_hoje_acao", None) or chave == "hoje":
+                alvo_orb = "recomendacao"
+            elif (widget is getattr(self, "dashboard_resumo_ia", None)
+                  or chave == "planejamento"):
+                alvo_orb = "planejamento"
+            elif widget is getattr(self, "_dashboard_foco_widget", None):
+                alvo_orb = "foco"
+            if alvo_orb is not None:
+                self.telas.setCurrentWidget(self.tela_inicial)
+                self._agendar_atualizacao_dashboard()
+                QTimer.singleShot(0, lambda k=alvo_orb: orbs.open(k))
+                return
         self.telas.setCurrentWidget(self.tela_inicial)
         self._agendar_atualizacao_dashboard()
         if chave:
@@ -38192,6 +38505,8 @@ class SistemaEstudos(QMainWindow):
         # Nao acrescentar abas ou rotas adicionais nesta etapa.
         self.dashboard_quick_nav = criar_cabecalho_discreto_dashboard(
             self.abrir_busca_global, carregar_logo_vighnastudy(),
+            nivel_badge=DashboardLevelArcWidget("1"),
+            abrir_conquistas=lambda: self.abrir_estatisticas("Conquistas"),
         )
         aplicar_estilo_cabecalho_dashboard(self.dashboard_quick_nav, self.tema_atual)
         layout.addWidget(self.dashboard_quick_nav)
@@ -38213,6 +38528,16 @@ class SistemaEstudos(QMainWindow):
         self.dashboard_hoje_painel.setObjectName(
             "dashboardFocusPanel"
         )
+        # O painel externo é apenas estrutura: não deve desenhar a faixa
+        # escura em volta dos cards Recomendação e Foco no tema Futurista.
+        # A pintura própria, a borda ciano e os fundos dos cards filhos
+        # permanecem intocados.
+        if normalizar_tema(self.tema_atual) == "futurista":
+            self.dashboard_hoje_painel.setStyleSheet(
+                "QFrame#dashboardFocusPanel {"
+                "background-color: transparent;"
+                "border: none; border-radius: 0px; }"
+            )
 
         foco_painel_layout = QVBoxLayout(
             self.dashboard_hoje_painel
@@ -38316,10 +38641,90 @@ class SistemaEstudos(QMainWindow):
         # ----------------------------------------------------
         # Modo Foco — protagonista
         # ----------------------------------------------------
-        foco_hoje = QFrame()
+        # Foco Premium E6: fundo atmosférico isolado no próprio card.
+        # A pintura é decorativa e não modifica os controles nem a Home.
+        class _FocusCinematicCard(QFrame):
+            def __init__(self):
+                super().__init__()
+                self._hourglass_overlay = None
+                self._focus_progress_widget = None
+
+            def attach_hourglass(self, artwork):
+                self._hourglass_overlay = artwork
+                self._place_hourglass()
+                artwork.raise_()
+
+            def bind_focus_progress(self, progress):
+                # Usar a posição real da barra quando o Qt concluir o layout.
+                self._focus_progress_widget = progress
+                QTimer.singleShot(0, self._place_hourglass)
+
+            def _place_hourglass(self):
+                artwork = self._hourglass_overlay
+                if artwork is None:
+                    return
+                x = max(0, self.width() - artwork.width() - 12)
+                # A ampulheta é decorativa e não deve cobrir a barra.
+                y = max(38, min(54, round(self.height() * 0.14)))
+                progress = self._focus_progress_widget
+                if progress is not None and progress.y() > 100:
+                    y = max(28, min(y, progress.y() - artwork.height() - 6))
+                artwork.move(x, y)
+
+            def resizeEvent(self, event):
+                super().resizeEvent(event)
+                QTimer.singleShot(0, self._place_hourglass)
+
+            def paintEvent(self, event):
+                super().paintEvent(event)
+                w, h = self.width(), self.height()
+                if w <= 0 or h <= 0:
+                    return
+                painter = QPainter(self)
+                painter.setRenderHint(QPainter.Antialiasing, True)
+                painter.setClipRect(self.rect().adjusted(2, 2, -2, -2))
+                # Halo radial sem borda retangular. Transparência total
+                # na periferia para integrar a arte ao fundo da interface.
+                glow_center = QPointF(w * 0.85, h * 0.42)
+                glow = QRadialGradient(glow_center, max(1.0, w * 0.31))
+                glow.setColorAt(0.0, QColor(10, 113, 205, 25))
+                glow.setColorAt(0.45, QColor(7, 74, 148, 13))
+                glow.setColorAt(1.0, QColor(7, 55, 112, 0))
+                painter.setPen(Qt.NoPen)
+                painter.setBrush(QBrush(glow))
+                painter.drawEllipse(glow_center, w * 0.29, h * 0.46)
+                # Textura diagonal sutil, como na referência futurista.
+                painter.setPen(QPen(QColor(43, 132, 208, 14), 1))
+                for dx in (0, 32, 64, 96, 128):
+                    painter.drawLine(
+                        QPointF(w * 0.65 + dx, h * 0.09),
+                        QPointF(w * 0.82 + dx, h * 0.59),
+                    )
+                for xr, yr, alpha in ((0.78, 0.19, 34), (0.90, 0.33, 29),
+                                      (0.70, 0.52, 20), (0.93, 0.63, 28)):
+                    painter.setPen(Qt.NoPen)
+                    painter.setBrush(QColor(87, 198, 255, alpha))
+                    painter.drawEllipse(QPointF(w * xr, h * yr), 1.7, 1.7)
+                painter.end()
+
+        foco_hoje = _FocusCinematicCard()
         foco_hoje.setObjectName(
             "focusDashboardMainCard"
         )
+        if normalizar_tema(self.tema_atual) == "futurista":
+            # Card Foco com opacidade 100%: superficie totalmente preenchida,
+            # mantendo a borda ciano, a ampulheta e os elementos internos.
+            foco_hoje.setStyleSheet(
+                "QFrame#focusDashboardMainCard {"
+                "background: qlineargradient(x1:0, y1:0, x2:1, y2:1,"
+                " stop:0 rgba(4, 18, 34, 255),"
+                " stop:0.55 rgba(5, 24, 46, 255),"
+                " stop:1 rgba(3, 14, 28, 255));"
+                "border: 1px solid rgba(21, 120, 171, 186);"
+                "border-radius: 16px; }"
+                "QFrame#focusDashboardMainCard:hover {"
+                "border-color: rgba(14, 183, 219, 211); }"
+            )
         foco_hoje.setMinimumHeight(320)
         foco_hoje.setSizePolicy(
             QSizePolicy.Expanding,
@@ -38338,8 +38743,15 @@ class SistemaEstudos(QMainWindow):
         foco_card_icone = QLabel("◉")
         foco_card_icone.setObjectName("focusDashboardCardIcon")
         foco_card_icone.setAlignment(Qt.AlignCenter)
-        foco_card_icone.setFixedSize(42, 42)
+        foco_card_icone.setFixedSize(44, 44)
         _icone_card_dashboard(foco_card_icone, "fa5s.bullseye", 22)
+        # E4: moldura circular para aproximar o alvo neon da referência.
+        foco_card_icone.setStyleSheet(
+            "QLabel#focusDashboardCardIcon {"
+            "background: rgba(3, 35, 64, 0.70);"
+            "border: 1px solid rgba(0, 212, 255, 0.85);"
+            "border-radius: 22px; padding: 0px; }"
+        )
 
         foco_card_titulos = QHBoxLayout()
         foco_card_titulos.setSpacing(7)
@@ -38366,8 +38778,10 @@ class SistemaEstudos(QMainWindow):
         )
         foco_descricao.setWordWrap(True)
 
-        foco_valor_linha = QHBoxLayout()
-        foco_valor_linha.setSpacing(7)
+        # Foco Premium E1: tempo e legenda em coluna, como na referencia.
+        foco_valor_linha = QVBoxLayout()
+        foco_valor_linha.setContentsMargins(0, 0, 0, 0)
+        foco_valor_linha.setSpacing(0)
         self.dashboard_hoje_foco_valor = QLabel(
             "0 min"
         )
@@ -38381,16 +38795,11 @@ class SistemaEstudos(QMainWindow):
             "focusDashboardCaption"
         )
         foco_valor_linha.addWidget(
-            self.dashboard_hoje_foco_valor,
-            0,
-            Qt.AlignBottom,
+            self.dashboard_hoje_foco_valor, 0, Qt.AlignLeft
         )
         foco_valor_linha.addWidget(
-            foco_valor_legenda,
-            0,
-            Qt.AlignBottom,
+            foco_valor_legenda, 0, Qt.AlignLeft
         )
-        foco_valor_linha.addStretch(1)
 
         self.dashboard_hoje_foco_detalhe = QLabel(
             "Meta semanal de foco desativada"
@@ -38426,50 +38835,214 @@ class SistemaEstudos(QMainWindow):
             self.abrir_modo_foco
         )
 
+        # ====================================================
+        # FOCO PREMIUM 2.0 / E1 — arquitetura estrutural.
+        # Mesmos widgets de tempo, meta, progresso e CTA; sem motor paralelo.
+        # E2: focusDashboardArtSlot recebe a ampulheta luminosa da referência.
+        # ====================================================
+        foco_hoje_pill = QLabel("Hoje")
+        foco_hoje_pill.setObjectName("focusDashboardTodayPill")
+        foco_hoje_pill.setAlignment(Qt.AlignCenter)
+        foco_hoje_pill.setFixedSize(70, 27)
+        foco_cabecalho.addWidget(foco_hoje_pill, 0, Qt.AlignVCenter)
         foco_hoje_layout.addLayout(foco_cabecalho)
-        foco_descricao_linha = QHBoxLayout()
-        foco_descricao_linha.setContentsMargins(0, 0, 0, 0)
-        foco_descricao_linha.addSpacing(51)
-        foco_descricao_linha.addWidget(foco_descricao, 1)
-        foco_hoje_layout.addLayout(foco_descricao_linha)
-        foco_hoje_layout.addLayout(foco_valor_linha)
-        # Objetivo diário + histórico recente de foco.
-        foco_objetivo_box = QFrame()
-        foco_objetivo_box.setObjectName("dashboardQuickAccess")
-        foco_objetivo_box.setProperty("embedded", True)
-        foco_objetivo_layout = QVBoxLayout(foco_objetivo_box)
-        foco_objetivo_layout.setContentsMargins(15, 12, 15, 12)
-        foco_objetivo_layout.setSpacing(6)
 
-        objetivo_topo = QHBoxLayout()
-        objetivo_topo.setSpacing(8)
-        objetivo_titulo = QLabel("Objetivo de hoje")
-        objetivo_titulo.setObjectName("dashboardQuickAccessTitle")
+        # E6: linha compacta das métricas. A ampulheta fica sobreposta,
+        # fora deste layout, como na referência cinematográfica.
+        foco_corpo_widget = QWidget(foco_hoje)
+        foco_corpo_widget.setObjectName("focusDashboardMetricsRow")
+        foco_corpo_widget.setFixedHeight(186)
+        foco_corpo_widget.setMaximumWidth(370)
+        foco_corpo_widget.setStyleSheet("background: transparent; border: none;")
+        foco_corpo = QHBoxLayout(foco_corpo_widget)
+        foco_corpo.setContentsMargins(0, 5, 0, 0)
+        foco_corpo.setSpacing(8)
+
+        foco_tempo_box = QWidget(foco_hoje)
+        foco_tempo_box.setObjectName("focusDashboardTimeColumn")
+        foco_tempo_box.setMinimumWidth(152)
+        foco_tempo_layout = QVBoxLayout(foco_tempo_box)
+        foco_tempo_layout.setContentsMargins(0, 0, 0, 0)
+        foco_tempo_layout.setSpacing(3)
+        foco_tempo_layout.addLayout(foco_valor_linha)
+        foco_tempo_layout.addStretch(1)
+        foco_corpo.addWidget(foco_tempo_box, 4)
+
+        foco_divisor = QFrame(foco_hoje)
+        foco_divisor.setObjectName("focusDashboardMetricDivider")
+        foco_divisor.setFixedWidth(1)
+        foco_divisor.setMinimumHeight(70)
+        foco_corpo.addWidget(foco_divisor, 0, Qt.AlignVCenter)
+
+        foco_meta_box = QWidget(foco_hoje)
+        foco_meta_box.setObjectName("focusDashboardGoalColumn")
+        foco_meta_box.setMinimumWidth(170)
+        foco_meta_layout = QVBoxLayout(foco_meta_box)
+        foco_meta_layout.setContentsMargins(0, 6, 0, 0)
+        foco_meta_layout.setSpacing(4)
+        foco_meta_cabecalho = QHBoxLayout()
+        foco_meta_cabecalho.setSpacing(7)
+        foco_meta_icone = QLabel("◎")
+        foco_meta_icone.setObjectName("focusDashboardGoalIcon")
+        foco_meta_icone.setAlignment(Qt.AlignCenter)
+        foco_meta_icone.setFixedSize(30, 30)
+        _icone_card_dashboard(foco_meta_icone, "fa5s.bullseye", 22)
+        foco_meta_rotulo = QLabel("Meta diária")
+        foco_meta_rotulo.setObjectName("focusDashboardGoalTitle")
+        foco_meta_cabecalho.addWidget(foco_meta_icone, 0, Qt.AlignVCenter)
+        foco_meta_cabecalho.addWidget(foco_meta_rotulo, 1, Qt.AlignVCenter)
+        foco_meta_layout.addLayout(foco_meta_cabecalho)
         self.dashboard_focus_goal_value = QLabel("Meta não definida")
-        self.dashboard_focus_goal_value.setObjectName("focusDashboardDetail")
-        self.dashboard_focus_goal_value.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        objetivo_topo.addWidget(objetivo_titulo, 0, Qt.AlignVCenter)
-        objetivo_topo.addStretch(1)
-        objetivo_topo.addWidget(self.dashboard_focus_goal_value, 0, Qt.AlignVCenter)
-        foco_objetivo_layout.addLayout(objetivo_topo)
-        foco_objetivo_layout.addWidget(self.dashboard_hoje_foco_detalhe)
+        self.dashboard_focus_goal_value.setObjectName("focusDashboardGoalValue")
+        self.dashboard_focus_goal_value.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        self.dashboard_focus_goal_value.setWordWrap(True)
+        foco_meta_layout.addWidget(self.dashboard_focus_goal_value)
+        foco_meta_layout.addStretch(1)
+        foco_corpo.addWidget(foco_meta_box, 4)
 
-        # A barra existente passa a representar explicitamente o objetivo diário.
-        foco_objetivo_layout.addWidget(self.dashboard_hoje_foco_barra)
+        # E4: a arte ocupa até 156 px, mas reduz sua largura suavemente quando
+        # necessário, preservando a proporção original e a interação do CTA.
+        from ui.dashboard_focus_hourglass_e2 import ampulheta_foco_png
 
+        class _FocusHourglassResponsive(QLabel):
+            def __init__(self, parent):
+                super().__init__(parent)
+                self._source_pixmap = QPixmap()
+                self._source_pixmap.loadFromData(ampulheta_foco_png(), "PNG")
+                self.setObjectName("focusDashboardArtSlot")
+                self.setFixedSize(184, 210)
+                self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+                self.setAlignment(Qt.AlignCenter)
+                self.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+                self.setAccessibleName("Ampulheta luminosa azul e dourada")
+                self._sync_pixmap()
+
+            def sizeHint(self):
+                return QSize(184, 210)
+
+            def _sync_pixmap(self):
+                if self._source_pixmap.isNull():
+                    return
+                tamanho = self.size()
+                if tamanho.width() < 1 or tamanho.height() < 1:
+                    tamanho = QSize(184, 210)
+                self.setPixmap(self._source_pixmap.scaled(
+                    tamanho, Qt.KeepAspectRatio, Qt.SmoothTransformation
+                ))
+
+            def resizeEvent(self, event):
+                self._sync_pixmap()
+                super().resizeEvent(event)
+
+        foco_arte_reserva = _FocusHourglassResponsive(foco_hoje)
+        self.dashboard_focus_art_slot = foco_arte_reserva
+        foco_hoje_layout.addWidget(foco_corpo_widget, 0, Qt.AlignLeft)
+        foco_hoje.attach_hourglass(foco_arte_reserva)
+
+        # Foco Premium E3: acabamento cinematográfico da referência.
+        # Remove os subcards escuros, integra melhor a ampulheta ao painel
+        # e refina barra, divisória, selo e CTA, preservando os mesmos dados.
+        foco_tempo_box.setStyleSheet("background: transparent; border: none;")
+        foco_meta_box.setStyleSheet("background: transparent; border: none;")
+        foco_arte_reserva.setStyleSheet("background: transparent; border: none; padding: 0px;")
+        foco_divisor.setStyleSheet("background-color: rgba(43, 182, 255, 0.52); border: none;")
+        foco_hoje_pill.setStyleSheet(
+            "background: rgba(2, 17, 42, 0.62);"
+            "border: 1px solid rgba(0, 224, 255, 0.86);"
+            "border-radius: 13px; color: #F5FBFF;"
+            "font-weight: 700; font-size: 11px;"
+            "padding: 0 12px;"
+        )
+        self.dashboard_hoje_foco_valor.setStyleSheet(
+            "color: #00DEFF; font-size: 44px; font-weight: 800;"
+            "letter-spacing: -0.5px; background: transparent;"
+        )
+        foco_valor_legenda.setStyleSheet(
+            "color: rgba(240, 250, 255, 0.96); font-size: 15px;"
+            "font-weight: 500; background: transparent; margin-top: 1px;"
+        )
+        foco_meta_rotulo.setStyleSheet(
+            "color: rgba(230, 247, 255, 0.95); font-size: 15px;"
+            "font-weight: 600; background: transparent;"
+        )
+        self.dashboard_focus_goal_value.setStyleSheet(
+            "color: #FFFFFF; font-size: 17px; font-weight: 700;"
+            "background: transparent;"
+        )
+        self.dashboard_hoje_foco_detalhe.setStyleSheet(
+            "color: rgba(235, 245, 255, 0.95); font-size: 14px;"
+            "font-weight: 500; background: transparent; padding-top: 1px;"
+        )
+        self.dashboard_hoje_foco_barra.setStyleSheet(
+            "QProgressBar {"
+            "background: rgba(10, 34, 76, 0.72);"
+            "border: 1px solid rgba(40, 169, 255, 0.68);"
+            "border-radius: 7px; padding: 1px; min-height: 14px; }"
+            "QProgressBar::chunk {"
+            "background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0,"
+            "stop:0 rgba(22, 106, 255, 235), stop:1 rgba(0, 229, 255, 245));"
+            "border-radius: 6px; }"
+        )
+        self.dashboard_iniciar_foco.setStyleSheet(
+            "QPushButton#dashboardFocusPrimaryButton {"
+            "background: qlineargradient(x1:0, y1:0, x2:1, y2:0,"
+            "stop:0 rgba(17, 90, 148, 0.97), stop:1 rgba(27, 118, 174, 0.97));"
+            "border: 1px solid rgba(0, 225, 255, 0.78);"
+            "border-radius: 14px; color: #F6FBFF; font-size: 17px;"
+            "font-weight: 700; padding: 8px 16px; }"
+            "QPushButton#dashboardFocusPrimaryButton:hover {"
+            "background: qlineargradient(x1:0, y1:0, x2:1, y2:0,"
+            "stop:0 rgba(26, 112, 176, 1.0), stop:1 rgba(37, 136, 199, 1.0)); }"
+            "QPushButton#dashboardFocusPrimaryButton:pressed {"
+            "background: rgba(12, 73, 120, 0.96); }"
+            "QPushButton#dashboardFocusPrimaryButton:focus {"
+            "border: 2px solid #8BF4FF; }"
+        )
+
+        # Barra diária fora do antigo subcard, mantida como o mesmo QProgressBar
+        # (atualização dinâmica e valores não foram alterados).
+        self.dashboard_hoje_foco_barra.setMinimumHeight(14)
+        foco_hoje_layout.addWidget(self.dashboard_hoje_foco_barra)
+        foco_hoje_layout.addWidget(self.dashboard_hoje_foco_detalhe)
+        foco_hoje.bind_focus_progress(self.dashboard_hoje_foco_barra)
+
+        # Metadados históricos continuam sendo atualizados. Os dois labels
+        # permanecem na árvore Qt, mas são ocultados pelo layout Futurista.
+        foco_historico = QWidget(foco_hoje)
+        foco_historico.setObjectName("focusDashboardHistoryContainer")
+        foco_historico_layout = QVBoxLayout(foco_historico)
+        foco_historico_layout.setContentsMargins(0, 0, 0, 0)
+        foco_historico_layout.setSpacing(2)
         self.dashboard_focus_last_session = QLabel("Última sessão: —")
         self.dashboard_focus_last_session.setObjectName("focusQuickHint")
         self.dashboard_focus_best_week = QLabel("Melhor sessão da semana: —")
         self.dashboard_focus_best_week.setObjectName("focusQuickHint")
-        foco_objetivo_layout.addWidget(self.dashboard_focus_last_session)
-        foco_objetivo_layout.addWidget(self.dashboard_focus_best_week)
-
+        foco_historico_layout.addWidget(foco_descricao)
+        foco_historico_layout.addWidget(self.dashboard_focus_last_session)
+        foco_historico_layout.addWidget(self.dashboard_focus_best_week)
+        foco_hoje_layout.addWidget(foco_historico)
         self._dashboard_foco_descricao_widget = foco_descricao
-        foco_hoje_layout.addWidget(foco_objetivo_box)
-        foco_hoje_layout.addStretch(1)
-        foco_hoje_layout.addWidget(
-            self.dashboard_iniciar_foco
+        foco_historico.setVisible(False)
+        foco_hoje_layout.setStretchFactor(foco_corpo_widget, 0)
+        foco_hoje_layout.addStretch(0)
+        self.dashboard_iniciar_foco.setMinimumHeight(48)
+        self.dashboard_iniciar_foco.setFocusPolicy(Qt.StrongFocus)
+        self.dashboard_iniciar_foco.setAccessibleName("Iniciar Modo Foco")
+        self.dashboard_iniciar_foco.setAccessibleDescription(
+            "Abre o cronômetro de estudo do VighnaStudy e registra o tempo efetivo."
         )
+        self.dashboard_hoje_foco_barra.setAccessibleName(
+            "Progresso de foco da meta diária"
+        )
+        self.dashboard_hoje_foco_barra.setToolTip(
+            "Progresso do tempo efetivo em relação à referência diária."
+        )
+        self.dashboard_focus_goal_value.setAccessibleName(
+            "Tempo registrado e meta diária de foco"
+        )
+        foco_hoje_layout.addWidget(self.dashboard_iniciar_foco)
+        # Camada visual acima do fundo/barra, sem capturar o mouse.
+        foco_arte_reserva.raise_()
 
         # ----------------------------------------------------
         # Seu progresso — bloco visual em quatro faixas:
@@ -39316,9 +39889,12 @@ class SistemaEstudos(QMainWindow):
         )
         resumo_header.addStretch()
 
-        layout.addLayout(
-            resumo_header
-        )
+        self.dashboard_resumo_painel = QWidget()
+        self.dashboard_resumo_painel.setObjectName("dashboardOverviewTransferGroup")
+        _layout_visao_geral = QVBoxLayout(self.dashboard_resumo_painel)
+        _layout_visao_geral.setContentsMargins(0, 0, 0, 0)
+        _layout_visao_geral.setSpacing(0)
+        _layout_visao_geral.addLayout(resumo_header)
 
         self.dashboard_resumo_conteudo = QWidget()
         self.dashboard_resumo_conteudo.setObjectName(
@@ -40122,9 +40698,8 @@ class SistemaEstudos(QMainWindow):
             2
         )
 
-        layout.addWidget(
-            self.dashboard_resumo_conteudo
-        )
+        _layout_visao_geral.addWidget(self.dashboard_resumo_conteudo)
+        layout.addWidget(self.dashboard_resumo_painel)
 
         # ====================================================
         # NOTIFICAÇÕES E ALERTAS — CENTRAL DE ATENÇÃO
@@ -40134,6 +40709,7 @@ class SistemaEstudos(QMainWindow):
         notificacoes_card.setObjectName(
             "dashboardNotificationsPanel"
         )
+        self.dashboard_notificacoes_painel = notificacoes_card
 
         notificacoes_layout = QVBoxLayout(
             notificacoes_card
@@ -42075,133 +42651,8 @@ class SistemaEstudos(QMainWindow):
         # do algoritmo e no card compacto de Planejamento.
         fila_painel.setVisible(False)
 
-        # ====================================================
-        # DISCIPLINAS
-        # ====================================================
-
-        barra_disciplinas = QFrame()
-        barra_disciplinas.setObjectName(
-            "dashboardCenterBar"
-        )
-        barra_disciplinas.setFixedSize(
-            390,
-            50
-        )
-
-        barra_disciplinas_layout = QHBoxLayout(
-            barra_disciplinas
-        )
-        barra_disciplinas_layout.setContentsMargins(
-            14,
-            7,
-            14,
-            7
-        )
-        barra_disciplinas_layout.setSpacing(
-            10
-        )
-
-        self.dashboard_toggle_disciplinas = QPushButton(
-            "▾  Disciplinas"
-        )
-        self.dashboard_toggle_disciplinas.setObjectName(
-            "dashboardSectionToggleCentered"
-        )
-        self.dashboard_toggle_disciplinas.setFixedHeight(
-            34
-        )
-        self.dashboard_toggle_disciplinas.setCursor(
-            Qt.PointingHandCursor
-        )
-        self.dashboard_toggle_disciplinas.clicked.connect(
-            lambda:
-                self.alternar_secao_dashboard(
-                    "disciplinas"
-                )
-        )
-
-        editar_disciplinas = QPushButton(
-            "Edição"
-        )
-        editar_disciplinas.setObjectName(
-            "sectionEditButton"
-        )
-        editar_disciplinas.setFixedSize(
-            92,
-            34
-        )
-        editar_disciplinas.setToolTip(
-            "Adicionar, renomear ou excluir disciplinas e acessar as disciplinas desativadas do perfil."
-        )
-        editar_disciplinas.clicked.connect(
-            self.abrir_disciplinas
-        )
-
-        barra_disciplinas_layout.addStretch()
-        barra_disciplinas_layout.addWidget(
-            self.dashboard_toggle_disciplinas,
-            0,
-            Qt.AlignVCenter
-        )
-        barra_disciplinas_layout.addWidget(
-            editar_disciplinas,
-            0,
-            Qt.AlignVCenter
-        )
-        barra_disciplinas_layout.addStretch()
-
-        linha_disciplinas = QHBoxLayout()
-        linha_disciplinas.addStretch()
-        linha_disciplinas.addWidget(
-            barra_disciplinas,
-            0,
-            Qt.AlignCenter
-        )
-        linha_disciplinas.addStretch()
-
-        layout.addLayout(
-            linha_disciplinas
-        )
-
-        self.dashboard_disciplinas_conteudo = QWidget()
-        self.dashboard_disciplinas_conteudo.setObjectName(
-            "dashboardCollapsibleContent"
-        )
-
-        self.botoes_disciplinas_layout = QGridLayout(
-            self.dashboard_disciplinas_conteudo
-        )
-        self.botoes_disciplinas_layout.setContentsMargins(
-            0,
-            0,
-            0,
-            0
-        )
-        self.botoes_disciplinas_layout.setHorizontalSpacing(
-            12
-        )
-        self.botoes_disciplinas_layout.setVerticalSpacing(
-            10
-        )
-
-        self.botoes_disciplinas_layout.setColumnStretch(
-            0,
-            1
-        )
-        self.botoes_disciplinas_layout.setColumnStretch(
-            1,
-            1
-        )
-        self.botoes_disciplinas_layout.setColumnStretch(
-            2,
-            1
-        )
-
-        layout.addWidget(
-            self.dashboard_disciplinas_conteudo
-        )
-
-        self.carregar_botoes_disciplinas()
+        # A secao visual Disciplinas foi retirada exclusivamente do Dashboard.
+        # A pagina exclusiva de Disciplinas continua disponivel pela Home/Recursos.
 
         self.aplicar_estados_secoes_dashboard()
 
@@ -42320,21 +42771,6 @@ class SistemaEstudos(QMainWindow):
                 ),
                 "titulo": "Estudo por questões",
                 "config": "dashboard_secao_estudar_expandida",
-            },
-            "disciplinas": {
-                "conteudo": getattr(
-                    self,
-                    "dashboard_disciplinas_conteudo",
-                    None
-                ),
-                "botao": getattr(
-                    self,
-                    "dashboard_toggle_disciplinas",
-                    None
-                ),
-                "subtitulo": None,
-                "titulo": "Disciplinas",
-                "config": "dashboard_secao_disciplinas_expandida",
             },
         }
 
@@ -43494,6 +43930,39 @@ class SistemaEstudos(QMainWindow):
             relatorio_hoje.get("answered_attempt_count", {}).get("value", 0)
             or 0
         )
+
+        # Planejamento compacto no topo do Dashboard (Futurista): usar os
+        # mesmos dados ja calculados acima, sem consulta e sem pontuacao nova.
+        painel_topo = getattr(self, "dashboard_quick_nav", None)
+        if painel_topo is not None and hasattr(painel_topo, "planejamento_faixa"):
+            dias = ("Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo")
+            painel_topo.planejamento_data.setText(
+                f"{dias[hoje_qdate.dayOfWeek() - 1]} • {hoje_qdate.toString('dd/MM')}"
+            )
+            if meta > 0:
+                percentual_topo = round(100.0 * questoes_hoje / meta)
+                painel_topo.planejamento_questoes.setText(
+                    f"{questoes_hoje} / {meta} questões"
+                )
+                painel_topo.planejamento_percentual.setText(
+                    f"{percentual_topo}% concluído"
+                )
+                painel_topo.planejamento_barra.setValue(
+                    min(100, max(0, int(percentual_topo)))
+                )
+            else:
+                painel_topo.planejamento_questoes.setText(
+                    f"{questoes_hoje} questões"
+                )
+                painel_topo.planejamento_percentual.setText("Meta desativada")
+                painel_topo.planejamento_barra.setValue(0)
+            painel_topo.planejamento_revisoes.setText(
+                f"{revisoes_pendentes} "
+                + ("revisão" if revisoes_pendentes == 1 else "revisões")
+            )
+            painel_topo.planejamento_revisoes.setToolTip(
+                f"{revisoes_hoje} para hoje • {revisoes_atrasadas} atrasadas"
+            )
 
         if meta > 0:
             percentual_meta = round(
@@ -64276,6 +64745,17 @@ class SistemaEstudos(QMainWindow):
             if visual_dashboard.styleSheet() != estilo:
                 visual_dashboard.setStyleSheet(estilo)
             visual_dashboard.update()
+        # O painel Estudo por questões utiliza os MESMOS estilos que possuía
+        # no Dashboard, mesmo agora residindo na Central de Simulados.
+        raiz_estudo = getattr(self, "_portal_estudo_questoes_raiz", None)
+        if raiz_estudo is not None and visual_dashboard is not None:
+            if raiz_estudo.styleSheet() != visual_dashboard.styleSheet():
+                raiz_estudo.setStyleSheet(visual_dashboard.styleSheet())
+
+        raiz_edital = getattr(self, "_portal_edital_dashboard_raiz", None)
+        if raiz_edital is not None and visual_dashboard is not None:
+            if raiz_edital.styleSheet() != visual_dashboard.styleSheet():
+                raiz_edital.setStyleSheet(visual_dashboard.styleSheet())
 
         if hasattr(self, "botao_configuracoes_topo"):
             fallback_config = (
@@ -64380,6 +64860,9 @@ class SistemaEstudos(QMainWindow):
                 fundo_home.definir_reducao_movimento(preferencia.value(
                     "acessibilidade/reduzir_movimento", False, type=bool
                 ))
+            # A preferência de movimento é compartilhada com o novo GIF do
+            # Dashboard e entra em vigor sem reiniciar o aplicativo.
+            self._sincronizar_animacao_dashboard()
 
             QMessageBox.information(
                 self,

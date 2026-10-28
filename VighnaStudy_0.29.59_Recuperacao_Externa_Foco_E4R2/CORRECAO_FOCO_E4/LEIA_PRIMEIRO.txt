@@ -1,0 +1,28 @@
+VIGHNASTUDY 0.29.59 — RECUPERACAO EXTERNA E4R2
+
+A atualizacao E4 apresentou UnboundLocalError: QSize ao abrir o VighnaStudy.
+Este pacote usa o motor ORIGINAL da Central de Atualizacoes e realiza nova
+compilacao em area isolada, com backup e rollback. Nao substitui estudos.db.
+
+INSTALACAO (SEM PRECISAR ABRIR O VIGHNA)
+1. Feche o VighnaStudy completamente.
+2. Localize a raiz do VighnaStudy: pasta que contem main.py, versao.py,
+   estudos.db, VighnaStudy.spec e .venv.
+   Pelo atalho do Vighna: botao direito > Abrir local do arquivo; se abrir
+   dist\SistemaEstudos, volte DUAS pastas ate a raiz do projeto.
+3. Extraia a pasta CORRECAO_FOCO_E4 deste ZIP DENTRO da raiz do VighnaStudy.
+   Exemplo: C:\SistemaEstudos\CORRECAO_FOCO_E4
+   Nao substitua outras pastas nem arquivos do projeto.
+4. Dentro de CORRECAO_FOCO_E4, clique duas vezes RECUPERAR_FOCO_E4.cmd.
+5. Acompanhe as mensagens. O script exige o build exato da E4 e aborta em
+   caso de incompatibilidade. Quando indicar concluido, abra pelo atalho.
+
+ATENCAO
+- Nao rode atualizar_exe.bat para tentar consertar a falha.
+- Nao mexa no estudos.db, backups ou dist manualmente.
+- Necessario Python/venv e PyInstaller ja presentes na instalacao.
+- Recompilacao Windows e abertura real precisam ser verificadas no seu PC.
+- Se aparecer "main.py diferente da E4", pare e envie a mensagem exibida.
+
+Alternativa: se o aplicativo ainda abrir, o ZIP interno da pasta pode ser
+importado pela Central de Atualizacoes normalmente.

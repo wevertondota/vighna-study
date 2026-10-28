@@ -137,6 +137,7 @@ def criar_portal_treinos(*, abrir_inicio, abrir_dashboard, abrir_simulado,
 
     scroll = QScrollArea()
     scroll.setObjectName("portalTreinosScroll")
+    pagina.portal_treinos_scroll = scroll
     scroll.setWidgetResizable(True)
     scroll.setFrameShape(QFrame.NoFrame)
     scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -145,6 +146,8 @@ def criar_portal_treinos(*, abrir_inicio, abrir_dashboard, abrir_simulado,
     coluna = QVBoxLayout(corpo)
     coluna.setContentsMargins(18, 16, 18, 20)
     coluna.setSpacing(12)
+    # Ponto de inserção seguro para reparenting do quadro-mãe original.
+    pagina.portal_treinos_conteudo_layout = coluna
 
     cabecalho = QFrame()
     cabecalho.setObjectName("portalTreinosCabecalho")
