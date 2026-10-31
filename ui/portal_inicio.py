@@ -1185,3 +1185,31 @@ def aplicar_estilo_portal(pagina: QWidget, tema: str) -> None:
         cabeca_h10.definir_tema(tema)
     for icone in pagina.findChildren(_IconeModulo):
         icone.definir_tema(tema)
+
+
+# HOME R4H — camadas invisíveis reais para os quatro acessos do GIF.
+# Os motores existentes, perfis e atalho Ctrl+K permanecem os mesmos.
+from ui.home_r4h_canvas import IntegracaoHomeR4H as _IntegracaoHomeR4H
+
+_criar_portal_inicio_sem_r4h = criar_portal_inicio
+_aplicar_estilo_portal_sem_r4h = aplicar_estilo_portal
+
+def criar_portal_inicio(abrir_dashboard, abrir_busca, abrir_questoes,
+                        abrir_simulados=None, abrir_recursos=None,
+                        cabecalho_compartilhado=None, abrir_edital=None):
+    pagina = _criar_portal_inicio_sem_r4h(
+        abrir_dashboard, abrir_busca, abrir_questoes,
+        abrir_simulados=abrir_simulados, abrir_recursos=abrir_recursos,
+        cabecalho_compartilhado=cabecalho_compartilhado, abrir_edital=abrir_edital)
+    integracao = _IntegracaoHomeR4H(
+        pagina, cabecalho_compartilhado,
+        {"Dashboard":abrir_dashboard,"Simulados":abrir_simulados,
+         "Meu Edital":abrir_edital,"Recursos":abrir_recursos})
+    pagina.portal_home_r4h = integracao
+    return pagina
+
+def aplicar_estilo_portal(pagina: QWidget, tema: str) -> None:
+    _aplicar_estilo_portal_sem_r4h(pagina, tema)
+    integracao = getattr(pagina, "portal_home_r4h", None)
+    if integracao is not None:
+        integracao.definir_tema(tema)

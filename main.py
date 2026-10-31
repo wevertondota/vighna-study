@@ -17350,6 +17350,44 @@ class JanelaResolverQuestoes(QDialog):
             app.installEventFilter(self)
             self._filtro_teclado_aplicacao_instalado = True
 
+        # T01: observador isolado da bateria. O QTimer roda SOMENTE na GUI;
+        # a thread de diagnóstico não consulta Qt nem banco de dados.
+        self._t01_monitor = None
+        self._t01_pulso_timer = None
+        try:
+            from ui.diagnostico_bateria_t01 import MonitorTravamentoBateria
+            self._t01_monitor = MonitorTravamentoBateria()
+            self._t01_pulso_timer = QTimer(self)
+            self._t01_pulso_timer.setInterval(350)
+            self._t01_pulso_timer.timeout.connect(self._t01_pulso)
+            self._t01_pulso_timer.start()
+        except Exception:
+            # Instrumentação não pode impedir a abertura da bateria.
+            self._t01_monitor = None
+
+    def _t01_pulso(self):
+        monitor = getattr(self, '_t01_monitor', None)
+        if monitor is not None:
+            monitor.pulso()
+
+    def _t01_evento(self, etiqueta, *, gravar=True):
+        monitor = getattr(self, '_t01_monitor', None)
+        if monitor is not None:
+            if gravar:
+                monitor.registrar(etiqueta)
+            else:
+                monitor.marcar(etiqueta)
+
+    def _t01_encerrar(self):
+        timer = getattr(self, '_t01_pulso_timer', None)
+        if timer is not None:
+            timer.stop()
+            self._t01_pulso_timer = None
+        monitor = getattr(self, '_t01_monitor', None)
+        if monitor is not None:
+            monitor.parar()
+            self._t01_monitor = None
+
     def _aplicar_visual_moderno_resolvedor(self):
         """Aparência moderna, restrita à janela da bateria e aos três temas.
 
@@ -17611,6 +17649,7 @@ class JanelaResolverQuestoes(QDialog):
 
     def abrir_pausa_programada(self):
         """Configura ou administra uma pausa sem sair da bateria atual."""
+        self._t01_evento('pausa_abrir_configuracao')
         if self.finalizada:
             return
         if self._pausa_relogio is None and (
@@ -17648,6 +17687,7 @@ class JanelaResolverQuestoes(QDialog):
         self.iniciar_pausa_programada(minutos, minimizar=minimizar)
 
     def iniciar_pausa_programada(self, minutos, minimizar=False):
+        self._t01_evento('pausa_inicio')
         if self.finalizada or self._pausa_relogio is not None:
             return
         self._pausa_relogio = RelogioPausa(minutos)
@@ -17688,6 +17728,7 @@ class JanelaResolverQuestoes(QDialog):
             self.showMinimized()
 
     def verificar_pausa_programada(self):
+        self._t01_evento('pausa_verificar_timer', gravar=False)
         relogio = self._pausa_relogio
         if relogio is None or self.finalizada:
             return
@@ -17700,11 +17741,13 @@ class JanelaResolverQuestoes(QDialog):
         if restantes or self._pausa_aviso is not None:
             return
         self._pausa_timer.stop()
+        self._t01_evento('pausa_aviso_criar')
         aviso = AvisoPausaFinalizada()
         self._pausa_aviso = aviso
         aviso.retornar.connect(lambda: self.encerrar_pausa_programada(trazer_bateria=True))
         aviso.adiar.connect(self.adiar_pausa_programada)
         aviso.exibir_prioritario()
+        self._t01_evento('pausa_aviso_exibido')
         if self._pausa_config["som"]:
             QApplication.beep()
 
@@ -17716,6 +17759,7 @@ class JanelaResolverQuestoes(QDialog):
             aviso.deleteLater()
 
     def adiar_pausa_programada(self):
+        self._t01_evento('pausa_adiar_inicio')
         if self._pausa_relogio is None:
             return
         self._fechar_aviso_pausa()
@@ -17723,8 +17767,10 @@ class JanelaResolverQuestoes(QDialog):
         self._pausa_timer.start()
         self._aplicar_visual_pausa_programada(True)
         self.verificar_pausa_programada()
+        self._t01_evento('pausa_adiar_concluido')
 
     def encerrar_pausa_programada(self, trazer_bateria=False):
+        self._t01_evento('pausa_retornar_inicio' if trazer_bateria else 'pausa_encerrar_inicio')
         if self._pausa_relogio is None:
             return
         self._pausa_timer.stop()
@@ -17760,6 +17806,7 @@ class JanelaResolverQuestoes(QDialog):
         # somente a restauração normal retomará a medição.
         if not self.isMinimized():
             self.retomar_cronometro_questao()
+        self._t01_evento('pausa_encerrada')
 
     def pausar_cronometro_questao(self):
         """Pausa só o tempo da questão; simulados cronometrados continuam correndo."""
@@ -19231,6 +19278,7 @@ class JanelaResolverQuestoes(QDialog):
         )
 
     def carregar_atual(self):
+        self._t01_evento('questao_carregar', gravar=False)
         self._modo_revisao_historico = False
         self._indice_revisao_historico = None
         if self.indice >= len(
@@ -19764,6 +19812,7 @@ class JanelaResolverQuestoes(QDialog):
         )
 
     def confirmar_resposta(self):
+        self._t01_evento('questao_confirmar_resposta', gravar=False)
         if self._modo_revisao_historico:
             return
         if self._pausa_relogio is not None or self.resposta_confirmada or self._editando_alternativas:
@@ -20207,6 +20256,7 @@ class JanelaResolverQuestoes(QDialog):
             self.carregar_atual()
 
     def proxima(self):
+        self._t01_evento('questao_proxima', gravar=False)
         if self._modo_revisao_historico:
             return
         if self._pausa_relogio is not None or self._editando_alternativas:
@@ -20283,6 +20333,7 @@ class JanelaResolverQuestoes(QDialog):
         concluida,
         motivo
     ):
+        self._t01_evento('sessao_finalizar_inicio')
         if self.finalizada:
             return
 
@@ -20459,6 +20510,8 @@ class JanelaResolverQuestoes(QDialog):
         self.accept()
 
     def done(self, resultado):
+        self._t01_evento('sessao_fechar')
+        self._t01_encerrar()
         self.caneta_estudo.definir_modo(None)
         self.caneta_estudo.limpar()
         self.encerrar_pausa_programada(trazer_bateria=False)
@@ -20477,6 +20530,7 @@ class JanelaResolverQuestoes(QDialog):
         event
     ):
         if self.finalizada:
+            self._t01_encerrar()
             event.accept()
             return
         if not self.confirmar_saida_com_edicao_alternativas():
