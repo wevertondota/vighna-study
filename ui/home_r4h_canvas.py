@@ -1,24 +1,25 @@
-"""Home Neural V3: imagem animada nativa + 4 áreas de clique independentes.
+"""Home V9: reprodução quadro-a-quadro, sem perdas, e quatro acessos Qt.
 
-Lote escopado: não altera Dashboard nem os motores de Simulados e Recursos.
-GIF Neural V3 original (160 quadros; 1300x715), sem reprocessar ou alterar seus bytes.
+Os 200 quadros do GIF enviado foram recompostos sem alterar cores,
+geometria ou texto. Fundo e ações não interferem nas outras telas.
 """
 from __future__ import annotations
 import os
 
-from PySide6.QtCore import Qt, QRect, QRectF, QBuffer, QByteArray, QIODevice, QSettings
-from PySide6.QtGui import QColor, QMovie, QPainter, QPen, QRadialGradient
+from PySide6.QtCore import Qt, QRect, QRectF, QSettings, QTimer, QByteArray
+from PySide6.QtGui import QColor, QImage, QPainter, QRadialGradient
 from PySide6.QtWidgets import QPushButton, QWidget, QScrollArea, QLabel
 
-from ui.home_r4h_asset import bytes_home_r4h
+from ui.home_v9_frames import obter_png, QUADROS, DURACAO_QUADRO_MS, iniciar_preaquecimento
+from ui.gif_activity_manager import MonitorAtividadeGIF, pode_reproduzir
 
 ART_W, ART_H = 1300.0, 715.0
 # Coordenadas na imagem ORIGINAL, não na janela incluindo barra lateral/título.
 AREAS = (
-    ("Simulados",  (281, 231, 182, 155)),
-    ("Dashboard",  (524, 164, 209, 181)),
-    ("Meu Edital", (794, 231, 169, 155)),
-    ("Recursos",   (182, 388, 137, 132)),
+    ("Simulados",  (354, 242, 139, 132)),
+    ("Dashboard",  (567, 184, 156, 143)),
+    ("Meu Edital", (841, 242, 137, 132)),
+    ("Recursos",   (228, 389, 117, 113)),
 )
 
 
@@ -54,15 +55,21 @@ class _TelaAnimadaR4H(QWidget):
         super().__init__(parent)
         self.setObjectName("portalInicioR4HAnimado")
         self.setMinimumSize(1, 1)
-        self._buffer = QBuffer(self)
-        self._buffer.setData(QByteArray(bytes_home_r4h()))
-        self._buffer.open(QIODevice.ReadOnly)
-        self._movie = QMovie(self._buffer, b"gif", self)
-        if not self._movie.isValid():
-            raise ValueError("QMovie não reconheceu o GIF da Home Neural V3")
-        self._movie.setCacheMode(QMovie.CacheNone)
-        self._movie.frameChanged.connect(lambda _indice: self.update())
-        self._movie.jumpToFrame(0)
+        # O V9 original tem 113 MB, acima dos limites seguros do atualizador.
+        # A codificação de quadros PNG + diferenças é VISUALMENTE sem perdas:
+        # a imagem reconstruída de cada quadro coincide exatamente com o GIF.
+        # Decodificamos apenas um patch a cada 100 ms, sem QMovie de 113 MB.
+        self._indice_quadro = 0
+        self._imagem = QImage.fromData(QByteArray(obter_png(0)), "PNG")
+        if self._imagem.isNull():
+            raise ValueError("Não foi possível carregar o quadro 0 da Home V9")
+        self._imagem = self._imagem.convertToFormat(QImage.Format_ARGB32)
+        self._quadro_inicial = self._imagem.copy()
+        iniciar_preaquecimento()
+        self._timer_animacao = QTimer(self)
+        self._timer_animacao.setTimerType(Qt.PreciseTimer)
+        self._timer_animacao.setInterval(DURACAO_QUADRO_MS)
+        self._timer_animacao.timeout.connect(self._proximo_quadro)
         self._hover = None
         self._botoes = []
         for nome, rect in AREAS:
@@ -71,6 +78,24 @@ class _TelaAnimadaR4H(QWidget):
         self._header = None
         self._movimento_reduzido = False
         self._ajustar_botoes()
+        self._monitor_gif = MonitorAtividadeGIF(self, self._sync_movie)
+
+    def _proximo_quadro(self):
+        proximo = (self._indice_quadro + 1) % QUADROS
+        if proximo == 0:
+            # Reinicia sem decodificar novamente um PNG completo de 1300x715.
+            self._imagem = self._quadro_inicial.copy()
+        else:
+            delta = QImage.fromData(QByteArray(obter_png(proximo)), "PNG")
+            if delta.isNull():
+                self._timer_animacao.stop()
+                return
+            pintor = QPainter(self._imagem)
+            pintor.setCompositionMode(QPainter.CompositionMode_SourceOver)
+            pintor.drawImage(0, 0, delta)
+            pintor.end()
+        self._indice_quadro = proximo
+        self.update()
 
     def frame_rect(self):
         escala = min(self.width()/ART_W, self.height()/ART_H)
@@ -108,10 +133,9 @@ class _TelaAnimadaR4H(QWidget):
         super().paintEvent(event)
         painter = QPainter(self)
         painter.fillRect(self.rect(),QColor(3,13,28))
-        current = self._movie.currentPixmap()
-        if not current.isNull():
+        if not self._imagem.isNull():
             painter.setRenderHint(QPainter.SmoothPixmapTransform,True)
-            painter.drawPixmap(self.frame_rect(),current,QRectF(current.rect()))
+            painter.drawImage(self.frame_rect(), self._imagem, QRectF(self._imagem.rect()))
         if self._hover is not None:
             for btn, (x,y,w,h) in self._botoes:
                 if btn is self._hover:
@@ -136,14 +160,12 @@ class _TelaAnimadaR4H(QWidget):
         self._sync_movie()
 
     def _sync_movie(self):
-        if not self.isVisible() or self._movimento_reduzido or self.window().isMinimized():
-            if self._movie.state() == QMovie.Running:
-                self._movie.setPaused(True)
-        else:
-            if self._movie.state() == QMovie.NotRunning:
-                self._movie.start()
-            elif self._movie.state() == QMovie.Paused:
-                self._movie.setPaused(False)
+        # Nome preservado por compatibilidade com MonitorAtividadeGIF.
+        # A animação pausa ao minimizar, desativar ou esconder a Home.
+        if self._movimento_reduzido or not pode_reproduzir(self):
+            self._timer_animacao.stop()
+        elif not self._timer_animacao.isActive():
+            self._timer_animacao.start()
 
     def showEvent(self,e):
         super().showEvent(e)

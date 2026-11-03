@@ -9752,7 +9752,123 @@ QPushButton#sectionEditButton:hover {
     }
 
 
-    QFrame#settingsSearchBar {
+    /* M03 — cabecalho Qt com arte estática e tipografia temática */
+    QLabel#settingsHeaderEyebrowM03 {
+        color: {{color:settings.section_description_text}};
+        background: transparent;
+        font-size: 8pt;
+        font-weight: 700;
+        padding: 0px;
+    }
+    QLabel#settingsHeaderArtworkM03 {
+        background: transparent;
+        border: none;
+        padding: 0px;
+    }
+    /* Configurações — M02: coluna de navegação com arte estática Vighna. */
+    QFrame#settingsHeaderM01 {
+        background-color: {{color:settings.section_surface}};
+        border: 1px solid {{color:settings.section_border}};
+        border-radius: 10px;
+    }
+    QFrame#settingsHeaderM01 QLabel {
+        background: transparent;
+    }
+    QFrame#settingsNavigationM01 {
+        background-color: {{color:settings.section_surface}};
+        border: 1px solid {{color:settings.section_border}};
+        border-radius: 12px;
+    }
+    QLabel#settingsNavigationTitleM01 {
+        color: {{color:settings.section_title_text}};
+        background: transparent;
+        font-weight: 800;
+        font-size: 9pt;
+        padding: 2px 6px 1px 6px;
+    }
+    QLabel#settingsNavigationSubTitleM02 {
+        color: {{color:settings.section_description_text}};
+        background: transparent;
+        font-weight: 600;
+        font-size: 7pt;
+        padding: 0px 6px 5px 6px;
+    }
+        QLabel#settingsNavSummaryV2 {
+        color: {{color:settings.section_description_text}};
+        background: transparent;
+        border: none;
+        font-weight: 700;
+        font-size: 8pt;
+        padding: 2px 6px 3px 6px;
+    }
+    QFrame#settingsNavigationDividerM02 {
+        background-color: {{color:settings.option_border}};
+        border: none;
+        min-height: 1px;
+        max-height: 1px;
+    }
+    QLabel#settingsNavigationArtworkM02 {
+        border: 1px solid {{color:settings.option_border}};
+        border-radius: 8px;
+        background: transparent;
+    }
+    QScrollArea#settingsNavigationScrollM01,
+    QScrollArea#settingsNavigationScrollM01 QWidget {
+        background: transparent;
+        border: none;
+    }
+    QPushButton#settingsNavigationButtonM01 {
+        background-color: {{color:settings.option_surface}};
+        color: {{color:settings.option_title_text}};
+        border: 1px solid {{color:settings.option_border}};
+        border-left: 3px solid {{color:settings.option_border}};
+        border-radius: 8px;
+        padding: 7px 4px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 9pt;
+    }
+    QPushButton#settingsNavigationButtonM01:hover {
+        border-color: {{color:settings.search_bar_border}};
+        border-left: 3px solid {{color:settings.search_input_border}};
+        background-color: {{color:settings.section_surface}};
+    }
+    QPushButton#settingsNavigationButtonM01:checked {
+        border: 1px solid {{color:settings.search_input_border}};
+        border-left: 3px solid {{color:settings.search_input_border}};
+        background-color: {{color:settings.search_count_surface}};
+        color: {{color:settings.section_title_text}};
+        font-weight: 700;
+    }
+    QPushButton#settingsNavigationButtonM01:focus {
+        border-bottom: 2px solid {{color:settings.search_input_border}};
+    }
+
+        QComboBox#settingsSearchResultsV2 {
+        background-color: {{color:settings.search_count_surface}};
+        color: {{color:settings.section_title_text}};
+        border: 1px solid {{color:settings.search_count_border}};
+        border-radius: 7px;
+        padding: 5px 8px;
+        min-height: 29px;
+    }
+    QFrame#settingsOption[configSearchActiveV2="true"] {
+        border: 2px solid {{color:settings.search_input_border}};
+    }
+/* V2/M06: busca integrada à mesma moldura do cabeçalho */
+QFrame#settingsHeaderM01 QFrame#settingsSearchBar {
+    background: transparent;
+    border: none;
+    border-radius: 0px;
+    padding: 0px;
+}
+QFrame#settingsHeaderM01 QLabel#pageSubtitle {
+    font-size: 9pt;
+}
+QFrame#settingsHeaderM01 QLabel#pageTitle {
+    font-size: 18pt;
+}
+QFrame#settingsSearchBar {
         background-color: {{color:settings.search_bar_surface}};
         border: 1px solid {{color:settings.search_bar_border}};
         border-radius: 10px;
@@ -9794,10 +9910,65 @@ QPushButton#sectionEditButton:hover {
         font-size: 9pt;
     }
 
+    /* M04 — tipografia/hierarquia dos paineis centrais; somente Settings. */
+    QFrame#settingsSectionHeaderM04 {
+        background: transparent;
+        border: none;
+    }
+    QLabel#settingsSectionIndexM04 {
+        color: {{color:settings.search_count_text}};
+        background-color: {{color:settings.search_count_surface}};
+        border: 1px solid {{color:settings.search_count_border}};
+        border-radius: 7px;
+        font-size: 11px;
+        font-weight: 800;
+        padding: 0px;
+    }
+    QLabel#settingsSectionCountM04 {
+        color: {{color:settings.section_description_text}};
+        background: transparent;
+        border: 1px solid {{color:settings.option_border}};
+        border-radius: 6px;
+        font-size: 9px;
+        font-weight: 700;
+        padding: 5px 8px;
+    }
+    QFrame#settingsSectionSeparatorM04 {
+        background-color: {{color:settings.section_border}};
+        border: none;
+        min-height: 1px;
+        max-height: 1px;
+    }
+    QWidget#settingsPreferenceGridV2M04 {
+        background: transparent;
+        border: none;
+    }
+    QFrame#settingsOption[preferenceCardV2M04="true"] {
+        border-radius: 10px;
+        border: 1px solid {{color:settings.option_border}};
+        border-top: 3px solid {{color:settings.search_count_border}};
+        background-color: {{color:settings.option_surface}};
+    }
+    QFrame#settingsOption[preferenceCardV2M04="true"]:hover {
+        border-top: 3px solid {{color:settings.search_input_border}};
+    }
+    QFrame#settingsOption[preferenceCardV2M04="true"][configSearchActiveV2="true"] {
+        border: 2px solid {{color:settings.search_input_border}};
+        border-top: 3px solid {{color:settings.search_input_border}};
+    }
     QFrame#settingsOption {
         background-color: {{color:settings.option_surface}};
         border: 1px solid {{color:settings.option_border}};
-        border-radius: 9px;
+        border-left: 3px solid {{color:settings.option_border}};
+        border-radius: 8px;
+    }
+    QFrame#settingsOption:hover {
+        border-color: {{color:settings.search_bar_border}};
+        border-left: 3px solid {{color:settings.search_input_border}};
+    }
+    QFrame#settingsSection QComboBox,
+    QFrame#settingsSection QSpinBox {
+        min-height: 28px;
     }
 
     QFrame#settingsOption QLabel,
@@ -9805,6 +9976,24 @@ QPushButton#sectionEditButton:hover {
         background: transparent;
     }
 
+    /* V2/M05 — operações e preferências separadas visualmente */
+    QLabel#settingsOperationTagV2M05 {
+        background: transparent;
+        border: none;
+        color: {{color:settings.section_description_text}};
+        font-weight: 700;
+        font-size: 8pt;
+        padding: 0px;
+    }
+    QLabel#settingsOperationTagV2M05[operationKindV2M05="preference"] {
+        color: {{color:settings.search_input_border}};
+    }
+    QFrame#settingsOption[operationKindV2M05="action"] {
+        border-top: 3px solid {{color:settings.option_border}};
+    }
+    QFrame#settingsOption[operationKindV2M05="maintenance"] {
+        border-top: 3px solid {{color:settings.search_input_border}};
+    }
     QLabel#configOptionTitle {
         color: {{color:settings.option_title_text}};
         font-size: 10pt;
@@ -9824,6 +10013,26 @@ QPushButton#sectionEditButton:hover {
 
     QFrame#settingsFooter QLabel {
         background: transparent;
+    }
+    /* M05 — estado de edição: somente o rodapé de Configurações. */
+    /* V2/M07 — marcador à direita, distinto da faixa esquerda da página ativa */
+    QPushButton#settingsNavigationButtonM01[alteracoesPendentesV2M07="true"] {
+        border-right: 3px solid {{color:settings.search_input_border}};
+    }
+    QLabel#settingsEditStateM05 {
+        color: {{color:settings.section_description_text}};
+        background: transparent;
+        font-weight: 700;
+        font-size: 9pt;
+    }
+    QLabel#settingsEditStateM05[pendente="true"] {
+        color: {{color:settings.search_input_border}};
+        font-weight: 800;
+    }
+    QLabel#settingsFooterHintM05 {
+        color: {{color:settings.section_description_text}};
+        background: transparent;
+        font-size: 8pt;
     }
 
     QLabel#settingsEmptyState {
@@ -16368,7 +16577,123 @@ def stylesheet_escuro():
     }
 
 
-    QFrame#settingsSearchBar {
+    /* M03 — cabecalho Qt com arte estática e tipografia temática */
+    QLabel#settingsHeaderEyebrowM03 {
+        color: {{color:settings.section_description_text}};
+        background: transparent;
+        font-size: 8pt;
+        font-weight: 700;
+        padding: 0px;
+    }
+    QLabel#settingsHeaderArtworkM03 {
+        background: transparent;
+        border: none;
+        padding: 0px;
+    }
+    /* Configurações — M02: coluna de navegação com arte estática Vighna. */
+    QFrame#settingsHeaderM01 {
+        background-color: {{color:settings.section_surface}};
+        border: 1px solid {{color:settings.section_border}};
+        border-radius: 10px;
+    }
+    QFrame#settingsHeaderM01 QLabel {
+        background: transparent;
+    }
+    QFrame#settingsNavigationM01 {
+        background-color: {{color:settings.section_surface}};
+        border: 1px solid {{color:settings.section_border}};
+        border-radius: 12px;
+    }
+    QLabel#settingsNavigationTitleM01 {
+        color: {{color:settings.section_title_text}};
+        background: transparent;
+        font-weight: 800;
+        font-size: 9pt;
+        padding: 2px 6px 1px 6px;
+    }
+    QLabel#settingsNavigationSubTitleM02 {
+        color: {{color:settings.section_description_text}};
+        background: transparent;
+        font-weight: 600;
+        font-size: 7pt;
+        padding: 0px 6px 5px 6px;
+    }
+        QLabel#settingsNavSummaryV2 {
+        color: {{color:settings.section_description_text}};
+        background: transparent;
+        border: none;
+        font-weight: 700;
+        font-size: 8pt;
+        padding: 2px 6px 3px 6px;
+    }
+    QFrame#settingsNavigationDividerM02 {
+        background-color: {{color:settings.option_border}};
+        border: none;
+        min-height: 1px;
+        max-height: 1px;
+    }
+    QLabel#settingsNavigationArtworkM02 {
+        border: 1px solid {{color:settings.option_border}};
+        border-radius: 8px;
+        background: transparent;
+    }
+    QScrollArea#settingsNavigationScrollM01,
+    QScrollArea#settingsNavigationScrollM01 QWidget {
+        background: transparent;
+        border: none;
+    }
+    QPushButton#settingsNavigationButtonM01 {
+        background-color: {{color:settings.option_surface}};
+        color: {{color:settings.option_title_text}};
+        border: 1px solid {{color:settings.option_border}};
+        border-left: 3px solid {{color:settings.option_border}};
+        border-radius: 8px;
+        padding: 7px 4px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 9pt;
+    }
+    QPushButton#settingsNavigationButtonM01:hover {
+        border-color: {{color:settings.search_bar_border}};
+        border-left: 3px solid {{color:settings.search_input_border}};
+        background-color: {{color:settings.section_surface}};
+    }
+    QPushButton#settingsNavigationButtonM01:checked {
+        border: 1px solid {{color:settings.search_input_border}};
+        border-left: 3px solid {{color:settings.search_input_border}};
+        background-color: {{color:settings.search_count_surface}};
+        color: {{color:settings.section_title_text}};
+        font-weight: 700;
+    }
+    QPushButton#settingsNavigationButtonM01:focus {
+        border-bottom: 2px solid {{color:settings.search_input_border}};
+    }
+
+        QComboBox#settingsSearchResultsV2 {
+        background-color: {{color:settings.search_count_surface}};
+        color: {{color:settings.section_title_text}};
+        border: 1px solid {{color:settings.search_count_border}};
+        border-radius: 7px;
+        padding: 5px 8px;
+        min-height: 29px;
+    }
+    QFrame#settingsOption[configSearchActiveV2="true"] {
+        border: 2px solid {{color:settings.search_input_border}};
+    }
+/* V2/M06: busca integrada à mesma moldura do cabeçalho */
+QFrame#settingsHeaderM01 QFrame#settingsSearchBar {
+    background: transparent;
+    border: none;
+    border-radius: 0px;
+    padding: 0px;
+}
+QFrame#settingsHeaderM01 QLabel#pageSubtitle {
+    font-size: 9pt;
+}
+QFrame#settingsHeaderM01 QLabel#pageTitle {
+    font-size: 18pt;
+}
+QFrame#settingsSearchBar {
         background-color: {{color:settings.search_bar_surface}};
         border: 1px solid {{color:settings.search_bar_border}};
         border-radius: 10px;
@@ -16410,10 +16735,65 @@ def stylesheet_escuro():
         font-size: 9pt;
     }
 
+    /* M04 — tipografia/hierarquia dos paineis centrais; somente Settings. */
+    QFrame#settingsSectionHeaderM04 {
+        background: transparent;
+        border: none;
+    }
+    QLabel#settingsSectionIndexM04 {
+        color: {{color:settings.search_count_text}};
+        background-color: {{color:settings.search_count_surface}};
+        border: 1px solid {{color:settings.search_count_border}};
+        border-radius: 7px;
+        font-size: 11px;
+        font-weight: 800;
+        padding: 0px;
+    }
+    QLabel#settingsSectionCountM04 {
+        color: {{color:settings.section_description_text}};
+        background: transparent;
+        border: 1px solid {{color:settings.option_border}};
+        border-radius: 6px;
+        font-size: 9px;
+        font-weight: 700;
+        padding: 5px 8px;
+    }
+    QFrame#settingsSectionSeparatorM04 {
+        background-color: {{color:settings.section_border}};
+        border: none;
+        min-height: 1px;
+        max-height: 1px;
+    }
+    QWidget#settingsPreferenceGridV2M04 {
+        background: transparent;
+        border: none;
+    }
+    QFrame#settingsOption[preferenceCardV2M04="true"] {
+        border-radius: 10px;
+        border: 1px solid {{color:settings.option_border}};
+        border-top: 3px solid {{color:settings.search_count_border}};
+        background-color: {{color:settings.option_surface}};
+    }
+    QFrame#settingsOption[preferenceCardV2M04="true"]:hover {
+        border-top: 3px solid {{color:settings.search_input_border}};
+    }
+    QFrame#settingsOption[preferenceCardV2M04="true"][configSearchActiveV2="true"] {
+        border: 2px solid {{color:settings.search_input_border}};
+        border-top: 3px solid {{color:settings.search_input_border}};
+    }
     QFrame#settingsOption {
         background-color: {{color:settings.option_surface}};
         border: 1px solid {{color:settings.option_border}};
-        border-radius: 9px;
+        border-left: 3px solid {{color:settings.option_border}};
+        border-radius: 8px;
+    }
+    QFrame#settingsOption:hover {
+        border-color: {{color:settings.search_bar_border}};
+        border-left: 3px solid {{color:settings.search_input_border}};
+    }
+    QFrame#settingsSection QComboBox,
+    QFrame#settingsSection QSpinBox {
+        min-height: 28px;
     }
 
     QFrame#settingsOption QLabel,
@@ -16421,6 +16801,24 @@ def stylesheet_escuro():
         background: transparent;
     }
 
+    /* V2/M05 — operações e preferências separadas visualmente */
+    QLabel#settingsOperationTagV2M05 {
+        background: transparent;
+        border: none;
+        color: {{color:settings.section_description_text}};
+        font-weight: 700;
+        font-size: 8pt;
+        padding: 0px;
+    }
+    QLabel#settingsOperationTagV2M05[operationKindV2M05="preference"] {
+        color: {{color:settings.search_input_border}};
+    }
+    QFrame#settingsOption[operationKindV2M05="action"] {
+        border-top: 3px solid {{color:settings.option_border}};
+    }
+    QFrame#settingsOption[operationKindV2M05="maintenance"] {
+        border-top: 3px solid {{color:settings.search_input_border}};
+    }
     QLabel#configOptionTitle {
         color: {{color:settings.option_title_text}};
         font-size: 10pt;
@@ -16440,6 +16838,26 @@ def stylesheet_escuro():
 
     QFrame#settingsFooter QLabel {
         background: transparent;
+    }
+    /* M05 — estado de edição: somente o rodapé de Configurações. */
+    /* V2/M07 — marcador à direita, distinto da faixa esquerda da página ativa */
+    QPushButton#settingsNavigationButtonM01[alteracoesPendentesV2M07="true"] {
+        border-right: 3px solid {{color:settings.search_input_border}};
+    }
+QLabel#settingsEditStateM05 {
+        color: {{color:settings.section_description_text}};
+        background: transparent;
+        font-weight: 700;
+        font-size: 9pt;
+    }
+    QLabel#settingsEditStateM05[pendente="true"] {
+        color: {{color:settings.search_input_border}};
+        font-weight: 800;
+    }
+    QLabel#settingsFooterHintM05 {
+        color: {{color:settings.section_description_text}};
+        background: transparent;
+        font-size: 8pt;
     }
 
     QLabel#settingsEmptyState {
@@ -19889,6 +20307,266 @@ def stylesheet_escuro():
 
 
 
+
+# Central de Controle Vighna: estilo Futurista isolado, sem efeito no Dashboard.
+ESTILO_CONFIG_CENTRAL_M06_FUTURISTA = r"""
+QFrame#settingsHeaderM01 {
+    background-color: #0E1926;
+    border: 1px solid #31516B;
+    border-radius: 11px;
+}
+QFrame#settingsHeaderM01 QLabel { background: transparent; }
+QLabel#settingsHeaderEyebrowM03 {
+    color: #B49269;
+    background: transparent;
+    font-size: 8pt;
+    font-weight: 700;
+}
+QLabel#settingsHeaderArtworkM03 {
+    background: transparent;
+    border: none;
+    padding: 0px;
+}
+QFrame#settingsNavigationM01 {
+    background-color: #0E1926;
+    border: 1px solid #31516B;
+    border-radius: 12px;
+}
+QLabel#settingsNavigationTitleM01 {
+    color: #E4F2FA;
+    background: transparent;
+    font-size: 9pt;
+    font-weight: 800;
+    padding: 2px 6px 1px 6px;
+}
+QLabel#settingsNavigationSubTitleM02 {
+    color: #9DAFC0;
+    background: transparent;
+    font-size: 7pt;
+    font-weight: 600;
+    padding: 0px 6px 5px 6px;
+}
+QLabel#settingsNavSummaryV2 {
+    color: #98BDD4;
+    background: transparent;
+    border: none;
+    font-weight: 700;
+    font-size: 8pt;
+    padding: 2px 6px 3px 6px;
+}
+QFrame#settingsNavigationDividerM02 {
+    background-color: #31516B;
+    border: none;
+    min-height: 1px;
+    max-height: 1px;
+}
+QLabel#settingsNavigationArtworkM02 {
+    background: transparent;
+    border: 1px solid #31516B;
+    border-radius: 8px;
+}
+QScrollArea#settingsNavigationScrollM01,
+QScrollArea#settingsNavigationScrollM01 QWidget {
+    background: transparent;
+    border: none;
+}
+QPushButton#settingsNavigationButtonM01 {
+    color: #CADBEA;
+    background-color: #14283E;
+    border: 1px solid #2C4961;
+    border-left: 3px solid #2C4961;
+    border-radius: 8px;
+    padding: 7px 4px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 9pt;
+}
+QPushButton#settingsNavigationButtonM01:hover {
+    background-color: #19354B;
+    border: 1px solid #4FB2E5;
+    border-left: 3px solid #4FB2E5;
+}
+QPushButton#settingsNavigationButtonM01:checked {
+    color: #E4F2FA;
+    background-color: #1C3C51;
+    border: 1px solid #B49269;
+    border-left: 3px solid #B49269;
+    font-weight: 700;
+}
+QPushButton#settingsNavigationButtonM01:focus {
+    border-bottom: 2px solid #4FB2E5;
+}
+QComboBox#settingsSearchResultsV2 {
+    background-color: #14283E;
+    color: #E4F2FA;
+    border: 1px solid #4FB2E5;
+    border-radius: 7px;
+    padding: 5px 8px;
+    min-height: 29px;
+}
+QFrame#settingsOption[configSearchActiveV2="true"] {
+    border: 2px solid #B49269;
+}
+/* V2/M06: busca integrada à mesma moldura do cabeçalho */
+QFrame#settingsHeaderM01 QFrame#settingsSearchBar {
+    background: transparent;
+    border: none;
+    border-radius: 0px;
+    padding: 0px;
+}
+QFrame#settingsHeaderM01 QLabel#pageSubtitle {
+    font-size: 9pt;
+}
+QFrame#settingsHeaderM01 QLabel#pageTitle {
+    font-size: 18pt;
+}
+QFrame#settingsSearchBar {
+    background-color: #0E1926;
+    border: 1px solid #31516B;
+    border-radius: 10px;
+}
+QLineEdit#settingsSearchInput {
+    background-color: #14283E;
+    color: #E4F2FA;
+    border: 1px solid #31516B;
+    border-radius: 7px;
+    padding: 5px 10px;
+}
+QLineEdit#settingsSearchInput:focus { border-color: #4FB2E5; }
+QLabel#settingsSearchCount {
+    color: #B5C0C3;
+    background-color: #14283E;
+    border: 1px solid #31516B;
+    border-radius: 7px;
+    padding: 5px 8px;
+    font-size: 9pt;
+    font-weight: 600;
+}
+QFrame#settingsSection {
+    background-color: #0E1926;
+    border: 1px solid #31516B;
+    border-radius: 11px;
+}
+QFrame#settingsSection QLabel { background: transparent; }
+QLabel#settingsSectionTitle {
+    color: #E4F2FA;
+    font-size: 15px;
+    font-weight: 700;
+}
+QLabel#settingsSectionDescription {
+    color: #9DAFC0;
+    font-size: 9pt;
+}
+QFrame#settingsSectionHeaderM04 { background: transparent; border: none; }
+QLabel#settingsSectionIndexM04 {
+    color: #B49269;
+    background-color: #14283E;
+    border: 1px solid #31516B;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 0px;
+}
+QLabel#settingsSectionCountM04 {
+    color: #9DAFC0;
+    background: transparent;
+    border: 1px solid #31516B;
+    border-radius: 6px;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 5px 8px;
+}
+QFrame#settingsSectionSeparatorM04 {
+    background-color: #31516B;
+    border: none;
+    min-height: 1px;
+    max-height: 1px;
+}
+QWidget#settingsPreferenceGridV2M04 {
+    background: transparent;
+    border: none;
+}
+QFrame#settingsOption[preferenceCardV2M04="true"] {
+    border-radius: 10px;
+    border: 1px solid #2E475E;
+    border-top: 3px solid #3179BF;
+    background-color: #14283E;
+}
+QFrame#settingsOption[preferenceCardV2M04="true"]:hover {
+    border-top: 3px solid #4FB2E5;
+}
+QFrame#settingsOption[preferenceCardV2M04="true"][configSearchActiveV2="true"] {
+    border: 2px solid #B49269;
+    border-top: 3px solid #B49269;
+}
+QFrame#settingsOption {
+    background-color: #14283E;
+    border: 1px solid #2E475E;
+    border-left: 3px solid #2E475E;
+    border-radius: 8px;
+}
+QFrame#settingsOption:hover {
+    border: 1px solid #3179BF;
+    border-left: 3px solid #4FB2E5;
+}
+QFrame#settingsOption QLabel,
+QFrame#settingsOption QCheckBox { background: transparent; }
+QFrame#settingsSection QComboBox,
+QFrame#settingsSection QSpinBox { min-height: 28px; }
+/* V2/M05 — painéis operacionais, tema Futurista */
+QLabel#settingsOperationTagV2M05 {
+    background: transparent;
+    border: none;
+    color: #9DAFC0;
+    font-weight: 700;
+    font-size: 8pt;
+    padding: 0px;
+}
+QLabel#settingsOperationTagV2M05[operationKindV2M05="preference"] {
+    color: #4FB2E5;
+}
+QFrame#settingsOption[operationKindV2M05="action"] {
+    border-top: 3px solid #3179BF;
+}
+QFrame#settingsOption[operationKindV2M05="maintenance"] {
+    border-top: 3px solid #B49269;
+}
+QLabel#configOptionTitle {
+    color: #E4F2FA;
+    font-size: 10pt;
+    font-weight: 700;
+}
+QFrame#settingsFooter {
+    background-color: #0E1926;
+    border: 1px solid #31516B;
+    border-radius: 10px;
+}
+QFrame#settingsFooter QLabel { background: transparent; }
+QLabel#settingsEditStateM05 {
+    color: #B5C0C3;
+    background: transparent;
+    font-size: 9pt;
+    font-weight: 700;
+}
+QLabel#settingsEditStateM05[pendente="true"] {
+    color: #B49269;
+    font-weight: 800;
+}
+QLabel#settingsFooterHintM05 {
+    color: #9DAFC0;
+    background: transparent;
+    font-size: 8pt;
+}
+QLabel#settingsEmptyState {
+    color: #E4F2FA;
+    background-color: #14283E;
+    border: 1px dashed #4FB2E5;
+    border-radius: 10px;
+    padding: 20px;
+    font-size: 10pt;
+}
+"""
+
 def stylesheet_futurista():
     """
     Aparência Futurista nativa do VighnaStudy.
@@ -23067,7 +23745,547 @@ def stylesheet_futurista():
         font-size: 7.5pt;
     }
 
-""" + ESTILO_JORNADA_FUTURISTA + render_native_qss( ESTILO_DASHBOARD_MODERNO_FUTURISTA) + render_native_qss( ESTILO_FOCO_DASHBOARD_FUTURISTA) + render_native_qss( ESTILO_ALGORITMO_DASHBOARD_FUTURISTA) + render_native_qss( ESTILO_BUSCA_GLOBAL_FUTURISTA) + render_native_qss( ESTILO_INTELIGENCIA_RESUMO_FUTURISTA) + ESTILO_TOPICOS_DISCIPLINA_FUTURISTA + render_native_qss( ESTILO_DASHBOARD_NEO_FUTURISTA) + ESTILO_RESOLVEDOR_FUTURISTA + render_native_qss( ESTILO_TOPICO_DETALHES_FUTURISTA) + ESTILO_RESOLVEDOR_ELIMINADAS_FUTURISTA + ESTILO_RESOLVEDOR_TECLADO_FUTURISTA + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_FUTURISTA + render_native_qss( ESTILO_BARRA_EXPLICACAO_RICA) + render_native_qss( ESTILO_RESOLVEDOR_ALTERNATIVAS_INLINE_FUTURISTA) + ESTILO_CALENDARIO_PREVISAO_FUTURISTA + ESTILO_DASHBOARD_SHELL_FUTURISTA + render_native_qss( ESTILO_DASHBOARD_BLOCO_B_FUTURISTA) + render_native_qss( ESTILO_DASHBOARD_BLOCO_C) + render_native_qss( ESTILO_DASHBOARD_BLOCO_D) + render_native_qss( ESTILO_DASHBOARD_BLOCO_E) + render_native_qss( ESTILO_DASHBOARD_BLOCO_F) + render_native_qss( ESTILO_DASHBOARD_BLOCO_G) + render_native_qss( ESTILO_DASHBOARD_BLOCO_H) + render_native_qss( ESTILO_NAVEGACAO_BUSCA_GLOBAL) + render_native_qss( ESTILO_NAVEGACAO_RETORNOS_DASHBOARD) + render_native_qss( ESTILO_CARDS_GLOBAIS_BLOCO_A) + render_native_qss( ESTILO_CARDS_GLOBAIS_BLOCO_B) + render_native_qss( ESTILO_CARDS_GLOBAIS_BLOCO_C) + render_native_qss( ESTILO_MODO_FOCO_INTEGRACAO_RESOLVEDOR) + ESTILO_DASHBOARD_ALVO_5B_FUTURISTA + render_native_qss( ESTILO_DASHBOARD_SIDEBAR_FUTURISTA))
+""" + ESTILO_JORNADA_FUTURISTA + render_native_qss( ESTILO_DASHBOARD_MODERNO_FUTURISTA) + render_native_qss( ESTILO_FOCO_DASHBOARD_FUTURISTA) + render_native_qss( ESTILO_ALGORITMO_DASHBOARD_FUTURISTA) + render_native_qss( ESTILO_BUSCA_GLOBAL_FUTURISTA) + render_native_qss( ESTILO_INTELIGENCIA_RESUMO_FUTURISTA) + ESTILO_TOPICOS_DISCIPLINA_FUTURISTA + render_native_qss( ESTILO_DASHBOARD_NEO_FUTURISTA) + ESTILO_RESOLVEDOR_FUTURISTA + render_native_qss( ESTILO_TOPICO_DETALHES_FUTURISTA) + ESTILO_RESOLVEDOR_ELIMINADAS_FUTURISTA + ESTILO_RESOLVEDOR_TECLADO_FUTURISTA + ESTILO_RESOLVEDOR_EXPLICACAO_EDITOR_FUTURISTA + render_native_qss( ESTILO_BARRA_EXPLICACAO_RICA) + render_native_qss( ESTILO_RESOLVEDOR_ALTERNATIVAS_INLINE_FUTURISTA) + ESTILO_CALENDARIO_PREVISAO_FUTURISTA + ESTILO_DASHBOARD_SHELL_FUTURISTA + render_native_qss( ESTILO_DASHBOARD_BLOCO_B_FUTURISTA) + render_native_qss( ESTILO_DASHBOARD_BLOCO_C) + render_native_qss( ESTILO_DASHBOARD_BLOCO_D) + render_native_qss( ESTILO_DASHBOARD_BLOCO_E) + render_native_qss( ESTILO_DASHBOARD_BLOCO_F) + render_native_qss( ESTILO_DASHBOARD_BLOCO_G) + render_native_qss( ESTILO_DASHBOARD_BLOCO_H) + render_native_qss( ESTILO_NAVEGACAO_BUSCA_GLOBAL) + render_native_qss( ESTILO_NAVEGACAO_RETORNOS_DASHBOARD) + render_native_qss( ESTILO_CARDS_GLOBAIS_BLOCO_A) + render_native_qss( ESTILO_CARDS_GLOBAIS_BLOCO_B) + render_native_qss( ESTILO_CARDS_GLOBAIS_BLOCO_C) + render_native_qss( ESTILO_MODO_FOCO_INTEGRACAO_RESOLVEDOR) + ESTILO_DASHBOARD_ALVO_5B_FUTURISTA + render_native_qss( ESTILO_DASHBOARD_SIDEBAR_FUTURISTA)) + ESTILO_CONFIG_CENTRAL_M06_FUTURISTA
+
+
+
+# H03: correção de estados e controles exclusivamente nas Configurações.
+ESTILO_CONFIG_H03_CLARO = r"""
+/* H03 — Acabamento local das Configurações (claro). */
+QPushButton#settingsNavigationButtonM01 {
+    padding: 4px 4px;
+}
+QFrame#settingsFooter QPushButton#primaryButton:disabled {
+    color: #8190A3;
+    background-color: #E6EBF2;
+    border: 1px solid #CCD6E3;
+    font-weight: 600;
+}
+QFrame#settingsFooter QPushButton#primaryButton:disabled:hover {
+    color: #8190A3;
+    background-color: #E6EBF2;
+    border: 1px solid #CCD6E3;
+}
+QFrame#settingsSection QSpinBox#settingsDailyGoalSpinH03 {
+    padding-right: 24px;
+}
+QFrame#settingsSection QSpinBox#settingsDailyGoalSpinH03::up-button,
+QFrame#settingsSection QSpinBox#settingsDailyGoalSpinH03::down-button {
+    width: 22px;
+    background-color: #EDF4FC;
+    border-left: 1px solid #BDD5EA;
+}
+QFrame#settingsSection QSpinBox#settingsDailyGoalSpinH03::up-button {
+    border-bottom: 1px solid #BDD5EA;
+}
+"""
+ESTILO_CONFIG_H03_ESCURO = r"""
+/* H03 — Acabamento local das Configurações (escuro). */
+QPushButton#settingsNavigationButtonM01 {
+    padding: 4px 4px;
+}
+QFrame#settingsFooter QPushButton#primaryButton:disabled {
+    color: #75879D;
+    background-color: #253244;
+    border: 1px solid #34495D;
+    font-weight: 600;
+}
+QFrame#settingsFooter QPushButton#primaryButton:disabled:hover {
+    color: #75879D;
+    background-color: #253244;
+    border: 1px solid #34495D;
+}
+QFrame#settingsSection QSpinBox#settingsDailyGoalSpinH03 {
+    padding-right: 24px;
+}
+QFrame#settingsSection QSpinBox#settingsDailyGoalSpinH03::up-button,
+QFrame#settingsSection QSpinBox#settingsDailyGoalSpinH03::down-button {
+    width: 22px;
+    background-color: #21364C;
+    border-left: 1px solid #42617B;
+}
+QFrame#settingsSection QSpinBox#settingsDailyGoalSpinH03::up-button {
+    border-bottom: 1px solid #42617B;
+}
+"""
+ESTILO_CONFIG_H03_FUTURISTA = r"""
+/* H03 — Acabamento local das Configurações (futurista). */
+QPushButton#settingsNavigationButtonM01 {
+    padding: 4px 4px;
+}
+QFrame#settingsFooter QPushButton#primaryButton:disabled {
+    color: #718FA5;
+    background-color: #152B3D;
+    border: 1px solid #31516B;
+    font-weight: 600;
+}
+QFrame#settingsFooter QPushButton#primaryButton:disabled:hover {
+    color: #718FA5;
+    background-color: #152B3D;
+    border: 1px solid #31516B;
+}
+QFrame#settingsSection QSpinBox#settingsDailyGoalSpinH03 {
+    padding-right: 24px;
+}
+QFrame#settingsSection QSpinBox#settingsDailyGoalSpinH03::up-button,
+QFrame#settingsSection QSpinBox#settingsDailyGoalSpinH03::down-button {
+    width: 22px;
+    background-color: #17374D;
+    border-left: 1px solid #3E789A;
+}
+QFrame#settingsSection QSpinBox#settingsDailyGoalSpinH03::up-button {
+    border-bottom: 1px solid #3E789A;
+}
+"""
+
+
+
+# H04: meta diaria, botoes Qt explicitos (+/-), sem dependencias de assets.
+ESTILO_CONFIG_H04_CLARO = r"""
+/* H04: controles da meta diaria, exclusivamente Configuracoes. */
+QFrame#settingsGoalControlH04 {
+    background: transparent;
+    border: none;
+}
+QFrame#settingsSection QSpinBox#settingsDailyGoalSpinH03 {
+    padding-right: 6px;
+}
+QFrame#settingsGoalControlH04 QPushButton#settingsGoalStepButtonH04 {
+    color: #1D4B70;
+    background-color: #E9F3FC;
+    border: 1px solid #BDD5EA;
+    border-radius: 3px;
+    padding: 0px;
+    font-size: 12px;
+    font-weight: 700;
+    min-width: 22px;
+    max-width: 22px;
+    min-height: 17px;
+    max-height: 17px;
+}
+QFrame#settingsGoalControlH04 QPushButton#settingsGoalStepButtonH04:hover {
+    background-color: #D7EAFB;
+}
+QFrame#settingsGoalControlH04 QPushButton#settingsGoalStepButtonH04:pressed {
+    background-color: #C4E1F7;
+}
+"""
+ESTILO_CONFIG_H04_ESCURO = r"""
+/* H04: controles da meta diaria, exclusivamente Configuracoes. */
+QFrame#settingsGoalControlH04 {
+    background: transparent;
+    border: none;
+}
+QFrame#settingsSection QSpinBox#settingsDailyGoalSpinH03 {
+    padding-right: 6px;
+}
+QFrame#settingsGoalControlH04 QPushButton#settingsGoalStepButtonH04 {
+    color: #DCECF7;
+    background-color: #253B50;
+    border: 1px solid #49647B;
+    border-radius: 3px;
+    padding: 0px;
+    font-size: 12px;
+    font-weight: 700;
+    min-width: 22px;
+    max-width: 22px;
+    min-height: 17px;
+    max-height: 17px;
+}
+QFrame#settingsGoalControlH04 QPushButton#settingsGoalStepButtonH04:hover {
+    background-color: #31516A;
+}
+QFrame#settingsGoalControlH04 QPushButton#settingsGoalStepButtonH04:pressed {
+    background-color: #1C384E;
+}
+"""
+ESTILO_CONFIG_H04_FUTURISTA = r"""
+/* H04: controles da meta diaria, exclusivamente Configuracoes. */
+QFrame#settingsGoalControlH04 {
+    background: transparent;
+    border: none;
+}
+QFrame#settingsSection QSpinBox#settingsDailyGoalSpinH03 {
+    padding-right: 6px;
+}
+QFrame#settingsGoalControlH04 QPushButton#settingsGoalStepButtonH04 {
+    color: #D9F3FF;
+    background-color: #17374D;
+    border: 1px solid #3E789A;
+    border-radius: 3px;
+    padding: 0px;
+    font-size: 12px;
+    font-weight: 700;
+    min-width: 22px;
+    max-width: 22px;
+    min-height: 17px;
+    max-height: 17px;
+}
+QFrame#settingsGoalControlH04 QPushButton#settingsGoalStepButtonH04:hover {
+    background-color: #255675;
+}
+QFrame#settingsGoalControlH04 QPushButton#settingsGoalStepButtonH04:pressed {
+    background-color: #19445E;
+}
+"""
+
+
+
+# V2/M08 — estilos de acessibilidade e acabamento restritos à Central.
+ESTILO_CONFIG_V2_M08_CLARO = r"""
+/* VIGHNA CONFIG V2/M08 — acabamento de três temas; somente Configurações. */
+QFrame#settingsHeaderM01 {
+    background-color: #F7FAFD; border: 1px solid #C8D8E5; border-radius: 11px;
+}
+QLabel#settingsHeaderEyebrowM03 {
+    color: #425E73; background: transparent; font-weight: 700; font-size: 8pt;
+}
+QFrame#settingsNavigationM01 {
+    background-color: #F7FAFD; border: 1px solid #C8D8E5; border-radius: 11px;
+}
+QLabel#settingsNavigationTitleM01 { color: #21384D; background: transparent; }
+QLabel#settingsNavigationSubTitleM02,
+QLabel#settingsNavSummaryV2 { color: #425E73; background: transparent; }
+QPushButton#settingsNavigationButtonM01 {
+    background-color: #ECF3FA; color: #21384D;
+    border: 1px solid #C6D8E8;
+    border-left: 3px solid #C6D8E8;
+    border-radius: 7px; padding: 5px 5px;
+    text-align: left; font-size: 9pt; font-weight: 600;
+}
+QPushButton#settingsNavigationButtonM01:hover {
+    background-color: #E1EEF9; border-color: #2C78AA;
+    border-left: 3px solid #2C78AA;
+}
+QPushButton#settingsNavigationButtonM01:checked {
+    background-color: #D6E9F6; color: #173F60;
+    border: 1px solid #276F9C;
+    border-left: 3px solid #276F9C; font-weight: 700;
+}
+QPushButton#settingsNavigationButtonM01:focus {
+    border-bottom: 2px solid #1277B4;
+}
+/* O marcador de edição fica à direita; preserva a faixa de seleção à esquerda. */
+QPushButton#settingsNavigationButtonM01[alteracoesPendentesV2M07="true"] {
+    border-right: 3px solid #906029;
+}
+QPushButton#settingsNavigationButtonM01[alteracoesPendentesV2M07="true"]:checked {
+    border-right: 3px solid #906029;
+    border-left: 3px solid #276F9C;
+}
+QFrame#settingsSearchBar { background-color: #F7FAFD; border-color: #C8D8E5; }
+QFrame#settingsHeaderM01 QFrame#settingsSearchBar {
+    background: transparent; border: none; border-radius: 0px;
+}
+QLineEdit#settingsSearchInput {
+    background-color: #FFFFFF; color: #21384D;
+    border: 1px solid #C8D8E5; border-radius: 7px;
+    padding: 5px 10px; min-height: 26px;
+}
+QLineEdit#settingsSearchInput:focus { border: 2px solid #1277B4; }
+QComboBox#settingsSearchResultsV2 {
+    background-color: #FFFFFF; color: #21384D;
+    border: 1px solid #C8D8E5; border-radius: 7px; min-height: 28px;
+}
+QComboBox#settingsSearchResultsV2:focus { border: 2px solid #1277B4; }
+QLabel#settingsSearchCount {
+    color: #425E73; background-color: #ECF3FA;
+    border: 1px solid #C8D8E5; border-radius: 7px;
+}
+QFrame#settingsSection {
+    background-color: #F7FAFD; border: 1px solid #C8D8E5; border-radius: 11px;
+}
+QLabel#settingsSectionTitle { color: #21384D; font-weight: 700; }
+QLabel#settingsSectionDescription { color: #425E73; font-size: 9pt; }
+QLabel#settingsSectionIndexM04 { color: #276F9C; }
+QLabel#settingsSectionCountM04 { color: #425E73; border-color: #C8D8E5; }
+QFrame#settingsSectionSeparatorM04 { background-color: #C8D8E5; border: none; }
+QFrame#settingsOption {
+    background-color: #F3F8FD;
+    border: 1px solid #C9D9E7; border-left: 3px solid #C9D9E7;
+    border-radius: 8px;
+}
+QFrame#settingsOption:hover {
+    border: 1px solid #2C78AA; border-left: 3px solid #2D78A8;
+}
+QFrame#settingsOption[preferenceCardV2M04="true"] {
+    background-color: #F7FBFF;
+    border: 1px solid #C9D9E7; border-top: 3px solid #2D78A8;
+    border-radius: 9px;
+}
+QFrame#settingsOption[preferenceCardV2M04="true"]:hover {
+    border-top: 3px solid #2C78AA;
+}
+QFrame#settingsOption[configSearchActiveV2="true"],
+QFrame#settingsOption[preferenceCardV2M04="true"][configSearchActiveV2="true"] {
+    border: 2px solid #276F9C; border-top: 3px solid #276F9C;
+}
+QLabel#settingsOperationTagV2M05 { color: #3D607A; background: transparent; }
+QLabel#settingsOperationTagV2M05[operationKindV2M05="preference"] { color: #2D78A8; }
+QFrame#settingsOption[operationKindV2M05="action"] { border-top: 3px solid #2D78A8; }
+QFrame#settingsOption[operationKindV2M05="maintenance"] { border-top: 3px solid #94652E; }
+QFrame#settingsFooter {
+    background-color: #F7FAFD; border: 1px solid #C8D8E5; border-radius: 10px;
+}
+QLabel#settingsEditStateM05 { color: #425E73; background: transparent; }
+QLabel#settingsEditStateM05[pendente="true"] { color: #906029; font-weight: 800; }
+QLabel#settingsFooterHintM05 { color: #425E73; background: transparent; }
+QScrollArea#settingsPageScrollV2 QScrollBar:vertical,
+QScrollArea#settingsNavigationScrollM01 QScrollBar:vertical {
+    background-color: #EAF1F7; border: none; width: 9px; margin: 0px;
+}
+QScrollArea#settingsPageScrollV2 QScrollBar::handle:vertical,
+QScrollArea#settingsNavigationScrollM01 QScrollBar::handle:vertical {
+    background-color: #A0B9CB; border-radius: 4px; min-height: 32px;
+}
+QScrollArea#settingsPageScrollV2 QScrollBar::handle:vertical:hover,
+QScrollArea#settingsNavigationScrollM01 QScrollBar::handle:vertical:hover {
+    background-color: #638AA6;
+}
+QScrollArea#settingsPageScrollV2 QScrollBar::add-line:vertical,
+QScrollArea#settingsPageScrollV2 QScrollBar::sub-line:vertical,
+QScrollArea#settingsNavigationScrollM01 QScrollBar::add-line:vertical,
+QScrollArea#settingsNavigationScrollM01 QScrollBar::sub-line:vertical {
+    height: 0px; border: none;
+}
+"""
+
+ESTILO_CONFIG_V2_M08_ESCURO = r"""
+/* VIGHNA CONFIG V2/M08 — acabamento de três temas; somente Configurações. */
+QFrame#settingsHeaderM01 {
+    background-color: #142332; border: 1px solid #355066; border-radius: 11px;
+}
+QLabel#settingsHeaderEyebrowM03 {
+    color: #B2C3D2; background: transparent; font-weight: 700; font-size: 8pt;
+}
+QFrame#settingsNavigationM01 {
+    background-color: #142332; border: 1px solid #355066; border-radius: 11px;
+}
+QLabel#settingsNavigationTitleM01 { color: #E5EFF8; background: transparent; }
+QLabel#settingsNavigationSubTitleM02,
+QLabel#settingsNavSummaryV2 { color: #B2C3D2; background: transparent; }
+QPushButton#settingsNavigationButtonM01 {
+    background-color: #1A2B3C; color: #E5EFF8;
+    border: 1px solid #36556C;
+    border-left: 3px solid #36556C;
+    border-radius: 7px; padding: 5px 5px;
+    text-align: left; font-size: 9pt; font-weight: 600;
+}
+QPushButton#settingsNavigationButtonM01:hover {
+    background-color: #234056; border-color: #6BB7E3;
+    border-left: 3px solid #6BB7E3;
+}
+QPushButton#settingsNavigationButtonM01:checked {
+    background-color: #24465F; color: #F2FAFF;
+    border: 1px solid #73C1EF;
+    border-left: 3px solid #73C1EF; font-weight: 700;
+}
+QPushButton#settingsNavigationButtonM01:focus {
+    border-bottom: 2px solid #82D4F9;
+}
+/* O marcador de edição fica à direita; preserva a faixa de seleção à esquerda. */
+QPushButton#settingsNavigationButtonM01[alteracoesPendentesV2M07="true"] {
+    border-right: 3px solid #D1AA71;
+}
+QPushButton#settingsNavigationButtonM01[alteracoesPendentesV2M07="true"]:checked {
+    border-right: 3px solid #D1AA71;
+    border-left: 3px solid #73C1EF;
+}
+QFrame#settingsSearchBar { background-color: #142332; border-color: #355066; }
+QFrame#settingsHeaderM01 QFrame#settingsSearchBar {
+    background: transparent; border: none; border-radius: 0px;
+}
+QLineEdit#settingsSearchInput {
+    background-color: #102538; color: #E5EFF8;
+    border: 1px solid #355066; border-radius: 7px;
+    padding: 5px 10px; min-height: 26px;
+}
+QLineEdit#settingsSearchInput:focus { border: 2px solid #82D4F9; }
+QComboBox#settingsSearchResultsV2 {
+    background-color: #102538; color: #E5EFF8;
+    border: 1px solid #355066; border-radius: 7px; min-height: 28px;
+}
+QComboBox#settingsSearchResultsV2:focus { border: 2px solid #82D4F9; }
+QLabel#settingsSearchCount {
+    color: #B2C3D2; background-color: #1A2B3C;
+    border: 1px solid #355066; border-radius: 7px;
+}
+QFrame#settingsSection {
+    background-color: #142332; border: 1px solid #355066; border-radius: 11px;
+}
+QLabel#settingsSectionTitle { color: #E5EFF8; font-weight: 700; }
+QLabel#settingsSectionDescription { color: #B2C3D2; font-size: 9pt; }
+QLabel#settingsSectionIndexM04 { color: #73C1EF; }
+QLabel#settingsSectionCountM04 { color: #B2C3D2; border-color: #355066; }
+QFrame#settingsSectionSeparatorM04 { background-color: #355066; border: none; }
+QFrame#settingsOption {
+    background-color: #192F42;
+    border: 1px solid #3B5A70; border-left: 3px solid #3B5A70;
+    border-radius: 8px;
+}
+QFrame#settingsOption:hover {
+    border: 1px solid #6BB7E3; border-left: 3px solid #70BFED;
+}
+QFrame#settingsOption[preferenceCardV2M04="true"] {
+    background-color: #152A3C;
+    border: 1px solid #3B5A70; border-top: 3px solid #70BFED;
+    border-radius: 9px;
+}
+QFrame#settingsOption[preferenceCardV2M04="true"]:hover {
+    border-top: 3px solid #6BB7E3;
+}
+QFrame#settingsOption[configSearchActiveV2="true"],
+QFrame#settingsOption[preferenceCardV2M04="true"][configSearchActiveV2="true"] {
+    border: 2px solid #73C1EF; border-top: 3px solid #73C1EF;
+}
+QLabel#settingsOperationTagV2M05 { color: #B2CADB; background: transparent; }
+QLabel#settingsOperationTagV2M05[operationKindV2M05="preference"] { color: #70BFED; }
+QFrame#settingsOption[operationKindV2M05="action"] { border-top: 3px solid #70BFED; }
+QFrame#settingsOption[operationKindV2M05="maintenance"] { border-top: 3px solid #D1AA71; }
+QFrame#settingsFooter {
+    background-color: #142332; border: 1px solid #355066; border-radius: 10px;
+}
+QLabel#settingsEditStateM05 { color: #B2C3D2; background: transparent; }
+QLabel#settingsEditStateM05[pendente="true"] { color: #D1AA71; font-weight: 800; }
+QLabel#settingsFooterHintM05 { color: #B2C3D2; background: transparent; }
+QScrollArea#settingsPageScrollV2 QScrollBar:vertical,
+QScrollArea#settingsNavigationScrollM01 QScrollBar:vertical {
+    background-color: #152737; border: none; width: 9px; margin: 0px;
+}
+QScrollArea#settingsPageScrollV2 QScrollBar::handle:vertical,
+QScrollArea#settingsNavigationScrollM01 QScrollBar::handle:vertical {
+    background-color: #557B96; border-radius: 4px; min-height: 32px;
+}
+QScrollArea#settingsPageScrollV2 QScrollBar::handle:vertical:hover,
+QScrollArea#settingsNavigationScrollM01 QScrollBar::handle:vertical:hover {
+    background-color: #7DB2D3;
+}
+QScrollArea#settingsPageScrollV2 QScrollBar::add-line:vertical,
+QScrollArea#settingsPageScrollV2 QScrollBar::sub-line:vertical,
+QScrollArea#settingsNavigationScrollM01 QScrollBar::add-line:vertical,
+QScrollArea#settingsNavigationScrollM01 QScrollBar::sub-line:vertical {
+    height: 0px; border: none;
+}
+"""
+
+ESTILO_CONFIG_V2_M08_FUTURISTA = r"""
+/* VIGHNA CONFIG V2/M08 — acabamento de três temas; somente Configurações. */
+QFrame#settingsHeaderM01 {
+    background-color: #0E1926; border: 1px solid #31516B; border-radius: 11px;
+}
+QLabel#settingsHeaderEyebrowM03 {
+    color: #AEC4D2; background: transparent; font-weight: 700; font-size: 8pt;
+}
+QFrame#settingsNavigationM01 {
+    background-color: #0E1926; border: 1px solid #31516B; border-radius: 11px;
+}
+QLabel#settingsNavigationTitleM01 { color: #E4F2FA; background: transparent; }
+QLabel#settingsNavigationSubTitleM02,
+QLabel#settingsNavSummaryV2 { color: #AEC4D2; background: transparent; }
+QPushButton#settingsNavigationButtonM01 {
+    background-color: #14283E; color: #E4F2FA;
+    border: 1px solid #31536D;
+    border-left: 3px solid #31536D;
+    border-radius: 7px; padding: 5px 5px;
+    text-align: left; font-size: 9pt; font-weight: 600;
+}
+QPushButton#settingsNavigationButtonM01:hover {
+    background-color: #19384E; border-color: #4FB2E5;
+    border-left: 3px solid #4FB2E5;
+}
+QPushButton#settingsNavigationButtonM01:checked {
+    background-color: #1C4057; color: #EAF7FF;
+    border: 1px solid #B49269;
+    border-left: 3px solid #B49269; font-weight: 700;
+}
+QPushButton#settingsNavigationButtonM01:focus {
+    border-bottom: 2px solid #58C8EF;
+}
+/* O marcador de edição fica à direita; preserva a faixa de seleção à esquerda. */
+QPushButton#settingsNavigationButtonM01[alteracoesPendentesV2M07="true"] {
+    border-right: 3px solid #C7A375;
+}
+QPushButton#settingsNavigationButtonM01[alteracoesPendentesV2M07="true"]:checked {
+    border-right: 3px solid #C7A375;
+    border-left: 3px solid #B49269;
+}
+QFrame#settingsSearchBar { background-color: #0E1926; border-color: #31516B; }
+QFrame#settingsHeaderM01 QFrame#settingsSearchBar {
+    background: transparent; border: none; border-radius: 0px;
+}
+QLineEdit#settingsSearchInput {
+    background-color: #14283E; color: #E4F2FA;
+    border: 1px solid #31516B; border-radius: 7px;
+    padding: 5px 10px; min-height: 26px;
+}
+QLineEdit#settingsSearchInput:focus { border: 2px solid #58C8EF; }
+QComboBox#settingsSearchResultsV2 {
+    background-color: #14283E; color: #E4F2FA;
+    border: 1px solid #31516B; border-radius: 7px; min-height: 28px;
+}
+QComboBox#settingsSearchResultsV2:focus { border: 2px solid #58C8EF; }
+QLabel#settingsSearchCount {
+    color: #AEC4D2; background-color: #14283E;
+    border: 1px solid #31516B; border-radius: 7px;
+}
+QFrame#settingsSection {
+    background-color: #0E1926; border: 1px solid #31516B; border-radius: 11px;
+}
+QLabel#settingsSectionTitle { color: #E4F2FA; font-weight: 700; }
+QLabel#settingsSectionDescription { color: #AEC4D2; font-size: 9pt; }
+QLabel#settingsSectionIndexM04 { color: #B49269; }
+QLabel#settingsSectionCountM04 { color: #AEC4D2; border-color: #31516B; }
+QFrame#settingsSectionSeparatorM04 { background-color: #31516B; border: none; }
+QFrame#settingsOption {
+    background-color: #172F44;
+    border: 1px solid #355771; border-left: 3px solid #355771;
+    border-radius: 8px;
+}
+QFrame#settingsOption:hover {
+    border: 1px solid #4FB2E5; border-left: 3px solid #4FB2E5;
+}
+QFrame#settingsOption[preferenceCardV2M04="true"] {
+    background-color: #11273A;
+    border: 1px solid #355771; border-top: 3px solid #4FB2E5;
+    border-radius: 9px;
+}
+QFrame#settingsOption[preferenceCardV2M04="true"]:hover {
+    border-top: 3px solid #4FB2E5;
+}
+QFrame#settingsOption[configSearchActiveV2="true"],
+QFrame#settingsOption[preferenceCardV2M04="true"][configSearchActiveV2="true"] {
+    border: 2px solid #B49269; border-top: 3px solid #B49269;
+}
+QLabel#settingsOperationTagV2M05 { color: #AEC8D9; background: transparent; }
+QLabel#settingsOperationTagV2M05[operationKindV2M05="preference"] { color: #4FB2E5; }
+QFrame#settingsOption[operationKindV2M05="action"] { border-top: 3px solid #4FB2E5; }
+QFrame#settingsOption[operationKindV2M05="maintenance"] { border-top: 3px solid #C7A375; }
+QFrame#settingsFooter {
+    background-color: #0E1926; border: 1px solid #31516B; border-radius: 10px;
+}
+QLabel#settingsEditStateM05 { color: #AEC4D2; background: transparent; }
+QLabel#settingsEditStateM05[pendente="true"] { color: #C7A375; font-weight: 800; }
+QLabel#settingsFooterHintM05 { color: #AEC4D2; background: transparent; }
+QScrollArea#settingsPageScrollV2 QScrollBar:vertical,
+QScrollArea#settingsNavigationScrollM01 QScrollBar:vertical {
+    background-color: #102235; border: none; width: 9px; margin: 0px;
+}
+QScrollArea#settingsPageScrollV2 QScrollBar::handle:vertical,
+QScrollArea#settingsNavigationScrollM01 QScrollBar::handle:vertical {
+    background-color: #426B87; border-radius: 4px; min-height: 32px;
+}
+QScrollArea#settingsPageScrollV2 QScrollBar::handle:vertical:hover,
+QScrollArea#settingsNavigationScrollM01 QScrollBar::handle:vertical:hover {
+    background-color: #60B3DE;
+}
+QScrollArea#settingsPageScrollV2 QScrollBar::add-line:vertical,
+QScrollArea#settingsPageScrollV2 QScrollBar::sub-line:vertical,
+QScrollArea#settingsNavigationScrollM01 QScrollBar::add-line:vertical,
+QScrollArea#settingsNavigationScrollM01 QScrollBar::sub-line:vertical {
+    height: 0px; border: none;
+}
+"""
+
 
 def aplicar_tema(
     app,
@@ -23083,15 +24301,15 @@ def aplicar_tema(
 
     if tema == "escuro":
         app.setStyleSheet(
-            stylesheet_escuro()
+            stylesheet_escuro() + ESTILO_CONFIG_H03_ESCURO + ESTILO_CONFIG_H04_ESCURO + ESTILO_CONFIG_V2_M08_ESCURO
         )
     elif tema == "futurista":
         app.setStyleSheet(
-            stylesheet_futurista()
+            stylesheet_futurista() + ESTILO_CONFIG_H03_FUTURISTA + ESTILO_CONFIG_H04_FUTURISTA + ESTILO_CONFIG_V2_M08_FUTURISTA
         )
     else:
         app.setStyleSheet(
-            stylesheet_claro()
+            stylesheet_claro() + ESTILO_CONFIG_H03_CLARO + ESTILO_CONFIG_H04_CLARO + ESTILO_CONFIG_V2_M08_CLARO
         )
 
     return tema

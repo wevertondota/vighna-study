@@ -1,28 +1,41 @@
-VighnaStudy 0.29.6 — RECUPERAÇÃO CONSOLIDADA
+VIGHNASTUDY HOME V9 — REPARO EXTERNO R2 (Windows)
 
-Este pacote foi produzido a partir da pasta SistemaEstudos enviada em 20/09/2026.
-O banco estudos.db incluído já contém a recuperação aplicada diretamente sobre a
-base mais recente enviada pelo usuário.
+POR QUE EXISTE ESTE PACOTE
+O atualizador "Atualizacoes do painel" do VighnaLab 3.1.70 so atualiza
+arquivos do proprio VighnaLab. Ele corretamente rejeita o codigo de
+ui/home_r4h_canvas.py, pertencente ao VighnaStudy.
 
-CONTAGENS CONFIRMADAS:
-- 2.551 questões ativas
-- 2.564 registros físicos
-- 312 questões ativas em Direito Penal
-- 54 questões ativas em Crimes contra a Dignidade Sexual
-- 13 questões na lixeira
-- integrity_check: ok
-- foreign_key_check: 0
+Este kit executa o motor NATIVO de atualizacao do VighnaStudy, sem alterar
+as permissoes/whitelist do VighnaLab.
 
-INSTALAÇÃO RECOMENDADA:
-1. Feche o VighnaStudy.
-2. Faça uma cópia de C:\SistemaEstudos\estudos.db por segurança.
-3. Copie TODO o conteúdo desta pasta sobre C:\SistemaEstudos, aceitando substituir.
-   Não apague sua pasta .venv existente.
-4. Execute VERIFICAR_BANCO_ATIVO.bat.
-5. O status esperado é RECUPERAÇÃO 2026-09-20 CONFIRMADA.
-6. Teste pelo CMD: cd /d C:\SistemaEstudos && python main.py
-7. Confira 2.551 ativas na Central e 54 em Dignidade Sexual.
-8. Só então execute atualizar_exe.bat.
+USAR SOMENTE SE
+- O VighnaStudy 0.29.59 recebeu a Home V9 apos Simulados R1;
+- O aplicativo agora falha na inicializacao com QImage.fromData / PNG;
+- Ha backup independente dos dados e fontes em local seguro.
 
-Observação: os diretórios build, dist, backups, checkpoints, .git e .venv não
-foram incluídos neste pacote porque devem permanecer no computador do usuário.
+COMO EXECUTAR
+1) Feche o VighnaStudy e qualquer atualizacao ainda em andamento.
+2) Confirme que possui um backup independente da instalacao real.
+3) Extraia os 4 arquivos deste ZIP DIRETAMENTE na pasta raiz da instalacao,
+   normalmente C:\SistemaEstudos (nao em subpasta, nem em dist\SistemaEstudos).
+4) Execute APLICAR_REPARO_HOME_V9.cmd, que usa .venv\Scripts\python.exe.
+5) Leia o diagnostico e digite INSTALAR somente se o caminho estiver correto.
+6) Aguarde o processo terminar; ele recompila pelo PyInstaller na propria
+   instalacao e aplica a transacao com backup e rollback nativos.
+7) Se concluir, abra o aplicativo e valide a Home e as 4 esferas.
+
+O QUE SERA ALTERADO
+- ui/home_r4h_canvas.py: 3 chamadas QImage.fromData corrigidas;
+- versao.py: identificacao da versao de hotfix.
+Nao muda banco de dados, gif, esferas, controles do VighnaLab nem plugins.
+
+BLOQUEIOS DE SEGURANCA
+- Exige instalacao com banco, spec, executavel e motor nativo;
+- Exige hash exato do ZIP corretivo;
+- Exige build e schema correspondentes;
+- Recusa com VighnaStudy aberto;
+- Valida integridade do banco e espaco livre >=2GB;
+- Faz staging, snapshot, backup do banco, compilacao, rollback e historico.
+
+NAO e um ZIP de "Atualizacoes do painel" do VighnaLab.
+O processo nao foi executado no seu Windows; requer homologacao local.

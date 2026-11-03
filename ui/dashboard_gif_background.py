@@ -8,6 +8,7 @@ import base64
 import os
 from PySide6.QtCore import QBuffer, QByteArray, QIODevice, QSettings
 from PySide6.QtGui import QMovie
+from ui.gif_activity_manager import MonitorAtividadeGIF, pode_reproduzir
 
 _GIF_SHA256 = "66819cff871a770e12978be8bdcba0af4932ce1748ad40be6e5a102616ad76df"
 _GIF_BASE64 = (
@@ -45122,6 +45123,9 @@ class FundoGifDashboard:
         self.buffer = None
         self.movie = None
         self.ativo = False
+        self._visivel_solicitado = False
+        self._tema_solicitado = "claro"
+        self._monitor_gif = MonitorAtividadeGIF(canvas, self._ressincronizar_atividade)
         try:
             self.buffer = QBuffer(canvas)
             self.buffer.setData(QByteArray(dados_gif_dashboard()))
@@ -45150,15 +45154,21 @@ class FundoGifDashboard:
         imagem = self.movie.currentPixmap()
         return imagem if not imagem.isNull() else None
 
+    def _ressincronizar_atividade(self):
+        self.sincronizar(self._visivel_solicitado, self._tema_solicitado)
+
     def sincronizar(self, visivel, tema):
         """A preferência de redução de movimento já usada na Home vale aqui."""
+        self._visivel_solicitado = bool(visivel)
+        self._tema_solicitado = tema
         ambiente = os.environ.get("VIGHNA_HOME_REDUZIR_MOVIMENTO", "").strip().lower()
         bloqueio_ambiente = ambiente in ("1", "true", "sim", "yes", "on")
         preferencia = QSettings("VighnaStudy", "Home").value(
             "acessibilidade/reduzir_movimento", False, type=bool
         )
         reproduzir = bool(visivel and tema in ("futurista", "escuro")
-                          and not preferencia and not bloqueio_ambiente)
+                          and not preferencia and not bloqueio_ambiente
+                          and pode_reproduzir(self.canvas))
         self.ativo = bool(visivel and tema in ("futurista", "escuro"))
         if self.movie is None:
             return

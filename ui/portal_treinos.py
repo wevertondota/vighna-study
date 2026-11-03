@@ -3,11 +3,12 @@
 Somente apresentação e atalhos para os controladores existentes. Sem consulta,
 escrita em banco ou criação de uma segunda sessão de questões.
 """
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, QBuffer, QByteArray, QIODevice, QSettings, QRectF
 from PySide6.QtWidgets import (
-    QFrame, QGridLayout, QHBoxLayout, QLabel, QPushButton,
-    QScrollArea, QSizePolicy, QVBoxLayout, QWidget,
+    QApplication, QFrame, QGridLayout, QHBoxLayout, QLabel, QPushButton,
+    QScrollArea, QSizePolicy, QVBoxLayout, QWidget, QStackedWidget, QMenu,
 )
+from PySide6.QtGui import QMovie, QPainter, QColor, QPen
 from ui.design import render_native_qss, render_qss
 
 
@@ -126,6 +127,184 @@ class _CardModalidade(QFrame):
         super().keyPressEvent(evento)
 
 
+
+# Regiões medidas sobre a imagem ORIGINAL 1300 × 715; não esticam com a janela.
+# As ações são QPushButtons reais, sem clonar os motores de questões.
+_ESFERAS_CLICAVEIS = (
+    ("Revisão Inteligente", (312, 160, 193, 178), "revisao"),
+    ("Treino Adaptativo", (802, 159, 193, 182), "adaptativo"),
+    ("Simulado", (220, 327, 207, 186), "simulado"),
+    ("Banco de Erros", (878, 327, 207, 186), "erros"),
+)
+
+
+class _CenaSimulados(QWidget):
+    """GIF cinematográfico com quatro botões Qt reais alinhados à arte.
+
+    Não é um QLabel sobre o qual se desenham botões: o QMovie apenas fornece
+    o pixmap ao paintEvent; controles permanecem acima e acessíveis por teclado.
+    """
+
+    def __init__(self, acoes, ferramentas):
+        super().__init__()
+        self.setObjectName("portalTreinosCena")
+        self.setMinimumSize(320, 240)
+        self.setFocusPolicy(Qt.StrongFocus)
+        self.setAttribute(Qt.WA_OpaquePaintEvent, True)
+        self._movie = None
+        self._buffer = None
+        self._dados = None
+        self._alvo = QRectF()
+        self._hover_ativo = None
+        self._botoes = []
+        for titulo, retangulo, chave in _ESFERAS_CLICAVEIS:
+            botao = QPushButton(self)
+            botao.setObjectName("portalTreinosOrbClick")
+            botao.setAccessibleName("Abrir " + titulo)
+            botao.setToolTip("Abrir " + titulo)
+            botao.setCursor(Qt.PointingHandCursor)
+            botao.setFocusPolicy(Qt.StrongFocus)
+            botao.setStyleSheet("QPushButton#portalTreinosOrbClick { background: transparent; border: none; }"
+                                "QPushButton#portalTreinosOrbClick:focus { border: 1px solid #4FB2E5; border-radius: 65px; }")
+            botao.clicked.connect(acoes[chave])
+            self._botoes.append((botao, retangulo))
+
+        self._menu_button = QPushButton("Ferramentas  ▾", self)
+        self._menu_button.setObjectName("portalTreinosSceneTools")
+        self._menu_button.setAccessibleName("Acessos complementares de Simulados e Treinos")
+        self._menu_button.setFocusPolicy(Qt.StrongFocus)
+        self._menu_button.setCursor(Qt.PointingHandCursor)
+        self._menu_button.setStyleSheet(
+            "QPushButton#portalTreinosSceneTools {background-color: rgba(4,9,17,190); "
+            "border: 1px solid #41556F; border-radius: 7px; color: #E4F2FA; "
+            "padding: 5px 10px; font-size: 9pt;}"
+            "QPushButton#portalTreinosSceneTools:hover, QPushButton#portalTreinosSceneTools:focus "
+            "{border-color: #4FB2E5; background-color: rgba(20,40,62,235);}"
+        )
+        self._menu = QMenu(self)
+        self._menu.setStyleSheet("QMenu {background-color: #0E1926; color: #E4F2FA; border: 1px solid #41556F;}"
+                                 "QMenu::item:selected {background-color: #14283E;}")
+        for rotulo, callback in ferramentas:
+            self._menu.addAction(rotulo, callback)
+        self._menu_button.clicked.connect(lambda: self._menu.exec(
+            self._menu_button.mapToGlobal(self._menu_button.rect().topRight())))
+
+        self._retomar = QPushButton("Retomar sessão", self)
+        self._retomar.setObjectName("portalTreinosSceneResume")
+        self._retomar.setCursor(Qt.PointingHandCursor)
+        self._retomar.setFocusPolicy(Qt.StrongFocus)
+        self._retomar.setStyleSheet("QPushButton#portalTreinosSceneResume {background-color: #14283E; "
+                                    "color: #E4F2FA; border: 1px solid #4FB2E5; "
+                                    "border-radius: 7px; padding: 5px 12px;}")
+        self._retomar.clicked.connect(acoes["retomar"])
+        self._retomar.setVisible(False)
+        self._tem_retomada = False
+        # Quando o usuário alterna para outro programa, também pausa o GIF.
+        app = QApplication.instance()
+        if app is not None:
+            app.applicationStateChanged.connect(
+                lambda _estado: self._sincronizar_movie())
+
+    def definir_retomada(self, ativa, detalhes=""):
+        self._tem_retomada = bool(ativa)
+        self._retomar.setToolTip(detalhes or "Retomar sessão de questões")
+        self._retomar.setVisible(self.isVisible() and self._tem_retomada)
+
+    def _iniciar_movie(self):
+        if self._movie is not None:
+            return
+        try:
+            # Importar/decode somente quando esta tela for efetivamente exibida.
+            from ui.simulados_gif_background import dados_gif_simulados
+            self._dados = QByteArray(dados_gif_simulados())
+            self._buffer = QBuffer(self)
+            self._buffer.setData(self._dados)
+            if not self._buffer.open(QIODevice.ReadOnly):
+                return
+            self._movie = QMovie(self._buffer, QByteArray(b"gif"), self)
+            self._movie.setCacheMode(QMovie.CacheMode.CacheNone)
+            if not self._movie.isValid():
+                self._movie = None
+                return
+            self._movie.frameChanged.connect(lambda _idx: self.update())
+        except Exception:
+            # Fallback de UI: ferramentas e motor de estudos continuam acessíveis.
+            self._movie = None
+
+    def _reduzir_movimento(self):
+        import os
+        ambiente = os.environ.get("VIGHNA_HOME_REDUZIR_MOVIMENTO", "").strip().lower()
+        if ambiente in ("1", "true", "sim", "yes", "on"):
+            return True
+        return QSettings("VighnaStudy", "Home").value(
+            "acessibilidade/reduzir_movimento", False, type=bool)
+
+    def _sincronizar_movie(self):
+        if self._movie is None:
+            return
+        janela = self.window()
+        animar = (self.isVisible() and not self._reduzir_movimento()
+                  and not janela.isMinimized()
+                  and QApplication.applicationState() == Qt.ApplicationActive)
+        if animar:
+            if self._movie.state() == QMovie.MovieState.NotRunning:
+                self._movie.start()
+            elif self._movie.state() == QMovie.MovieState.Paused:
+                self._movie.setPaused(False)
+        elif self._movie.state() == QMovie.MovieState.Running:
+            self._movie.setPaused(True)
+        if self._movie.currentPixmap().isNull() and self._movie.state() == QMovie.MovieState.NotRunning:
+            self._movie.jumpToFrame(0)
+        self.update()
+
+    def showEvent(self, evento):
+        super().showEvent(evento)
+        self._iniciar_movie()
+        self._sincronizar_movie()
+        self._retomar.setVisible(self._tem_retomada)
+
+    def hideEvent(self, evento):
+        if self._movie is not None and self._movie.state() == QMovie.MovieState.Running:
+            self._movie.setPaused(True)
+        super().hideEvent(evento)
+
+    def changeEvent(self, evento):
+        super().changeEvent(evento)
+        if self._movie is not None:
+            QTimer.singleShot(0, self._sincronizar_movie)
+
+    def resizeEvent(self, evento):
+        super().resizeEvent(evento)
+        largura, altura = self.width(), self.height()
+        escala = min(largura / 1300.0, altura / 715.0)
+        w, h = 1300 * escala, 715 * escala
+        x, y = (largura - w) / 2.0, (altura - h) / 2.0
+        self._alvo = QRectF(x, y, w, h)
+        for botao, (rx, ry, rw, rh) in self._botoes:
+            botao.setGeometry(round(x+rx*escala), round(y+ry*escala),
+                               round(rw*escala), round(rh*escala))
+        self._menu_button.adjustSize()
+        self._menu_button.move(max(6, round(x+12*escala)),
+                               max(6, round(y+h-34*escala)))
+        self._retomar.adjustSize()
+        self._retomar.move(min(largura-self._retomar.width()-6, round(x+w-self._retomar.width()-12*escala)),
+                          max(6, round(y+h-34*escala)))
+
+    def paintEvent(self, evento):
+        painter = QPainter(self)
+        painter.fillRect(self.rect(), QColor("#040911"))
+        if self._movie is not None:
+            quadro = self._movie.currentPixmap()
+            if not quadro.isNull():
+                painter.setRenderHint(QPainter.SmoothPixmapTransform, True)
+                painter.drawPixmap(self._alvo, quadro, QRectF(quadro.rect()))
+        elif not self._alvo.isNull():
+            painter.setPen(QColor("#E4F2FA"))
+            painter.drawText(self.rect(), Qt.AlignCenter,
+                             "Câmara de Treinamento — use Ferramentas para abrir o painel completo")
+        painter.end()
+
+
 def criar_portal_treinos(*, abrir_inicio, abrir_dashboard, abrir_simulado,
                          abrir_adaptativo, abrir_bateria, abrir_revisao,
                          abrir_erros, abrir_historico, retomar_sessao) -> QWidget:
@@ -231,6 +410,40 @@ def criar_portal_treinos(*, abrir_inicio, abrir_dashboard, abrir_simulado,
     pagina.portal_treinos_retomar = retomar
     pagina.portal_treinos_grupo_retomada = grupo_retomada
     pagina.portal_treinos_detalhes = detalhe
+
+    # Cena visual fica na primeira página. A antiga central, com todos os
+    # cards funcionais e o quadro-mãe reparentado do Dashboard, continua viva
+    # na segunda página e pode ser aberta por Ferramentas > Painel completo.
+    base.removeWidget(scroll)
+    pilha = QStackedWidget(pagina)
+    pilha.setObjectName("portalTreinosVisualStack")
+    cena = _CenaSimulados(
+        {
+            "revisao": abrir_revisao,
+            "adaptativo": abrir_adaptativo,
+            "simulado": abrir_simulado,
+            "erros": abrir_erros,
+            "retomar": retomar_sessao,
+        },
+        [
+            ("Painel completo e estatísticas", lambda: pilha.setCurrentWidget(scroll)),
+            ("Bateria personalizada / Modo manual", abrir_bateria),
+            ("Histórico de questões", abrir_historico),
+            ("Início", abrir_inicio),
+            ("Dashboard", abrir_dashboard),
+        ],
+    )
+    pilha.addWidget(cena)
+    pilha.addWidget(scroll)
+    base.addWidget(pilha)
+    pilha.setCurrentWidget(cena)
+    pagina.portal_treinos_pilha = pilha
+    pagina.portal_treinos_cena = cena
+    botao_cena = QPushButton("Voltar à Câmara de Treinamento")
+    botao_cena.setObjectName("portalTreinosNavegar")
+    botao_cena.setCursor(Qt.PointingHandCursor)
+    botao_cena.clicked.connect(lambda: pilha.setCurrentWidget(cena))
+    faixa.addWidget(botao_cena)
     return pagina
 
 
@@ -247,6 +460,9 @@ def atualizar_retomada_treinos(pagina: QWidget, existe_sessao: bool,
         botao.setEnabled(bool(existe_sessao))
     if grupo is not None and grupo.isHidden() == bool(existe_sessao):
         grupo.setVisible(bool(existe_sessao))
+    cena = getattr(pagina, "portal_treinos_cena", None)
+    if cena is not None:
+        cena.definir_retomada(existe_sessao, novo_detalhe)
 
 
 def aplicar_estilo_treinos(pagina: QWidget, tema: str) -> None:
