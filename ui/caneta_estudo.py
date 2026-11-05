@@ -46,6 +46,9 @@ class _SuperficieRabisco(QWidget):
         self.setAttribute(Qt.WA_TransparentForMouseEvents, True)
         self.setAutoFillBackground(False)
         self.setFocusPolicy(Qt.NoFocus)
+        # B16R2: guide of reading receives passive mouse movements even while ink is selected.
+        # This does not change _pressionar/_mover/_soltar or ink painting.
+        self.setMouseTracking(True)
         ancora.installEventFilter(self)
         self.sincronizar()
         self.show()
