@@ -10,6 +10,10 @@ from __future__ import annotations
 import json
 from datetime import date, timedelta
 
+from statistics_core.ciclo_revisao_integral_v1 import (
+    resultado_cobertura_revisao_integral,
+    marcar_ciclo_revisao_consolidado,
+)
 from banco import (
     obter_configuracao_bool,
     obter_configuracao_int,
@@ -120,10 +124,19 @@ def integrar_sessao_questoes_com_revisoes(sessao_id: int) -> list[dict]:
         # questões ativas terem recebido ao menos uma resposta efetiva na
         # rodada. O resultado final usa uma observação (a mais recente) por
         # questão, evitando que repetições pesem artificialmente no percentual.
-        cobertura = obter_resultado_cobertura_revisao(
-            contexto["topico_id"],
-            contexto.get("concurso_id"),
+        cobertura = resultado_cobertura_revisao_integral(
+            sessao_id, contexto["topico_id"], contexto.get("concurso_id"),
         )
+        if cobertura is None:
+            cobertura = obter_resultado_cobertura_revisao(
+                contexto["topico_id"], contexto.get("concurso_id"),
+            )
+        if cobertura and cobertura.get("ja_consolidado"):
+            resultados.append({
+                **base, "status_integracao": "ciclo_ja_consolidado",
+                "descricao": "O ciclo já foi consolidado; nenhuma nova revisão foi registrada.",
+            })
+            continue
         if cobertura and cobertura.get("ativa"):
             total_cobertura = int(cobertura.get("total") or 0)
             restantes_cobertura = int(cobertura.get("restantes") or 0)
@@ -140,7 +153,7 @@ def integrar_sessao_questoes_com_revisoes(sessao_id: int) -> list[dict]:
                     "descricao": (
                         f"Rodada de revisão em andamento: {cobertas_cobertura}/{total_cobertura} "
                         f"questões cobertas ({restantes_cobertura} restante(s)). "
-                        "A data da próxima revisão foi preservada até a cobertura completa."
+                        "Nenhum novo agendamento será calculado antes da cobertura completa."
                     ),
                 })
                 continue
@@ -153,6 +166,9 @@ def integrar_sessao_questoes_com_revisoes(sessao_id: int) -> list[dict]:
                 contexto["questoes"] = questoes
                 contexto["acertos"] = acertos
                 contexto["percentual"] = percentual_cobertura
+                if cobertura.get("tipo") == "ciclo_integral":
+                    contexto["numero_revisao"] = cobertura["numero_revisao_real"]
+                    contexto["percentual_anterior"] = cobertura["percentual_anterior_real"]
                 primeiro_contato = False
                 base.update({
                     "questoes": questoes,
@@ -190,8 +206,17 @@ def integrar_sessao_questoes_com_revisoes(sessao_id: int) -> list[dict]:
                     proxima_revisao=proxima,
                     sessao_questoes_id=sessao_id,
                     concurso_id=contexto.get("concurso_id"),
-                    tentativas_desde=cobertura.get("referencia"),
+                    # Ciclos recuperados preservam o vínculo histórico
+                    # das tentativas antigas com suas revisões originais.
+                    tentativas_desde=(
+                        None if cobertura.get("tipo") == "ciclo_integral"
+                        else cobertura.get("referencia")
+                    ),
                 )
+                if cobertura.get("tipo") == "ciclo_integral":
+                    marcar_ciclo_revisao_consolidado(
+                        cobertura["ciclo_id"], salvo["revisao_id"],
+                    )
                 resultados.append({
                     **base,
                     "revisao_id": salvo["revisao_id"],

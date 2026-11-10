@@ -22,11 +22,18 @@ from contextlib import closing
 from pathlib import Path, PurePosixPath
 
 FORMAT = 'vighna-source-update-v1'
-MAX_UNCOMPRESSED = 100 * 1024 * 1024
-MAX_FILE = 15 * 1024 * 1024
-MAX_MEMBERS = 80
+# Tamanhos máximos de SEGURANÇA (não remover). 500 MiB compactados, 2 GiB
+# descompactados e 1 GiB por fonte, com limite de 512 membros e razão 200:1.
+MiB = 1024 * 1024
+MAX_ZIP_SIZE = 500 * MiB
+MAX_UNCOMPRESSED = 2 * 1024 * MiB
+MAX_FILE = 1024 * MiB
+MAX_MEMBERS = 512
+MAX_COMPRESSION_RATIO = 200
+MAX_MANIFEST_SIZE = 2 * MiB
+MAX_VERSION_SIZE = 1 * MiB
 EXCLUDED_NAMES = {'estudos.db', 'VighnaStudy.exe', 'VighnaUpdater.exe'}
-ROOT_MODULES = {"main.py", "jogos.py", "versao.py", "tema.py", "foco.py", "icones.py", "caminhos.py",
+ROOT_MODULES = {"main.py", "versao.py", "tema.py", "foco.py", "icones.py", "caminhos.py",
                 "backup.py", "checkpoint.py", "startup_splash.py", "navegacao.py",
                 "banco.py", "importador_pdf.py", "importador_txt.py", "relatorios_lazy.py",
                 "estatisticas_lazy.py", "inteligencia.py", "fila_candidata.py",
@@ -46,6 +53,15 @@ def sha256_bytes(data):
 def hash_file(file):
     digest = hashlib.sha256()
     with open(file, 'rb') as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b''):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _hash_zip_member(archive, filename):
+    """Confere o membro por blocos; evita manter fontes grandes em memória."""
+    digest = hashlib.sha256()
+    with archive.open(filename, 'r') as stream:
         for chunk in iter(lambda: stream.read(1024 * 1024), b''):
             digest.update(chunk)
     return digest.hexdigest()
@@ -72,6 +88,10 @@ def valid_source_path(path):
 
 def _metadata(package):
     try:
+        # Verificação antes de descompactar e calcular hashes; ZIPs gigantes
+        # são recusados mesmo que declarem conteúdo descompactado pequeno.
+        if Path(package).stat().st_size > MAX_ZIP_SIZE:
+            raise UpdateError('ZIP excede o limite de 500 MiB compactados.')
         with zipfile.ZipFile(package) as archive:
             infos = archive.infolist()
             if len(infos) > MAX_MEMBERS + 1:
@@ -84,8 +104,16 @@ def _metadata(package):
             if 'manifest.json' not in paths:
                 raise UpdateError('Manifesto do pacote ausente.')
             total = sum(x.file_size for x in infos)
-            if total > MAX_UNCOMPRESSED or any(x.file_size > MAX_FILE for x in infos):
-                raise UpdateError('Limites de tamanho do pacote excedidos.')
+            if total > MAX_UNCOMPRESSED:
+                raise UpdateError('Pacote excede 2 GiB descompactados.')
+            if any(x.file_size > MAX_FILE for x in infos):
+                raise UpdateError('Arquivo individual excede 1 GiB descompactado.')
+            if any(x.file_size > MAX_COMPRESSION_RATIO * max(x.compress_size, 1)
+                   for x in infos):
+                raise UpdateError('ZIP com razão de compressão perigosa (possível ZIP bomb).')
+            manifest_info = archive.getinfo('manifest.json')
+            if manifest_info.file_size > MAX_MANIFEST_SIZE:
+                raise UpdateError('Manifesto excede o tamanho máximo.')
             for info in infos:
                 if info.flag_bits & 0x1:
                     raise UpdateError('ZIP criptografado não é aceito.')
@@ -107,7 +135,7 @@ def _metadata(package):
             for path, expected in files.items():
                 if not valid_source_path(path) or not isinstance(expected, str) or len(expected) != 64:
                     raise UpdateError(f'Entrada inválida no manifesto: {path}')
-                if sha256_bytes(archive.read(path)) != expected.lower():
+                if _hash_zip_member(archive, path) != expected.lower():
                     raise UpdateError(f'Hash incorreto: {path}')
             required = ('base_version', 'base_build', 'target_version', 'target_build', 'schema')
             if any(not isinstance(manifest.get(k), str) or not manifest[k].strip() for k in required[:4]):
@@ -118,6 +146,8 @@ def _metadata(package):
                 raise UpdateError('Descrição da atualização inválida.')
             if 'versao.py' not in files:
                 raise UpdateError('O pacote deve declarar sua versão em versao.py.')
+            if archive.getinfo('versao.py').file_size > MAX_VERSION_SIZE:
+                raise UpdateError('Arquivo de versão excede o tamanho máximo.')
             version_tree = ast.parse(archive.read('versao.py'), filename='versao.py')
             declarations = {}
             for statement in version_tree.body:
@@ -352,6 +382,14 @@ def install_package(package, root, *, python_exe, report=lambda progress, status
     manifest = inspect_package(package, root)
     package_sha256 = hash_file(package)
     source_db = root / 'estudos.db'
+    # Reservar espaço para staging, backup de fontes, build e margem de erro.
+    # A estimativa é deliberadamente conservadora, não uma alocação real.
+    with zipfile.ZipFile(package) as archive:
+        estimated_source_bytes = sum(info.file_size for info in archive.infolist())
+    necessary_free = (3 * estimated_source_bytes + source_db.stat().st_size
+                      + 512 * MiB)
+    if shutil.disk_usage(root).free < necessary_free:
+        raise UpdateError('Espaço insuficiente para atualizar com backup e rollback.')
     backup_root = root / 'backups' / 'atualizacoes'
     run_id = datetime.now().strftime('%Y%m%d_%H%M%S') + '_' + uuid.uuid4().hex[:8]
     saved = backup_root / run_id
@@ -388,7 +426,9 @@ def install_package(package, root, *, python_exe, report=lambda progress, status
             for filename in manifest['files']:
                 target = work / filename
                 target.parent.mkdir(parents=True, exist_ok=True)
-                target.write_bytes(archive.read(filename))
+                # Extração em fluxo; não materializa arquivos grandes na RAM.
+                with archive.open(filename, 'r') as source, target.open('wb') as destination:
+                    shutil.copyfileobj(source, destination, 1024 * 1024)
         if version_from_file(work / 'versao.py') != (manifest['target_version'], manifest['target_build'], manifest['schema']):
             raise UpdateError('Versão divergente na área de compilação.')
         for file in work.rglob('*.py'):

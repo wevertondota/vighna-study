@@ -38,6 +38,7 @@ from statistics_core import StatisticsService
 from statistics_core.models import METRIC_VERSION
 from statistics_core.periods import statistical_timezone
 from caminhos import CAMINHO_BANCO, PASTA_DADOS
+from statistics_core.historico_retencao_segura_q_v1 import garantir_schema_preservacao
 from cache_persistente import (
     garantir_schema_cache_persistente,
     obter_ou_calcular as obter_ou_calcular_cache_persistente,
@@ -1984,6 +1985,11 @@ def criar_banco():
         ]
         for comando in indices_performance:
             conexao.execute(comando)
+
+        # Histórico V2 N: arquivamento transacional de revisões quando
+        # tópicos/disciplinas forem removidos; preserva linhagem dos concursos.
+        # A rotina NÃO arquiva a exclusão corretiva de revisão inválida.
+        garantir_schema_preservacao(conexao)
 
         # A camada de identidade precisa existir antes das sincronizações
         # estruturais. Assim, até uma disciplina renomeada continua sendo
