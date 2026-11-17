@@ -26,6 +26,7 @@ class LinhaGrade:
     acertos: int
     tentativas: int
     nota: str
+    importancia: int = 3
 
 
 class RepositorioGrade:
@@ -127,7 +128,7 @@ class RepositorioGrade:
             notas = {int(id_): str(txt or '') for id_, txt in nota_rows}
         resultado = []
         for row in registros:
-            ident, nome, revisoes, ultima, proxima, percentual, _importancia = row[:7]
+            ident, nome, revisoes, ultima, proxima, percentual, importancia = row[:7]
             q, respondidas, tentativas, acertos = por_topico.get(int(ident), (0,0,0,0))
             resultado.append(LinhaGrade(
                 topico_id=int(ident), topico=str(nome), revisoes=int(revisoes or 0),
@@ -135,8 +136,107 @@ class RepositorioGrade:
                 percentual=(float(percentual) if percentual is not None else None),
                 respondidas=respondidas, questoes_ativas=q, acertos=acertos,
                 tentativas=tentativas, nota=notas.get(int(ident), ''),
+                importancia=max(1, min(5, int(importancia or 3))),
             ))
         return resultado
+
+    def ciclos_em_andamento(self, concurso_id):
+        """Ciclos efetivamente ativos e com questões pendentes no perfil.
+
+        Reutiliza o controle persistente do motor; leitura em lote sem writes.
+        Questões concluídas no histórico não são inferidas como ciclo aberto.
+        """
+        try:
+            with closing(self._conexao()) as cx:
+                registros = cx.execute('''
+                    SELECT c.topico_id,
+                           SUM(CASE WHEN ci.estado='respondida' THEN 1 ELSE 0 END),
+                           SUM(CASE WHEN ci.estado='pendente'
+                                     AND q.id IS NOT NULL
+                                     AND q.ativa=1
+                                     AND COALESCE(q.excluida,0)=0
+                                    THEN 1 ELSE 0 END),
+                           COUNT(*)
+                    FROM ciclos_questoes c
+                    JOIN ciclo_questoes_itens ci ON ci.ciclo_id=c.id
+                    LEFT JOIN questoes q ON q.id=ci.questao_id
+                    WHERE c.concurso_id=? AND c.status='ativo'
+                    GROUP BY c.id, c.topico_id
+                ''', (int(concurso_id),)).fetchall()
+        except sqlite3.OperationalError as exc:
+            # Ausência de tabelas em instalações legadas pode significar
+            # nenhum ciclo; outros problemas de SQLite não são ocultados.
+            if 'no such table' in str(exc).lower():
+                return {}
+            raise
+        return {int(topico_id): (int(respondidas or 0), int(pendentes or 0), int(total or 0))
+                for topico_id, respondidas, pendentes, total in registros
+                if int(pendentes or 0) > 0}
+
+    def tendencias_recentes(self, concurso_id, topico_ids):
+        '''Comparação descritiva das 10 últimas vs. 10 anteriores, por perfil.
+
+        Fonte histórica de tentativas, inclusive snapshots de itens arquivados.
+        Somente retorna tendência se houver 20 respostas com resultado 0/1;
+        nunca trata saltos ou amostras insuficientes como desempenho zero.
+        Não grava e não modifica o motor de domínio.
+        '''
+        ids = [int(i) for i in topico_ids]
+        if not ids:
+            return {}
+        marcadores = ','.join('?' for _ in ids)
+        with closing(self._conexao()) as cx:
+            linhas = cx.execute(f'''
+                WITH tentativas_ordenadas AS (
+                    SELECT COALESCE(tq.topico_id_snapshot, q.topico_id) AS topico_id,
+                           tq.correta AS correta,
+                           ROW_NUMBER() OVER (
+                               PARTITION BY COALESCE(tq.topico_id_snapshot, q.topico_id)
+                               ORDER BY tq.respondida_em DESC, tq.id DESC
+                           ) AS posicao
+                    FROM tentativas_questoes tq
+                    LEFT JOIN questoes q ON q.id = tq.questao_id
+                    WHERE tq.concurso_id = ?
+                      AND tq.correta IN (0, 1)
+                      AND COALESCE(tq.topico_id_snapshot, q.topico_id)
+                          IN ({marcadores})
+                )
+                SELECT topico_id,
+                       SUM(CASE WHEN posicao <= 10 THEN correta ELSE 0 END) AS acertos_recentes,
+                       SUM(CASE WHEN posicao BETWEEN 11 AND 20 THEN correta ELSE 0 END) AS acertos_anteriores,
+                       COUNT(*) AS qtd
+                FROM tentativas_ordenadas
+                WHERE posicao <= 20
+                GROUP BY topico_id
+            ''', (int(concurso_id), *ids)).fetchall()
+        resultados = {}
+        for topico_id, recente, anterior, qtd in linhas:
+            if int(qtd) >= 20:
+                # Ambas as janelas contêm exatamente 10 respostas válidas.
+                resultados[int(topico_id)] = (float(recente or 0) - float(anterior or 0)) * 10.0
+        return resultados
+
+    def edicoes_agenda(self, concurso_id, topico_ids):
+        """Última edição manual por tópico, sem criar ou atualizar registros."""
+        ids = [int(i) for i in topico_ids]
+        if not ids:
+            return {}
+        placeholders = ','.join('?' for _ in ids)
+        try:
+            with closing(self._conexao()) as cx:
+                registros = cx.execute(f'''
+                    SELECT topico_id, novo
+                    FROM grade_estudos_agenda_edicoes_v1
+                    WHERE concurso_id=? AND topico_id IN ({placeholders})
+                    ORDER BY id DESC
+                ''', (int(concurso_id), *ids)).fetchall()
+        except sqlite3.OperationalError:
+            # Instalações legadas sem tabela de auditoria: origem desconhecida.
+            return {}
+        ultima = {}
+        for topico_id, nova in registros:
+            ultima.setdefault(int(topico_id), nova)
+        return ultima
 
     def salvar_nota(self, concurso_id, topico_id, texto):
         cid, tid = int(concurso_id), int(topico_id)

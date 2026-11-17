@@ -6,7 +6,7 @@ O nome exibido no Perfil e o concurso ativo nunca definem a identidade.
 
 Cópias de teste podem chamar a função com módulo backup sintético no ambiente
 isolado; produção usa obrigatoriamente backup.ARQUIVO_BANCO e banco.py assinado
-pelo hash de referência A–T, SEM variáveis de override de origem acadêmica.
+pelo hash de referência auditada R2, SEM variáveis de override de origem acadêmica.
 """
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from pathlib import Path
 import os
 import sys
 
-HASH_BANCO_HISTORICO_AT = "a6f122846530a2d50710f5d1a3f7cd5d4a21e6e353b68fb89fe6d91a388a633b"
+HASH_BANCO_HISTORICO_AT = "8ca86c54f938ea13cc51679105f14c56cc4105c4b94f1067302083ef6b6c63a2"
 SUBPASTAS_ESTADO = ("VighnaStudy", "MeritoGlobal")
 NOME_BANCO_MERITO = "merito_global_vighna.sqlite3"
 
@@ -51,7 +51,7 @@ def _sob(pasta: Path, origem: Path) -> bool:
 def _localizacao_segura() -> LocalizacaoM25:
     """Obtém exclusivamente a origem registrada pelo aplicativo existente.
 
-    A instalação de fontes Histórico V2 A–T tem banco.py no mesmo diretório de estudos.db;
+    A instalação de fontes Relatórios R2 tem banco.py no mesmo diretório de estudos.db;
     qualquer divergência é NO-GO até nova auditoria, não fallback silencioso.
     """
     from backup import ARQUIVO_BANCO
@@ -72,7 +72,7 @@ def _localizacao_segura() -> LocalizacaoM25:
     if not fonte.is_file() or fonte.is_symlink():
         raise ProducaoM25Bloqueada("banco.py da instalação indisponível")
     if sha256(fonte.read_bytes()).hexdigest() != HASH_BANCO_HISTORICO_AT:
-        raise ProducaoM25Bloqueada("banco.py divergente da referência auditada Histórico V2 A–T")
+        raise ProducaoM25Bloqueada("banco.py divergente da referência auditada Relatórios R2")
     if not (raiz / "main.py").is_file() or not (raiz / "versao.py").is_file():
         raise ProducaoM25Bloqueada("Raiz de fontes da instalação incompleta")
     pasta = raiz_dados.joinpath(*SUBPASTAS_ESTADO)

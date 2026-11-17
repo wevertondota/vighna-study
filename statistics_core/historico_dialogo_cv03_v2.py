@@ -11,7 +11,7 @@ from PySide6.QtCore import Qt, QDate
 from PySide6.QtWidgets import (
     QDialog, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QFrame,
     QLabel, QPushButton, QComboBox, QDateEdit, QTableWidget,
-    QTableWidgetItem, QHeaderView, QScrollArea,
+    QTableWidgetItem, QHeaderView, QScrollArea, QTabWidget,
 )
 
 from .historico_validacao_exibicao_t_v1 import validar_exibicao_historica
@@ -146,6 +146,33 @@ class JanelaHistoricoAcademicoV2(QDialog):
         fechar.clicked.connect(self.accept)
         rodape.addWidget(fechar)
         raiz.addLayout(rodape)
+        # Preservar todos os controles históricos originais em uma aba separada.
+        # A segunda aba recebe histórico temporal apenas de leitura.
+        from ui.tempo_historico_widgets_v1 import PainelTempoEfetivo
+        abas = QTabWidget(self)
+        aba_geral = QWidget(abas)
+        layout_geral = QVBoxLayout(aba_geral)
+        layout_geral.setContentsMargins(3, 3, 3, 3)
+        while raiz.count():
+            proporcao = raiz.stretch(0)
+            item = raiz.takeAt(0)
+            if item.widget() is not None:
+                layout_geral.addWidget(item.widget(), proporcao)
+            elif item.layout() is not None:
+                layout_geral.addLayout(item.layout(), proporcao)
+            elif item.spacerItem() is not None:
+                layout_geral.addItem(item.spacerItem())
+        abas.addTab(aba_geral, 'Histórico acadêmico geral')
+        self.painel_tempo_efetivo = PainelTempoEfetivo(
+            self.caminho_banco, concurso_id=self.concurso_id,
+            modo='historico', parent=abas,
+        )
+        abas.addTab(self.painel_tempo_efetivo, 'Tempo efetivo (dias, semanas e meses)')
+        abas.currentChanged.connect(
+            lambda indice: self.painel_tempo_efetivo.atualizar()
+            if indice == 1 else None
+        )
+        raiz.addWidget(abas)
         # Filtros modificados invalidam visualmente a consulta anterior.
         # Evita apresentar resultados de 30 dias com o seletor em 365 dias.
         self.inicio.dateChanged.connect(self._alteracao_data)

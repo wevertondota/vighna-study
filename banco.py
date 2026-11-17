@@ -20423,7 +20423,7 @@ def obter_relatorio_estrategico(
         inicio, fim = fim, inicio
 
     chave = (
-        f"relatorio_estrategico:v2:{concurso_id}:"
+        f"relatorio_estrategico:v3:{concurso_id}:"
         f"{inicio.isoformat()}:{fim.isoformat()}"
     )
     return obter_ou_calcular_cache_persistente(
@@ -20489,15 +20489,6 @@ def _obter_relatorio_estrategico_calcular(
                 ON t_ref.id = COALESCE(tq.topico_id_snapshot, q.topico_id)
             LEFT JOIN disciplinas d
                 ON d.id = t_ref.disciplina_id
-            JOIN disciplina_concurso_inclusao dc
-                ON dc.disciplina_id = t_ref.disciplina_id
-                AND dc.concurso_id = ?
-                AND dc.incluido = 1
-                AND COALESCE(dc.pausado, 0) = 0
-            JOIN topico_concurso_importancia tc
-                ON tc.topico_id = t_ref.id
-                AND tc.concurso_id = ?
-                AND tc.incluido = 1
             WHERE
                 tq.concurso_id = ?
                 AND tq.correta IS NOT NULL
@@ -20506,8 +20497,6 @@ def _obter_relatorio_estrategico_calcular(
             ORDER BY tq.respondida_em ASC, tq.id ASC
             """,
             (
-                concurso_id,
-                concurso_id,
                 concurso_id,
                 inicio_anterior.isoformat(),
                 fim.isoformat(),
@@ -20990,24 +20979,31 @@ def obter_relatorio_periodo(
                 ON t.id = r.topico_id
             JOIN disciplinas d
                 ON d.id = t.disciplina_id
-            JOIN disciplina_concurso_inclusao dc
+            LEFT JOIN disciplina_concurso_inclusao dc
                 ON dc.disciplina_id = d.id
                 AND dc.concurso_id = ?
-                AND dc.incluido = 1
-                AND COALESCE(dc.pausado, 0) = 0
-            JOIN topico_concurso_importancia tc
+            LEFT JOIN topico_concurso_importancia tc
                 ON tc.topico_id = t.id
                 AND tc.concurso_id = ?
-                AND tc.incluido = 1
             WHERE
                 r.data >= ?
                 AND r.data <= ?
+                AND (
+                    r.concurso_id = ?
+                    OR (
+                        r.concurso_id IS NULL
+                        AND COALESCE(dc.incluido, 0) = 1
+                        AND COALESCE(dc.pausado, 0) = 0
+                        AND COALESCE(tc.incluido, 0) = 1
+                    )
+                )
             """,
             (
                 concurso_id,
                 concurso_id,
                 data_inicio,
-                data_fim
+                data_fim,
+                concurso_id
             )
         ).fetchone()
 
@@ -21090,18 +21086,24 @@ def obter_relatorio_disciplinas_periodo(
                 ON t.id = r.topico_id
             JOIN disciplinas d
                 ON d.id = t.disciplina_id
-            JOIN disciplina_concurso_inclusao dc
+            LEFT JOIN disciplina_concurso_inclusao dc
                 ON dc.disciplina_id = d.id
                 AND dc.concurso_id = ?
-                AND dc.incluido = 1
-                AND COALESCE(dc.pausado, 0) = 0
-            JOIN topico_concurso_importancia tc
+            LEFT JOIN topico_concurso_importancia tc
                 ON tc.topico_id = t.id
                 AND tc.concurso_id = ?
-                AND tc.incluido = 1
             WHERE
                 r.data >= ?
                 AND r.data <= ?
+                AND (
+                    r.concurso_id = ?
+                    OR (
+                        r.concurso_id IS NULL
+                        AND COALESCE(dc.incluido, 0) = 1
+                        AND COALESCE(dc.pausado, 0) = 0
+                        AND COALESCE(tc.incluido, 0) = 1
+                    )
+                )
             GROUP BY
                 d.id,
                 d.nome
@@ -21114,7 +21116,8 @@ def obter_relatorio_disciplinas_periodo(
                 concurso_id,
                 concurso_id,
                 data_inicio,
-                data_fim
+                data_fim,
+                concurso_id
             )
         ).fetchall()
 
@@ -21162,18 +21165,24 @@ def obter_relatorio_topicos_periodo(
                 ON t.id = r.topico_id
             JOIN disciplinas d
                 ON d.id = t.disciplina_id
-            JOIN disciplina_concurso_inclusao dc
+            LEFT JOIN disciplina_concurso_inclusao dc
                 ON dc.disciplina_id = d.id
                 AND dc.concurso_id = ?
-                AND dc.incluido = 1
-                AND COALESCE(dc.pausado, 0) = 0
-            JOIN topico_concurso_importancia tc
+            LEFT JOIN topico_concurso_importancia tc
                 ON tc.topico_id = t.id
                 AND tc.concurso_id = ?
-                AND tc.incluido = 1
             WHERE
                 r.data >= ?
                 AND r.data <= ?
+                AND (
+                    r.concurso_id = ?
+                    OR (
+                        r.concurso_id IS NULL
+                        AND COALESCE(dc.incluido, 0) = 1
+                        AND COALESCE(dc.pausado, 0) = 0
+                        AND COALESCE(tc.incluido, 0) = 1
+                    )
+                )
             GROUP BY
                 t.id,
                 d.nome,
@@ -21188,7 +21197,8 @@ def obter_relatorio_topicos_periodo(
                 concurso_id,
                 concurso_id,
                 data_inicio,
-                data_fim
+                data_fim,
+                concurso_id
             )
         ).fetchall()
 
@@ -21232,18 +21242,24 @@ def obter_relatorio_diario_periodo(
                 ON t.id = r.topico_id
             JOIN disciplinas d
                 ON d.id = t.disciplina_id
-            JOIN disciplina_concurso_inclusao dc
+            LEFT JOIN disciplina_concurso_inclusao dc
                 ON dc.disciplina_id = d.id
                 AND dc.concurso_id = ?
-                AND dc.incluido = 1
-                AND COALESCE(dc.pausado, 0) = 0
-            JOIN topico_concurso_importancia tc
+            LEFT JOIN topico_concurso_importancia tc
                 ON tc.topico_id = t.id
                 AND tc.concurso_id = ?
-                AND tc.incluido = 1
             WHERE
                 r.data >= ?
                 AND r.data <= ?
+                AND (
+                    r.concurso_id = ?
+                    OR (
+                        r.concurso_id IS NULL
+                        AND COALESCE(dc.incluido, 0) = 1
+                        AND COALESCE(dc.pausado, 0) = 0
+                        AND COALESCE(tc.incluido, 0) = 1
+                    )
+                )
             GROUP BY
                 r.data
             ORDER BY
@@ -21253,7 +21269,8 @@ def obter_relatorio_diario_periodo(
                 concurso_id,
                 concurso_id,
                 data_inicio,
-                data_fim
+                data_fim,
+                concurso_id
             )
         ).fetchall()
 

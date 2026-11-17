@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
 )
 
 from ui.tempo_baterias_v1 import formatar_duracao, obter_resumo_diario
+from ui.tempo_historico_dados_v1 import consultar_resumo, formatar_variacao
 
 
 _TITULOS = (
@@ -104,6 +105,34 @@ class PainelAnaliticoV1(QWidget):
             indicadores.addWidget(card, i // 3, i % 3)
             indicadores.setColumnStretch(i % 3, 1)
         corpo.addLayout(indicadores)
+
+        secao_tempo = QLabel('EVOLUÇÃO DO TEMPO  /  TODOS OS PERFIS')
+        secao_tempo.setObjectName('analiticoSecao')
+        corpo.addWidget(secao_tempo)
+        quadro_tempo = QGridLayout()
+        quadro_tempo.setHorizontalSpacing(12)
+        self._resumos_tempo = {}
+        for i, (chave, rotulo) in enumerate((
+            ('semana', 'TEMPO EFETIVO ESTA SEMANA'),
+            ('mes', 'TEMPO EFETIVO ESTE MÊS'),
+        )):
+            card = QFrame()
+            card.setObjectName('analiticoCard')
+            bloco = QVBoxLayout(card)
+            bloco.setContentsMargins(18, 10, 18, 11)
+            etiqueta = QLabel(rotulo)
+            etiqueta.setObjectName('analiticoCardRotulo')
+            valor = QLabel('—')
+            valor.setObjectName('analiticoCardValor')
+            auxiliar = QLabel('—')
+            auxiliar.setObjectName('analiticoObservacao')
+            bloco.addWidget(etiqueta)
+            bloco.addWidget(valor)
+            bloco.addWidget(auxiliar)
+            self._resumos_tempo[chave] = (valor, auxiliar)
+            quadro_tempo.addWidget(card, 0, i)
+            quadro_tempo.setColumnStretch(i, 1)
+        corpo.addLayout(quadro_tempo)
 
         formula = QFrame()
         formula.setObjectName("analiticoMetodo")
@@ -205,6 +234,17 @@ class PainelAnaliticoV1(QWidget):
         }
         for chave, valor in atualizacoes.items():
             self._valores[chave].setText(valor)
+        try:
+            historico = consultar_resumo(self._caminho_banco)
+            for chave, anterior in (('semana', 'semana_anterior'), ('mes', 'mes_anterior')):
+                valor, auxiliar = self._resumos_tempo[chave]
+                valor.setText(formatar_duracao(historico[chave]))
+                auxiliar.setText('Comparado ao período anterior: ' +
+                                 formatar_variacao(historico[chave], historico[anterior]))
+        except Exception:
+            for valor, auxiliar in self._resumos_tempo.values():
+                valor.setText('—')
+                auxiliar.setText('Histórico de tempo indisponível')
         self._atualizado.setText(
             "Atualizado em " + datetime.now().strftime("%d/%m/%Y às %H:%M")
             + "  •  Tempo total de baterias concluídas (todos os perfis)"

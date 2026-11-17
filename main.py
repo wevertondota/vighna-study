@@ -30,6 +30,7 @@ if __name__ == "__main__":
         _STARTUP_SPLASH_BOOTSTRAP = None
 
 import base64
+from html import escape as _escape_html_historico
 import json
 import csv
 import re
@@ -121,8 +122,8 @@ from ui.dashboard_visual_premium import dashboard_fundo_bytes, dashboard_visual_
 from ui.dashboard_compact_nav import (
     criar_cabecalho_discreto_dashboard, aplicar_estilo_cabecalho_dashboard,
 )
-from ui.portal_treinos import (
-    criar_portal_treinos, aplicar_estilo_treinos, atualizar_retomada_treinos,
+from ui.portal_simulados_nativo_v1 import (
+    PortalSimuladosNativo, aplicar_tema_central_simulados,
 )
 from ui.portal_recursos import criar_portal_recursos, aplicar_estilo_recursos
 from ui.caneta_estudo import CanetaEstudo
@@ -2026,262 +2027,112 @@ class IndicadorChamasPrioridade(QWidget):
             )
 
 
+class _ItemHistoricoOrdenavel(QTableWidgetItem):
+    """Classificação confiável de datas, contagens e porcentagens da tabela."""
+
+    def __lt__(self, outro):
+        if isinstance(outro, QTableWidgetItem):
+            a = self.data(int(Qt.UserRole) + 1)
+            b = outro.data(int(Qt.UserRole) + 1)
+            if a is not None and b is not None:
+                try:
+                    return a < b
+                except (TypeError, ValueError):
+                    pass
+        return super().__lt__(outro)
+
+
 class GraficoEvolucao(QWidget):
+    """Gráfico cronológico legível, inclusive com dois pontos ou DPI elevado."""
+
     def __init__(self, parent=None):
         super().__init__(parent)
-
         self.percentuais = []
         self.rotulos = []
+        self.setMinimumHeight(200)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.setAccessibleName("Evolução do desempenho nas revisões detalhadas")
 
-        self.setMinimumHeight(190)
-
-        self.setSizePolicy(
-            QSizePolicy.Expanding,
-            QSizePolicy.Fixed
-        )
-
-    def definir_dados(
-        self,
-        percentuais,
-        rotulos=None
-    ):
-        self.percentuais = [
-            float(valor)
-            for valor in percentuais
-        ]
-
-        if rotulos is None:
-            self.rotulos = [
-                f"R{i + 1}"
-                for i in range(
-                    len(self.percentuais)
-                )
-            ]
-        else:
-            self.rotulos = list(rotulos)
-
+    def definir_dados(self, percentuais, rotulos=None):
+        self.percentuais = [float(valor) for valor in percentuais]
+        self.rotulos = (list(rotulos) if rotulos is not None
+                        else [f"R{i + 1}" for i in range(len(self.percentuais))])
+        self.setToolTip("Evolução cronológica; não inclui revisões legadas sem resultados individuais.")
         self.update()
 
     def paintEvent(self, evento):
         painter = QPainter(self)
-
-        painter.setRenderHint(
-            QPainter.Antialiasing
-        )
-
+        painter.setRenderHint(QPainter.Antialiasing)
         area = self.rect()
-
-        painter.fillRect(
-            area,
-            self.palette().base()
-        )
-
-        margem_esquerda = 52
-        margem_direita = 24
-        margem_topo = 24
-        margem_baixo = 42
-
-        largura = (
-            area.width()
-            - margem_esquerda
-            - margem_direita
-        )
-
-        altura = (
-            area.height()
-            - margem_topo
-            - margem_baixo
-        )
-
-        if largura <= 0 or altura <= 0:
+        painter.fillRect(area, self.palette().base())
+        esquerdo, direito, topo, baixo = 72, 40, 34, 42
+        largura = max(0, area.width() - esquerdo - direito)
+        altura = max(0, area.height() - topo - baixo)
+        if largura <= 40 or altura <= 30:
             return
 
-        fonte = QFont(
-            painter.font()
-        )
-        fonte.setPointSize(8)
-
+        fonte = QFont(painter.font())
+        fonte.setPointSize(9)
         painter.setFont(fonte)
-
-        # Linhas de referência de 0% a 100%.
-        for valor in [0, 25, 50, 75, 100]:
-            y = (
-                margem_topo
-                + altura
-                - (
-                    valor / 100.0
-                ) * altura
-            )
-
-            painter.setPen(
-                QPen(
-                    self.palette().mid().color(),
-                    1
-                )
-            )
-
-            painter.drawLine(
-                margem_esquerda,
-                int(y),
-                margem_esquerda + largura,
-                int(y)
-            )
-
-            painter.setPen(
-                self.palette().text().color()
-            )
-
-            painter.drawText(
-                QRectF(
-                    4,
-                    y - 10,
-                    margem_esquerda - 10,
-                    20
-                ),
-                Qt.AlignRight |
-                Qt.AlignVCenter,
-                f"{valor}%"
-            )
+        cor_texto = self.palette().text().color()
+        cor_grade = self.palette().mid().color()
+        cor_destaque = self.palette().highlight().color()
+        for valor in (0, 25, 50, 75, 100):
+            y = topo + altura * (1.0 - valor / 100.0)
+            painter.setPen(QPen(cor_grade, 1))
+            painter.drawLine(esquerdo, round(y), esquerdo + largura, round(y))
+            painter.setPen(QPen(cor_texto, 1))
+            painter.drawText(QRectF(4, y - 10, esquerdo - 16, 20),
+                             Qt.AlignRight | Qt.AlignVCenter, f"{valor}%")
 
         if not self.percentuais:
-            painter.setPen(
-                self.palette().text().color()
-            )
-
-            painter.drawText(
-                QRectF(
-                    margem_esquerda,
-                    margem_topo,
-                    largura,
-                    altura
-                ),
-                Qt.AlignCenter,
-                "Ainda não há revisões detalhadas "
-                "registradas no programa."
-            )
+            painter.setPen(QPen(cor_texto))
+            painter.drawText(QRectF(esquerdo, topo, largura, altura),
+                             Qt.AlignCenter, "Ainda não há revisões detalhadas.")
             return
 
-        if len(self.percentuais) == 1:
-            xs = [
-                margem_esquerda
-                + largura / 2
-            ]
-        else:
-            passo = (
-                largura /
-                (
-                    len(self.percentuais) - 1
-                )
-            )
+        # Pontos ficam afastados das escalas e das bordas, ao contrário do
+        # gráfico antigo, que colidia com 100% e 75% no primeiro registro.
+        margem_interna = min(58, max(28, largura * 0.075))
+        inicio = esquerdo + margem_interna
+        fim = esquerdo + largura - margem_interna
+        n = len(self.percentuais)
+        passo = (fim - inicio) / (n - 1) if n > 1 else 0
+        pontos = [QPointF((inicio + i * passo) if n > 1
+                          else (inicio + fim) / 2,
+                          topo + altura * (1.0 - max(0, min(100, valor)) / 100))
+                  for i, valor in enumerate(self.percentuais)]
+        painter.setPen(QPen(cor_destaque, 2))
+        for i in range(len(pontos) - 1):
+            painter.drawLine(pontos[i], pontos[i + 1])
 
-            xs = [
-                margem_esquerda
-                + indice * passo
-                for indice in range(
-                    len(self.percentuais)
-                )
-            ]
-
-        pontos = []
-
-        for indice, percentual in enumerate(
-            self.percentuais
-        ):
-            percentual = max(
-                0.0,
-                min(
-                    100.0,
-                    percentual
-                )
-            )
-
-            y = (
-                margem_topo
-                + altura
-                - (
-                    percentual / 100.0
-                ) * altura
-            )
-
-            pontos.append(
-                QPointF(
-                    xs[indice],
-                    y
-                )
-            )
-
-        # Linha de evolução.
-        painter.setPen(
-            QPen(
-                self.palette().highlight().color(),
-                2
-            )
-        )
-
-        for indice in range(
-            len(pontos) - 1
-        ):
-            painter.drawLine(
-                pontos[indice],
-                pontos[indice + 1]
-            )
-
-        # Pontos e rótulos.
-        for indice, ponto in enumerate(
-            pontos
-        ):
-            painter.setBrush(
-                self.palette().highlight()
-            )
-
-            painter.setPen(
-                QPen(
-                    self.palette().highlight().color(),
-                    1
-                )
-            )
-
-            painter.drawEllipse(
-                ponto,
-                4,
-                4
-            )
-
-            painter.setPen(
-                self.palette().text().color()
-            )
-
-            painter.drawText(
-                QRectF(
-                    ponto.x() - 28,
-                    ponto.y() - 27,
-                    56,
-                    20
-                ),
-                Qt.AlignCenter,
-                formatar_percentual(
-                    self.percentuais[indice],
-                    1
-                )
-            )
-
-            rotulo = (
-                self.rotulos[indice]
-                if indice < len(self.rotulos)
-                else f"R{indice + 1}"
-            )
-
-            painter.drawText(
-                QRectF(
-                    ponto.x() - 35,
-                    margem_topo + altura + 8,
-                    70,
-                    22
-                ),
-                Qt.AlignCenter,
-                rotulo
-            )
-
+        usados_valores = []
+        usados_datas = []
+        for i, ponto in enumerate(pontos):
+            painter.setBrush(cor_destaque)
+            painter.setPen(QPen(cor_destaque, 1))
+            painter.drawEllipse(ponto, 4, 4)
+            painter.setPen(QPen(cor_texto, 1))
+            # Reduzir anotações quando não houver espaço horizontal.
+            salto = max(1, math.ceil(100 / max(1.0, passo))) if n > 1 else 1
+            if not (i == 0 or i == n - 1 or i % salto == 0):
+                continue
+            x = min(max(ponto.x() - 43, esquerdo + 7), esquerdo + largura - 86)
+            y = max(5.0, ponto.y() - 27)
+            valor_rect = QRectF(x, y, 86, 22)
+            if any(valor_rect.intersects(outro) for outro in usados_valores):
+                alternativo = QRectF(x, min(topo + altura - 14, ponto.y() + 8), 86, 22)
+                if any(alternativo.intersects(outro) for outro in usados_valores):
+                    continue
+                valor_rect = alternativo
+            painter.drawText(valor_rect, Qt.AlignCenter,
+                             formatar_percentual(self.percentuais[i], 1))
+            usados_valores.append(valor_rect)
+            rotulo = self.rotulos[i] if i < len(self.rotulos) else f"R{i + 1}"
+            data_rect = QRectF(x - 1, topo + altura + 8, 88, 24)
+            if not any(data_rect.intersects(outro) for outro in usados_datas):
+                painter.drawText(data_rect, Qt.AlignCenter, str(rotulo))
+                usados_datas.append(data_rect)
 
 class GraficoSerieTemporal(QWidget):
     def __init__(
@@ -10465,6 +10316,28 @@ class JanelaLixeiraQuestoes(QDialog):
             )
 
 
+def _distribuir_questoes_simulado_r3(capacidades, objetivo):
+    """Distribuição balanceada, limitada ao estoque de cada disciplina.
+
+    Não acessa banco, não altera a estratégia do motor e não seleciona IDs de questões.
+    """
+    alocacao = {chave: 0 for chave in capacidades}
+    restantes = max(0, min(int(objetivo), sum(max(0, int(v)) for v in capacidades.values())))
+    elegiveis = [chave for chave, cap in capacidades.items() if int(cap) > 0]
+    while restantes and elegiveis:
+        proximos = []
+        for chave in elegiveis:
+            if restantes <= 0:
+                break
+            if alocacao[chave] < int(capacidades[chave]):
+                alocacao[chave] += 1
+                restantes -= 1
+            if alocacao[chave] < int(capacidades[chave]):
+                proximos.append(chave)
+        elegiveis = proximos
+    return alocacao
+
+
 class JanelaConfigurarSimulado(QDialog):
     def __init__(
         self,
@@ -10474,6 +10347,7 @@ class JanelaConfigurarSimulado(QDialog):
             parent
         )
         self.setWindowModality(Qt.WindowModal)
+        self.setObjectName("mockExamConfigDialogR3")
 
         # Janela operacional ampla: permite maximizar/restaurar
         # pelo botão nativo do Windows e por duplo clique na barra.
@@ -10492,15 +10366,15 @@ class JanelaConfigurarSimulado(QDialog):
         self.linhas_personalizadas = {}
 
         self.setWindowTitle(
-            "Simulados"
+            "Configurar simulado"
         )
         self.resize(
             1040,
             760
         )
         self.setMinimumSize(
-            900,
-            650
+            880,
+            610
         )
 
         layout = QVBoxLayout(
@@ -10513,8 +10387,62 @@ class JanelaConfigurarSimulado(QDialog):
             16
         )
         layout.setSpacing(
-            10
+            8
         )
+        # O rodapé fica fixo; o conteúdo completo pode rolar em DPI elevado.
+        corpo_scroll = QScrollArea(self)
+        corpo_scroll.setWidgetResizable(True)
+        corpo_scroll.setFrameShape(QFrame.NoFrame)
+        corpo_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        corpo_scroll.setObjectName("mockExamScrollR3")
+        corpo = QWidget()
+        corpo.setObjectName("mockExamScrollBodyR3")
+        corpo_layout = QVBoxLayout(corpo)
+        corpo_layout.setContentsMargins(1, 1, 1, 1)
+        corpo_layout.setSpacing(8)
+        # Vincular o conteúdo ao QScrollArea somente após montar todo o layout.
+        # Refinamento local: não modifica o QSS global nem outras janelas.
+        # Campos sem setas nativas defeituosas continuam editáveis por texto,
+        # teclado (setas) e rolagem, com ações de seleção em lote.
+        self.setStyleSheet("""
+            QDialog#mockExamConfigDialogR3 QScrollArea#mockExamScrollR3,
+            QDialog#mockExamConfigDialogR3 QWidget#mockExamScrollBodyR3 {
+                background-color: transparent;
+                border: none;
+            }
+            QDialog#mockExamConfigDialogR3 QSpinBox#mockExamSpinR3 {
+                padding: 4px 9px;
+                min-height: 34px;
+                min-width: 100px;
+            }
+            QDialog#mockExamConfigDialogR3 QComboBox#mockExamComboR3 {
+                padding-left: 9px;
+                padding-right: 30px;
+                min-height: 34px;
+            }
+            QDialog#mockExamConfigDialogR3 QComboBox#mockExamComboR3::drop-down {
+                width: 28px;
+                border-left: 1px solid rgba(89, 171, 207, 95);
+            }
+            QDialog#mockExamConfigDialogR3 QTableWidget#mockExamTable {
+                selection-background-color: rgba(0, 178, 218, 50);
+            }
+            QDialog#mockExamConfigDialogR3 QWidget#mockExamCheckContainerR3 {
+                background: transparent;
+                border: 0px;
+            }
+            QDialog#mockExamConfigDialogR3 QPushButton#mockExamSecondaryR3 {
+                padding: 6px 12px;
+                min-height: 30px;
+                border: 1px solid rgba(79, 158, 192, 120);
+                border-radius: 7px;
+            }
+            QDialog#mockExamConfigDialogR3 QLabel#mockExamGlobalSummaryR3 {
+                padding: 9px 11px;
+                border: 1px solid rgba(56, 156, 193, 110);
+                border-radius: 8px;
+            }
+        """)
 
         # ----------------------------------------------------
         # CABEÇALHO
@@ -10528,7 +10456,7 @@ class JanelaConfigurarSimulado(QDialog):
         )
 
         titulo = QLabel(
-            "Simulados"
+            "Configurar simulado"
         )
         titulo.setObjectName(
             "pageTitle"
@@ -10536,8 +10464,7 @@ class JanelaConfigurarSimulado(QDialog):
 
         subtitulo = QLabel(
             (
-                "Escolha entre prova real, distribuição equilibrada ou um "
-                "simulado estratégico com ajuste moderado pelas fragilidades."
+                "Defina as condições da prova e selecione as disciplinas."
             )
         )
         subtitulo.setObjectName(
@@ -10571,9 +10498,7 @@ class JanelaConfigurarSimulado(QDialog):
             Qt.AlignVCenter
         )
 
-        layout.addLayout(
-            cabecalho
-        )
+        corpo_layout.addLayout(cabecalho)
 
         # ----------------------------------------------------
         # TIPO E OPÇÕES GERAIS
@@ -10599,8 +10524,12 @@ class JanelaConfigurarSimulado(QDialog):
         config_layout.setVerticalSpacing(
             6
         )
+        etapa_config = QLabel("01 — Configurações da prova")
+        etapa_config.setObjectName("mockExamSectionTitle")
+        config_layout.addWidget(etapa_config, 0, 0, 1, 2)
 
         self.tipo = QComboBox()
+        self.tipo.setObjectName("mockExamComboR3")
         self.tipo.setMinimumHeight(
             34
         )
@@ -10611,6 +10540,9 @@ class JanelaConfigurarSimulado(QDialog):
         ])
 
         self.tempo = QSpinBox()
+        self.tempo.setObjectName("mockExamSpinR3")
+        self.tempo.setButtonSymbols(QAbstractSpinBox.NoButtons)
+        self.tempo.setToolTip("Digite minutos (0 = sem limite). Use as setas do teclado para ajustar.")
         self.tempo.setRange(
             0,
             600
@@ -10642,6 +10574,7 @@ class JanelaConfigurarSimulado(QDialog):
         )
 
         self.formato = QComboBox()
+        self.formato.setObjectName("mockExamComboR3")
         self.formato.setMinimumHeight(34)
         self.formato.addItem(
             "Todos os formatos",
@@ -10660,6 +10593,7 @@ class JanelaConfigurarSimulado(QDialog):
         )
 
         self.regra_pontuacao = QComboBox()
+        self.regra_pontuacao.setObjectName("mockExamComboR3")
         self.regra_pontuacao.setMinimumHeight(34)
         self.regra_pontuacao.addItem(
             "Normal (+1 acerto / 0 erro)",
@@ -10677,71 +10611,61 @@ class JanelaConfigurarSimulado(QDialog):
             QLabel(
                 "Tipo de simulado"
             ),
-            0,
+            1,
             0
         )
         config_layout.addWidget(
             QLabel(
                 "Tempo limite"
             ),
-            0,
+            1,
             1
         )
 
         config_layout.addWidget(
             self.tipo,
-            1,
+            2,
             0
         )
         config_layout.addWidget(
             self.tempo,
-            1,
+            2,
             1
         )
         config_layout.addWidget(
             self.preferir_ineditas,
+            5,
+            0,
             1,
             2
         )
         config_layout.addWidget(
             QLabel("Formato das questões"),
-            2,
+            3,
             0
         )
         config_layout.addWidget(
             QLabel("Pontuação"),
-            2,
+            3,
             1
         )
         config_layout.addWidget(
             self.formato,
-            3,
+            4,
             0
         )
         config_layout.addWidget(
             self.regra_pontuacao,
-            3,
-            1,
-            1,
-            2
-        )
-
-        config_layout.setColumnStretch(
-            0,
-            2
-        )
-        config_layout.setColumnStretch(
-            1,
+            4,
             1
         )
-        config_layout.setColumnStretch(
-            2,
-            2
-        )
 
-        layout.addWidget(
-            config_card
-        )
+        config_layout.setColumnStretch(0, 1)
+        config_layout.setColumnStretch(1, 1)
+        config_layout.setColumnMinimumWidth(0, 300)
+        config_layout.setColumnMinimumWidth(1, 300)
+
+        corpo_layout.addWidget(config_card)
 
         nota = QLabel(
             (
@@ -10759,9 +10683,22 @@ class JanelaConfigurarSimulado(QDialog):
             True
         )
 
-        layout.addWidget(
-            nota
+        self.regras_detalhadas = nota
+        self.regras_detalhadas.setVisible(False)
+        regras_linha = QHBoxLayout()
+        regras_resumo = QLabel(
+            "Durante a prova, o gabarito e a correção ficam ocultos até a entrega."
         )
+        regras_resumo.setWordWrap(True)
+        regras_linha.addWidget(regras_resumo, 1)
+        self.botao_regras = QPushButton("Como funciona ▸")
+        self.botao_regras.setObjectName("mockExamSecondaryR3")
+        self.botao_regras.setCheckable(True)
+        self.botao_regras.setAccessibleName("Expandir as regras do simulado")
+        self.botao_regras.toggled.connect(self.alternar_regras)
+        regras_linha.addWidget(self.botao_regras)
+        corpo_layout.addLayout(regras_linha)
+        corpo_layout.addWidget(self.regras_detalhadas)
 
         # ----------------------------------------------------
         # CONTEÚDO VARIÁVEL
@@ -10790,7 +10727,7 @@ class JanelaConfigurarSimulado(QDialog):
         personalizado_header = QHBoxLayout()
 
         personalizado_titulo = QLabel(
-            "Escolha as matérias e a quantidade de questões"
+            "02 — Disciplinas e quantidade de questões"
         )
         personalizado_titulo.setObjectName(
             "mockExamSectionTitle"
@@ -10800,10 +10737,24 @@ class JanelaConfigurarSimulado(QDialog):
             personalizado_titulo
         )
         personalizado_header.addStretch()
+        personalizado_layout.addLayout(personalizado_header)
+        acoes_selecao = QHBoxLayout()
+        acoes_selecao.setSpacing(7)
+        self.botao_selecionar_todas = QPushButton("Selecionar disponíveis")
+        self.botao_limpar = QPushButton("Limpar")
+        self.botao_distribuir = QPushButton("Distribuir igualmente")
+        for botao in (self.botao_selecionar_todas, self.botao_limpar, self.botao_distribuir):
+            botao.setObjectName("mockExamSecondaryR3")
+            acoes_selecao.addWidget(botao)
+        self.botao_selecionar_todas.setToolTip("Marca as disciplinas com questões disponíveis; atribui até 5 questões a cada uma.")
+        self.botao_limpar.setToolTip("Desmarca todas as disciplinas e zera as quantidades.")
+        self.botao_distribuir.setToolTip("Distribui até 50 questões igualmente entre as matérias selecionadas, respeitando a disponibilidade de cada uma.")
+        self.botao_selecionar_todas.clicked.connect(self.selecionar_materias_disponiveis)
+        self.botao_limpar.clicked.connect(self.limpar_selecao_materias)
+        self.botao_distribuir.clicked.connect(self.distribuir_materias_igualmente)
 
-        personalizado_layout.addLayout(
-            personalizado_header
-        )
+        acoes_selecao.addStretch()
+        personalizado_layout.addLayout(acoes_selecao)
 
         self.tabela_personalizado = QTableWidget()
         self.tabela_personalizado.setObjectName(
@@ -10832,8 +10783,14 @@ class JanelaConfigurarSimulado(QDialog):
             False
         )
         self.tabela_personalizado.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarAlwaysOff
+            Qt.ScrollBarAsNeeded
         )
+        self.tabela_personalizado.setMinimumHeight(200)
+        self.tabela_personalizado.setWordWrap(False)
+        self.tabela_personalizado.setToolTip(
+            "Inclua matérias, depois digite a quantidade em cada linha. Use as setas do teclado para ajustar."
+        )
+        self.tabela_personalizado.horizontalHeader().setMinimumHeight(38)
 
         header = (
             self.tabela_personalizado.horizontalHeader()
@@ -10843,16 +10800,11 @@ class JanelaConfigurarSimulado(QDialog):
             QHeaderView.Stretch
         )
 
-        for coluna in (
-            0,
-            2,
-            3,
-            4
-        ):
-            header.setSectionResizeMode(
-                coluna,
-                QHeaderView.ResizeToContents
-            )
+        # Larguras fixas para os dados e o QSpinBox; somente Matéria estica.
+        # ResizeToContents diminuía a última coluna e cortava suas setas.
+        for coluna, largura in ((0, 78), (2, 120), (3, 112), (4, 154)):
+            header.setSectionResizeMode(coluna, QHeaderView.Fixed)
+            self.tabela_personalizado.setColumnWidth(coluna, largura)
 
         self.tabela_personalizado.setRowCount(
             len(
@@ -10873,6 +10825,7 @@ class JanelaConfigurarSimulado(QDialog):
             )
 
             check_container = QWidget()
+            check_container.setObjectName("mockExamCheckContainerR3")
             check_layout = QHBoxLayout(
                 check_container
             )
@@ -10917,6 +10870,10 @@ class JanelaConfigurarSimulado(QDialog):
             )
 
             spin = QSpinBox()
+            spin.setObjectName("mockExamSpinR3")
+            spin.setButtonSymbols(QAbstractSpinBox.NoButtons)
+            spin.setAlignment(Qt.AlignCenter)
+            spin.setToolTip("Digite uma quantidade ou use as setas do teclado.")
             spin.setRange(
                 0,
                 item[
@@ -10929,9 +10886,8 @@ class JanelaConfigurarSimulado(QDialog):
             spin.setEnabled(
                 False
             )
-            spin.setMinimumWidth(
-                80
-            )
+            spin.setMinimumWidth(110)
+            spin.setMinimumHeight(30)
 
             self.tabela_personalizado.setCellWidget(
                 linha,
@@ -10953,15 +10909,20 @@ class JanelaConfigurarSimulado(QDialog):
                 3,
                 ineditas
             )
+            spin_container = QWidget()
+            spin_container.setObjectName("mockExamCheckContainerR3")
+            spin_layout = QHBoxLayout(spin_container)
+            spin_layout.setContentsMargins(8, 3, 8, 3)
+            spin_layout.addWidget(spin)
             self.tabela_personalizado.setCellWidget(
                 linha,
                 4,
-                spin
+                spin_container
             )
 
             self.tabela_personalizado.setRowHeight(
                 linha,
-                34
+                42
             )
 
             self.linhas_personalizadas[
@@ -10995,9 +10956,7 @@ class JanelaConfigurarSimulado(QDialog):
             self.tabela_personalizado,
             1
         )
-        personalizado_layout.addWidget(
-            self.personalizado_resumo
-        )
+        # O resumo único fica no rodapé, abaixo das duas modalidades.
 
         self.paginas.addWidget(
             pagina_personalizado
@@ -11031,6 +10990,9 @@ class JanelaConfigurarSimulado(QDialog):
         )
 
         self.quantidade_vighna = QSpinBox()
+        self.quantidade_vighna.setObjectName("mockExamSpinR3")
+        self.quantidade_vighna.setButtonSymbols(QAbstractSpinBox.NoButtons)
+        self.quantidade_vighna.setToolTip("Informe o total de questões; ajuste pelas setas do teclado.")
         total_disponivel = sum(
             item[
                 "disponiveis"
@@ -11115,8 +11077,10 @@ class JanelaConfigurarSimulado(QDialog):
             False
         )
         self.tabela_vighna.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarAlwaysOff
+            Qt.ScrollBarAsNeeded
         )
+        self.tabela_vighna.setWordWrap(False)
+        self.tabela_vighna.horizontalHeader().setMinimumHeight(38)
 
         header_vighna = (
             self.tabela_vighna.horizontalHeader()
@@ -11126,16 +11090,9 @@ class JanelaConfigurarSimulado(QDialog):
             QHeaderView.Stretch
         )
 
-        for coluna in (
-            1,
-            2,
-            3,
-            4
-        ):
-            header_vighna.setSectionResizeMode(
-                coluna,
-                QHeaderView.ResizeToContents
-            )
+        for coluna, largura in ((1, 95), (2, 190), (3, 120), (4, 105)):
+            header_vighna.setSectionResizeMode(coluna, QHeaderView.Fixed)
+            self.tabela_vighna.setColumnWidth(coluna, largura)
 
         self.vighna_resumo = QLabel(
             ""
@@ -11151,18 +11108,19 @@ class JanelaConfigurarSimulado(QDialog):
             self.tabela_vighna,
             1
         )
-        vighna_layout.addWidget(
-            self.vighna_resumo
-        )
+        # O resumo único fica abaixo do QStackedWidget.
 
         self.paginas.addWidget(
             pagina_vighna
         )
 
-        layout.addWidget(
-            self.paginas,
-            1
-        )
+        corpo_layout.addWidget(self.paginas, 1)
+        self.resumo_geral = QLabel()
+        self.resumo_geral.setObjectName("mockExamGlobalSummaryR3")
+        self.resumo_geral.setWordWrap(True)
+        corpo_layout.addWidget(self.resumo_geral)
+        corpo_scroll.setWidget(corpo)
+        layout.addWidget(corpo_scroll, 1)
 
         # ----------------------------------------------------
         # BOTÕES
@@ -11207,11 +11165,85 @@ class JanelaConfigurarSimulado(QDialog):
         self.formato.currentIndexChanged.connect(
             self.atualizar_formato_simulado
         )
+        self.tempo.valueChanged.connect(self.atualizar_resumo_geral)
+        self.regra_pontuacao.currentIndexChanged.connect(self.atualizar_resumo_geral)
+        self.preferir_ineditas.toggled.connect(self.atualizar_resumo_geral)
 
         self.atualizar_formato_simulado()
         self.atualizar_tipo()
         self.atualizar_preview_vighna()
         self.atualizar_resumo_personalizado()
+        self.atualizar_resumo_geral()
+
+    def alternar_regras(self, aberto):
+        self.regras_detalhadas.setVisible(bool(aberto))
+        self.botao_regras.setText("Ocultar regras ▾" if aberto else "Como funciona ▸")
+        self.botao_regras.setAccessibleName(
+            "Ocultar as regras do simulado" if aberto else "Expandir as regras do simulado"
+        )
+
+    def alterar_materias_em_lote(self, novos_valores):
+        """Aplica seleções sem eventos intermediários nem cálculo duplicado."""
+        for disciplina_id, linha in self.linhas_personalizadas.items():
+            check, spin = linha["check"], linha["spin"]
+            qtd = min(
+                max(0, int(novos_valores.get(disciplina_id, 0))),
+                int(linha["dados"].get("disponiveis", 0) or 0),
+            )
+            check.blockSignals(True)
+            spin.blockSignals(True)
+            try:
+                check.setChecked(qtd > 0)
+                spin.setEnabled(qtd > 0)
+                spin.setValue(qtd)
+            finally:
+                check.blockSignals(False)
+                spin.blockSignals(False)
+        self.atualizar_resumo_personalizado()
+
+    def selecionar_materias_disponiveis(self):
+        self.alterar_materias_em_lote({
+            disciplina_id: min(5, int(linha["dados"].get("disponiveis", 0) or 0))
+            for disciplina_id, linha in self.linhas_personalizadas.items()
+        })
+
+    def limpar_selecao_materias(self):
+        self.alterar_materias_em_lote({})
+
+    def distribuir_materias_igualmente(self):
+        ativos = {
+            disciplina_id: int(linha["dados"].get("disponiveis", 0) or 0)
+            for disciplina_id, linha in self.linhas_personalizadas.items()
+            if linha["check"].isChecked() and int(linha["dados"].get("disponiveis", 0) or 0) > 0
+        }
+        if not ativos:
+            QMessageBox.information(self, "Distribuição", "Selecione uma ou mais matérias antes de distribuir questões.")
+            return
+        alocacao = _distribuir_questoes_simulado_r3(ativos, min(50, sum(ativos.values())))
+        self.alterar_materias_em_lote(alocacao)
+
+    def atualizar_resumo_geral(self, *_args):
+        if not hasattr(self, "resumo_geral") or not hasattr(self, "iniciar"):
+            return
+        minutos = self.tempo.value()
+        tempo_txt = f"{minutos} min" if minutos else "sem limite"
+        regra_txt = "Cebraspe (+1/−1)" if self.regra_pontuacao.currentData() == "CEBRASPE" else "Normal (+1/0)"
+        ineditas = "priorizadas (com complemento se necessário)" if self.preferir_ineditas.isChecked() else "sem prioridade"
+        if self.tipo.currentIndex() == 0:
+            quantidades = self.quantidades_personalizadas()
+            qtd, materias = sum(quantidades.values()), len(quantidades)
+        else:
+            tem_disponibilidade = any(
+                int(item.get("disponiveis", 0) or 0) > 0
+                for item in self.disponibilidade
+            )
+            qtd = int(self.quantidade_vighna.value()) if tem_disponibilidade else 0
+            materias = self.tabela_vighna.rowCount() if tem_disponibilidade else 0
+        status = "Selecione matérias e quantidades." if qtd <= 0 else f"{materias} matéria(s) • {qtd} questão(ões)"
+        self.resumo_geral.setText(
+            f"03 — Resumo da prova  |  {status}  |  Tempo: {tempo_txt}  |  "
+            f"Pontuação: {regra_txt}  |  Inéditas: {ineditas}"
+        )
 
     def tipo_questao_selecionado(self):
         return self.formato.currentData()
@@ -11353,9 +11385,8 @@ class JanelaConfigurarSimulado(QDialog):
                 "Nenhuma matéria selecionada."
             )
             if self.tipo.currentIndex() == 0:
-                self.iniciar.setEnabled(
-                    False
-                )
+                self.iniciar.setEnabled(False)
+            self.atualizar_resumo_geral()
             return
 
         self.personalizado_resumo.setText(
@@ -11366,9 +11397,8 @@ class JanelaConfigurarSimulado(QDialog):
         )
 
         if self.tipo.currentIndex() == 0:
-            self.iniciar.setEnabled(
-                True
-            )
+            self.iniciar.setEnabled(True)
+        self.atualizar_resumo_geral()
 
     def atualizar_preview_vighna(
         self
@@ -11380,6 +11410,7 @@ class JanelaConfigurarSimulado(QDialog):
             )
             if self.tipo.currentIndex() in (1, 2):
                 self.iniciar.setEnabled(False)
+            self.atualizar_resumo_geral()
             return
 
         estrategia = (
@@ -11437,6 +11468,7 @@ class JanelaConfigurarSimulado(QDialog):
         )
         if self.tipo.currentIndex() in (1, 2):
             self.iniciar.setEnabled(plano["quantidade"] > 0)
+        self.atualizar_resumo_geral()
 
     def atualizar_tipo(
         self
@@ -11450,6 +11482,7 @@ class JanelaConfigurarSimulado(QDialog):
             self.atualizar_resumo_personalizado()
         else:
             self.atualizar_preview_vighna()
+        self.atualizar_resumo_geral()
 
     def confirmar(
         self
@@ -11469,6 +11502,21 @@ class JanelaConfigurarSimulado(QDialog):
                     "Selecione ao menos uma matéria e defina uma quantidade de questões."
                 )
                 return
+            disponibilidade_atual = obter_disponibilidade_simulado_disciplinas(
+                self.concurso[0], tipo_questao=tipo_questao
+            )
+            limites = {
+                int(item["disciplina_id"]): int(item.get("disponiveis", 0) or 0)
+                for item in disponibilidade_atual
+            }
+            if any(qtd <= 0 or qtd > limites.get(int(disciplina_id), 0)
+                   for disciplina_id, qtd in quantidades.items()):
+                QMessageBox.warning(
+                    self, "Disponibilidade alterada",
+                    "A quantidade disponível mudou. Revise os valores antes de iniciar o simulado."
+                )
+                self.atualizar_formato_simulado()
+                return
             selecao = montar_simulado_personalizado(
                 self.concurso[0],
                 quantidades,
@@ -11479,6 +11527,12 @@ class JanelaConfigurarSimulado(QDialog):
             modo = "Simulado • Prova real"
             estrategia_simulado = "prova_real"
         else:
+            if not self.disponibilidade or not any(
+                int(item.get("disponiveis", 0) or 0) > 0
+                for item in self.disponibilidade
+            ):
+                QMessageBox.information(self, "Simulado", "Não há questões disponíveis para este formato.")
+                return
             estrategia_simulado = (
                 "estrategico" if indice_tipo == 2 else "equilibrado"
             )
@@ -65475,14 +65529,14 @@ class JanelaTopico(QDialog):
         topo_resumo = QFrame(self)
         topo_resumo.setObjectName("topicSummaryCard")
         resumo_h = QHBoxLayout(topo_resumo)
-        resumo_h.setContentsMargins(14, 12, 14, 12)
-        resumo_h.setSpacing(14)
+        resumo_h.setContentsMargins(13, 9, 13, 9)
+        resumo_h.setSpacing(17)
 
         dominio_resumo = QFrame()
         dominio_resumo.setObjectName("topicSummaryHalf")
         dominio_resumo_layout = QVBoxLayout(dominio_resumo)
         dominio_resumo_layout.setContentsMargins(0, 0, 0, 0)
-        dominio_resumo_layout.setSpacing(6)
+        dominio_resumo_layout.setSpacing(5)
         dominio_eyebrow = QLabel("◎  Seu domínio atual")
         dominio_eyebrow.setObjectName("topicSummaryEyebrow")
         dominio_resumo_layout.addWidget(dominio_eyebrow)
@@ -65505,7 +65559,7 @@ class JanelaTopico(QDialog):
         self.proximo_card.setObjectName("topicSummaryHalf")
         proximo_layout = QVBoxLayout(self.proximo_card)
         proximo_layout.setContentsMargins(0, 0, 0, 0)
-        proximo_layout.setSpacing(5)
+        proximo_layout.setSpacing(4)
         aviso_titulo = QLabel("◷  Revisão programada")
         aviso_titulo.setObjectName("topicSummaryEyebrow")
         proximo_layout.addWidget(aviso_titulo)
@@ -65525,10 +65579,11 @@ class JanelaTopico(QDialog):
         self.proximo_atencao.setWordWrap(True)
         self.proximo_atencao.setVisible(False)
         proximo_layout.addWidget(self.proximo_atencao)
-        proximo_layout.addStretch(1)
         self.proximo_revisar_btn = QPushButton("◈  Revisar agora")
         self.proximo_revisar_btn.setObjectName("topicNextPrimaryButton")
-        self.proximo_revisar_btn.setFixedHeight(38)
+        self.proximo_revisar_btn.setMinimumHeight(34)
+        self.proximo_revisar_btn.setMaximumHeight(38)
+        self.proximo_revisar_btn.setMaximumWidth(320)
         self.proximo_revisar_btn.clicked.connect(self.revisar_topico)
         proximo_layout.addWidget(self.proximo_revisar_btn)
         resumo_h.addWidget(self.proximo_card, 1)
@@ -65542,41 +65597,68 @@ class JanelaTopico(QDialog):
         pagina_visao_geral.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         visao_conteudo = QWidget()
         visao_conteudo.setObjectName("topicOverviewContent")
-        pagina_visao_geral.setWidget(visao_conteudo)
+        # Construir o layout ANTES de instalar o conteúdo na QScrollArea.
+        # Isso permite ao Qt calcular corretamente os sizeHints dos painéis.
         visao_layout = QVBoxLayout(visao_conteudo)
-        visao_layout.setContentsMargins(0, 2, 0, 4)
+        visao_layout.setContentsMargins(3, 3, 3, 5)
         visao_layout.setSpacing(9)
+        visao_layout.setAlignment(Qt.AlignTop)
         diagnosticos_linha = QHBoxLayout()
         diagnosticos_linha.setSpacing(10)
 
         self.dominio_card = QFrame()
         self.dominio_card.setObjectName("topicDomainCardModern")
         dominio_layout = QVBoxLayout(self.dominio_card)
-        dominio_layout.setContentsMargins(15, 13, 15, 13)
-        dominio_layout.setSpacing(7)
+        dominio_layout.setContentsMargins(13, 11, 13, 11)
+        dominio_layout.setSpacing(8)
         titulo_analise = QLabel("◧  Análise de domínio")
         titulo_analise.setObjectName("topicDomainTitleModern")
         dominio_layout.addWidget(titulo_analise)
+        explicacao_indicadores = QLabel(
+            "Componentes do índice do Vighna (0 a 100). "
+            "Passe o cursor sobre o nome para entender cada dimensão."
+        )
+        explicacao_indicadores.setObjectName("topicSummaryExplanation")
+        explicacao_indicadores.setWordWrap(True)
+        dominio_layout.addWidget(explicacao_indicadores)
         self._topic_metric_bars = {}
-        for titulo_metrica, atributo in (
+        # Três linhas em duas colunas, em vez de seis componentes empilhados.
+        metricas_grid = QGridLayout()
+        metricas_grid.setContentsMargins(0, 0, 0, 0)
+        metricas_grid.setHorizontalSpacing(16)
+        metricas_grid.setVerticalSpacing(9)
+        descricoes_componentes = {
+            "dominio_desempenho": "Componente de desempenho calculado pelo motor de domínio; não equivale necessariamente à taxa bruta de acertos.",
+            "dominio_variedade": "Componente que considera a diversidade de questões e evidências utilizada pelo motor.",
+            "dominio_estabilidade": "Indicador de consistência calculado pelo motor. Valores menores merecem acompanhamento; não alteram sozinhos o diagnóstico oficial.",
+            "dominio_recencia": "Componente que considera a atualidade das evidências de estudo.",
+            "dominio_erros": "Componente do controle de erros e recuperação conforme as regras existentes do motor.",
+            "dominio_evidencia_score": "Componente de qualidade e quantidade das evidências registradas no histórico.",
+        }
+        for idx, (titulo_metrica, atributo) in enumerate((
             ("Desempenho", "dominio_desempenho"),
             ("Variedade", "dominio_variedade"),
             ("Estabilidade", "dominio_estabilidade"),
             ("Recência", "dominio_recencia"),
             ("Erros / recuperação", "dominio_erros"),
             ("Evidência", "dominio_evidencia_score"),
-        ):
+        )):
+            grupo = QWidget(self.dominio_card)
+            grupo_layout = QVBoxLayout(grupo)
+            grupo_layout.setContentsMargins(0, 0, 0, 0)
+            grupo_layout.setSpacing(4)
             rotulo_linha = QHBoxLayout()
             rotulo_linha.setSpacing(5)
             rotulo = QLabel(titulo_metrica)
             rotulo.setObjectName("topicDomainComponentLabelModern")
+            rotulo.setToolTip(descricoes_componentes[atributo])
             valor = QLabel("—")
             valor.setObjectName("topicDomainComponentValueModern")
             valor.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
             setattr(self, atributo, valor)
             rotulo_linha.addWidget(rotulo, 1)
             rotulo_linha.addWidget(valor)
-            dominio_layout.addLayout(rotulo_linha)
+            grupo_layout.addLayout(rotulo_linha)
             barra = QProgressBar()
             barra.setObjectName("topicDiagnosticBar")
             barra.setProperty("metric", atributo)
@@ -65584,15 +65666,19 @@ class JanelaTopico(QDialog):
             barra.setValue(0)
             barra.setTextVisible(False)
             barra.setFixedHeight(6)
+            barra.setToolTip(descricoes_componentes[atributo])
             self._topic_metric_bars[atributo] = barra
-            dominio_layout.addWidget(barra)
-        dominio_layout.addStretch(1)
+            grupo_layout.addWidget(barra)
+            metricas_grid.addWidget(grupo, idx // 2, idx % 2)
+        metricas_grid.setColumnStretch(0, 1)
+        metricas_grid.setColumnStretch(1, 1)
+        dominio_layout.addLayout(metricas_grid)
         diagnosticos_linha.addWidget(self.dominio_card, 1)
 
         diagnostico_card = QFrame()
         diagnostico_card.setObjectName("topicDiagnosticCard")
         diagnostico_layout = QVBoxLayout(diagnostico_card)
-        diagnostico_layout.setContentsMargins(15, 13, 15, 13)
+        diagnostico_layout.setContentsMargins(13, 11, 13, 11)
         diagnostico_layout.setSpacing(7)
         titulo_diag = QLabel("✧  Diagnóstico Vighna")
         titulo_diag.setObjectName("topicDomainTitleModern")
@@ -65615,10 +65701,17 @@ class JanelaTopico(QDialog):
         self.dominio_motivos.setObjectName("topicDomainInsightText")
         self.dominio_motivos.setWordWrap(True)
         diagnostico_layout.addWidget(self.dominio_motivos)
-        diagnostico_layout.addStretch(1)
+        self.dominio_observacao_visual = QLabel("")
+        self.dominio_observacao_visual.setObjectName("topicDomainVisualObservation")
+        self.dominio_observacao_visual.setWordWrap(True)
+        self.dominio_observacao_visual.setToolTip(
+            "Observação informativa da interface; não altera score, critérios, "
+            "classificações ou recomendações do motor de domínio."
+        )
+        self.dominio_observacao_visual.hide()
+        diagnostico_layout.addWidget(self.dominio_observacao_visual)
         self.topic_last_practice = QLabel("—")
         self.topic_last_practice.setObjectName("topicLastPractice")
-        diagnostico_layout.addWidget(self.topic_last_practice)
         diagnosticos_linha.addWidget(diagnostico_card, 1)
         visao_layout.addLayout(diagnosticos_linha)
 
@@ -65629,10 +65722,14 @@ class JanelaTopico(QDialog):
         evidencia_layout.setContentsMargins(14, 11, 14, 11)
         evidencia_layout.setSpacing(6)
         evidencia_titulo_linha = QHBoxLayout()
+        self._evidencia_titulo_linha = evidencia_titulo_linha
         titulo_evidencia = QLabel("♧  Base de evidências")
         titulo_evidencia.setObjectName("topicDomainTitleModern")
         evidencia_titulo_linha.addWidget(titulo_evidencia)
         evidencia_titulo_linha.addStretch(1)
+        # A última prática acompanha as evidências, não ocupa um rodapé isolado
+        # no painel de diagnóstico.
+        evidencia_titulo_linha.addWidget(self.topic_last_practice)
         self.proximo_historico_btn = QPushButton("Ver histórico  →")
         self.proximo_historico_btn.setObjectName("topicEvidenceLink")
         self.proximo_historico_btn.setCursor(Qt.PointingHandCursor)
@@ -65669,6 +65766,7 @@ class JanelaTopico(QDialog):
         evidencia_layout.addWidget(self.aviso_legado)
         visao_layout.addWidget(evidencia_card)
         visao_layout.addStretch(1)
+        pagina_visao_geral.setWidget(visao_conteudo)
 
         # Historical metrics remain available on the History tab.
         metricas_anteriores = QFrame()
@@ -65772,12 +65870,22 @@ class JanelaTopico(QDialog):
         registrar_manual.clicked.connect(self.nova_revisao)
         topo_historico.addWidget(registrar_manual)
 
-        alterar_data = QPushButton("Alterar próxima")
-        alterar_data.setObjectName("topicHistoryButton")
-        alterar_data.setToolTip("Alterar manualmente a data da próxima revisão.")
-        alterar_data.clicked.connect(self.alterar_proxima_revisao)
-        topo_historico.addWidget(alterar_data)
         historico_layout.addLayout(topo_historico)
+        agenda_linha = QHBoxLayout()
+        agenda_linha.setSpacing(8)
+        self.hist_agenda_info = QLabel("Agenda: —")
+        self.hist_agenda_info.setObjectName("topicHistoryHint")
+        agenda_linha.addWidget(self.hist_agenda_info, 1)
+        alterar_data = QPushButton("Reagendar próxima revisão")
+        alterar_data.setObjectName("topicHistoryButton")
+        alterar_data.setToolTip("Editar a data planejada para a próxima revisão.")
+        alterar_data.clicked.connect(self.alterar_proxima_revisao)
+        agenda_linha.addWidget(alterar_data)
+        historico_layout.addLayout(agenda_linha)
+        self.hist_resumo_registros = QLabel("Carregando histórico…")
+        self.hist_resumo_registros.setObjectName("topicHistoryHint")
+        self.hist_resumo_registros.setWordWrap(True)
+        historico_layout.addWidget(self.hist_resumo_registros)
 
         self.tabela = QTableWidget()
         self.tabela.setObjectName("topicHistoryTable")
@@ -65795,7 +65903,24 @@ class JanelaTopico(QDialog):
         self.tabela.setAlternatingRowColors(True)
         self.tabela.setShowGrid(False)
         self.tabela.verticalHeader().setVisible(False)
-        self.tabela.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        cabecalho_tabela = self.tabela.horizontalHeader()
+        cabecalho_tabela.setSectionResizeMode(0, QHeaderView.Fixed)
+        cabecalho_tabela.resizeSection(0, 112)
+        cabecalho_tabela.setSectionResizeMode(1, QHeaderView.Fixed)
+        cabecalho_tabela.resizeSection(1, 88)
+        cabecalho_tabela.setSectionResizeMode(2, QHeaderView.Fixed)
+        cabecalho_tabela.resizeSection(2, 78)
+        cabecalho_tabela.setSectionResizeMode(3, QHeaderView.Fixed)
+        cabecalho_tabela.resizeSection(3, 103)
+        cabecalho_tabela.setSectionResizeMode(4, QHeaderView.Stretch)
+        self.tabela.setSortingEnabled(True)
+        self.tabela.sortItems(0, Qt.DescendingOrder)
+        self.tabela.setMinimumHeight(180)
+        self.tabela.setMaximumHeight(330)
+        self.tabela.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
+        self.tabela.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
+        self.tabela.setAccessibleName("Histórico cronológico das revisões detalhadas")
+        self.tabela.setToolTip("Clique no cabeçalho para ordenar. Selecione uma linha para consultar os detalhes.")
         historico_layout.addWidget(self.tabela, 1)
 
         linha_acoes = QHBoxLayout()
@@ -65804,11 +65929,15 @@ class JanelaTopico(QDialog):
         self.editar_revisao_btn.setObjectName("topicHistoryButton")
         self.editar_revisao_btn.clicked.connect(self.editar_revisao)
         self.excluir_revisao_btn = QPushButton("Excluir revisão")
-        self.excluir_revisao_btn.setObjectName("dangerButton")
+        self.excluir_revisao_btn.setObjectName("topicHistoryDeleteButton")
         self.excluir_revisao_btn.clicked.connect(self.excluir_revisao_selecionada)
         linha_acoes.addWidget(self.editar_revisao_btn)
         linha_acoes.addWidget(self.excluir_revisao_btn)
         historico_layout.addLayout(linha_acoes)
+        self.hist_estado_acoes = QLabel("Selecione uma revisão para consultar seus detalhes.")
+        self.hist_estado_acoes.setObjectName("topicHistoryHint")
+        self.hist_estado_acoes.setWordWrap(True)
+        historico_layout.addWidget(self.hist_estado_acoes)
 
         card_detalhes = QFrame()
         card_detalhes.setObjectName("topicHistoryDetailsCard")
@@ -65825,7 +65954,7 @@ class JanelaTopico(QDialog):
         self.detalhes = QTextEdit()
         self.detalhes.setObjectName("detailsReadOnly")
         self.detalhes.setReadOnly(True)
-        self.detalhes.setPlaceholderText("Nenhuma revisão selecionada.")
+        self.detalhes.setPlaceholderText("Selecione uma linha da tabela para consultar a revisão.")
         self.detalhes.setMinimumHeight(170)
         detalhes_layout.addWidget(subtitulo_detalhes)
         detalhes_layout.addWidget(explicacao_detalhes)
@@ -65849,8 +65978,8 @@ class JanelaTopico(QDialog):
         historico_pagina_layout.addWidget(voltar_geral, 0, Qt.AlignLeft)
         historico_principal = QHBoxLayout()
         historico_principal.setSpacing(10)
-        historico_principal.addWidget(card_historico, 3)
-        historico_principal.addWidget(card_detalhes, 2)
+        historico_principal.addWidget(card_historico, 7)
+        historico_principal.addWidget(card_detalhes, 4)
         historico_pagina_layout.addLayout(historico_principal)
         historico_pagina_layout.addWidget(card_evolucao)
         historico_pagina_layout.addWidget(metricas_anteriores)
@@ -65870,6 +65999,39 @@ class JanelaTopico(QDialog):
 
         self.tabela.itemSelectionChanged.connect(self.mostrar_detalhes)
         self.carregar_historico()
+
+    @staticmethod
+    def _observacao_visual_componentes(dominio):
+        """Apenas apresentação. Não altera as classificações do motor.
+
+        O limite de 50 é uma referência visual identificada no texto, não um
+        limiar oficial para limitar pontuação, domínio ou agenda de revisões.
+        """
+        campos = (
+            ("Desempenho", "desempenho"),
+            ("Variedade", "variedade"),
+            ("Estabilidade", "estabilidade"),
+            ("Recência", "recencia"),
+            ("Erros / recuperação", "controle_erros"),
+            ("Evidência", "evidencia"),
+        )
+        abaixo = []
+        for rotulo, chave in campos:
+            bruto = dominio.get(chave)
+            if bruto is None:
+                continue
+            try:
+                valor = float(bruto)
+            except (ValueError, TypeError):
+                continue
+            if 0 <= valor < 50:
+                abaixo.append(f"{rotulo}: {valor:.0f}/100")
+        if not abaixo:
+            return ""
+        return (
+            "Observação visual (referência 50/100): " + ", ".join(abaixo)
+            + ". Esta indicação não muda a avaliação oficial do Vighna."
+        )
 
     def carregar_historico(self):
         resumo = obter_resumo_topico(
@@ -66002,8 +66164,13 @@ class JanelaTopico(QDialog):
         self.dominio_motivos.setText(
             " • ".join(motivos_dominio)
             if motivos_dominio
-            else "Nenhum limitador relevante aberto no momento."
+            else "O motor de domínio não sinalizou limitadores adicionais."
         )
+        # Referência VISUAL para chamar atenção a pontuações baixas sem
+        # substituir a avaliação oficial nem criar uma nova regra de domínio.
+        observacao_visual = self._observacao_visual_componentes(dominio)
+        self.dominio_observacao_visual.setText(observacao_visual)
+        self.dominio_observacao_visual.setVisible(bool(observacao_visual))
 
         self.dados_revisoes = (
             listar_revisoes_topico(
@@ -66011,9 +66178,14 @@ class JanelaTopico(QDialog):
             )
         )
 
-        self.tabela.setRowCount(
-            len(self.dados_revisoes)
-        )
+        selecao_anterior = self._id_revisao_selecionada()
+        coluna_ordenada = self.tabela.horizontalHeader().sortIndicatorSection()
+        ordem_ordenada = self.tabela.horizontalHeader().sortIndicatorOrder()
+        ordenacao_ativa = self.tabela.isSortingEnabled()
+        self.tabela.blockSignals(True)
+        self.tabela.setSortingEnabled(False)
+        self.tabela.setRowCount(0)
+        self.tabela.setRowCount(len(self.dados_revisoes))
 
         for linha, revisao in enumerate(
             self.dados_revisoes
@@ -66053,23 +66225,50 @@ class JanelaTopico(QDialog):
             for coluna, valor in enumerate(
                 valores
             ):
-                item = QTableWidgetItem(
-                    valor
-                )
-                item.setTextAlignment(
-                    Qt.AlignCenter
-                )
+                item = _ItemHistoricoOrdenavel(valor)
+                item.setTextAlignment(Qt.AlignCenter if coluna < 4
+                                      else (Qt.AlignLeft | Qt.AlignVCenter))
+                item.setData(Qt.UserRole, revisao[0])
+                if coluna == 0:
+                    chave = str(revisao[1] or "")[:10]
+                elif coluna in (1, 2):
+                    chave = int(revisao[2 + coluna - 1] or 0)
+                elif coluna == 3:
+                    chave = float(revisao[4] or 0.0)
+                else:
+                    chave = str(valor).casefold()
+                item.setData(int(Qt.UserRole) + 1, chave)
+                item.setToolTip(str(valor))
+                self.tabela.setItem(linha, coluna, item)
 
-                self.tabela.setItem(
-                    linha,
-                    coluna,
-                    item
-                )
-
-            self.tabela.setRowHeight(
-                linha,
-                30
-            )
+            self.tabela.setRowHeight(linha, 32)
+        self.tabela.setSortingEnabled(ordenacao_ativa)
+        if ordenacao_ativa and 0 <= coluna_ordenada < self.tabela.columnCount():
+            self.tabela.sortItems(coluna_ordenada, ordem_ordenada)
+        self.tabela.clearSelection()
+        self.tabela.setCurrentCell(-1, -1)
+        if selecao_anterior is not None:
+            for linha in range(self.tabela.rowCount()):
+                item = self.tabela.item(linha, 0)
+                if item is not None and str(item.data(Qt.UserRole)) == str(selecao_anterior):
+                    self.tabela.setCurrentCell(linha, 0)
+                    self.tabela.selectRow(linha)
+                    break
+        self.tabela.blockSignals(False)
+        importadas = max(0, int(resumo.get("revisoes_iniciais", 0) or 0))
+        total = max(len(self.dados_revisoes), int(resumo.get("revisoes_totais", 0) or 0))
+        sem_detalhes = max(0, total - len(self.dados_revisoes))
+        if sem_detalhes:
+            origem_legada = (f"{sem_detalhes} importada(s) do Excel, sem detalhes individuais"
+                             if sem_detalhes == importadas
+                             else f"{sem_detalhes} sem detalhamento individual")
+            mensagem_hist = (f"{total} revisões no total • "
+                              f"{len(self.dados_revisoes)} detalhada(s) • {origem_legada}.")
+        else:
+            mensagem_hist = f"{total} revisão(ões) detalhada(s)."
+        self.hist_resumo_registros.setText(mensagem_hist)
+        self.hist_agenda_info.setText("Próxima revisão: " +
+                                      formatar_data(resumo.get("proxima_revisao")))
 
         # Resumo executivo da página do tópico. Os números usam a mesma
         # telemetria que alimenta o Domínio V2 e o motor de recomendação.
@@ -66118,7 +66317,7 @@ class JanelaTopico(QDialog):
         self.valor_ultima_pratica_topico.setText(
             texto_ultima
         )
-        self.topic_last_practice.setText("Última prática\n" + texto_ultima)
+        self.topic_last_practice.setText("Última prática: " + texto_ultima)
 
         self.valor_proxima_topico.setText(
             formatar_data(
@@ -66201,6 +66400,23 @@ class JanelaTopico(QDialog):
         self.proximo_atencao.setText(
             f"{erros_em_atencao} erro(s) em atenção • {quantidade_questoes} questão(ões) ativa(s)"
         )
+        self.proximo_atencao.setVisible(erros_em_atencao > 0)
+        if estado_agenda in ("overdue", "today"):
+            self.proximo_revisar_btn.setText("Iniciar revisão por questões")
+        elif estado_agenda in ("soon", "future"):
+            self.proximo_revisar_btn.setText("Antecipar revisão por questões")
+        else:
+            self.proximo_revisar_btn.setText("Estudar por questões")
+        topico_pausado = topico_esta_pausado(self.topico_id)
+        tem_questoes = quantidade_questoes > 0
+        self.proximo_revisar_btn.setEnabled(not topico_pausado and tem_questoes)
+        if topico_pausado:
+            mensagem_acao = "Reative o tópico antes de iniciar questões."
+        elif not tem_questoes:
+            mensagem_acao = "Não há questões ativas para iniciar uma revisão."
+        else:
+            mensagem_acao = "Iniciar uma sessão interna de questões do tópico."
+        self.proximo_revisar_btn.setToolTip(mensagem_acao)
 
         iniciais = resumo[
             "revisoes_iniciais"
@@ -66234,10 +66450,9 @@ class JanelaTopico(QDialog):
         ]
 
         rotulos_grafico = [
-            f"R{i + 1}"
-            for i in range(
-                len(cronologico)
-            )
+            (formatar_data(revisao[1])[:6] + formatar_data(revisao[1])[-2:])
+            if len(formatar_data(revisao[1])) == 10 else formatar_data(revisao[1])
+            for revisao in cronologico
         ]
 
         self.grafico_evolucao.definir_dados(
@@ -66286,59 +66501,40 @@ class JanelaTopico(QDialog):
                 f"Pior {formatar_percentual(pior)}"
             )
 
-        self.detalhes.clear()
-        self.atualizar_estado_botoes()
+        self.mostrar_detalhes()
+
+    def _id_revisao_selecionada(self):
+        item = self.tabela.item(self.tabela.currentRow(), 0)
+        if item is None or not item.isSelected():
+            return None
+        return item.data(Qt.UserRole)
+
+    def _revisao_selecionada(self):
+        identificador = self._id_revisao_selecionada()
+        if identificador is None:
+            return None
+        for revisao in self.dados_revisoes:
+            if str(revisao[0]) == str(identificador):
+                return revisao
+        return None
 
     def atualizar_estado_botoes(self):
-        tem_selecao = (
-            self.tabela.currentRow() >= 0
-            and len(self.dados_revisoes) > 0
-        )
-
-        automatica = False
-
-        if tem_selecao:
-            revisao = self.dados_revisoes[
-                self.tabela.currentRow()
-            ]
-            automatica = (
-                len(
-                    revisao
-                ) > 8
-                and revisao[8]
-                == "questoes_internas"
-            )
-
-        editavel = (
-            tem_selecao
-            and not automatica
-        )
-
-        self.editar_revisao_btn.setEnabled(
-            editavel
-        )
-        self.excluir_revisao_btn.setEnabled(
-            editavel
-        )
-
+        revisao = self._revisao_selecionada()
+        automatica = (revisao is not None and len(revisao) > 8
+                      and revisao[8] == "questoes_internas")
+        editavel = revisao is not None and not automatica
+        self.editar_revisao_btn.setEnabled(editavel)
+        self.excluir_revisao_btn.setEnabled(editavel)
         if automatica:
-            texto = (
-                "Revisões automáticas são controladas pelas "
-                "tentativas das questões internas."
-            )
-            self.editar_revisao_btn.setToolTip(
-                texto
-            )
-            self.excluir_revisao_btn.setToolTip(
-                texto
-            )
+            aviso = ("Revisão automática: registro protegido. "
+                     "Consulte as questões vinculadas no painel de detalhes.")
+        elif revisao is not None:
+            aviso = "Revisão manual: os comandos Editar e Excluir estão disponíveis."
         else:
-            self.editar_revisao_btn.setToolTip(
-                "Editar a revisão manual selecionada."
-            )
-            self.excluir_revisao_btn.setToolTip(
-                "Excluir a revisão manual selecionada."
-            )
+            aviso = "Selecione uma revisão. Somente registros manuais podem ser editados ou excluídos."
+        self.hist_estado_acoes.setText(aviso)
+        self.editar_revisao_btn.setToolTip(aviso)
+        self.excluir_revisao_btn.setToolTip(aviso)
 
     def exec(self):
         """Mantém a API dos chamadores sem tornar a página do tópico modal."""
@@ -66453,12 +66649,9 @@ class JanelaTopico(QDialog):
             self.carregar_historico()
 
     def editar_revisao(self):
-        linha = self.tabela.currentRow()
-
-        if linha < 0:
+        revisao = self._revisao_selecionada()
+        if revisao is None or (len(revisao) > 8 and revisao[8] == "questoes_internas"):
             return
-
-        revisao = self.dados_revisoes[linha]
 
         janela = JanelaRevisao(
             self.topico_id,
@@ -66473,12 +66666,9 @@ class JanelaTopico(QDialog):
             self.carregar_historico()
 
     def excluir_revisao_selecionada(self):
-        linha = self.tabela.currentRow()
-
-        if linha < 0:
+        revisao = self._revisao_selecionada()
+        if revisao is None or (len(revisao) > 8 and revisao[8] == "questoes_internas"):
             return
-
-        revisao = self.dados_revisoes[linha]
 
         resposta = QMessageBox.question(
             self,
@@ -66576,114 +66766,45 @@ class JanelaTopico(QDialog):
             self.carregar_historico()
 
     def mostrar_detalhes(self):
-        linha = self.tabela.currentRow()
-
-        if linha < 0:
+        revisao = self._revisao_selecionada()
+        if revisao is None:
             self.detalhes.clear()
             self.atualizar_estado_botoes()
             return
 
-        revisao = self.dados_revisoes[
-            linha
-        ]
+        def campo(titulo, conteudo):
+            texto = _escape_html_historico(str(conteudo or "—")).replace("\n", "<br>")
+            return ("<p style='margin:0 0 11px 0;'>"
+                    f"<b>{_escape_html_historico(titulo)}</b><br>{texto}</p>")
 
-        observacao = revisao[5] or "—"
-        texto_erros = revisao[6] or "—"
-        continuacao = revisao[7] or "—"
-
-        origem = (
-            revisao[8]
-            if len(
-                revisao
-            ) > 8
-            else "manual"
-        )
-
-        if origem == "questoes_internas":
-            confianca = (
-                revisao[9]
-                if len(
-                    revisao
-                ) > 9
-                else ""
-            )
-
-            if confianca == "muito_baixa":
-                confianca_texto = (
-                    "Muito baixa • primeiro contato"
-                )
-            elif confianca == "baixa":
-                confianca_texto = (
-                    "Baixa confiança"
-                )
-            else:
-                confianca_texto = (
-                    "Normal"
-                )
-
-            tentativas = (
-                listar_tentativas_revisao_automatica(
-                    revisao[0]
-                )
-            )
-
-            linhas_questoes = []
-
+        interna = len(revisao) > 8 and revisao[8] == "questoes_internas"
+        partes = [campo("Data", formatar_data(revisao[1])),
+                  campo("Resultado", f"{revisao[3]}/{revisao[2]} acertos • "
+                        + formatar_percentual(revisao[4])),
+                  campo("Origem", "Questões internas • registro protegido"
+                        if interna else "Revisão manual")]
+        if interna:
+            confianca = revisao[9] if len(revisao) > 9 else ""
+            legenda = {"muito_baixa": "Muito baixa • primeiro contato",
+                       "baixa": "Baixa confiança"}.get(confianca, "Normal")
+            partes.append(campo("Confiança", legenda))
+            tentativas = listar_tentativas_revisao_automatica(revisao[0])
+            linhas = []
             for tentativa in tentativas:
-                linhas_questoes.append(
-                    (
-                        f"#{tentativa['questao_id']} • "
-                        f"{tentativa['status']} • "
-                        f"marcada {tentativa['marcada'] or '—'} • "
-                        f"gabarito {tentativa['gabarito'] or '—'}"
-                        + (
-                            " • dúvida"
-                            if tentativa[
-                                "duvida"
-                            ]
-                            else ""
-                        )
-                    )
+                linhas.append(
+                    f"#{tentativa['questao_id']} • {tentativa['status']} • "
+                    f"marcada {tentativa['marcada'] or '—'} • "
+                    f"gabarito {tentativa['gabarito'] or '—'}"
+                    + (" • dúvida" if tentativa['duvida'] else "")
                 )
-
-            bloco_questoes = (
-                "\n".join(
-                    linhas_questoes
-                )
-                if linhas_questoes
-                else "Nenhuma tentativa vinculada."
-            )
-
-            self.detalhes.setPlainText(
-                "ORIGEM\n"
-                "──────\n"
-                "Questões internas\n\n"
-                "CONFIANÇA\n"
-                "─────────\n"
-                f"{confianca_texto}\n\n"
-                "QUESTÕES QUE FORMARAM A REVISÃO\n"
-                "───────────────────────────────\n"
-                f"{bloco_questoes}\n\n"
-                "OBSERVAÇÃO\n"
-                "──────────\n"
-                f"{observacao}"
-            )
+            partes.append(campo("Questões vinculadas", "\n".join(linhas)
+                                if linhas else "Nenhuma tentativa vinculada."))
+            partes.append(campo("Observação", revisao[5]))
         else:
-            self.detalhes.setPlainText(
-                "ORIGEM\n"
-                "──────\n"
-                "Registro manual\n\n"
-                "OBSERVAÇÃO\n"
-                "──────────\n"
-                f"{observacao}\n\n"
-                "TEXTO DE ERROS\n"
-                "──────────────\n"
-                f"{texto_erros}\n\n"
-                "CONTINUAÇÃO\n"
-                "───────────\n"
-                f"{continuacao}"
-            )
-
+            partes.extend((campo("Observação", revisao[5]),
+                           campo("Texto de erros", revisao[6]),
+                           campo("Continuação", revisao[7])))
+        self.detalhes.setHtml("<div style='font-size:11pt'>" + "".join(partes) + "</div>")
         self.atualizar_estado_botoes()
 
 
@@ -66968,7 +67089,9 @@ class CentralIntegradaTopico(JanelaTopico):
     def _aba_alterada_e04(self, indice):
         if indice == self._ABAS["questoes"]:
             self._carregar_questoes_e04()
-        elif indice == self._ABAS["historico"]:
+        elif indice in (self._ABAS["historico"], self._ABAS["resumo"]):
+            # O Resumo e o Histórico consultam os mesmos dados oficiais. Um
+            # retorno à aba após estudo ou alteração da agenda atualiza ambos.
             self.carregar_historico()
 
     def _carregar_questoes_e04(self):
@@ -67109,10 +67232,9 @@ class CentralIntegradaTopico(JanelaTopico):
         self._mostrar_formulario_revisao_e04()
 
     def editar_revisao(self):
-        linha = self.tabela.currentRow()
-        if linha < 0 or linha >= len(self.dados_revisoes):
+        revisao = self._revisao_selecionada()
+        if revisao is None:
             return
-        revisao = self.dados_revisoes[linha]
         if len(revisao) > 8 and revisao[8] == "questoes_internas":
             QMessageBox.information(
                 self, "Revisão automática",
@@ -67377,26 +67499,30 @@ class CentralIntegradaTopico(JanelaTopico):
         faixa.setObjectName("centralResumoIntroducao")
         faixa_layout = QVBoxLayout(faixa)
         faixa_layout.setContentsMargins(13, 9, 13, 9)
-        faixa_layout.setSpacing(3)
+        faixa_layout.setSpacing(2)
+        faixa_linha = QHBoxLayout()
+        faixa_linha.setSpacing(8)
         titulo = QLabel("RESUMO DO TÓPICO")
         titulo.setObjectName("centralResumoTitulo")
+        faixa_linha.addWidget(titulo)
+        faixa_linha.addStretch(1)
+        # Move o mesmo botão do quadro de evidências para o cabeçalho, sem
+        # duplicar sinal ou widget. Histórico fica acessível sem rolar.
+        self._evidencia_titulo_linha.removeWidget(self.proximo_historico_btn)
+        self.proximo_historico_btn.setParent(faixa)
+        self.proximo_historico_btn.setText("Histórico e registros  →")
+        faixa_linha.addWidget(self.proximo_historico_btn)
+        faixa_layout.addLayout(faixa_linha)
         descricao = QLabel(
-            "Domínio, próxima revisão, diagnóstico e evidências reunidos em uma única visão."
+            "Domínio, próxima revisão, diagnóstico e evidências em uma única visão."
         )
         descricao.setObjectName("centralResumoDescricao")
         descricao.setWordWrap(True)
-        faixa_layout.addWidget(titulo)
         faixa_layout.addWidget(descricao)
         miolo.insertWidget(0, faixa)
         miolo.insertWidget(1, quadro)
 
         # Ações já existentes e conectadas pela JanelaTopico.
-        self.proximo_revisar_btn.setText("Iniciar revisão por questões")
-        self.proximo_revisar_btn.setToolTip(
-            "Abre o resolvedor interno para uma revisão do tópico. "
-            "As respostas da sessão são registradas conforme as regras do Vighna."
-        )
-        self.proximo_historico_btn.setText("Histórico e registros  →")
         self.proximo_historico_btn.setToolTip(
             "Ver a evolução e registrar uma revisão realizada fora do aplicativo."
         )
@@ -67679,6 +67805,76 @@ class CentralIntegradaTopico(JanelaTopico):
                 background: {c['superficie']}; color: {c['muted']};
                 border-left: 2px solid {c['ouro']}; border-radius: 6px;
                 padding: 8px 11px;
+            }}
+        """
+        qss += f"""
+            QDialog#centralIntegradaTopico QTableWidget#topicHistoryTable {{
+                background: {c['fundo']}; color: {c['texto']};
+                alternate-background-color: {c['linha']};
+                border: 1px solid {c['borda']}; border-radius: 7px;
+                selection-background-color: {c['selecionado']};
+                selection-color: {c['texto']};
+            }}
+            QDialog#centralIntegradaTopico QTableWidget#topicHistoryTable QHeaderView::section {{
+                background: {c['superficie']}; color: {c['texto']};
+                border: none; border-bottom: 1px solid {c['borda']};
+                padding: 7px 6px; font-weight: 600;
+            }}
+            QDialog#centralIntegradaTopico QPushButton#topicHistoryButton,
+            QDialog#centralIntegradaTopico QPushButton#topicHistoryDeleteButton {{
+                background: {c['superficie']}; color: {c['texto']};
+                border: 1px solid {c['borda']}; border-radius: 7px;
+                padding: 7px 11px; min-height: 27px;
+            }}
+            QDialog#centralIntegradaTopico QPushButton#topicHistoryDeleteButton:enabled {{
+                border-color: {c['ouro']}; color: {c['texto']};
+            }}
+            QDialog#centralIntegradaTopico QPushButton#topicHistoryButton:hover:enabled,
+            QDialog#centralIntegradaTopico QPushButton#topicHistoryDeleteButton:hover:enabled {{
+                border-color: {c['ciano']}; background: {c['hover']};
+            }}
+            QDialog#centralIntegradaTopico QPushButton#topicHistoryButton:disabled,
+            QDialog#centralIntegradaTopico QPushButton#topicHistoryDeleteButton:disabled {{
+                background: {c['fundo']}; color: {c['muted']};
+                border: 1px solid {c['borda']};
+            }}
+            QDialog#centralIntegradaTopico QLabel#topicHistoryHint {{
+                color: {c['muted']}; background: transparent; border: none;
+            }}
+            QDialog#centralIntegradaTopico QTextEdit#detailsReadOnly {{
+                background: {c['superficie']}; color: {c['texto']};
+                border: 1px solid {c['borda']}; border-radius: 7px;
+                padding: 9px;
+            }}
+        """
+        qss += f"""
+            QDialog#centralIntegradaTopico QLabel#topicDomainScoreModern {{
+                color: {c['texto']}; font-size: 27px; font-weight: 700;
+                background: transparent; border: none; padding: 0px;
+            }}
+            QDialog#centralIntegradaTopico QLabel#topicNextStatus {{
+                font-size: 18px; font-weight: 700; color: {c['texto']};
+                background: transparent; border: none;
+            }}
+            QDialog#centralIntegradaTopico QLabel#topicSummaryExplanation {{
+                color: {c['muted']}; font-size: 11px;
+                background: transparent; border: none;
+            }}
+            QDialog#centralIntegradaTopico QLabel#topicDomainVisualObservation {{
+                background: {c['cartao']}; color: {c['ouro']};
+                border-left: 3px solid {c['ouro']}; border-radius: 5px;
+                padding: 7px 9px; font-size: 11px;
+            }}
+            QDialog#centralIntegradaTopico QLabel#topicLastPractice {{
+                color: {c['muted']}; font-size: 11px;
+                background: transparent; border: none;
+            }}
+            QDialog#centralIntegradaTopico QPushButton#topicNextPrimaryButton:disabled {{
+                background: {c['fundo']}; color: {c['muted']};
+                border: 1px solid {c['borda']};
+            }}
+            QDialog#centralIntegradaTopico QLabel#topicDomainComponentLabelModern {{
+                color: {c['texto']}; background: transparent; border: none;
             }}
         """
         self.setStyleSheet(self.styleSheet() + qss)
@@ -76081,21 +76277,21 @@ class SistemaEstudos(QMainWindow):
         # O Planejamento compacto do topo do Dashboard NÃO faz parte.
         self._transferir_cards_dashboard_para_portal_edital()
         # L03: pagina separada, sem modificar o Dashboard ou os motores.
-        self.tela_portal_treinos = criar_portal_treinos(
-            abrir_inicio=self.abrir_portal_inicio,
-            abrir_dashboard=self.voltar_inicio,
-            abrir_simulado=lambda: self._abrir_treino_pelo_portal("simulado"),
-            abrir_adaptativo=lambda: self._abrir_treino_pelo_portal("adaptativo"),
-            abrir_bateria=lambda: self._abrir_treino_pelo_portal("bateria"),
+        # Central de Simulados nativa: quatro cartoes clicaveis, sem GIF,
+        # metricas inferiores ou grade duplicada de modalidades.
+        self.tela_portal_treinos = PortalSimuladosNativo(
+            perfil_ativo=self.combo_concurso.currentText(),
+            logo=carregar_logo_vighnastudy(),
             abrir_revisao=lambda: self._abrir_treino_pelo_portal("revisao"),
+            abrir_treino=lambda: self._abrir_treino_pelo_portal("adaptativo"),
+            abrir_simulado=lambda: self._abrir_treino_pelo_portal("simulado"),
             abrir_erros=self.abrir_banco_erros,
-            abrir_historico=self.abrir_historico_questoes,
             retomar_sessao=self.abrir_ou_trazer_resolvedor_questoes,
         )
         self.telas.addWidget(self.tela_portal_treinos)
-        aplicar_estilo_treinos(self.tela_portal_treinos, self.tema_atual)
-        # Transferência real do quadro-mãe; NÃO cria uma segunda instância.
-        # A Home e os seis acessos já existentes do portal permanecem intactos.
+        aplicar_tema_central_simulados(self.tela_portal_treinos, self.tema_atual)
+        # Remove o painel duplicado do Dashboard, preservando seu objeto Qt
+        # e suas conexoes em memoria, sem coloca-lo na interface nova.
         self._transferir_quadro_estudo_questoes_para_simulados()
         # L05: catálogo de destinos reais, totalmente independente do banco.
         self.tela_portal_recursos = criar_portal_recursos(
@@ -76201,14 +76397,13 @@ class SistemaEstudos(QMainWindow):
         coluna.addWidget(separador)
         coluna.addSpacing(9)
 
-        # Navegacao consolidada L05f: quatro destinos principais e cinco
-        # ferramentas de estudo. As rotas secundarias continuam nas centrais.
-        # Icones usam o recurso existente; caracteres sao fallback.
+        # Barra lateral minimalista: apenas Inicio e Recursos no grupo principal.
+        # Iniciar Estudo e Simulados continuam acessiveis pelos cards da Home;
+        # os seus controladores, telas e rotas internos nao sao modificados.
+        # A montagem por QVBoxLayout reposiciona os demais icones sem lacunas.
         grupos_navegacao = (
             ("ÁREAS PRINCIPAIS", (
                 ("inicio", "Início", "fa6s.house", "⌂", self.abrir_portal_inicio),
-                ("dashboard", "Dashboard", "fa6s.chart-column", "▥", self.voltar_inicio),
-                ("simulados", "Simulados e Treinos", "fa6s.clipboard-check", "▣", self.abrir_portal_treinos),
                 ("recursos", "Central de Recursos", "fa6s.grip", "▦", self.abrir_portal_recursos),
             )),
             ("FERRAMENTAS DE ESTUDO", (
@@ -76814,6 +77009,9 @@ class SistemaEstudos(QMainWindow):
         if rotulo is not None:
             rotulo.setText("Perfil ativo: " + (self.combo_concurso.currentText().strip() or "—"))
         atualizar_perfil_mini_edital(pagina, self.combo_concurso.currentText())
+        treinos = getattr(self, "tela_portal_treinos", None)
+        if treinos is not None and hasattr(treinos, "set_perfil"):
+            treinos.set_perfil(self.combo_concurso.currentText())
         edital = getattr(self, "tela_portal_edital", None)
         if edital is not None:
             atualizar_perfil_portal_edital(edital, self.combo_concurso.currentText())
@@ -76845,42 +77043,23 @@ class SistemaEstudos(QMainWindow):
                 detalhes = f"{modalidade}  •  Questão {min(indice + 1, quantidade)} de {quantidade}"
             else:
                 detalhes = modalidade
-        atualizar_retomada_treinos(portal, existe_sessao, detalhes)
+        portal.atualizar_retomada(existe_sessao, detalhes)
 
     def _transferir_quadro_estudo_questoes_para_simulados(self):
-        """Move o QFrame original e os quatro subcards do Dashboard ao portal.
+        """Retira a grade antiga duplicada do Dashboard sem destruir controles.
 
-        O próprio QWidget, os layouts e os sinais dos botões são reaproveitados.
-        O wrapper visual mantém o seletor #dashboardRoot para que os tokens
-        originais do quadro permaneçam idênticos à origem, sem clonar widgets.
+        O painel original continua em memoria para os controladores e rotinas
+        que o atualizam, mas fica invisivel na Central de Simulados nativa.
+        A nova interface tem exatamente quatro acessos, sem faixa de metricas.
         """
         painel = self.dashboard_estudo_questoes_painel
         origem = self.dashboard_estrategias_slot
-        destino = self.tela_portal_treinos.portal_treinos_conteudo_layout
         assert origem.indexOf(painel) >= 0, "Quadro original fora do Dashboard"
-        assert destino is not None, "Portal de Simulados sem layout de destino"
-
-        # Retirar também o layout vazio do Dashboard: sem quadro residual,
-        # placeholder ou espaçamento extra entre as outras seções.
         origem.removeWidget(painel)
         self._dashboard_root_layout.removeItem(origem)
-
-        raiz_visual = QWidget(self.tela_portal_treinos)
-        raiz_visual.setObjectName("dashboardRoot")
-        raiz_visual.setAttribute(Qt.WA_StyledBackground, True)
-        raiz_visual.setStyleSheet(self.dashboard_visual_root.styleSheet())
-        raiz_visual.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        coluna = QVBoxLayout(raiz_visual)
-        coluna.setContentsMargins(0, 0, 0, 0)
-        coluna.setSpacing(0)
-        coluna.addWidget(painel)
-        # Logo após o cabeçalho; nenhuma modalidade pré-existente é removida.
-        destino.insertWidget(1, raiz_visual)
-        self._portal_estudo_questoes_raiz = raiz_visual
-
-        # A seção veio recolhida do Dashboard Executivo? Exibir os quatro
-        # cards na Central sem sobrescrever a preferência salva do Dashboard.
-        self.definir_estado_secao_dashboard("estudar", True, salvar=False)
+        painel.setParent(self.tela_portal_treinos)
+        painel.hide()
+        self._portal_estudo_questoes_raiz = None
 
     def _transferir_cards_dashboard_para_portal_edital(self):
         """Move os widgets reais do Dashboard para Meu Edital, sem copiá-los.
@@ -77748,7 +77927,7 @@ class SistemaEstudos(QMainWindow):
         if getattr(self, "_portal_tema_estilizado", None) != self.tema_atual:
             aplicar_estilo_portal(self.tela_portal_inicio, self.tema_atual)
             aplicar_estilo_portal_edital(self.tela_portal_edital, self.tema_atual)
-            aplicar_estilo_treinos(self.tela_portal_treinos, self.tema_atual)
+            aplicar_tema_central_simulados(self.tela_portal_treinos, self.tema_atual)
             aplicar_estilo_recursos(self.tela_portal_recursos, self.tema_atual)
             aplicar_estilo_portal_disciplinas(self.tela_portal_disciplinas, self.tema_atual)
             aplicar_estilo_cabecalho_dashboard(self.dashboard_quick_nav, self.tema_atual)
@@ -77834,6 +78013,10 @@ class SistemaEstudos(QMainWindow):
             divisor_marca.setVisible(False)
         self._ajustar_cabecalho_dashboard(futurista and visivel)
         self._ajustar_densidade_dashboard_lateral(futurista, visivel, expandida)
+        # Mudanças de largura da barra lateral também afetam o Calendário,
+        # mesmo quando a janela principal não recebe resizeEvent.
+        if getattr(self, "_previsao_semana_grade_dias", None) is not None:
+            QTimer.singleShot(0, self._ajustar_colunas_previsao_calendario)
         controller = getattr(self, "_dashboard_m2d1c_controller", None)
         if controller is not None and controller.active:
             controller.request_update()
@@ -77861,12 +78044,13 @@ class SistemaEstudos(QMainWindow):
         if not hasattr(self, "_sidebar_botoes"):
             return
         atual = self.telas.currentWidget()
+        # Paginas acessadas pela Home (estudo e simulados) nao tem atalho
+        # proprio no menu minimalista, logo nao marcam um item inexistente.
         chave = ("inicio" if atual in (
                     getattr(self, "tela_portal_inicio", None),
                     getattr(self, "tela_portal_edital", None))
                  else "recursos" if atual is getattr(self, "tela_portal_recursos", None)
-                 else "simulados" if atual is getattr(self, "tela_portal_treinos", None)
-                 else "dashboard" if atual is self.tela_inicial else None)
+                 else None)
         for nome_widget, destino in (
             ("tela_perfil_candidato", "perfil_candidato"),
             ("tela_portal_disciplinas", "disciplinas"),
@@ -78215,6 +78399,7 @@ class SistemaEstudos(QMainWindow):
         self.dados_relatorio_disciplinas = None
         self.dados_relatorio_topicos = None
         self.dados_relatorio_diario = None
+        self.dados_relatorio_tempo_diario = None
 
         if (
             atualizar_se_visivel
@@ -78321,6 +78506,10 @@ class SistemaEstudos(QMainWindow):
             return True
 
         aba = self._nome_aba_estatisticas_atual()
+        if aba == 'Tempo de estudo':
+            # A nova aba faz sua própria consulta de leitura, independentemente
+            # do estado dos snapshots acadêmicos preexistentes.
+            return False
         return self._estado_estatisticas.precisa_atualizar(aba)
 
     def _agendar_atualizacao_estatisticas(self, forcar=False):
@@ -94998,6 +95187,20 @@ class SistemaEstudos(QMainWindow):
 
         barra_visualizacao.addWidget(self.calendario_btn_mes)
         barra_visualizacao.addWidget(self.calendario_btn_semana)
+        self.calendario_btn_hoje = QPushButton("Hoje")
+        self.calendario_btn_hoje.setObjectName("subtleButton")
+        self.calendario_btn_hoje.setMinimumWidth(78)
+        self.calendario_btn_hoje.setToolTip("Voltar ao dia atual e mostrar suas revisões")
+        self.calendario_btn_hoje.clicked.connect(self.ir_para_hoje_calendario)
+        barra_visualizacao.addWidget(self.calendario_btn_hoje)
+        self.calendario_btn_atrasadas = QPushButton("Ver atrasadas")
+        self.calendario_btn_atrasadas.setObjectName("subtleButton")
+        self.calendario_btn_atrasadas.setMinimumWidth(128)
+        self.calendario_btn_atrasadas.setToolTip(
+            "Consultar revisões vencidas de todos os meses deste perfil"
+        )
+        self.calendario_btn_atrasadas.clicked.connect(self.abrir_pendencias_calendario)
+        barra_visualizacao.addWidget(self.calendario_btn_atrasadas)
         barra_visualizacao.addStretch()
 
         self.calendario_aviso_previsao = QLabel(
@@ -95124,6 +95327,12 @@ class SistemaEstudos(QMainWindow):
             0,
             3
         )
+        self.calendario_card_mes.setToolTip("Revisões agendadas no mês exibido")
+        self.calendario_card_dias.setToolTip("Datas distintas com revisão no mês exibido")
+        self.calendario_card_hoje.setToolTip("Revisões previstas para hoje neste perfil")
+        self.calendario_card_atrasadas.setToolTip(
+            "Revisões vencidas no perfil, inclusive em meses anteriores"
+        )
 
         mes_layout.addLayout(
             indicadores
@@ -95142,12 +95351,8 @@ class SistemaEstudos(QMainWindow):
         painel_calendario.setObjectName(
             "calendarPanel"
         )
-        painel_calendario.setMinimumWidth(
-            430
-        )
-        painel_calendario.setMaximumWidth(
-            520
-        )
+        painel_calendario.setMinimumWidth(355)
+        painel_calendario.setMaximumWidth(485)
 
         painel_calendario_layout = QVBoxLayout(
             painel_calendario
@@ -95176,7 +95381,7 @@ class SistemaEstudos(QMainWindow):
             QDate.currentDate()
         )
         self.calendario_revisoes.selectionChanged.connect(
-            self.atualizar_calendario_dia
+            self._calendario_ao_selecionar_dia
         )
         self.calendario_revisoes.currentPageChanged.connect(
             self.mudar_mes_calendario
@@ -95214,6 +95419,9 @@ class SistemaEstudos(QMainWindow):
             "calendarLegendFuture"
         )
 
+        legenda_agendada.setToolTip("Revisão com data futura")
+        legenda_atrasada.setToolTip("Revisão com data anterior a hoje")
+        legenda_hoje.setToolTip("Data atual (azul); a seleção é independente")
         legenda.addWidget(
             legenda_hoje
         )
@@ -95293,6 +95501,7 @@ class SistemaEstudos(QMainWindow):
             True
         )
 
+        self.calendario_explicacao_dia = explicacao_dia
         painel_dia_layout.addWidget(
             explicacao_dia
         )
@@ -95324,50 +95533,81 @@ class SistemaEstudos(QMainWindow):
         self.tabela_calendario.verticalHeader().setVisible(
             False
         )
-        self.tabela_calendario.setAlternatingRowColors(
-            False
-        )
-        self.tabela_calendario.setShowGrid(
-            False
+        self.tabela_calendario.setAlternatingRowColors(True)
+        self.tabela_calendario.setShowGrid(False)
+        self.tabela_calendario.setSortingEnabled(False)
+        self.tabela_calendario.setToolTip(
+            "Clique no cabeçalho para ordenar. Selecione uma linha para habilitar ações."
         )
 
         cabecalho_tabela = (
             self.tabela_calendario
             .horizontalHeader()
         )
-        cabecalho_tabela.setSectionResizeMode(
-            0,
-            QHeaderView.ResizeToContents
-        )
-        cabecalho_tabela.setSectionResizeMode(
-            1,
-            QHeaderView.Stretch
-        )
-        cabecalho_tabela.setSectionResizeMode(
-            2,
-            QHeaderView.ResizeToContents
-        )
-        cabecalho_tabela.setSectionResizeMode(
-            3,
-            QHeaderView.ResizeToContents
-        )
-        cabecalho_tabela.setSectionResizeMode(
-            4,
-            QHeaderView.ResizeToContents
-        )
-        cabecalho_tabela.setSectionResizeMode(
-            5,
-            QHeaderView.ResizeToContents
-        )
-
+        cabecalho_tabela.setSectionResizeMode(0, QHeaderView.Interactive)
+        cabecalho_tabela.setSectionResizeMode(1, QHeaderView.Stretch)
+        cabecalho_tabela.setSectionResizeMode(2, QHeaderView.Fixed)
+        cabecalho_tabela.setSectionResizeMode(3, QHeaderView.Fixed)
+        cabecalho_tabela.setSectionResizeMode(4, QHeaderView.Fixed)
+        cabecalho_tabela.setSectionResizeMode(5, QHeaderView.Fixed)
+        self.tabela_calendario.setColumnWidth(0, 138)
+        self.tabela_calendario.setColumnWidth(2, 48)
+        self.tabela_calendario.setColumnWidth(3, 72)
+        self.tabela_calendario.setColumnWidth(4, 92)
+        self.tabela_calendario.setColumnWidth(5, 112)
+        cabecalho_tabela.setStretchLastSection(False)
         self.tabela_calendario.cellDoubleClicked.connect(
             self.abrir_topico_calendario
         )
 
-        painel_dia_layout.addWidget(
-            self.tabela_calendario,
-            1
+        self.calendario_conteudo_dia = QStackedWidget()
+        self.calendario_conteudo_dia.setObjectName("calendarDayContent")
+        self.calendario_conteudo_dia.addWidget(self.tabela_calendario)
+
+        painel_sem_revisoes = QWidget()
+        painel_sem_revisoes.setObjectName("calendarEmptyPanel")
+        vazio_layout = QVBoxLayout(painel_sem_revisoes)
+        vazio_layout.setContentsMargins(20, 22, 20, 22)
+        vazio_layout.setSpacing(12)
+        vazio_layout.addStretch(1)
+        self.calendario_vazio_titulo = QLabel("Nenhuma revisão nesta data")
+        self.calendario_vazio_titulo.setObjectName("calendarDateTitle")
+        self.calendario_vazio_titulo.setAlignment(Qt.AlignCenter)
+        vazio_layout.addWidget(self.calendario_vazio_titulo)
+        self.calendario_vazio_descricao = QLabel(
+            "Selecione outro dia ou consulte as pendências do perfil."
         )
+        self.calendario_vazio_descricao.setWordWrap(True)
+        self.calendario_vazio_descricao.setAlignment(Qt.AlignCenter)
+        self.calendario_vazio_descricao.setObjectName("mutedLabel")
+        vazio_layout.addWidget(self.calendario_vazio_descricao)
+        self.calendario_vazio_proxima = QLabel("")
+        self.calendario_vazio_proxima.setWordWrap(True)
+        self.calendario_vazio_proxima.setAlignment(Qt.AlignCenter)
+        self.calendario_vazio_proxima.setObjectName("calendarForecastSubtitle")
+        vazio_layout.addWidget(self.calendario_vazio_proxima)
+        self.calendario_vazio_pendencias = QLabel("")
+        self.calendario_vazio_pendencias.setWordWrap(True)
+        self.calendario_vazio_pendencias.setAlignment(Qt.AlignCenter)
+        self.calendario_vazio_pendencias.setObjectName("calendarForecastSubtitle")
+        vazio_layout.addWidget(self.calendario_vazio_pendencias)
+        botoes_vazio = QHBoxLayout()
+        botoes_vazio.addStretch()
+        self.calendario_vazio_ir_proxima = QPushButton("Ver próxima data")
+        self.calendario_vazio_ir_proxima.setObjectName("subtleButton")
+        self.calendario_vazio_ir_proxima.clicked.connect(self._calendario_ir_proxima_data)
+        botoes_vazio.addWidget(self.calendario_vazio_ir_proxima)
+        self.calendario_vazio_ver_atrasadas = QPushButton("Ver atrasadas")
+        self.calendario_vazio_ver_atrasadas.setObjectName("subtleButton")
+        self.calendario_vazio_ver_atrasadas.clicked.connect(
+            self.abrir_pendencias_calendario
+        )
+        botoes_vazio.addWidget(self.calendario_vazio_ver_atrasadas)
+        botoes_vazio.addStretch()
+        vazio_layout.addLayout(botoes_vazio)
+        vazio_layout.addStretch(1)
+        self.calendario_conteudo_dia.addWidget(painel_sem_revisoes)
+        painel_dia_layout.addWidget(self.calendario_conteudo_dia, 1)
 
         acoes = QHBoxLayout()
         acoes.setSpacing(
@@ -95405,6 +95645,20 @@ class SistemaEstudos(QMainWindow):
             self.resolver_topico_calendario
         )
 
+        self.calendario_acao_abrir = abrir_topico
+        self.calendario_acao_revisar = revisar_manual
+        self.calendario_acao_resolver = resolver_agora
+        for botao in (
+            self.calendario_acao_abrir,
+            self.calendario_acao_revisar,
+            self.calendario_acao_resolver,
+        ):
+            botao.setEnabled(False)
+            botao.setToolTip("Selecione uma revisão na tabela para habilitar")
+        self.tabela_calendario.itemSelectionChanged.connect(
+            self._calendario_atualizar_estado_acoes
+        )
+
         acoes.addWidget(
             abrir_topico
         )
@@ -95437,6 +95691,9 @@ class SistemaEstudos(QMainWindow):
 
         self.datas_formatadas_calendario = set()
         self.dados_calendario_mes = []
+        self._calendario_modo_pendencias = False
+        self._calendario_proxima_data = None
+        self._calendario_pendencias = []
         self._previsao_semana_suja = True
 
         return tela
@@ -95445,24 +95702,21 @@ class SistemaEstudos(QMainWindow):
         pagina = QWidget()
         layout = QVBoxLayout(pagina)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(10)
+        layout.setSpacing(8)
 
         painel = QFrame()
         painel.setObjectName("calendarForecastPanel")
         painel_layout = QVBoxLayout(painel)
-        painel_layout.setContentsMargins(14, 12, 14, 12)
-        painel_layout.setSpacing(9)
+        painel_layout.setContentsMargins(14, 11, 14, 11)
+        painel_layout.setSpacing(8)
 
         topo = QHBoxLayout()
-        topo.setSpacing(8)
-
+        topo.setSpacing(9)
         textos = QVBoxLayout()
-        textos.setSpacing(1)
-        titulo = QLabel("Previsão semanal")
+        textos.setSpacing(2)
+        titulo = QLabel("Planejamento semanal")
         titulo.setObjectName("calendarForecastTitle")
-        subtitulo = QLabel(
-            "Segunda a domingo: dias anteriores mostram o realizado; hoje e os próximos dias mostram a projeção atual."
-        )
+        subtitulo = QLabel("Estudos realizados e próximos compromissos, sem misturar fatos e projeções.")
         subtitulo.setObjectName("calendarForecastSubtitle")
         subtitulo.setWordWrap(True)
         textos.addWidget(titulo)
@@ -95481,31 +95735,82 @@ class SistemaEstudos(QMainWindow):
         topo.addWidget(self.calendario_previsao_recalcular, 0, Qt.AlignVCenter)
         painel_layout.addLayout(topo)
 
+        controle = QHBoxLayout()
+        controle.setSpacing(6)
+        self._previsao_semana_modo = "semana"
+        self._previsao_semana_modo_botoes = {}
+        for chave, legenda in (
+            ("semana", "Semana atual"),
+            ("proximos", "Próximos 7 dias"),
+        ):
+            botao = QPushButton(legenda)
+            botao.setObjectName("calendarViewToggle")
+            botao.setCheckable(True)
+            botao.setChecked(chave == "semana")
+            botao.setMinimumHeight(34)
+            botao.clicked.connect(
+                lambda _checked=False, modo=chave: self._alterar_modo_previsao_calendario(modo)
+            )
+            self._previsao_semana_modo_botoes[chave] = botao
+            controle.addWidget(botao)
+        controle.addStretch(1)
+        self.calendario_previsao_intervalo = QLabel("")
+        self.calendario_previsao_intervalo.setObjectName("calendarForecastUpdated")
+        controle.addWidget(self.calendario_previsao_intervalo)
+        painel_layout.addLayout(controle)
+
         aviso = QLabel(
-            "É uma projeção, não uma agenda fixa. Se você responder questões, revisar, "
-            "alterar metas ou mudar prioridades, os próximos tópicos podem mudar."
+            "Projeções podem mudar conforme a prática e as prioridades. "
+            "Revisões da agenda mantêm a data original, mesmo com estudo no mesmo tópico."
         )
         aviso.setObjectName("calendarForecastNotice")
         aviso.setWordWrap(True)
         painel_layout.addWidget(aviso)
 
+        self.calendario_previsao_alteracoes = QLabel("")
+        self.calendario_previsao_alteracoes.setObjectName("calendarForecastUpdated")
+        self.calendario_previsao_alteracoes.setWordWrap(True)
+        self.calendario_previsao_alteracoes.setVisible(False)
+        painel_layout.addWidget(self.calendario_previsao_alteracoes)
+
         self.calendario_previsao_scroll = QScrollArea()
         self.calendario_previsao_scroll.setObjectName("calendarForecastScroll")
         self.calendario_previsao_scroll.setWidgetResizable(True)
-        self.calendario_previsao_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.calendario_previsao_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.calendario_previsao_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         painel_layout.addWidget(self.calendario_previsao_scroll, 1)
-
         self.calendario_previsao_estado = QLabel(
-            "Abra esta visualização para calcular a projeção da semana."
+            "Abra esta visualização para calcular a previsão da semana."
         )
         self.calendario_previsao_estado.setObjectName("calendarForecastEmpty")
         self.calendario_previsao_estado.setAlignment(Qt.AlignCenter)
         self.calendario_previsao_estado.setWordWrap(True)
         self.calendario_previsao_scroll.setWidget(self.calendario_previsao_estado)
-
         layout.addWidget(painel, 1)
         return pagina
+
+    def _alterar_modo_previsao_calendario(self, modo):
+        if modo not in ("semana", "proximos"):
+            return
+        if modo == getattr(self, "_previsao_semana_modo", "semana"):
+            self._sincronizar_modo_previsao_calendario()
+            return
+        self._previsao_semana_modo = modo
+        self._sincronizar_modo_previsao_calendario()
+        self._previsao_semana_suja = True
+        self.atualizar_previsao_semana_calendario()
+
+    def _sincronizar_modo_previsao_calendario(self):
+        for chave, botao in getattr(self, "_previsao_semana_modo_botoes", {}).items():
+            botao.setChecked(chave == getattr(self, "_previsao_semana_modo", "semana"))
+
+    def _intervalo_previsao_calendario(self):
+        hoje = QDate.currentDate()
+        if getattr(self, "_previsao_semana_modo", "semana") == "proximos":
+            inicio = hoje
+        else:
+            inicio = hoje.addDays(1 - hoje.dayOfWeek())
+        return inicio, inicio.addDays(6), hoje
 
     def alternar_visualizacao_calendario(self, indice):
         indice = 1 if int(indice) == 1 else 0
@@ -95521,74 +95826,66 @@ class SistemaEstudos(QMainWindow):
             self.atualizar_previsao_semana_calendario()
 
     def _montar_itens_previsao_calendario(self, concurso_id):
-        hoje = QDate.currentDate()
-        segunda = hoje.addDays(1 - hoje.dayOfWeek())
-        domingo = segunda.addDays(6)
-        inicio_txt = hoje.toString("yyyy-MM-dd")
-        domingo_txt = domingo.toString("yyyy-MM-dd")
+        inicio, fim, hoje = self._intervalo_previsao_calendario()
+        hoje_txt = hoje.toString("yyyy-MM-dd")
+        fim_txt = fim.toString("yyyy-MM-dd")
+        plano_inicio = hoje if inicio < hoje else inicio
 
         plano_ativo = obter_plano_acao_automatico(concurso_id) or {}
         carga = str(plano_ativo.get("carga") or "moderada").lower()
         if carga not in {"leve", "moderada", "intensa"}:
             carga = "moderada"
-
-        # O motor projeta a partir de hoje. Quando a semana está perto do fim,
-        # ele pode produzir datas da semana seguinte; elas são filtradas abaixo.
-        horizonte = max(3, hoje.daysTo(domingo) + 1)
         plano = gerar_plano_acao_automatico(
             concurso_id=concurso_id,
-            data_inicio=inicio_txt,
+            data_inicio=plano_inicio.toString("yyyy-MM-dd"),
             carga=carga,
-            horizonte=horizonte,
+            horizonte=max(3, plano_inicio.daysTo(fim) + 1),
             variacao=0,
-        )
-
-        por_data = {
-            segunda.addDays(i).toString("yyyy-MM-dd"): []
-            for i in range(7)
-        }
+        ) or {}
+        por_data = {inicio.addDays(i).toString("yyyy-MM-dd"): [] for i in range(7)}
         vistos = set()
 
         def adicionar(item):
-            data_txt = str(item.get("data") or "")[:10]
+            copia = dict(item)
+            data_txt = str(copia.get("data") or "")[:10]
             if data_txt not in por_data:
                 return
-            topico_id = item.get("topico_id")
-            if topico_id not in (None, ""):
-                # A visão é por tópico: evita duplicação quando revisão e
-                # recomendação convergem para o mesmo conteúdo no mesmo dia.
-                chave = (data_txt, int(topico_id))
+            topico_id = copia.get("topico_id")
+            identificador = (
+                int(topico_id) if topico_id not in (None, "")
+                else str(copia.get("titulo") or copia.get("topico") or "").casefold()
+            )
+            # Registros efetivos, revisões oficiais e recomendações são
+            # entidades distintas. Nunca apagar uma revisão por ter ocorrido
+            # estudo no mesmo dia/tópico.
+            if copia.get("realizado"):
+                classe = "realizado"
+                tipo_identidade = "realizado"
+            elif copia.get("origem") == "agenda_calendario":
+                classe = "revisao"
+                tipo_identidade = "agenda"
             else:
-                chave = (
-                    data_txt,
-                    None,
-                    str(item.get("tipo") or ""),
-                    str(item.get("titulo") or item.get("topico") or ""),
-                )
+                classe = "recomendacao"
+                tipo_identidade = str(copia.get("tipo") or "sugestão").casefold()
+            chave = (data_txt, classe, identificador, tipo_identidade)
             if chave in vistos:
                 return
             vistos.add(chave)
-            por_data[data_txt].append(dict(item))
+            copia["classe_previsao"] = classe
+            por_data[data_txt].append(copia)
 
-        # Dias passados da semana mostram o que efetivamente foi registrado.
-        # O dia atual também recebe os tópicos já estudados antes da projeção.
-        for deslocamento in range(7):
-            data = segunda.addDays(deslocamento)
+        # Atividades passadas são consultadas apenas do histórico efetivo.
+        for indice in range(7):
+            data = inicio.addDays(indice)
             if data > hoje:
                 continue
             data_txt = data.toString("yyyy-MM-dd")
-            realizados = obter_relatorio_topicos_periodo(
-                data_txt,
-                data_txt,
-                concurso_id,
-            )
-            for dado in realizados:
+            for dado in obter_relatorio_topicos_periodo(data_txt, data_txt, concurso_id):
                 revisoes = int(dado[3] or 0)
                 questoes = int(dado[4] or 0)
-                percentual = dado[6]
                 adicionar({
                     "data": data_txt,
-                    "tipo": "Estudado" if data < hoje else "Estudado hoje",
+                    "tipo": "Estudado",
                     "titulo": str(dado[2]),
                     "disciplina": str(dado[1]),
                     "topico": str(dado[2]),
@@ -95597,103 +95894,122 @@ class SistemaEstudos(QMainWindow):
                     "prioridade": 200.0,
                     "fixa": True,
                     "realizado": True,
+                    "situacao_previsao": "realizado",
                     "detalhe": (
-                        f"Registrado neste dia: {revisoes} revisão(ões), "
-                        f"{questoes} questão(ões) e desempenho {formatar_percentual(percentual)}."
+                        f"Registrado na data: {revisoes} revisão(ões), "
+                        f"{questoes} questão(ões) e desempenho {formatar_percentual(dado[6])}."
                     ),
                 })
 
-        # Revisões são desagrupadas para mostrar os tópicos reais nas colunas.
-        for dado in listar_pendencias(inicio_txt, concurso_id):
-            adicionar({
-                "data": inicio_txt,
-                "tipo": "Revisão",
-                "titulo": str(dado[2]),
-                "disciplina": str(dado[1]),
-                "topico": str(dado[2]),
-                "topico_id": int(dado[0]),
-                "questoes": 0,
-                "prioridade": 130.0,
-                "fixa": True,
-                "detalhe": (
-                    "Revisão vencida ou prevista para hoje. "
-                    f"Domínio atual: {formatar_percentual(dado[5])}."
-                ),
-            })
-
-        if hoje < domingo:
-            futuras = listar_revisoes_agendadas_periodo(
-                hoje.addDays(1).toString("yyyy-MM-dd"),
-                domingo_txt,
-                concurso_id,
-            )
-            for dado in futuras:
+        # A data original de cada obrigação é preservada; um estudo do mesmo
+        # tópico não prova, por si só, que a revisão foi cumprida.
+        if hoje_txt in por_data:
+            for dado in listar_pendencias(hoje_txt, concurso_id):
+                vencimento = str(dado[4] or "")[:10]
+                atraso = bool(vencimento and vencimento < hoje_txt)
                 adicionar({
-                    "data": str(dado[4]),
-                    "tipo": "Revisão",
+                    "data": hoje_txt,
+                    "tipo": "Atrasada" if atraso else "Vence hoje",
+                    "situacao_previsao": "atrasada" if atraso else "vence_hoje",
+                    "data_original": vencimento,
+                    "origem": "agenda_calendario",
                     "titulo": str(dado[2]),
                     "disciplina": str(dado[1]),
                     "topico": str(dado[2]),
                     "topico_id": int(dado[0]),
                     "questoes": 0,
-                    "prioridade": 120.0,
+                    "prioridade": 150.0 if atraso else 140.0,
                     "fixa": True,
                     "detalhe": (
-                        "Revisão já vinculada à agenda. "
+                        (f"Vencida desde {vencimento[8:10]}/{vencimento[5:7]}/{vencimento[:4]}. " if atraso
+                         else "Revisão prevista para hoje. ")
+                        + f"Domínio atual: {formatar_percentual(dado[5])}."
+                    ),
+                })
+
+        if hoje < fim:
+            futuras = listar_revisoes_agendadas_periodo(
+                hoje.addDays(1).toString("yyyy-MM-dd"), fim_txt, concurso_id,
+            )
+            for dado in futuras:
+                data_prevista = str(dado[4])[:10]
+                adicionar({
+                    "data": data_prevista,
+                    "tipo": "Agendada",
+                    "situacao_previsao": "agendada",
+                    "data_original": data_prevista,
+                    "origem": "agenda_calendario",
+                    "titulo": str(dado[2]),
+                    "disciplina": str(dado[1]),
+                    "topico": str(dado[2]),
+                    "topico_id": int(dado[0]),
+                    "questoes": 0,
+                    "prioridade": 130.0,
+                    "fixa": True,
+                    "detalhe": (
+                        "Revisão prevista na agenda para este dia. "
                         f"Domínio atual: {formatar_percentual(dado[5])}."
                     ),
                 })
 
         for item in list(plano.get("itens") or []):
-            if item.get("origem") == "agenda_revisoes" and item.get("topico_id") in (None, ""):
+            # A agenda foi desagrupada acima, com os IDs reais. Não repetir
+            # o cartão agregado do motor do plano.
+            if item.get("origem") == "agenda_revisoes":
                 continue
-            adicionar(item)
+            sugerido = dict(item)
+            if str(sugerido.get("tipo") or "").lower().startswith("revis"):
+                sugerido["tipo"] = "Revisão sugerida"
+                # A própria revisão oficial tem precedência sobre uma
+                # sugestão equivalente no mesmo tópico e dia.
+                data_plano = str(sugerido.get("data") or "")[:10]
+                tid = sugerido.get("topico_id")
+                if tid not in (None, "") and any(
+                    registro.get("classe_previsao") == "revisao"
+                    and registro.get("topico_id") == int(tid)
+                    for registro in por_data.get(data_plano, ())
+                ):
+                    continue
+            sugerido["situacao_previsao"] = "sugerida"
+            adicionar(sugerido)
 
+        ordem = {"atrasada": 0, "vence_hoje": 1, "realizado": 2, "agendada": 3, "sugerida": 4}
         for itens in por_data.values():
-            itens.sort(
-                key=lambda item: (
-                    0 if item.get("realizado") else (1 if item.get("fixa") else 2),
-                    -float(item.get("prioridade") or 0.0),
-                    str(item.get("disciplina") or ""),
-                    str(item.get("topico") or item.get("titulo") or ""),
-                )
-            )
-
+            itens.sort(key=lambda item: (
+                ordem.get(item.get("situacao_previsao"), 5),
+                -float(item.get("prioridade") or 0.0),
+                str(item.get("disciplina") or "").casefold(),
+                str(item.get("topico") or item.get("titulo") or "").casefold(),
+            ))
         return por_data, plano
 
     def _criar_card_previsao_calendario(self, item):
         card = QFrame()
         card.setObjectName("calendarForecastCard")
-
-        tipo = str(item.get("tipo") or "Recomendação")
-        tipo_chave = "realizado" if item.get("realizado") else (
-            "revisao" if tipo.lower().startswith("revis") else (
-                "simulado" if "simulado" in tipo.lower() else "recomendacao"
-            )
-        )
-        card.setProperty("forecastKind", tipo_chave)
-
+        classe = str(item.get("classe_previsao") or "recomendacao")
+        card.setProperty("forecastKind", classe)
+        situacao = str(item.get("situacao_previsao") or "sugerida")
+        card.setProperty("forecastStatus", situacao)
         detalhe = str(item.get("detalhe") or item.get("acao") or "").strip()
         if detalhe:
-            card.setToolTip("Por que isso está aqui?\n" + detalhe)
-
+            card.setToolTip(detalhe)
         box = QVBoxLayout(card)
-        box.setContentsMargins(9, 8, 9, 8)
-        box.setSpacing(4)
+        box.setContentsMargins(13, 11, 13, 11)
+        box.setSpacing(6)
 
         cab = QHBoxLayout()
-        cab.setSpacing(5)
+        cab.setSpacing(8)
         disciplina = QLabel(str(item.get("disciplina") or "Geral"))
         disciplina.setObjectName("calendarForecastDiscipline")
         disciplina.setWordWrap(True)
         cab.addWidget(disciplina, 1)
-
         if item.get("topico_id") not in (None, ""):
             abrir = QToolButton()
             abrir.setObjectName("calendarForecastOpen")
             abrir.setText("↗")
-            abrir.setToolTip("Abrir tópico")
-            abrir.setFixedSize(24, 24)
+            abrir.setToolTip("Abrir este tópico na Central Integrada")
+            abrir.setAccessibleName("Abrir tópico " + str(item.get("topico") or item.get("titulo") or ""))
+            abrir.setFixedSize(32, 32)
             abrir.clicked.connect(
                 lambda _=False,
                 tid=int(item.get("topico_id")),
@@ -95706,132 +96022,295 @@ class SistemaEstudos(QMainWindow):
         titulo = QLabel(str(item.get("topico") or item.get("titulo") or "Atividade"))
         titulo.setObjectName("calendarForecastCardTitle")
         titulo.setWordWrap(True)
+        titulo.setTextInteractionFlags(Qt.TextSelectableByMouse)
         box.addWidget(titulo)
 
         rodape = QHBoxLayout()
-        rodape.setSpacing(5)
-        etiqueta = QLabel(tipo)
+        rodape.setSpacing(7)
+        etiqueta = QLabel(str(item.get("tipo") or "Recomendação"))
         etiqueta.setObjectName("calendarForecastKind")
+        etiqueta.setProperty("forecastStatus", situacao)
+        if situacao == "atrasada":
+            etiqueta.setStyleSheet("color: #FFD1D1; background: #783344; border: 1px solid #BA5266; border-radius: 5px; padding: 3px 7px;")
         rodape.addWidget(etiqueta)
-
         qtd = int(item.get("questoes") or 0)
         if qtd > 0:
             carga = QLabel(f"{qtd} q.")
             carga.setObjectName("calendarForecastLoad")
             rodape.addWidget(carga)
-        rodape.addStretch()
+        rodape.addStretch(1)
         box.addLayout(rodape)
 
         if detalhe:
-            motivo = QLabel(detalhe)
-            motivo.setObjectName("calendarForecastReason")
-            motivo.setWordWrap(True)
-            motivo.setMaximumHeight(40)
-            box.addWidget(motivo)
-
+            # O resumo tem leitura imediata; o texto integral é acessível
+            # sem depender de tooltip, inclusive por teclado.
+            limite = 108
+            trecho = detalhe if len(detalhe) <= limite else detalhe[:limite].rsplit(" ", 1)[0] + "…"
+            resumo = QLabel(trecho)
+            resumo.setObjectName("calendarForecastReason")
+            resumo.setWordWrap(True)
+            box.addWidget(resumo)
+            if trecho != detalhe:
+                expandir = QPushButton("Mais detalhes ▾")
+                expandir.setObjectName("subtleButton")
+                expandir.setCheckable(True)
+                expandir.setMinimumHeight(30)
+                texto_completo = QLabel(detalhe)
+                texto_completo.setObjectName("calendarForecastReason")
+                texto_completo.setWordWrap(True)
+                texto_completo.setTextInteractionFlags(Qt.TextSelectableByMouse)
+                texto_completo.setVisible(False)
+                expandir.toggled.connect(
+                    lambda aberto, rotulo=texto_completo, botao=expandir: (
+                        rotulo.setVisible(aberto),
+                        botao.setText("Menos detalhes ▴" if aberto else "Mais detalhes ▾")
+                    )
+                )
+                box.addWidget(expandir, 0, Qt.AlignLeft)
+                box.addWidget(texto_completo)
         return card
+
+    def _selecionar_dia_previsao_calendario(self, data_txt):
+        if data_txt not in getattr(self, "_previsao_semana_itens", {}):
+            return
+        self._previsao_semana_dia_selecionado = data_txt
+        for data, botao in getattr(self, "_previsao_semana_botoes", {}).items():
+            botao.setChecked(data == data_txt)
+        area = getattr(self, "_previsao_semana_detalhes", None)
+        if area is None:
+            return
+        # Não manter widgets antigos conectados a um dia anterior.
+        while area.count():
+            item_layout = area.takeAt(0)
+            componente = item_layout.widget()
+            if componente is not None:
+                componente.setParent(None)
+                componente.deleteLater()
+            elif item_layout.layout() is not None:
+                sublayout = item_layout.layout()
+                while sublayout.count():
+                    sub_item = sublayout.takeAt(0)
+                    if sub_item.widget() is not None:
+                        sub_item.widget().setParent(None)
+                        sub_item.widget().deleteLater()
+
+        data = QDate.fromString(data_txt, "yyyy-MM-dd")
+        hoje = QDate.currentDate()
+        itens = list(self._previsao_semana_itens.get(data_txt) or [])
+        grupos = (
+            ("Revisões da agenda", [i for i in itens if i.get("classe_previsao") == "revisao"]),
+            ("Atividades realizadas", [i for i in itens if i.get("classe_previsao") == "realizado"]),
+            ("Recomendações do planejamento", [i for i in itens if i.get("classe_previsao") == "recomendacao"]),
+        )
+        topo = QFrame()
+        topo.setObjectName("calendarForecastDay")
+        info = QHBoxLayout(topo)
+        info.setContentsMargins(12, 8, 12, 8)
+        nomes_dias = {
+            1: "Segunda-feira", 2: "Terça-feira", 3: "Quarta-feira",
+            4: "Quinta-feira", 5: "Sexta-feira", 6: "Sábado", 7: "Domingo",
+        }
+        legenda = QLabel(
+            nomes_dias.get(data.dayOfWeek(), "Dia")
+            + ", " + data.toString("dd/MM/yyyy")
+            + ("  •  Hoje" if data == hoje else "")
+            + f"  •  {len(itens)} atividade(s)"
+        )
+        legenda.setObjectName("calendarForecastDayName")
+        info.addWidget(legenda, 1)
+        area.addWidget(topo)
+
+        self._previsao_semana_grades_cartoes = []
+        if not itens:
+            vazio = QLabel(
+                "Sem estudo registrado nesta data." if data < hoje else
+                "Nenhuma atividade projetada para esta data. A programação pode mudar após novos estudos."
+            )
+            vazio.setObjectName("calendarForecastDayEmpty")
+            vazio.setWordWrap(True)
+            vazio.setAlignment(Qt.AlignCenter)
+            vazio.setMinimumHeight(96)
+            area.addWidget(vazio)
+        for nome, registros in grupos:
+            if not registros:
+                continue
+            rotulo = QLabel(f"{nome}  •  {len(registros)}")
+            rotulo.setObjectName("calendarForecastDayName")
+            area.addWidget(rotulo)
+            grade = QGridLayout()
+            grade.setContentsMargins(0, 0, 0, 0)
+            grade.setHorizontalSpacing(9)
+            grade.setVerticalSpacing(9)
+            cartoes = [self._criar_card_previsao_calendario(i) for i in registros]
+            for indice, cartao in enumerate(cartoes):
+                grade.addWidget(cartao, indice // 2, indice % 2)
+            area.addLayout(grade)
+            self._previsao_semana_grades_cartoes.append((grade, cartoes))
+        area.addStretch(1)
+        self._ajustar_colunas_previsao_calendario()
+
+    def _ajustar_colunas_previsao_calendario(self):
+        faixa = getattr(self, "_previsao_semana_grade_dias", None)
+        scroll = getattr(self, "calendario_previsao_scroll", None)
+        if faixa is None or scroll is None:
+            return
+        largura = max(0, scroll.viewport().width())
+        colunas_dias = 7 if largura >= 980 else (4 if largura >= 550 else 2)
+        colunas_cards = 2 if largura >= 750 else 1
+        if getattr(self, "_previsao_ultima_geometria", None) == (colunas_dias, colunas_cards):
+            return
+        self._previsao_ultima_geometria = (colunas_dias, colunas_cards)
+        botoes = list(getattr(self, "_previsao_semana_botoes", {}).values())
+        for botao in botoes:
+            faixa.removeWidget(botao)
+        for coluna in range(7):
+            faixa.setColumnStretch(coluna, 1 if coluna < colunas_dias else 0)
+        for indice, botao in enumerate(botoes):
+            faixa.addWidget(botao, indice // colunas_dias, indice % colunas_dias)
+        for grade, cartoes in getattr(self, "_previsao_semana_grades_cartoes", []):
+            for cartao in cartoes:
+                grade.removeWidget(cartao)
+            for coluna in range(2):
+                grade.setColumnStretch(coluna, 1 if coluna < colunas_cards else 0)
+            for indice, cartao in enumerate(cartoes):
+                grade.addWidget(cartao, indice // colunas_cards, indice % colunas_cards)
 
     def atualizar_previsao_semana_calendario(self, forcar=False):
         if not hasattr(self, "calendario_previsao_scroll"):
             return
-
-        hoje_txt = QDate.currentDate().toString("yyyy-MM-dd")
+        inicio, fim, hoje = self._intervalo_previsao_calendario()
+        modo = getattr(self, "_previsao_semana_modo", "semana")
+        concurso_id = int(obter_concurso_ativo()[0])
+        identidade = (concurso_id, modo, inicio.toString("yyyy-MM-dd"))
         if (
             not forcar
             and not getattr(self, "_previsao_semana_suja", True)
-            and self._previsao_semana_data_referencia == hoje_txt
+            and getattr(self, "_previsao_semana_identidade", None) == identidade
         ):
             return
 
         self.calendario_previsao_recalcular.setEnabled(False)
         self.calendario_previsao_recalcular.setText("Recalculando…")
         QApplication.processEvents(QEventLoop.AllEvents, 40)
-
         try:
-            concurso_id = int(obter_concurso_ativo()[0])
             por_data, plano = self._montar_itens_previsao_calendario(concurso_id)
+            anterior = getattr(self, "_previsao_semana_snapshot", None)
+            def chave_item(data_txt, item):
+                return (
+                    data_txt,
+                    str(item.get("classe_previsao") or ""),
+                    str(item.get("topico_id") or item.get("titulo") or ""),
+                    str(item.get("tipo") or ""),
+                )
+            snapshot = {
+                chave_item(data_txt, item)
+                for data_txt, itens in por_data.items()
+                for item in itens if not item.get("realizado")
+            }
+            if forcar and anterior is not None and getattr(self, "_previsao_semana_identidade", None) == identidade:
+                novos = len(snapshot - anterior)
+                retirados = len(anterior - snapshot)
+                if novos or retirados:
+                    mensagem = f"Previsão atualizada: {novos} nova(s) atividade(s) e {retirados} removida(s)."
+                else:
+                    mensagem = "Previsão recalculada: nenhuma atividade alterada."
+                self.calendario_previsao_alteracoes.setText(mensagem)
+                self.calendario_previsao_alteracoes.setVisible(True)
+            else:
+                self.calendario_previsao_alteracoes.setVisible(False)
+            self._previsao_semana_snapshot = snapshot
 
             conteudo = QWidget()
             conteudo.setObjectName("calendarForecastBoard")
-            colunas = QHBoxLayout(conteudo)
-            colunas.setContentsMargins(2, 2, 2, 2)
-            colunas.setSpacing(8)
+            corpo = QVBoxLayout(conteudo)
+            corpo.setContentsMargins(3, 3, 3, 5)
+            corpo.setSpacing(11)
 
-            nomes = {
-                1: "Segunda", 2: "Terça", 3: "Quarta", 4: "Quinta",
-                5: "Sexta", 6: "Sábado", 7: "Domingo",
-            }
-            hoje = QDate.currentDate()
-            segunda = hoje.addDays(1 - hoje.dayOfWeek())
-            total_itens = 0
-
-            for deslocamento in range(7):
-                data = segunda.addDays(deslocamento)
+            self._previsao_semana_grade_dias = QGridLayout()
+            self._previsao_semana_grade_dias.setHorizontalSpacing(7)
+            self._previsao_semana_grade_dias.setVerticalSpacing(7)
+            self._previsao_semana_botoes = {}
+            nomes = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"]
+            for indice in range(7):
+                data = inicio.addDays(indice)
                 data_txt = data.toString("yyyy-MM-dd")
-                itens = list(por_data.get(data_txt) or [])
-                total_itens += len(itens)
-
-                coluna = QFrame()
-                coluna.setObjectName("calendarForecastDay")
+                quantidade = len(por_data.get(data_txt) or [])
+                nome = nomes[data.dayOfWeek() - 1]
+                botao = QPushButton(f"{nome}  {data.toString('dd/MM')}\n{quantidade} atividade(s)")
+                botao.setObjectName("calendarForecastDayButton")
+                botao.setCheckable(True)
+                botao.setMinimumWidth(0)
+                botao.setMinimumHeight(72)
+                botao.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+                botao.setToolTip("Selecionar atividades de " + data.toString("dd/MM/yyyy"))
+                botao.setAccessibleName(f"{nome} {data.toString('dd/MM/yyyy')}: {quantidade} atividades")
                 if data < hoje:
-                    estado_dia = "past"
+                    estado = "past"
                 elif data == hoje:
-                    estado_dia = "today"
+                    estado = "today"
                 else:
-                    estado_dia = "future"
-                coluna.setProperty("dayState", estado_dia)
-                coluna.setMinimumWidth(168)
-                coluna.setMaximumWidth(235)
-
-                cbox = QVBoxLayout(coluna)
-                cbox.setContentsMargins(8, 9, 8, 9)
-                cbox.setSpacing(7)
-
-                nome_dia = nomes.get(data.dayOfWeek(), "")
-                dia = QLabel(f"{nome_dia} • Hoje" if data == hoje else nome_dia)
-                dia.setObjectName("calendarForecastDayName")
-                cbox.addWidget(dia)
-
-                linha_data = QHBoxLayout()
-                data_label = QLabel(data.toString("dd/MM"))
-                data_label.setObjectName("calendarForecastDayDate")
-                linha_data.addWidget(data_label)
-                linha_data.addStretch()
-                qtd_label = QLabel(str(len(itens)))
-                qtd_label.setObjectName("calendarForecastDayCount")
-                linha_data.addWidget(qtd_label)
-                cbox.addLayout(linha_data)
-
-                if itens:
-                    for item in itens:
-                        cbox.addWidget(self._criar_card_previsao_calendario(item))
+                    estado = "future"
+                botao.setProperty("dayState", estado)
+                tema_semana = normalizar_tema(getattr(self, "tema_atual", "futurista"))
+                if tema_semana == "claro":
+                    fundo, texto, borda, selecionado = "#F1F6FB", "#1A3548", "#9CB8C8", "#D7EEFB"
+                elif tema_semana == "escuro":
+                    fundo, texto, borda, selecionado = "#253341", "#EDF4F8", "#536E82", "#28506C"
                 else:
-                    vazio = QLabel(
-                        "Sem estudo registrado" if data < hoje else "Sem atividade prevista"
-                    )
-                    vazio.setObjectName("calendarForecastDayEmpty")
-                    vazio.setWordWrap(True)
-                    vazio.setAlignment(Qt.AlignCenter)
-                    cbox.addWidget(vazio)
+                    fundo, texto, borda, selecionado = "#112D40", "#E1EFF8", "#285B72", "#154D68"
+                botao.setStyleSheet(
+                    "QPushButton#calendarForecastDayButton {"
+                    f"background: {fundo}; color: {texto}; border: 1px solid {borda}; "
+                    "border-radius: 9px; padding: 6px 3px; font-weight: 600; "
+                    "text-align: center;} "
+                    "QPushButton#calendarForecastDayButton:hover {border-color: #27B6DF;} "
+                    "QPushButton#calendarForecastDayButton:checked {"
+                    f"background: {selecionado}; color: {texto}; "
+                    "border: 2px solid #24ACCF;} "
+                    "QPushButton#calendarForecastDayButton:focus {border: 2px solid #D8A748;}"
+                )
+                botao.clicked.connect(
+                    lambda _checked=False, data_chave=data_txt: self._selecionar_dia_previsao_calendario(data_chave)
+                )
+                self._previsao_semana_botoes[data_txt] = botao
+                self._previsao_semana_grade_dias.addWidget(botao, 0, indice)
+            corpo.addLayout(self._previsao_semana_grade_dias)
 
-                cbox.addStretch(1)
-                colunas.addWidget(coluna, 1)
+            detalhes_painel = QFrame()
+            detalhes_painel.setObjectName("calendarForecastDetailsPanel")
+            self._previsao_semana_detalhes = QVBoxLayout(detalhes_painel)
+            self._previsao_semana_detalhes.setContentsMargins(3, 5, 3, 8)
+            self._previsao_semana_detalhes.setSpacing(10)
+            corpo.addWidget(detalhes_painel, 1)
 
+            self._previsao_semana_itens = por_data
+            self._previsao_ultima_geometria = None
             self.calendario_previsao_scroll.setWidget(conteudo)
-            agora = QDate.currentDate().toString("dd/MM") + " • " + datetime.now().strftime("%H:%M")
+            selecao = getattr(self, "_previsao_semana_dia_selecionado", None)
+            if selecao not in por_data:
+                selecao = hoje.toString("yyyy-MM-dd")
+            if selecao not in por_data:
+                selecao = inicio.toString("yyyy-MM-dd")
+            self._selecionar_dia_previsao_calendario(selecao)
+            self._ajustar_colunas_previsao_calendario()
+
+            self.calendario_previsao_intervalo.setText(
+                inicio.toString("dd/MM") + " a " + fim.toString("dd/MM/yyyy")
+            )
+            agora = hoje.toString("dd/MM") + " • " + datetime.now().strftime("%H:%M")
             self.calendario_previsao_atualizado.setText(f"Atualizado {agora}")
             self.calendario_previsao_atualizado.setToolTip(
-                "A projeção representa o cenário atual se nenhuma prioridade relevante mudar."
+                "Previsão gerada com as informações disponíveis neste momento."
             )
+            total_itens = sum(len(itens) for itens in por_data.values())
             self.calendario_previsao_recalcular.setToolTip(
-                f"{total_itens} atividade(s) prevista(s) • carga {str(plano.get('carga') or 'moderada').capitalize()}"
+                f"{total_itens} cartão(ões) nesta janela • carga {str(plano.get('carga') or 'moderada').capitalize()}"
             )
             self._previsao_semana_suja = False
-            self._previsao_semana_data_referencia = hoje_txt
+            self._previsao_semana_data_referencia = hoje.toString("yyyy-MM-dd")
+            self._previsao_semana_identidade = identidade
         except Exception as erro:
-            falha = QLabel(
-                "Não foi possível calcular a previsão semanal.\n\n" + str(erro)
-            )
+            falha = QLabel("Não foi possível calcular a previsão semanal.\n\n" + str(erro))
             falha.setObjectName("calendarForecastEmpty")
             falha.setAlignment(Qt.AlignCenter)
             falha.setWordWrap(True)
@@ -95852,25 +96331,85 @@ class SistemaEstudos(QMainWindow):
     def abrir_calendario(self):
         self._garantir_tela_calendario()
         hoje = QDate.currentDate().toString("yyyy-MM-dd")
-        if (
-            not self._calendario_precarregado
-            or self._calendario_data_referencia != hoje
-        ):
-            self.atualizar_calendario()
-            self._calendario_precarregado = True
-            self._calendario_data_referencia = hoje
-
-        self.telas.setCurrentWidget(
-            self.tela_calendario
-        )
-
-        if (
-            self.calendario_paginas.currentIndex() == 1
-            and getattr(self, "_previsao_semana_suja", True)
-        ):
+        self._calendario_precarregado = True
+        self._calendario_data_referencia = hoje
+        self._previsao_semana_suja = True
+        self.atualizar_calendario()
+        self.telas.setCurrentWidget(self.tela_calendario)
+        if self.calendario_paginas.currentIndex() == 1:
             self.atualizar_previsao_semana_calendario()
 
+    def _calendario_ao_selecionar_dia(self):
+        """Uma data escolhida encerra a visualização global de pendências."""
+        self._calendario_modo_pendencias = False
+        self.atualizar_calendario_dia()
+
+    def abrir_pendencias_calendario(self):
+        """Lista vencimentos de todo o perfil, sem reprogramar as datas."""
+        if self.calendario_paginas.currentIndex() != 0:
+            self.alternar_visualizacao_calendario(0)
+        self._calendario_modo_pendencias = True
+        self.atualizar_calendario()
+
+    def _calendario_ir_proxima_data(self):
+        data = getattr(self, "_calendario_proxima_data", None)
+        if not isinstance(data, QDate) or not data.isValid():
+            return
+        self._calendario_modo_pendencias = False
+        self.calendario_revisoes.setSelectedDate(data)
+        self.calendario_revisoes.showSelectedDate()
+        self.atualizar_calendario()
+
+    def _calendario_atualizar_estado_acoes(self):
+        if not hasattr(self, "calendario_acao_abrir"):
+            return
+        topico_id, _nome = self.obter_topico_calendario_selecionado()
+        habilitado = topico_id not in (None, "")
+        for botao in (
+            self.calendario_acao_abrir,
+            self.calendario_acao_revisar,
+            self.calendario_acao_resolver,
+        ):
+            botao.setEnabled(habilitado)
+            botao.setToolTip(
+                "Abrir ação para o tópico selecionado" if habilitado
+                else "Selecione uma revisão na tabela para habilitar"
+            )
+
+    def _calendario_atualizar_estado_vazio(self, atrasadas):
+        """Mostra próximos agendamentos e atrasos sem atribuí-los à data vazia."""
+        hoje = QDate.currentDate()
+        concurso_id = int(obter_concurso_ativo()[0])
+        inicio = hoje.addDays(1).toString("yyyy-MM-dd")
+        fim = hoje.addDays(90).toString("yyyy-MM-dd")
+        futuras = listar_revisoes_agendadas_periodo(inicio, fim, concurso_id)
+        datas = sorted({str(item[4])[:10] for item in futuras})
+        self._calendario_proxima_data = (
+            QDate.fromString(datas[0], "yyyy-MM-dd") if datas else None
+        )
+        if self._calendario_proxima_data and self._calendario_proxima_data.isValid():
+            data_texto = self._calendario_proxima_data.toString("dd/MM/yyyy")
+            total = sum(1 for item in futuras if str(item[4])[:10] == datas[0])
+            self.calendario_vazio_proxima.setText(
+                f"Próxima data agendada: {data_texto} · {total} revisão(ões)"
+            )
+            self.calendario_vazio_ir_proxima.setEnabled(True)
+        else:
+            self.calendario_vazio_proxima.setText(
+                "Nenhuma próxima revisão agendada nos próximos 90 dias."
+            )
+            self.calendario_vazio_ir_proxima.setEnabled(False)
+        qtd = len(atrasadas)
+        self.calendario_vazio_pendencias.setText(
+            f"Pendências vencidas do perfil: {qtd}." if qtd
+            else "Nenhuma revisão vencida encontrada para o perfil."
+        )
+        self.calendario_vazio_ver_atrasadas.setEnabled(bool(qtd))
+
     def ir_para_hoje_calendario(self):
+        if self.calendario_paginas.currentIndex() != 0:
+            self.alternar_visualizacao_calendario(0)
+        self._calendario_modo_pendencias = False
         hoje = QDate.currentDate()
 
         self.calendario_revisoes.setSelectedDate(
@@ -95885,6 +96424,7 @@ class SistemaEstudos(QMainWindow):
         ano,
         mes
     ):
+        self._calendario_modo_pendencias = False
         selecionada = (
             self.calendario_revisoes
             .selectedDate()
@@ -95937,11 +96477,18 @@ class SistemaEstudos(QMainWindow):
                 resumo["hoje"]
             )
         )
-        self.calendario_card_atrasadas.setText(
-            str(
-                resumo["atrasadas"]
-            )
+        self.calendario_card_atrasadas.setText(str(resumo["atrasadas"]))
+        hoje = QDate.currentDate()
+        pendencias = listar_pendencias(hoje.toString("yyyy-MM-dd"), concurso[0])
+        self._calendario_pendencias = [
+            item for item in pendencias
+            if QDate.fromString(str(item[4])[:10], "yyyy-MM-dd").isValid()
+            and QDate.fromString(str(item[4])[:10], "yyyy-MM-dd") < hoje
+        ]
+        self.calendario_btn_atrasadas.setText(
+            f"Ver atrasadas ({len(self._calendario_pendencias)})"
         )
+        self.calendario_btn_atrasadas.setEnabled(bool(self._calendario_pendencias))
 
         ano = (
             self.calendario_revisoes
@@ -96056,6 +96603,13 @@ class SistemaEstudos(QMainWindow):
             )
         }
 
+        # Os finais de semana não compartilham a cor reservada às revisões vencidas.
+        neutra = QColor("#53697C") if tema_atual == "claro" else QColor("#BECBDC")
+        formato_fim_semana = QTextCharFormat()
+        formato_fim_semana.setForeground(neutra)
+        self.calendario_revisoes.setWeekdayTextFormat(Qt.Saturday, formato_fim_semana)
+        self.calendario_revisoes.setWeekdayTextFormat(Qt.Sunday, formato_fim_semana)
+
         for data_texto in sorted(
             dias_ocupados
         ):
@@ -96098,168 +96652,118 @@ class SistemaEstudos(QMainWindow):
                 formato
             )
 
-            self.datas_formatadas_calendario.add(
-                data
-            )
+            self.datas_formatadas_calendario.add(data)
+
+        # A data atual permanece identificada mesmo quando não há revisão nela.
+        if hoje not in self.datas_formatadas_calendario:
+            formato_hoje = QTextCharFormat()
+            formato_hoje.setForeground(qcolor(tema_atual, "calendar.today_text"))
+            formato_hoje.setBackground(qcolor(tema_atual, "calendar.today_surface"))
+            formato_hoje.setFontWeight(int(QFont.Weight.Bold))
+            self.calendario_revisoes.setDateTextFormat(hoje, formato_hoje)
+            self.datas_formatadas_calendario.add(hoje)
 
     def atualizar_calendario_dia(self):
-        if not hasattr(
-            self,
-            "tabela_calendario"
-        ):
+        if not hasattr(self, "tabela_calendario"):
             return
 
-        data = (
-            self.calendario_revisoes
-            .selectedDate()
-        )
-
-        data_texto = data.toString(
-            "yyyy-MM-dd"
-        )
-
-        self.calendario_data_titulo.setText(
-            f"Revisões de {data.toString('dd/MM/yyyy')}"
-        )
-
-        dados_dia = [
-            item
-            for item in getattr(
-                self,
-                "dados_calendario_mes",
-                []
-            )
-            if item[4] == data_texto
-        ]
-
-        quantidade = len(
-            dados_dia
-        )
-
-        texto_quantidade = (
-            "1 revisão"
-            if quantidade == 1
-            else f"{quantidade} revisões"
-        )
-
-        self.calendario_contagem_dia.setText(
-            texto_quantidade
-        )
-
-        self.tabela_calendario.setRowCount(
-            quantidade
-        )
-
+        data = self.calendario_revisoes.selectedDate()
+        data_texto = data.toString("yyyy-MM-dd")
         hoje = QDate.currentDate()
-
-        for linha, dado in enumerate(
-            dados_dia
-        ):
-            topico_id = dado[0]
-            disciplina = dado[1]
-            topico = dado[2]
-            revisoes = dado[3]
-            percentual = dado[5]
-            importancia = dado[6]
-
-            item_disciplina = QTableWidgetItem(
-                disciplina
+        modo_atrasadas = bool(getattr(self, "_calendario_modo_pendencias", False))
+        if modo_atrasadas:
+            dados_dia = list(getattr(self, "_calendario_pendencias", []))
+            dados_dia.sort(key=lambda item: (str(item[4]), str(item[1]), str(item[2])))
+            self.calendario_data_titulo.setText("Revisões atrasadas · Todo o perfil")
+            self.calendario_explicacao_dia.setText(
+                "Pendências vencidas de todos os meses. Selecione uma revisão para agir."
+            )
+        else:
+            dados_dia = [
+                item for item in getattr(self, "dados_calendario_mes", [])
+                if str(item[4])[:10] == data_texto
+            ]
+            self.calendario_data_titulo.setText(
+                f"Revisões de {data.toString('dd/MM/yyyy')}"
+            )
+            self.calendario_explicacao_dia.setText(
+                "Selecione uma revisão para habilitar os botões; duplo clique abre o tópico."
             )
 
-            item_topico = QTableWidgetItem(
-                topico
-            )
-            item_topico.setData(
-                Qt.UserRole,
-                topico_id
-            )
+        quantidade = len(dados_dia)
+        self.calendario_contagem_dia.setText(
+            "1 revisão" if quantidade == 1 else f"{quantidade} revisões"
+        )
+        self.tabela_calendario.setSortingEnabled(False)
+        self.tabela_calendario.clearSelection()
+        self.tabela_calendario.setRowCount(quantidade)
+        for linha, dado in enumerate(dados_dia):
+            topico_id, disciplina, topico, revisoes, vencimento, percentual, importancia = dado[:7]
+            item_disciplina = _ItemHistoricoOrdenavel(str(disciplina))
+            item_topico = _ItemHistoricoOrdenavel(str(topico))
+            item_topico.setData(Qt.UserRole, topico_id)
+            item_revisoes = _ItemHistoricoOrdenavel(str(int(revisoes or 0)))
+            item_revisoes.setData(int(Qt.UserRole) + 1, int(revisoes or 0))
+            item_revisoes.setTextAlignment(Qt.AlignCenter)
+            item_percentual = _ItemHistoricoOrdenavel(formatar_percentual(percentual))
+            try:
+                item_percentual.setData(int(Qt.UserRole) + 1, float(percentual))
+            except (TypeError, ValueError):
+                item_percentual.setData(int(Qt.UserRole) + 1, -1.0)
+            item_percentual.setTextAlignment(Qt.AlignCenter)
 
-            item_revisoes = QTableWidgetItem(
-                str(
-                    revisoes
-                )
-            )
-            item_revisoes.setTextAlignment(
-                Qt.AlignCenter
-            )
-
-            item_percentual = QTableWidgetItem(
-                formatar_percentual(
-                    percentual
-                )
-            )
-            item_percentual.setTextAlignment(
-                Qt.AlignCenter
-            )
-
-            if data < hoje:
-                situacao = "Atrasada"
-                nivel = "perigo"
-            elif data == hoje:
-                situacao = "Hoje"
-                nivel = "atencao"
+            vencimento_data = QDate.fromString(str(vencimento)[:10], "yyyy-MM-dd")
+            if vencimento_data < hoje:
+                situacao, nivel = "Atrasada", "perigo"
+            elif vencimento_data == hoje:
+                situacao, nivel = "Hoje", "atencao"
             else:
-                situacao = "Agendada"
-                nivel = "sucesso"
+                situacao, nivel = "Agendada", "sucesso"
+            situacao_visivel = (
+                f"{situacao} {vencimento_data.toString('dd/MM')}"
+                if modo_atrasadas else situacao
+            )
+            item_situacao = _ItemHistoricoOrdenavel(situacao_visivel)
+            item_situacao.setTextAlignment(Qt.AlignCenter)
+            item_situacao.setData(int(Qt.UserRole) + 1,
+                                   0 if situacao == "Atrasada" else (1 if situacao == "Hoje" else 2))
+            item_situacao.setToolTip(
+                f"Data prevista: {vencimento_data.toString('dd/MM/yyyy')}"
+            )
+            aplicar_destaque_tabela(item_situacao, nivel, False)
 
-            item_situacao = QTableWidgetItem(
-                situacao
-            )
-            item_situacao.setTextAlignment(
-                Qt.AlignCenter
-            )
-            aplicar_destaque_tabela(
-                item_situacao,
-                nivel,
-                False
-            )
+            item_importancia = _ItemHistoricoOrdenavel("")
+            try:
+                item_importancia.setData(int(Qt.UserRole) + 1, float(importancia))
+            except (ValueError, TypeError):
+                item_importancia.setData(int(Qt.UserRole) + 1, 0.0)
+            for coluna, item in enumerate((item_disciplina, item_topico,
+                                           item_revisoes, item_percentual,
+                                           item_importancia, item_situacao)):
+                self.tabela_calendario.setItem(linha, coluna, item)
+            estrelas = IndicadorEstrelasFila(importancia)
+            self.tabela_calendario.setCellWidget(linha, 4, estrelas)
+            self.tabela_calendario.setRowHeight(linha, 34)
 
-            self.tabela_calendario.setItem(
-                linha,
-                0,
-                item_disciplina
-            )
-            self.tabela_calendario.setItem(
-                linha,
-                1,
-                item_topico
-            )
-            self.tabela_calendario.setItem(
-                linha,
-                2,
-                item_revisoes
-            )
-            self.tabela_calendario.setItem(
-                linha,
-                3,
-                item_percentual
-            )
-
-            estrelas = IndicadorEstrelasFila(
-                importancia
-            )
-
-            self.tabela_calendario.setCellWidget(
-                linha,
-                4,
-                estrelas
-            )
-
-            self.tabela_calendario.setItem(
-                linha,
-                5,
-                item_situacao
-            )
-
-            self.tabela_calendario.setRowHeight(
-                linha,
-                32
-            )
-
+        self.tabela_calendario.setSortingEnabled(True)
+        # A seleção fica explícita; não iniciar ações automaticamente sobre a 1ª linha.
+        self.tabela_calendario.clearSelection()
         if quantidade:
-            self.tabela_calendario.selectRow(
-                0
+            self.calendario_conteudo_dia.setCurrentIndex(0)
+        else:
+            self.calendario_conteudo_dia.setCurrentIndex(1)
+            self.calendario_vazio_titulo.setText(
+                "Nenhuma revisão atrasada" if modo_atrasadas
+                else "Nenhuma revisão agendada nesta data"
             )
+            self.calendario_vazio_descricao.setText(
+                "Não há pendências vencidas no perfil." if modo_atrasadas
+                else "Selecione outra data ou consulte os próximos agendamentos."
+            )
+            self._calendario_atualizar_estado_vazio(
+                getattr(self, "_calendario_pendencias", [])
+            )
+        self._calendario_atualizar_estado_acoes()
 
     def obter_topico_calendario_selecionado(
         self
@@ -96269,7 +96773,7 @@ class SistemaEstudos(QMainWindow):
             .currentRow()
         )
 
-        if linha < 0:
+        if linha < 0 or not self.tabela_calendario.selectionModel().hasSelection():
             return (
                 None,
                 None
@@ -96305,6 +96809,7 @@ class SistemaEstudos(QMainWindow):
 
         if item is None:
             return
+        self.tabela_calendario.selectRow(linha)
 
         topico_id = item.data(
             Qt.UserRole
@@ -96401,16 +96906,8 @@ class SistemaEstudos(QMainWindow):
             tela
         )
 
-        layout.setContentsMargins(
-            28,
-            20,
-            28,
-            24
-        )
-
-        layout.setSpacing(
-            12
-        )
+        layout.setContentsMargins(18, 11, 18, 12)
+        layout.setSpacing(7)
 
         # ====================================================
         # CABEÇALHO
@@ -96434,9 +96931,7 @@ class SistemaEstudos(QMainWindow):
         voltar.setFixedWidth(
             88
         )
-        voltar.clicked.connect(
-            self.voltar_inicio
-        )
+        voltar.clicked.connect(self.abrir_painel_analitico)
 
         cabecalho.addWidget(
             voltar
@@ -96526,26 +97021,37 @@ class SistemaEstudos(QMainWindow):
             cabecalho
         )
 
-        # ====================================================
-        # AVISO SOBRE DADOS LEGADOS
-        # ====================================================
-
+        # Nota de proveniência acessível, mas recolhida por padrão.
+        self.rel_detalhes_dados = QPushButton("Dados e limitações  ▸")
+        self.rel_detalhes_dados.setObjectName("subtleButton")
+        self.rel_detalhes_dados.setToolTip(
+            "Entenda a origem dos indicadores e o alcance dos dados legados."
+        )
+        self.rel_detalhes_dados.setFixedHeight(26)
+        self.rel_detalhes_dados.setMaximumWidth(178)
         aviso = QLabel(
-            "Os relatórios por período usam as revisões detalhadas "
-            "registradas no VighnaStudy. Revisões legadas importadas "
-            "do Excel continuam nos totais gerais, mas não podem ser "
-            "atribuídas a datas específicas."
+            "Resumo e abas por disciplina/tópico/dia: revisões detalhadas registradas "
+            "no programa. Estratégico: tentativas de questões registradas nas baterias. "
+            "Essas fontes podem produzir totais diferentes e não devem ser somadas. "
+            "Registros anteriores sem perfil identificado podem depender da associação "
+            "atual ao perfil; revisões antigas importadas do Excel sem data específica "
+            "não entram nos filtros por período. Tempo efetivo: somente baterias "
+            "concluídas desde a ativação do contador, com pausas descontadas."
         )
-        aviso.setObjectName(
-            "infoNotice"
+        aviso.setObjectName("infoNotice")
+        aviso.setWordWrap(True)
+        aviso.setVisible(False)
+        self.rel_detalhes_dados.clicked.connect(
+            lambda checked=False: (
+                aviso.setVisible(not aviso.isVisible()),
+                self.rel_detalhes_dados.setText(
+                    "Dados e limitações  ▾" if aviso.isVisible()
+                    else "Dados e limitações  ▸"
+                ),
+            )
         )
-        aviso.setWordWrap(
-            True
-        )
-
-        layout.addWidget(
-            aviso
-        )
+        layout.addWidget(self.rel_detalhes_dados, 0, Qt.AlignLeft)
+        layout.addWidget(aviso)
 
         # ====================================================
         # FILTROS
@@ -96584,10 +97090,9 @@ class SistemaEstudos(QMainWindow):
             32
         )
         self.combo_periodo_relatorio.addItems([
-            "Últimos 7 dias",
-            "Últimos 30 dias",
-            "Este mês",
-            "Personalizado"
+            "Últimos 7 dias", "Últimos 30 dias", "Últimos 90 dias",
+            "Últimos 180 dias", "Últimos 365 dias", "Este mês",
+            "Este ano", "Personalizado",
         ])
         self.combo_periodo_relatorio.currentIndexChanged.connect(
             self.alterar_periodo_relatorio
@@ -96633,6 +97138,13 @@ class SistemaEstudos(QMainWindow):
         )
         self.data_fim_relatorio.setFixedHeight(
             32
+        )
+        self._alterando_datas_relatorio = False
+        self.data_inicio_relatorio.dateChanged.connect(
+            self._ao_alterar_data_relatorio
+        )
+        self.data_fim_relatorio.dateChanged.connect(
+            self._ao_alterar_data_relatorio
         )
 
         atualizar = QPushButton(
@@ -96725,7 +97237,7 @@ class SistemaEstudos(QMainWindow):
 
         card, self.rel_card_questoes = (
             self.criar_mini_indicador_disciplina(
-                "Questões"
+                "Questões (revisões)"
             )
         )
         grade.addWidget(
@@ -96789,9 +97301,16 @@ class SistemaEstudos(QMainWindow):
             5
         )
 
-        layout.addLayout(
-            grade
+        layout.addLayout(grade)
+        self.rel_rotulo_fonte = QLabel(
+            "Resumo: revisões detalhadas do perfil · Estratégico: tentativas das baterias"
         )
+        self.rel_rotulo_fonte.setObjectName("mutedLabel")
+        self.rel_rotulo_fonte.setToolTip(
+            "Questões e acertos das revisões não equivalem necessariamente "
+            "às tentativas individuais. Consulte Dados e limitações."
+        )
+        layout.addWidget(self.rel_rotulo_fonte)
 
         # ====================================================
         # COMPARAÇÃO COM O PERÍODO ANTERIOR
@@ -96805,15 +97324,8 @@ class SistemaEstudos(QMainWindow):
         comparacao_layout = QVBoxLayout(
             comparacao
         )
-        comparacao_layout.setContentsMargins(
-            14,
-            11,
-            14,
-            12
-        )
-        comparacao_layout.setSpacing(
-            8
-        )
+        comparacao_layout.setContentsMargins(10, 5, 10, 6)
+        comparacao_layout.setSpacing(3)
 
         linha_comparacao_titulo = QHBoxLayout()
 
@@ -96870,12 +97382,7 @@ class SistemaEstudos(QMainWindow):
             quadro_layout = QVBoxLayout(
                 quadro
             )
-            quadro_layout.setContentsMargins(
-                12,
-                7,
-                12,
-                8
-            )
+            quadro_layout.setContentsMargins(8, 2, 8, 3)
             quadro_layout.setSpacing(
                 1
             )
@@ -96908,7 +97415,7 @@ class SistemaEstudos(QMainWindow):
 
         quadro, self.rel_comp_questoes = (
             criar_comparador(
-                "Questões"
+                "Questões nas revisões"
             )
         )
         comparacao_grade.addWidget(
@@ -96930,7 +97437,7 @@ class SistemaEstudos(QMainWindow):
 
         quadro, self.rel_comp_desempenho = (
             criar_comparador(
-                "Desempenho"
+                "Desempenho das revisões"
             )
         )
         comparacao_grade.addWidget(
@@ -97371,6 +97878,7 @@ class SistemaEstudos(QMainWindow):
         self.tabela_relatorio_estrategico_disciplinas.setEditTriggers(
             QAbstractItemView.NoEditTriggers
         )
+        self.tabela_relatorio_estrategico_disciplinas.setSortingEnabled(True)
         self.tabela_relatorio_estrategico_disciplinas.setAlternatingRowColors(True)
         self.tabela_relatorio_estrategico_disciplinas.setShowGrid(False)
         self.tabela_relatorio_estrategico_disciplinas.verticalHeader().setVisible(False)
@@ -97469,9 +97977,17 @@ class SistemaEstudos(QMainWindow):
             "filterCount"
         )
 
-        cab_disc.addWidget(
-            self.rel_contagem_disciplinas
+        cab_disc.addWidget(self.rel_contagem_disciplinas)
+        self.rel_busca_disciplinas = QLineEdit()
+        self.rel_busca_disciplinas.setPlaceholderText("Buscar disciplina")
+        self.rel_busca_disciplinas.setClearButtonEnabled(True)
+        self.rel_busca_disciplinas.setMinimumWidth(155)
+        self.rel_busca_disciplinas.setMaximumWidth(215)
+        self.rel_busca_disciplinas.setFixedHeight(30)
+        self.rel_busca_disciplinas.textChanged.connect(
+            lambda texto: self._filtrar_tabela_relatorio("disciplinas", texto)
         )
+        cab_disc.addWidget(self.rel_busca_disciplinas)
 
         lay_disc.addLayout(
             cab_disc
@@ -97492,6 +98008,10 @@ class SistemaEstudos(QMainWindow):
         self.tabela_relatorio_disciplinas.setEditTriggers(
             QAbstractItemView.NoEditTriggers
         )
+        self.tabela_relatorio_disciplinas.horizontalHeader().setSortIndicator(
+            4, Qt.AscendingOrder
+        )
+        self.tabela_relatorio_disciplinas.setSortingEnabled(True)
         self.tabela_relatorio_disciplinas.setAlternatingRowColors(
             True
         )
@@ -97567,7 +98087,7 @@ class SistemaEstudos(QMainWindow):
         )
 
         explicacao_topicos = QLabel(
-            "Ordenado do menor para o maior desempenho. Dê duplo clique para abrir o histórico."
+            "Ordenado inicialmente do menor desempenho para o maior. Selecione e clique em Abrir, ou use duplo clique."
         )
         explicacao_topicos.setObjectName(
             "mutedLabel"
@@ -97595,9 +98115,25 @@ class SistemaEstudos(QMainWindow):
             "filterCount"
         )
 
-        cab_topicos.addWidget(
-            self.rel_contagem_topicos
+        cab_topicos.addWidget(self.rel_contagem_topicos)
+        self.rel_busca_topicos = QLineEdit()
+        self.rel_busca_topicos.setPlaceholderText("Buscar tópico ou disciplina")
+        self.rel_busca_topicos.setClearButtonEnabled(True)
+        self.rel_busca_topicos.setMinimumWidth(165)
+        self.rel_busca_topicos.setMaximumWidth(220)
+        self.rel_busca_topicos.setFixedHeight(30)
+        self.rel_busca_topicos.textChanged.connect(
+            lambda texto: self._filtrar_tabela_relatorio("topicos", texto)
         )
+        cab_topicos.addWidget(self.rel_busca_topicos)
+        self.rel_abrir_topico = QPushButton("Abrir tópico selecionado")
+        self.rel_abrir_topico.setObjectName("toolbarButton")
+        self.rel_abrir_topico.setFixedHeight(30)
+        self.rel_abrir_topico.setEnabled(False)
+        self.rel_abrir_topico.clicked.connect(
+            self._abrir_topico_selecionado_relatorio
+        )
+        cab_topicos.addWidget(self.rel_abrir_topico)
 
         lay_topicos.addLayout(
             cab_topicos
@@ -97620,6 +98156,10 @@ class SistemaEstudos(QMainWindow):
         self.tabela_relatorio_topicos.setEditTriggers(
             QAbstractItemView.NoEditTriggers
         )
+        self.tabela_relatorio_topicos.horizontalHeader().setSortIndicator(
+            5, Qt.AscendingOrder
+        )
+        self.tabela_relatorio_topicos.setSortingEnabled(True)
         self.tabela_relatorio_topicos.setAlternatingRowColors(
             True
         )
@@ -97641,6 +98181,11 @@ class SistemaEstudos(QMainWindow):
         )
         self.tabela_relatorio_topicos.cellDoubleClicked.connect(
             self.abrir_topico_relatorio
+        )
+        self.tabela_relatorio_topicos.itemSelectionChanged.connect(
+            lambda: self.rel_abrir_topico.setEnabled(
+                self.tabela_relatorio_topicos.currentRow() >= 0
+            )
         )
 
         self.tabela_relatorio_topicos.setColumnWidth(
@@ -97715,7 +98260,7 @@ class SistemaEstudos(QMainWindow):
         )
 
         descricao_diario = QLabel(
-            "Veja como revisões, questões e desempenho se distribuíram ao longo do período."
+            "Revisões e tempo líquido das baterias por dia. Uma ausência de medição aparece como —."
         )
         descricao_diario.setObjectName(
             "mutedLabel"
@@ -97749,19 +98294,15 @@ class SistemaEstudos(QMainWindow):
         )
 
         self.tabela_relatorio_diario = QTableWidget()
-        self.tabela_relatorio_diario.setColumnCount(
-            5
-        )
+        self.tabela_relatorio_diario.setColumnCount(6)
         self.tabela_relatorio_diario.setHorizontalHeaderLabels([
-            "Data",
-            "Revisões",
-            "Questões",
-            "Acertos",
-            "Desempenho"
+            "Data", "Revisões", "Questões", "Acertos", "Desempenho",
+            "Tempo efetivo"
         ])
         self.tabela_relatorio_diario.setEditTriggers(
             QAbstractItemView.NoEditTriggers
         )
+        self.tabela_relatorio_diario.setSortingEnabled(True)
         self.tabela_relatorio_diario.setAlternatingRowColors(
             True
         )
@@ -97802,6 +98343,7 @@ class SistemaEstudos(QMainWindow):
         self.dados_relatorio_disciplinas = None
         self.dados_relatorio_topicos = None
         self.dados_relatorio_diario = None
+        self.dados_relatorio_tempo_diario = None
 
         self.combo_periodo_relatorio.setCurrentIndex(
             1
@@ -97830,12 +98372,21 @@ class SistemaEstudos(QMainWindow):
             fim = hoje
             personalizado = False
 
+        elif escolha in (
+            "Últimos 90 dias", "Últimos 180 dias", "Últimos 365 dias"
+        ):
+            dias = int(escolha.split()[1])
+            inicio = hoje.addDays(-(dias - 1))
+            fim = hoje
+            personalizado = False
+
         elif escolha == "Este mês":
-            inicio = QDate(
-                hoje.year(),
-                hoje.month(),
-                1
-            )
+            inicio = QDate(hoje.year(), hoje.month(), 1)
+            fim = hoje
+            personalizado = False
+
+        elif escolha == "Este ano":
+            inicio = QDate(hoje.year(), 1, 1)
             fim = hoje
             personalizado = False
 
@@ -97858,20 +98409,25 @@ class SistemaEstudos(QMainWindow):
                     self.data_fim_relatorio.date()
                 )
 
-        if not personalizado:
-            self.data_inicio_relatorio.setDate(
-                inicio
-            )
-            self.data_fim_relatorio.setDate(
-                fim
-            )
+        self._alterando_datas_relatorio = True
+        try:
+            if not personalizado:
+                self.data_inicio_relatorio.setDate(inicio)
+                self.data_fim_relatorio.setDate(fim)
+            self.data_inicio_relatorio.setEnabled(personalizado)
+            self.data_fim_relatorio.setEnabled(personalizado)
+        finally:
+            self._alterando_datas_relatorio = False
+        if hasattr(self, "tela_relatorios"):
+            self._agendar_atualizacao_relatorios()
 
-        self.data_inicio_relatorio.setEnabled(
-            personalizado
-        )
-        self.data_fim_relatorio.setEnabled(
-            personalizado
-        )
+    def _ao_alterar_data_relatorio(self, *args):
+        if getattr(self, "_alterando_datas_relatorio", False):
+            return
+        if self.combo_periodo_relatorio.currentText() != "Personalizado":
+            return
+        if hasattr(self, "tela_relatorios"):
+            self._agendar_atualizacao_relatorios()
 
     def abrir_historico_academico_v2(self):
         """Abre histórico somente leitura; não altera relatórios homologados."""
@@ -97993,6 +98549,7 @@ class SistemaEstudos(QMainWindow):
         self.dados_relatorio_disciplinas = None
         self.dados_relatorio_topicos = None
         self.dados_relatorio_diario = None
+        self.dados_relatorio_tempo_diario = None
 
     def _atualizar_resumo_relatorios(self, contexto):
         inicio_medicao = time.perf_counter()
@@ -98099,6 +98656,8 @@ class SistemaEstudos(QMainWindow):
         tabela = self.tabela_relatorio_disciplinas
         tabela.setUpdatesEnabled(False)
         tabela.blockSignals(True)
+        ordenava = tabela.isSortingEnabled()
+        tabela.setSortingEnabled(False)
         try:
             tabela.setRowCount(quantidade)
             for linha, dado in enumerate(disciplinas):
@@ -98107,7 +98666,11 @@ class SistemaEstudos(QMainWindow):
                     formatar_percentual(dado[4]), str(dado[5]),
                 ]
                 for coluna, valor in enumerate(valores):
-                    item = QTableWidgetItem(valor)
+                    from ui.relatorios_apresentacao_v1 import ItemOrdenavelRelatorio
+                    item = ItemOrdenavelRelatorio(valor)
+                    chave = dado[coluna]
+                    item.setData(ItemOrdenavelRelatorio.SORT_ROLE,
+                                 -1.0 if chave is None else chave)
                     if coluna in (1, 2, 3, 4, 5):
                         item.setTextAlignment(Qt.AlignCenter)
                     if coluna == 4 and dado[4] is not None:
@@ -98122,8 +98685,13 @@ class SistemaEstudos(QMainWindow):
                     tabela.setItem(linha, coluna, item)
                 tabela.setRowHeight(linha, 31)
         finally:
+            tabela.setSortingEnabled(ordenava)
             tabela.blockSignals(False)
             tabela.setUpdatesEnabled(True)
+
+        self._filtrar_tabela_relatorio(
+            "disciplinas", self.rel_busca_disciplinas.text()
+        )
 
     def _preencher_relatorio_topicos(self, topicos):
         quantidade = len(topicos)
@@ -98133,6 +98701,8 @@ class SistemaEstudos(QMainWindow):
         tabela = self.tabela_relatorio_topicos
         tabela.setUpdatesEnabled(False)
         tabela.blockSignals(True)
+        ordenava = tabela.isSortingEnabled()
+        tabela.setSortingEnabled(False)
         try:
             tabela.setRowCount(quantidade)
             for linha, dado in enumerate(topicos):
@@ -98142,7 +98712,12 @@ class SistemaEstudos(QMainWindow):
                     formatar_data(dado[8]),
                 ]
                 for coluna, valor in enumerate(valores):
-                    item = QTableWidgetItem(valor)
+                    from ui.relatorios_apresentacao_v1 import ItemOrdenavelRelatorio
+                    item = ItemOrdenavelRelatorio(valor)
+                    indice = [1, 2, 3, 4, 5, 6, 7, 8][coluna]
+                    chave = dado[indice]
+                    item.setData(ItemOrdenavelRelatorio.SORT_ROLE,
+                                 -1.0 if chave is None else str(chave) if coluna in (0, 1) else chave)
                     if coluna == 1:
                         item.setData(Qt.UserRole, dado[0])
                     if coluna in (2, 3, 4, 5, 6, 7):
@@ -98159,27 +98734,106 @@ class SistemaEstudos(QMainWindow):
                     tabela.setItem(linha, coluna, item)
                 tabela.setRowHeight(linha, 31)
         finally:
+            tabela.setSortingEnabled(ordenava)
             tabela.blockSignals(False)
             tabela.setUpdatesEnabled(True)
 
+        self._filtrar_tabela_relatorio("topicos", self.rel_busca_topicos.text())
+
+    def _filtrar_tabela_relatorio(self, nome, texto):
+        """Busca local e não destrutiva sobre linhas já consultadas."""
+        nome = str(nome)
+        if nome == "disciplinas":
+            tabela = getattr(self, "tabela_relatorio_disciplinas", None)
+            colunas = (0,)
+        elif nome == "topicos":
+            tabela = getattr(self, "tabela_relatorio_topicos", None)
+            colunas = (0, 1)
+        else:
+            return
+        if tabela is None:
+            return
+        import unicodedata
+        def simplificar(valor):
+            return "".join(
+                caractere for caractere in
+                unicodedata.normalize("NFKD", str(valor or "").casefold())
+                if not unicodedata.combining(caractere)
+            )
+        termo = simplificar(texto).strip()
+        for linha in range(tabela.rowCount()):
+            conteudo = " ".join(
+                tabela.item(linha, coluna).text()
+                if tabela.item(linha, coluna) is not None else ""
+                for coluna in colunas
+            )
+            tabela.setRowHidden(linha, termo not in simplificar(conteudo))
+
+    def _tempo_diario_relatorio(self, contexto):
+        """Lê tempo do perfil sem qualquer alteração no banco; ausência != zero."""
+        from caminhos import CAMINHO_BANCO
+        from ui.tempo_historico_dados_v1 import consultar_serie, FonteTempoIndisponivel
+        try:
+            resultado = consultar_serie(
+                CAMINHO_BANCO,
+                inicio=contexto["inicio"], fim=contexto["fim"],
+                agrupamento="dia", concurso_id=contexto["concurso"][0],
+            )
+        except FonteTempoIndisponivel:
+            return {}
+        return {
+            linha["inicio"]: int(linha["liquido"])
+            for linha in resultado["linhas"]
+            if linha["tem_registro"]
+        }
+
+    def _abrir_topico_selecionado_relatorio(self, checked=False):
+        linha = self.tabela_relatorio_topicos.currentRow()
+        if linha >= 0:
+            self.abrir_topico_relatorio(linha, 1)
+
     def _preencher_relatorio_diario(self, diario):
-        quantidade = len(diario)
+        from ui.tempo_baterias_v1 import formatar_duracao
+        from ui.relatorios_apresentacao_v1 import ItemOrdenavelRelatorio
+
+        tempos = self.dados_relatorio_tempo_diario or {}
+        por_data = {str(item[0]): item for item in diario}
+        # Um dia com tempo, mas sem revisão detalhada, também deve ser exibido.
+        for data_iso in tempos:
+            por_data.setdefault(data_iso, (data_iso, 0, 0, 0, None))
+        linhas = [por_data[d] for d in sorted(por_data)]
+        quantidade = len(linhas)
         self.rel_contagem_dias.setText(
             "1 dia" if quantidade == 1 else f"{quantidade} dias"
         )
         tabela = self.tabela_relatorio_diario
         tabela.setUpdatesEnabled(False)
         tabela.blockSignals(True)
+        ordenava = tabela.isSortingEnabled()
+        tabela.setSortingEnabled(False)
         try:
             tabela.setRowCount(quantidade)
-            for linha, dado in enumerate(diario):
+            for linha, dado in enumerate(linhas):
+                data_iso = str(dado[0])
+                segundos = tempos.get(data_iso)
                 valores = [
-                    formatar_data(dado[0]), str(dado[1]), str(dado[2]),
+                    formatar_data(data_iso), str(dado[1]), str(dado[2]),
                     str(dado[3]), formatar_percentual(dado[4]),
+                    "—" if segundos is None else formatar_duracao(segundos),
                 ]
+                chaves = [data_iso, int(dado[1]), int(dado[2]),
+                          int(dado[3]), float(dado[4]) if dado[4] is not None else -1.0,
+                          int(segundos) if segundos is not None else -1]
                 for coluna, valor in enumerate(valores):
-                    item = QTableWidgetItem(valor)
+                    item = ItemOrdenavelRelatorio(valor)
+                    item.setData(ItemOrdenavelRelatorio.SORT_ROLE, chaves[coluna])
                     item.setTextAlignment(Qt.AlignCenter)
+                    if coluna == 5:
+                        item.setToolTip(
+                            "Sem medição disponível"
+                            if segundos is None else
+                            "Tempo líquido de baterias concluídas, descontadas as pausas"
+                        )
                     if coluna == 4 and dado[4] is not None:
                         if dado[4] < 60:
                             aplicar_destaque_tabela(item, "perigo", False)
@@ -98188,6 +98842,7 @@ class SistemaEstudos(QMainWindow):
                     tabela.setItem(linha, coluna, item)
                 tabela.setRowHeight(linha, 31)
         finally:
+            tabela.setSortingEnabled(ordenava)
             tabela.blockSignals(False)
             tabela.setUpdatesEnabled(True)
 
@@ -98212,6 +98867,7 @@ class SistemaEstudos(QMainWindow):
         elif aba == "Por dia":
             dados = obter_relatorio_diario_periodo(inicio, fim, concurso_id)
             self.dados_relatorio_diario = dados
+            self.dados_relatorio_tempo_diario = self._tempo_diario_relatorio(contexto)
             self._preencher_relatorio_diario(dados)
         else:
             return
@@ -98289,6 +98945,8 @@ class SistemaEstudos(QMainWindow):
             self.dados_relatorio_diario = obter_relatorio_diario_periodo(
                 contexto["inicio"], contexto["fim"], concurso[0]
             )
+        if self.dados_relatorio_tempo_diario is None:
+            self.dados_relatorio_tempo_diario = self._tempo_diario_relatorio(contexto)
 
 
     def atualizar_relatorio_estrategico(
@@ -98556,6 +99214,8 @@ class SistemaEstudos(QMainWindow):
         tabela = self.tabela_relatorio_estrategico_disciplinas
         tabela.setUpdatesEnabled(False)
         tabela.blockSignals(True)
+        ordenava = tabela.isSortingEnabled()
+        tabela.setSortingEnabled(False)
         try:
             tabela.setRowCount(len(disciplinas))
 
@@ -98575,7 +99235,16 @@ class SistemaEstudos(QMainWindow):
                 ]
 
                 for coluna, valor in enumerate(valores):
-                    celula = QTableWidgetItem(str(valor))
+                    from ui.relatorios_apresentacao_v1 import ItemOrdenavelRelatorio
+                    celula = ItemOrdenavelRelatorio(str(valor))
+                    chave = (
+                        item.get("dominio") if coluna == 2 else
+                        item.get("desempenho") if coluna == 3 else
+                        item.get("cobertura_evidencia") if coluna == 4 else
+                        item.get("variacao") if coluna == 5 else str(valor)
+                    )
+                    celula.setData(ItemOrdenavelRelatorio.SORT_ROLE,
+                                  -1.0 if chave is None else chave)
                     if coluna == 0:
                         celula.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
                     else:
@@ -98594,6 +99263,7 @@ class SistemaEstudos(QMainWindow):
 
                 tabela.setRowHeight(linha, 31)
         finally:
+            tabela.setSortingEnabled(ordenava)
             tabela.blockSignals(False)
             tabela.setUpdatesEnabled(True)
 
@@ -98704,6 +99374,8 @@ class SistemaEstudos(QMainWindow):
                         "dd/MM/yyyy"
                     )
                 ])
+                escritor.writerow(["Fontes", "Resumo: revisões detalhadas | Estratégico: tentativas de baterias"])
+                escritor.writerow(["Tempo efetivo", "Somente baterias concluídas desde a ativação do contador"])
                 escritor.writerow([])
                 escritor.writerow([
                     "Revisões",
@@ -98957,18 +99629,19 @@ class SistemaEstudos(QMainWindow):
                     ])
 
                 escritor.writerow([])
+                escritor.writerow(["POR DIA"])
                 escritor.writerow([
-                    "POR DIA"
-                ])
-                escritor.writerow([
-                    "Data",
-                    "Revisões",
-                    "Questões",
-                    "Acertos",
-                    "Desempenho"
+                    "Data", "Revisões", "Questões", "Acertos", "Desempenho",
+                    "Tempo efetivo (segundos)", "Tempo efetivo (h/min)",
                 ])
 
-                for dado in self.dados_relatorio_diario:
+                from ui.tempo_baterias_v1 import formatar_duracao
+                tempos = self.dados_relatorio_tempo_diario or {}
+                diarios = {str(item[0]): item for item in self.dados_relatorio_diario}
+                for data_iso in tempos:
+                    diarios.setdefault(data_iso, (data_iso, 0, 0, 0, None))
+                for data_iso in sorted(diarios):
+                    dado = diarios[data_iso]
                     escritor.writerow([
                         formatar_data(
                             dado[0]
@@ -98986,7 +99659,9 @@ class SistemaEstudos(QMainWindow):
                                 ","
                             )
                             + "%"
-                        )
+                        ),
+                        tempos.get(data_iso, ""),
+                        "" if data_iso not in tempos else formatar_duracao(tempos[data_iso]),
                     ])
 
             QMessageBox.information(
@@ -103748,6 +104423,19 @@ class SistemaEstudos(QMainWindow):
             self.filtrar_progresso_edital
         )
 
+        # Nova aba independente: usa somente tempo_baterias_dia_v1.
+        from caminhos import CAMINHO_BANCO
+        from ui.tempo_historico_widgets_v1 import PainelTempoEfetivo
+        self.aba_tempo_estudo = PainelTempoEfetivo(
+            CAMINHO_BANCO, modo='estatisticas', tema=self.tema_atual,
+            parent=self.abas_estatisticas,
+        )
+        self.abas_estatisticas.addTab(self.aba_tempo_estudo, 'Tempo de estudo')
+        self.abas_estatisticas.currentChanged.connect(
+            lambda indice: self.aba_tempo_estudo.atualizar()
+            if self.abas_estatisticas.tabText(indice) == 'Tempo de estudo' else None
+        )
+
         descricoes_abas = self.descricoes_abas_estatisticas()
         for indice in range(self.abas_estatisticas.count()):
             nome_aba = self.abas_estatisticas.tabText(indice)
@@ -103825,6 +104513,11 @@ class SistemaEstudos(QMainWindow):
             "Progresso": (
                 "Acompanha a cobertura do edital por disciplina e tópico, incluindo "
                 "estado de preparação, importância, domínio e próxima revisão."
+            ),
+            "Tempo de estudo": (
+                "Soma o tempo líquido realmente registrado nas baterias concluídas. "
+                "Exibe dias, semanas, meses, média por dia ativo e comparação mensal. "
+                "Os registros anteriores à ativação do contador não são estimados."
             ),
         }
 
@@ -107179,6 +107872,12 @@ class SistemaEstudos(QMainWindow):
 
         # Navegação primeiro; cálculo somente se o snapshot visível estiver sujo.
         self.telas.setCurrentWidget(self.tela_estatisticas)
+        if hasattr(self, 'aba_tempo_estudo'):
+            self.aba_tempo_estudo.definir_concurso(
+                concurso_id if 'concurso_id' in locals() else None
+            )
+            if self._nome_aba_estatisticas_atual() == 'Tempo de estudo':
+                self.aba_tempo_estudo.atualizar()
         self._agendar_atualizacao_estatisticas()
 
     def _obter_resumo_estatisticas(self, concurso_id, hoje):
@@ -107387,6 +108086,10 @@ class SistemaEstudos(QMainWindow):
         path complementa o pré-carregamento do startup e elimina verificações
         redundantes durante a navegação normal.
         """
+        if (hasattr(self, 'aba_tempo_estudo')
+                and self._nome_aba_estatisticas_atual() == 'Tempo de estudo'):
+            self.aba_tempo_estudo.atualizar()
+            return
         if self._estatisticas_refresh_em_andamento:
             return
         if not hasattr(self, "abas_estatisticas"):
