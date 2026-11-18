@@ -196,6 +196,572 @@ def _b26r4_pixmap_progressao_constelacao():
 
 from importador_txt import ler_arquivo_txt_questoes
 
+
+# ---------------------------------------------------------------------------
+# VighnaKnowledge M1/M2 — núcleo embutido para compatibilidade com o atualizador
+# nativo, que só aceita determinadas rotas de código. Mantido independente
+# dos cálculos acadêmicos, sem modificar pontuação, domínio ou revisões.
+# ---------------------------------------------------------------------------
+"""Catálogo VighnaKnowledge M1/M2 R1 — validação e persistência independente.
+
+Contrato inicial: JSON catalogo_piloto_vighnaknowledge com secções
+catalogo, questoes e mapeamento; questões reais importadas pelo VPQ nativo.
+Nenhuma métrica de domínio é modificada aqui.
+"""
+
+
+import hashlib
+import json
+import os
+import re
+import sqlite3
+import sys
+import unicodedata
+import uuid
+from collections import Counter, defaultdict
+from contextlib import contextmanager
+from datetime import datetime, timezone
+from pathlib import Path
+
+VKN_LETRAS = frozenset("ABCDE")
+VKN_SCHEMA = 1
+
+class VknErroCatalogo(ValueError):
+    pass
+
+
+def _vkn_now():
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def _vkn_canon(value):
+    value = unicodedata.normalize("NFKC", str(value or ""))
+    return re.sub(r"\s+", " ", value).strip()
+
+
+def _vkn_hash(value):
+    if not isinstance(value, bytes):
+        value = str(value).encode("utf-8")
+    return hashlib.sha256(value).hexdigest()
+
+
+def _vkn_partitura(alt):
+    """Assinatura sem números de questão: texto A–E + letra do gabarito."""
+    if isinstance(alt, dict):
+        alt = alt.values()
+    por_letra = {}
+    for a in alt:
+        letra = str(a.get("letra") or a.get("alternativa") or "").upper().strip()
+        if letra in por_letra:
+            raise VknErroCatalogo(f"Alternativa repetida: {letra}")
+        por_letra[letra] = _vkn_canon(a.get("texto") or a.get("texto_alternativa"))
+    if set(por_letra) != VKN_LETRAS or not all(por_letra.values()):
+        raise VknErroCatalogo("Uma questão não possui cinco alternativas A–E válidas.")
+    return por_letra
+
+
+def _vkn_assinatura(por_letra):
+    return _vkn_hash(json.dumps(por_letra, ensure_ascii=False, sort_keys=True))
+
+
+def vkn_carregar_catalogo(caminho):
+    caminho = Path(caminho)
+    if caminho.suffix.lower() != ".json":
+        raise VknErroCatalogo("Selecione o catálogo estruturado JSON gerado no M1, não o TXT de consulta.")
+    dados_originais = caminho.read_bytes()
+    if len(dados_originais) > 8_000_000:
+        raise VknErroCatalogo("Catálogo grande demais para o importador-piloto (limite: 8 MB).")
+    try:
+        c = json.loads(dados_originais.decode("utf-8-sig"))
+    except (ValueError, UnicodeError) as e:
+        raise VknErroCatalogo(f"O JSON do catálogo é inválido: {e}") from e
+    if not isinstance(c, dict) or c.get("tipo") != "catalogo_piloto_vighnaknowledge":
+        raise VknErroCatalogo("Formato de catálogo não reconhecido para este piloto.")
+    temas, questoes, vinculos = c.get("catalogo"), c.get("questoes"), c.get("mapeamento")
+    if not all(isinstance(x, list) and len(x) > 0 for x in (temas, questoes, vinculos)):
+        raise VknErroCatalogo("O catálogo deve conter microtemas, questões e associações não vazias.")
+    ids = [str(x.get("id") or "") for x in temas]
+    if len(set(ids)) != len(ids) or any(not x for x in ids):
+        raise VknErroCatalogo("IDs de microtema vazios ou duplicados.")
+    for t in temas:
+        for ch in ("id", "nome", "regra", "referencia_normativa"):
+            if not _vkn_canon(t.get(ch)):
+                raise VknErroCatalogo(f"Microtema {t.get('id')}: campo obrigatório {ch} ausente.")
+    por_q = defaultdict(dict)
+    for l in vinculos:
+        q = str(l.get("questao") or "").strip()
+        a = str(l.get("alternativa") or "").strip().upper()
+        mid = str(l.get("microtema_id") or "")
+        if mid not in ids or a not in VKN_LETRAS or not q or not _vkn_canon(l.get("texto_alternativa")):
+            raise VknErroCatalogo(f"Vínculo incompleto ou com microtema inexistente em {q}-{a}.")
+        if a in por_q[q]:
+            raise VknErroCatalogo(f"Vínculo duplicado em {q}-{a}.")
+        por_q[q][a] = l
+    qids = [str(q.get("questao") or "") for q in questoes]
+    if len(set(qids)) != len(qids) or set(qids) != set(por_q):
+        raise VknErroCatalogo("Lista de questões e mapeamento não coincidem.")
+    ass_a_questao = {}
+    for q in questoes:
+        qid = str(q["questao"])
+        gab = str(q.get("gabarito") or "").upper().strip()
+        linhas = por_q[qid]
+        if set(linhas) != VKN_LETRAS or gab not in VKN_LETRAS:
+            raise VknErroCatalogo(f"{qid}: gabarito ou alternativas A–E incompletos.")
+        for letra, v in linhas.items():
+            papel = "gabarito" if letra == gab else "eliminavel"
+            registrado = str(v.get("papel") or "").lower().strip()
+            if registrado != papel:
+                raise VknErroCatalogo(f"{qid}-{letra}: papel divergente do gabarito.")
+            if str(v.get("gabarito_questao") or "").upper().strip() != gab:
+                raise VknErroCatalogo(f"{qid}-{letra}: gabarito divergente.")
+        assinatura = _vkn_assinatura({a: _vkn_canon(v["texto_alternativa"]) for a,v in linhas.items()})
+        if assinatura in ass_a_questao:
+            raise VknErroCatalogo(f"Duas questões catalogadas possuem alternativas idênticas: {qid}.")
+        ass_a_questao[assinatura] = {"qid":qid,"gabarito":gab,"linhas":linhas}
+    c["_vkn_indice"] = ass_a_questao
+    c["_vkn_sha256"] = _vkn_hash(dados_originais)
+    c["_vkn_fonte"] = str(caminho.resolve())
+    return c
+
+
+
+def vkn_conferir_fonte_vpq(catalogo, arquivo_vpq):
+    """Exige identidade do TXT quando o catálogo inclui hash da fonte VPQ.
+
+    Evita associar IDs a alterações do enunciado que preservam alternativas.
+    """
+    fontes = catalogo.get("fontes") or []
+    fontes_vpq = [f for f in fontes if isinstance(f,dict) and "VPQ" in str(f.get("arquivo", "")).upper()
+                  and f.get("sha256")]
+    if not fontes_vpq:
+        return True  # Catálogos sem hashes devem passar pela validação das alternativas.
+    digest = _vkn_hash(Path(arquivo_vpq).read_bytes())
+    if not any(str(f["sha256"]).lower() == digest for f in fontes_vpq):
+        raise VknErroCatalogo(
+            "O TXT VPQ não é idêntico ao arquivo usado para gerar este catálogo. "
+            "Reextraia/reconcilie os microtemas antes de importar a nova versão."
+        )
+    return True
+
+
+def vkn_conferir_compatibilidade_banco(catalogo, pasta=None):
+    """Bloqueia conflito de IDs ANTES de gravar qualquer questão nativa."""
+    pasta = Path(pasta) if pasta is not None else vkn_pasta_dados()
+    path = pasta / "knowledge.sqlite3"
+    if not path.exists(): return True
+    # mode=ro impede criação acidental, escrita ou migração em pré-conferência.
+    with sqlite3.connect(path.as_uri() + "?mode=ro",uri=True) as db:
+        tabelas = db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='vk_microthemes'").fetchone()
+        if not tabelas: raise VknErroCatalogo("Base VighnaKnowledge existente não possui schema reconhecido.")
+        for tema in catalogo["catalogo"]:
+            row = db.execute("SELECT discipline,normative_ref,name,rule,rule_version FROM vk_microthemes WHERE id=?",(tema['id'],)).fetchone()
+            atual = (str(tema.get('disciplina') or ''), str(tema.get('referencia_normativa') or ''),
+                     str(tema.get('nome') or ''), str(tema.get('regra') or ''),int(tema.get('versao_regra',1)))
+            if row and tuple(row) != atual:
+                raise VknErroCatalogo(f"O ID {tema['id']} já possui regra distinta; reconcilie seu catálogo antes de importar.")
+    return True
+
+def vkn_conferir_questoes_nativas(catalogo, questoes):
+    """Confere todas as questões parsadas pelo importador VPQ nativo.
+
+    Identifica por assinatura das cinco alternativas, sem depender de Q01/Q02;
+    recusa gabaritos divergentes, ausências e duplicações. Retorna QIDs na ordem.
+    """
+    indice = catalogo["_vkn_indice"]
+    vistos = set()
+    resultado = []
+    for i, q in enumerate(questoes,1):
+        assinatura = _vkn_assinatura(_vkn_partitura(q.get("alternativas") or []))
+        if assinatura not in indice:
+            raise VknErroCatalogo(f"Questão nativa {i}: alternativas não correspondem ao catálogo.\nConfira se VPQ e JSON são da mesma bateria.")
+        item = indice[assinatura]
+        if item["qid"] in vistos:
+            raise VknErroCatalogo(f"Questão catalogada repetida na leitura: {item['qid']}.")
+        vistos.add(item["qid"])
+        gab_nativo = str(q.get("gabarito") or "").upper().strip()
+        if not gab_nativo:
+            gab_nativo = next((str(a.get('letra') or '') for a in q.get('alternativas',[]) if a.get('correta')), '')
+        if gab_nativo and gab_nativo != item["gabarito"]:
+            raise VknErroCatalogo(f"{item['qid']}: gabarito diferente no VPQ ({gab_nativo}) e no catálogo ({item['gabarito']}).")
+        resultado.append(item["qid"])
+    if len(questoes) != len(indice) or len(vistos) != len(indice):
+        faltam = sorted(set(x["qid"] for x in indice.values()) - vistos)
+        raise VknErroCatalogo(f"Bateria incompleta: {len(vistos)}/{len(indice)} questões encontradas; ausentes: {', '.join(faltam[:10])}.")
+    return resultado
+
+
+def vkn_conferir_registros_importacao(catalogo, registros):
+    """Validação de subconjunto de registros selecionados após deduplicação.
+
+    A pré-conferência completa acontece antes da janela padrão; a seleção
+    nativa pode legitimamente omitir questões ou ignorar duplicatas.
+    """
+    indice = catalogo["_vkn_indice"]
+    usados = set()
+    saida = []
+    for registro in registros:
+        alt = _vkn_partitura(registro.get("alternativas") or [])
+        assinatura = _vkn_assinatura(alt)
+        item = indice.get(assinatura)
+        if item is None:
+            raise VknErroCatalogo("Questão da importação foi modificada em relação ao catálogo.")
+        if item["qid"] in usados:
+            raise VknErroCatalogo(f"Questão repetida na importação: {item['qid']}.")
+        usados.add(item["qid"])
+        gab = next((str(a.get("letra") or "") for a in registro["alternativas"] if a.get("correta")), None)
+        if gab != item["gabarito"]:
+            raise VknErroCatalogo(f"{item['qid']}: gabarito alterado na conferência de importação.")
+        saida.append({"qid":item["qid"],"registro":registro,"links":item["linhas"],"gabarito":gab})
+    return saida
+
+
+def vkn_pasta_dados():
+    # Instalação portátil: mesmo diretório do VighnaStudy (fora da extração PyInstaller).
+    if getattr(sys,"frozen",False):
+        base = Path(sys.executable).resolve().parent
+    else:
+        base = Path(__file__).resolve().parent
+    return base / "VighnaKnowledge"
+
+
+def _vkn_criar_estrutura(db):
+    db.execute("PRAGMA foreign_keys=ON")
+    db.execute("PRAGMA busy_timeout=5000")
+    db.executescript('''
+        CREATE TABLE IF NOT EXISTS vk_metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS vk_catalogs (
+          digest TEXT PRIMARY KEY, source_name TEXT NOT NULL, imported_utc TEXT NOT NULL,
+          status TEXT NOT NULL, scope_json TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS vk_microthemes (
+          id TEXT PRIMARY KEY, discipline TEXT NOT NULL, normative_ref TEXT NOT NULL,
+          name TEXT NOT NULL, rule TEXT NOT NULL, rule_version INTEGER NOT NULL,
+          status TEXT NOT NULL, created_utc TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS vk_batches (
+          batch_id TEXT PRIMARY KEY, catalog_digest TEXT NOT NULL REFERENCES vk_catalogs(digest),
+          imported_utc TEXT NOT NULL, question_count INTEGER NOT NULL, original_vpq TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS vk_question_versions (
+          version_key TEXT PRIMARY KEY, legacy_question_id INTEGER NOT NULL,
+          batch_id TEXT NOT NULL REFERENCES vk_batches(batch_id),
+          source_question TEXT NOT NULL, enunciado TEXT NOT NULL,
+          answer TEXT NOT NULL, alternatives_json TEXT NOT NULL,
+          content_sha256 TEXT NOT NULL, created_utc TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS vk_question_legacy_idx ON vk_question_versions(legacy_question_id);
+        CREATE TABLE IF NOT EXISTS vk_alternative_links (
+          version_key TEXT NOT NULL REFERENCES vk_question_versions(version_key),
+          letter TEXT NOT NULL CHECK(letter IN ('A','B','C','D','E')),
+          microtheme_id TEXT NOT NULL REFERENCES vk_microthemes(id),
+          role TEXT NOT NULL CHECK(role IN ('gabarito','eliminavel')),
+          text_sha256 TEXT NOT NULL,
+          PRIMARY KEY(version_key, letter)
+        );
+    ''')
+    row = db.execute("SELECT value FROM vk_metadata WHERE key='schema'").fetchone()
+    if row and int(row[0]) != VKN_SCHEMA:
+        raise VknErroCatalogo(f"Banco VighnaKnowledge usa schema {row[0]}, incompatível com {VKN_SCHEMA}.")
+    db.execute("INSERT OR IGNORE INTO vk_metadata(key,value) VALUES ('schema',?)", (str(VKN_SCHEMA),))
+    db.commit()
+
+
+def vkn_registrar_lote(catalogo, registros, ids_questoes, *, vpq_origem="", pasta=None):
+    """Grava vínculos SOMENTE após importação nativa das questões com sucesso.
+
+    Inviolabilidade: nunca altera tabelas acadêmicas do VighnaStudy.
+    Um erro levanta exceção; a interface deve alertar sobre importação parcial.
+    """
+    preflight = vkn_conferir_registros_importacao(catalogo, registros)
+    if not preflight:
+        raise VknErroCatalogo("Nenhuma questão selecionada para catalogar.")
+    if len(ids_questoes) != len(preflight):
+        raise VknErroCatalogo("Quantidade de IDs importados diferente da quantidade de questões validadas.")
+    try:
+        ids = [int(x) for x in ids_questoes]
+    except (TypeError, ValueError) as e:
+        raise VknErroCatalogo("IDs de questões inválidos na importação nativa.") from e
+    if len(set(ids)) != len(ids):
+        raise VknErroCatalogo("IDs duplicados retornados na importação nativa.")
+    pasta = Path(pasta) if pasta is not None else vkn_pasta_dados()
+    pasta.mkdir(parents=True, exist_ok=True)
+    arquivo = pasta / "knowledge.sqlite3"
+    # Backup SQLite pela API SQLite: não copia WAL incompleto.
+    if arquivo.exists():
+        pasta_backups = pasta / "backups"
+        pasta_backups.mkdir(exist_ok=True)
+        backup = pasta_backups / f"knowledge-{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}.sqlite3"
+        with sqlite3.connect(str(arquivo),timeout=5) as anterior, sqlite3.connect(str(backup)) as anterior_backup:
+            anterior.backup(anterior_backup)
+    with sqlite3.connect(str(arquivo),timeout=5) as db:
+        _vkn_criar_estrutura(db)
+        db.execute("BEGIN IMMEDIATE")
+        try:
+            d = catalogo["_vkn_sha256"]
+            db.execute("INSERT OR IGNORE INTO vk_catalogs VALUES (?,?,?,?,?)", (
+                d, Path(catalogo["_vkn_fonte"]).name, _vkn_now(),
+                str(catalogo.get("estado","provisorio")), json.dumps(catalogo.get("escopo",{}),ensure_ascii=False)
+            ))
+            for t in catalogo["catalogo"]:
+                row = db.execute("SELECT discipline,normative_ref,name,rule,rule_version FROM vk_microthemes WHERE id=?", (t["id"],)).fetchone()
+                novos = (str(t.get("disciplina") or ""), str(t.get("referencia_normativa") or ""),
+                         str(t.get("nome") or ""), str(t.get("regra") or ""), int(t.get("versao_regra",1)))
+                if row and tuple(row) != novos:
+                    raise VknErroCatalogo(f"Microtema {t['id']} já existe com dados diferentes: reconciliação de versão exigida.")
+                if not row:
+                    db.execute("INSERT INTO vk_microthemes VALUES (?,?,?,?,?,?,?,?)", (
+                        t["id"], *novos, str(t.get("estado") or "provisorio"), _vkn_now()))
+            bid = str(uuid.uuid4())
+            db.execute("INSERT INTO vk_batches VALUES (?,?,?,?,?)", (bid, d, _vkn_now(),len(preflight),str(vpq_origem)))
+            for item, qid_legacy in zip(preflight, ids):
+                registro = item["registro"]
+                alt = _vkn_partitura(registro["alternativas"])
+                checksum = _vkn_hash(json.dumps({"enunciado":_vkn_canon(registro.get('enunciado')),
+                      "alternativas":alt,"gabarito":item['gabarito']},sort_keys=True,ensure_ascii=False))
+                # Uma versão específica não pode ser vinculada duas vezes ao
+                # mesmo ID acadêmico, mesmo que a importação seja repetida.
+                anterior = db.execute(
+                    "SELECT version_key FROM vk_question_versions "
+                    "WHERE legacy_question_id=? AND content_sha256=?", (qid_legacy,checksum)
+                ).fetchone()
+                if anterior:
+                    raise VknErroCatalogo(
+                        f"Questão {qid_legacy} já possui essa versão catalogada."
+                    )
+                chave = str(uuid.uuid4())
+                db.execute("INSERT INTO vk_question_versions VALUES (?,?,?,?,?,?,?,?,?)", (
+                    chave, qid_legacy, bid, item["qid"], str(registro.get('enunciado') or ''),
+                    item["gabarito"], json.dumps(alt,ensure_ascii=False,sort_keys=True),checksum,_vkn_now()))
+                for letra, link in item["links"].items():
+                    db.execute("INSERT INTO vk_alternative_links VALUES (?,?,?,?,?)", (
+                        chave, letra, link["microtema_id"],
+                        "gabarito" if letra==item["gabarito"] else "eliminavel", _vkn_hash(alt[letra])))
+            falhas = db.execute("PRAGMA foreign_key_check").fetchall()
+            if falhas: raise VknErroCatalogo("Falha de integridade relacional no VighnaKnowledge.")
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+    return {"lote":bid,"questoes":len(preflight),"vinculos":5*len(preflight),"arquivo":str(arquivo)}
+
+
+def vkn_registrar_pendencia(catalogo, registros, ids_questoes, mensagem, *,vpq_origem="",pasta=None):
+    """Plano de recuperação: salva mapeamento e IDs se o lote nativo já foi gravado."""
+    pasta = Path(pasta) if pasta is not None else vkn_pasta_dados()
+    pasta = pasta / "pendencias"
+    pasta.mkdir(parents=True,exist_ok=True)
+    chave = uuid.uuid4().hex
+    destino = pasta / f"lote-sem-vinculo-{chave}.json"
+    dados = {"created_utc":_vkn_now(),"reason":str(mensagem),"catalogue":str(catalogo.get('_vkn_fonte') or ''),
+             "catalogue_digest":catalogo.get('_vkn_sha256'),"vpq":str(vpq_origem),
+             "question_ids":list(ids_questoes),"questions":list(registros)}
+    temporario = destino.with_suffix('.tmp')
+    temporario.write_text(json.dumps(dados,indent=2,ensure_ascii=False,default=str),encoding='utf-8')
+    os.replace(temporario,destino)
+    return destino
+
+
+def vkn_resumo_banco(pasta=None):
+    base = Path(pasta) if pasta is not None else vkn_pasta_dados()
+    path = base / "knowledge.sqlite3"
+    if not path.exists():
+        return {"catalogos":0,"microtemas":0,"questoes":0,"vinculos":0,"caminho":str(path)}
+    with sqlite3.connect(str(path)) as db:
+        return {"catalogos":db.execute('SELECT count(*) FROM vk_catalogs').fetchone()[0],
+                "microtemas":db.execute('SELECT count(*) FROM vk_microthemes').fetchone()[0],
+                "questoes":db.execute('SELECT count(*) FROM vk_question_versions').fetchone()[0],
+                "vinculos":db.execute('SELECT count(*) FROM vk_alternative_links').fetchone()[0],
+                "caminho":str(path)}
+
+
+# O catálogo-piloto JSON é distribuído como recurso embutido: não requer
+# inserir diretórios novos no ZIP nem alterar as permissões do atualizador.
+_VKN_CTB_PILOTO_SHA256 = '4b849cf52c789fd3cfdf37dbd76ae0c2084d1ff03a9503c4898e537af8efef25'
+_VKN_CTB_PILOTO_ZLIB_B64 = (
+    'eNrdfVuPI1eS3vv+CkJPNtAan/tl56kl9e4OMCNpZzQDGItFIc6tRJlk1vBSFrRYwPZfsH/AzO7DQgb0JPtlHrf+iX+JI05mkskqFpnVLJa6pBa6q8hk5mGe'
+    'yIgvbl/8019NJh+tpzfNR389+SjCGmbNdXN1M5016+bqdnr99QL+y6L5r7OcrvNHb+jg27xcQXNVmuUc1vVj7Bf8489++/ZvvmoPyKs1pPrGl7/94ssvfvfV'
+    '26vP335x9avffPnFb796+4d3v776/IurP/zqb//u87e/++r3n/3nq7df/f7tr9vPJlwBfVIwYT7m/GPu+nPGpq7xn/A3Om66itOb2XRRj/70q0/qYfgGLNfT'
+    '62ZFr/J//8sEJurf/9K/98cNLq3J9KZg/fGzdV4uYD29BXqds/6N+TQum3WeQ3s4vvjPdSWlWazrKf6hHteup174j5vpbdMt5+rtcr264ldwpa7+8OXf40+8'
+    'vwGf4r349IvffPnrd1998R/4f/zF+tt1t0A8y+prENrUvQg2WZ54YS6BBZ8ZFxBdscypDJKlKLhNSvkos45MQ2FFFdC2JFYglY/qKf/5zdhV/mb7fa/y1W/g'
+    'JsM8L1AG8I5cvR3cpCNLVt6wUHCNMSufVEoWuDfGQk6Csawli45Wb5LN+BHunIUSTAEpneJOdUvGv/+x3up5XjepQYGcwm7nb6eLuJmhiDZLuuZg/yZvP363'
+    't9UopXmxWcQpiuPVdj+vmrCcXqPoLqd0HwrMVrn71CrPcoR6d64hwHKK8t29tYb4dXtH7l31aoGXuX/0Ks+vdp+4uoElLmJGn0yb22mCq5tlXm3m9FOA6bdw'
+    'FZtFmcIiwtUqX33dbG7zVbNZL5vV4DQrvNRV98UeudC6WbeXyXiVTN/8arpYbco0TvH93H8q5bTBhydC92VvltN5ni5hgs/Ycr1Z4LpSnuDPk+1dm+DvKBSz'
+    'N/XlVV6hDvhPcRpn26Xc5BV9Uzym3qGrCLNpWMLyzQTv0IRWHej2TlNzf5NajUKfms43a7jNs19O8CPLTDpmM4PlJC6n+PeiwU1uD8blzElG2xfnwy+Hp1xv'
+    'qgJY5mv8TjdL/Fb4Iq4ff5vOb2aZjqfvPimb9WYJH20f7l4BPny8p6l7Zj7+zVcfM8b47gHA74kPDYrTdZ7TQXTA4O17qurux4QKaoL396vl3b8sVig1k0+W'
+    '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'
+    'XmiLxUlLIsZakiffQXJk/uqf/+r/A6fptrc='
+)
+
+
+def vkn_disponibilizar_catalogo_piloto():
+    """Disponibiliza o JSON de exemplo no espaço independente, sem sobrescrever."""
+    destino = vkn_pasta_dados() / "catalogos" / "CTB_Arts_1_a_4_PILOTO_v0_1.json"
+    if destino.exists():
+        return destino
+    conteudo = zlib.decompress(base64.b64decode(_VKN_CTB_PILOTO_ZLIB_B64))
+    if hashlib.sha256(conteudo).hexdigest() != _VKN_CTB_PILOTO_SHA256:
+        raise VknErroCatalogo("Integridade do catálogo-piloto embutido não conferiu.")
+    destino.parent.mkdir(parents=True,exist_ok=True)
+    temporario = destino.with_name(destino.name+"."+uuid.uuid4().hex+".tmp")
+    try:
+        temporario.write_bytes(conteudo)
+        if destino.exists():
+            temporario.unlink(missing_ok=True)
+            return destino
+        os.replace(temporario,destino)
+    finally:
+        temporario.unlink(missing_ok=True)
+    return destino
+# ---------------------------------------------------------------------------
+# Fim do núcleo VighnaKnowledge M1/M2.
+# ---------------------------------------------------------------------------
+
+
 from inteligencia import (
     CacheAnalitico, MotorRecomendacaoV4, MotorRecomendacaoV5,
     PESOS_PADRAO_V5, montar_preparacao_foco
@@ -4392,8 +4958,9 @@ class JanelaTextoExtraidoPDF(QDialog):
 class JanelaCentralImportacaoQuestoes(QDialog):
     """Hub único de entrada para as formas de importação de questões."""
 
-    def __init__(self, parent=None, topico_id_padrao=None):
+    def __init__(self, parent=None, topico_id_padrao=None, modo_vighnaknowledge=False):
         super().__init__(parent)
+        self.modo_vighnaknowledge = bool(modo_vighnaknowledge)
         self.origem_escolhida = None
         self.topico_id_padrao = (
             int(topico_id_padrao)
@@ -4405,7 +4972,7 @@ class JanelaCentralImportacaoQuestoes(QDialog):
             if self.topico_id_padrao is not None
             else None
         )
-        self.setWindowTitle("Central de importação")
+        self.setWindowTitle("Importação VighnaKnowledge" if self.modo_vighnaknowledge else "Central de importação")
         self.resize(940, 660)
         self.setMinimumSize(780, 600)
 
@@ -4413,9 +4980,11 @@ class JanelaCentralImportacaoQuestoes(QDialog):
         layout.setContentsMargins(18, 16, 18, 16)
         layout.setSpacing(12)
 
-        titulo = QLabel("Central de importação de questões")
+        titulo = QLabel("Importação VighnaKnowledge" if self.modo_vighnaknowledge else "Central de importação de questões")
         titulo.setObjectName("pageTitle")
         subtitulo = QLabel(
+            "Escolha PDF, TXT, texto colado ou CSV. Depois, selecione o catálogo JSON para validar os vínculos A–E antes de importar."
+            if self.modo_vighnaknowledge else
             "Escolha a origem. O Vighna analisa e valida o conteúdo antes de gravar qualquer questão no banco."
         )
         subtitulo.setObjectName("pageSubtitle")
@@ -4542,7 +5111,12 @@ class JanelaCentralImportacaoQuestoes(QDialog):
         ), 1, 1)
         layout.addLayout(cards, 1)
 
+        # A escolha entre importação convencional e VighnaKnowledge ocorre
+        # ANTES desta janela, pelo botão Importar da Central de Questões.
         nota = QLabel(
+            "VighnaKnowledge: as cinco alternativas devem corresponder ao catálogo estruturado. "
+            "Questões e vínculos são conferidos antes da gravação, com backup acadêmico."
+            if self.modo_vighnaknowledge else
             "Importações sempre passam por validação. Antes da gravação definitiva, o Vighna cria um backup de segurança."
         )
         nota.setObjectName("pdfImportHint")
@@ -7114,6 +7688,18 @@ class JanelaImportarPDFQuestoes(QDialog):
             )
             return
 
+        # O JSON não é fonte de gabarito: ele deve concordar com o VPQ e com
+        # todas as opções selecionadas na conferência nativa.
+        if getattr(self, "vkn_catalogo", None) is not None:
+            try:
+                vkn_conferir_registros_importacao(self.vkn_catalogo, registros)
+            except Exception as erro:
+                QMessageBox.warning(
+                    self, "VighnaKnowledge — vínculos inválidos",
+                    "A importação catalogada foi bloqueada sem gravar questões.\n\n" + str(erro),
+                )
+                return
+
         resposta = QMessageBox.question(
             self,
             "Confirmar importação",
@@ -7174,6 +7760,36 @@ class JanelaImportarPDFQuestoes(QDialog):
             )
             return
 
+        # Gravação independente, depois do commit da importação acadêmica.
+        # Eventual falha nunca deve declarar que as questões não foram gravadas.
+        aviso_vkn = ""
+        if getattr(self, "vkn_catalogo", None) is not None:
+            try:
+                resumo_vkn = vkn_registrar_lote(
+                    self.vkn_catalogo, registros, ids_importadas,
+                    vpq_origem=getattr(self, "vkn_vpq_fonte", ""),
+                )
+                aviso_vkn = (
+                    f"\n\nVighnaKnowledge: {resumo_vkn['vinculos']} vínculos "
+                    "registrados em base independente (piloto)."
+                )
+            except Exception as erro:
+                caminho_pendencia = ""
+                try:
+                    caminho_pendencia = str(vkn_registrar_pendencia(
+                        self.vkn_catalogo, registros, ids_importadas, str(erro),
+                        vpq_origem=getattr(self, "vkn_vpq_fonte", ""),
+                    ))
+                except Exception:
+                    caminho_pendencia = "não pôde ser gerado"
+                QMessageBox.warning(
+                    self, "VighnaKnowledge — associação pendente",
+                    "As questões foram importadas no banco acadêmico, porém "
+                    "o registro dos microtemas NÃO foi concluído.\n\n"
+                    + str(erro) + "\n\nArquivo de recuperação: " + caminho_pendencia,
+                )
+                aviso_vkn = "\n\nVighnaKnowledge: associação PENDENTE."
+
         self.importadas = len(
             ids_importadas
         )
@@ -7184,6 +7800,7 @@ class JanelaImportarPDFQuestoes(QDialog):
             (
                 f"Questões importadas: {self.importadas}\n"
                 f"Duplicadas ignoradas: {duplicadas}"
+                + aviso_vkn
             )
         )
 
@@ -76276,6 +76893,10 @@ class SistemaEstudos(QMainWindow):
         # Migra os três cards executivos originais para Meu Edital.
         # O Planejamento compacto do topo do Dashboard NÃO faz parte.
         self._transferir_cards_dashboard_para_portal_edital()
+        # E01: a Central continua usando as consultas acadêmicas originais,
+        # mas apresenta cobertura, alertas e disciplinas em ordem operacional.
+        from ui.central_edital_profissional_r1 import instalar_central_edital_profissional
+        instalar_central_edital_profissional(self)
         # L03: pagina separada, sem modificar o Dashboard ou os motores.
         # Central de Simulados nativa: quatro cartoes clicaveis, sem GIF,
         # metricas inferiores ou grade duplicada de modalidades.
@@ -77015,9 +77636,28 @@ class SistemaEstudos(QMainWindow):
         edital = getattr(self, "tela_portal_edital", None)
         if edital is not None:
             atualizar_perfil_portal_edital(edital, self.combo_concurso.currentText())
+            visual = getattr(self, "_central_edital_profissional_r1", None)
+            if visual is not None:
+                visual.atualizar()
+
+    def _edital_id_perfil_ativo_v2(self):
+        """Usa a mesma referência de perfil das consultas de progresso."""
+        return obter_concurso_ativo()[0]
+
+    def _abrir_detalhe_disciplina_edital_v2(self, disciplina):
+        """Reutiliza a aba Progresso e seu filtro de disciplina existente."""
+        self.abrir_progresso_edital()
+
+        def selecionar():
+            filtro = getattr(self, "progresso_filtro_disciplina", None)
+            if filtro is not None and filtro.findText(disciplina) >= 0:
+                filtro.setCurrentText(disciplina)
+                self.filtrar_progresso_edital()
+
+        QTimer.singleShot(0, selecionar)
 
     def abrir_portal_edital(self):
-        """Abre o setor relacionado ao concurso atualmente selecionado."""
+        """Abre a Central do Edital com os indicadores do perfil atual."""
         self._atualizar_perfil_portal()
         self.telas.setCurrentWidget(self.tela_portal_edital)
 
@@ -77106,36 +77746,12 @@ class SistemaEstudos(QMainWindow):
         return True
 
     def abrir_portal_treinos(self):
-        """Mostra a Central imediatamente; sincroniza retomada no próximo ciclo."""
-        # Monitor leve, temporário: quando o Windows deixa de receber eventos,
-        # registra a pilha Python sem consultar nem alterar o banco de estudos.
-        from ui.diagnostico_treinos import MonitorNavegacaoTreinos
-        anterior = getattr(self, "_monitor_navegacao_treinos", None)
-        if anterior is not None:
-            anterior.encerrar()
-        monitor = MonitorNavegacaoTreinos()
-        self._monitor_navegacao_treinos = monitor
-        monitor.marcar("antes_de_abrir_pagina")
-        self.telas.setCurrentWidget(self.tela_portal_treinos)
-        monitor.marcar("pagina_aberta")
+        """Abre diretamente o configurador de simulado, sem tela intermediária.
 
-        def primeiro_ciclo():
-            if getattr(self, "_monitor_navegacao_treinos", None) is not monitor:
-                return
-            monitor.marcar("antes_de_atualizar_retomada")
-            self._atualizar_retomada_no_portal_treinos()
-            monitor.marcar("retomada_atualizada")
-
-        def pulso_gui():
-            if getattr(self, "_monitor_navegacao_treinos", None) is not monitor:
-                return
-            if not monitor.ativo:
-                return
-            monitor.pulso()
-            QTimer.singleShot(250, pulso_gui)
-
-        QTimer.singleShot(0, primeiro_ciclo)
-        QTimer.singleShot(0, pulso_gui)
+        Mantém a proteção acadêmica existente: se houver sessão aberta, a
+        janela de resolução é retomada antes de iniciar outra prova.
+        """
+        return self._abrir_treino_pelo_portal("simulado")
 
     def abrir_portal_recursos(self):
         """Mostra o catálogo sem destruir nem recarregar sessões existentes."""
@@ -77927,6 +78543,9 @@ class SistemaEstudos(QMainWindow):
         if getattr(self, "_portal_tema_estilizado", None) != self.tema_atual:
             aplicar_estilo_portal(self.tela_portal_inicio, self.tema_atual)
             aplicar_estilo_portal_edital(self.tela_portal_edital, self.tema_atual)
+            visual_edital = getattr(self, "_central_edital_profissional_r1", None)
+            if visual_edital is not None:
+                visual_edital.set_tema(self.tema_atual)
             aplicar_tema_central_simulados(self.tela_portal_treinos, self.tema_atual)
             aplicar_estilo_recursos(self.tela_portal_recursos, self.tema_atual)
             aplicar_estilo_portal_disciplinas(self.tela_portal_disciplinas, self.tema_atual)
@@ -79243,9 +79862,9 @@ class SistemaEstudos(QMainWindow):
             {
                 "id": "simulados_treinos",
                 "categoria": "NAVEGAÇÃO",
-                "titulo": "Simulados e Treinos",
-                "descricao": "Abrir a central de modalidades de prática",
-                "termos": "simulados treinos provas adaptativo bateria pratica prática central",
+                "titulo": "Configurar simulado",
+                "descricao": "Configurar prova ou retomar uma sessão ativa",
+                "termos": "simulados prova simulacao simulação configurar exame",
                 "atalho": "",
                 "prioridade": 97,
             },
@@ -79288,8 +79907,8 @@ class SistemaEstudos(QMainWindow):
             {
                 "id": "estudo_questoes",
                 "categoria": "ESTUDO",
-                "titulo": "Estudo por questões",
-                "descricao": "Revisão, treino adaptativo e simulado",
+                "titulo": "Iniciar Estudo",
+                "descricao": "Escolher estudo automático, manual, simulados ou banco de erros",
                 "termos": "questoes questões revisar revisão treino adaptativo simulado pratica prática",
                 "atalho": "",
                 "prioridade": 95,
@@ -79427,6 +80046,26 @@ class SistemaEstudos(QMainWindow):
         # Atalhos antigos dos três blocos devem abrir Meu Edital, nunca o
         # Dashboard do qual os widgets foram removidos.
         secoes_edital = ("resumo", "notificacoes", "planejamento", "progresso")
+        view = getattr(self, "_central_edital_profissional_r1", None)
+        if view is not None and (
+            chave in secoes_edital
+            or widget in (
+                getattr(self, "dashboard_resumo_painel", None),
+                getattr(self, "dashboard_notificacoes_painel", None),
+                getattr(self, "dashboard_planejamento_painel", None),
+            )
+        ):
+            self.abrir_portal_edital()
+            if chave == "planejamento" or widget is getattr(self, "dashboard_planejamento_painel", None):
+                if not view.planning_frame.isVisible():
+                    view.mostrar_planejamento()
+                target = view.planning_frame
+            elif chave == "notificacoes" or widget is getattr(self, "dashboard_notificacoes_painel", None):
+                target = view.alert_box
+            else:
+                target = view.percent
+            QTimer.singleShot(0, lambda target=target: view.overlay.ensureWidgetVisible(target, 0, 20))
+            return
         alvo_edital = {
             "resumo": getattr(self, "dashboard_resumo_painel", None),
             "notificacoes": getattr(self, "dashboard_notificacoes_painel", None),
@@ -79447,16 +80086,11 @@ class SistemaEstudos(QMainWindow):
                     scroll.ensureWidgetVisible(alvo, 0, 24)
                 )
             return
-        # O Estudo por questões já não reside no Dashboard. Links antigos,
-        # incluindo a Busca Global, devem abrir seu novo destino único.
+        # Atalhos legados de estudo por questões retornam aos quatro
+        # acessos de Iniciar Estudo, não à Central de Simulados desativada.
         if chave == "estudar" or (widget is not None and widget is getattr(self, "dashboard_estudo_questoes_painel", None)):
-            self.abrir_portal_treinos()
-            portal = self.tela_portal_treinos
-            rolador = getattr(portal, "portal_treinos_scroll", None)
-            if rolador is not None:
-                QTimer.singleShot(0, lambda: rolador.ensureWidgetVisible(
-                    self.dashboard_estudo_questoes_painel, 0, 24
-                ))
+            self.telas.setCurrentWidget(self.tela_inicial)
+            self._agendar_atualizacao_dashboard()
             return
         # O04-R1: rotas antigas de busca/portal continuam alcançando os
         # mesmos cards funcionais, agora abertos pelas esferas do GIF.
@@ -87907,10 +88541,10 @@ class SistemaEstudos(QMainWindow):
             Qt.PointingHandCursor
         )
         importar.setToolTip(
-            "Abrir a Central de importação de questões."
+            "Escolher importação convencional ou VighnaKnowledge."
         )
         importar.clicked.connect(
-            self.abrir_central_importacao_questoes
+            self.abrir_seletor_importacao_questoes
         )
         painel_admin_layout.addWidget(
             importar,
@@ -91195,7 +91829,81 @@ class SistemaEstudos(QMainWindow):
         )
         janela.exec()
 
-    def abrir_central_importacao_questoes(self, topico_id_padrao=None):
+    def abrir_seletor_importacao_questoes(self, _checado=False):
+        """Apresenta duas modalidades antes de abrir o fluxo existente.
+
+        O importador convencional e o importador catalogado permanecem
+        independentes; a seleção não grava nem altera nenhuma questão.
+        """
+        janela = QDialog(self)
+        janela.setObjectName("questionImportModeDialog")
+        janela.setWindowTitle("Importar questões")
+        janela.resize(640, 260)
+        janela.setMinimumSize(570, 240)
+
+        layout = QVBoxLayout(janela)
+        layout.setContentsMargins(20, 18, 20, 20)
+        layout.setSpacing(12)
+
+        titulo = QLabel("Escolha a modalidade de importação")
+        titulo.setObjectName("pageTitle")
+        layout.addWidget(titulo)
+
+        descricao = QLabel(
+            "Selecione como deseja importar as questões. "
+            "Os fluxos de validação e conferência serão preservados."
+        )
+        descricao.setObjectName("pageSubtitle")
+        descricao.setWordWrap(True)
+        layout.addWidget(descricao)
+
+        modalidades = QHBoxLayout()
+        modalidades.setSpacing(12)
+
+        def criar_opcao(texto, resumo, codigo):
+            painel = QFrame()
+            painel.setObjectName("questionEditorCard")
+            coluna = QVBoxLayout(painel)
+            coluna.setContentsMargins(14, 14, 14, 14)
+            coluna.setSpacing(9)
+
+            botao = QPushButton(texto)
+            botao.setObjectName("primaryButton")
+            botao.setCursor(Qt.PointingHandCursor)
+            botao.setMinimumHeight(45)
+            botao.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+            botao.clicked.connect(lambda _=False: janela.done(codigo))
+            coluna.addWidget(botao)
+
+            ajuda = QLabel(resumo)
+            ajuda.setObjectName("pdfImportMeta")
+            ajuda.setWordWrap(True)
+            ajuda.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+            coluna.addWidget(ajuda, 1)
+            return painel
+
+        modalidades.addWidget(criar_opcao(
+            "Importação convencional",
+            "PDF, TXT, texto colado ou CSV. Abre a Central de importação atual.",
+            1,
+        ), 1)
+        modalidades.addWidget(criar_opcao(
+            "Importação VighnaKnowledge",
+            "Bateria VPQ 1.1 com catálogo de microtemas. Abre a importação catalogada.",
+            2,
+        ), 1)
+        layout.addLayout(modalidades, 1)
+
+        escolha = janela.exec()
+        if escolha not in (1, 2):
+            return
+        topico_id = self._obter_topico_id_contexto_central_questoes()
+        if escolha == 1:
+            self.abrir_central_importacao_questoes(topico_id_padrao=topico_id)
+        else:
+            self.abrir_central_importacao_questoes(topico_id_padrao=topico_id, modo_vighnaknowledge=True)
+
+    def abrir_central_importacao_questoes(self, topico_id_padrao=None, modo_vighnaknowledge=False):
         # clicked(bool) de QPushButton/QToolButton pode fornecer False como
         # argumento. Isso não é um ID de tópico e deve ser tratado como ausência
         # de contexto explícito.
@@ -91207,12 +91915,16 @@ class SistemaEstudos(QMainWindow):
         janela = JanelaCentralImportacaoQuestoes(
             self,
             topico_id_padrao=topico_id_padrao,
+            modo_vighnaknowledge=modo_vighnaknowledge,
         )
 
         if janela.exec() != QDialog.Accepted:
             return
 
         origem = janela.origem_escolhida
+        if modo_vighnaknowledge:
+            self.importar_questoes_vighnaknowledge(origem, topico_id_padrao=topico_id_padrao)
+            return
 
         if origem == "pdf":
             if topico_id_padrao is None:
@@ -91229,6 +91941,8 @@ class SistemaEstudos(QMainWindow):
                 self.importar_questoes_texto()
             else:
                 self.importar_questoes_texto(topico_id_padrao=topico_id_padrao)
+        elif origem == "txt_catalogado":
+            self.importar_questoes_txt_catalogado(topico_id_padrao=topico_id_padrao)
         elif origem == "csv":
             if topico_id_padrao is None:
                 self.importar_questoes_csv()
@@ -91245,6 +91959,174 @@ class SistemaEstudos(QMainWindow):
             if janela.importadas > 0:
                 self.carregar_questoes()
                 self.notificar_dados_alterados("questoes")
+
+    def _vkn_escolher_catalogo_estruturado(self):
+        """Seleciona e valida catálogo antes de abrir a revisão nativa."""
+        try:
+            inicial = str(vkn_disponibilizar_catalogo_piloto())
+        except Exception:
+            inicial = str(vkn_pasta_dados() / "catalogos")
+        caminho, _ = QFileDialog.getOpenFileName(
+            self, "VighnaKnowledge — catálogo de microtemas", inicial,
+            "Catálogo estruturado JSON (*.json)",
+        )
+        if not caminho:
+            return None
+        try:
+            catalogo = vkn_carregar_catalogo(caminho)
+            vkn_conferir_compatibilidade_banco(catalogo)
+            return catalogo
+        except Exception as erro:
+            QMessageBox.warning(
+                self, "VighnaKnowledge — catálogo inválido",
+                "Nenhuma questão foi gravada.\n\n" + str(erro),
+            )
+            return None
+
+    def importar_questoes_vighnaknowledge(self, origem, topico_id_padrao=None):
+        """Quatro entradas para o mesmo contrato A–E, sem relaxar a validação."""
+        origem = str(origem or "").strip().lower()
+        if origem == "csv":
+            self.importar_questoes_csv(
+                topico_id_padrao=topico_id_padrao, modo_vighnaknowledge=True,
+            )
+            return
+        if origem == "pdf" and not dependencia_pdf_disponivel():
+            QMessageBox.warning(self, "VighnaKnowledge — PDF",
+                "A leitura de PDF requer a mesma dependência pypdf da importação convencional.\n"
+                "Não é possível extrair PDF digitalizado sem texto selecionável.")
+            return
+        if origem == "texto":
+            janela_texto = QDialog(self)
+            janela_texto.setWindowTitle("VighnaKnowledge — texto colado")
+            janela_texto.resize(900, 650)
+            janela_texto.setMinimumSize(660, 470)
+            layout = QVBoxLayout(janela_texto)
+            layout.setContentsMargins(18, 16, 18, 16)
+            layout.setSpacing(10)
+            titulo = QLabel("Cole as questões para associar aos microtemas")
+            titulo.setObjectName("pageTitle")
+            ajuda = QLabel("O conteúdo será analisado como na importação convencional. "
+                           "As cinco alternativas e o gabarito deverão coincidir com o catálogo JSON.")
+            ajuda.setObjectName("pageSubtitle")
+            ajuda.setWordWrap(True)
+            entrada = QTextEdit()
+            entrada.setObjectName("pdfExtractedText")
+            entrada.setPlaceholderText("Cole aqui a bateria VPQ 1.1 ou texto estruturado com alternativas A–E...")
+            botoes = QHBoxLayout()
+            colar = QPushButton("Colar da área de transferência")
+            colar.setObjectName("subtleButton")
+            colar.clicked.connect(lambda: entrada.setPlainText(QApplication.clipboard().text()))
+            cancelar = QPushButton("Cancelar")
+            cancelar.setObjectName("subtleButton")
+            cancelar.clicked.connect(janela_texto.reject)
+            conferir = QPushButton("Analisar e conferir →")
+            conferir.setObjectName("primaryButton")
+            conferir.clicked.connect(janela_texto.accept)
+            botoes.addWidget(colar)
+            botoes.addStretch(1)
+            botoes.addWidget(cancelar)
+            botoes.addWidget(conferir)
+            layout.addWidget(titulo)
+            layout.addWidget(ajuda)
+            layout.addWidget(entrada, 1)
+            layout.addLayout(botoes)
+            if janela_texto.exec() != QDialog.Accepted:
+                return
+            texto = entrada.toPlainText().strip()
+            if len(texto) < 30:
+                QMessageBox.warning(self, "VighnaKnowledge — texto colado",
+                    "Cole questões completas com enunciado, alternativas e gabarito.")
+                return
+            caminho = "texto_colado.txt"
+            dados = {"caminho": "", "arquivo": "Texto colado", "total_paginas": 1,
+                     "pagina_inicial": 1, "pagina_final": 1, "texto": texto,
+                     "faixas_paginas": [], "caracteres": len(texto)}
+            nome_origem = "Texto colado"
+        elif origem in ("txt", "pdf"):
+            extensao = "TXT (*.txt)" if origem == "txt" else "PDF (*.pdf)"
+            caminho, _ = QFileDialog.getOpenFileName(
+                self, f"VighnaKnowledge — selecionar {origem.upper()}", "", extensao)
+            if not caminho:
+                return
+            QApplication.setOverrideCursor(Qt.WaitCursor)
+            try:
+                dados = (ler_arquivo_txt_questoes(caminho) if origem == "txt"
+                         else extrair_texto_pdf_questoes(caminho))
+            except Exception as erro:
+                QApplication.restoreOverrideCursor()
+                QMessageBox.warning(self, f"VighnaKnowledge — {origem.upper()}",
+                    "Não foi possível ler o arquivo. Nenhuma questão foi gravada.\n\n" + str(erro))
+                return
+            QApplication.restoreOverrideCursor()
+            if int(dados.get("caracteres", 0)) < (30 if origem == "txt" else 80):
+                QMessageBox.warning(self, "VighnaKnowledge — leitura insuficiente",
+                    "O documento possui pouco texto extraível. Para PDF, utilize texto selecionável.")
+                return
+            nome_origem = Path(caminho).name
+        else:
+            return
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        try:
+            analise = analisar_texto_questoes_pdf(
+                dados["texto"], dados.get("faixas_paginas") or [])
+            if analise.get("vpq_bloqueia_importacao"):
+                raise VknErroCatalogo("A auditoria VPQ nativa bloqueou esta bateria.")
+            questoes = list(analise.get("questoes") or [])
+            if not questoes:
+                raise VknErroCatalogo("Nenhuma questão completa foi reconhecida na origem selecionada.")
+        except Exception as erro:
+            QApplication.restoreOverrideCursor()
+            QMessageBox.warning(self, "VighnaKnowledge — análise não aprovada",
+                "Nenhuma questão foi gravada.\n\n" + str(erro))
+            return
+        QApplication.restoreOverrideCursor()
+        catalogo = self._vkn_escolher_catalogo_estruturado()
+        if catalogo is None:
+            return
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        try:
+            # O hash integral do arquivo VPQ só é aplicável ao TXT original;
+            # PDF ou colagem passam pela comparação estrita das cinco opções
+            # e do gabarito, sem fingir identidade binária de origem.
+            if origem == "txt":
+                vkn_conferir_fonte_vpq(catalogo, caminho)
+            vkn_conferir_questoes_nativas(catalogo, questoes)
+        except Exception as erro:
+            QApplication.restoreOverrideCursor()
+            QMessageBox.warning(self, "VighnaKnowledge — correspondência rejeitada",
+                "Não é possível importar questões sem vínculos confiáveis.\n"
+                "Revise o catálogo e a origem. Nenhum registro foi gravado.\n\n" + str(erro))
+            return
+        QApplication.restoreOverrideCursor()
+        resposta = QMessageBox.question(
+            self, "VighnaKnowledge — conferência catalogada",
+            f"Origem: {nome_origem}\nQuestões verificadas: {len(questoes)}\n"
+            f"Microtemas: {len(catalogo['catalogo'])}\n"
+            f"Vínculos: {len(catalogo['mapeamento'])}.\n\n"
+            "IDs provisórios do piloto. Será aberta a conferência nativa, "
+            "com backup e verificação de duplicatas.\n"
+            "O histórico acadêmico e os cálculos não serão modificados pela catalogação.\n\n"
+            "Deseja continuar?",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+        if resposta != QMessageBox.Yes:
+            return
+        janela = JanelaImportarPDFQuestoes(
+            caminho, dados, analise, self,
+            origem_tipo=origem, nome_origem=nome_origem,
+            topico_id_padrao=topico_id_padrao,
+        )
+        janela.vkn_catalogo = catalogo
+        janela.vkn_vpq_fonte = str(Path(caminho).resolve()) if origem in ("pdf", "txt") else "Texto colado"
+        if janela.exec() == QDialog.Accepted and janela.importadas > 0:
+            self.carregar_questoes()
+            self.notificar_dados_alterados("questoes")
+
+    def importar_questoes_txt_catalogado(self, topico_id_padrao=None):
+        """Atalho legado — mantido para chamadas antigas e integrações."""
+        return self.importar_questoes_vighnaknowledge(
+            "txt", topico_id_padrao=topico_id_padrao,
+        )
 
     def importar_questoes_txt(self, topico_id_padrao=None):
         caminho, _ = QFileDialog.getOpenFileName(
@@ -91524,7 +92406,7 @@ class SistemaEstudos(QMainWindow):
             )
         )
 
-    def importar_questoes_csv(self, topico_id_padrao=None):
+    def importar_questoes_csv(self, topico_id_padrao=None, modo_vighnaknowledge=False):
         caminho, _ = QFileDialog.getOpenFileName(
             self,
             "Importar questões",
@@ -91534,6 +92416,11 @@ class SistemaEstudos(QMainWindow):
 
         if not caminho:
             return
+        catalogo_vkn = None
+        if modo_vighnaknowledge:
+            catalogo_vkn = self._vkn_escolher_catalogo_estruturado()
+            if catalogo_vkn is None:
+                return
 
         concurso_id = (
             obter_concurso_ativo()[0]
@@ -91913,6 +92800,21 @@ class SistemaEstudos(QMainWindow):
                     "classificacao": f"{disciplina} › {topico}",
                 })
 
+            if modo_vighnaknowledge:
+                # CSV usa seu validador nativo, mas o piloto catalogado
+                # exige cinco alternativas e gabarito mapeados. Linhas com
+                # erros não são omitidas silenciosamente da bateria.
+                if erros:
+                    detalhes_erro = "; ".join(
+                        f"linha {num}: {motivo}" for num, motivo in erros[:8]
+                    )
+                    raise VknErroCatalogo(
+                        f"CSV catalogado contém {len(erros)} linha(s) inválida(s). "
+                        "Corrija-as antes de importar: " + detalhes_erro
+                    )
+                if registros:
+                    vkn_conferir_registros_importacao(catalogo_vkn, registros)
+
             if not registros:
                 detalhes = ""
 
@@ -91966,9 +92868,42 @@ class SistemaEstudos(QMainWindow):
                 )
                 return
 
-            criar_questoes_lote(
+            ids_importadas = criar_questoes_lote(
                 registros
             )
+            if modo_vighnaknowledge and len(ids_importadas) != len(registros):
+                QMessageBox.critical(
+                    self, "VighnaKnowledge — importação parcial",
+                    "A quantidade de IDs confirmados não corresponde ao lote. "
+                    "Verifique o banco e não repita a importação automaticamente.",
+                )
+                return
+            aviso_vkn = ""
+            if modo_vighnaknowledge:
+                try:
+                    resumo_vkn = vkn_registrar_lote(
+                        catalogo_vkn, registros, ids_importadas,
+                        vpq_origem=str(Path(caminho).resolve()),
+                    )
+                    aviso_vkn = (
+                        f"\n\nVighnaKnowledge: {resumo_vkn['vinculos']} vínculos "
+                        "associados em base independente."
+                    )
+                except Exception as erro_vkn:
+                    try:
+                        pendencia = str(vkn_registrar_pendencia(
+                            catalogo_vkn, registros, ids_importadas,
+                            str(erro_vkn), vpq_origem=str(Path(caminho).resolve()),
+                        ))
+                    except Exception:
+                        pendencia = "falha ao criar arquivo de recuperação"
+                    QMessageBox.warning(
+                        self, "VighnaKnowledge — associação pendente",
+                        "As questões foram IMPORTADAS, mas o registro dos microtemas falhou. "
+                        "Não repita a importação.\n\n" + str(erro_vkn)
+                        + "\n\nRecuperação: " + pendencia,
+                    )
+                    aviso_vkn = "\n\nVighnaKnowledge: associação PENDENTE."
 
             self.carregar_questoes()
 
@@ -91992,7 +92927,7 @@ class SistemaEstudos(QMainWindow):
                     f"Importadas: {len(registros)}\n"
                     f"Duplicadas ignoradas: {duplicadas}\n"
                     f"Linhas com erro: {len(erros)}"
-                    f"{detalhes}"
+                    f"{detalhes}" + aviso_vkn
                 )
             )
 
@@ -102997,220 +103932,205 @@ class SistemaEstudos(QMainWindow):
             12,
             12
         )
-        progresso_layout.setSpacing(
-            10
-        )
+        progresso_layout.setSpacing(8)
 
-        # Resumo principal.
+        # R2: visual specification only; existing queries and metrics preserved.
+        progresso_conteudo.setStyleSheet("""
+            QFrame#progressHeroR2 {
+                background-color: #102B40;
+                border: 1px solid #315971;
+                border-radius: 11px;
+            }
+            QFrame#progressMetricR2 {
+                background-color: #14273A;
+                border: 1px solid #2C4459;
+                border-radius: 9px;
+            }
+            QFrame#progressGapsR2 {
+                background: transparent;
+                border: none;
+            }
+            QFrame#progressGapMetricR2 {
+                background-color: #102638;
+                border: 1px solid #29475C;
+                border-radius: 7px;
+            }
+            QLabel#progressHeroValueR2 {
+                color: #EAF8FE;
+                font-size: 23pt;
+                font-weight: 700;
+                background: transparent;
+            }
+            QLabel#progressMetricValueR2 {
+                color: #E6F2F9;
+                font-size: 15pt;
+                font-weight: 700;
+                background: transparent;
+            }
+            QLabel#progressGapValueR2 {
+                color: #E9F5FA;
+                font-size: 13pt;
+                font-weight: 700;
+                background: transparent;
+            }
+            QPushButton#progressAlertFilterR2 {
+                background-color: #102A3D;
+                color: #CADDE9;
+                border: 1px solid #315267;
+                border-radius: 7px;
+                text-align: center;
+                padding: 5px 12px;
+                font-weight: 600;
+            }
+            QPushButton#progressAlertFilterR2:hover {
+                border-color: #45AFC9;
+                background-color: #17374D;
+            }
+            QPushButton#progressAlertFilterR2:checked {
+                color: #DFFAFF;
+                background-color: #13526B;
+                border: 1px solid #1CC5E2;
+            }
+            QPushButton#progressCriteriaR2, QPushButton#progressForecastToggleR2 {
+                background-color: #112C3E;
+                color: #B9D7E6;
+                border: 1px solid #32576B;
+                border-radius: 7px;
+                padding: 6px 12px;
+            }
+            QPushButton#progressCriteriaR2:hover, QPushButton#progressForecastToggleR2:hover {
+                background-color: #173E53;
+                border-color: #34ABC7;
+            }
+            QProgressBar#progressCoverageR2 {
+                background: #24495D;
+                border: none;
+                border-radius: 4px;
+            }
+            QProgressBar#progressCoverageR2::chunk {
+                background: #2AB8CB;
+                border-radius: 4px;
+            }
+        """)
+
+        # Faixa de cobertura: hierarquia primária.
+        self.progresso_painel_cobertura = QFrame()
+        self.progresso_painel_cobertura.setObjectName("progressHeroR2")
+        hero_layout = QVBoxLayout(self.progresso_painel_cobertura)
+        hero_layout.setContentsMargins(15, 10, 15, 11)
+        hero_layout.setSpacing(5)
+        hero_linha = QHBoxLayout()
+        hero_linha.setSpacing(12)
+        hero_textos = QVBoxLayout()
+        hero_textos.setSpacing(1)
+        hero_nome = QLabel("Cobertura do edital · tópicos iniciados")
+        hero_nome.setObjectName("syllabusSectionTitle")
+        self.progresso_card_trabalhado_hint = QLabel("—")
+        self.progresso_card_trabalhado_hint.setObjectName("syllabusStatHint")
+        hero_textos.addWidget(hero_nome)
+        hero_textos.addWidget(self.progresso_card_trabalhado_hint)
+        hero_linha.addLayout(hero_textos, 1)
+        self.progresso_criterios_botao = QPushButton("Critérios")
+        self.progresso_criterios_botao.setObjectName("progressCriteriaR2")
+        self.progresso_criterios_botao.setFixedHeight(30)
+        self.progresso_criterios_botao.setCursor(Qt.PointingHandCursor)
+        self.progresso_criterios_botao.clicked.connect(
+            lambda: QMessageBox.information(
+                self, "Critérios de progresso",
+                "Cobertura de tópicos: considera tópicos iniciados com tentativas efetivas.\n"
+                "Cobertura de questões: questões ativas respondidas ao menos uma vez.\n"
+                "Evidência suficiente: amostra moderada ou alta.\n"
+                "Consolidado: depende do estado persistido de consolidação; não é inferido dos acertos.\n"
+                "Índice de domínio: pontuação interna, calculada somente onde houver base.\n"
+                "Os grupos de lacunas podem se sobrepor. As projeções são estimativas."
+            )
+        )
+        hero_linha.addWidget(self.progresso_criterios_botao, 0, Qt.AlignVCenter)
+        self.progresso_card_trabalhado = QLabel("—")
+        self.progresso_card_trabalhado.setObjectName("progressHeroValueR2")
+        self.progresso_card_trabalhado.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        hero_linha.addWidget(self.progresso_card_trabalhado)
+        hero_layout.addLayout(hero_linha)
+        self.progresso_barra_cobertura_r2 = QProgressBar()
+        self.progresso_barra_cobertura_r2.setObjectName("progressCoverageR2")
+        self.progresso_barra_cobertura_r2.setRange(0, 100)
+        self.progresso_barra_cobertura_r2.setTextVisible(False)
+        self.progresso_barra_cobertura_r2.setFixedHeight(8)
+        hero_layout.addWidget(self.progresso_barra_cobertura_r2)
+        progresso_layout.addWidget(self.progresso_painel_cobertura)
+
+        # Quatro métricas secundárias, nenhuma substitui o cálculo original.
         resumo_progresso = QGridLayout()
-        resumo_progresso.setHorizontalSpacing(
-            9
-        )
+        resumo_progresso.setHorizontalSpacing(8)
+        resumo_progresso.setVerticalSpacing(7)
+        for coluna in range(4):
+            resumo_progresso.setColumnStretch(coluna, 1)
 
-        for coluna in range(
-            5
-        ):
-            resumo_progresso.setColumnStretch(
-                coluna,
-                1
-            )
-
-        def criar_card_progresso(
-            titulo_texto
-        ):
+        def criar_card_progresso(titulo_texto):
             card = QFrame()
-            card.setObjectName(
-                "syllabusStat"
-            )
+            card.setObjectName("progressMetricR2")
+            card_layout = QVBoxLayout(card)
+            card_layout.setContentsMargins(11, 7, 11, 7)
+            card_layout.setSpacing(2)
+            rotulo = QLabel(titulo_texto)
+            rotulo.setObjectName("miniStatLabel")
+            valor = QLabel("—")
+            valor.setObjectName("progressMetricValueR2")
+            detalhe = QLabel("—")
+            detalhe.setObjectName("syllabusStatHint")
+            detalhe.setWordWrap(True)
+            card_layout.addWidget(rotulo)
+            card_layout.addWidget(valor)
+            card_layout.addWidget(detalhe)
+            return card, valor, detalhe
 
-            card_layout = QVBoxLayout(
-                card
-            )
-            card_layout.setContentsMargins(
-                12,
-                9,
-                12,
-                9
-            )
-            card_layout.setSpacing(
-                2
-            )
+        (card, self.progresso_card_nao_iniciado,
+         self.progresso_card_nao_iniciado_hint) = criar_card_progresso("Cobertura de questões")
+        resumo_progresso.addWidget(card, 0, 0)
+        (card, self.progresso_card_consolidando,
+         self.progresso_card_consolidando_hint) = criar_card_progresso("Evidência suficiente")
+        resumo_progresso.addWidget(card, 0, 1)
+        (card, self.progresso_card_consolidado,
+         self.progresso_card_consolidado_hint) = criar_card_progresso("Consolidados")
+        resumo_progresso.addWidget(card, 0, 2)
+        (card, self.progresso_card_dominio,
+         self.progresso_card_dominio_hint) = criar_card_progresso("Índice de domínio")
+        resumo_progresso.addWidget(card, 0, 3)
+        progresso_layout.addLayout(resumo_progresso)
 
-            rotulo = QLabel(
-                titulo_texto
-            )
-            rotulo.setObjectName(
-                "miniStatLabel"
-            )
-
-            valor = QLabel(
-                "—"
-            )
-            valor.setObjectName(
-                "miniStatValue"
-            )
-
-            detalhe = QLabel(
-                "—"
-            )
-            detalhe.setObjectName(
-                "syllabusStatHint"
-            )
-
-            card_layout.addWidget(
-                rotulo
-            )
-            card_layout.addWidget(
-                valor
-            )
-            card_layout.addWidget(
-                detalhe
-            )
-
-            return (
-                card,
-                valor,
-                detalhe
-            )
-
-        (
-            card,
-            self.progresso_card_trabalhado,
-            self.progresso_card_trabalhado_hint
-        ) = criar_card_progresso(
-            "Cobertura do edital"
-        )
-        resumo_progresso.addWidget(
-            card,
-            0,
-            0
-        )
-
-        (
-            card,
-            self.progresso_card_consolidado,
-            self.progresso_card_consolidado_hint
-        ) = criar_card_progresso(
-            "Consolidado"
-        )
-        resumo_progresso.addWidget(
-            card,
-            0,
-            1
-        )
-
-        (
-            card,
-            self.progresso_card_consolidando,
-            self.progresso_card_consolidando_hint
-        ) = criar_card_progresso(
-            "Evidência suficiente"
-        )
-        resumo_progresso.addWidget(
-            card,
-            0,
-            2
-        )
-
-        (
-            card,
-            self.progresso_card_nao_iniciado,
-            self.progresso_card_nao_iniciado_hint
-        ) = criar_card_progresso(
-            "Cobertura de questões"
-        )
-        resumo_progresso.addWidget(
-            card,
-            0,
-            3
-        )
-
-        (
-            card,
-            self.progresso_card_dominio,
-            self.progresso_card_dominio_hint
-        ) = criar_card_progresso(
-            "Domínio oficial"
-        )
-        resumo_progresso.addWidget(
-            card,
-            0,
-            4
-        )
-
-        progresso_layout.addLayout(
-            resumo_progresso
-        )
-
-        # Regra de classificação.
-        regras = QFrame()
-        regras.setObjectName(
-            "syllabusRules"
-        )
-
-        regras_layout = QVBoxLayout(
-            regras
-        )
-        regras_layout.setContentsMargins(
-            13,
-            9,
-            13,
-            9
-        )
-        regras_layout.setSpacing(
-            3
-        )
-
-        regras_titulo = QLabel(
-            "Como interpretar o progresso"
-        )
-        regras_titulo.setObjectName(
-            "syllabusSectionTitle"
-        )
-
-        regras_texto = QLabel(
-            (
-                "Cobertura mede tópicos iniciados por tentativas efetivas; cobertura de "
-                "questões mede questões ativas já respondidas. Evidência indica a força "
-                "da amostra. Domínio é exibido somente quando calculável. Consolidado "
-                "depende exclusivamente de topic_consolidation_status@1.\n"
-                "“Em consolidação” é apenas um estado visual: evidência moderada/alta, "
-                "domínio oficial de pelo menos 70 e consolidação oficial ainda não atingida."
-            )
-        )
-        regras_texto.setObjectName(
-            "mutedLabel"
-        )
-        regras_texto.setWordWrap(
-            True
-        )
-
-        regras_layout.addWidget(
-            regras_titulo
-        )
-        regras_layout.addWidget(
-            regras_texto
-        )
-
-        progresso_layout.addWidget(
-            regras
-        )
-
-        self.progresso_lacunas_resumo = QLabel(
-            "Lacunas do edital: aguardando dados"
-        )
-        self.progresso_lacunas_resumo.setObjectName(
-            "syllabusRules"
-        )
-        self.progresso_lacunas_resumo.setWordWrap(
-            True
-        )
-        self.progresso_lacunas_resumo.setToolTip(
-            "Visão analítica; não altera prioridade, fila ou recomendação."
-        )
-        progresso_layout.addWidget(
-            self.progresso_lacunas_resumo
-        )
+        # Lacunas em indicadores legíveis. Não se somam os subconjuntos.
+        lacunas_cabecalho = QHBoxLayout()
+        lacunas_nome = QLabel("Lacunas do conteúdo")
+        lacunas_nome.setObjectName("syllabusSectionTitle")
+        lacunas_cabecalho.addWidget(lacunas_nome)
+        lacunas_cabecalho.addStretch()
+        progresso_layout.addLayout(lacunas_cabecalho)
+        lacunas_linha = QHBoxLayout()
+        lacunas_linha.setSpacing(7)
+        self.progresso_lacunas_valores_r2 = {}
+        for chave, titulo in (
+            ("not_started", "Não iniciados"),
+            ("started_insufficient_evidence", "Amostra insuficiente"),
+            ("low_evidence", "Evidência baixa"),
+            ("sufficient_evidence_not_consolidated", "Suficiente, não consolidado"),
+            ("overdue_review", "Revisões vencidas"),
+        ):
+            caixa = QFrame()
+            caixa.setObjectName("progressGapMetricR2")
+            caixal = QHBoxLayout(caixa)
+            caixal.setContentsMargins(9, 7, 9, 7)
+            caixal.setSpacing(5)
+            rotulo = QLabel(titulo)
+            rotulo.setObjectName("miniStatLabel")
+            rotulo.setWordWrap(True)
+            numero = QLabel("—")
+            numero.setObjectName("progressGapValueR2")
+            numero.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            caixal.addWidget(rotulo, 1)
+            caixal.addWidget(numero)
+            lacunas_linha.addWidget(caixa, 1)
+            self.progresso_lacunas_valores_r2[chave] = numero
+        progresso_layout.addLayout(lacunas_linha)
 
         # ----------------------------------------------------
         # ALERTAS DE CONTEÚDO
@@ -103224,15 +104144,8 @@ class SistemaEstudos(QMainWindow):
         alertas_layout = QVBoxLayout(
             self.alertas_progresso_card
         )
-        alertas_layout.setContentsMargins(
-            14,
-            11,
-            14,
-            12
-        )
-        alertas_layout.setSpacing(
-            9
-        )
+        alertas_layout.setContentsMargins(12, 9, 12, 11)
+        alertas_layout.setSpacing(7)
 
         alertas_header = QHBoxLayout()
 
@@ -103248,26 +104161,6 @@ class SistemaEstudos(QMainWindow):
             "syllabusSectionTitle"
         )
 
-        alertas_desc = QLabel(
-            (
-                "Sinaliza tópicos vencidos, baixo desempenho sem retorno, "
-                "conteúdo importante ainda não iniciado e casos sem novo agendamento."
-            )
-        )
-        alertas_desc.setObjectName(
-            "mutedLabel"
-        )
-        alertas_desc.setWordWrap(
-            True
-        )
-
-        alertas_titulos.addWidget(
-            alertas_titulo
-        )
-        alertas_titulos.addWidget(
-            alertas_desc
-        )
-
         alertas_header.addLayout(
             alertas_titulos
         )
@@ -103280,137 +104173,35 @@ class SistemaEstudos(QMainWindow):
             "filterCount"
         )
 
-        alertas_header.addWidget(
-            self.alertas_contagem_total
-        )
+        # A contagem é apresentada somente nos filtros de nível.
 
         alertas_layout.addLayout(
             alertas_header
         )
 
-        alertas_resumo = QGridLayout()
-        alertas_resumo.setHorizontalSpacing(
-            8
-        )
-
-        for coluna in range(
-            4
+        # Filtros de nível: chips compactos substituem quatro cartões grandes.
+        alertas_resumo = QHBoxLayout()
+        alertas_resumo.setSpacing(7)
+        self.alertas_filtros_botoes_r2 = {}
+        for nivel, texto in (
+            ("Todos os níveis", "Todos"),
+            ("Crítico", "Críticos"),
+            ("Atenção", "Atenção"),
+            ("Monitorar", "Monitorar"),
         ):
-            alertas_resumo.setColumnStretch(
-                coluna,
-                1
+            botao = QPushButton(texto)
+            botao.setObjectName("progressAlertFilterR2")
+            botao.setCheckable(True)
+            botao.setMinimumHeight(32)
+            botao.setCursor(Qt.PointingHandCursor)
+            botao.clicked.connect(
+                lambda _marcado=False, valor=nivel:
+                    self.alertas_filtro_nivel.setCurrentText(valor)
             )
-
-        def criar_card_alerta(
-            titulo_texto
-        ):
-            card = QFrame()
-            card.setObjectName(
-                "syllabusAlertStat"
-            )
-
-            card_layout = QVBoxLayout(
-                card
-            )
-            card_layout.setContentsMargins(
-                10,
-                7,
-                10,
-                7
-            )
-            card_layout.setSpacing(
-                1
-            )
-
-            rotulo = QLabel(
-                titulo_texto
-            )
-            rotulo.setObjectName(
-                "miniStatLabel"
-            )
-
-            valor = QLabel(
-                "0"
-            )
-            valor.setObjectName(
-                "miniStatValue"
-            )
-
-            card_layout.addWidget(
-                rotulo
-            )
-            card_layout.addWidget(
-                valor
-            )
-
-            return (
-                card,
-                valor
-            )
-
-        (
-            card,
-            self.alertas_total_valor
-        ) = criar_card_alerta(
-            "Total"
-        )
-        alertas_resumo.addWidget(
-            card,
-            0,
-            0
-        )
-
-        (
-            card,
-            self.alertas_criticos_valor
-        ) = criar_card_alerta(
-            "Críticos"
-        )
-        card.setProperty(
-            "alertLevel",
-            "critico"
-        )
-        alertas_resumo.addWidget(
-            card,
-            0,
-            1
-        )
-
-        (
-            card,
-            self.alertas_atencao_valor
-        ) = criar_card_alerta(
-            "Atenção"
-        )
-        card.setProperty(
-            "alertLevel",
-            "atencao"
-        )
-        alertas_resumo.addWidget(
-            card,
-            0,
-            2
-        )
-
-        (
-            card,
-            self.alertas_monitorar_valor
-        ) = criar_card_alerta(
-            "Monitorar"
-        )
-        card.setProperty(
-            "alertLevel",
-            "monitorar"
-        )
-        alertas_resumo.addWidget(
-            card,
-            0,
-            3
-        )
-
-        alertas_layout.addLayout(
-            alertas_resumo
-        )
+            alertas_resumo.addWidget(botao)
+            self.alertas_filtros_botoes_r2[nivel] = botao
+        alertas_resumo.addStretch(1)
+        alertas_layout.addLayout(alertas_resumo)
 
         filtros_alertas = QHBoxLayout()
         filtros_alertas.setSpacing(
@@ -103461,9 +104252,9 @@ class SistemaEstudos(QMainWindow):
             self.alertas_busca,
             1
         )
-        filtros_alertas.addWidget(
-            self.alertas_filtro_nivel
-        )
+        # Mantido como estado de filtro, sem seletor visual redundante.
+        self.alertas_filtro_nivel.setParent(self.alertas_progresso_card)
+        self.alertas_filtro_nivel.hide()
         filtros_alertas.addWidget(
             self.alertas_filtro_tipo
         )
@@ -103525,9 +104316,7 @@ class SistemaEstudos(QMainWindow):
         self.tabela_alertas_conteudo.setShowGrid(
             False
         )
-        self.tabela_alertas_conteudo.setMinimumHeight(
-            245
-        )
+        self.tabela_alertas_conteudo.setMinimumHeight(260)
         self.tabela_alertas_conteudo.cellDoubleClicked.connect(
             self.abrir_topico_alerta
         )
@@ -103568,24 +104357,6 @@ class SistemaEstudos(QMainWindow):
 
         alertas_layout.addWidget(
             self.tabela_alertas_conteudo
-        )
-
-        regra_alertas = QLabel(
-            (
-                "Critério conservador: um intervalo longo não gera alerta quando "
-                "a próxima revisão ainda está dentro do agendamento normal. "
-                "A prioridade aumenta com atraso, importância e baixo desempenho."
-            )
-        )
-        regra_alertas.setObjectName(
-            "syllabusAlertsRule"
-        )
-        regra_alertas.setWordWrap(
-            True
-        )
-
-        alertas_layout.addWidget(
-            regra_alertas
         )
 
         progresso_layout.addWidget(
@@ -104027,9 +104798,6 @@ class SistemaEstudos(QMainWindow):
             previsao_nota
         )
 
-        progresso_layout.addWidget(
-            self.previsao_edital_card
-        )
 
         self.previsao_janela.currentTextChanged.connect(
             self.atualizar_previsao_edital
@@ -104396,6 +105164,25 @@ class SistemaEstudos(QMainWindow):
         progresso_layout.addWidget(
             topicos_card
         )
+
+        # Projeções preservadas, acessíveis sem ocupar a visão inicial.
+        self.progresso_previsao_toggle_r2 = QPushButton("Projeções e cenários  ▸")
+        self.progresso_previsao_toggle_r2.setObjectName("progressForecastToggleR2")
+        self.progresso_previsao_toggle_r2.setCheckable(True)
+        self.progresso_previsao_toggle_r2.setChecked(False)
+        self.progresso_previsao_toggle_r2.setCursor(Qt.PointingHandCursor)
+        self.progresso_previsao_toggle_r2.setMinimumHeight(34)
+        self.progresso_previsao_toggle_r2.clicked.connect(
+            lambda ativado: (
+                self.previsao_edital_card.setVisible(ativado),
+                self.progresso_previsao_toggle_r2.setText(
+                    "Projeções e cenários  ▾" if ativado else "Projeções e cenários  ▸"
+                ),
+            )
+        )
+        progresso_layout.addWidget(self.progresso_previsao_toggle_r2)
+        progresso_layout.addWidget(self.previsao_edital_card)
+        self.previsao_edital_card.setVisible(False)
         progresso_layout.addStretch()
 
         self.progresso_scroll.setWidget(
@@ -104409,6 +105196,7 @@ class SistemaEstudos(QMainWindow):
             self.aba_progresso_edital,
             "Progresso"
         )
+        self.abas_estatisticas.tabBar().setUsesScrollButtons(True)
 
         self.progresso_busca.textChanged.connect(
             self.filtrar_progresso_edital
@@ -105981,33 +106769,16 @@ class SistemaEstudos(QMainWindow):
             ] == "Monitorar"
         )
 
-        self.alertas_total_valor.setText(
-            str(
-                total
-            )
-        )
-        self.alertas_criticos_valor.setText(
-            str(
-                criticos
-            )
-        )
-        self.alertas_atencao_valor.setText(
-            str(
-                atencao
-            )
-        )
-        self.alertas_monitorar_valor.setText(
-            str(
-                monitorar
-            )
-        )
-
+        contagens = {
+            "Todos os níveis": ("Todos", total),
+            "Crítico": ("Críticos", criticos),
+            "Atenção": ("Atenção", atencao),
+            "Monitorar": ("Monitorar", monitorar),
+        }
+        for nivel, (titulo, quantidade) in contagens.items():
+            self.alertas_filtros_botoes_r2[nivel].setText(f"{titulo}  {quantidade}")
         self.alertas_contagem_total.setText(
-            (
-                "1 alerta"
-                if total == 1
-                else f"{total} alertas"
-            )
+            "1 alerta" if total == 1 else f"{total} alertas"
         )
 
         self.filtrar_alertas_conteudo()
@@ -106026,6 +106797,8 @@ class SistemaEstudos(QMainWindow):
         nivel = (
             self.alertas_filtro_nivel.currentText()
         )
+        for nome, botao in self.alertas_filtros_botoes_r2.items():
+            botao.setChecked(nome == nivel)
         tipo = (
             self.alertas_filtro_tipo.currentText()
         )
@@ -106397,6 +107170,11 @@ class SistemaEstudos(QMainWindow):
         self.progresso_card_trabalhado_hint.setText(
             f"{trabalhados} de {total} tópicos"
         )
+        try:
+            valor_barra = round(float(percentual_trabalhado)) if percentual_trabalhado is not None else 0
+            self.progresso_barra_cobertura_r2.setValue(max(0, min(100, int(valor_barra))))
+        except (TypeError, ValueError, OverflowError):
+            self.progresso_barra_cobertura_r2.setValue(0)
 
         self.progresso_card_consolidado.setText(
             (
@@ -106464,16 +107242,8 @@ class SistemaEstudos(QMainWindow):
             )
 
         lacunas = snapshot["gaps"]
-        self.progresso_lacunas_resumo.setText(
-            "Lacunas do edital — "
-            f"não iniciados: {lacunas['not_started']} • "
-            f"iniciados com evidência insuficiente: "
-            f"{lacunas['started_insufficient_evidence']} • "
-            f"evidência baixa: {lacunas['low_evidence']} • "
-            f"evidência suficiente, ainda não consolidados: "
-            f"{lacunas['sufficient_evidence_not_consolidated']} • "
-            f"revisões vencidas: {lacunas['overdue_review']}"
-        )
+        for chave, rotulo in self.progresso_lacunas_valores_r2.items():
+            rotulo.setText(str(lacunas.get(chave, 0)))
 
         # ----------------------------------------------------
         # DISCIPLINAS

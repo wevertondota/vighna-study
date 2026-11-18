@@ -120,7 +120,7 @@ class LogoHomeMaduro(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("homeLogoOficial")
-        self.setMinimumHeight(178)
+        self.setMinimumHeight(155)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         # Versões 1x e 2x pré-renderizadas com filtro Lanczos a partir da
         # imagem original, ambas com fundo realmente transparente.
@@ -139,7 +139,7 @@ class LogoHomeMaduro(QWidget):
 
         # Reserva a base para a assinatura preexistente. Sem esticar a marca,
         # não desenha as palavras Vighna e Study uma segunda vez.
-        faixa_assinatura = 43.0
+        faixa_assinatura = 39.0
         area_logo_h = max(1.0, h - faixa_assinatura - 3.0)
         # Em monitores HiDPI a variante 2x evita ampliar uma fonte 1x.
         # A variante 1x mantém os pixels já filtrados na escala padrão.
@@ -210,11 +210,12 @@ class CartaoHomeMaduro(QAbstractButton):
         self.setCursor(Qt.PointingHandCursor)
         self.setFocusPolicy(Qt.StrongFocus)
         self.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Fixed)
-        self.setMinimumWidth(225)
+        self.setMinimumWidth(200)
         # Evita a altura ~38px observada quando a folha QSS global comprime botões.
-        self.setFixedHeight(270)
-        self.setToolTip(titulo+" — "+descricao)
+        self.setFixedHeight(224)
+        # Título e descrição já estão visíveis; evita tooltip redundante.
         self.setAccessibleName(titulo)
+        self.setAccessibleDescription(descricao)
         if callback is not None:
             self.clicked.connect(callback)
         else:
@@ -277,6 +278,27 @@ class CartaoHomeMaduro(QAbstractButton):
                 p.setPen(QPen(branco,4,Qt.SolidLine,Qt.RoundCap,Qt.RoundJoin))
                 p.drawLine(QPointF(3,y),QPointF(21,y))
             p.drawLine(QPointF(3,28),QPointF(21,28))
+        elif tipo=="dashboard":
+            # Análise: eixos, barras crescentes e linha de tendência. Ícone
+            # original desenhado em Qt, sem recursos externos ou animação.
+            p.setPen(QPen(branco,4.3,Qt.SolidLine,Qt.RoundCap,Qt.RoundJoin))
+            p.drawLine(QPointF(-41,36),QPointF(39,36))
+            p.drawLine(QPointF(-41,36),QPointF(-41,-32))
+            p.setPen(Qt.NoPen)
+            p.setBrush(QColor("#4C95B8"))
+            p.drawRoundedRect(QRectF(-28,9,14,25),2,2)
+            p.drawRoundedRect(QRectF(-4,-5,14,39),2,2)
+            p.drawRoundedRect(QRectF(20,-23,14,57),2,2)
+            p.setBrush(Qt.NoBrush)
+            p.setPen(QPen(ciano,5,Qt.SolidLine,Qt.RoundCap,Qt.RoundJoin))
+            tendencia=QPainterPath()
+            tendencia.moveTo(-27,4)
+            tendencia.lineTo(-5,-12)
+            tendencia.lineTo(11,-8)
+            tendencia.lineTo(32,-33)
+            p.drawPath(tendencia)
+            p.drawLine(QPointF(21,-33),QPointF(32,-33))
+            p.drawLine(QPointF(32,-33),QPointF(32,-22))
         elif tipo=="edital":
             p.setPen(QPen(branco,5,Qt.SolidLine,Qt.RoundCap,Qt.RoundJoin))
             folha=QPainterPath()
@@ -302,46 +324,59 @@ class CartaoHomeMaduro(QAbstractButton):
         p.restore()
 
     def paintEvent(self,event):
+        """Hierarquia com contraste controlado, sem CTAs ou linhas decorativas."""
         p=QPainter(self)
         p.setRenderHint(QPainter.Antialiasing,True)
         w=float(self.width());h=float(self.height())
-        destaque=self.tipo=="estudo" or self._hover or self.hasFocus()
-        rect=QRectF(3,3,w-6,h-6)
-        fill=QLinearGradient(0,0,w,h)
-        fill.setColorAt(0,QColor("#10405d") if destaque else QColor("#102f49"))
-        fill.setColorAt(.60,QColor("#0A263E"))
-        fill.setColorAt(1,QColor("#061d33"))
-        p.setPen(Qt.NoPen)
-        p.setBrush(fill)
-        p.drawRoundedRect(rect,29,29)
-        # Traço único e discreto evita borda dupla no foco.
-        cor_borda=QColor("#13DDF6") if destaque else QColor("#507FA0")
-        p.setPen(QPen(cor_borda,2.1 if destaque else 1.6))
-        p.setBrush(Qt.NoBrush)
-        p.drawRoundedRect(rect,29,29)
-        # Iluminação suave no centro superior do cartão.
-        glow=QRadialGradient(QPointF(w/2,h*.30),w*.57)
-        glow.setColorAt(0,QColor(6,137,194,33 if destaque else 19))
-        glow.setColorAt(1,QColor(0,34,50,0))
-        p.setPen(Qt.NoPen);p.setBrush(glow)
-        p.drawRoundedRect(rect.adjusted(4,4,-4,-4),25,25)
+        principal=self.tipo=="estudo"
+        em_foco=self.hasFocus()
+        realce=self._hover or em_foco
+        rect=QRectF(2.5,2.5,max(1.0,w-5),max(1.0,h-5))
 
-        icon_size=min(100,max(64,int(h*.32)))
-        self._desenhar_icone(p,self.tipo,w/2,h*.32,icon_size)
-        titulo_px=min(35,max(23,int(w*.085)))
-        titulo_f=_font(titulo_px,QFont.Bold)
-        if QFontMetrics(titulo_f).horizontalAdvance(self.titulo)>w-27:
-            titulo_f=_font(int(titulo_px*.85),QFont.Bold)
+        fundo=QLinearGradient(0,0,w,h)
+        if principal:
+            fundo.setColorAt(0,QColor("#123B54") if realce else QColor("#10334B"))
+            fundo.setColorAt(.65,QColor("#0A293E"))
+            fundo.setColorAt(1,QColor("#082137"))
+        else:
+            fundo.setColorAt(0,QColor("#12324A") if realce else QColor("#102B40"))
+            fundo.setColorAt(.65,QColor("#0A2338"))
+            fundo.setColorAt(1,QColor("#081E32"))
+        p.setPen(Qt.NoPen)
+        p.setBrush(fundo)
+        p.drawRoundedRect(rect,22,22)
+
+        # Ação primária: ciano contido, sem alterar a altura ou a tipografia.
+        # Foco pelo teclado visível e prioritário para acessibilidade.
+        if em_foco:
+            borda=QColor("#73E7F5");espessura=2.1
+        elif realce:
+            borda=QColor("#3AC6E0");espessura=1.7
+        elif principal:
+            borda=QColor("#15AEC9");espessura=1.6
+        else:
+            borda=QColor("#446B84");espessura=1.15
+        p.setPen(QPen(borda,espessura))
+        p.setBrush(Qt.NoBrush)
+        p.drawRoundedRect(rect,22,22)
+
+        icon_size=min(78,max(60,int(h*.32)))
+        self._desenhar_icone(p,self.tipo,w/2,h*.33,icon_size)
+        titulo_f=_font(28,QFont.Bold)
+        if QFontMetrics(titulo_f).horizontalAdvance(self.titulo)>w-28:
+            titulo_f=_font(25,QFont.Bold)
         p.setFont(titulo_f)
-        p.setPen(QColor("#F8FBFF"))
-        p.drawText(QRectF(12,h*.54,w-24,h*.15),Qt.AlignHCenter|Qt.AlignVCenter,self.titulo)
-        desc_f=_font(min(19,max(13,int(w*.047))),QFont.Normal)
-        if QFontMetrics(desc_f).horizontalAdvance(self.descricao)>w-27:
-            desc_f=_font(max(12,int(desc_f.pixelSize()*.86)),QFont.Normal)
-        p.setFont(desc_f);p.setPen(QColor("#C9DBEA"))
-        p.drawText(QRectF(8,h*.70,w-16,h*.12),Qt.AlignHCenter|Qt.AlignVCenter,self.descricao)
-        p.setPen(QPen(QColor("#00D7F1"),4,Qt.SolidLine,Qt.RoundCap))
-        p.drawLine(QPointF(w*.36,h*.89),QPointF(w*.64,h*.89))
+        p.setPen(QColor("#F5F9FC"))
+        p.drawText(QRectF(12,h*.57,w-24,h*.16),
+                   Qt.AlignHCenter|Qt.AlignVCenter,self.titulo)
+
+        desc_f=_font(16,QFont.Normal)
+        if QFontMetrics(desc_f).horizontalAdvance(self.descricao)>w-24:
+            desc_f=_font(14,QFont.Normal)
+        p.setFont(desc_f)
+        p.setPen(QColor("#B8CCDD"))
+        p.drawText(QRectF(11,h*.75,w-22,h*.11),
+                   Qt.AlignHCenter|Qt.AlignVCenter,self.descricao)
         p.end()
 
 
@@ -364,7 +399,7 @@ def criar_portal_inicio(abrir_dashboard, abrir_busca, abrir_questoes,
     conteudo.setObjectName("portalInicioConteudo")
     conteudo.setMinimumSize(795,660)
     coluna=QVBoxLayout(conteudo)
-    coluna.setContentsMargins(52,22,52,30)
+    coluna.setContentsMargins(52,22,52,24)
     coluna.setSpacing(0)
 
     header=QHBoxLayout()
@@ -372,8 +407,8 @@ def criar_portal_inicio(abrir_dashboard, abrir_busca, abrir_questoes,
     header.addStretch(1)
     if cabecalho_compartilhado is not None:
         # Mesmo perfil, mesmo QComboBox e mesmas ligações. Sem duplicação.
-        cabecalho_compartilhado.setFixedWidth(363)
-        cabecalho_compartilhado.setFixedHeight(83)
+        cabecalho_compartilhado.setFixedWidth(280)
+        cabecalho_compartilhado.setFixedHeight(58)
         cabecalho_compartilhado.setObjectName("dashboardTopBar")
         gerenciar=cabecalho_compartilhado.findChild(QPushButton,"premiumHeaderManageButton")
         if gerenciar is not None:
@@ -402,12 +437,12 @@ def criar_portal_inicio(abrir_dashboard, abrir_busca, abrir_questoes,
         header.addWidget(rotulo)
         pagina.portal_perfil_label=rotulo
     coluna.addLayout(header)
-    coluna.addSpacing(8)
+    coluna.addSpacing(42)
 
     logo=LogoHomeMaduro(conteudo)
-    logo.setFixedHeight(195)
+    logo.setFixedHeight(171)
     coluna.addWidget(logo)
-    coluna.addSpacing(28)
+    coluna.addSpacing(52)
 
     # Contêiner de altura explícita: o layout vertical não pode comprimir a
     # faixa dos três cartões para a altura de um QPushButton convencional.
@@ -419,20 +454,28 @@ def criar_portal_inicio(abrir_dashboard, abrir_busca, abrir_questoes,
     faixa_cartoes.setAttribute(Qt.WA_NoSystemBackground, True)
     faixa_cartoes.setAttribute(Qt.WA_TranslucentBackground, True)
     faixa_cartoes.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Fixed)
-    faixa_cartoes.setFixedHeight(270)
+    faixa_cartoes.setFixedHeight(224)
     cards=QHBoxLayout(faixa_cartoes)
-    cards.setSpacing(22)
+    cards.setSpacing(19)
     cards.setContentsMargins(0,0,0,0)
+    # O contrato original passa o método voltar_inicio como abrir_dashboard.
+    # Seu proprietário é a janela principal; usamos a rota JÁ EXISTENTE para
+    # Central de Análises, sem criar um segundo Dashboard nem editar main.py.
+    controlador=getattr(abrir_dashboard,"__self__",None)
+    abrir_central_analises=getattr(controlador,"abrir_painel_analitico",None)
+    if not callable(abrir_central_analises):
+        raise RuntimeError("Home: rota para Central de Análises indisponível")
     especificacoes=(
-        ("Iniciar Estudo","Disciplinas, tópicos e questões","estudo",abrir_dashboard),
-        ("Simulados","Avalie seus conhecimentos","simulados",abrir_simulados),
-        ("Meu Edital","Acompanhe conteúdos e cobertura","edital",abrir_edital),
+        ("Iniciar Estudo","Estudo automático, manual e simulados","estudo",abrir_dashboard),
+        ("Dashboard","Análise de desempenho","dashboard",abrir_central_analises),
+        ("Meu Edital","Conteúdos e cobertura","edital",abrir_edital),
     )
     pagina._home_cards=[]
     for titulo,descricao,tipo,abrir in especificacoes:
         cartao=CartaoHomeMaduro(titulo,descricao,tipo,abrir,conteudo)
-        cartao.setFixedHeight(270)
-        cards.addWidget(cartao,1)
+        cartao.setFixedHeight(224)
+        # Hierarquia 36% / 32% / 32%, sem superdimensionar a ação principal.
+        cards.addWidget(cartao,9 if tipo=="estudo" else 8)
         pagina._home_cards.append(cartao)
     coluna.addWidget(faixa_cartoes,0)
     pagina._home_faixa_cartoes=faixa_cartoes
@@ -456,7 +499,7 @@ def aplicar_estilo_portal(pagina, tema):
     QWidget#portalInicioCardsContainer { background-color: transparent; border: none; }
     /* O QPainter desenha bordas e preenchimento, não o QSS dos botões. */
     QAbstractButton#homeMaduroCard_estudo,
-    QAbstractButton#homeMaduroCard_simulados,
+    QAbstractButton#homeMaduroCard_dashboard,
     QAbstractButton#homeMaduroCard_edital {
         background-color: transparent; border: none;
     }
@@ -471,53 +514,60 @@ def aplicar_estilo_portal(pagina, tema):
 
 
 def estilizar_perfil_maduro(painel):
-    """Aplica estética compacta ao cabeçalho ORIGINAL (mesmo seletor)."""
+    """Compacta apenas o cabeçalho compartilhado; preserva o seletor real."""
     painel.setStyleSheet("""
     QFrame#dashboardTopBar {
-        background: rgba(7, 33, 55, 232);
-        border: 1px solid #3f7da2;
-        border-radius: 17px;
+        background: rgba(7, 31, 51, 230);
+        border: 1px solid #315D79;
+        border-radius: 14px;
     }
     QFrame#dashboardTopBar QFrame#topProfileBar {
         background: transparent; border: none; border-radius: 0px;
     }
     QFrame#dashboardTopBar QLabel#topProfileLabel {
-        background: transparent; color: #c6d8e9;
-        font-size: 12px; font-weight: 500; padding: 0px;
+        background: transparent; border: none;
     }
     QFrame#dashboardTopBar QLabel#premiumHeaderProfileIcon {
-        color: #e5f4ff; background: transparent; border: none;
+        color: #D5E8F2; background: transparent; border: none;
     }
     QFrame#dashboardTopBar QComboBox#topProfileCombo {
-        background: transparent; color: #f8fcff;
-        border: none; font-size: 18px; font-weight: 700;
+        background: transparent; color: #EFF7FB;
+        border: none; font-size: 15px; font-weight: 650;
         padding-left: 0px; padding-top: 0px;
     }
     QFrame#dashboardTopBar QComboBox#topProfileCombo::drop-down {
-        width: 26px; border: none;
+        width: 20px; border: none;
     }
     QFrame#dashboardTopBar QComboBox#topProfileCombo:hover,
     QFrame#dashboardTopBar QComboBox#topProfileCombo:focus {
-        background: rgba(25, 82, 115, 110);
+        background: rgba(25, 82, 115, 115);
     }
     """)
-    # Reaproveita o layout original e conserva todos os sinais do perfil.
+    # Mesmo QComboBox, mesmos sinais, mesma alteração do perfil ativo.
     lay=painel.layout()
     if lay is not None:
-        lay.setContentsMargins(14, 8, 9, 8)
+        lay.setContentsMargins(10,5,10,5)
         lay.setSpacing(3)
     profile=painel.findChild(QFrame,"topProfileBar")
     if profile is not None:
-        profile.setMinimumWidth(265)
-        profile.setMaximumWidth(330)
+        profile.setFixedHeight(44)
+        profile.setMinimumWidth(222)
+        profile.setMaximumWidth(239)
         pl=profile.layout()
         if pl is not None:
-            pl.setContentsMargins(4,3,4,3)
-            pl.setSpacing(11)
+            pl.setContentsMargins(4,2,4,2)
+            pl.setSpacing(7)
+        rotulo=profile.findChild(QLabel,"topProfileLabel")
+        if rotulo is not None:
+            rotulo.hide()   # O valor com ícone já identifica o perfil.
+        icone=profile.findChild(QLabel,"premiumHeaderProfileIcon")
+        if icone is not None:
+            icone.setFixedSize(25,28)
         from PySide6.QtWidgets import QComboBox
         combo=profile.findChild(QComboBox,"topProfileCombo")
         if combo is not None:
-            combo.setMinimumWidth(200)
-            combo.setMaximumWidth(280)
-            combo.setFixedHeight(31)
+            combo.setMinimumWidth(150)
+            combo.setMaximumWidth(187)
+            combo.setFixedHeight(30)
+            combo.setAccessibleName("Perfil ativo")
     return painel

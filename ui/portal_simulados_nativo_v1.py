@@ -1,15 +1,17 @@
-"""Portal nativo da Central de Simulados (sem GIF e sem painel de desempenho).
+"""Portal Qt da Central de Simulados — harmonia visual profissional R1.
 
-O modulo e exclusivamente visual: os destinos continuam nos controladores do
-main.py. Nao abre banco de dados, nao inicia sessoes e nao cria temporizadores.
+Somente apresentacao: quatro rotas originais, sem novos acessos ao banco,
+sem alteracao de sessao, controladores, timers, filtros ou sistema de estudos.
 """
 from __future__ import annotations
 
 from PySide6.QtCore import Qt, QRectF, QPointF, QSize
-from PySide6.QtGui import QColor, QFont, QPainter, QPainterPath, QPen, QBrush, QLinearGradient, QPolygonF
+from PySide6.QtGui import (
+    QColor, QPainter, QPainterPath, QPen, QBrush, QLinearGradient,
+)
 from PySide6.QtWidgets import (
     QWidget, QLabel, QFrame, QPushButton, QVBoxLayout, QHBoxLayout,
-    QGridLayout, QScrollArea, QSizePolicy
+    QGridLayout, QScrollArea, QSizePolicy,
 )
 
 
@@ -70,44 +72,54 @@ class _IconeModalidade(QWidget):
 
 
 class _CartaoModalidade(QPushButton):
+    '''Um único alvo interativo: sem botões falsos ou sublinhados decorativos.'''
+
+    ALTURA = 224
+
     def __init__(self, titulo, descricao, icone, destaque, callback, parent=None):
         super().__init__(parent)
-        self.setObjectName('simuladosCardDestaque' if destaque else 'simuladosCard')
+        # Mantém o parâmetro legado "destaque", mas não privilegia um modo.
+        self.setObjectName('simuladosCard')
         self.setAccessibleName(titulo)
-        self.setToolTip(f'{titulo}: {descricao}')
+        self.setAccessibleDescription(descricao)
         self.setCursor(Qt.PointingHandCursor)
-        # Cartoes com dimensao previsivel e sem compressao por QScrollArea,
-        # estilo QSS, DPI ou widgets expansivos acima deles.
+        self.setFocusPolicy(Qt.StrongFocus)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.setFixedHeight(228)
-        self.setMinimumWidth(185)
-        self.clicked.connect(lambda _=False: callback())
-        lay = QVBoxLayout(self)
-        lay.setContentsMargins(14, 17, 14, 14)
-        lay.setSpacing(10)
-        lay.addWidget(_IconeModalidade(icone, self), 0, Qt.AlignHCenter)
-        heading = QLabel(titulo, self)
-        heading.setObjectName('simuladosCardTitle')
-        heading.setAlignment(Qt.AlignHCenter)
-        heading.setAttribute(Qt.WA_TransparentForMouseEvents)
-        heading.setWordWrap(True)
-        lay.addWidget(heading)
-        desc = QLabel(descricao, self)
-        desc.setObjectName('simuladosCardDescription')
-        desc.setAlignment(Qt.AlignHCenter)
-        desc.setWordWrap(True)
-        desc.setAttribute(Qt.WA_TransparentForMouseEvents)
-        desc.setMinimumHeight(42)
-        lay.addWidget(desc)
-        lay.addStretch(1)
-        linha = QFrame(self)
-        linha.setObjectName('simuladosCardAccent' if destaque else 'simuladosCardAccentNeutral')
-        linha.setFixedSize(63, 3)
-        linha.setAttribute(Qt.WA_TransparentForMouseEvents)
-        lay.addWidget(linha, 0, Qt.AlignHCenter)
+        self.setFixedHeight(self.ALTURA)
+        self.setMinimumWidth(208)
+        if callable(callback):
+            self.clicked.connect(lambda _=False: callback())
+        else:
+            self.setEnabled(False)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(16, 23, 16, 18)
+        layout.setSpacing(8)
+        icone_widget = _IconeModalidade(icone, self)
+        icone_widget.setFixedSize(72, 68)
+        layout.addWidget(icone_widget, 0, Qt.AlignHCenter)
+        layout.addSpacing(5)
+
+        titulo_widget = QLabel(titulo, self)
+        titulo_widget.setObjectName('simuladosCardTitle')
+        titulo_widget.setAlignment(Qt.AlignHCenter)
+        titulo_widget.setWordWrap(True)
+        titulo_widget.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+        layout.addWidget(titulo_widget)
+
+        descricao_widget = QLabel(descricao, self)
+        descricao_widget.setObjectName('simuladosCardDescription')
+        descricao_widget.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
+        descricao_widget.setWordWrap(True)
+        descricao_widget.setMinimumHeight(40)
+        descricao_widget.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+        layout.addWidget(descricao_widget)
+        layout.addStretch(1)
 
 
 class _FundoSimulados(QWidget):
+    '''Superfície vetorial próxima da Home R2, sem recursos externos.'''
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self._claro = False
@@ -125,160 +137,148 @@ class _FundoSimulados(QWidget):
     def _redistribuir(self):
         if not hasattr(self, 'grade'):
             return
-        width = self.width()
-        colunas = 4 if width >= 940 else (2 if width >= 495 else 1)
+        largura = self.width()
+        colunas = 4 if largura >= 1010 else (2 if largura >= 530 else 1)
         if self._colunas == colunas:
             return
         self._colunas = colunas
-        for c in self._cards:
-            self.grade.removeWidget(c)
-        for i, c in enumerate(self._cards):
-            self.grade.addWidget(c, i // colunas, i % colunas)
+        for card in self._cards:
+            self.grade.removeWidget(card)
+        for i, card in enumerate(self._cards):
+            self.grade.addWidget(card, i // colunas, i % colunas)
         for coluna in range(4):
             self.grade.setColumnStretch(coluna, 1 if coluna < colunas else 0)
+        # Não permitir que uma linha vazia comprima os cartões.
+        for linha in range(4):
+            self.grade.setRowStretch(linha, 0)
 
     def paintEvent(self, event):
         p = QPainter(self)
-        p.setRenderHint(QPainter.Antialiasing)
-        rect = QRectF(self.rect())
-        grad = QLinearGradient(rect.topLeft(), rect.bottomRight())
+        p.setRenderHint(QPainter.Antialiasing, True)
+        w, h = float(self.width()), float(self.height())
+        reto = QRectF(self.rect())
+        grad = QLinearGradient(0, 0, w, h)
         if self._claro:
-            grad.setColorAt(0, QColor('#ebf4fc'))
-            grad.setColorAt(0.55, QColor('#d7e9f8'))
-            grad.setColorAt(1, QColor('#c2dff3'))
-            linha = QColor(30, 103, 153, 58)
+            for pos, cor in ((0, '#e5f2fc'), (.50, '#f2f8fd'), (1, '#d3e8f7')):
+                grad.setColorAt(pos, QColor(cor))
+            traco = QColor(24, 107, 157, 47)
+            faixa = QColor(28, 107, 158, 13)
         else:
-            grad.setColorAt(0, QColor('#073756'))
-            grad.setColorAt(0.32, QColor('#001729'))
-            grad.setColorAt(0.75, QColor('#001323'))
-            grad.setColorAt(1, QColor('#005078'))
-            linha = QColor(4, 146, 209, 80)
-        p.fillRect(rect, grad)
-        p.setPen(QPen(linha, 1.6))
-        curve = QPainterPath(QPointF(-80, 180))
-        curve.cubicTo(QPointF(230, 80), QPointF(210, 3), QPointF(580, -48))
-        p.drawPath(curve)
-        curve2 = QPainterPath(QPointF(self.width() * 0.67, self.height() + 24))
-        curve2.cubicTo(QPointF(self.width() * 0.82, self.height() * 0.91), QPointF(self.width() * 0.95, self.height() * 0.91), QPointF(self.width() + 40, self.height() * 0.68))
-        p.drawPath(curve2)
+            for pos, cor in ((0, '#082b43'), (.42, '#051d30'), (1, '#04192b')):
+                grad.setColorAt(pos, QColor(cor))
+            traco = QColor(11, 151, 193, 62)
+            faixa = QColor(16, 107, 151, 22)
+        p.fillRect(reto, grad)
+        p.setPen(Qt.NoPen)
+        p.setBrush(faixa)
+        curva = QPainterPath()
+        curva.moveTo(0, 0)
+        curva.lineTo(w * .42, 0)
+        curva.cubicTo(w * .31, 45, w * .17, 91, 0, 137)
+        curva.closeSubpath()
+        p.drawPath(curva)
+        p.setBrush(Qt.NoBrush)
+        p.setPen(QPen(traco, 1.0))
+        borda = QPainterPath(QPointF(0, 139))
+        borda.cubicTo(QPointF(w * .18, 91), QPointF(w * .31, 45), QPointF(w * .43, 0))
+        p.drawPath(borda)
+        curva_inferior = QPainterPath(QPointF(w * .61, h + 4))
+        curva_inferior.cubicTo(QPointF(w * .79, h * .89), QPointF(w * .95, h * .92), QPointF(w + 8, h * .81))
+        p.drawPath(curva_inferior)
         p.end()
 
 
 class PortalSimuladosNativo(QWidget):
+    '''Central de quatro modalidades, mantendo a API invocada por main.py.'''
+
     def __init__(self, *, perfil_ativo, logo, abrir_revisao, abrir_treino,
                  abrir_simulado, abrir_erros, retomar_sessao):
         super().__init__()
         self.setObjectName('centralSimuladosRoot')
         self.setMinimumSize(400, 400)
+        # "logo" continua na assinatura para compatibilidade com o controlador.
+        # A marca já está presente na Home; repetir o logotipo aqui a sobrecarregava.
         self._retomar_sessao_callback = retomar_sessao
         root = QVBoxLayout(self)
         root.setContentsMargins(0, 0, 0, 0)
+        root.setSpacing(0)
         scroll = QScrollArea(self)
         scroll.setObjectName('centralSimuladosScroll')
         scroll.setFrameShape(QFrame.NoFrame)
         scroll.setWidgetResizable(True)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         root.addWidget(scroll)
+
         self.canvas = _FundoSimulados(scroll)
         self.canvas.setObjectName('centralSimuladosCanvas')
         self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.MinimumExpanding)
         self.canvas.setMinimumHeight(560)
-        # IMPORTANTE: configurar inteiramente o layout do canvas ANTES de
-        # associar o widget ao QScrollArea. O Qt pode ignorar a nova geometria
-        # de widgets cujo layout for instalado depois do setWidget().
+        # Preparar todo o layout antes de scroll.setWidget.
         coluna = QVBoxLayout(self.canvas)
-        coluna.setContentsMargins(26, 12, 26, 30)
+        coluna.setContentsMargins(30, 34, 30, 32)
         coluna.setSpacing(0)
 
         topo = QHBoxLayout()
         topo.setContentsMargins(0, 0, 0, 0)
-        topo.setSpacing(10)
-        # Espaco simetrico ao cartao de perfil: logotipo centralizado na tela.
-        topo.addSpacing(170)
-        topo.addStretch(1)
-        marca = QWidget(self.canvas)
-        marca_lay = QHBoxLayout(marca)
-        marca_lay.setContentsMargins(0, 0, 0, 0)
-        marca_lay.setSpacing(10)
-        self.logo = QLabel(marca)
-        self.logo.setFixedSize(51, 58)
-        self.logo.setAlignment(Qt.AlignCenter)
-        if logo is not None and not logo.isNull():
-            self.logo.setPixmap(logo.scaled(QSize(50, 55), Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        marca_lay.addWidget(self.logo)
-        marca_titulos = QVBoxLayout()
-        marca_titulos.setSpacing(1)
-        nome = QLabel('Vighna<span style="color:#07d5ff">Study</span>', marca)
-        nome.setObjectName('centralSimuladosMarca')
-        nome.setTextFormat(Qt.RichText)
-        marca_titulos.addWidget(nome)
-        subtitulo = QLabel('S I S T E M A  D E  E S T U D O S  A V A N Ç A D O', marca)
-        subtitulo.setObjectName('centralSimuladosMarcaSub')
-        marca_titulos.addWidget(subtitulo)
-        marca_lay.addLayout(marca_titulos)
-        topo.addWidget(marca, 0, Qt.AlignHCenter)
-        topo.addStretch(1)
-        perfil_card = QFrame(self.canvas)
-        perfil_card.setObjectName('centralSimuladosPerfil')
-        perfil_card.setFixedWidth(170)
-        perfil_lay = QVBoxLayout(perfil_card)
-        perfil_lay.setContentsMargins(12, 7, 12, 7)
-        perfil_lay.setSpacing(2)
-        legenda = QLabel('◆   PERFIL ATIVO', perfil_card)
-        legenda.setObjectName('centralSimuladosPerfilLegenda')
-        perfil_lay.addWidget(legenda)
-        self.perfil_nome = QLabel(perfil_ativo or '—', perfil_card)
-        self.perfil_nome.setObjectName('centralSimuladosPerfilNome')
-        self.perfil_nome.setWordWrap(True)
-        perfil_lay.addWidget(self.perfil_nome)
-        topo.addWidget(perfil_card, 0, Qt.AlignTop)
-        coluna.addLayout(topo)
-        coluna.addSpacing(32)
-
-        titulo_linha = QHBoxLayout()
-        titulo_linha.setSpacing(17)
-        icon_header = _IconeModalidade('prancheta', self.canvas)
-        icon_header.setFixedSize(64, 62)
-        titulo_linha.addWidget(icon_header, 0, Qt.AlignVCenter)
-        divisor = QFrame(self.canvas)
-        divisor.setObjectName('centralSimuladosDivisor')
-        divisor.setFixedSize(2, 52)
-        titulo_linha.addWidget(divisor, 0, Qt.AlignVCenter)
+        topo.setSpacing(16)
         textos = QVBoxLayout()
-        textos.setSpacing(3)
+        textos.setContentsMargins(0, 0, 0, 0)
+        textos.setSpacing(5)
         heading = QLabel('Central de Simulados', self.canvas)
         heading.setObjectName('centralSimuladosTitulo')
         textos.addWidget(heading)
         intro = QLabel('Pratique, avalie e aperfeiçoe seu desempenho.', self.canvas)
         intro.setObjectName('centralSimuladosSubtitulo')
+        intro.setWordWrap(True)
         textos.addWidget(intro)
-        titulo_linha.addLayout(textos, 1)
-        coluna.addLayout(titulo_linha)
-        coluna.addSpacing(32)
+        topo.addLayout(textos, 1)
+
+        perfil = QFrame(self.canvas)
+        perfil.setObjectName('centralSimuladosPerfil')
+        perfil.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Fixed)
+        perfil_lay = QHBoxLayout(perfil)
+        perfil_lay.setContentsMargins(13, 9, 13, 9)
+        perfil_lay.setSpacing(8)
+        self.perfil_nome = QLabel('', perfil)
+        self.perfil_nome.setObjectName('centralSimuladosPerfilNome')
+        self.perfil_nome.setWordWrap(False)
+        self.perfil_nome.setMaximumWidth(250)
+        perfil_lay.addWidget(self.perfil_nome)
+        topo.addWidget(perfil, 0, Qt.AlignTop)
+        coluna.addLayout(topo)
+        coluna.addSpacing(68)
 
         self.canvas.grade = QGridLayout()
         self.canvas.grade.setContentsMargins(0, 0, 0, 0)
-        self.canvas.grade.setHorizontalSpacing(12)
-        self.canvas.grade.setVerticalSpacing(14)
+        self.canvas.grade.setHorizontalSpacing(15)
+        self.canvas.grade.setVerticalSpacing(15)
         self.canvas._cards = [
-            _CartaoModalidade('Revisão Inteligente', 'Reforce conteúdos que precisam de revisão.', 'livro', True, abrir_revisao, self.canvas),
-            _CartaoModalidade('Treino Adaptativo', 'Pratique questões com foco no seu desempenho.', 'alvo', False, abrir_treino, self.canvas),
-            _CartaoModalidade('Simulado', 'Teste seus conhecimentos em condições de prova.', 'prancheta', False, abrir_simulado, self.canvas),
-            _CartaoModalidade('Banco de Erros', 'Revisite questões erradas e consolide o aprendizado.', 'banco', False, abrir_erros, self.canvas),
+            _CartaoModalidade('Revisão Inteligente',
+                'Reforce conteúdos que precisam de revisão.', 'livro', False,
+                abrir_revisao, self.canvas),
+            _CartaoModalidade('Treino Adaptativo',
+                'Pratique questões com foco no seu desempenho.', 'alvo', False,
+                abrir_treino, self.canvas),
+            _CartaoModalidade('Simulado',
+                'Teste seus conhecimentos em condições de prova.', 'prancheta', False,
+                abrir_simulado, self.canvas),
+            _CartaoModalidade('Banco de Erros',
+                'Revisite questões erradas e consolide o aprendizado.', 'banco', False,
+                abrir_erros, self.canvas),
         ]
         coluna.addLayout(self.canvas.grade)
-        self.canvas._redistribuir()
         coluna.addSpacing(20)
 
         self.botao_retomar = QPushButton('Retomar sessão em andamento', self.canvas)
         self.botao_retomar.setObjectName('centralSimuladosRetomar')
+        self.botao_retomar.setCursor(Qt.PointingHandCursor)
+        self.botao_retomar.setFocusPolicy(Qt.StrongFocus)
         self.botao_retomar.clicked.connect(lambda _=False: self._retomar_sessao_callback())
         self.botao_retomar.setVisible(False)
         self.botao_retomar.setMinimumHeight(38)
         coluna.addWidget(self.botao_retomar, 0, Qt.AlignLeft)
         coluna.addStretch(1)
-        # Depois de prontos os widgets, as alturas e a grade responsiva,
-        # somente agora vincula o canvas ao scroll area.
+
         scroll.setWidget(self.canvas)
         self.canvas._colunas = 0
         self.canvas._redistribuir()
@@ -286,48 +286,81 @@ class PortalSimuladosNativo(QWidget):
         aplicar_tema_central_simulados(self, 'futurista')
 
     def set_perfil(self, nome):
-        self.perfil_nome.setText(str(nome or '—').strip() or '—')
+        nome = str(nome or '—').strip() or '—'
+        self.perfil_nome.setText('Perfil: ' + nome)
+        # Tooltip exclusivamente para texto longo truncado, não por padrão.
+        self.perfil_nome.setToolTip(nome if len(nome) > 30 else '')
 
     def atualizar_retomada(self, existe, detalhes=''):
         self.botao_retomar.setVisible(bool(existe))
         if existe:
             self.botao_retomar.setToolTip(detalhes or 'Trazer a sessão ativa para a frente.')
+        else:
+            self.botao_retomar.setToolTip('')
 
 
 def aplicar_tema_central_simulados(portal, tema):
     tema = str(tema).strip().lower()
     claro = tema == 'claro'
     portal.canvas.definir_claro(claro)
-    texto = '#17354d' if claro else '#f3f9ff'
-    secundario = '#38667d' if claro else '#afc5d6'
-    bg = '#f9fdff' if claro else '#04253c'
-    contorno = '#78abc8' if claro else '#356d91'
-    hover = '#e8f7ff' if claro else '#083653'
+    texto = '#183b54' if claro else '#f2f7fc'
+    secundario = '#416b80' if claro else '#aec6d8'
+    fundo = '#f9fdff' if claro else '#0b273d'
+    fundo_primario = '#f0f8fd' if claro else '#103149'
+    contorno = '#93b7cc' if claro else '#38617a'
+    hover = '#e7f6ff' if claro else '#12354e'
     portal.setStyleSheet('''
-        QScrollArea#centralSimuladosScroll, QWidget#centralSimuladosRoot,
-        QWidget#centralSimuladosCanvas {border: none; background: transparent;}
+        QScrollArea#centralSimuladosScroll,
+        QWidget#centralSimuladosRoot, QWidget#centralSimuladosCanvas {
+          border: none; background: transparent;
+        }
         QLabel {background: transparent; border: none; color: %(texto)s;}
-        QLabel#centralSimuladosMarca {font-size: 25px; font-weight: 800; color: %(texto)s;}
-        QLabel#centralSimuladosMarcaSub {font-size: 8px; letter-spacing: 1px; color: %(secundario)s;}
-        QLabel#centralSimuladosTitulo {font-size: 29px; font-weight: 800; color: %(texto)s;}
-        QLabel#centralSimuladosSubtitulo {font-size: 13px; font-weight: 400; color: %(secundario)s;}
-        QFrame#centralSimuladosPerfil {border: 1px solid %(contorno)s;
-          border-radius: 12px; background: %(bg)s;}
-        QLabel#centralSimuladosPerfilLegenda {font-size: 9px; font-weight: 600; color: %(secundario)s;}
-        QLabel#centralSimuladosPerfilNome {font-size: 13px; font-weight: 700; color: %(texto)s;}
-        QFrame#centralSimuladosDivisor {background: #1bb9ed; border: none;}
-        QPushButton#simuladosCard, QPushButton#simuladosCardDestaque {
-          background: %(bg)s; border: 1px solid %(contorno)s;
-          border-radius: 15px; padding: 0px; color: %(texto)s;}
-        QPushButton#simuladosCard:hover, QPushButton#simuladosCard:focus,
-        QPushButton#simuladosCardDestaque:hover, QPushButton#simuladosCardDestaque:focus {
-          background: %(hover)s; border: 2px solid #09cdf6; }
-        QPushButton#simuladosCardDestaque {border: 2px solid #05d6ff;}
-        QLabel#simuladosCardTitle {font-size: 16px; font-weight: 750; color: %(texto)s;}
-        QLabel#simuladosCardDescription {font-size: 12px; color: %(secundario)s;}
-        QFrame#simuladosCardAccent {border: none; background: #08d5fd;}
-        QFrame#simuladosCardAccentNeutral {border: none; background: #90aabd;}
-        QPushButton#centralSimuladosRetomar {background: %(bg)s; border: 1px solid #07bfd9;
-          color: %(texto)s; font-size: 13px; border-radius: 9px; padding: 7px 15px;}
-        QPushButton#centralSimuladosRetomar:hover {background: %(hover)s;}
-    ''' % dict(texto=texto, secundario=secundario, bg=bg, contorno=contorno, hover=hover))
+        QLabel#centralSimuladosTitulo {
+          font-family: "Segoe UI"; font-size: 30px; font-weight: 700; color: %(texto)s;
+        }
+        QLabel#centralSimuladosSubtitulo {
+          font-family: "Segoe UI"; font-size: 15px; color: %(secundario)s;
+        }
+        QFrame#centralSimuladosPerfil {
+          border: 1px solid %(contorno)s; border-radius: 10px;
+          background: %(fundo)s;
+        }
+        QLabel#centralSimuladosPerfilNome {
+          font-family: "Segoe UI"; font-size: 12px; font-weight: 600;
+          color: %(texto)s;
+        }
+        QPushButton#simuladosCard {
+          background: %(fundo)s; border: 1px solid %(contorno)s;
+          border-radius: 15px; padding: 0px; color: %(texto)s;
+        }
+        QPushButton#simuladosCard:hover {
+          background: %(fundo_primario)s;
+          border: 1px solid #16bad8;
+        }
+        QPushButton#simuladosCard:focus {
+          background: %(hover)s;
+          border: 2px solid #19d1ed;
+        }
+        QPushButton#simuladosCard:pressed {
+          background: %(fundo_primario)s;
+          border: 1px solid #12b8d5;
+        }
+        QLabel#simuladosCardTitle {
+          font-family: "Segoe UI"; font-size: 18px;
+          font-weight: 700; color: %(texto)s;
+        }
+        QLabel#simuladosCardDescription {
+          font-family: "Segoe UI"; font-size: 13px;
+          color: %(secundario)s;
+        }
+        QPushButton#centralSimuladosRetomar {
+          font-family: "Segoe UI"; background: %(fundo_primario)s;
+          border: 1px solid #149fbe; color: %(texto)s;
+          font-size: 13px; border-radius: 9px; padding: 7px 15px;
+        }
+        QPushButton#centralSimuladosRetomar:hover,
+        QPushButton#centralSimuladosRetomar:focus {
+          background: %(hover)s; border: 1px solid #17c8e7;
+        }
+    ''' % dict(texto=texto, secundario=secundario, fundo=fundo,
+               fundo_primario=fundo_primario, contorno=contorno, hover=hover))

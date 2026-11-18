@@ -64,7 +64,7 @@ class CenarioIniciarEstudo(QWidget):
         p.setPen(Qt.NoPen);p.setBrush(grad);p.drawPath(pt)
         pt2=QPainterPath();pt2.moveTo(w*.38,0);pt2.lineTo(w*.83,0)
         pt2.cubicTo(w*.72,20,w*.62,72,w*.39,93)
-        p.setPen(QPen(QColor(0,209,251,155),1.5));p.setBrush(Qt.NoBrush);p.drawPath(pt2)
+        p.setPen(QPen(QColor(0,163,204,85),1.0));p.setBrush(Qt.NoBrush);p.drawPath(pt2)
         # Traço inferior direito longe do conteúdo.
         area=QPainterPath();area.moveTo(w*.30,h)
         area.cubicTo(w*.48,h*.94,w*.74,h*.86,w,h*.88)
@@ -72,9 +72,7 @@ class CenarioIniciarEstudo(QWidget):
         p.setPen(Qt.NoPen);p.setBrush(_grad(0,h*.86,w,h,[(0,'#052038'),(1,'#063452')]));p.drawPath(area)
         linha=QPainterPath();linha.moveTo(w*.48,h)
         linha.cubicTo(w*.68,h*.84,w*.85,h*.84,w,h*.89)
-        p.setPen(QPen(_cor('#069fca'),1.4));p.setBrush(Qt.NoBrush);p.drawPath(linha)
-        # Regra ciano do cabeçalho.
-        p.setPen(QPen(QColor(28,135,171,150),1));p.drawLine(QPointF(0,90),QPointF(w,90))
+        p.setPen(QPen(QColor(6,159,202,110),1.0));p.setBrush(Qt.NoBrush);p.drawPath(linha)
         p.end()
 
 
@@ -135,17 +133,24 @@ class CartaoIniciarEstudo(QAbstractButton):
             'planejamento': 'Abrir planejamento',
             'comecar': 'Começar agora',
             'manual': 'Abrir Grade de Estudos',
+            'simulados': 'Configurar simulado',
+            'erros': 'Abrir Banco de Erros',
             'nivel': 'Ver conquistas',
         }.get(tipo, 'Abrir')
         self._hover=False
         self.setObjectName('iniciarEstudoH36_'+tipo)
+        # Cartão único: sem pseudo-botão interno nem tooltip redundante.
+        # Mesmo acabamento e densidade visual da Home profissional R2.
+        self.setAutoFillBackground(False)
+        self.setAttribute(Qt.WA_NoSystemBackground, True)
+        self.setAttribute(Qt.WA_TranslucentBackground, True)
         self.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Fixed)
         self.setMinimumWidth(208)
-        self.setFixedHeight(316)
+        self.setFixedHeight(148)
         self.setFocusPolicy(Qt.StrongFocus)
         self.setCursor(Qt.PointingHandCursor)
-        self.setToolTip(self.texto_acao + ' — ' + subtitulo)
-        self.setAccessibleName(self.texto_acao + ' — ' + titulo)
+        self.setAccessibleName(titulo)
+        self.setAccessibleDescription(self.texto_acao + ' — ' + subtitulo)
         if callable(callback):self.clicked.connect(callback)
         else:self.setEnabled(False)
 
@@ -185,6 +190,31 @@ class CartaoIniciarEstudo(QAbstractButton):
             p.setPen(Qt.NoPen);p.setBrush(ciano)
             p.drawRoundedRect(QRectF(-25,-26,27,6),2,2)
             p.drawRoundedRect(QRectF(4,14,20,8),2,2)
+        elif tipo=='simulados':
+            # Configuração de provas: usa o controlador original de simulado.
+            p.setPen(QPen(az,4.5,Qt.SolidLine,Qt.RoundCap,Qt.RoundJoin))
+            p.setBrush(Qt.NoBrush)
+            p.drawRoundedRect(QRectF(-30,-36,60,73),6,6)
+            p.drawRoundedRect(QRectF(-14,-43,28,13),4,4)
+            for y in (-14,8,27):
+                p.setPen(QPen(ciano,4,Qt.SolidLine,Qt.RoundCap,Qt.RoundJoin))
+                p.drawLine(QPointF(-19,y),QPointF(-14,y+4))
+                p.drawLine(QPointF(-14,y+4),QPointF(-7,y-4))
+                p.setPen(QPen(az,3,Qt.SolidLine,Qt.RoundCap,Qt.RoundJoin))
+                p.drawLine(QPointF(3,y),QPointF(19,y))
+        elif tipo=='erros':
+            # Banco de erros: pilha de registros e indicador de correção.
+            p.setPen(QPen(az,4,Qt.SolidLine,Qt.RoundCap,Qt.RoundJoin))
+            p.drawEllipse(QRectF(-34,-34,61,17))
+            p.drawLine(QPointF(-34,-25.5),QPointF(-34,19))
+            p.drawLine(QPointF(27,-25.5),QPointF(27,4))
+            p.drawArc(QRectF(-34,-14,61,17),180*16,180*16)
+            p.drawArc(QRectF(-34,5,61,17),180*16,180*16)
+            p.drawArc(QRectF(-34,12,61,17),180*16,180*16)
+            p.setPen(QPen(ciano,4,Qt.SolidLine,Qt.RoundCap,Qt.RoundJoin))
+            p.drawEllipse(QRectF(8,6,37,37))
+            p.drawLine(QPointF(18,16),QPointF(35,33))
+            p.drawLine(QPointF(35,16),QPointF(18,33))
         else:
             # Brasão vetorial dourado, ícone do destino do perfil, não novo nível.
             esc=QPainterPath();esc.moveTo(0,-39);esc.lineTo(32,-27)
@@ -207,77 +237,99 @@ class CartaoIniciarEstudo(QAbstractButton):
         p.restore()
 
     def paintEvent(self,event):
-        p=QPainter(self)
-        p.setRenderHint(QPainter.Antialiasing,True)
-        w,h=float(self.width()),float(self.height())
-        principal=self.tipo=='comecar'
-        foco=self.hasFocus()
-        hover=self._hover and self.isEnabled()
-        # Destaque primário permanente != foco do teclado != hover.
-        r=QRectF(5,5,max(1,w-10),max(1,h-10))
-        gradiente=_grad(0,0,w,h,[(0,'#0e4562' if principal else '#0d3048'),
-                                  (.65,'#08263e'),(1,'#061c30')])
-        cor_borda='#04dff2' if principal else ('#3ab8d4' if hover else '#2588ad')
-        espessura=2.6 if principal else (2.0 if hover else 1.5)
-        _arred(p,r,24,gradiente,cor_borda,espessura)
-        luz=QRadialGradient(QPointF(w*.5,h*.10),w*.62)
-        luz.setColorAt(0,QColor(0,207,249,38 if principal else (28 if hover else 13)))
-        luz.setColorAt(1,QColor(0,40,70,0))
+        """Cartão horizontal: ícone, informação e sinal discreto de navegação.
+
+        Mantém toda a área clicável e o destaque cromático da Home R2.
+        Não desenha ações internas, métricas ou novos controles Qt.
+        """
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing, True)
+        w, h = float(self.width()), float(self.height())
+        principal = self.tipo == 'comecar'
+        foco = self.hasFocus()
+        realce = self._hover and self.isEnabled()
+        if not self.isEnabled():
+            p.setOpacity(.53)
+        ret = QRectF(2.3, 2.3, max(1.0, w - 4.6), max(1.0, h - 4.6))
+
+        fundo = QLinearGradient(0, 0, w, h)
+        if principal:
+            fundo.setColorAt(0, _cor('#12364c' if realce else '#103147'))
+            fundo.setColorAt(1, _cor('#082337'))
+        else:
+            fundo.setColorAt(0, _cor('#103047' if realce else '#0d283c'))
+            fundo.setColorAt(1, _cor('#091e31'))
         p.setPen(Qt.NoPen)
-        p.setBrush(luz)
-        p.drawRoundedRect(r.adjusted(3,3,-3,-3),21,21)
+        p.setBrush(fundo)
+        p.drawRoundedRect(ret, 18, 18)
+
         if foco:
-            # Anel interno azul claro, independente do destaque principal.
-            p.setBrush(Qt.NoBrush)
-            p.setPen(QPen(_cor('#e5f9ff'),2,Qt.DashLine))
-            p.drawRoundedRect(r.adjusted(6,6,-6,-6),18,18)
-        self._icone(p,self.tipo,w*.5,h*.275,93)
-        fonte_titulo=_fonte(29,QFont.Bold)
-        while (fonte_titulo.pixelSize()>17 and
-               QFontMetrics(fonte_titulo).horizontalAdvance(self.titulo)>w-32):
-            fonte_titulo.setPixelSize(fonte_titulo.pixelSize()-1)
-        p.setFont(fonte_titulo)
-        p.setPen(_cor('#f7f9ff'))
-        p.drawText(QRectF(9,h*.445,w-18,h*.135),Qt.AlignHCenter|Qt.AlignVCenter,self.titulo)
-        # A descrição pode ocupar duas linhas, sem ficar minúscula em duas colunas.
-        fonte_sub=_fonte(17 if w>=380 else 15)
-        p.setFont(fonte_sub)
-        p.setPen(_cor('#d0e3f0'))
-        p.drawText(QRectF(22,h*.585,w-44,h*.16),
-                   Qt.AlignHCenter|Qt.AlignVCenter|Qt.TextWordWrap,self.subtitulo)
-        btn=QRectF(w*.13,h*.765,w*.74,h*.16)
-        preenchido=principal or hover
-        _arred(p,btn,11,_grad(btn.left(),btn.top(),btn.left(),btn.bottom(),
-                  [(0,'#0ce6f2' if preenchido else '#073149'),
-                   (1,'#0787cb' if preenchido else '#062139')]),
-                  '#05e1f0' if preenchido else '#13b6d5',1.5)
-        area_texto=QRectF(btn.left()+7,btn.top(),max(15,btn.width()-43),btn.height())
-        fonte_acao=_fonte(18,QFont.DemiBold)
-        while (fonte_acao.pixelSize()>11 and
-               QFontMetrics(fonte_acao).horizontalAdvance(self.texto_acao)>area_texto.width()-7):
-            fonte_acao.setPixelSize(fonte_acao.pixelSize()-1)
-        p.setFont(fonte_acao)
-        p.setPen(_cor('#ffffff'))
-        p.drawText(area_texto,Qt.AlignHCenter|Qt.AlignVCenter,self.texto_acao)
-        ax=btn.right()-26
-        ay=btn.center().y()
-        p.setPen(QPen(_cor('#eefbff'),2.3,Qt.SolidLine,Qt.RoundCap,Qt.RoundJoin))
-        p.drawLine(QPointF(ax,ay-7),QPointF(ax+8,ay))
-        p.drawLine(QPointF(ax+8,ay),QPointF(ax,ay+7))
+            borda, espessura = '#75dfed', 2.0
+        elif realce:
+            borda, espessura = '#47c5d9', 1.6
+        elif principal:
+            borda, espessura = '#1bb4d2', 1.45
+        else:
+            borda, espessura = '#365b72', 1.1
+        p.setPen(QPen(_cor(borda), espessura))
+        p.setBrush(Qt.NoBrush)
+        p.drawRoundedRect(ret, 18, 18)
+
+        # Placa do ícone ocupa uma área fixa à esquerda, sem competir com o título.
+        placa_lado = 74.0 if w >= 370 else 58.0
+        placa_x = 24.0 if w >= 370 else 14.0
+        placa_y = (h - placa_lado) / 2
+        p.setPen(Qt.NoPen)
+        p.setBrush(_cor('#10445a' if principal else '#143247'))
+        p.drawRoundedRect(QRectF(placa_x, placa_y, placa_lado, placa_lado), 13, 13)
+        self._icone(p, self.tipo, placa_x + placa_lado / 2,
+                    h / 2, 55 if w >= 370 else 46)
+
+        # Um único alinhamento de texto: duas linhas úteis, sem CTA repetido.
+        texto_x = placa_x + placa_lado + (21 if w >= 370 else 13)
+        seta_reserva = 39 if w >= 370 else 22
+        texto_largura = max(75.0, w - texto_x - seta_reserva)
+        titulo_f = _fonte(22 if w >= 440 else 20, QFont.DemiBold)
+        metrica = QFontMetrics(titulo_f)
+        while titulo_f.pixelSize() > 16 and metrica.horizontalAdvance(self.titulo) > texto_largura:
+            titulo_f.setPixelSize(titulo_f.pixelSize() - 1)
+            metrica = QFontMetrics(titulo_f)
+        p.setPen(_cor('#f3f8fc'))
+        p.setFont(titulo_f)
+        p.drawText(QRectF(texto_x, h * .20, texto_largura, h * .32),
+                   Qt.AlignLeft | Qt.AlignVCenter | Qt.TextWordWrap,
+                   self.titulo)
+
+        subt_f = _fonte(15 if w >= 440 else 14)
+        p.setFont(subt_f)
+        p.setPen(_cor('#adc4d3'))
+        p.drawText(QRectF(texto_x, h * .52, texto_largura, h * .34),
+                   Qt.AlignLeft | Qt.AlignVCenter | Qt.TextWordWrap,
+                   self.subtitulo)
+
+        # Chevron de acesso: orienta a navegação sem virar outro botão.
+        if w >= 340:
+            px, py = w - 23.0, h / 2
+            p.setPen(QPen(_cor('#79c2d3' if principal else '#6a91a6'),
+                          2.0, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
+            p.drawLine(QPointF(px - 5, py - 7), QPointF(px + 2, py))
+            p.drawLine(QPointF(px + 2, py), QPointF(px - 5, py + 7))
         p.end()
 
 
 class PaginaIniciarEstudo(QWidget):
-    # Duas escolhas de estudo, em um único lugar: recomendação ou escolha manual.
-    ALTURA_CARTAO=316
+    # Quatro acessos de preparação: automático, manual, simulado e banco de erros.
+    ALTURA_CARTAO=148
     ESPACAMENTO_CARTOES=18
 
     @staticmethod
     def colunas_para_largura(largura):
-        # Dois cartões com boa largura; coluna única para DPI/janelas estreitas.
-        return 2 if largura>=660 else 1
+        # Duas colunas no desktop e uma em janelas estreitas.
+        # A largura recebida já desconta as margens do conteúdo.
+        return 2 if largura >= 760 else 1
 
-    def __init__(self,abrir_planejamento,comecar,abrir_nivel,parent=None):
+    def __init__(self,abrir_planejamento,comecar,abrir_nivel,parent=None,
+                 abrir_simulados=None,abrir_erros=None):
         super().__init__(parent)
         self.setObjectName('iniciarEstudoH36Page')
         self.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
@@ -290,39 +342,36 @@ class PaginaIniciarEstudo(QWidget):
         scroll.setWidgetResizable(True)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         conteudo=CenarioIniciarEstudo()
-        conteudo.setMinimumHeight(620)
+        conteudo.setMinimumHeight(590)
         col=QVBoxLayout(conteudo)
-        col.setContentsMargins(28,0,28,25)
+        col.setContentsMargins(52,0,52,28)
         col.setSpacing(0)
-        col.addWidget(MarcaIniciarEstudo(conteudo),0)
-        col.addSpacing(15)
-        titulo=QWidget(conteudo)
-        titulo.setFixedHeight(88)
-        lt=QHBoxLayout(titulo)
-        lt.setContentsMargins(1,0,0,0)
-        lt.setSpacing(23)
-        dourado=QFrame(titulo)
-        dourado.setFixedSize(5,68)
-        dourado.setStyleSheet('background:#efb336;border-radius:2px;')
-        lt.addWidget(dourado,0,Qt.AlignVCenter)
-        duo=QVBoxLayout()
-        duo.setContentsMargins(0,0,0,0)
-        duo.setSpacing(4)
-        titulo_1=QLabel('Escolha seu modo de estudo')
+        # A marca já está presente na Home: não a repete dentro da área de trabalho.
+        # Hierarquia enxuta: título da seção, subtítulo e ações de estudo.
+        col.addSpacing(34)
+        cabecalho=QWidget(conteudo)
+        cabecalho.setObjectName('iniciarEstudoR1Cabecalho')
+        cabecalho.setFixedHeight(84)
+        cabecalho.setStyleSheet('background:transparent;border:none;')
+        cabecalho_layout=QVBoxLayout(cabecalho)
+        cabecalho_layout.setContentsMargins(0,0,0,0)
+        cabecalho_layout.setSpacing(7)
+        titulo_1=QLabel('Iniciar Estudo',cabecalho)
         titulo_1.setObjectName('iniciarEstudoH36Titulo')
-        titulo_1.setStyleSheet('color:#f8fbff;background:transparent;font-family:"Segoe UI";font-size:29px;font-weight:700;')
-        titulo_2=QLabel('Siga a recomendação do Vighna ou escolha o conteúdo que deseja estudar.')
+        titulo_1.setStyleSheet('color:#f5f9fc;background:transparent;font-family:"Segoe UI";font-size:30px;font-weight:700;')
+        titulo_2=QLabel('Escolha como deseja estudar, praticar ou revisar.',cabecalho)
         titulo_2.setObjectName('iniciarEstudoH36Subtitulo')
         titulo_2.setWordWrap(True)
-        titulo_2.setStyleSheet('color:#cfdfed;background:transparent;font-family:"Segoe UI";font-size:17px;')
-        duo.addWidget(titulo_1)
-        duo.addWidget(titulo_2)
-        lt.addLayout(duo,1)
-        col.addWidget(titulo,0)
-        col.addSpacing(15)
-        # Dois únicos cartões reais, sem faixa auxiliar ou botões duplicados.
+        titulo_2.setStyleSheet('color:#b8ccdd;background:transparent;font-family:"Segoe UI";font-size:16px;')
+        cabecalho_layout.addWidget(titulo_1)
+        cabecalho_layout.addWidget(titulo_2)
+        col.addWidget(cabecalho,0)
+        col.addStretch(1)
+        # Quatro cartões horizontais, agrupados por função em duas linhas:
+        # estudo (automático/manual) e avaliação/correção (simulados/erros).
         box=QWidget(conteudo)
         box.setObjectName('iniciarEstudoH36Cards')
+        box.setAttribute(Qt.WA_NoSystemBackground, True)
         box.setAttribute(Qt.WA_TranslucentBackground, True)
         box.setStyleSheet('background:transparent;border:none;')
         grade=QGridLayout(box)
@@ -332,15 +381,24 @@ class PaginaIniciarEstudo(QWidget):
         # Mantém o mesmo callback do algoritmo de recomendação do Dashboard.
         self.cartao_automatico=CartaoIniciarEstudo(
             'Estudo Automático',
-            'Siga a próxima atividade recomendada pelo algoritmo Vighna.',
+            'Continue pela próxima atividade recomendada.',
             'comecar',comecar,box)
         # O instalador da Grade conecta este cartão ao fluxo original,
         # sem criar um segundo botão ou uma segunda página.
         self.cartao_manual=CartaoIniciarEstudo(
             'Estudo Manual',
-            'Escolha o que estudar na Grade de Estudos e Revisões.',
+            'Escolha disciplinas e revisões na Grade.',
             'manual',None,box)
-        self.cartoes=[self.cartao_automatico,self.cartao_manual]
+        self.cartao_simulados=CartaoIniciarEstudo(
+            'Simulados',
+            'Configure uma prova e avalie seu desempenho.',
+            'simulados',abrir_simulados,box)
+        self.cartao_erros=CartaoIniciarEstudo(
+            'Banco de Erros',
+            'Revise questões respondidas incorretamente.',
+            'erros',abrir_erros,box)
+        self.cartoes=[self.cartao_automatico,self.cartao_manual,
+                      self.cartao_simulados,self.cartao_erros]
         self.grade_cartoes=grade
         self.cartoes_container=box
         self._ultima_colunas=None
@@ -348,7 +406,7 @@ class PaginaIniciarEstudo(QWidget):
         col.addWidget(box,0)
         # Parâmetros legados permanecem na assinatura para compatibilidade
         # com o main.py instalado; os outros destinos não são exibidos aqui.
-        col.addStretch(1)
+        col.addStretch(2)
         scroll.setWidget(conteudo)
         main.addWidget(scroll)
         self.cenario=conteudo
@@ -357,37 +415,45 @@ class PaginaIniciarEstudo(QWidget):
         self.setStyleSheet('''
           QWidget#iniciarEstudoH36Page { background: #041829; border: none; }
           QScrollArea#iniciarEstudoH36Scroll { background: transparent; border: none; }
+          QWidget#iniciarEstudoH36Cards { background: transparent; border: none; }
+          QAbstractButton#iniciarEstudoH36_comecar,
+          QAbstractButton#iniciarEstudoH36_manual,
+          QAbstractButton#iniciarEstudoH36_simulados,
+          QAbstractButton#iniciarEstudoH36_erros { background: transparent; border: none; }
           QScrollBar:vertical { background:#061b2d;width:8px; }
           QScrollBar::handle:vertical { background:#1c739a; border-radius:4px;min-height:30px; }
         ''')
 
     def _reorganizar_cartoes(self, largura):
         colunas=self.colunas_para_largura(max(0,int(largura)))
-        if colunas==self._ultima_colunas:
+        if colunas == self._ultima_colunas:
             return
-        self._ultima_colunas=colunas
+        self._ultima_colunas = colunas
+        altura = self.ALTURA_CARTAO if colunas == 2 else 150
+        for cartao in self.cartoes:
+            cartao.setFixedHeight(altura)
         while self.grade_cartoes.count():
             self.grade_cartoes.takeAt(0)
-        for coluna in range(2):
-            self.grade_cartoes.setColumnStretch(coluna,1 if coluna<colunas else 0)
+        for coluna in range(4):
+            self.grade_cartoes.setColumnStretch(coluna, 1 if coluna < colunas else 0)
         for i,cartao in enumerate(self.cartoes):
             self.grade_cartoes.addWidget(cartao,i//colunas,i%colunas)
         linhas=(len(self.cartoes)+colunas-1)//colunas
         self.cartoes_container.setFixedHeight(
-            linhas*self.ALTURA_CARTAO+(linhas-1)*self.ESPACAMENTO_CARTOES
+            linhas*altura+(linhas-1)*self.ESPACAMENTO_CARTOES
         )
         self.cartoes_container.updateGeometry()
 
     def eventFilter(self,obj,event):
         if obj is self.scroll.viewport() and event.type()==QEvent.Resize:
             largura=obj.width()
-            self._reorganizar_cartoes(largura-56)
+            self._reorganizar_cartoes(largura-104)
         return super().eventFilter(obj,event)
 
     def showEvent(self,event):
         super().showEvent(event)
         largura=self.scroll.viewport().width()
-        self._reorganizar_cartoes(largura-56)
+        self._reorganizar_cartoes(largura-104)
 
 
 def instalar_no_dashboard_existente(janela):
@@ -406,7 +472,9 @@ def instalar_no_dashboard_existente(janela):
     if layout is None:raise RuntimeError('H36: layout do Dashboard não encontrado')
     painel=PaginaIniciarEstudo(janela.abrir_calendario,
                                janela.iniciar_estudo_um_clique,
-                               janela.abrir_perfil_candidato,pagina)
+                               janela.abrir_perfil_candidato,pagina,
+                               abrir_simulados=janela.abrir_portal_treinos,
+                               abrir_erros=janela.abrir_banco_erros)
     layout.addWidget(painel,1)
     scroll.hide()
     pagina._h36_painel=painel
