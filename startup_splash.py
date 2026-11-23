@@ -6567,6 +6567,8 @@ class ControladorSplashInicializacao:
     def __init__(self):
         nome = f"vighnastudy_startup_{os.getpid()}_{uuid.uuid4().hex}.json"
         self.caminho_estado = Path(tempfile.gettempdir()) / nome
+        # B43: pedido do usuário no splash; separado do estado de progresso.
+        self.caminho_minimizacao = self.caminho_estado.with_suffix('.minimized')
         self.processo: subprocess.Popen | None = None
         self.disponivel = False
         self._encerrado = False
@@ -6681,10 +6683,25 @@ class ControladorSplashInicializacao:
             except Exception:
                 pass
 
-        try:
-            self.caminho_estado.unlink(missing_ok=True)
-        except OSError:
-            pass
+        # B43: evitar que a janela principal reapareça inesperadamente quando
+        # a inicialização termina com o splash minimizado. Qt é importado apenas
+        # nesta etapa, depois do carregamento pesado do aplicativo principal.
+        if self.caminho_minimizacao.is_file():
+            try:
+                from PySide6.QtWidgets import QApplication
+                app = QApplication.instance()
+                if app is not None:
+                    for janela in app.topLevelWidgets():
+                        if (type(janela).__name__ == 'SistemaEstudos'
+                                and janela.isVisible()):
+                            janela.showMinimized()
+            except (ImportError, RuntimeError, OSError, AttributeError):
+                pass
+        for caminho in (self.caminho_estado, self.caminho_minimizacao):
+            try:
+                caminho.unlink(missing_ok=True)
+            except OSError:
+                pass
         self.disponivel = False
 
     def _encerrar_ao_sair(self) -> None:
@@ -6710,7 +6727,7 @@ def executar_splash_worker_cli(argv=None) -> int:
 
     from math import sin, pi
 
-    from PySide6.QtCore import Qt, QTimer, QRectF, QPointF
+    from PySide6.QtCore import Qt, QTimer, QRectF, QPointF, QEvent
     from PySide6.QtGui import QPainter, QPainterPath, QPen, QIcon, QBrush, QPixmap
     from PySide6.QtWidgets import (
         QApplication,
@@ -6719,6 +6736,7 @@ def executar_splash_worker_cli(argv=None) -> int:
         QHBoxLayout,
         QLabel,
         QSizePolicy,
+        QToolButton,
         QVBoxLayout,
         QWidget,
     )
@@ -6825,6 +6843,11 @@ def executar_splash_worker_cli(argv=None) -> int:
             self._status_base = "Inicializando o VighnaStudy"
             self._pontos = 0
             self._ticks_pai = 0
+            # B43: comunicação segura com a aplicação principal.
+            self._caminho_minimizacao = caminho_estado.with_suffix('.minimized')
+            self._musica = None
+            self._musica_habilitada = False
+            self._gravar_preferencia_musica = None
 
             base = QFrame(self)
             base.setObjectName("startupShell")
@@ -6839,6 +6862,28 @@ def executar_splash_worker_cli(argv=None) -> int:
             chamada.setObjectName("startupEyebrow")
             faixa.addWidget(chamada)
             faixa.addStretch(1)
+            # B43: os dois controles são adicionados À faixa do splash
+            # original, sem substituir logo, painel ou barra viva.
+            self.botao_musica = QToolButton(base)
+            self.botao_musica.setObjectName('startupMusicToggleB43')
+            self.botao_musica.setFixedSize(29, 25)
+            self.botao_musica.setCursor(Qt.PointingHandCursor)
+            self.botao_musica.setFocusPolicy(Qt.StrongFocus)
+            self.botao_musica.setAccessibleName('Pausar ou retomar música ambiente')
+            self.botao_musica.clicked.connect(self._alternar_musica)
+            faixa.addWidget(self.botao_musica)
+
+            self.botao_minimizar = QToolButton(base)
+            self.botao_minimizar.setObjectName('startupMinimizeB43')
+            self.botao_minimizar.setText('−')
+            self.botao_minimizar.setFixedSize(29, 25)
+            self.botao_minimizar.setCursor(Qt.PointingHandCursor)
+            self.botao_minimizar.setFocusPolicy(Qt.StrongFocus)
+            self.botao_minimizar.setToolTip('Minimizar sem interromper o carregamento')
+            self.botao_minimizar.setAccessibleName('Minimizar VighnaStudy durante a inicialização')
+            self.botao_minimizar.clicked.connect(self._minimizar)
+            faixa.addWidget(self.botao_minimizar)
+            faixa.addSpacing(9)
             try:
                 from versao import VIGHNA_VERSION as _versao_atual
             except Exception:
@@ -6954,7 +6999,24 @@ def executar_splash_worker_cli(argv=None) -> int:
                     color: #729BAC; font-family: 'Segoe UI'; font-size: 9px;
                 }
                 QLabel#startupMotherBrand { background: transparent; border: none; }
+                QToolButton#startupMusicToggleB43, QToolButton#startupMinimizeB43 {
+                    background: #0B263C; color: #BCEEFF;
+                    border: 1px solid #256D8D; border-radius: 7px;
+                    font-family: 'Segoe UI'; font-size: 15px; font-weight: 600;
+                    padding: 0px;
+                }
+                QToolButton#startupMusicToggleB43:hover, QToolButton#startupMinimizeB43:hover {
+                    background: #12415C; border-color: #4BCEE7;
+                }
+                QToolButton#startupMusicToggleB43:focus, QToolButton#startupMinimizeB43:focus {
+                    border: 2px solid #E6BF74;
+                }
+                QToolButton#startupMusicToggleB43:disabled {
+                    color: #587E91; background: #102438; border-color: #21425A;
+                }
             """)
+
+            self._preparar_musica()
 
             self._timer_estado = QTimer(self)
             self._timer_estado.setInterval(80)
@@ -6965,6 +7027,86 @@ def executar_splash_worker_cli(argv=None) -> int:
             self._timer_texto.setInterval(320)
             self._timer_texto.timeout.connect(self._animar_texto)
             self._timer_texto.start()
+
+        def _preparar_musica(self):
+            """Usa o reprodutor B42 e a mesma preferência da Home, sem novos áudios."""
+            try:
+                from ui.musica_ambiente_b42 import (
+                    ReprodutorOrbitaB42, musica_habilitada, alterar_musica_habilitada,
+                )
+                self._gravar_preferencia_musica = alterar_musica_habilitada
+                # B43 R3: a pausa manual anterior não bloqueia a próxima
+                # inicialização. A música começa ligada em cada novo splash.
+                # A preferência continua compartilhada com a Home nesta sessão.
+                self._musica_habilitada = True
+                alterar_musica_habilitada(True)
+                self._musica = ReprodutorOrbitaB42(self)
+                self._atualizar_botao_musica()
+                if self._musica_habilitada:
+                    QTimer.singleShot(0, self._tocar_musica)
+            except (ImportError, RuntimeError, OSError, AttributeError):
+                # Um erro opcional de áudio nunca impede a inicialização.
+                self.botao_musica.setText('♪')
+                self.botao_musica.setToolTip('Áudio indisponível neste carregamento')
+                self.botao_musica.setEnabled(False)
+
+        def _atualizar_botao_musica(self):
+            self.botao_musica.setText('♫' if self._musica_habilitada else '♪')
+            self.botao_musica.setToolTip(
+                'Pausar Órbita de Cristal' if self._musica_habilitada
+                else 'Retomar Órbita de Cristal'
+            )
+
+        def _tocar_musica(self):
+            if self._musica_habilitada and self._musica is not None:
+                try:
+                    self._musica.iniciar()
+                except (RuntimeError, OSError, AttributeError):
+                    pass
+
+        def _alternar_musica(self):
+            if self._musica is None:
+                return
+            self._musica_habilitada = not self._musica_habilitada
+            if self._gravar_preferencia_musica is not None:
+                try:
+                    self._gravar_preferencia_musica(self._musica_habilitada)
+                except (RuntimeError, OSError, AttributeError):
+                    pass
+            if self._musica_habilitada:
+                self._tocar_musica()
+            else:
+                try:
+                    self._musica.pausar()
+                except (RuntimeError, OSError, AttributeError):
+                    pass
+            self._atualizar_botao_musica()
+
+        def _minimizar(self):
+            # O marcador também permite que a janela principal permaneça
+            # minimizada ao final do carregamento, se isso foi solicitado.
+            try:
+                self._caminho_minimizacao.write_text('1', encoding='ascii')
+            except OSError:
+                pass
+            self.showMinimized()
+
+        def changeEvent(self, event):
+            if (event.type() == QEvent.WindowStateChange and not self.isMinimized()):
+                # Se o usuário restaurar o splash, a Home abrirá normalmente.
+                try:
+                    self._caminho_minimizacao.unlink(missing_ok=True)
+                except OSError:
+                    pass
+            super().changeEvent(event)
+
+        def closeEvent(self, event):
+            if self._musica is not None:
+                try:
+                    self._musica.fechar()
+                except (RuntimeError, OSError, AttributeError):
+                    pass
+            super().closeEvent(event)
 
         def _animar_texto(self):
             self._pontos = (self._pontos + 1) % 4

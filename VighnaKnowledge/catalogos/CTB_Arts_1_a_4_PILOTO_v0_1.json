@@ -1,0 +1,1603 @@
+{
+  "tipo": "catalogo_piloto_vighnaknowledge",
+  "versao_formato": "0.1-DRAFT",
+  "estado": "PROPOSTA_NAO_IMPORTAVEL_NO_VIGHNASTUDY_ATUAL",
+  "data": "2026-11-18",
+  "escopo": {
+    "disciplina": "CTB",
+    "artigos": "1º a 4º",
+    "questoes": 20,
+    "alternativas": 100,
+    "microtemas": 20
+  },
+  "fontes": [
+    {
+      "arquivo": "CTB_Arts_1_a_4_VPQ_1_1_IMPORTACAO_COMPLETO(1).txt",
+      "sha256": "cb7d71d1f08da7a9e012ac8f7084ea30dc217d449c3e5c05af0f4fa57fd0fadf"
+    },
+    {
+      "arquivo": "CTB_Arts_1_a_4_Microtemas_e_Mapeamento_100_Alternativas(1).txt",
+      "sha256": "4960bfc8fce49d4dd7a19667aed200e530c8084e6d7e2561887afb6fa3384184"
+    }
+  ],
+  "metodologia": {
+    "vinculo_por": "alternativa A-E",
+    "questao_enunciado_microtema_obrigatorio": false,
+    "selecao": "gabarito",
+    "tachamento": "alternativa_nao_gabarito",
+    "sem_tachamento_parcial": "duvida_presumida_baixa_confianca_se_houve_outros_tachamentos_na_questao",
+    "sem_tachamento_total": "evidencia_insuficiente",
+    "deduplicacao": "primeira oportunidade por microtema e papel, por sessao/ciclo",
+    "peso_papel": "a_calibrar, nao estabelecido",
+    "questao_versao": "imutavel; ao reformular criar nova versao e mapear novamente",
+    "status": "regra proposta para implementacao futura"
+  },
+  "catalogo": [
+    {
+      "id": "CTB-MT-0001",
+      "alias_origem": "MT-01",
+      "disciplina": "Código de Trânsito Brasileiro",
+      "topico_origem": "Disposições preliminares — arts. 1º a 4º",
+      "referencia_normativa": "Art. 1º, caput",
+      "nome": "Âmbito territorial e material do CTB",
+      "regra": "O CTB rege o trânsito de qualquer natureza nas vias terrestres do território nacional abertas à circulação.",
+      "estado": "provisorio_aprovacao_pendente",
+      "versao_regra": 1,
+      "verificacao_juridica_independente": false
+    },
+    {
+      "id": "CTB-MT-0002",
+      "alias_origem": "MT-02",
+      "disciplina": "Código de Trânsito Brasileiro",
+      "topico_origem": "Disposições preliminares — arts. 1º a 4º",
+      "referencia_normativa": "Art. 1º, § 1º",
+      "nome": "Sujeitos integrantes do conceito de trânsito",
+      "regra": "A utilização de vias por pessoas, veículos e animais caracteriza trânsito, não se exigindo automotor ou condutor.",
+      "estado": "provisorio_aprovacao_pendente",
+      "versao_regra": 1,
+      "verificacao_juridica_independente": false
+    },
+    {
+      "id": "CTB-MT-0003",
+      "alias_origem": "MT-03",
+      "disciplina": "Código de Trânsito Brasileiro",
+      "topico_origem": "Disposições preliminares — arts. 1º a 4º",
+      "referencia_normativa": "Art. 1º, § 1º",
+      "nome": "Utilização isolada ou em grupo e com ou sem condução",
+      "regra": "O uso das vias constitui trânsito mesmo isoladamente ou em grupos, com ou sem condução.",
+      "estado": "provisorio_aprovacao_pendente",
+      "versao_regra": 1,
+      "verificacao_juridica_independente": false
+    },
+    {
+      "id": "CTB-MT-0004",
+      "alias_origem": "MT-04",
+      "disciplina": "Código de Trânsito Brasileiro",
+      "topico_origem": "Disposições preliminares — arts. 1º a 4º",
+      "referencia_normativa": "Art. 1º, § 1º",
+      "nome": "Finalidades da utilização das vias",
+      "regra": "Integram o conceito de trânsito a circulação, a parada, o estacionamento e as operações de carga ou descarga.",
+      "estado": "provisorio_aprovacao_pendente",
+      "versao_regra": 1,
+      "verificacao_juridica_independente": false
+    },
+    {
+      "id": "CTB-MT-0005",
+      "alias_origem": "MT-05",
+      "disciplina": "Código de Trânsito Brasileiro",
+      "topico_origem": "Disposições preliminares — arts. 1º a 4º",
+      "referencia_normativa": "Art. 1º, § 2º",
+      "nome": "Titularidade universal do direito ao trânsito seguro",
+      "regra": "O trânsito em condições seguras é direito de todos.",
+      "estado": "provisorio_aprovacao_pendente",
+      "versao_regra": 1,
+      "verificacao_juridica_independente": false
+    },
+    {
+      "id": "CTB-MT-0006",
+      "alias_origem": "MT-06",
+      "disciplina": "Código de Trânsito Brasileiro",
+      "topico_origem": "Disposições preliminares — arts. 1º a 4º",
+      "referencia_normativa": "Art. 1º, § 2º",
+      "nome": "Dever dos órgãos e entidades do SNT dentro das competências",
+      "regra": "Os órgãos e entidades do Sistema Nacional de Trânsito têm o dever de adotar medidas para assegurar o direito ao trânsito seguro, dentro de suas competências.",
+      "estado": "provisorio_aprovacao_pendente",
+      "versao_regra": 1,
+      "verificacao_juridica_independente": false
+    },
+    {
+      "id": "CTB-MT-0007",
+      "alias_origem": "MT-07",
+      "disciplina": "Código de Trânsito Brasileiro",
+      "topico_origem": "Disposições preliminares — arts. 1º a 4º",
+      "referencia_normativa": "Art. 1º, § 3º",
+      "nome": "Responsabilidade objetiva e limites de competência",
+      "regra": "Órgãos e entidades do SNT respondem objetivamente, no âmbito de suas competências, por danos causados a cidadãos nas hipóteses legais, sem exigir prova de culpa.",
+      "estado": "provisorio_aprovacao_pendente",
+      "versao_regra": 1,
+      "verificacao_juridica_independente": false
+    },
+    {
+      "id": "CTB-MT-0008",
+      "alias_origem": "MT-08",
+      "disciplina": "Código de Trânsito Brasileiro",
+      "topico_origem": "Disposições preliminares — arts. 1º a 4º",
+      "referencia_normativa": "Art. 1º, § 3º",
+      "nome": "Ação, omissão ou erro como causas de dano",
+      "regra": "A responsabilidade objetiva legal pode decorrer de ação, omissão ou erro, vinculados às atividades de trânsito seguro descritas no dispositivo.",
+      "estado": "provisorio_aprovacao_pendente",
+      "versao_regra": 1,
+      "verificacao_juridica_independente": false
+    },
+    {
+      "id": "CTB-MT-0009",
+      "alias_origem": "MT-09",
+      "disciplina": "Código de Trânsito Brasileiro",
+      "topico_origem": "Disposições preliminares — arts. 1º a 4º",
+      "referencia_normativa": "Art. 1º, § 3º",
+      "nome": "Execução e manutenção de programas, projetos e serviços",
+      "regra": "A previsão de responsabilidade abrange danos a cidadãos decorrentes da execução e manutenção de programas, projetos e serviços que garantam o trânsito seguro.",
+      "estado": "provisorio_aprovacao_pendente",
+      "versao_regra": 1,
+      "verificacao_juridica_independente": false
+    },
+    {
+      "id": "CTB-MT-0010",
+      "alias_origem": "MT-10",
+      "disciplina": "Código de Trânsito Brasileiro",
+      "topico_origem": "Disposições preliminares — arts. 1º a 4º",
+      "referencia_normativa": "Art. 1º, § 5º",
+      "nome": "Prioridade à vida, saúde e meio ambiente",
+      "regra": "Os órgãos e entidades de trânsito do SNT devem priorizar a defesa da vida, incluindo a preservação da saúde e do meio ambiente.",
+      "estado": "provisorio_aprovacao_pendente",
+      "versao_regra": 1,
+      "verificacao_juridica_independente": false
+    },
+    {
+      "id": "CTB-MT-0011",
+      "alias_origem": "MT-11",
+      "disciplina": "Código de Trânsito Brasileiro",
+      "topico_origem": "Disposições preliminares — arts. 1º a 4º",
+      "referencia_normativa": "Art. 2º, caput",
+      "nome": "Espécies urbanas e rurais de vias terrestres",
+      "regra": "São vias terrestres urbanas e rurais: ruas, avenidas, logradouros, caminhos, passagens, estradas e rodovias.",
+      "estado": "provisorio_aprovacao_pendente",
+      "versao_regra": 1,
+      "verificacao_juridica_independente": false
+    },
+    {
+      "id": "CTB-MT-0012",
+      "alias_origem": "MT-12",
+      "disciplina": "Código de Trânsito Brasileiro",
+      "topico_origem": "Disposições preliminares — arts. 1º a 4º",
+      "referencia_normativa": "Art. 2º, caput",
+      "nome": "Regulamentação pelo órgão com circunscrição",
+      "regra": "A regulamentação do uso das vias cabe ao órgão ou entidade que detenha circunscrição sobre elas.",
+      "estado": "provisorio_aprovacao_pendente",
+      "versao_regra": 1,
+      "verificacao_juridica_independente": false
+    },
+    {
+      "id": "CTB-MT-0013",
+      "alias_origem": "MT-13",
+      "disciplina": "Código de Trânsito Brasileiro",
+      "topico_origem": "Disposições preliminares — arts. 1º a 4º",
+      "referencia_normativa": "Art. 2º, caput",
+      "nome": "Peculiaridades locais e circunstâncias especiais",
+      "regra": "Na regulamentação do uso das vias devem ser consideradas as peculiaridades locais e as circunstâncias especiais.",
+      "estado": "provisorio_aprovacao_pendente",
+      "versao_regra": 1,
+      "verificacao_juridica_independente": false
+    },
+    {
+      "id": "CTB-MT-0014",
+      "alias_origem": "MT-14",
+      "disciplina": "Código de Trânsito Brasileiro",
+      "topico_origem": "Disposições preliminares — arts. 1º a 4º",
+      "referencia_normativa": "Art. 2º, parágrafo único",
+      "nome": "Praias abertas à circulação pública",
+      "regra": "Para efeitos do CTB, praias abertas à circulação pública são consideradas vias terrestres.",
+      "estado": "provisorio_aprovacao_pendente",
+      "versao_regra": 1,
+      "verificacao_juridica_independente": false
+    },
+    {
+      "id": "CTB-MT-0015",
+      "alias_origem": "MT-15",
+      "disciplina": "Código de Trânsito Brasileiro",
+      "topico_origem": "Disposições preliminares — arts. 1º a 4º",
+      "referencia_normativa": "Art. 2º, parágrafo único",
+      "nome": "Vias internas de condomínios de unidades autônomas",
+      "regra": "As vias internas de condomínios constituídos por unidades autônomas são consideradas vias terrestres para efeitos do CTB.",
+      "estado": "provisorio_aprovacao_pendente",
+      "versao_regra": 1,
+      "verificacao_juridica_independente": false
+    },
+    {
+      "id": "CTB-MT-0016",
+      "alias_origem": "MT-16",
+      "disciplina": "Código de Trânsito Brasileiro",
+      "topico_origem": "Disposições preliminares — arts. 1º a 4º",
+      "referencia_normativa": "Art. 2º, parágrafo único",
+      "nome": "Vias e estacionamentos de estabelecimentos privados de uso coletivo",
+      "regra": "As vias e áreas de estacionamento de estabelecimentos privados de uso coletivo são consideradas vias terrestres para efeitos do CTB.",
+      "estado": "provisorio_aprovacao_pendente",
+      "versao_regra": 1,
+      "verificacao_juridica_independente": false
+    },
+    {
+      "id": "CTB-MT-0017",
+      "alias_origem": "MT-17",
+      "disciplina": "Código de Trânsito Brasileiro",
+      "topico_origem": "Disposições preliminares — arts. 1º a 4º",
+      "referencia_normativa": "Art. 3º",
+      "nome": "Aplicabilidade a qualquer veículo",
+      "regra": "As disposições do CTB aplicam-se a qualquer veículo, não apenas aos automotores.",
+      "estado": "provisorio_aprovacao_pendente",
+      "versao_regra": 1,
+      "verificacao_juridica_independente": false
+    },
+    {
+      "id": "CTB-MT-0018",
+      "alias_origem": "MT-18",
+      "disciplina": "Código de Trânsito Brasileiro",
+      "topico_origem": "Disposições preliminares — arts. 1º a 4º",
+      "referencia_normativa": "Art. 3º",
+      "nome": "Proprietários e condutores de veículos nacionais e estrangeiros",
+      "regra": "As disposições do CTB são aplicáveis a proprietários e condutores de veículos nacionais ou estrangeiros.",
+      "estado": "provisorio_aprovacao_pendente",
+      "versao_regra": 1,
+      "verificacao_juridica_independente": false
+    },
+    {
+      "id": "CTB-MT-0019",
+      "alias_origem": "MT-19",
+      "disciplina": "Código de Trânsito Brasileiro",
+      "topico_origem": "Disposições preliminares — arts. 1º a 4º",
+      "referencia_normativa": "Art. 3º",
+      "nome": "Pessoas expressamente mencionadas no Código",
+      "regra": "As disposições do CTB alcançam as outras pessoas nele expressamente mencionadas.",
+      "estado": "provisorio_aprovacao_pendente",
+      "versao_regra": 1,
+      "verificacao_juridica_independente": false
+    },
+    {
+      "id": "CTB-MT-0020",
+      "alias_origem": "MT-20",
+      "disciplina": "Código de Trânsito Brasileiro",
+      "topico_origem": "Disposições preliminares — arts. 1º a 4º",
+      "referencia_normativa": "Art. 4º",
+      "nome": "Localização dos conceitos e definições legais",
+      "regra": "Para os efeitos do CTB, os conceitos e definições são os constantes do Anexo I.",
+      "estado": "provisorio_aprovacao_pendente",
+      "versao_regra": 1,
+      "verificacao_juridica_independente": false
+    }
+  ],
+  "questoes": [
+    {
+      "questao": "Q01",
+      "gabarito": "C",
+      "enunciado_sha256": "032a1b75fb29722ff3da722b06f309d93866fb8d0fe0075e7db297ed6d9d4e25"
+    },
+    {
+      "questao": "Q02",
+      "gabarito": "A",
+      "enunciado_sha256": "45ffdf1f1f77cbb71a7c91046f8bf73a01ed90ad4108296c7fb33dadc3f3aa00"
+    },
+    {
+      "questao": "Q03",
+      "gabarito": "E",
+      "enunciado_sha256": "fdb825c4c710bbc5cb35061549a59d1b29f053ab66a83bf1ed37f29b86a5d03b"
+    },
+    {
+      "questao": "Q04",
+      "gabarito": "B",
+      "enunciado_sha256": "9177a3ffdf3ecde5b994bc129fb52e16385178f02ec6e296d9e5d8593c4c608b"
+    },
+    {
+      "questao": "Q05",
+      "gabarito": "D",
+      "enunciado_sha256": "08d64bea54b451e54653a7885e1fd2c6642f5099c0615712ee03d3c1c78b2d00"
+    },
+    {
+      "questao": "Q06",
+      "gabarito": "D",
+      "enunciado_sha256": "3a519d87497c264c4497f8432b2693a91c58f758adf9c5e3f552db49192cc43e"
+    },
+    {
+      "questao": "Q07",
+      "gabarito": "B",
+      "enunciado_sha256": "413d6bae2e2451ef76f41fe2aa796077780125c6f98989885b53c7e20d7e84b5"
+    },
+    {
+      "questao": "Q08",
+      "gabarito": "E",
+      "enunciado_sha256": "38776dc5e40d3bd47e46da5ed3874b6ca26150346e26244b97e4d012115fc821"
+    },
+    {
+      "questao": "Q09",
+      "gabarito": "A",
+      "enunciado_sha256": "c8c7841589b0da416674683739f81d0c3dc996da809f269a9ba8029de79a2211"
+    },
+    {
+      "questao": "Q10",
+      "gabarito": "C",
+      "enunciado_sha256": "ec3833bf3e3206cc16d308b42b0765e85200caee06f3cf6a2a34fa08873c36fd"
+    },
+    {
+      "questao": "Q11",
+      "gabarito": "A",
+      "enunciado_sha256": "e21a81e76496a4adfad27cb537f43ff593a8e09af0da663d946fa02d1900a8dc"
+    },
+    {
+      "questao": "Q12",
+      "gabarito": "B",
+      "enunciado_sha256": "e475cea190357b1ab5e195faaf6a27bd6bd791c066174c6e4f31cb2b68688324"
+    },
+    {
+      "questao": "Q13",
+      "gabarito": "D",
+      "enunciado_sha256": "2ef78ea619446f36f8d9e04199d768d49562f54e3067b4fd931c6e299767809a"
+    },
+    {
+      "questao": "Q14",
+      "gabarito": "E",
+      "enunciado_sha256": "37c91de92f9499ddbbf9cd1f7b149d70e056c43b6b4cfe9b072b0c410719f945"
+    },
+    {
+      "questao": "Q15",
+      "gabarito": "C",
+      "enunciado_sha256": "e229479fb6f1e4655c7509368eb9d29a83f7e7fccaf7889c25d2cd2e7d7a0c7c"
+    },
+    {
+      "questao": "Q16",
+      "gabarito": "E",
+      "enunciado_sha256": "69c9957c0e5c9f84325ac40cc9aded0424cc7bba82b501e4d2c8eb1126ea807c"
+    },
+    {
+      "questao": "Q17",
+      "gabarito": "D",
+      "enunciado_sha256": "4ad8cbccc14d88eb4ea78ec866b0fc7370365b1194a04102a4bb93bda4ee28b8"
+    },
+    {
+      "questao": "Q18",
+      "gabarito": "B",
+      "enunciado_sha256": "05fa01e44ac4c3fb1b9f297e10fe9af33254735e00b84f237fc02fd0f30a76cf"
+    },
+    {
+      "questao": "Q19",
+      "gabarito": "A",
+      "enunciado_sha256": "f70611e1e21f8c07eae09838a6bd8d3319c57078056fde9f50f162cc78979d46"
+    },
+    {
+      "questao": "Q20",
+      "gabarito": "C",
+      "enunciado_sha256": "c59037d83f4ba5e507fe7e90719df3617701f19eca3580c419c0d2abfe067fcd"
+    }
+  ],
+  "mapeamento": [
+    {
+      "questao": "Q01",
+      "alternativa": "A",
+      "microtema_id": "CTB-MT-0015",
+      "microtema_alias_origem": "MT-15",
+      "papel": "eliminavel",
+      "gabarito_questao": "C",
+      "texto_alternativa_sha256": "879d4602337ee5319ccea438f743627c65c50fb6232e7e5130abc8fb180f7490",
+      "texto_alternativa": "Em condomínio de unidades autônomas, a via interna só é via terrestre quando o acesso de visitantes for permitido sem autorização prévia.",
+      "referencia_extraida": "Art. 2º, parágrafo único"
+    },
+    {
+      "questao": "Q01",
+      "alternativa": "B",
+      "microtema_id": "CTB-MT-0012",
+      "microtema_alias_origem": "MT-12",
+      "papel": "eliminavel",
+      "gabarito_questao": "C",
+      "texto_alternativa_sha256": "959c77091321590771dcfc75c0ce7b2a6ec24a8f7ae9e93b0a0f9e6ec61beb91",
+      "texto_alternativa": "A entidade que administra fisicamente uma via pode regulamentar seu uso mesmo quando a circunscrição legal cabe a outro órgão de trânsito.",
+      "referencia_extraida": "Art. 2º, caput"
+    },
+    {
+      "questao": "Q01",
+      "alternativa": "C",
+      "microtema_id": "CTB-MT-0001",
+      "microtema_alias_origem": "MT-01",
+      "papel": "gabarito",
+      "gabarito_questao": "C",
+      "texto_alternativa_sha256": "70551d60d12ea4fc17a5f3d1b85a21104511832adb94f4d7b38e4f30d654d9ba",
+      "texto_alternativa": "No território nacional, o CTB disciplina o trânsito de qualquer natureza nas vias terrestres abertas à circulação, independentemente da categoria de usuário.",
+      "referencia_extraida": "Art. 1º, caput"
+    },
+    {
+      "questao": "Q01",
+      "alternativa": "D",
+      "microtema_id": "CTB-MT-0006",
+      "microtema_alias_origem": "MT-06",
+      "papel": "eliminavel",
+      "gabarito_questao": "C",
+      "texto_alternativa_sha256": "6cc617f7acbba7f59796fcf30dbed50d9fe0503b48852f44916671df650cb607",
+      "texto_alternativa": "O dever de garantir trânsito seguro concentra-se no órgão que regulamenta o uso da via, ficando os demais integrantes do SNT com funções auxiliares.",
+      "referencia_extraida": "Art. 1º, § 2º"
+    },
+    {
+      "questao": "Q01",
+      "alternativa": "E",
+      "microtema_id": "CTB-MT-0017",
+      "microtema_alias_origem": "MT-17",
+      "papel": "eliminavel",
+      "gabarito_questao": "C",
+      "texto_alternativa_sha256": "bff8af7b5ed9b2d49399b46242bb0c51b7953c6a47a315e96bace68d02da4c11",
+      "texto_alternativa": "Em vias abrangidas pelo CTB, veículos sem motor ficam sujeitos ao Código somente quando participam do fluxo junto a veículos automotores.",
+      "referencia_extraida": "Art. 3º"
+    },
+    {
+      "questao": "Q02",
+      "alternativa": "A",
+      "microtema_id": "CTB-MT-0002",
+      "microtema_alias_origem": "MT-02",
+      "papel": "gabarito",
+      "gabarito_questao": "A",
+      "texto_alternativa_sha256": "d86bd03167a10b17521afe7cc8b7a41c1b01f4308b917f0e3a4b14ed2d9e7174",
+      "texto_alternativa": "A utilização da via por pedestres, veículos ou animais caracteriza trânsito, ainda que nenhum condutor de veículo automotor participe da situação.",
+      "referencia_extraida": "Art. 1º, § 1º"
+    },
+    {
+      "questao": "Q02",
+      "alternativa": "B",
+      "microtema_id": "CTB-MT-0006",
+      "microtema_alias_origem": "MT-06",
+      "papel": "eliminavel",
+      "gabarito_questao": "A",
+      "texto_alternativa_sha256": "1844b5fd86fe817b0ac90e58592e36944de8f46a61149319edbf968795a4375d",
+      "texto_alternativa": "O dever de assegurar o trânsito seguro tem natureza comum e autoriza qualquer órgão do SNT a adotar providências também fora de suas atribuições específicas.",
+      "referencia_extraida": "Art. 1º, § 2º"
+    },
+    {
+      "questao": "Q02",
+      "alternativa": "C",
+      "microtema_id": "CTB-MT-0018",
+      "microtema_alias_origem": "MT-18",
+      "papel": "eliminavel",
+      "gabarito_questao": "A",
+      "texto_alternativa_sha256": "1f6ff9b68978ce44263e99766b47c10df542c858a14af42ad1d3e0a76a469831",
+      "texto_alternativa": "O proprietário de veículo estrangeiro só se sujeita ao CTB quando também o conduz em território nacional, diferentemente do proprietário de veículo nacional.",
+      "referencia_extraida": "Art. 3º"
+    },
+    {
+      "questao": "Q02",
+      "alternativa": "D",
+      "microtema_id": "CTB-MT-0013",
+      "microtema_alias_origem": "MT-13",
+      "papel": "eliminavel",
+      "gabarito_questao": "A",
+      "texto_alternativa_sha256": "9f00ee9c86b990fc3c682c6be001b78767e395b9eeb5c96037e907cf71481cb1",
+      "texto_alternativa": "A regulamentação de vias da mesma categoria deve adotar regras uniformes, cabendo considerar peculiaridades locais apenas durante a fiscalização.",
+      "referencia_extraida": "Art. 2º, caput"
+    },
+    {
+      "questao": "Q02",
+      "alternativa": "E",
+      "microtema_id": "CTB-MT-0014",
+      "microtema_alias_origem": "MT-14",
+      "papel": "eliminavel",
+      "gabarito_questao": "A",
+      "texto_alternativa_sha256": "8e1a443b42b257ece609e9e5cf920714019c42598bf9677371ccee4642d6cff1",
+      "texto_alternativa": "Praia aberta à circulação de pedestres é considerada via terrestre apenas se também permitir a passagem regular de veículos.",
+      "referencia_extraida": "Art. 2º, parágrafo único"
+    },
+    {
+      "questao": "Q03",
+      "alternativa": "A",
+      "microtema_id": "CTB-MT-0007",
+      "microtema_alias_origem": "MT-07",
+      "papel": "eliminavel",
+      "gabarito_questao": "E",
+      "texto_alternativa_sha256": "cd4bada9ef08b8799559c3016a8b250cea3d240ae99fe81ea714fd50746c2fec",
+      "texto_alternativa": "Dano causado por falha na manutenção de serviço de trânsito seguro gera responsabilidade do órgão do SNT desde que se comprove a culpa da equipe responsável.",
+      "referencia_extraida": "Art. 1º, § 3º"
+    },
+    {
+      "questao": "Q03",
+      "alternativa": "B",
+      "microtema_id": "CTB-MT-0010",
+      "microtema_alias_origem": "MT-10",
+      "papel": "eliminavel",
+      "gabarito_questao": "E",
+      "texto_alternativa_sha256": "7b37bce7205b60afd84fdae58b374ffa07423d6c86b90e0ff93bb424d5c49934",
+      "texto_alternativa": "Ao ordenar suas ações, o SNT deve priorizar a vida e a saúde; medidas de proteção ambiental integram somente políticas complementares.",
+      "referencia_extraida": "Art. 1º, § 5º"
+    },
+    {
+      "questao": "Q03",
+      "alternativa": "C",
+      "microtema_id": "CTB-MT-0020",
+      "microtema_alias_origem": "MT-20",
+      "papel": "eliminavel",
+      "gabarito_questao": "E",
+      "texto_alternativa_sha256": "666820fa899f2592e64afb26fb8e09318aae59c64da29f53e05d9cdb627e9b8b",
+      "texto_alternativa": "Conceitos do CTB constantes do Anexo I podem ser adaptados por normas locais quando a configuração da via exigir significado técnico diferente.",
+      "referencia_extraida": "Art. 4º"
+    },
+    {
+      "questao": "Q03",
+      "alternativa": "D",
+      "microtema_id": "CTB-MT-0011",
+      "microtema_alias_origem": "MT-11",
+      "papel": "eliminavel",
+      "gabarito_questao": "E",
+      "texto_alternativa_sha256": "6825b1e8b62f9a267430e2010016c30f2b92830c2254077df58c178384a3c36d",
+      "texto_alternativa": "Caminhos e passagens são vias terrestres somente quando servem de ligação entre ruas, estradas ou rodovias formalmente reconhecidas.",
+      "referencia_extraida": "Art. 2º, caput"
+    },
+    {
+      "questao": "Q03",
+      "alternativa": "E",
+      "microtema_id": "CTB-MT-0003",
+      "microtema_alias_origem": "MT-03",
+      "papel": "gabarito",
+      "gabarito_questao": "E",
+      "texto_alternativa_sha256": "806358d5b6a70fa620a2f05914bba1174eff51f2032c30f1d170cad10155c038",
+      "texto_alternativa": "A utilização das vias configura trânsito quando pessoas, veículos ou animais atuam isoladamente ou em grupos, conduzidos ou não.",
+      "referencia_extraida": "Art. 1º, § 1º"
+    },
+    {
+      "questao": "Q04",
+      "alternativa": "A",
+      "microtema_id": "CTB-MT-0020",
+      "microtema_alias_origem": "MT-20",
+      "papel": "eliminavel",
+      "gabarito_questao": "B",
+      "texto_alternativa_sha256": "b5a4bd958132439e164f4faba7368b5f0c34c74c3d3a7f6da43120f833accebf",
+      "texto_alternativa": "Quando houver regulamentação local do uso de uma via, os conceitos empregados nessa regulamentação prevalecem sobre os do Anexo I do CTB.",
+      "referencia_extraida": "Art. 4º"
+    },
+    {
+      "questao": "Q04",
+      "alternativa": "B",
+      "microtema_id": "CTB-MT-0004",
+      "microtema_alias_origem": "MT-04",
+      "papel": "gabarito",
+      "gabarito_questao": "B",
+      "texto_alternativa_sha256": "414f59e9c5e897ff056e755bea0872195d8a5fd5ff6deda544b7c7a369f77532",
+      "texto_alternativa": "A utilização das vias para circulação, parada, estacionamento e operações de carga ou descarga integra o conceito legal de trânsito.",
+      "referencia_extraida": "Art. 1º, § 1º"
+    },
+    {
+      "questao": "Q04",
+      "alternativa": "C",
+      "microtema_id": "CTB-MT-0001",
+      "microtema_alias_origem": "MT-01",
+      "papel": "eliminavel",
+      "gabarito_questao": "B",
+      "texto_alternativa_sha256": "531b4c5540b0a3eb22616a6c121a1c83fad9ffa64434cb9e2f58b563105e9d28",
+      "texto_alternativa": "O CTB rege o trânsito em vias terrestres abertas à circulação somente quando se tratar de bem público ou de via particular submetida a servidão formal de passagem.",
+      "referencia_extraida": "Art. 1º, caput"
+    },
+    {
+      "questao": "Q04",
+      "alternativa": "D",
+      "microtema_id": "CTB-MT-0016",
+      "microtema_alias_origem": "MT-16",
+      "papel": "eliminavel",
+      "gabarito_questao": "B",
+      "texto_alternativa_sha256": "682a4b3da3d2113d7b2b2336ddabc19dcebc0bf4473fd9f49ca678a76ac0a6f7",
+      "texto_alternativa": "O estacionamento de estabelecimento privado de uso coletivo só é via terrestre se a entrada de veículos ocorrer livremente, sem identificação ou controle de acesso.",
+      "referencia_extraida": "Art. 2º, parágrafo único"
+    },
+    {
+      "questao": "Q04",
+      "alternativa": "E",
+      "microtema_id": "CTB-MT-0006",
+      "microtema_alias_origem": "MT-06",
+      "papel": "eliminavel",
+      "gabarito_questao": "B",
+      "texto_alternativa_sha256": "2c4a67f986d5ad2f0513519fd9a544213fb71f8732ae2f3d99e0b4e7eee7a7f9",
+      "texto_alternativa": "Cabe aos órgãos fiscalizadores assegurar o trânsito seguro; às demais entidades do SNT compete colaborar apenas quando acionadas pelos fiscais.",
+      "referencia_extraida": "Art. 1º, § 2º"
+    },
+    {
+      "questao": "Q05",
+      "alternativa": "A",
+      "microtema_id": "CTB-MT-0016",
+      "microtema_alias_origem": "MT-16",
+      "papel": "eliminavel",
+      "gabarito_questao": "D",
+      "texto_alternativa_sha256": "e735d7f4341e39b15db7998ae0dca927bcf3145e161b6e24e17fe678c489effe",
+      "texto_alternativa": "As vias de estabelecimentos privados de uso coletivo são vias terrestres somente quando franqueadas também a pessoas sem vínculo de consumo com o estabelecimento.",
+      "referencia_extraida": "Art. 2º, parágrafo único"
+    },
+    {
+      "questao": "Q05",
+      "alternativa": "B",
+      "microtema_id": "CTB-MT-0008",
+      "microtema_alias_origem": "MT-08",
+      "papel": "eliminavel",
+      "gabarito_questao": "D",
+      "texto_alternativa_sha256": "d51569f78c7bc2f037fc73f993383d5d3e35df36c14c736450396ad18c4ede64",
+      "texto_alternativa": "O órgão do SNT responde objetivamente por ação ou erro em programa de trânsito seguro, mas a omissão de manutenção depende de prova de culpa.",
+      "referencia_extraida": "Art. 1º, § 3º"
+    },
+    {
+      "questao": "Q05",
+      "alternativa": "C",
+      "microtema_id": "CTB-MT-0012",
+      "microtema_alias_origem": "MT-12",
+      "papel": "eliminavel",
+      "gabarito_questao": "D",
+      "texto_alternativa_sha256": "faf96f799ea3b7d8c5d54a0fa532bb3157ead776799440169f761770867d6d45",
+      "texto_alternativa": "Havendo órgãos diferentes para circunscrição e gestão cotidiana da via, a regulamentação do uso cabe àquele que efetivamente a administra.",
+      "referencia_extraida": "Art. 2º, caput"
+    },
+    {
+      "questao": "Q05",
+      "alternativa": "D",
+      "microtema_id": "CTB-MT-0005",
+      "microtema_alias_origem": "MT-05",
+      "papel": "gabarito",
+      "gabarito_questao": "D",
+      "texto_alternativa_sha256": "66c92e257a5632366d93429ff678e0e886a8c9380fa60f2260f7013b3593e771",
+      "texto_alternativa": "Em qualquer situação de utilização das vias abrangidas pelo CTB, o trânsito em condições seguras constitui direito de todos os usuários.",
+      "referencia_extraida": "Art. 1º, § 2º"
+    },
+    {
+      "questao": "Q05",
+      "alternativa": "E",
+      "microtema_id": "CTB-MT-0017",
+      "microtema_alias_origem": "MT-17",
+      "papel": "eliminavel",
+      "gabarito_questao": "D",
+      "texto_alternativa_sha256": "29c86aad207bd33f0c9821612a6d6044d20deaeb596e942776ec1897fe69d873",
+      "texto_alternativa": "O CTB se aplica a veículos que transportem pessoas ou cargas, mas veículos destinados apenas ao apoio operacional ficam fora de sua abrangência.",
+      "referencia_extraida": "Art. 3º"
+    },
+    {
+      "questao": "Q06",
+      "alternativa": "A",
+      "microtema_id": "CTB-MT-0018",
+      "microtema_alias_origem": "MT-18",
+      "papel": "eliminavel",
+      "gabarito_questao": "D",
+      "texto_alternativa_sha256": "740786c605cfff3a15a4fddc8e3818161bded5f92c8b0b60c522d1290119d93b",
+      "texto_alternativa": "O CTB alcança o condutor de veículo estrangeiro, mas seu proprietário só é abrangido se possuir domicílio no Brasil.",
+      "referencia_extraida": "Art. 3º"
+    },
+    {
+      "questao": "Q06",
+      "alternativa": "B",
+      "microtema_id": "CTB-MT-0014",
+      "microtema_alias_origem": "MT-14",
+      "papel": "eliminavel",
+      "gabarito_questao": "D",
+      "texto_alternativa_sha256": "35349d0887cde246c8c608beb35d8fe2df7d1dc262ae3e7b47b3ed5cfa375ff1",
+      "texto_alternativa": "Uma praia utilizada pelo público para caminhadas só se equipara a via terrestre se nela houver uma faixa reservada ao tráfego de veículos.",
+      "referencia_extraida": "Art. 2º, parágrafo único"
+    },
+    {
+      "questao": "Q06",
+      "alternativa": "C",
+      "microtema_id": "CTB-MT-0002",
+      "microtema_alias_origem": "MT-02",
+      "papel": "eliminavel",
+      "gabarito_questao": "D",
+      "texto_alternativa_sha256": "c76d36707eb9bfcab7749b5e5ddc7240996085433ea57bd878ac0a72097ad3fc",
+      "texto_alternativa": "Animais soltos em via terrestre caracterizam trânsito somente quando sua movimentação interfere no deslocamento de pessoas ou veículos.",
+      "referencia_extraida": "Art. 1º, § 1º"
+    },
+    {
+      "questao": "Q06",
+      "alternativa": "D",
+      "microtema_id": "CTB-MT-0006",
+      "microtema_alias_origem": "MT-06",
+      "papel": "gabarito",
+      "gabarito_questao": "D",
+      "texto_alternativa_sha256": "df759ccd30d207e131028c386ff6805c75c9818ea60f8afa8f8de856ef48ad08",
+      "texto_alternativa": "Os órgãos e entidades do SNT têm o dever de adotar medidas para assegurar o trânsito seguro, no âmbito das respectivas competências.",
+      "referencia_extraida": "Art. 1º, § 2º"
+    },
+    {
+      "questao": "Q06",
+      "alternativa": "E",
+      "microtema_id": "CTB-MT-0008",
+      "microtema_alias_origem": "MT-08",
+      "papel": "eliminavel",
+      "gabarito_questao": "D",
+      "texto_alternativa_sha256": "2331d4502ed76c470b2f78709a6ead0ce6ff1a0285ff4a32175cfc74176c7b8b",
+      "texto_alternativa": "A responsabilidade objetiva do órgão do SNT por erro em serviço de trânsito seguro dispensa prova de culpa, mas exige a identificação nominal do servidor causador.",
+      "referencia_extraida": "Art. 1º, § 3º"
+    },
+    {
+      "questao": "Q07",
+      "alternativa": "A",
+      "microtema_id": "CTB-MT-0006",
+      "microtema_alias_origem": "MT-06",
+      "papel": "eliminavel",
+      "gabarito_questao": "B",
+      "texto_alternativa_sha256": "b2c0900072651ef185364c24886fc00d7b05541a14e37a8d2c67a56d6bb46942",
+      "texto_alternativa": "Quando mais de um integrante do SNT atua na mesma via, o dever de assegurar sua segurança concentra-se no responsável pela regulamentação de uso.",
+      "referencia_extraida": "Art. 1º, § 2º"
+    },
+    {
+      "questao": "Q07",
+      "alternativa": "B",
+      "microtema_id": "CTB-MT-0007",
+      "microtema_alias_origem": "MT-07",
+      "papel": "gabarito",
+      "gabarito_questao": "B",
+      "texto_alternativa_sha256": "0367c3a9414c7968d3281fb0e6d365561de7b081b3c794328215a6f24fd29bb7",
+      "texto_alternativa": "Órgãos e entidades do SNT respondem objetivamente, nos limites de suas competências, pelos danos causados a cidadãos na execução e manutenção de programas, projetos e serviços de trânsito seguro.",
+      "referencia_extraida": "Art. 1º, § 3º"
+    },
+    {
+      "questao": "Q07",
+      "alternativa": "C",
+      "microtema_id": "CTB-MT-0014",
+      "microtema_alias_origem": "MT-14",
+      "papel": "eliminavel",
+      "gabarito_questao": "B",
+      "texto_alternativa_sha256": "77c3d0e1bece92e4d39fb74d2c38a97644b5baac77d8f8c5b13b7e841bec4a91",
+      "texto_alternativa": "A praia aberta à circulação pública adquire natureza de via terrestre somente quando existir faixa de passagem oficialmente demarcada para usuários.",
+      "referencia_extraida": "Art. 2º, parágrafo único"
+    },
+    {
+      "questao": "Q07",
+      "alternativa": "D",
+      "microtema_id": "CTB-MT-0019",
+      "microtema_alias_origem": "MT-19",
+      "papel": "eliminavel",
+      "gabarito_questao": "B",
+      "texto_alternativa_sha256": "32cc39d8178b93976dac0b02f241b3a242a7bd713f511dc467249cbb1210bedd",
+      "texto_alternativa": "Além de proprietários e condutores, terceiros vinculados diretamente à ocorrência de trânsito se submetem ao CTB mesmo sem previsão expressa sobre eles.",
+      "referencia_extraida": "Art. 3º"
+    },
+    {
+      "questao": "Q07",
+      "alternativa": "E",
+      "microtema_id": "CTB-MT-0011",
+      "microtema_alias_origem": "MT-11",
+      "papel": "eliminavel",
+      "gabarito_questao": "B",
+      "texto_alternativa_sha256": "6d51ba06d0d0da8e0c0c7c1a0ab64a6b9a53ad8dd8f7c51702ae933ed165a168",
+      "texto_alternativa": "Estradas e rodovias rurais sem denominação oficial só passam a ser vias terrestres após ato de classificação do órgão com circunscrição.",
+      "referencia_extraida": "Art. 2º, caput"
+    },
+    {
+      "questao": "Q08",
+      "alternativa": "A",
+      "microtema_id": "CTB-MT-0020",
+      "microtema_alias_origem": "MT-20",
+      "papel": "eliminavel",
+      "gabarito_questao": "E",
+      "texto_alternativa_sha256": "39d5e9c0aa583d384e44b74200647fb8cc498de328f2e41eae71695659dc453a",
+      "texto_alternativa": "Os conceitos técnicos do CTB podem receber definição diferente daquela do Anexo I quando o órgão com circunscrição justificar a mudança por peculiaridade local.",
+      "referencia_extraida": "Art. 4º"
+    },
+    {
+      "questao": "Q08",
+      "alternativa": "B",
+      "microtema_id": "CTB-MT-0012",
+      "microtema_alias_origem": "MT-12",
+      "papel": "eliminavel",
+      "gabarito_questao": "E",
+      "texto_alternativa_sha256": "36d10e35ad37c75517b5b958c76800b7fd902015d43b336f60a651c3b8edb7f0",
+      "texto_alternativa": "A localização urbana da via determina a competência municipal para regulamentar seu uso, mesmo que outro ente detenha circunscrição sobre ela.",
+      "referencia_extraida": "Art. 2º, caput"
+    },
+    {
+      "questao": "Q08",
+      "alternativa": "C",
+      "microtema_id": "CTB-MT-0003",
+      "microtema_alias_origem": "MT-03",
+      "papel": "eliminavel",
+      "gabarito_questao": "E",
+      "texto_alternativa_sha256": "7c73c19695add436790550e0bf60751eba3f7f992ee7c5749a6ffcbed574f40b",
+      "texto_alternativa": "O deslocamento de animais sem condução humana é trânsito apenas quando ocorre junto à circulação de pessoas ou veículos.",
+      "referencia_extraida": "Art. 1º, § 1º"
+    },
+    {
+      "questao": "Q08",
+      "alternativa": "D",
+      "microtema_id": "CTB-MT-0019",
+      "microtema_alias_origem": "MT-19",
+      "papel": "eliminavel",
+      "gabarito_questao": "E",
+      "texto_alternativa_sha256": "2c9f44343bc68e7e8e9e27ecf8c96a49661f0019194ccbdcd59026b8324b3629",
+      "texto_alternativa": "Uma pessoa expressamente mencionada no CTB, que não seja condutora nem proprietária, só se submete às suas disposições durante deslocamento pela via.",
+      "referencia_extraida": "Art. 3º"
+    },
+    {
+      "questao": "Q08",
+      "alternativa": "E",
+      "microtema_id": "CTB-MT-0008",
+      "microtema_alias_origem": "MT-08",
+      "papel": "gabarito",
+      "gabarito_questao": "E",
+      "texto_alternativa_sha256": "b99e1c07b34938adead429f1fc397c0f59088dd72ef607f463fe45eb8f28e727",
+      "texto_alternativa": "Os órgãos do SNT respondem objetivamente, em suas competências, por danos a cidadãos causados por ação, omissão ou erro ao executar ou manter serviços de trânsito seguro.",
+      "referencia_extraida": "Art. 1º, § 3º"
+    },
+    {
+      "questao": "Q09",
+      "alternativa": "A",
+      "microtema_id": "CTB-MT-0009",
+      "microtema_alias_origem": "MT-09",
+      "papel": "gabarito",
+      "gabarito_questao": "A",
+      "texto_alternativa_sha256": "88f9b3c8b528b0fde1adeb2d7a00187110f25f457c683fc801075ec84553e80e",
+      "texto_alternativa": "Órgãos do SNT respondem objetivamente, em suas competências, por danos a cidadãos causados na execução ou manutenção de programas, projetos e serviços de trânsito seguro.",
+      "referencia_extraida": "Art. 1º, § 3º"
+    },
+    {
+      "questao": "Q09",
+      "alternativa": "B",
+      "microtema_id": "CTB-MT-0012",
+      "microtema_alias_origem": "MT-12",
+      "papel": "eliminavel",
+      "gabarito_questao": "A",
+      "texto_alternativa_sha256": "2e62f2528eab6dc53ea0dd281b7ec9df0f3af280efb13a75987f09a5661ddef9",
+      "texto_alternativa": "A competência para regulamentar a via permanece com o órgão que a implantou, ainda que outro tenha assumido sua circunscrição.",
+      "referencia_extraida": "Art. 2º, caput"
+    },
+    {
+      "questao": "Q09",
+      "alternativa": "C",
+      "microtema_id": "CTB-MT-0017",
+      "microtema_alias_origem": "MT-17",
+      "papel": "eliminavel",
+      "gabarito_questao": "A",
+      "texto_alternativa_sha256": "68125fe1825f5b4b8ed13fedc0593537ba209ace652edbd78328c4263a118f35",
+      "texto_alternativa": "Veículos sem motor somente são abrangidos pelo CTB quando normas locais equiparam sua circulação à de veículos motorizados.",
+      "referencia_extraida": "Art. 3º"
+    },
+    {
+      "questao": "Q09",
+      "alternativa": "D",
+      "microtema_id": "CTB-MT-0001",
+      "microtema_alias_origem": "MT-01",
+      "papel": "eliminavel",
+      "gabarito_questao": "A",
+      "texto_alternativa_sha256": "bdbdbe68a762581d31054b0a676d0dea6a56049f033f60d386c1d5c70a7c4dce",
+      "texto_alternativa": "O CTB alcança o trânsito de qualquer natureza no Brasil, inclusive em áreas terrestres não consideradas vias abertas à circulação.",
+      "referencia_extraida": "Art. 1º, caput"
+    },
+    {
+      "questao": "Q09",
+      "alternativa": "E",
+      "microtema_id": "CTB-MT-0002",
+      "microtema_alias_origem": "MT-02",
+      "papel": "eliminavel",
+      "gabarito_questao": "A",
+      "texto_alternativa_sha256": "29bdf34f9d6d89fdf0609250c9c45e3a19e890aa8375ca83c0fedd0d9f6df07c",
+      "texto_alternativa": "O deslocamento de pessoas a pé é trânsito quando envolve travessia de fluxo de veículos, mas não quando ocorre isoladamente na via.",
+      "referencia_extraida": "Art. 1º, § 1º"
+    },
+    {
+      "questao": "Q10",
+      "alternativa": "A",
+      "microtema_id": "CTB-MT-0015",
+      "microtema_alias_origem": "MT-15",
+      "papel": "eliminavel",
+      "gabarito_questao": "C",
+      "texto_alternativa_sha256": "754f6d8c65289f77e662000873836f6f08698304ae0db84b4a8e19f296d4c2da",
+      "texto_alternativa": "A via interna de condomínio formado por unidades autônomas integra as vias terrestres somente se o regulamento condominial permitir acesso habitual a não moradores.",
+      "referencia_extraida": "Art. 2º, parágrafo único"
+    },
+    {
+      "questao": "Q10",
+      "alternativa": "B",
+      "microtema_id": "CTB-MT-0005",
+      "microtema_alias_origem": "MT-05",
+      "papel": "eliminavel",
+      "gabarito_questao": "C",
+      "texto_alternativa_sha256": "b6b1237fecd07f348dca577e20ae3553dfbc402bc82c1063df8f864f1bb1855e",
+      "texto_alternativa": "O direito de todos ao trânsito seguro protege a circulação, mas não o uso da via exclusivamente para parada ou estacionamento.",
+      "referencia_extraida": "Art. 1º, § 2º"
+    },
+    {
+      "questao": "Q10",
+      "alternativa": "C",
+      "microtema_id": "CTB-MT-0010",
+      "microtema_alias_origem": "MT-10",
+      "papel": "gabarito",
+      "gabarito_questao": "C",
+      "texto_alternativa_sha256": "bebd3c4084bb8dc81875fac96c127ffc19fb3334b085790b81999685cb68b721",
+      "texto_alternativa": "As ações dos órgãos e entidades do SNT priorizam a defesa da vida, abrangendo a preservação da saúde e do meio ambiente.",
+      "referencia_extraida": "Art. 1º, § 5º"
+    },
+    {
+      "questao": "Q10",
+      "alternativa": "D",
+      "microtema_id": "CTB-MT-0019",
+      "microtema_alias_origem": "MT-19",
+      "papel": "eliminavel",
+      "gabarito_questao": "C",
+      "texto_alternativa_sha256": "ae1a539f036bc905b696d59584300e1f561837ee0567a4c9c15ec3369baeb5ec",
+      "texto_alternativa": "Pessoas não identificadas como proprietários ou condutores também se sujeitam ao CTB se atuarem profissionalmente no trânsito, ainda sem menção expressa na lei.",
+      "referencia_extraida": "Art. 3º"
+    },
+    {
+      "questao": "Q10",
+      "alternativa": "E",
+      "microtema_id": "CTB-MT-0013",
+      "microtema_alias_origem": "MT-13",
+      "papel": "eliminavel",
+      "gabarito_questao": "C",
+      "texto_alternativa_sha256": "1e2ca5aabc2a57cba6931285ded3f9d604d72c0feac632bc0186fb2de2cd33a1",
+      "texto_alternativa": "Peculiaridades locais orientam a regulamentação da via, mas circunstâncias especiais só justificam medidas pontuais após a regulamentação.",
+      "referencia_extraida": "Art. 2º, caput"
+    },
+    {
+      "questao": "Q11",
+      "alternativa": "A",
+      "microtema_id": "CTB-MT-0011",
+      "microtema_alias_origem": "MT-11",
+      "papel": "gabarito",
+      "gabarito_questao": "A",
+      "texto_alternativa_sha256": "91e2ef216367f81fd35067002fac1f99cedbefa85e6f04547af34adefa684f3f",
+      "texto_alternativa": "Uma passagem urbana e um caminho rural figuram entre as vias terrestres do CTB, assim como ruas, avenidas, logradouros, estradas e rodovias.",
+      "referencia_extraida": "Art. 2º, caput"
+    },
+    {
+      "questao": "Q11",
+      "alternativa": "B",
+      "microtema_id": "CTB-MT-0005",
+      "microtema_alias_origem": "MT-05",
+      "papel": "eliminavel",
+      "gabarito_questao": "A",
+      "texto_alternativa_sha256": "149386cc2d974f1de7e2d8599186eac3d13a5fbfffc56cb11fcf21f4dd06ad7b",
+      "texto_alternativa": "O trânsito seguro é direito dos condutores e passageiros, enquanto os demais usuários recebem apenas proteção administrativa reflexa.",
+      "referencia_extraida": "Art. 1º, § 2º"
+    },
+    {
+      "questao": "Q11",
+      "alternativa": "C",
+      "microtema_id": "CTB-MT-0007",
+      "microtema_alias_origem": "MT-07",
+      "papel": "eliminavel",
+      "gabarito_questao": "A",
+      "texto_alternativa_sha256": "f24a6ae59f801442ef4f6883a01eafa98731c983ebc0513a74d5a81a53887411",
+      "texto_alternativa": "Os órgãos do SNT respondem objetivamente por erro de execução de serviços viários, mas a omissão na manutenção exige demonstração de culpa administrativa.",
+      "referencia_extraida": "Art. 1º, § 3º"
+    },
+    {
+      "questao": "Q11",
+      "alternativa": "D",
+      "microtema_id": "CTB-MT-0004",
+      "microtema_alias_origem": "MT-04",
+      "papel": "eliminavel",
+      "gabarito_questao": "A",
+      "texto_alternativa_sha256": "9c2bbb3e1a94c38f1180acf849c618dab77f10d7732fd7409fcbae123940a8da",
+      "texto_alternativa": "A carga ou descarga com veículo imobilizado em via terrestre integra trânsito somente se houver manobra simultânea de posicionamento.",
+      "referencia_extraida": "Art. 1º, § 1º"
+    },
+    {
+      "questao": "Q11",
+      "alternativa": "E",
+      "microtema_id": "CTB-MT-0015",
+      "microtema_alias_origem": "MT-15",
+      "papel": "eliminavel",
+      "gabarito_questao": "A",
+      "texto_alternativa_sha256": "dc9da149acd62051c516943e061da7418df5e4545dfcafd56b9c11a348e403cc",
+      "texto_alternativa": "Vias internas de condomínios de unidades autônomas contam como vias terrestres somente quando também permitem acesso de prestadores de serviço externos.",
+      "referencia_extraida": "Art. 2º, parágrafo único"
+    },
+    {
+      "questao": "Q12",
+      "alternativa": "A",
+      "microtema_id": "CTB-MT-0009",
+      "microtema_alias_origem": "MT-09",
+      "papel": "eliminavel",
+      "gabarito_questao": "B",
+      "texto_alternativa_sha256": "6b2d7ffef2ac59f91a43b0e9a36168b8cf4458cbff2b096e8fc8218df86034ce",
+      "texto_alternativa": "Danos provocados na implantação de projeto de trânsito seguro estão sob responsabilidade objetiva, mas falhas posteriores na manutenção exigem prova de culpa.",
+      "referencia_extraida": "Art. 1º, § 3º"
+    },
+    {
+      "questao": "Q12",
+      "alternativa": "B",
+      "microtema_id": "CTB-MT-0012",
+      "microtema_alias_origem": "MT-12",
+      "papel": "gabarito",
+      "gabarito_questao": "B",
+      "texto_alternativa_sha256": "a1c68b7f63bbc8ccb9014137ca3b35a6e825795244e2755273de4aaadd46e3fe",
+      "texto_alternativa": "A regulamentação do uso das vias terrestres cabe ao órgão ou entidade que detenha circunscrição sobre a via, conforme a disciplina do CTB.",
+      "referencia_extraida": "Art. 2º, caput"
+    },
+    {
+      "questao": "Q12",
+      "alternativa": "C",
+      "microtema_id": "CTB-MT-0004",
+      "microtema_alias_origem": "MT-04",
+      "papel": "eliminavel",
+      "gabarito_questao": "B",
+      "texto_alternativa_sha256": "583cb7ecfe51be03587717361da7d5559b46a022919eee7aced744b20e236e85",
+      "texto_alternativa": "O estacionamento em via terrestre integra trânsito quando constitui intervalo de uma viagem; o uso da vaga como destino autônomo não recebe essa qualificação.",
+      "referencia_extraida": "Art. 1º, § 1º"
+    },
+    {
+      "questao": "Q12",
+      "alternativa": "D",
+      "microtema_id": "CTB-MT-0015",
+      "microtema_alias_origem": "MT-15",
+      "papel": "eliminavel",
+      "gabarito_questao": "B",
+      "texto_alternativa_sha256": "296a94fd3b5717a99cb81331b78fadc16c3f3b457b778f2f167a97278a4849e7",
+      "texto_alternativa": "Vias de condomínio de unidades autônomas são vias terrestres somente se o regulamento interno previr acesso habitual de terceiros.",
+      "referencia_extraida": "Art. 2º, parágrafo único"
+    },
+    {
+      "questao": "Q12",
+      "alternativa": "E",
+      "microtema_id": "CTB-MT-0018",
+      "microtema_alias_origem": "MT-18",
+      "papel": "eliminavel",
+      "gabarito_questao": "B",
+      "texto_alternativa_sha256": "bf78b89a96d1e299fba42b9aff938603229faf2b029807074bd64ea3da6033b6",
+      "texto_alternativa": "Condutor de veículo estrangeiro se submete ao CTB somente depois de regularizar a documentação do automóvel perante autoridade brasileira de trânsito.",
+      "referencia_extraida": "Art. 3º"
+    },
+    {
+      "questao": "Q13",
+      "alternativa": "A",
+      "microtema_id": "CTB-MT-0009",
+      "microtema_alias_origem": "MT-09",
+      "papel": "eliminavel",
+      "gabarito_questao": "D",
+      "texto_alternativa_sha256": "33367d4d13d02260482524cbb559c703e4f1be72163af8a742c05e8ac9cc6cbd",
+      "texto_alternativa": "A responsabilidade objetiva do órgão do SNT cobre danos decorrentes de serviços permanentes de trânsito seguro, mas não a execução de projetos ainda em implantação.",
+      "referencia_extraida": "Art. 1º, § 3º"
+    },
+    {
+      "questao": "Q13",
+      "alternativa": "B",
+      "microtema_id": "CTB-MT-0017",
+      "microtema_alias_origem": "MT-17",
+      "papel": "eliminavel",
+      "gabarito_questao": "D",
+      "texto_alternativa_sha256": "44c692d4cf18a3e1cb76b0cf855b6704804c4cf3cf414165e5897cfb0ccf4b75",
+      "texto_alternativa": "Veículos utilizados temporariamente no território nacional só ficam sujeitos ao CTB após registro nacional, ainda que circulem por via abrangida pelo Código.",
+      "referencia_extraida": "Art. 3º"
+    },
+    {
+      "questao": "Q13",
+      "alternativa": "C",
+      "microtema_id": "CTB-MT-0002",
+      "microtema_alias_origem": "MT-02",
+      "papel": "eliminavel",
+      "gabarito_questao": "D",
+      "texto_alternativa_sha256": "5697335b7ddafcb8547c60d639b9ad22196ddd9e305488ef384c320f17b74e01",
+      "texto_alternativa": "A utilização de uma via por pedestres sem presença de veículos constitui deslocamento individual, mas não trânsito segundo o CTB.",
+      "referencia_extraida": "Art. 1º, § 1º"
+    },
+    {
+      "questao": "Q13",
+      "alternativa": "D",
+      "microtema_id": "CTB-MT-0013",
+      "microtema_alias_origem": "MT-13",
+      "papel": "gabarito",
+      "gabarito_questao": "D",
+      "texto_alternativa_sha256": "d27799c0cdd334b110ef400d31bec99a1eb0fc66a4df0084178cf018648c52fa",
+      "texto_alternativa": "Ao regulamentar o uso de uma via, o órgão com circunscrição deve considerar as peculiaridades locais e as circunstâncias especiais.",
+      "referencia_extraida": "Art. 2º, caput"
+    },
+    {
+      "questao": "Q13",
+      "alternativa": "E",
+      "microtema_id": "CTB-MT-0005",
+      "microtema_alias_origem": "MT-05",
+      "papel": "eliminavel",
+      "gabarito_questao": "D",
+      "texto_alternativa_sha256": "0272ae83f1354314b36e36bfff3e2054e1dbea5eedaab6e212d044ddbedcf0fd",
+      "texto_alternativa": "O direito ao trânsito seguro protege a circulação, enquanto quem usa a via apenas para parada ou estacionamento tem somente proteção regulamentar.",
+      "referencia_extraida": "Art. 1º, § 2º"
+    },
+    {
+      "questao": "Q14",
+      "alternativa": "A",
+      "microtema_id": "CTB-MT-0019",
+      "microtema_alias_origem": "MT-19",
+      "papel": "eliminavel",
+      "gabarito_questao": "E",
+      "texto_alternativa_sha256": "c90dabc8f94de5f94781e0d0061e9407a68497cc043c1ab4ef88aa77d0c50519",
+      "texto_alternativa": "Terceiro que não seja condutor nem proprietário fica sujeito ao CTB sempre que sua atividade interfira na segurança da via, mesmo sem menção expressa na lei.",
+      "referencia_extraida": "Art. 3º"
+    },
+    {
+      "questao": "Q14",
+      "alternativa": "B",
+      "microtema_id": "CTB-MT-0009",
+      "microtema_alias_origem": "MT-09",
+      "papel": "eliminavel",
+      "gabarito_questao": "E",
+      "texto_alternativa_sha256": "8f4402ef9543d9ff3a25bf0772ec6257d09b4553efe17740107ba7a2b830ae1a",
+      "texto_alternativa": "Danos a cidadãos decorrentes de programas e projetos de trânsito seguro se sujeitam à responsabilidade objetiva; em serviços já em operação, exige-se culpa.",
+      "referencia_extraida": "Art. 1º, § 3º"
+    },
+    {
+      "questao": "Q14",
+      "alternativa": "C",
+      "microtema_id": "CTB-MT-0001",
+      "microtema_alias_origem": "MT-01",
+      "papel": "eliminavel",
+      "gabarito_questao": "E",
+      "texto_alternativa_sha256": "adcb4c9123e5d7582221518900f1b5c039de07c3d4968e92277e38b9d8cc2792",
+      "texto_alternativa": "O CTB rege trânsito nas vias terrestres abertas à circulação em território brasileiro quando nelas participe ao menos um veículo em movimento.",
+      "referencia_extraida": "Art. 1º, caput"
+    },
+    {
+      "questao": "Q14",
+      "alternativa": "D",
+      "microtema_id": "CTB-MT-0004",
+      "microtema_alias_origem": "MT-04",
+      "papel": "eliminavel",
+      "gabarito_questao": "E",
+      "texto_alternativa_sha256": "2fd7713ea974a0b09418cc6ac447eebc00b9eaa9e3dcf360f4bea5ce0d36c239",
+      "texto_alternativa": "A parada para embarque em via terrestre constitui situação de uso da via, mas não trânsito para fins legais, diferentemente do estacionamento.",
+      "referencia_extraida": "Art. 1º, § 1º"
+    },
+    {
+      "questao": "Q14",
+      "alternativa": "E",
+      "microtema_id": "CTB-MT-0014",
+      "microtema_alias_origem": "MT-14",
+      "papel": "gabarito",
+      "gabarito_questao": "E",
+      "texto_alternativa_sha256": "9f91cfc2476e7811900b662ef84f99f06766ea2a409c9259f0ebe8f861e264c3",
+      "texto_alternativa": "Pelo CTB, a praia aberta à circulação pública é considerada via terrestre, independentemente de ser formalmente designada rua ou estrada.",
+      "referencia_extraida": "Art. 2º, parágrafo único"
+    },
+    {
+      "questao": "Q15",
+      "alternativa": "A",
+      "microtema_id": "CTB-MT-0008",
+      "microtema_alias_origem": "MT-08",
+      "papel": "eliminavel",
+      "gabarito_questao": "C",
+      "texto_alternativa_sha256": "4cbaa7677b8d7e6562d00aa05b92b43d20336e0ba427425ee79c7e85f7fac423",
+      "texto_alternativa": "Na manutenção de serviço de trânsito seguro, a omissão danosa do órgão do SNT só enseja responsabilidade objetiva se houver ordem formal prévia para agir.",
+      "referencia_extraida": "Art. 1º, § 3º"
+    },
+    {
+      "questao": "Q15",
+      "alternativa": "B",
+      "microtema_id": "CTB-MT-0001",
+      "microtema_alias_origem": "MT-01",
+      "papel": "eliminavel",
+      "gabarito_questao": "C",
+      "texto_alternativa_sha256": "ae9acf55d974e99d53f2c812477381d8a44f4ceeaf8ea98134d573754e48a8ba",
+      "texto_alternativa": "No território brasileiro, o CTB rege o trânsito em instalações terrestres de uso privado ainda que fechadas à circulação de usuários.",
+      "referencia_extraida": "Art. 1º, caput"
+    },
+    {
+      "questao": "Q15",
+      "alternativa": "C",
+      "microtema_id": "CTB-MT-0015",
+      "microtema_alias_origem": "MT-15",
+      "papel": "gabarito",
+      "gabarito_questao": "C",
+      "texto_alternativa_sha256": "935081556699a32f3d5558dd9c3c8477b06217a6b41f03c20f8148de660eadff",
+      "texto_alternativa": "O CTB inclui entre as vias terrestres as vias internas de condomínios constituídos por unidades autônomas, sem exigir natureza pública.",
+      "referencia_extraida": "Art. 2º, parágrafo único"
+    },
+    {
+      "questao": "Q15",
+      "alternativa": "D",
+      "microtema_id": "CTB-MT-0018",
+      "microtema_alias_origem": "MT-18",
+      "papel": "eliminavel",
+      "gabarito_questao": "C",
+      "texto_alternativa_sha256": "8de7cd568c9143eef5b692ac0fdf2c03927d237cfbcf6f7ea866850037e09964",
+      "texto_alternativa": "A sujeição do proprietário de veículo estrangeiro ao CTB exige domicílio no Brasil, ao contrário da sujeição do respectivo condutor.",
+      "referencia_extraida": "Art. 3º"
+    },
+    {
+      "questao": "Q15",
+      "alternativa": "E",
+      "microtema_id": "CTB-MT-0005",
+      "microtema_alias_origem": "MT-05",
+      "papel": "eliminavel",
+      "gabarito_questao": "C",
+      "texto_alternativa_sha256": "dc398a3caafe4d2ddddac53757d96b7ed07548cbbc1a444f213b36d1b3b94c31",
+      "texto_alternativa": "O direito ao trânsito seguro alcança usuários de vias rurais somente se o órgão local editar regulamentação específica de circulação.",
+      "referencia_extraida": "Art. 1º, § 2º"
+    },
+    {
+      "questao": "Q16",
+      "alternativa": "A",
+      "microtema_id": "CTB-MT-0008",
+      "microtema_alias_origem": "MT-08",
+      "papel": "eliminavel",
+      "gabarito_questao": "E",
+      "texto_alternativa_sha256": "b61b5844ca7ee039fc78182427a8ece470e8b283a0c24af04841b862890d772d",
+      "texto_alternativa": "Os danos causados por ação ou erro de órgão do SNT na execução de serviço de trânsito seguro seguem responsabilidade objetiva; a omissão exige prova de culpa.",
+      "referencia_extraida": "Art. 1º, § 3º"
+    },
+    {
+      "questao": "Q16",
+      "alternativa": "B",
+      "microtema_id": "CTB-MT-0013",
+      "microtema_alias_origem": "MT-13",
+      "papel": "eliminavel",
+      "gabarito_questao": "E",
+      "texto_alternativa_sha256": "d3c80b930f070f470af421537013dfe691ef2ecf94386502cb7df3675e946c24",
+      "texto_alternativa": "Circunstâncias especiais só precisam ser consideradas na regulamentação de uma via quando persistirem por período prolongado, ao contrário das peculiaridades locais.",
+      "referencia_extraida": "Art. 2º, caput"
+    },
+    {
+      "questao": "Q16",
+      "alternativa": "C",
+      "microtema_id": "CTB-MT-0020",
+      "microtema_alias_origem": "MT-20",
+      "papel": "eliminavel",
+      "gabarito_questao": "E",
+      "texto_alternativa_sha256": "d1483683d592d71f839c4504c4900a58c8070c7310e543335c9880df2f8cd8a5",
+      "texto_alternativa": "Havendo peculiaridade na via, o órgão com circunscrição pode atribuir aos termos do CTB significado diverso daquele estabelecido no Anexo I.",
+      "referencia_extraida": "Art. 4º"
+    },
+    {
+      "questao": "Q16",
+      "alternativa": "D",
+      "microtema_id": "CTB-MT-0003",
+      "microtema_alias_origem": "MT-03",
+      "papel": "eliminavel",
+      "gabarito_questao": "E",
+      "texto_alternativa_sha256": "b82206a18ef9cf6797b73c0b327e9a9036d4377a23aaf953fbb301b20d9bcdc6",
+      "texto_alternativa": "Para o CTB, o uso coletivo de via por grupo não conduzido só configura trânsito se ao menos um participante estiver dirigindo veículo.",
+      "referencia_extraida": "Art. 1º, § 1º"
+    },
+    {
+      "questao": "Q16",
+      "alternativa": "E",
+      "microtema_id": "CTB-MT-0016",
+      "microtema_alias_origem": "MT-16",
+      "papel": "gabarito",
+      "gabarito_questao": "E",
+      "texto_alternativa_sha256": "d281e03a4c9af322c767ea10f37825d466cf6156dac94ccba6e4bf5c213a98c3",
+      "texto_alternativa": "As vias e áreas de estacionamento de estabelecimentos privados de uso coletivo integram o conceito de vias terrestres, nos termos do CTB.",
+      "referencia_extraida": "Art. 2º, parágrafo único"
+    },
+    {
+      "questao": "Q17",
+      "alternativa": "A",
+      "microtema_id": "CTB-MT-0003",
+      "microtema_alias_origem": "MT-03",
+      "papel": "eliminavel",
+      "gabarito_questao": "D",
+      "texto_alternativa_sha256": "df45c4f2242cf6e422fbec7996f592228d3543f6307d67d0b8b05ceed1ef4a67",
+      "texto_alternativa": "O uso da via por animais configura trânsito, ainda que sem veículo, somente quando existe pessoa responsável por sua condução durante o deslocamento.",
+      "referencia_extraida": "Art. 1º, § 1º"
+    },
+    {
+      "questao": "Q17",
+      "alternativa": "B",
+      "microtema_id": "CTB-MT-0011",
+      "microtema_alias_origem": "MT-11",
+      "papel": "eliminavel",
+      "gabarito_questao": "D",
+      "texto_alternativa_sha256": "15685de881f1925035c470aefe96df160013cd7db2ed420c2c63a7d63f3972d6",
+      "texto_alternativa": "Caminhos e passagens são vias terrestres somente quando desempenham ligação entre vias oficialmente reconhecidas pelo órgão com circunscrição.",
+      "referencia_extraida": "Art. 2º, caput"
+    },
+    {
+      "questao": "Q17",
+      "alternativa": "C",
+      "microtema_id": "CTB-MT-0007",
+      "microtema_alias_origem": "MT-07",
+      "papel": "eliminavel",
+      "gabarito_questao": "D",
+      "texto_alternativa_sha256": "d726102002c72d07299897334bc6c9e9f4642dac7921d6818e7c50e9f5e32d38",
+      "texto_alternativa": "Em danos causados na manutenção de projeto de trânsito seguro, responde objetivamente o órgão que realizou a atividade, mesmo quando fora de sua competência.",
+      "referencia_extraida": "Art. 1º, § 3º"
+    },
+    {
+      "questao": "Q17",
+      "alternativa": "D",
+      "microtema_id": "CTB-MT-0017",
+      "microtema_alias_origem": "MT-17",
+      "papel": "gabarito",
+      "gabarito_questao": "D",
+      "texto_alternativa_sha256": "6d9435c4949a4f7891d4e22f8bcdbbbc7f6f629e518c647ab870692052206c15",
+      "texto_alternativa": "As disposições do CTB aplicam-se a qualquer veículo, inclusive aos não motorizados, sem limitar o alcance da norma aos automotores.",
+      "referencia_extraida": "Art. 3º"
+    },
+    {
+      "questao": "Q17",
+      "alternativa": "E",
+      "microtema_id": "CTB-MT-0014",
+      "microtema_alias_origem": "MT-14",
+      "papel": "eliminavel",
+      "gabarito_questao": "D",
+      "texto_alternativa_sha256": "abf4201a491ea2f46ecfc30147c12696758484dba4d315854419eb6189dde556",
+      "texto_alternativa": "Praia aberta à circulação pública, mas reservada à passagem de pedestres, não é via terrestre por não comportar tráfego de veículos.",
+      "referencia_extraida": "Art. 2º, parágrafo único"
+    },
+    {
+      "questao": "Q18",
+      "alternativa": "A",
+      "microtema_id": "CTB-MT-0009",
+      "microtema_alias_origem": "MT-09",
+      "papel": "eliminavel",
+      "gabarito_questao": "B",
+      "texto_alternativa_sha256": "7b60291e60d7f8cfb69798c27aabe731de313977ec5da49d366a56d5d72dd3c2",
+      "texto_alternativa": "A responsabilidade objetiva por falha em programa de trânsito seguro inclui prejuízos suportados apenas pelo próprio órgão, mesmo sem dano a cidadão.",
+      "referencia_extraida": "Art. 1º, § 3º"
+    },
+    {
+      "questao": "Q18",
+      "alternativa": "B",
+      "microtema_id": "CTB-MT-0018",
+      "microtema_alias_origem": "MT-18",
+      "papel": "gabarito",
+      "gabarito_questao": "B",
+      "texto_alternativa_sha256": "734a0ce9964cada68484d4272f36818df7014b535d3e5555a39bf0c82606b806",
+      "texto_alternativa": "Proprietários e condutores estão sujeitos às disposições do CTB tanto em relação a veículos nacionais quanto a veículos estrangeiros.",
+      "referencia_extraida": "Art. 3º"
+    },
+    {
+      "questao": "Q18",
+      "alternativa": "C",
+      "microtema_id": "CTB-MT-0003",
+      "microtema_alias_origem": "MT-03",
+      "papel": "eliminavel",
+      "gabarito_questao": "B",
+      "texto_alternativa_sha256": "59887a78a24493b7b192c7552a5c948057057e14d715e68ba791acd24acb6760",
+      "texto_alternativa": "Grupo de pedestres sem condução ou liderança só constitui trânsito quando seu deslocamento se relaciona à passagem simultânea de veículos.",
+      "referencia_extraida": "Art. 1º, § 1º"
+    },
+    {
+      "questao": "Q18",
+      "alternativa": "D",
+      "microtema_id": "CTB-MT-0011",
+      "microtema_alias_origem": "MT-11",
+      "papel": "eliminavel",
+      "gabarito_questao": "B",
+      "texto_alternativa_sha256": "286d896def6e7ff1f447a0fc8611e79653a16b90a78a411e6aa6467822aa834e",
+      "texto_alternativa": "Logradouros e passagens só são considerados vias terrestres após o órgão competente regulamentar formalmente sua utilização.",
+      "referencia_extraida": "Art. 2º, caput"
+    },
+    {
+      "questao": "Q18",
+      "alternativa": "E",
+      "microtema_id": "CTB-MT-0010",
+      "microtema_alias_origem": "MT-10",
+      "papel": "eliminavel",
+      "gabarito_questao": "B",
+      "texto_alternativa_sha256": "f27e156a86d3533a5b654b5ae107b203e3b96beaf0928283b038dcf5f79adcc3",
+      "texto_alternativa": "A preservação ambiental pode resultar das ações prioritárias do SNT, mas não é mencionada expressamente no dever de defesa da vida.",
+      "referencia_extraida": "Art. 1º, § 5º"
+    },
+    {
+      "questao": "Q19",
+      "alternativa": "A",
+      "microtema_id": "CTB-MT-0019",
+      "microtema_alias_origem": "MT-19",
+      "papel": "gabarito",
+      "gabarito_questao": "A",
+      "texto_alternativa_sha256": "6bbedad4bba306546f0e1e4d93a488366912f48200445ff38c43cbad6cd26fb9",
+      "texto_alternativa": "O CTB alcança, além de proprietários e condutores de veículos, as demais pessoas que o próprio Código menciona expressamente.",
+      "referencia_extraida": "Art. 3º"
+    },
+    {
+      "questao": "Q19",
+      "alternativa": "B",
+      "microtema_id": "CTB-MT-0007",
+      "microtema_alias_origem": "MT-07",
+      "papel": "eliminavel",
+      "gabarito_questao": "A",
+      "texto_alternativa_sha256": "27c7410c4afe58495ed98710fb793d5ef56aaf4bc7f5c6d5a33599f182b365c6",
+      "texto_alternativa": "Para dano causado por falha em programa de trânsito seguro, a responsabilidade objetiva dispensa culpa do agente, mas requer comprovar culpa institucional do órgão.",
+      "referencia_extraida": "Art. 1º, § 3º"
+    },
+    {
+      "questao": "Q19",
+      "alternativa": "C",
+      "microtema_id": "CTB-MT-0004",
+      "microtema_alias_origem": "MT-04",
+      "papel": "eliminavel",
+      "gabarito_questao": "A",
+      "texto_alternativa_sha256": "e2cf2f6249e79194845a81eb1425474e50e0a4cf3a52d2c2f47b987984d00b23",
+      "texto_alternativa": "A operação de carga ou descarga com veículo parado é uso acessório da via, não trânsito, salvo se interferir na circulação de terceiros.",
+      "referencia_extraida": "Art. 1º, § 1º"
+    },
+    {
+      "questao": "Q19",
+      "alternativa": "D",
+      "microtema_id": "CTB-MT-0010",
+      "microtema_alias_origem": "MT-10",
+      "papel": "eliminavel",
+      "gabarito_questao": "A",
+      "texto_alternativa_sha256": "744dbb2dd7eeeec679298d53bc8fea2a10e86f713c33d691e1f4ec16faa689f7",
+      "texto_alternativa": "A preservação da saúde integra as prioridades do SNT quando houver ameaça imediata à vida; nos demais casos, prevalecem objetivos de circulação.",
+      "referencia_extraida": "Art. 1º, § 5º"
+    },
+    {
+      "questao": "Q19",
+      "alternativa": "E",
+      "microtema_id": "CTB-MT-0016",
+      "microtema_alias_origem": "MT-16",
+      "papel": "eliminavel",
+      "gabarito_questao": "A",
+      "texto_alternativa_sha256": "85a0e3d95347340fadcec9748a44102525ad98d4200d7a1ad1b9366538d27665",
+      "texto_alternativa": "Em estabelecimentos privados de uso coletivo, o CTB abrange as vias de acesso, mas as áreas de estacionamento exigem abertura também a não clientes.",
+      "referencia_extraida": "Art. 2º, parágrafo único"
+    },
+    {
+      "questao": "Q20",
+      "alternativa": "A",
+      "microtema_id": "CTB-MT-0016",
+      "microtema_alias_origem": "MT-16",
+      "papel": "eliminavel",
+      "gabarito_questao": "C",
+      "texto_alternativa_sha256": "b7fecb4e1501220050fd84386369e70677b871e89f3bcb94587551f8428891c5",
+      "texto_alternativa": "Área de estacionamento de estabelecimento privado de uso coletivo só é via terrestre quando admite também não clientes, ainda que receba regularmente clientes.",
+      "referencia_extraida": "Art. 2º, parágrafo único"
+    },
+    {
+      "questao": "Q20",
+      "alternativa": "B",
+      "microtema_id": "CTB-MT-0010",
+      "microtema_alias_origem": "MT-10",
+      "papel": "eliminavel",
+      "gabarito_questao": "C",
+      "texto_alternativa_sha256": "726e62438eebb3fadd3a9e8c2dcf5b76ccfd86d3563f448c8189463a7cc41960",
+      "texto_alternativa": "A defesa da vida deve orientar as ações do SNT, mas saúde e meio ambiente representam efeitos adicionais, não componentes expressos dessa prioridade.",
+      "referencia_extraida": "Art. 1º, § 5º"
+    },
+    {
+      "questao": "Q20",
+      "alternativa": "C",
+      "microtema_id": "CTB-MT-0020",
+      "microtema_alias_origem": "MT-20",
+      "papel": "gabarito",
+      "gabarito_questao": "C",
+      "texto_alternativa_sha256": "d9d33a9167876993ff23e77b054fdf27d204a655e65ff194a0859d26606319a0",
+      "texto_alternativa": "Mesmo em via com regulamentação local específica, os conceitos empregados para os efeitos do CTB são os constantes do Anexo I do próprio Código.",
+      "referencia_extraida": "Art. 4º"
+    },
+    {
+      "questao": "Q20",
+      "alternativa": "D",
+      "microtema_id": "CTB-MT-0002",
+      "microtema_alias_origem": "MT-02",
+      "papel": "eliminavel",
+      "gabarito_questao": "C",
+      "texto_alternativa_sha256": "fa5ee56cb046849bfbddff0d66faf6c7c3e1e8b16d2f04c0535395e0541b43f4",
+      "texto_alternativa": "O uso de via por animais caracteriza trânsito quando eles são conduzidos, mas não quando circulam livremente sem acompanhamento humano.",
+      "referencia_extraida": "Art. 1º, § 1º"
+    },
+    {
+      "questao": "Q20",
+      "alternativa": "E",
+      "microtema_id": "CTB-MT-0013",
+      "microtema_alias_origem": "MT-13",
+      "papel": "eliminavel",
+      "gabarito_questao": "C",
+      "texto_alternativa_sha256": "1c673ba91686f0556d3bdec5e16e530f61792ae6643da15379f35ead97758f35",
+      "texto_alternativa": "Peculiaridades locais podem orientar medidas de fiscalização, mas não a regulamentação de uso das vias, que deve seguir critérios gerais uniformes.",
+      "referencia_extraida": "Art. 2º, caput"
+    }
+  ],
+  "diagnostico_primeiras_oportunidades": [
+    {
+      "microtema": "CTB-MT-0001",
+      "primeiro_gabarito": "Q01-C",
+      "primeira_eliminavel": "Q04-C",
+      "eliminacao_antes_gabarito": false
+    },
+    {
+      "microtema": "CTB-MT-0002",
+      "primeiro_gabarito": "Q02-A",
+      "primeira_eliminavel": "Q06-C",
+      "eliminacao_antes_gabarito": false
+    },
+    {
+      "microtema": "CTB-MT-0003",
+      "primeiro_gabarito": "Q03-E",
+      "primeira_eliminavel": "Q08-C",
+      "eliminacao_antes_gabarito": false
+    },
+    {
+      "microtema": "CTB-MT-0004",
+      "primeiro_gabarito": "Q04-B",
+      "primeira_eliminavel": "Q11-D",
+      "eliminacao_antes_gabarito": false
+    },
+    {
+      "microtema": "CTB-MT-0005",
+      "primeiro_gabarito": "Q05-D",
+      "primeira_eliminavel": "Q10-B",
+      "eliminacao_antes_gabarito": false
+    },
+    {
+      "microtema": "CTB-MT-0006",
+      "primeiro_gabarito": "Q06-D",
+      "primeira_eliminavel": "Q01-D",
+      "eliminacao_antes_gabarito": true
+    },
+    {
+      "microtema": "CTB-MT-0007",
+      "primeiro_gabarito": "Q07-B",
+      "primeira_eliminavel": "Q03-A",
+      "eliminacao_antes_gabarito": true
+    },
+    {
+      "microtema": "CTB-MT-0008",
+      "primeiro_gabarito": "Q08-E",
+      "primeira_eliminavel": "Q05-B",
+      "eliminacao_antes_gabarito": true
+    },
+    {
+      "microtema": "CTB-MT-0009",
+      "primeiro_gabarito": "Q09-A",
+      "primeira_eliminavel": "Q12-A",
+      "eliminacao_antes_gabarito": false
+    },
+    {
+      "microtema": "CTB-MT-0010",
+      "primeiro_gabarito": "Q10-C",
+      "primeira_eliminavel": "Q03-B",
+      "eliminacao_antes_gabarito": true
+    },
+    {
+      "microtema": "CTB-MT-0011",
+      "primeiro_gabarito": "Q11-A",
+      "primeira_eliminavel": "Q03-D",
+      "eliminacao_antes_gabarito": true
+    },
+    {
+      "microtema": "CTB-MT-0012",
+      "primeiro_gabarito": "Q12-B",
+      "primeira_eliminavel": "Q01-B",
+      "eliminacao_antes_gabarito": true
+    },
+    {
+      "microtema": "CTB-MT-0013",
+      "primeiro_gabarito": "Q13-D",
+      "primeira_eliminavel": "Q02-D",
+      "eliminacao_antes_gabarito": true
+    },
+    {
+      "microtema": "CTB-MT-0014",
+      "primeiro_gabarito": "Q14-E",
+      "primeira_eliminavel": "Q02-E",
+      "eliminacao_antes_gabarito": true
+    },
+    {
+      "microtema": "CTB-MT-0015",
+      "primeiro_gabarito": "Q15-C",
+      "primeira_eliminavel": "Q01-A",
+      "eliminacao_antes_gabarito": true
+    },
+    {
+      "microtema": "CTB-MT-0016",
+      "primeiro_gabarito": "Q16-E",
+      "primeira_eliminavel": "Q04-D",
+      "eliminacao_antes_gabarito": true
+    },
+    {
+      "microtema": "CTB-MT-0017",
+      "primeiro_gabarito": "Q17-D",
+      "primeira_eliminavel": "Q01-E",
+      "eliminacao_antes_gabarito": true
+    },
+    {
+      "microtema": "CTB-MT-0018",
+      "primeiro_gabarito": "Q18-B",
+      "primeira_eliminavel": "Q02-C",
+      "eliminacao_antes_gabarito": true
+    },
+    {
+      "microtema": "CTB-MT-0019",
+      "primeiro_gabarito": "Q19-A",
+      "primeira_eliminavel": "Q07-D",
+      "eliminacao_antes_gabarito": true
+    },
+    {
+      "microtema": "CTB-MT-0020",
+      "primeiro_gabarito": "Q20-C",
+      "primeira_eliminavel": "Q03-C",
+      "eliminacao_antes_gabarito": true
+    }
+  ]
+}

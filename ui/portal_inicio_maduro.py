@@ -209,7 +209,9 @@ class CartaoHomeMaduro(QAbstractButton):
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         self.setCursor(Qt.PointingHandCursor)
         self.setFocusPolicy(Qt.StrongFocus)
-        self.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Fixed)
+        # H46 R1: não ponderar largura pelo sizeHint/texto do cartão.
+        # O QHBoxLayout divide o espaço disponível igualmente entre os três.
+        self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Fixed)
         self.setMinimumWidth(200)
         # Evita a altura ~38px observada quando a folha QSS global comprime botões.
         self.setFixedHeight(224)
@@ -474,9 +476,14 @@ def criar_portal_inicio(abrir_dashboard, abrir_busca, abrir_questoes,
     for titulo,descricao,tipo,abrir in especificacoes:
         cartao=CartaoHomeMaduro(titulo,descricao,tipo,abrir,conteudo)
         cartao.setFixedHeight(224)
-        # Hierarquia 36% / 32% / 32%, sem superdimensionar a ação principal.
-        cards.addWidget(cartao,9 if tipo=="estudo" else 8)
+        # H45 R1: geometrias iguais (1:1:1). O destaque do estudo e feito
+        # exclusivamente pelas cores do paintEvent, nunca pela largura.
+        # Assim, o centro do Dashboard coincide com o eixo da logo.
+        cards.addWidget(cartao, 1)
         pagina._home_cards.append(cartao)
+    # Os três cartões têm o mesmo peso mesmo após eventuais recalculos Qt.
+    for indice in range(3):
+        cards.setStretch(indice, 1)
     coluna.addWidget(faixa_cartoes,0)
     pagina._home_faixa_cartoes=faixa_cartoes
     coluna.addStretch(1)

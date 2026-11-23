@@ -366,6 +366,13 @@ class PaginaGradeEstudos(QWidget):
         atualizar.clicked.connect(self.atualizar)
         atualizar.setCursor(Qt.PointingHandCursor)
         cab.addWidget(atualizar, 0, Qt.AlignVCenter)
+        self.botao_caderno_m1 = QPushButton("Caderno")
+        self.botao_caderno_m1.setObjectName("gradeVighnaNotesButton")
+        self.botao_caderno_m1.setFixedHeight(34)
+        self.botao_caderno_m1.setToolTip(
+            "Consultar anotações do tópico selecionado, ou todas as do perfil.")
+        self.botao_caderno_m1.clicked.connect(lambda: self._abrir_caderno())
+        cab.addWidget(self.botao_caderno_m1, 0, Qt.AlignVCenter)
         raiz.addLayout(cab)
 
         # Abas por disciplina: a primeira mantém o escopo global dourado.
@@ -724,13 +731,13 @@ class PaginaGradeEstudos(QWidget):
             head.setSectionResizeMode(0, QHeaderView.Fixed)
             self.tabela.setColumnWidth(0, 142)
             head.setSectionResizeMode(1, QHeaderView.Stretch)
-            larguras = {2:72, 3:146, 4:44, 5:80, 6:124, 7:107, 8:62}
+            larguras = {2:72, 3:146, 4:44, 5:80, 6:124, 7:107, 8:116}
             for col, largura in larguras.items():
                 head.setSectionResizeMode(col, QHeaderView.Fixed)
                 self.tabela.setColumnWidth(col, largura)
         else:
             head.setSectionResizeMode(0, QHeaderView.Stretch)
-            larguras = {1:76, 2:158, 3:48, 4:83, 5:126, 6:117, 7:64}
+            larguras = {1:76, 2:158, 3:48, 4:83, 5:126, 6:117, 7:116}
             for col, largura in larguras.items():
                 head.setSectionResizeMode(col, QHeaderView.Fixed)
                 self.tabela.setColumnWidth(col, largura)
@@ -873,7 +880,20 @@ class PaginaGradeEstudos(QWidget):
             abrir_btn.setCursor(Qt.PointingHandCursor)
             abrir_btn.setAccessibleName('Abrir tópico ' + linha.topico)
             abrir_btn.clicked.connect(lambda _=False, r=linha: self._abrir(r))
-            self.tabela.setCellWidget(row_idx, 7 + deslocamento, abrir_btn)
+            # Grade: caderno por tópico ao lado do acesso Abrir, sem nova coluna.
+            coluna_acoes = QWidget()
+            linha_acoes_m1 = QHBoxLayout(coluna_acoes)
+            linha_acoes_m1.setContentsMargins(2, 1, 2, 1)
+            linha_acoes_m1.setSpacing(3)
+            abrir_btn.setFixedWidth(54)
+            botao_nota = QPushButton("Notas")
+            botao_nota.setObjectName("gradeVighnaNotesRowButton")
+            botao_nota.setFixedWidth(50)
+            botao_nota.setToolTip("Descobertas vinculadas a " + linha.topico)
+            botao_nota.clicked.connect(lambda _=False, r=linha: self._abrir_caderno(r))
+            linha_acoes_m1.addWidget(abrir_btn)
+            linha_acoes_m1.addWidget(botao_nota)
+            self.tabela.setCellWidget(row_idx, 7 + deslocamento, coluna_acoes)
             self.tabela.setRowHeight(row_idx, 41)
         self._filtrar()
         if selecionado is not None:
@@ -1042,6 +1062,27 @@ class PaginaGradeEstudos(QWidget):
             self.atualizar()
         except Exception as exc:
             QMessageBox.warning(self, 'Data não alterada', str(exc))
+
+    def _abrir_caderno(self, linha=None):
+        """Abre notas do tópico indicado, ou coleção completa do perfil."""
+        if linha is None and not self._modo_resumo():
+            indice = self.tabela.currentRow()
+            if 0 <= indice < len(self._linhas):
+                linha = self._linhas[indice]
+        contexto = {"perfil_id": self._concurso_id}
+        if linha is not None:
+            topico_id = int(linha.topico_id)
+            contexto.update({
+                "topico_id": topico_id,
+                "topico": str(linha.topico),
+                "disciplina": self._disciplina_por_topico.get(
+                    topico_id, (None, self._nome_disciplina_atual()))[1],
+            })
+        try:
+            from ui.vighnanotes_m1 import abrir_caderno
+            abrir_caderno(self, contexto=contexto)
+        except Exception as exc:
+            QMessageBox.warning(self, "VighnaNotes", f"Não foi possível abrir o caderno:\n{exc}")
 
     def _abrir(self, linha):
         self._posicoes[self._chave_scroll()] = self.tabela.verticalScrollBar().value()
