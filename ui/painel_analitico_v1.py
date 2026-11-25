@@ -85,6 +85,9 @@ class PainelAnaliticoV1(QWidget):
         corpo.addWidget(divisao)
 
         self._valores = {}
+        self._origens_hoje = QLabel("—")
+        self._origens_hoje.setObjectName("analiticoObservacao")
+        self._origens_hoje.setWordWrap(True)
         indicadores = QGridLayout()
         indicadores.setHorizontalSpacing(12)
         indicadores.setVerticalSpacing(12)
@@ -102,6 +105,8 @@ class PainelAnaliticoV1(QWidget):
             valor.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
             col.addWidget(valor)
             self._valores[chave] = valor
+            if chave == "tempo":
+                col.addWidget(self._origens_hoje)
             indicadores.addWidget(card, i // 3, i % 3)
             indicadores.setColumnStretch(i % 3, 1)
         corpo.addLayout(indicadores)
@@ -143,15 +148,15 @@ class PainelAnaliticoV1(QWidget):
         metodo_titulo.setObjectName("analiticoMetodoTitulo")
         method_box.addWidget(metodo_titulo)
         metodo = QLabel(
-            "Tempo efetivamente estudado = duração da bateria aberta − tempo acumulado "
-            "das pausas. O saldo de cada bateria finalizada é somado ao respectivo "
-            "dia; sessões que atravessam a meia-noite são divididas por data."
+            "Tempo efetivo = tempo líquido das baterias concluídas + revisões manuais "
+            "incluídas no total. Baterias são divididas por data quando atravessam a meia-noite; "
+            "revisões manuais usam a data da revisão."
         )
         metodo.setObjectName("analiticoMetodoTexto")
         metodo.setWordWrap(True)
         method_box.addWidget(metodo)
         observacao = QLabel(
-            "O contador de tempo começa após esta atualização. Sessões antigas não "
+            "Não são inventadas durações para registros antigos. Sessões antigas não "
             "possuem histórico persistente de pausas e não são estimadas. "
             "Questões/acertos exibem os registros acadêmicos do dia já existentes. "
             "Uma bateria em andamento só entra no saldo ao ser encerrada."
@@ -220,12 +225,14 @@ class PainelAnaliticoV1(QWidget):
     def atualizar_dados(self):
         try:
             dados = obter_resumo_diario(self._caminho_banco)
+            historico = consultar_resumo(self._caminho_banco)
+            fontes = historico["origens_hoje"]
         except Exception as exc:
             self._atualizado.setText(f"Indicadores indisponíveis: {str(exc)[:180]}")
             return
         respondidas = dados["acertos"] + dados["erros"]
         atualizacoes = {
-            "tempo": formatar_duracao(dados["tempo_liquido_segundos"]),
+            "tempo": formatar_duracao(fontes["baterias"]+fontes["manual"]),
             "baterias": str(dados["baterias"]),
             "pausas": formatar_duracao(dados["pausa_segundos"]),
             "questoes": str(respondidas),
@@ -234,18 +241,20 @@ class PainelAnaliticoV1(QWidget):
         }
         for chave, valor in atualizacoes.items():
             self._valores[chave].setText(valor)
+        self._origens_hoje.setText(f'Baterias: {formatar_duracao(fontes["baterias"])}  ·  Manual: {formatar_duracao(fontes["manual"])}')
         try:
-            historico = consultar_resumo(self._caminho_banco)
             for chave, anterior in (('semana', 'semana_anterior'), ('mes', 'mes_anterior')):
                 valor, auxiliar = self._resumos_tempo[chave]
                 valor.setText(formatar_duracao(historico[chave]))
-                auxiliar.setText('Comparado ao período anterior: ' +
+                fontes_periodo = historico['origens_'+chave]
+                auxiliar.setText(f'Baterias: {formatar_duracao(fontes_periodo["baterias"])} · Manual: {formatar_duracao(fontes_periodo["manual"])}\nComparado ao período anterior: ' +
                                  formatar_variacao(historico[chave], historico[anterior]))
+                auxiliar.setWordWrap(True)
         except Exception:
             for valor, auxiliar in self._resumos_tempo.values():
                 valor.setText('—')
                 auxiliar.setText('Histórico de tempo indisponível')
         self._atualizado.setText(
             "Atualizado em " + datetime.now().strftime("%d/%m/%Y às %H:%M")
-            + "  •  Tempo total de baterias concluídas (todos os perfis)"
+            + "  •  Tempo consolidado: baterias e revisões manuais (todos os perfis)"
         )

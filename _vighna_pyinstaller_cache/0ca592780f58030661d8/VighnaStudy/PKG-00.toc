@@ -37,7 +37,7 @@
    'C:\\SistemaEstudos\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_pyside6.py',
    'PYSOURCE'),
   ('main',
-   'C:\\SistemaEstudos\\_vighna_update_staging\\20261123_020313_e9afa232\\source\\main.py',
+   'C:\\SistemaEstudos\\_vighna_update_staging\\20261125_163331_c1b7fa48\\source\\main.py',
    'PYSOURCE')],
  'python313.dll',
  True,

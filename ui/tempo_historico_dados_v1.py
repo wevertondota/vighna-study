@@ -1,6 +1,6 @@
 """Consultas de tempo efetivo por dia/semana/mês/ano (SQLite somente leitura).
 
-Fonte única: tempo_baterias_dia_v1 e tempo_baterias_v1. Não reconstrói
+Fontes: baterias finalizadas e revisões manuais com duração elegível. Não reconstrói
 sessões anteriores à ativação nem confunde ausência de registro com 0 medido.
 """
 from __future__ import annotations
@@ -29,10 +29,6 @@ def _abrir_ro(caminho):
     uri = banco.as_uri() + '?mode=ro'
     con = sqlite3.connect(uri, uri=True, timeout=5.0)
     con.execute('PRAGMA query_only=ON')
-    tabelas = {r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('tempo_baterias_dia_v1','tempo_baterias_v1')")}
-    if len(tabelas) != 2:
-        con.close()
-        raise FonteTempoIndisponivel('O contador de tempo ainda não possui registros persistentes nesta instalação.')
     return con
 
 
@@ -52,6 +48,9 @@ def _where(concurso_id, inicio=None, fim=None):
 
 
 def _linhas(con, *, concurso_id=None, inicio=None, fim=None):
+    tabelas = {r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    if not {'tempo_baterias_v1','tempo_baterias_dia_v1'}.issubset(tabelas):
+        return []
     where, args = _where(concurso_id, inicio, fim)
     return con.execute('''
         SELECT d.dia_local, SUM(d.tempo_liquido_segundos),
@@ -62,11 +61,45 @@ def _linhas(con, *, concurso_id=None, inicio=None, fim=None):
         ''' + where + ' GROUP BY d.dia_local ORDER BY d.dia_local', args).fetchall()
 
 
-def _primeiro_dia(con, concurso_id=None):
-    where, args = _where(concurso_id)
-    linha = con.execute('''SELECT MIN(d.dia_local) FROM tempo_baterias_dia_v1 d
-        INNER JOIN tempo_baterias_v1 b ON b.chave=d.chave''' + where, args).fetchone()
-    return _data(linha[0]) if linha and linha[0] else None
+def _linhas_manuais(caminho_banco, *, concurso_id=None, inicio=None, fim=None):
+    """Histórico real, inclusive capítulos cuja autonomia foi desativada.
+    Banco inexistente ou versão anterior sem duração: nenhuma medição.
+    Erros de leitura não são confundidos com ausência de estudo.
+    """
+    caminho = Path(caminho_banco).expanduser().resolve().parent / 'revisoes_capitulos_v1.db'
+    if not caminho.is_file():
+        return []
+    with closing(_abrir_ro(caminho)) as con:
+        colunas = {r[1] for r in con.execute('PRAGMA table_info(revisoes)')}
+        if 'tempo_estudo_minutos' not in colunas:
+            return []
+        partes = ['tempo_estudo_minutos BETWEEN 1 AND 5999']
+        if 'contabilizar_tempo' in colunas:
+            partes.append('contabilizar_tempo=1')
+        args = []
+        if concurso_id is not None:
+            partes.append('perfil_id=?'); args.append(int(concurso_id))
+        if inicio is not None:
+            partes.append('data>=?'); args.append(_data(inicio).isoformat())
+        if fim is not None:
+            partes.append('data<=?'); args.append(_data(fim).isoformat())
+        return con.execute('SELECT data, SUM(tempo_estudo_minutos)*60, COUNT(*) FROM revisoes WHERE '
+            + ' AND '.join(partes) + ' GROUP BY data ORDER BY data', args).fetchall()
+
+
+def _consolidar(caminho_banco, *, concurso_id=None, inicio=None, fim=None, origem='todos'):
+    if origem not in ('todos','baterias','manual'):
+        raise ValueError('Origem de tempo inválida.')
+    por_dia = {}
+    if origem != 'manual':
+        with closing(_abrir_ro(caminho_banco)) as con:
+            for dia, liquido, pausa, bruto, baterias in _linhas(con, concurso_id=concurso_id,inicio=inicio,fim=fim):
+                por_dia[dia] = [int(liquido or 0), int(pausa or 0), int(bruto or 0), int(baterias or 0), 0, 0]
+    if origem != 'baterias':
+        for dia, segundos, quantidade in _linhas_manuais(caminho_banco, concurso_id=concurso_id,inicio=inicio,fim=fim):
+            valores = por_dia.setdefault(dia,[0,0,0,0,0,0])
+            valores[4] += int(segundos or 0); valores[5] += int(quantidade or 0)
+    return [(dia,*v) for dia,v in sorted(por_dia.items())]
 
 
 def _inicio_mes(dia):
@@ -111,7 +144,7 @@ def _rotulo(chave, agrupamento, fim):
     return str(chave.year)
 
 
-def consultar_serie(caminho_banco, *, inicio, fim, agrupamento='dia', concurso_id=None):
+def consultar_serie(caminho_banco, *, inicio, fim, agrupamento='dia', concurso_id=None, origem='todos'):
     """Grupos de calendário com indicação explícita de ausência de dados.
 
     Os intervalos parciais são contabilizados apenas no intervalo solicitado.
@@ -122,25 +155,28 @@ def consultar_serie(caminho_banco, *, inicio, fim, agrupamento='dia', concurso_i
         raise ValueError('A data inicial deve ser anterior ou igual à final.')
     if (b-a).days > 36525:
         raise ValueError('Intervalo de consulta excessivo.')
-    with closing(_abrir_ro(caminho_banco)) as con:
-        registros = _linhas(con, concurso_id=concurso_id, inicio=a, fim=b)
-        primeiro = _primeiro_dia(con, concurso_id)
+    todos = _consolidar(caminho_banco, concurso_id=concurso_id, fim=b, origem=origem)
+    primeiro = _data(todos[0][0]) if todos else None
+    registros = [r for r in todos if a.isoformat() <= r[0] <= b.isoformat()]
     grupos = {}
-    for data_str, liquido, pausa, bruto, baterias in registros:
+    for data_str, liquido, pausa, bruto, baterias, manual, revisoes in registros:
         chave = _chave(_data(data_str), agrupamento)
-        dados = grupos.setdefault(chave, [0, 0, 0, 0, 0])
-        dados[0] += int(liquido or 0)
-        dados[1] += int(pausa or 0)
-        dados[2] += int(bruto or 0)
-        dados[3] += int(baterias or 0)
+        dados = grupos.setdefault(chave, [0, 0, 0, 0, 0, 0, 0])
+        dados[0] += liquido
+        dados[1] += pausa
+        dados[2] += bruto
+        dados[3] += baterias
         dados[4] += 1
+        dados[5] += manual
+        dados[6] += revisoes
     resultado = []
     cursor = _chave(a, agrupamento)
     while cursor <= b:
-        valores = grupos.get(cursor, [0, 0, 0, 0, 0])
+        valores = grupos.get(cursor, [0, 0, 0, 0, 0, 0, 0])
         resultado.append({
             'inicio': cursor.isoformat(), 'rotulo': _rotulo(cursor, agrupamento, b),
-            'liquido': valores[0], 'pausa': valores[1], 'bruto': valores[2],
+            'liquido': valores[0]+valores[5], 'pausa': valores[1], 'bruto': valores[2],
+            'liquido_baterias': valores[0], 'liquido_manual': valores[5], 'revisoes_manuais': valores[6],
             'baterias': valores[3], 'dias_registrados': valores[4],
             'tem_registro': bool(valores[4]),
         })
@@ -150,21 +186,26 @@ def consultar_serie(caminho_banco, *, inicio, fim, agrupamento='dia', concurso_i
             'linhas': resultado, 'total_segundos': sum(i['liquido'] for i in resultado),
             'total_pausas': sum(i['pausa'] for i in resultado),
             'dias_registrados': sum(1 for _ in registros),
-            'baterias_periodo': sum(int(r[4] or 0) for r in registros)}
+            'baterias_periodo': sum(int(r[4] or 0) for r in registros),
+            'total_baterias': sum(i['liquido_baterias'] for i in resultado),
+            'total_manual': sum(i['liquido_manual'] for i in resultado),
+            'revisoes_manuais': sum(i['revisoes_manuais'] for i in resultado)}
 
 
-def consultar_resumo(caminho_banco, *, hoje=None, concurso_id=None):
+def consultar_resumo(caminho_banco, *, hoje=None, concurso_id=None, origem='todos'):
     hoje = _data(hoje or date.today())
     inicio_semana = hoje - timedelta(days=hoje.weekday())
     mes_atual = _inicio_mes(hoje)
     mes_anterior = _inicio_mes(mes_atual - timedelta(days=1))
     semana_anterior = inicio_semana - timedelta(days=7)
-    with closing(_abrir_ro(caminho_banco)) as con:
-        registros = _linhas(con, concurso_id=concurso_id, fim=hoje)
-        primeiro = _primeiro_dia(con, concurso_id)
-    por_dia = {_data(r[0]): int(r[1] or 0) for r in registros}
+    registros = _consolidar(caminho_banco, concurso_id=concurso_id, fim=hoje, origem=origem)
+    primeiro = _data(registros[0][0]) if registros else None
+    por_dia = {_data(r[0]): r[1]+r[5] for r in registros}
     def soma(a, b):
         return sum(v for d, v in por_dia.items() if a <= d <= b)
+    def origens(a,b):
+        linhas = [r for r in registros if a <= _data(r[0]) <= b]
+        return {'baterias':sum(r[1] for r in linhas), 'manual':sum(r[5] for r in linhas), 'revisoes':sum(r[6] for r in linhas)}
     semana = soma(inicio_semana, hoje)
     sem_ant = soma(semana_anterior, inicio_semana-timedelta(days=1))
     mes = soma(mes_atual, hoje)
@@ -175,6 +216,8 @@ def consultar_resumo(caminho_banco, *, hoje=None, concurso_id=None):
             'semana': semana, 'semana_anterior': sem_ant, 'mes': mes,
             'mes_anterior': mes_ant, 'ano': ano, 'total': sum(por_dia.values()),
             'dias_ativos': dias_ativos,
+            'origens_hoje': origens(hoje,hoje), 'origens_semana': origens(inicio_semana,hoje),
+            'origens_mes': origens(mes_atual,hoje), 'origens_total': origens(date.min,hoje),
             'media_dia_ativo': int(round(sum(por_dia.values())/dias_ativos)) if dias_ativos else 0}
 
 

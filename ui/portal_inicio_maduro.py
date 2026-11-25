@@ -39,6 +39,25 @@ class FundoHomeMaduro(QWidget):
         # Não existe animação periódica nesta Home.
         return None
 
+    def resizeEvent(self, event):
+        """Ajusta só a largura do grupo de cartões à área útil da Home.
+
+        Alinhamento horizontal permanece a cargo do QVBoxLayout. A largura
+        mínima visual de cada cartão evita cortes nos títulos e descrições.
+        """
+        super().resizeEvent(event)
+        faixa = getattr(self, "_home_faixa_cartoes", None)
+        coluna = self.layout()
+        if faixa is None or coluna is None:
+            return
+        margens = coluna.contentsMargins()
+        area_util = max(1, self.width() - margens.left() - margens.right())
+        # Na janela de 1366px: dois cartões de ~391px, separados por 30px.
+        # Em telas largas, limite de 930px; em telas compactas, até 680px.
+        largura = min(area_util, max(680, min(930, round(area_util * 0.68))))
+        if faixa.minimumWidth() != largura or faixa.maximumWidth() != largura:
+            faixa.setFixedWidth(largura)
+
     def paintEvent(self, event):
         p = QPainter(self)
         p.setRenderHint(QPainter.Antialiasing, True)
@@ -210,7 +229,7 @@ class CartaoHomeMaduro(QAbstractButton):
         self.setCursor(Qt.PointingHandCursor)
         self.setFocusPolicy(Qt.StrongFocus)
         # H46 R1: não ponderar largura pelo sizeHint/texto do cartão.
-        # O QHBoxLayout divide o espaço disponível igualmente entre os três.
+        # O QHBoxLayout divide o espaço disponível igualmente entre os dois.
         self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Fixed)
         self.setMinimumWidth(200)
         # Evita a altura ~38px observada quando a folha QSS global comprime botões.
@@ -446,8 +465,8 @@ def criar_portal_inicio(abrir_dashboard, abrir_busca, abrir_questoes,
     coluna.addWidget(logo)
     coluna.addSpacing(52)
 
-    # Contêiner de altura explícita: o layout vertical não pode comprimir a
-    # faixa dos três cartões para a altura de um QPushButton convencional.
+    # Contêiner de altura explícita para os dois acessos da Home.
+    # O Dashboard continua acessível exclusivamente pela barra lateral.
     faixa_cartoes=QWidget(conteudo)
     faixa_cartoes.setObjectName("portalInicioCardsContainer")
     # Container puramente geometrico: nao deve pintar um retangulo atras dos
@@ -457,35 +476,36 @@ def criar_portal_inicio(abrir_dashboard, abrir_busca, abrir_questoes,
     faixa_cartoes.setAttribute(Qt.WA_TranslucentBackground, True)
     faixa_cartoes.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Fixed)
     faixa_cartoes.setFixedHeight(224)
+    # Dois cartões do mesmo tamanho, com largura limitada e centralizados
+    # no eixo da logo, sem esticar até as bordas do conteúdo.
+    # H48: o H47 usava o tamanho preferencial mínimo do layout (~426px),
+    # apesar de prever um máximo de 940px. A largura inicial explícita evita
+    # que ambos os cartões sejam comprimidos na primeira exibição.
+    faixa_cartoes.setFixedWidth(810)
     cards=QHBoxLayout(faixa_cartoes)
-    cards.setSpacing(19)
+    cards.setSpacing(30)
     cards.setContentsMargins(0,0,0,0)
-    # O contrato original passa o método voltar_inicio como abrir_dashboard.
-    # Seu proprietário é a janela principal; usamos a rota JÁ EXISTENTE para
-    # Central de Análises, sem criar um segundo Dashboard nem editar main.py.
-    controlador=getattr(abrir_dashboard,"__self__",None)
-    abrir_central_analises=getattr(controlador,"abrir_painel_analitico",None)
-    if not callable(abrir_central_analises):
-        raise RuntimeError("Home: rota para Central de Análises indisponível")
+    # Reutiliza as rotas originais de Iniciar Estudo e Meu Edital.
+    # A rota para o Dashboard na barra lateral não sofre alteração.
     especificacoes=(
         ("Iniciar Estudo","Estudo automático, manual e simulados","estudo",abrir_dashboard),
-        ("Dashboard","Análise de desempenho","dashboard",abrir_central_analises),
         ("Meu Edital","Conteúdos e cobertura","edital",abrir_edital),
     )
     pagina._home_cards=[]
     for titulo,descricao,tipo,abrir in especificacoes:
         cartao=CartaoHomeMaduro(titulo,descricao,tipo,abrir,conteudo)
         cartao.setFixedHeight(224)
-        # H45 R1: geometrias iguais (1:1:1). O destaque do estudo e feito
-        # exclusivamente pelas cores do paintEvent, nunca pela largura.
-        # Assim, o centro do Dashboard coincide com o eixo da logo.
+        # H47 R1: geometrias iguais (1:1); o estudo ganha destaque somente
+        # por cor. O conjunto dos dois cartões acompanha o centro da logo.
         cards.addWidget(cartao, 1)
         pagina._home_cards.append(cartao)
-    # Os três cartões têm o mesmo peso mesmo após eventuais recalculos Qt.
-    for indice in range(3):
+    # Dois cartões têm o mesmo peso, independentemente do texto e do sizeHint.
+    for indice in range(2):
         cards.setStretch(indice, 1)
-    coluna.addWidget(faixa_cartoes,0)
+    coluna.addWidget(faixa_cartoes,0,Qt.AlignHCenter)
     pagina._home_faixa_cartoes=faixa_cartoes
+    # Vincula o contêiner responsivo ao FundoHomeMaduro para reagir a resize.
+    conteudo._home_faixa_cartoes=faixa_cartoes
     coluna.addStretch(1)
     coluna.addSpacing(20)
     scroll.setWidget(conteudo)
@@ -502,11 +522,10 @@ def aplicar_estilo_portal(pagina, tema):
     QWidget#portalInicioPage { background: #03172a; border: none; }
     QScrollArea#portalInicioScroll { background: transparent; border: none; }
     QWidget#portalInicioConteudo { border: none; }
-    /* Evita a faixa opaca do widget geométrico atrás dos três cartões. */
+    /* Evita a faixa opaca do widget geométrico atrás dos dois cartões. */
     QWidget#portalInicioCardsContainer { background-color: transparent; border: none; }
     /* O QPainter desenha bordas e preenchimento, não o QSS dos botões. */
     QAbstractButton#homeMaduroCard_estudo,
-    QAbstractButton#homeMaduroCard_dashboard,
     QAbstractButton#homeMaduroCard_edital {
         background-color: transparent; border: none;
     }

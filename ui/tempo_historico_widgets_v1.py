@@ -1,6 +1,6 @@
 """UI Qt reutilizável para tempo efetivo em Estatísticas e Histórico V2.
 
-Nenhuma escrita em SQLite; os segundos vêm somente do registro diário da bateria.
+Nenhuma escrita em SQLite; consulta os tempos registrados nas duas fontes.
 """
 from __future__ import annotations
 
@@ -45,6 +45,7 @@ class GraficoTempoEfetivo(QWidget):
         fg = QColor('#304d61' if self._claro else '#b9d5e6')
         grade = QColor('#dce7ee' if self._claro else '#27465b')
         barra = QColor('#007fa5' if self._claro else '#3ac8ed')
+        manual = QColor('#9d6500' if self._claro else '#ddb360')
         vazio = QColor('#b0c5ce' if self._claro else '#426477')
         rect = self.rect().adjusted(42, 12, -12, -27)
         if rect.width() < 80 or rect.height() < 45:
@@ -75,8 +76,13 @@ class GraficoTempoEfetivo(QWidget):
                 altura = 2.0
             if altura > 0:
                 p.setPen(Qt.NoPen)
-                p.setBrush(barra if linha['tem_registro'] else vazio)
-                p.drawRoundedRect(QRectF(x, rect.bottom()-altura, largura, altura),2,2)
+                a = altura * linha.get('liquido_baterias', linha['liquido']) / max(1, linha['liquido'])
+                b = altura - a
+                if a > 0:
+                    p.setBrush(barra); p.drawRect(QRectF(x,rect.bottom()-a,largura,a))
+                if b > 0:
+                    p.setBrush(manual if linha.get('liquido_manual') else vazio)
+                    p.drawRect(QRectF(x,rect.bottom()-altura,largura,b))
             if indice % passo == 0 or indice == total-1:
                 p.setPen(fg)
                 rotulo = linha['rotulo'].split(' – ')[0]
@@ -113,7 +119,7 @@ class PainelTempoEfetivo(QWidget):
         titulo = QLabel('Tempo efetivo de estudo')
         titulo.setObjectName('tempoTitulo')
         raiz.addWidget(titulo)
-        explicacao = QLabel('Tempo registrado nas baterias concluídas, após o desconto das pausas. Consulte os dias, semanas e meses sem perder o histórico.')
+        explicacao = QLabel('Tempo efetivo consolidado: baterias concluídas (ciano) e revisões manuais (dourado). Use o filtro de origem para consultar cada fonte.')
         explicacao.setWordWrap(True)
         explicacao.setObjectName('tempoExplicacao')
         raiz.addWidget(explicacao)
@@ -165,6 +171,9 @@ class PainelTempoEfetivo(QWidget):
         filtros.addWidget(QLabel('Agrupar'))
         filtros.addWidget(self.combo_grupo)
         filtros.addWidget(self.combo_escopo)
+        self.combo_origem = QComboBox()
+        self.combo_origem.addItems(["Todas as origens", "Baterias", "Manual"])
+        filtros.addWidget(self.combo_origem)
         self.botao = QPushButton('Consultar')
         filtros.addWidget(self.botao)
         raiz.addLayout(filtros)
@@ -180,13 +189,13 @@ class PainelTempoEfetivo(QWidget):
 
         self.grafico = GraficoTempoEfetivo(self)
         raiz.addWidget(self.grafico)
-        self.tabela = QTableWidget(0, 5)
-        self.tabela.setHorizontalHeaderLabels(['Período','Tempo efetivo','Pausas descontadas','Baterias com tempo','Registro'])
+        self.tabela = QTableWidget(0, 7)
+        self.tabela.setHorizontalHeaderLabels(['Período','Tempo efetivo','Tempo baterias','Tempo manual','Pausas','Baterias','Registro'])
         self.tabela.setAlternatingRowColors(True)
         self.tabela.setEditTriggers(QTableWidget.NoEditTriggers)
         self.tabela.verticalHeader().setVisible(False)
         self.tabela.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
-        for col in (1,2,3,4):
+        for col in (1,2,3,4,5,6):
             self.tabela.horizontalHeader().setSectionResizeMode(col,QHeaderView.ResizeToContents)
         self.tabela.setMinimumHeight(190 if modo=='estatisticas' else 265)
         raiz.addWidget(self.tabela,1)
@@ -194,7 +203,7 @@ class PainelTempoEfetivo(QWidget):
         self.status.setObjectName('tempoObservacao')
         self.status.setWordWrap(True)
         raiz.addWidget(self.status)
-        for controle in (self.combo_grupo,self.combo_escopo):
+        for controle in (self.combo_grupo,self.combo_escopo,self.combo_origem):
             controle.currentIndexChanged.connect(self.atualizar)
         self.combo_periodo.currentTextChanged.connect(self._periodo_alterado)
         self.botao.clicked.connect(self.atualizar)
@@ -270,10 +279,11 @@ class PainelTempoEfetivo(QWidget):
         try:
             hoje = date.today()
             perfil = self.concurso_id if self.combo_escopo.currentText()=='Perfil atual' else None
-            resumo = consultar_resumo(self.caminho_banco, hoje=hoje, concurso_id=perfil)
+            origem = ("todos","baterias","manual")[self.combo_origem.currentIndex()]
+            resumo = consultar_resumo(self.caminho_banco, hoje=hoje, concurso_id=perfil, origem=origem)
             inicio, fim = self._intervalo(hoje, resumo['primeiro_registro'])
             grupo = {'Dia':'dia','Semana':'semana','Mês':'mes','Ano':'ano'}[self.combo_grupo.currentText()]
-            serie = consultar_serie(self.caminho_banco, inicio=inicio, fim=fim,agrupamento=grupo,concurso_id=perfil)
+            serie = consultar_serie(self.caminho_banco, inicio=inicio, fim=fim,agrupamento=grupo,concurso_id=perfil,origem=origem)
             textos = {chave:(formatar_duracao(resumo[chave]) if resumo['primeiro_registro'] else '—') for chave in ('semana','mes','ano','total','media_dia_ativo')}
             textos['comparacao'] = formatar_variacao(resumo['mes'],resumo['mes_anterior']) if resumo['primeiro_registro'] else '—'
             for chave, texto in textos.items():
@@ -286,6 +296,8 @@ class PainelTempoEfetivo(QWidget):
                 for i,r in enumerate(linhas):
                     valores = [r['rotulo'],
                                formatar_duracao(r['liquido']) if r['tem_registro'] else '—',
+                               formatar_duracao(r['liquido_baterias']) if r['tem_registro'] else '—',
+                               formatar_duracao(r['liquido_manual']) if r['tem_registro'] else '—',
                                formatar_duracao(r['pausa']) if r['tem_registro'] else '—',
                                str(r['baterias']) if r['tem_registro'] else '—',
                                'Registrado' if r['tem_registro'] else 'Sem registro']

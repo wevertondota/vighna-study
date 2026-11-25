@@ -45,4 +45,4 @@ missing module named 'cryptography.exceptions' - imported by pypdf._crypt_provid
 missing module named cryptography - imported by pypdf._crypt_providers._cryptography (top-level)
 excluded module named PySide6.QtOpenGL - imported by qtpy.QtGui (conditional, optional), PySide6.QtDataVisualization (top-level)
 excluded module named PySide6.QtOpenGLWidgets - imported by qtpy.QtWidgets (conditional, optional)
-excluded module named PySide6.QtMultimedia - imported by ui.musica_ambiente_b42 (optional), C:\SistemaEstudos\_vighna_update_staging\20261123_020313_e9afa232\source\main.py (optional)
+excluded module named PySide6.QtMultimedia - imported by ui.musica_ambiente_b42 (optional), C:\SistemaEstudos\_vighna_update_staging\20261125_163331_c1b7fa48\source\main.py (optional)
